@@ -1,5 +1,10 @@
-html, body { overflow-x: hidden; box-sizing: border-box; }
 @import "tailwindcss";
+
+html, body, #__next {
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
 
         * {
           box-sizing: border-box;
@@ -65,7 +70,8 @@ html, body { overflow-x: hidden; box-sizing: border-box; }
           color: var(--accent);
           font-size: 13px;
           font-weight: 600;
-          white-space: nowrap;
+          white-space: normal;
+          word-break: break-word;
           margin-bottom: 16px;
         }
 
@@ -237,7 +243,7 @@ html, body { overflow-x: hidden; box-sizing: border-box; }
           );
           min-height: 620px;
           display: grid;
-          grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+          grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
           gap: 40px;
           align-items: center;
         }
@@ -278,6 +284,8 @@ html, body { overflow-x: hidden; box-sizing: border-box; }
           font-weight: 800;
           letter-spacing: -0.05em;
           color: var(--foreground);
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
 
         .hero-copy {
@@ -287,6 +295,8 @@ html, body { overflow-x: hidden; box-sizing: border-box; }
           color: var(--muted-foreground);
           max-width: 560px;
           font-weight: 500;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
 
         .hero-search-card {
@@ -2956,14 +2966,68 @@ html, body { overflow-x: hidden; box-sizing: border-box; }
   #hero { padding: 20px 0 48px; }
 
   .hero-shell {
-    border-radius: 24px;
-    padding: 32px 24px;
-    gap: 32px;
+    grid-template-columns: 1fr !important;
+    border-radius: 20px;
+    padding: 20px 16px;
+    gap: 24px;
+    min-height: auto;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
-  .hero-title { font-size: 36px; letter-spacing: -0.03em; }
+  .hero-content {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+  }
 
-  .hero-copy { font-size: 16px; margin-bottom: 24px; }
+  .hero-title {
+    font-size: 28px !important;
+    letter-spacing: -0.02em;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .hero-copy {
+    font-size: 14px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100% !important;
+  }
+
+  .eyebrow {
+    white-space: normal !important;
+    word-break: break-word;
+    max-width: 100% !important;
+    font-size: 12px;
+  }
+
+  .hero-side {
+    justify-content: flex-start;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .hero-dashboard {
+    max-width: 100% !important;
+    width: 100%;
+    padding: 16px;
+  }
+
+  .dash-item {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .dash-thumb {
+    width: 44px;
+    height: 44px;
+  }
 
   .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
