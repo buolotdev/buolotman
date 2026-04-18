@@ -1,0 +1,453 @@
+/* tracking.module.css */
+
+.exportWrapper {
+  margin: 0;
+  background: #f8fafc;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+}
+
+/* Top Navigation */
+.topNav {
+  height: 88px; /* Increased from 72px for better logo fit */
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navContainer {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navLeft,
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Main Content Container */
+.pageContainer {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #001f3f;
+}
+
+/* Project Header */
+.projectHeader {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.phTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.phStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.miniLogo {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.miniLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Progress Bar */
+.progressWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: #001f3f;
+}
+
+.progressBarBg {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progressMeta {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Timeline Layout */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: 40px;
+}
+
+.timelineItem {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  z-index: 1;
+}
+
+.timelineItem:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  height: calc(100% + 12px);
+  width: 2px;
+  background: #e2e8f0;
+  z-index: -1;
+}
+
+.completed:not(:last-child)::after {
+  background: #10b981;
+}
+
+.timelineMarker {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.completed .timelineMarker {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.active .timelineMarker {
+  border-color: #ff4500;
+  border-width: 3px;
+}
+
+.activeDot {
+  width: 10px;
+  height: 10px;
+  background: #ff4500;
+  border-radius: 50%;
+}
+
+/* Milestone Cards */
+.milestoneCard {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.active .milestoneCard {
+  border-color: rgba(255, 69, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.05);
+}
+
+.mcHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.mcTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #001f3f;
+  margin: 0 0 6px 0;
+}
+
+.mcDate {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.mcAmount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #001f3f;
+}
+
+.mcDesc {
+  font-size: 14px;
+  color: #0f172a;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.mcFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
+}
+
+/* Buttons and Badges */
+.btnPrimary {
+  background: #ff4500;
+  color: #ffffff;
+  border: none;
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btnOutline {
+  background: transparent;
+  color: #001f3f;
+  border: 1px solid #e2e8f0;
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btnSm {
+  height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.btnIcon {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.badgeDefault { background: #f1f5f9; color: #475569; }
+.badgeSuccess { background: rgba(16, 185, 129, 0.1); color: #059669; }
+.badgeWarning { background: rgba(245, 158, 11, 0.1); color: #b45309; }
+.badgeActive { background: rgba(255, 69, 0, 0.1); color: #d93800; }
+
+/* In-progress/Attachment specific stuff */
+.attachmentBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.attachmentIcon {
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #001f3f;
+}
+
+.attachmentInfo {
+  flex: 1;
+}
+
+.attachmentName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #001f3f;
+  margin-bottom: 2px;
+}
+
+.attachmentMeta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .navContainer {
+    padding: 0 20px;
+  }
+  
+  .phTop {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .phStats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .mcHeader {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .mcAmount {
+    font-size: 18px;
+  }
+  
+  .mcFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .btnPrimary, .btnOutline {
+    width: 100%;
+  }
+
+  .attachmentBox {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .attachmentBox button {
+    width: 100%;
+  }
+}

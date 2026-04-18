@@ -24,9 +24,16 @@ const demoRoles = [
   {
     id: "company",
     label: "Company",
-    helper: "Opens the category marketplace view",
-    href: "/categories/electrical",
+    helper: "Opens the company dashboard",
+    href: "/dashboard/company",
     icon: "lucide:building-2",
+  },
+  {
+    id: "admin",
+    label: "Admin",
+    helper: "Opens the admin portal",
+    href: "/dashboard/admin",
+    icon: "lucide:shield-check",
   },
 ] as const;
 

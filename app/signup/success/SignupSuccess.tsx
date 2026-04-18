@@ -5,7 +5,7 @@ import styles from "./success.module.css";
 const roleDestinations: Record<string, { href: string; label: string }> = {
   client: { href: "/dashboard/client", label: "Go to Dashboard" },
   technician: { href: "/dashboard/technician", label: "Open Technician Dashboard" },
-  company: { href: "/categories/electrical", label: "Explore Categories" },
+  company: { href: "/dashboard/company", label: "Go to Dashboard" },
 };
 
 export default function SignupSuccess({ role }: { role: string }) {

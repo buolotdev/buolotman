@@ -110,6 +110,7 @@
   display: flex;
   min-height: calc(100vh - 72px);
   overflow: hidden;
+  width: 100%;
 }
 
 .sidebar {
@@ -164,10 +165,12 @@
 
 .conversationList {
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .conversationItem {
+  width: 100%;
   min-height: 86px;
   align-items: center;
   gap: 14px;
@@ -266,6 +269,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   padding-right: 18px;
+  max-width: 220px;
 }
 
 .unreadPill {
@@ -387,6 +391,10 @@
   background: rgba(0, 31, 63, 0.1);
 }
 
+.divider {
+  width: 100%;
+}
+
 .taskCard {
   align-self: center;
   width: 100%;
@@ -426,18 +434,20 @@
 }
 
 .thread {
+  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 8px 2px 0;
 }
 
 .messageRow {
+  width: 100%;
   align-items: flex-end;
   gap: 12px;
-  max-width: 100%;
 }
 
 .messageRowSent {
