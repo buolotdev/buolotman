@@ -87,6 +87,7 @@
   color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .navItem:hover {

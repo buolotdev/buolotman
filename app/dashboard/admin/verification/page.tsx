@@ -3,81 +3,40 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin-verification.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export default function AdminVerificationPage() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const toast = useToast();
+  const dialog = useDialog();
+  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: pendingUsers, loading: pendingLoading, refetch: refetchPending } = useFetch(() => api.adminListUsers({ verified: "false" }), []);
 
-  const verificationRequests = [
-    {
-      id: "1",
-      name: "Carlos Rodriguez",
-      role: "Technician (Plumber)",
-      roleIcon: "lucide:wrench",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FHispanic%2F5",
-      time: "Submitted 2 hours ago",
-      docs: [
-        { name: "ID Front", icon: "lucide:image" },
-        { name: "ID Back", icon: "lucide:image" },
-        { name: "Certificate", icon: "lucide:file-text" },
-      ]
-    },
-    {
-      id: "2",
-      name: "BuildLine Solutions",
-      role: "Company",
-      roleIcon: "lucide:building",
-      fallback: "BL",
-      time: "Submitted 5 hours ago",
-      docs: [
-        { name: "Reg. Cert.", icon: "lucide:file-text" },
-        { name: "Tax ID", icon: "lucide:file-text" },
-        { name: "Utility Bill", icon: "lucide:image" },
-      ]
-    },
-    {
-      id: "3",
-      name: "Emma Watson",
-      role: "Client",
-      roleIcon: "lucide:user",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F35-50%2FEuropean%2F3",
-      time: "Submitted Yesterday",
-      docs: [
-        { name: "ID Front", icon: "lucide:image" },
-        { name: "ID Back", icon: "lucide:image" },
-      ]
-    },
-    {
-      id: "4",
-      name: "Marcus T.",
-      role: "Technician (Electrician)",
-      roleIcon: "lucide:zap",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F18-25%2FAfrican%2F4",
-      time: "Submitted Yesterday",
-      docs: [
-        { name: "Passport", icon: "lucide:image" },
-        { name: "License", icon: "lucide:file-text" },
-      ]
-    }
-  ];
+  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
+  const userRole = user?.role || "";
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", href: "/dashboard/admin", icon: "lucide:layout-dashboard" },
     { id: "users", label: "Users", href: "/dashboard/admin/users", icon: "lucide:users" },
     { id: "tasks", label: "Tasks", href: "/dashboard/admin/tasks", icon: "lucide:file-text" },
-    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check", badge: 84 },
+    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check" },
     { id: "payments", label: "Payments", href: "/dashboard/admin/payments", icon: "lucide:credit-card" },
-    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale", badge: 3 },
+    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale" },
     { id: "content", label: "Content", href: "/dashboard/admin/content", icon: "lucide:layers" },
     { id: "settings", label: "Settings", href: "/dashboard/admin/settings", icon: "lucide:settings" },
   ];
 
   return (
     <div className={`${styles.layoutWrapper} ${mobileSidebarOpen ? styles.sidebarOpenMobile : ""}`}>
-      {/* Sidebar Overlay */}
       <div className={styles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
 
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <Link href="/" className={styles.brand}>
@@ -90,20 +49,15 @@ export default function AdminVerificationPage() {
             <Link key={item.id} href={item.href} className={`${styles.navItem} ${item.id === "verification" ? styles.navItemActive : ""}`}>
               <iconify-icon icon={item.icon} />
               <span>{item.label}</span>
-              {item.badge && <span className={styles.navItemBadge}>{item.badge}</span>}
             </Link>
           ))}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <Link href="/login" className={styles.logoutBtn}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutBtn} />
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={styles.mainContent}>
         <header className={styles.topbar}>
           <div className={styles.topbarLeft}>
@@ -117,10 +71,12 @@ export default function AdminVerificationPage() {
           </div>
           <div className={styles.topbarRight}>
             <div className={styles.adminProfile}>
-              <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&q=80" alt="David Miller" width={36} height={36} className={styles.avatar} />
+              <div className={styles.avatar}>
+                {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
+              </div>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>David Miller</span>
-                <span className={styles.profileRole}>Super Admin</span>
+                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
+                <span className={styles.profileRole}>{userRole}</span>
               </div>
             </div>
           </div>
@@ -146,55 +102,59 @@ export default function AdminVerificationPage() {
             </div>
           </div>
 
-          <div className={styles.verificationGrid}>
-            {verificationRequests.map((request) => (
-              <div key={request.id} className={styles.verificationCard}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.userMeta}>
-                    {request.avatar ? (
-                      <Image src={request.avatar} alt={request.name} width={48} height={48} className={styles.userAvatar} />
-                    ) : (
-                      <div className={styles.userAvatarFallback}>{request.fallback}</div>
-                    )}
-                    <div className={styles.userDetails}>
-                      <span className={styles.applicantName}>{request.name}</span>
-                      <span className={styles.applicantRole}>
-                        <iconify-icon icon={request.roleIcon} />
-                        {request.role}
-                      </span>
-                      <span className={styles.submissionDate}>{request.time}</span>
+          <div style={{ padding: pendingLoading ? 60 : 24 }}>
+            {pendingLoading ? (
+              <p style={{ textAlign: "center", color: "#94a3b8" }}>Loading...</p>
+            ) : pendingUsers && pendingUsers.length > 0 ? (
+              <div style={{ display: "grid", gap: 12 }}>
+                {pendingUsers.map((u: any) => (
+                  <div key={u.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 16, background: "white", borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                    <div>
+                      <strong>{`${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username}</strong>
+                      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}>{u.username} • {u.role} • {u.country || "—"}</p>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.adminVerifyUser(u.id);
+                            refetchPending();
+                            toast.success("User approved", `${u.first_name || u.username} is now verified.`);
+                          } catch (err: any) { toast.error("Approval failed", err?.message); }
+                        }}
+                        style={{ padding: "8px 16px", background: "#16a34a", color: "white", border: "none", borderRadius: 6, cursor: "pointer" }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const ok = await dialog.confirm({
+                            title: "Reject verification?",
+                            message: `This will suspend ${u.first_name || u.username}. They will lose access immediately.`,
+                            confirmText: "Reject & Suspend",
+                            variant: "danger",
+                          });
+                          if (!ok) return;
+                          try {
+                            await api.adminSuspendUser(u.id, "suspend");
+                            refetchPending();
+                            toast.warning("User rejected", `${u.first_name || u.username} has been suspended.`);
+                          } catch (err: any) { toast.error("Rejection failed", err?.message); }
+                        }}
+                        style={{ padding: "8px 16px", background: "#dc2626", color: "white", border: "none", borderRadius: 6, cursor: "pointer" }}
+                      >
+                        Reject
+                      </button>
                     </div>
                   </div>
-                  <div className={`${styles.statusBadge} ${styles.statusPending}`}>Pending</div>
-                </div>
-
-                <div className={styles.docsSection}>
-                  <div className={styles.docsTitle}>
-                    <span>Documents Provided</span>
-                    <iconify-icon icon="lucide:maximize-2" style={{ cursor: "pointer" }} />
-                  </div>
-                  <div className={styles.docsGrid}>
-                    {request.docs.map((doc, idx) => (
-                      <div key={idx} className={styles.docItem}>
-                        <div className={styles.docIcon}>
-                          <iconify-icon icon={doc.icon} style={{ fontSize: "24px" }} />
-                        </div>
-                        <span className={styles.docName}>{doc.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.cardActions}>
-                  <button className={`${styles.btn} ${styles.btnReject}`}>
-                    <iconify-icon icon="lucide:x" /> Reject
-                  </button>
-                  <button className={`${styles.btn} ${styles.btnApprove}`}>
-                    <iconify-icon icon="lucide:check" /> Approve
-                  </button>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div style={{ padding: 40, textAlign: "center", color: "#94a3b8", fontSize: 14 }}>
+                <iconify-icon icon="lucide:shield-check" style={{ fontSize: 48, marginBottom: 16, display: "block", opacity: 0.4 }} />
+                <p>Verification queue is empty.</p>
+              </div>
+            )}
           </div>
         </div>
       </main>

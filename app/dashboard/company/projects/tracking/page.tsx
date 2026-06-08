@@ -2,56 +2,147 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useMemo, Suspense } from "react";
 import styles from "./tracking.module.css";
+import { useFetch } from "@/app/lib/useFetch";
+import { api } from "@/app/lib/api";
+import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import { formatXOF } from "@/app/lib/format";
 
-export default function ProjectTracking() {
+function ProjectTrackingContent() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+
+  const { data: projectsData, loading } = useFetch(() => api.getCompanyProjects(), []);
+  const { data: userData } = useFetch(() => api.getMe(), []);
+
+  const project = useMemo(() => {
+    if (!projectsData) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results = (projectsData?.results ?? projectsData) as any[];
+    if (projectId) {
+      return Array.isArray(results)
+        ? results.find((p) => String(p.id) === projectId)
+        : null;
+    }
+    return Array.isArray(results) && results.length > 0 ? results[0] : null;
+  }, [projectsData, projectId]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const milestones = (project?.milestones ?? project?.milestone_set ?? []) as any[];
+
+  const completedCount = milestones.filter(
+    (m) => m.status === "completed" || m.is_completed
+  ).length;
+
+  const progress = project?.progress ?? (milestones.length > 0
+    ? Math.round((completedCount / milestones.length) * 100)
+    : 0);
+
+  if (loading) {
+    return (
+      <div className={styles.exportWrapper}>
+        <header className={styles.topNav}>
+          <div className={styles.navContainer}>
+            <div className={styles.navLeft}>
+              <Link href="/dashboard/company" className={styles.brand}>
+                <Image
+                  src="/boulotman-logo.png"
+                  alt="Boulot Man"
+                  width={180}
+                  height={46}
+                  style={{ width: 'auto', height: '46px' }}
+                  priority
+                />
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main className={styles.pageContainer}>
+          <SkeletonBlock style={{ height: 24, width: 200, marginBottom: 24 }} />
+          <SkeletonBlock style={{ height: 180, borderRadius: 12, marginBottom: 32 }} />
+          <SkeletonCard />
+          <SkeletonCard />
+        </main>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className={styles.exportWrapper}>
+        <header className={styles.topNav}>
+          <div className={styles.navContainer}>
+            <div className={styles.navLeft}>
+              <Link href="/dashboard/company" className={styles.brand}>
+                <Image
+                  src="/boulotman-logo.png"
+                  alt="Boulot Man"
+                  width={180}
+                  height={46}
+                  style={{ width: 'auto', height: '46px' }}
+                  priority
+                />
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main className={styles.pageContainer}>
+          <Link href="/dashboard/company/projects" className={styles.backLink}>
+            <iconify-icon icon="lucide:arrow-left" style={{ fontSize: '16px' }}></iconify-icon>
+            Back to Projects
+          </Link>
+          <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
+            <iconify-icon icon="lucide:folder-open" style={{ fontSize: "48px", display: "block", marginBottom: "16px" }}></iconify-icon>
+            <h3 style={{ margin: "0 0 8px", color: "#0f172a" }}>Project not found</h3>
+            <p style={{ margin: 0 }}>Select a project from the projects list to view tracking.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.exportWrapper}>
-      {/* Top Navigation */}
       <header className={styles.topNav}>
         <div className={styles.navContainer}>
           <div className={styles.navLeft}>
             <Link href="/dashboard/company" className={styles.brand}>
-              <Image 
-                src="/boulotman-logo.png" 
-                alt="Boulot Man" 
-                width={180} 
-                height={46} 
+              <Image
+                src="/boulotman-logo.png"
+                alt="Boulot Man"
+                width={180}
+                height={46}
                 style={{ width: 'auto', height: '46px' }}
-                priority 
+                priority
               />
             </Link>
           </div>
           <div className={styles.navRight}>
             <button className={styles.btnIcon}>
-              <iconify-icon
-                icon="lucide:bell"
-                style={{ fontSize: '20px' }}
-              ></iconify-icon>
+              <iconify-icon icon="lucide:bell" style={{ fontSize: '20px' }}></iconify-icon>
             </button>
             <div className={styles.avatar}>
-              <Image
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&q=80"
-                alt="Profile"
-                width={36}
-                height={36}
-              />
+              {userData?.avatar_url ? (
+                <Image
+                  src={userData.avatar_url}
+                  alt=""
+                  width={36}
+                  height={36}
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className={styles.pageContainer}>
         <Link href="/dashboard/company/projects" className={styles.backLink}>
-          <iconify-icon
-            icon="lucide:arrow-left"
-            style={{ fontSize: '16px' }}
-          ></iconify-icon>
+          <iconify-icon icon="lucide:arrow-left" style={{ fontSize: '16px' }}></iconify-icon>
           Back to Projects
         </Link>
 
-        {/* Project Header */}
         <div className={styles.projectHeader}>
           <div className={styles.phTop}>
             <div>
@@ -71,19 +162,19 @@ export default function ProjectTracking() {
                     margin: 0,
                   }}
                 >
-                  Electrical Wiring for New Retail Store
+                  {project.title || project.name || ""}
                 </h1>
-                <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active Project</span>
+                <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+                  {project.status === "completed" ? "Completed" : "Active Project"}
+                </span>
               </div>
               <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>
-                Project ID: PRJ-9042-BW • Created on Oct 01, 2023
+                Project ID: {project.id ?? ""}
+                {project.created_at && ` • Created on ${new Date(project.created_at).toLocaleDateString()}`}
               </p>
             </div>
             <Link href="/dashboard/company/messages" className={styles.btnOutline}>
-              <iconify-icon
-                icon="lucide:message-square"
-                style={{ fontSize: '16px' }}
-              ></iconify-icon>
+              <iconify-icon icon="lucide:message-square" style={{ fontSize: '16px' }}></iconify-icon>
               Message Client
             </Link>
           </div>
@@ -92,45 +183,38 @@ export default function ProjectTracking() {
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Client</span>
               <div className={styles.statValue}>
-                <div className={styles.miniLogo}>
-                  <Image
-                    src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop&q=80"
-                    alt="Client Logo"
-                    width={28}
-                    height={28}
-                  />
+                {project.client_name || ""}
+              </div>
+            </div>
+            {project.budget != null && (
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Total Budget</span>
+                <div className={styles.statValue}>
+                  <span style={{ fontSize: '18px', color: '#001f3f' }}>{formatXOF(project.budget)}</span>
                 </div>
-                Nexus Technologies
               </div>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Budget</span>
-              <div className={styles.statValue}>
-                <span style={{ fontSize: '18px', color: '#001f3f' }}>$7,500.00</span>
+            )}
+            {project.end_date && (
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Estimated Deadline</span>
+                <div className={styles.statValue}>
+                  <iconify-icon icon="lucide:calendar" style={{ fontSize: '16px', color: '#64748b' }}></iconify-icon>
+                  {new Date(project.end_date).toLocaleDateString()}
+                </div>
               </div>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Estimated Deadline</span>
-              <div className={styles.statValue}>
-                <iconify-icon
-                  icon="lucide:calendar"
-                  style={{ fontSize: '16px', color: '#64748b' }}
-                ></iconify-icon>
-                Nov 15, 2023
-              </div>
-            </div>
+            )}
           </div>
 
           <div className={styles.progressWrapper}>
             <div className={styles.progressInfo}>
               <span>Project Progress</span>
-              <span>33%</span>
+              <span>{progress}%</span>
             </div>
             <div className={styles.progressBarBg}>
-              <div className={styles.progressBarFill} style={{ width: '33%' }}></div>
+              <div className={styles.progressBarFill} style={{ width: `${progress}%` }}></div>
             </div>
             <div className={styles.progressMeta}>
-              1 of 3 Milestones Completed
+              {completedCount} of {milestones.length} Milestones Completed
             </div>
           </div>
         </div>
@@ -147,135 +231,109 @@ export default function ProjectTracking() {
           Milestones
         </h2>
 
-        {/* Timeline Section */}
-        <div className={styles.timeline}>
-          {/* Milestone 1: Completed */}
-          <div className={`${styles.timelineItem} ${styles.completed}`}>
-            <div className={styles.timelineMarker}>
-              <iconify-icon
-                icon="lucide:check"
-                style={{ fontSize: '16px', color: '#fff' }}
-              ></iconify-icon>
-            </div>
-            <div className={styles.milestoneCard}>
-              <div className={styles.mcHeader}>
-                <div>
-                  <h3 className={styles.mcTitle}>Initial Wiring & Setup</h3>
-                  <span className={styles.mcDate}>Due by Oct 20, 2023</span>
-                </div>
-                <div className={styles.mcAmount}>$2,500.00</div>
-              </div>
-              <p className={styles.mcDesc}>
-                Complete rough-in wiring for the main floor, install junction
-                boxes, and pull necessary cables for lighting and power outlets.
-              </p>
-
-              <div className={styles.mcFooter}>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <span className={`${styles.badge} ${styles.badgeDefault}`}>Completed</span>
-                  <span className={`${styles.badge} ${styles.badgeSuccess}`}>
-                    <iconify-icon
-                      icon="lucide:check-circle"
-                      style={{ fontSize: '12px' }}
-                    ></iconify-icon>
-                    Paid
-                  </span>
-                </div>
-                <div style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
-                  Approved on Oct 19, 2023
-                </div>
-              </div>
-            </div>
+        {milestones.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
+            <iconify-icon icon="lucide:list-checks" style={{ fontSize: "48px", display: "block", marginBottom: "16px" }}></iconify-icon>
+            <h3 style={{ margin: "0 0 8px", color: "#0f172a" }}>No milestones yet</h3>
+            <p style={{ margin: 0 }}>Milestones will appear here once defined for this project.</p>
           </div>
+        ) : (
+          <div className={styles.timeline}>
+            {milestones.map((milestone, index) => {
+              const isCompleted = milestone.status === "completed" || milestone.is_completed;
+              const isActive = milestone.status === "in_progress" || milestone.is_active;
 
-          {/* Milestone 2: Active */}
-          <div className={`${styles.timelineItem} ${styles.active}`}>
-            <div className={styles.timelineMarker}>
-              <div className={styles.activeDot}></div>
-            </div>
-            <div className={styles.milestoneCard}>
-              <div className={styles.mcHeader}>
-                <div>
-                  <h3 className={styles.mcTitle}>Main Panel Installation</h3>
-                  <span className={styles.mcDate}>Due by Nov 05, 2023</span>
-                </div>
-                <div className={styles.mcAmount}>$3,500.00</div>
-              </div>
-              <p className={styles.mcDesc}>
-                Install 200A main service panel, connect all previously pulled
-                circuits, and verify correct load balancing across phases.
-              </p>
+              return (
+                <div
+                  key={milestone.id || index}
+                  className={`${styles.timelineItem} ${isCompleted ? styles.completed : ""} ${isActive ? styles.active : ""}`}
+                >
+                  <div className={styles.timelineMarker}>
+                    {isCompleted && (
+                      <iconify-icon icon="lucide:check" style={{ fontSize: '16px', color: '#fff' }}></iconify-icon>
+                    )}
+                    {isActive && <div className={styles.activeDot}></div>}
+                  </div>
+                  <div className={styles.milestoneCard}>
+                    <div className={styles.mcHeader}>
+                      <div>
+                        <h3 className={styles.mcTitle}>{milestone.title || milestone.name || ""}</h3>
+                        <span className={styles.mcDate}>
+                          {milestone.due_date && `Due by ${new Date(milestone.due_date).toLocaleDateString()}`}
+                        </span>
+                      </div>
+                      {milestone.amount != null && (
+                        <div className={styles.mcAmount}>{formatXOF(milestone.amount)}</div>
+                      )}
+                    </div>
+                    {milestone.description && (
+                      <p className={styles.mcDesc}>{milestone.description}</p>
+                    )}
 
-              <div className={styles.attachmentBox}>
-                <div className={styles.attachmentIcon}>
-                  <iconify-icon
-                    icon="lucide:file-text"
-                    style={{ fontSize: '16px' }}
-                  ></iconify-icon>
+                    <div className={styles.mcFooter}>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <span className={`${styles.badge} ${isCompleted ? styles.badgeDefault : isActive ? styles.badgeActive : styles.badgeDefault}`}>
+                          {isCompleted ? "Completed" : isActive ? "In Progress" : "Pending"}
+                        </span>
+                        {(milestone.is_paid || milestone.payment_status === "paid") && (
+                          <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+                            <iconify-icon icon="lucide:check-circle" style={{ fontSize: '12px' }}></iconify-icon>
+                            Paid
+                          </span>
+                        )}
+                        {(milestone.is_funded || milestone.payment_status === "funded") && (
+                          <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+                            <iconify-icon icon="lucide:lock" style={{ fontSize: '12px' }}></iconify-icon>
+                            Funded in Escrow
+                          </span>
+                        )}
+                        {milestone.payment_status === "awaiting" && (
+                          <span className={`${styles.badge} ${styles.badgeWarning}`}>
+                            <iconify-icon icon="lucide:circle-dashed" style={{ fontSize: '12px' }}></iconify-icon>
+                            Awaiting Deposit
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.attachmentInfo}>
-                  <div className={styles.attachmentName}>Panel_Diagram_v2.pdf</div>
-                  <div className={styles.attachmentMeta}>1.2 MB • Uploaded by Client</div>
-                </div>
-                <button className={`${styles.btnOutline} ${styles.btnSm}`}>
-                  View
-                </button>
-              </div>
-
-              <div className={styles.mcFooter}>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <span className={`${styles.badge} ${styles.badgeActive}`}>In Progress</span>
-                  <span className={`${styles.badge} ${styles.badgeSuccess}`}>
-                    <iconify-icon
-                      icon="lucide:lock"
-                      style={{ fontSize: '12px' }}
-                    ></iconify-icon>
-                    Funded in Escrow
-                  </span>
-                </div>
-                <button className={styles.btnPrimary}>
-                  <iconify-icon
-                    icon="lucide:check-square"
-                    style={{ fontSize: '16px' }}
-                  ></iconify-icon>
-                  Mark as Complete
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
-
-          {/* Milestone 3: Pending */}
-          <div className={styles.timelineItem}>
-            <div className={styles.timelineMarker}></div>
-            <div className={styles.milestoneCard} style={{ opacity: 0.8 }}>
-              <div className={styles.mcHeader}>
-                <div>
-                  <h3 className={styles.mcTitle}>Final Inspection & Handover</h3>
-                  <span className={styles.mcDate}>Due by Nov 15, 2023</span>
-                </div>
-                <div className={styles.mcAmount}>$1,500.00</div>
-              </div>
-              <p className={styles.mcDesc}>
-                Testing of all outlets and fixtures, passing city electrical
-                inspection, and final handover to client.
-              </p>
-
-              <div className={styles.mcFooter}>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <span className={`${styles.badge} ${styles.badgeDefault}`}>Pending</span>
-                  <span className={`${styles.badge} ${styles.badgeWarning}`}>
-                    <iconify-icon
-                      icon="lucide:circle-dashed"
-                      style={{ fontSize: '12px' }}
-                    ></iconify-icon>
-                    Awaiting Deposit
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </main>
     </div>
+  );
+}
+
+export default function ProjectTracking() {
+  return (
+    <Suspense fallback={
+      <div className={styles.exportWrapper}>
+        <header className={styles.topNav}>
+          <div className={styles.navContainer}>
+            <div className={styles.navLeft}>
+              <Link href="/dashboard/company" className={styles.brand}>
+                <Image
+                  src="/boulotman-logo.png"
+                  alt="Boulot Man"
+                  width={180}
+                  height={46}
+                  style={{ width: 'auto', height: '46px' }}
+                  priority
+                />
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main className={styles.pageContainer}>
+          <SkeletonBlock style={{ height: 24, width: 200, marginBottom: 24 }} />
+          <SkeletonBlock style={{ height: 180, borderRadius: 12, marginBottom: 32 }} />
+          <SkeletonCard />
+        </main>
+      </div>
+    }>
+      <ProjectTrackingContent />
+    </Suspense>
   );
 }

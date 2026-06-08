@@ -4,7 +4,24 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "../../lib/api";
 import styles from "./verify.module.css";
+
+type RoleKey = "client" | "technician" | "company";
+
+const roleDestinations: Record<RoleKey, string> = {
+  client: "/dashboard/client",
+  technician: "/dashboard/technician",
+  company: "/dashboard/company",
+};
+
+function splitFullName(fullName: string): { first_name: string; last_name: string } {
+  const trimmed = fullName.trim();
+  if (!trimmed) return { first_name: "", last_name: "" };
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) return { first_name: parts[0], last_name: "" };
+  return { first_name: parts[0], last_name: parts.slice(1).join(" ") };
+}
 
 const OTP_LENGTH = 6;
 const INITIAL_TIMER = 165;
@@ -27,7 +44,17 @@ export default function OtpVerification({
   const router = useRouter();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [timer, setTimer] = useState(INITIAL_TIMER);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  useEffect(() => {
+    try {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_role");
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -98,13 +125,68 @@ export default function OtpVerification({
     inputRefs.current[0]?.focus();
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!canVerify) return;
+    if (!canVerify || submitting) return;
+    setError(null);
+    setSubmitting(true);
 
-    const params = new URLSearchParams();
-    if (role) params.set("role", role);
-    router.push(`/signup/success${params.toString() ? `?${params.toString()}` : ""}`);
+    try {
+      const raw = sessionStorage.getItem("signup_data");
+      if (!raw) {
+        setError("Your signup details expired. Please start again.");
+        setSubmitting(false);
+        return;
+      }
+      const data = JSON.parse(raw) as {
+        role: string;
+        fullName: string;
+        email: string;
+        phone: string;
+        password: string;
+      };
+
+      const { first_name, last_name } = splitFullName(data.fullName);
+      const payload: Record<string, string> = {
+        first_name,
+        last_name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+      };
+      if (data.role === "company") {
+        payload.company_name = data.fullName.trim() || data.email;
+      }
+
+      let registerResult: { message: string };
+      if (data.role === "technician") {
+        registerResult = await api.registerTechnician(payload);
+      } else if (data.role === "company") {
+        registerResult = await api.registerCompany(payload);
+      } else {
+        registerResult = await api.registerClient(payload);
+      }
+
+      const tokens = await api.login(data.email, data.password);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("access_token", tokens.access);
+        localStorage.setItem("refresh_token", tokens.refresh);
+        localStorage.setItem("user_role", data.role);
+      }
+
+      try {
+        sessionStorage.removeItem("signup_data");
+      } catch {}
+
+      router.push(roleDestinations[data.role as RoleKey] ?? "/dashboard/client");
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        err?.detail ||
+        "We could not create your account. Please try again.";
+      setError(typeof message === "string" ? message : "Signup failed. Please try again.");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -172,8 +254,8 @@ export default function OtpVerification({
           </div>
 
           <div className={styles.actions}>
-            <button type="submit" className={styles.primaryButton} disabled={!canVerify}>
-              Verify
+            <button type="submit" className={styles.primaryButton} disabled={!canVerify || submitting}>
+              {submitting ? "Creating account…" : "Verify"}
             </button>
 
             <Link href={backHref} className={styles.backLink}>
@@ -181,6 +263,8 @@ export default function OtpVerification({
               Back to sign up
             </Link>
           </div>
+
+          {error ? <p className={styles.errorText}>{error}</p> : null}
         </form>
       </section>
     </main>

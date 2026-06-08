@@ -1468,15 +1468,46 @@ body {
     background:#fff;
     border-top:1px solid var(--bm-border);
     display:none;
+    z-index:10050;
+    pointer-events:auto;
+    overflow:visible;
   }
   #bmMegaRoot .bmMega.active{
     display:block;
+  }
+  #bmMegaRoot .bmMegaGroup{
+    display:flex;
+    align-items:center;
+    padding-bottom:18px;
+    margin-bottom:-18px;
+  }
+  #bmMegaRoot .bmMegaGroup:hover .bmNavItem,
+  #bmMegaRoot .bmMegaGroup:focus-within .bmNavItem,
+  #bmMegaRoot .bmMega.active{
+    color:var(--bm-primary);
+  }
+  #bmMegaRoot .bmMegaGroup:hover .bmMega,
+  #bmMegaRoot .bmMegaGroup:focus-within .bmMega{
+    display:block;
+  }
+  #bmMegaRoot .bmMega::before{
+    content:"";
+    position:absolute;
+    top:-14px;
+    left:0;
+    right:0;
+    height:14px;
+    pointer-events:none;
+    z-index:-1;
   }
   #bmMegaRoot .bmMegaInner{
     max-width:1500px;
     margin:auto;
     display:flex;
     height:560px;
+    pointer-events:auto;
+    position:relative;
+    z-index:10051;
   }
   
   /* ================= SIDEBAR ================= */
@@ -1484,6 +1515,9 @@ body {
     width:320px;
     border-right:1px solid var(--bm-border);
     overflow-y:auto;
+    pointer-events:auto;
+    position:relative;
+    z-index:10052;
   }
   #bmMegaRoot .bmSideBtn{
     width:100%;
@@ -1494,6 +1528,12 @@ body {
     font-weight:600;
     cursor:pointer;
     border-left:4px solid transparent;
+    pointer-events:auto;
+    position:relative;
+    z-index:10053;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
   }
   #bmMegaRoot .bmSideBtn.active{
     background:#e2e8f0;
@@ -1505,6 +1545,9 @@ body {
     flex:1;
     padding:22px;
     overflow-y:auto;
+    pointer-events:auto;
+    position:relative;
+    z-index:10052;
   }
   #bmMegaRoot .bmGrid{
     display:grid;
@@ -1515,6 +1558,9 @@ body {
     border:1px solid var(--bm-border);
     border-radius:12px;
     padding:14px;
+    pointer-events:auto;
+    position:relative;
+    z-index:10053;
   }
   #bmMegaRoot .bmCard h4{
     color:var(--bm-primary);
@@ -1531,6 +1577,9 @@ body {
     font-size:13px;
     color:var(--bm-text);
     text-decoration:none;
+    pointer-events:auto;
+    position:relative;
+    z-index:10054;
   }
   #bmMegaRoot .bmItem:hover{
     background:#eef2ff;

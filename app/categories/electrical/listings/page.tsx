@@ -4,9 +4,14 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import { api } from "../../../lib/api";
+import { useFetch } from "../../../lib/useFetch";
+import { SkeletonBlock, SkeletonCard } from "../../../components/skeleton/Skeleton";
+import { formatXOF } from "../../../lib/format";
 import styles from "./page.module.css";
 
 type Listing = {
+  id: string | number;
   name: string;
   role: string;
   bio: string;
@@ -17,7 +22,7 @@ type Listing = {
   rating: number;
   reviews: number;
   location: string;
-  rate: string;
+  rate: number | string;
   verified?: boolean;
   availableToday?: boolean;
   emergency?: boolean;
@@ -28,139 +33,57 @@ type Listing = {
   skills: string[];
 };
 
-const listings: Listing[] = [
-  {
-    name: "Kouassi Marc",
-    role: "Master Electrician",
-    bio: "Certified electrician with 12 years of experience. Specializing in residential troubleshooting, smart home wiring, and panel upgrades.",
-    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=600&auto=format&fit=crop",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F35-50%2FAfrican%2F2",
-    jobsDone: 142,
-    response: "< 1 hr",
-    rating: 4.9,
-    reviews: 128,
-    location: "Cocody, Abidjan",
-    rate: "15,000 XOF",
-    verified: true,
-    availableToday: true,
-    emergency: true,
-    weekends: true,
-    backgroundChecked: true,
-    licensed: true,
-    type: "technician",
-    skills: ["Wiring", "Lighting", "Panels"],
-  },
-  {
-    name: "Awa Toure",
-    role: "Residential Electrician",
-    bio: "Expert in modern home electrical systems. I design and install complete solar setups and integrated smart home security grids.",
-    image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600&auto=format&fit=crop",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F25-35%2FAfrican%2F4",
-    jobsDone: 94,
-    response: "2 hrs",
-    rating: 4.8,
-    reviews: 94,
-    location: "Marcory, Abidjan",
-    rate: "20,000 XOF",
-    verified: true,
-    availableToday: true,
-    backgroundChecked: true,
-    type: "technician",
-    skills: ["Smart Home", "Security", "Solar"],
-  },
-  {
-    name: "Jean Bamba",
-    role: "HVAC & Electrical Tech",
-    bio: "Fast, reliable service for all cooling and refrigeration needs. I fix complex AC electrical issues and do routine maintenance.",
-    image: "https://storage.googleapis.com/banani-generated-images/generated-images/5f8d15b1-da73-49d6-81ba-5887a5dc37fc.jpg",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F18-25%2FAfrican%2F3",
-    jobsDone: 68,
-    response: "30 mins",
-    rating: 4.7,
-    reviews: 56,
-    location: "Yopougon, Abidjan",
-    rate: "10,000 XOF",
-    availableToday: true,
-    emergency: true,
-    weekends: true,
-    type: "technician",
-    skills: ["AC Repair", "Maintenance", "Wiring"],
-  },
-  {
-    name: "Oumar Sylla",
-    role: "Solar & Backup Energy",
-    bio: "Ensuring you never lose power. Large scale generator installation, deep cycle batteries, and heavy duty inverter setups.",
-    image: "https://storage.googleapis.com/banani-generated-images/generated-images/b820927f-4ce5-4e90-ba91-0fc4a7425c6e.jpg",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FAfrican%2F1",
-    jobsDone: 45,
-    response: "< 1 hr",
-    rating: 5,
-    reviews: 32,
-    location: "Bingerville, Abidjan",
-    rate: "25,000 XOF",
-    verified: true,
-    availableToday: true,
-    emergency: true,
-    backgroundChecked: true,
-    licensed: true,
-    type: "technician",
-    skills: ["Solar Panels", "Generators", "Inverters"],
-  },
-  {
-    name: "Mariam Kone",
-    role: "Network Specialist",
-    bio: "Low voltage cabling and telecommunications. I run neat, perfectly labeled server room cables, intercoms, and CCTV systems.",
-    image: "https://storage.googleapis.com/banani-generated-images/generated-images/dd7cb441-d5fd-4e35-9fce-3e6bf07c4abb.jpg",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F35-50%2FAfrican%2F2",
-    jobsDone: 158,
-    response: "2 hrs",
-    rating: 4.6,
-    reviews: 112,
-    location: "Plateau, Abidjan",
-    rate: "18,000 XOF",
-    verified: true,
-    backgroundChecked: true,
-    type: "technician",
-    skills: ["CCTV", "Data Network", "Intercoms"],
-  },
-  {
-    name: "Cedric Yapi",
-    role: "Interior Lighting Expert",
-    bio: "Transform your space with beautiful custom lighting solutions. Chandeliers, recessed LED lights, and custom switches.",
-    image: "https://storage.googleapis.com/banani-generated-images/generated-images/d5aa6958-2f02-48f1-b3ff-012483586b4e.jpg",
-    avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F18-25%2FAfrican%2F5",
-    jobsDone: 87,
-    response: "1 hr",
-    rating: 4.8,
-    reviews: 43,
-    location: "Treichville, Abidjan",
-    rate: "12,000 XOF",
-    availableToday: true,
-    weekends: true,
-    type: "technician",
-    skills: ["LED Setup", "Decor Lighting", "Design"],
-  },
-];
-
 export default function Page() {
+  const { data: tasksData, loading } = useFetch(
+    () => api.getTasks({ category: "electrical" }),
+    []
+  );
+
   const [availability, setAvailability] = useState({
-    today: true,
+    today: false,
     emergency: false,
     weekends: false,
   });
   const [trust, setTrust] = useState({
-    verified: true,
-    backgroundChecked: true,
+    verified: false,
+    backgroundChecked: false,
     licensed: false,
   });
   const [type, setType] = useState<"any" | "technician" | "company">("any");
-  const [rating, setRating] = useState(4.5);
+  const [rating, setRating] = useState(0);
   const [page, setPage] = useState(1);
 
+  const listings: Listing[] = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = (tasksData?.results ?? tasksData ?? []) as any[];
+    return raw.map((item) => ({
+      id: item.id,
+      name: item.owner_name || item.name || item.title || "Professional",
+      role: item.role || item.specialty || item.title || "Electrician",
+      bio: item.bio || item.description || "",
+      image: item.image || item.cover_image || "",
+      avatar: item.avatar || item.avatar_url || "",
+      jobsDone: Number(item.jobs_completed ?? item.jobsDone ?? 0),
+      response: item.response_time || item.response || "—",
+      rating: Number(item.rating ?? item.average_rating ?? 0),
+      reviews: Number(item.reviews_count ?? item.reviews ?? 0),
+      location: item.location || item.city || "",
+      rate: item.hourly_rate ?? item.rate ?? item.starting_price ?? 0,
+      verified: Boolean(item.verified ?? item.is_verified),
+      availableToday: Boolean(item.available_today),
+      emergency: Boolean(item.emergency ?? item.is_emergency),
+      weekends: Boolean(item.weekends ?? item.available_weekends),
+      backgroundChecked: Boolean(item.background_checked),
+      licensed: Boolean(item.licensed),
+      type: item.type || (item.company_name ? "company" : "technician"),
+      skills: Array.isArray(item.skills) ? item.skills : [],
+    }));
+  }, [tasksData]);
+
   const filtered = useMemo(() => {
-    const data = listings.filter((item) => {
+    return listings.filter((item) => {
       if (type !== "any" && item.type !== type) return false;
-      if (item.rating < rating) return false;
+      if (rating > 0 && item.rating < rating) return false;
       if (availability.today && !item.availableToday) return false;
       if (availability.emergency && !item.emergency) return false;
       if (availability.weekends && !item.weekends) return false;
@@ -169,14 +92,13 @@ export default function Page() {
       if (trust.licensed && !item.licensed) return false;
       return true;
     });
-    return data;
-  }, [availability, rating, trust, type]);
+  }, [listings, availability, rating, trust, type]);
 
   const clearFilters = () => {
-    setAvailability({ today: true, emergency: false, weekends: false });
-    setTrust({ verified: true, backgroundChecked: true, licensed: false });
+    setAvailability({ today: false, emergency: false, weekends: false });
+    setTrust({ verified: false, backgroundChecked: false, licensed: false });
     setType("any");
-    setRating(4.5);
+    setRating(0);
     setPage(1);
   };
 
@@ -202,10 +124,8 @@ export default function Page() {
 
           <div className={styles.filterSection}>
             <h3>Location</h3>
-            <select className={styles.select}>
-              <option>Abidjan, CI</option>
-              <option>Cocody</option>
-              <option>Plateau</option>
+            <select className={styles.select} defaultValue="">
+              <option value="">All locations</option>
             </select>
           </div>
 
@@ -239,10 +159,10 @@ export default function Page() {
 
           <div className={styles.filterSection}>
             <h3>Minimum Rating</h3>
-            {[4.5, 4.0, 3.0].map((value) => (
+            {[0, 3.0, 4.0, 4.5].map((value) => (
               <label key={value} className={styles.option}>
                 <input type="radio" name="rating" checked={rating === value} onChange={() => setRating(value)} />
-                {value} & up
+                {value === 0 ? "Any" : `${value} & up`}
               </label>
             ))}
           </div>
@@ -259,8 +179,8 @@ export default function Page() {
 
           <div className={styles.listingHeader}>
             <div>
-              <h1>Electricians in Abidjan</h1>
-              <p>{filtered.length} certified professionals available</p>
+              <h1>Electricians</h1>
+              <p>{loading ? "Loading…" : `${filtered.length} professionals available`}</p>
             </div>
             <div className={styles.listingControls}>
               <button type="button" className={styles.outlineButton}>Alert me of new pros</button>
@@ -270,94 +190,105 @@ export default function Page() {
 
           <section className={styles.featuredPromo}>
             <div className={styles.featuredContent}>
-              <div className={styles.featuredBadge}>Top Rated Company</div>
+              <div className={styles.featuredBadge}>Top Rated</div>
               <h2>Need a full commercial rewiring?</h2>
               <p>
-                ElectroTech CI specializes in large scale industrial and commercial
-                projects, with hundreds of completed jobs and guaranteed satisfaction.
+                Browse our directory of certified electricians with verified work history and customer reviews.
               </p>
-              <Link href="/categories/electrical" className={styles.primaryButton}>
+              <Link href="/search" className={styles.primaryButton}>
                 Get a Free Consultation
               </Link>
             </div>
             <div className={styles.featuredImage}>
-              <img
-                src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600&auto=format&fit=crop"
-                alt="Commercial Electrical"
-              />
+              <SkeletonBlock style={{ width: "100%", height: 200, borderRadius: 12 }} />
             </div>
           </section>
 
           <div className={styles.grid}>
-            {filtered.map((item) => (
-              <article key={item.name} className={styles.card}>
-                <div className={styles.cardCover}>
-                  <img src={item.image} alt={item.role} />
-                  {item.verified ? <div className={styles.verifiedBadge}>Verified Pro</div> : null}
-                  <div className={styles.avatarWrap}>
-                    <img src={item.avatar} alt={item.name} />
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : filtered.length === 0 ? (
+              <div style={{ padding: "32px 0", textAlign: "center", color: "#64748b" }}>
+                <p>No electricians match your filters yet.</p>
+              </div>
+            ) : (
+              filtered.map((item) => (
+                <article key={item.id} className={styles.card}>
+                  <div className={styles.cardCover}>
+                    {item.image ? (
+                      <img src={item.image} alt={item.role} />
+                    ) : (
+                      <SkeletonBlock style={{ width: "100%", height: 160 }} />
+                    )}
+                    {item.verified ? <div className={styles.verifiedBadge}>Verified Pro</div> : null}
+                    {item.avatar ? (
+                      <div className={styles.avatarWrap}>
+                        <img src={item.avatar} alt={item.name} />
+                      </div>
+                    ) : null}
                   </div>
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardHeader}>
-                    <h3>{item.name}</h3>
-                    <button type="button" className={styles.iconButton}>
-                      <iconify-icon icon="lucide:heart" />
-                    </button>
-                  </div>
-                  <p className={styles.role}>{item.role}</p>
-                  <p className={styles.bio}>{item.bio}</p>
-                  <div className={styles.stats}>
-                    <div>
-                      <span>Jobs Done</span>
-                      <strong>{item.jobsDone}</strong>
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardHeader}>
+                      <h3>{item.name}</h3>
+                      <button type="button" className={styles.iconButton}>
+                        <iconify-icon icon="lucide:heart" />
+                      </button>
                     </div>
-                    <div>
-                      <span>Response</span>
-                      <strong>{item.response}</strong>
+                    <p className={styles.role}>{item.role}</p>
+                    {item.bio ? <p className={styles.bio}>{item.bio}</p> : null}
+                    <div className={styles.stats}>
+                      <div>
+                        <span>Jobs Done</span>
+                        <strong>{item.jobsDone}</strong>
+                      </div>
+                      <div>
+                        <span>Response</span>
+                        <strong>{item.response}</strong>
+                      </div>
+                    </div>
+                    {item.skills.length > 0 ? (
+                      <div className={styles.skills}>
+                        {item.skills.map((skill) => (
+                          <span key={skill}>{skill}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                    <div className={styles.meta}>
+                      {item.rating ? <span>{item.rating.toFixed(1)} ({item.reviews})</span> : <span>New pro</span>}
+                      {item.location ? <span>{item.location}</span> : null}
+                    </div>
+                    <div className={styles.cardFooter}>
+                      <div>
+                        <strong>{item.rate ? formatXOF(item.rate) : "Contact for pricing"}</strong>
+                        <small>Hourly rate</small>
+                      </div>
+                      <Link href={`/profile/${item.id}`} className={styles.primarySmallButton}>
+                        View Profile
+                      </Link>
                     </div>
                   </div>
-                  <div className={styles.skills}>
-                    {item.skills.map((skill) => (
-                      <span key={skill}>{skill}</span>
-                    ))}
-                  </div>
-                  <div className={styles.meta}>
-                    <span>{item.rating} ({item.reviews})</span>
-                    <span>{item.location}</span>
-                  </div>
-                  <div className={styles.cardFooter}>
-                    <div>
-                      <strong>{item.rate}</strong>
-                      <small>Hourly rate</small>
-                    </div>
-                    <Link href="/search" className={styles.primarySmallButton}>
-                      View Profile
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </div>
 
-          <div className={styles.pagination}>
-            <button type="button" className={styles.pageButton} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-              Prev
-            </button>
-            {[1, 2, 3].map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={`${styles.pageNumber} ${page === value ? styles.pageNumberActive : ""}`}
-                onClick={() => setPage(value)}
-              >
-                {value}
+          {!loading && filtered.length > 0 && (
+            <div className={styles.pagination}>
+              <button type="button" className={styles.pageButton} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                Prev
               </button>
-            ))}
-            <button type="button" className={styles.pageButton} onClick={() => setPage((p) => p + 1)}>
-              Next
-            </button>
-          </div>
+              <button
+                type="button"
+                className={`${styles.pageNumber} ${page === 1 ? styles.pageNumberActive : ""}`}
+                onClick={() => setPage(1)}
+              >
+                1
+              </button>
+              <button type="button" className={styles.pageButton} onClick={() => setPage((p) => p + 1)}>
+                Next
+              </button>
+            </div>
+          )}
         </section>
       </main>
 

@@ -1,131 +1,133 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
+import { api } from "../lib/api";
+import { useFetch } from "../lib/useFetch";
+import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
+import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
 
-const categories = [
-  { label: "Electrical", count: 124, active: true },
-  { label: "Plumbing", count: 86, active: false },
-  { label: "Cleaning", count: 210, active: false },
-  { label: "Painting", count: 45, active: false },
-];
-
 const professionalTypes = [
-  { label: "Any", active: true },
-  { label: "Independent Technician", active: false },
-  { label: "Registered Company", active: false },
+  { value: "any", label: "Any" },
+  { value: "technician", label: "Independent Technician" },
+  { value: "company", label: "Registered Company" },
 ];
 
 const ratings = [
-  { label: "4.5 & up", active: true },
-  { label: "4.0 & up", active: false },
-  { label: "3.0 & up", active: false },
+  { value: "4.5", label: "4.5 & up" },
+  { value: "4.0", label: "4.0 & up" },
+  { value: "3.0", label: "3.0 & up" },
 ];
 
 const tabs = [
-  { label: "All results", count: 124, active: true },
-  { label: "Technicians", count: 86, active: false },
-  { label: "Companies", count: 38, active: false },
+  { value: "all", label: "All results" },
+  { value: "technician", label: "Technicians" },
+  { value: "company", label: "Companies" },
 ];
 
-const results = [
-  {
-    name: "Moussa Traoré",
-    badge: "Verified",
-    badgeKind: "verified",
-    role: "Master Electrician",
-    chips: ["Same-day booking", "Certified"],
-    description:
-      "Certified electrician with over 8 years of experience in residential and commercial wiring, troubleshooting, and emergency repairs.",
-    location: "Cocody, Abidjan",
-    rating: "4.9 (218 reviews)",
-    meta: "300+ jobs",
-    price: "18,000 XOF",
-    priceLabel: "per visit",
-    action: "View profile",
-    actionKind: "primary",
-    image:
-      "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FAfrican%2F2",
-    imageAlt: "Moussa Traoré",
-    metaIcon: "lucide:briefcase",
-  },
-  {
-    name: "FastFix Electrical",
-    badge: "Verified Company",
-    badgeKind: "company",
-    role: "Electrical Maintenance Company",
-    chips: ["24/7 Support", "Insured"],
-    description:
-      "A specialized electrical company providing round-the-clock emergency repairs, large-scale installations, and regular maintenance contracts for businesses.",
-    location: "Marcory, Abidjan",
-    rating: "4.8 (145 reviews)",
-    meta: "12 Staff",
-    price: "25,000 XOF",
-    priceLabel: "base callout",
-    action: "View company",
-    actionKind: "secondary",
-    placeholder: { icon: "lucide:building-2", tone: "primary" },
-    metaIcon: "lucide:users",
-  },
-  {
-    name: "Serge Yao",
-    badge: "Verified",
-    badgeKind: "verified",
-    role: "Facility Technician",
-    chips: ["Business support", "Verified ID"],
-    description:
-      "Jack-of-all-trades facility technician with a strong electrical background. Ideal for office maintenance, lighting replacements, and minor structural repairs.",
-    location: "Plateau, Abidjan",
-    rating: "4.7 (89 reviews)",
-    meta: "150+ jobs",
-    price: "15,000 XOF",
-    priceLabel: "per hour",
-    action: "View profile",
-    actionKind: "primary",
-    image:
-      "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F35-50%2FAfrican%2F1",
-    imageAlt: "Serge Yao",
-    metaIcon: "lucide:briefcase",
-  },
-  {
-    name: "Volt Power Solutions",
-    badge: "Verified Company",
-    badgeKind: "company",
-    role: "Energy & Electrical Systems",
-    chips: ["Solar Installation", "Commercial"],
-    description:
-      "Large-scale electrical installations, backup generator setup, and solar power integration for homes and corporate buildings.",
-    location: "Treichville, Abidjan",
-    rating: "4.9 (310 reviews)",
-    meta: "35 Staff",
-    price: "Custom Quote",
-    priceLabel: "Contact for pricing",
-    action: "View company",
-    actionKind: "secondary",
-    placeholder: { icon: "lucide:zap", tone: "accent" },
-    metaIcon: "lucide:users",
-  },
-  {
-    name: "Ibrahim Touré",
-    role: "Independent Electrician",
-    chips: ["Quick response"],
-    description:
-      "Reliable and affordable electrician for everyday household issues like short circuits, faulty outlets, and ceiling fan installations.",
-    location: "Yopougon, Abidjan",
-    rating: "4.6 (54 reviews)",
-    meta: "85+ jobs",
-    price: "10,000 XOF",
-    priceLabel: "per visit",
-    action: "View profile",
-    actionKind: "primary",
-    image:
-      "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FAfrican%2F5",
-    imageAlt: "Ibrahim Touré",
-    metaIcon: "lucide:briefcase",
-  },
-];
+type SearchResult = {
+  id: string | number;
+  type: "technician" | "company";
+  name: string;
+  role?: string;
+  description?: string;
+  image?: string;
+  category?: string;
+  rating?: number;
+  reviews?: number;
+  location?: string;
+  price?: number | string;
+  priceLabel?: string;
+  verified?: boolean;
+  skills?: string[];
+};
 
 export default function SearchPage() {
+  const { data: categoriesData } = useFetch(() => api.getCategories(), []);
+
+  const [query, setQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("any");
+  const [activeType, setActiveType] = useState<string>("any");
+  const [activeRating, setActiveRating] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("relevance");
+  const [page, setPage] = useState(1);
+
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const searchParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (location) params.location = location;
+    if (activeCategory && activeCategory !== "any") params.category = activeCategory;
+    if (activeType && activeType !== "any") params.type = activeType;
+    if (activeRating) params.min_rating = activeRating;
+    if (sortBy) params.sort = sortBy;
+    return params;
+  }, [query, location, activeCategory, activeType, activeRating, sortBy]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.search(searchParams);
+        if (cancelled) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
+        const mapped: SearchResult[] = raw.map((item) => ({
+          id: item.id,
+          type: item.type || (item.role === "company" ? "company" : "technician"),
+          name: item.name || item.full_name || item.company_name || "",
+          role: item.role || item.specialty || item.title,
+          description: item.description || item.bio,
+          image: item.image || item.avatar_url || item.avatar,
+          category: item.category || item.category_name,
+          rating: item.rating ?? item.average_rating,
+          reviews: item.reviews_count ?? item.reviews,
+          location: item.location || item.city,
+          price: item.price ?? item.hourly_rate ?? item.starting_price,
+          priceLabel: item.price_label,
+          verified: item.verified ?? item.is_verified,
+          skills: item.skills ?? [],
+        }));
+        setResults(mapped);
+      } catch (e) {
+        if (!cancelled) setError((e as Error)?.message || "Search failed");
+        setResults([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const categories = (categoriesData ?? []).map((c: any) => ({
+    label: c.name || c.title || c.slug,
+    slug: (c.slug || c.name || "").toString().toLowerCase(),
+  }));
+
+  const filteredByTab = useMemo(() => {
+    if (activeTab === "all") return results;
+    return results.filter((r) => r.type === activeTab);
+  }, [results, activeTab]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+  };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -143,24 +145,33 @@ export default function SearchPage() {
             </Link>
 
             <div className={styles.mobileProfile} aria-hidden="true">
-              <img
-                src="https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FEuropean%2F1"
-                alt=""
-              />
+              <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
             </div>
 
-            <form className={styles.searchBar} role="search">
+            <form className={styles.searchBar} role="search" onSubmit={submitSearch}>
               <label className={styles.searchField}>
                 <span className={styles.iconWrap} aria-hidden="true">
                   <iconify-icon icon="lucide:search" />
                 </span>
-                <input type="text" defaultValue="Electrician" aria-label="Service" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Service"
+                  aria-label="Service"
+                />
               </label>
               <label className={styles.searchField}>
                 <span className={styles.iconWrap} aria-hidden="true">
                   <iconify-icon icon="lucide:map-pin" />
                 </span>
-                <input type="text" defaultValue="Abidjan" aria-label="Location" />
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Location"
+                  aria-label="Location"
+                />
               </label>
               <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
                 Search
@@ -168,14 +179,11 @@ export default function SearchPage() {
             </form>
 
             <div className={styles.headerActions}>
-              <Link href="#" className={`${styles.button} ${styles.buttonSecondary}`}>
+              <Link href="/post-task" className={`${styles.button} ${styles.buttonSecondary}`}>
                 Post a job
               </Link>
               <div className={styles.avatar} aria-hidden="true">
-                <img
-                  src="https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FEuropean%2F1"
-                  alt=""
-                />
+                <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
               </div>
             </div>
           </div>
@@ -186,7 +194,18 @@ export default function SearchPage() {
         <aside className={styles.sidebar}>
           <div className={styles.filterHeader}>
             <h1 className={styles.filterTitle}>Filters</h1>
-            <button type="button" className={styles.clearButton}>
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={() => {
+                setActiveCategory("any");
+                setActiveType("any");
+                setActiveRating("");
+                setQuery("");
+                setLocation("");
+                setPage(1);
+              }}
+            >
               Clear all
             </button>
           </div>
@@ -196,19 +215,31 @@ export default function SearchPage() {
               Service Category
             </h2>
             <div className={styles.optionList}>
+              <button
+                type="button"
+                className={`${styles.optionItem} ${activeCategory === "any" ? styles.optionItemActive : ""}`}
+                aria-pressed={activeCategory === "any"}
+                onClick={() => setActiveCategory("any")}
+              >
+                <span className={styles.checkboxBox} aria-hidden="true">
+                  <iconify-icon icon="lucide:check" />
+                </span>
+                <span className={styles.optionLabel}>
+                  All categories
+                </span>
+              </button>
               {categories.map((category) => (
                 <button
-                  key={category.label}
+                  key={category.slug}
                   type="button"
-                  className={`${styles.optionItem} ${category.active ? styles.optionItemActive : ""}`}
-                  aria-pressed={category.active}
+                  className={`${styles.optionItem} ${activeCategory === category.slug ? styles.optionItemActive : ""}`}
+                  aria-pressed={activeCategory === category.slug}
+                  onClick={() => setActiveCategory(category.slug)}
                 >
                   <span className={styles.checkboxBox} aria-hidden="true">
                     <iconify-icon icon="lucide:check" />
                   </span>
-                  <span className={styles.optionLabel}>
-                    {category.label} <span className={styles.optionCount}>({category.count})</span>
-                  </span>
+                  <span className={styles.optionLabel}>{category.label}</span>
                 </button>
               ))}
             </div>
@@ -219,7 +250,7 @@ export default function SearchPage() {
               Location
             </h2>
             <button type="button" className={styles.selectFake}>
-              <span>Abidjan</span>
+              <span>{location || "All locations"}</span>
               <iconify-icon icon="lucide:chevron-down" />
             </button>
           </section>
@@ -231,14 +262,21 @@ export default function SearchPage() {
             <div className={styles.budgetGrid}>
               <label className={styles.budgetField}>
                 <span>Min</span>
-                <input className={styles.inputFake} type="text" defaultValue="0" aria-label="Minimum budget" />
+                <input
+                  className={styles.inputFake}
+                  type="number"
+                  defaultValue=""
+                  placeholder="0"
+                  aria-label="Minimum budget"
+                />
               </label>
               <label className={styles.budgetField}>
                 <span>Max</span>
                 <input
                   className={styles.inputFake}
-                  type="text"
-                  defaultValue="150,000+"
+                  type="number"
+                  defaultValue=""
+                  placeholder="Max"
                   aria-label="Maximum budget"
                 />
               </label>
@@ -252,10 +290,11 @@ export default function SearchPage() {
             <div className={styles.optionList}>
               {professionalTypes.map((option) => (
                 <button
-                  key={option.label}
+                  key={option.value}
                   type="button"
-                  className={`${styles.optionItem} ${option.active ? styles.optionItemActive : ""}`}
-                  aria-pressed={option.active}
+                  className={`${styles.optionItem} ${activeType === option.value ? styles.optionItemActive : ""}`}
+                  aria-pressed={activeType === option.value}
+                  onClick={() => setActiveType(option.value)}
                 >
                   <span className={styles.radioCircle} aria-hidden="true" />
                   <span className={styles.optionLabel}>{option.label}</span>
@@ -269,12 +308,22 @@ export default function SearchPage() {
               Minimum Rating
             </h2>
             <div className={styles.optionList}>
+              <button
+                type="button"
+                className={`${styles.optionItem} ${activeRating === "" ? styles.optionItemActive : ""}`}
+                aria-pressed={activeRating === ""}
+                onClick={() => setActiveRating("")}
+              >
+                <span className={styles.radioCircle} aria-hidden="true" />
+                <span className={styles.optionLabel}>Any rating</span>
+              </button>
               {ratings.map((rating) => (
                 <button
-                  key={rating.label}
+                  key={rating.value}
                   type="button"
-                  className={`${styles.optionItem} ${rating.active ? styles.optionItemActive : ""}`}
-                  aria-pressed={rating.active}
+                  className={`${styles.optionItem} ${activeRating === rating.value ? styles.optionItemActive : ""}`}
+                  aria-pressed={activeRating === rating.value}
+                  onClick={() => setActiveRating(rating.value)}
                 >
                   <span className={styles.radioCircle} aria-hidden="true" />
                   <span className={styles.optionLabel}>
@@ -292,134 +341,167 @@ export default function SearchPage() {
             <div className={styles.tabs} role="tablist" aria-label="Result categories">
               {tabs.map((tab) => (
                 <button
-                  key={tab.label}
+                  key={tab.value}
                   type="button"
                   role="tab"
-                  aria-selected={tab.active}
-                  className={`${styles.tab} ${tab.active ? styles.tabActive : ""}`}
+                  aria-selected={activeTab === tab.value}
+                  className={`${styles.tab} ${activeTab === tab.value ? styles.tabActive : ""}`}
+                  onClick={() => setActiveTab(tab.value)}
                 >
-                  {tab.label} ({tab.count})
+                  {tab.label} (
+                  {activeTab === tab.value ? filteredByTab.length : results.filter((r) => tab.value === "all" ? true : r.type === tab.value).length}
+                  )
                 </button>
               ))}
             </div>
 
             <label className={styles.sortBy}>
               <span>Sort by:</span>
-              <select aria-label="Sort results">
-                <option>Relevance</option>
-                <option>Highest rated</option>
-                <option>Lowest price</option>
+              <select
+                aria-label="Sort results"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="relevance">Relevance</option>
+                <option value="highest">Highest rated</option>
+                <option value="lowest">Lowest price</option>
               </select>
             </label>
           </div>
 
           <div className={styles.resultsList}>
-            {results.map((result) => (
-              <article key={result.name} className={styles.resultCard}>
-                <div className={styles.resultMedia}>
-                  {result.image ? (
-                    <img src={result.image} alt={result.imageAlt} className={styles.resultImage} />
-                  ) : (
-                    <div
-                      className={`${styles.companyPlaceholder} ${
-                        result.placeholder?.tone === "accent" ? styles.companyPlaceholderAccent : styles.companyPlaceholderPrimary
-                      }`}
-                      aria-hidden="true"
-                    >
-                      <iconify-icon icon={result.placeholder?.icon} />
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.resultBody}>
-                  <div className={styles.resultTitleRow}>
-                    <h2 className={styles.resultName}>{result.name}</h2>
-                    {result.badge ? (
-                      <span
-                        className={`${styles.badge} ${
-                          result.badgeKind === "company" ? styles.companyBadge : styles.verifiedBadge
-                        }`}
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : error ? (
+              <div style={{ padding: "32px 0", textAlign: "center", color: "#ef4444" }}>
+                <p>{error}</p>
+              </div>
+            ) : filteredByTab.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No results found. Try adjusting your filters.</p>
+              </div>
+            ) : (
+              filteredByTab.map((result) => (
+                <article key={result.id} className={styles.resultCard}>
+                  <div className={styles.resultMedia}>
+                    {result.image ? (
+                      <Image
+                        src={result.image}
+                        alt={result.name}
+                        fill
+                        sizes="160px"
+                        className={styles.resultImage}
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.companyPlaceholder} ${styles.companyPlaceholderPrimary}`}
+                        aria-hidden="true"
                       >
-                        <iconify-icon
-                          icon={result.badgeKind === "company" ? "lucide:building-2" : "lucide:shield-check"}
-                        />
-                        {result.badge}
-                      </span>
+                        <iconify-icon icon={result.type === "company" ? "lucide:building-2" : "lucide:user"} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.resultBody}>
+                    <div className={styles.resultTitleRow}>
+                      <h2 className={styles.resultName}>{result.name}</h2>
+                      {result.verified ? (
+                        <span
+                          className={`${styles.badge} ${result.type === "company" ? styles.companyBadge : styles.verifiedBadge}`}
+                        >
+                          <iconify-icon
+                            icon={result.type === "company" ? "lucide:building-2" : "lucide:shield-check"}
+                          />
+                          {result.type === "company" ? "Verified Company" : "Verified"}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {result.role ? <p className={styles.resultRole}>{result.role}</p> : null}
+
+                    {result.skills && result.skills.length > 0 ? (
+                      <div className={styles.chips}>
+                        {result.skills.map((chip) => (
+                          <span key={chip} className={styles.chip}>
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
                     ) : null}
+
+                    {result.description ? (
+                      <p className={styles.resultDescription}>{result.description}</p>
+                    ) : null}
+
+                    <div className={styles.metaRow}>
+                      {result.location ? (
+                        <span className={styles.metaItem}>
+                          <iconify-icon icon="lucide:map-pin" />
+                          {result.location}
+                        </span>
+                      ) : null}
+                      {result.rating != null ? (
+                        <span className={`${styles.metaItem} ${styles.metaRating}`}>
+                          <iconify-icon icon="lucide:star" className={styles.starIcon} />
+                          {Number(result.rating).toFixed(1)}
+                          {result.reviews != null ? ` (${result.reviews} reviews)` : ""}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
-                  <p className={styles.resultRole}>{result.role}</p>
+                  <div className={styles.resultActions}>
+                    <div className={styles.priceBlock}>
+                      <div className={styles.price}>
+                        {result.price != null ? formatXOF(result.price) : "Contact for pricing"}
+                      </div>
+                      <div className={styles.priceLabel}>
+                        {result.priceLabel || "starting price"}
+                      </div>
+                    </div>
 
-                  <div className={styles.chips}>
-                    {result.chips.map((chip) => (
-                      <span key={chip} className={styles.chip}>
-                        {chip}
-                      </span>
-                    ))}
+                    <Link
+                      href={`/profile/${result.id}`}
+                      className={`${styles.button} ${result.type === "company" ? styles.buttonSecondary : styles.buttonPrimary} ${styles.actionButton}`}
+                    >
+                      {result.type === "company" ? "View company" : "View profile"}
+                    </Link>
                   </div>
-
-                  <p className={styles.resultDescription}>{result.description}</p>
-
-                  <div className={styles.metaRow}>
-                    <span className={styles.metaItem}>
-                      <iconify-icon icon="lucide:map-pin" />
-                      {result.location}
-                    </span>
-                    <span className={`${styles.metaItem} ${styles.metaRating}`}>
-                      <iconify-icon icon="lucide:star" className={styles.starIcon} />
-                      {result.rating}
-                    </span>
-                    <span className={styles.metaItem}>
-                      <iconify-icon icon={result.metaIcon} />
-                      {result.meta}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.resultActions}>
-                  <div className={styles.priceBlock}>
-                    <div className={styles.price}>{result.price}</div>
-                    <div className={styles.priceLabel}>{result.priceLabel}</div>
-                  </div>
-
-                  <Link
-                    href="#"
-                    className={`${styles.button} ${
-                      result.actionKind === "secondary" ? styles.buttonSecondary : styles.buttonPrimary
-                    } ${styles.actionButton}`}
-                  >
-                    {result.action}
-                  </Link>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </div>
 
-          <nav className={styles.pagination} aria-label="Pagination">
-            <button type="button" className={`${styles.pageButton} ${styles.pageButtonDisabled}`} disabled>
-              <iconify-icon icon="lucide:chevron-left" />
-              Previous
-            </button>
-            <div className={styles.pageNumbers}>
-              <button type="button" className={`${styles.pageNumber} ${styles.pageNumberActive}`}>
-                1
+          {!loading && filteredByTab.length > 0 && (
+            <nav className={styles.pagination} aria-label="Pagination">
+              <button
+                type="button"
+                className={`${styles.pageButton} ${page === 1 ? styles.pageButtonDisabled : ""}`}
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                <iconify-icon icon="lucide:chevron-left" />
+                Previous
               </button>
-              <button type="button" className={styles.pageNumber}>
-                2
+              <div className={styles.pageNumbers}>
+                <button
+                  type="button"
+                  className={`${styles.pageNumber} ${page === 1 ? styles.pageNumberActive : ""}`}
+                  onClick={() => setPage(1)}
+                >
+                  1
+                </button>
+              </div>
+              <button
+                type="button"
+                className={styles.pageButton}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+                <iconify-icon icon="lucide:chevron-right" />
               </button>
-              <button type="button" className={styles.pageNumber}>
-                3
-              </button>
-              <span className={styles.pageEllipsis}>...</span>
-              <button type="button" className={styles.pageNumber}>
-                12
-              </button>
-            </div>
-            <button type="button" className={styles.pageButton}>
-              Next
-              <iconify-icon icon="lucide:chevron-right" />
-            </button>
-          </nav>
+            </nav>
+          )}
         </section>
       </main>
 

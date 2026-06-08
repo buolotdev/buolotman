@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { formatXOF } from "@/app/lib/format";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 
@@ -15,15 +19,104 @@ const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }
   { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client" },
 ];
 
-const attachments = [
-  { name: "apartment_floor_plan.pdf", size: "2.4 MB • PDF Document", icon: "lucide:file-text" },
-  { name: "current_panel_photo.jpg", size: "1.1 MB • JPEG Image", icon: "lucide:image" },
-];
+const DRAFT_KEY = "boulotman_post_task_draft";
 
-const skills = ["Wiring", "Circuit Breakers", "Lighting Installation", "Panel Installation"];
+type DraftPayload = {
+  title: string;
+  category: string;
+  subcategory: string;
+  description: string;
+  address: string;
+  apartment: string;
+  city: string;
+  expectedDate: string;
+  timePreference: string;
+  budget: string;
+  budgetMode: string;
+  urgency: string;
+  serviceType: string;
+  contactMethods: string[];
+  materialsProvided: boolean;
+  skills: string[];
+};
+
+function readDraft(): DraftPayload | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as DraftPayload;
+  } catch {
+    return null;
+  }
+}
 
 export default function TaskReviewPage() {
+  const router = useRouter();
+  const { data: meData } = useFetch(() => api.getMe(), []);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [draft, setDraft] = useState<DraftPayload | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDraft(readDraft());
+  }, []);
+
+  const userInitials = (() => {
+    const first = meData?.first_name || "";
+    const last = meData?.last_name || "";
+    if (first || last) return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+    return "";
+  })();
+  const userName =
+    [meData?.first_name, meData?.last_name].filter(Boolean).join(" ") || meData?.username || "";
+  const userRole = meData?.role ? meData.role.charAt(0).toUpperCase() + meData.role.slice(1) : "";
+
+  const title = draft?.title || "Untitled task";
+  const description = draft?.description || "";
+  const category = draft?.category || "—";
+  const subcategory = draft?.subcategory || "";
+  const urgency = draft?.urgency === "urgent" ? "Urgent (Within 24h)" : "Standard / Flexible";
+  const budget = draft?.budget ? Number(draft.budget) : 0;
+  const budgetMode = draft?.budgetMode === "hourly" ? "Hourly Rate" : "Fixed Price";
+  const serviceFee = Math.round(budget * 0.05);
+  const total = budget + serviceFee;
+  const skills = draft?.skills ?? [];
+  const address = [draft?.address, draft?.apartment, draft?.city].filter(Boolean).join(", ");
+
+  const publish = async () => {
+    if (!draft) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const categoryId = draft.category && /^\d+$/.test(draft.category) ? Number(draft.category) : null;
+      const address = [draft.address, draft.apartment, draft.city].filter(Boolean).join(", ");
+      await api.createTask({
+        title: draft.title,
+        description: draft.description,
+        category: categoryId,
+        location: address || draft.city || "",
+        city: draft.city,
+        schedule: draft.expectedDate || "",
+        deadline: draft.expectedDate || null,
+        urgency: draft.urgency || "standard",
+        service_type: draft.serviceType || "onsite",
+        budget_mode: draft.budgetMode || "fixed",
+        budget_min: budget || null,
+        budget_max: budget || null,
+        materials_provided: !!draft.materialsProvided,
+        contact_methods: draft.contactMethods || [],
+        skills: draft.skills || [],
+      });
+      window.localStorage.removeItem(DRAFT_KEY);
+      router.push("/post-task/success");
+    } catch (e) {
+      setSubmitError((e as Error)?.message || "Could not publish task");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <main className={styles.page}>
@@ -46,7 +139,11 @@ export default function TaskReviewPage() {
 
           <nav className={styles.sidebarNav} aria-label="Dashboard navigation">
             {navItems.map((item) => (
-              <Link key={item.key} href={item.href} className={`${styles.navItem} ${item.key === "tasks" ? styles.navItemActive : ""}`}>
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`${styles.navItem} ${item.key === "tasks" ? styles.navItemActive : ""}`}
+              >
                 <iconify-icon icon={item.icon} />
                 <span>{item.label}</span>
               </Link>
@@ -79,10 +176,10 @@ export default function TaskReviewPage() {
               </button>
 
               <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>JD</div>
+                <div className={styles.userAvatar}>{userInitials}</div>
                 <div>
-                  <p className={styles.userName}>John Doe</p>
-                  <p className={styles.userRole}>Client</p>
+                  <p className={styles.userName}>{userName}</p>
+                  <p className={styles.userRole}>{userRole}</p>
                 </div>
               </div>
             </div>
@@ -116,37 +213,46 @@ export default function TaskReviewPage() {
                 </div>
               </section>
 
+              {submitError ? (
+                <section className={styles.banner} style={{ borderColor: "#ef4444" }}>
+                  <div>
+                    <strong>Could not publish</strong>
+                    <p>{submitError}</p>
+                  </div>
+                </section>
+              ) : null}
+
               <div className={styles.twoColumnLayout}>
                 <div className={styles.mainColumn}>
                   <section className={styles.card}>
                     <div className={styles.previewMeta}>
-                      <span className={styles.metaBadge}>Electrical</span>
-                      <span className={styles.metaBadge}>Wiring & Installation</span>
-                      <span className={`${styles.metaBadge} ${styles.metaUrgency}`}>Standard / Flexible</span>
+                      <span className={styles.metaBadge}>{category}</span>
+                      {subcategory ? <span className={styles.metaBadge}>{subcategory}</span> : null}
+                      <span className={`${styles.metaBadge} ${styles.metaUrgency}`}>{urgency}</span>
                     </div>
 
-                    <h3 className={styles.taskTitle}>Complete electrical wiring for new apartment</h3>
+                    <h3 className={styles.taskTitle}>{title}</h3>
 
-                    <p className={styles.copy}>
-                      I need a certified electrician to completely wire a newly built 3-bedroom apartment. The job includes
-                      installing circuit breakers, wiring for all lighting fixtures, and installing wall outlets. All
-                      structural conduits are already in place.
-                    </p>
-                    <p className={styles.copy}>
-                      The workspace is clean and easily accessible. Expected timeframe for completion is about 3-5 days.
-                      Please ensure you have references for similar residential projects.
-                    </p>
+                    {description ? (
+                      <p className={styles.copy}>{description}</p>
+                    ) : (
+                      <p className={styles.copy} style={{ color: "#94a3b8" }}>No description provided.</p>
+                    )}
 
                     <div className={styles.divider} />
 
                     <div className={styles.skillsBlock}>
                       <strong>Required Skills</strong>
                       <div className={styles.tagRow}>
-                        {skills.map((skill) => (
-                          <span key={skill} className={styles.tag}>
-                            {skill}
-                          </span>
-                        ))}
+                        {skills.length === 0 ? (
+                          <span style={{ color: "#94a3b8", fontSize: 14 }}>No skills specified.</span>
+                        ) : (
+                          skills.map((skill) => (
+                            <span key={skill} className={styles.tag}>
+                              {skill}
+                            </span>
+                          ))
+                        )}
                       </div>
                     </div>
                   </section>
@@ -161,28 +267,28 @@ export default function TaskReviewPage() {
                         <span className={styles.detailIcon}><iconify-icon icon="lucide:calendar" /></span>
                         <div>
                           <small>Expected Date</small>
-                          <strong>Oct 24, 2025</strong>
+                          <strong>{draft?.expectedDate || "—"}</strong>
                         </div>
                       </div>
                       <div className={styles.detailItem}>
                         <span className={styles.detailIcon}><iconify-icon icon="lucide:sun" /></span>
                         <div>
                           <small>Time Preference</small>
-                          <strong>Morning (8AM - 12PM)</strong>
+                          <strong>{draft?.timePreference || "—"}</strong>
                         </div>
                       </div>
                       <div className={styles.detailItem}>
                         <span className={styles.detailIcon}><iconify-icon icon="lucide:hammer" /></span>
                         <div>
                           <small>Materials</small>
-                          <strong>Client provides materials</strong>
+                          <strong>{draft?.materialsProvided ? "Client provides materials" : "Pro provides materials"}</strong>
                         </div>
                       </div>
                       <div className={styles.detailItem}>
                         <span className={styles.detailIcon}><iconify-icon icon="lucide:smartphone" /></span>
                         <div>
                           <small>Contact Method</small>
-                          <strong>In-app Messaging, Phone</strong>
+                          <strong>{(draft?.contactMethods ?? []).join(", ") || "—"}</strong>
                         </div>
                       </div>
                     </div>
@@ -201,38 +307,10 @@ export default function TaskReviewPage() {
                       <div className={styles.locationInfo}>
                         <span className={styles.locationBadge}>
                           <iconify-icon icon="lucide:navigation" />
-                          Onsite Task
+                          {draft?.serviceType === "remote" ? "Remote Task" : "Onsite Task"}
                         </span>
-                        <strong>Rue des Jardins, Cocody Deux Plateaux</strong>
-                        <p>
-                          Building C, Apt 14
-                          <br />
-                          Abidjan
-                        </p>
+                        <strong>{address || "No address provided"}</strong>
                       </div>
-                    </div>
-                  </section>
-
-                  <section className={styles.card}>
-                    <div className={styles.sectionTitle}>
-                      <h3>Attachments (2)</h3>
-                    </div>
-
-                    <div className={styles.fileList}>
-                      {attachments.map((file) => (
-                        <div key={file.name} className={styles.fileItem}>
-                          <div className={styles.fileIcon}>
-                            <iconify-icon icon={file.icon} />
-                          </div>
-                          <div className={styles.fileInfo}>
-                            <strong>{file.name}</strong>
-                            <span>{file.size}</span>
-                          </div>
-                          <button type="button" className={styles.downloadButton} aria-label={`Download ${file.name}`}>
-                            <iconify-icon icon="lucide:download" />
-                          </button>
-                        </div>
-                      ))}
                     </div>
                   </section>
                 </div>
@@ -241,21 +319,29 @@ export default function TaskReviewPage() {
                   <section className={styles.card}>
                     <small className={styles.eyebrow}>Estimated Budget</small>
                     <div className={styles.priceDisplay}>
-                      85,000 <span>XOF</span>
+                      {budget ? formatXOF(budget) : "—"} <span>XOF</span>
                     </div>
-                    <span className={styles.priceType}>Fixed Price</span>
+                    <span className={styles.priceType}>{budgetMode}</span>
 
                     <div className={styles.divider} />
 
                     <div className={styles.costList}>
-                      <div>
-                        <span>Boulot Man Service Fee (5%)</span>
-                        <strong>4,250 XOF</strong>
-                      </div>
-                      <div>
-                        <span>Total Estimated Cost</span>
-                        <strong>89,250 XOF</strong>
-                      </div>
+                      {budget ? (
+                        <>
+                          <div>
+                            <span>Boulot Man Service Fee (5%)</span>
+                            <strong>{formatXOF(serviceFee)}</strong>
+                          </div>
+                          <div>
+                            <span>Total Estimated Cost</span>
+                            <strong>{formatXOF(total)}</strong>
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <span>Set a budget to estimate fees.</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className={styles.safeNotice}>
@@ -271,9 +357,14 @@ export default function TaskReviewPage() {
                     </div>
 
                     <div className={styles.actionStack}>
-                      <Link href="/post-task/success" className={styles.primaryButton}>
-                        Publish Task Now
-                      </Link>
+                      <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={publish}
+                        disabled={submitting || !draft}
+                      >
+                        {submitting ? "Publishing…" : "Publish Task Now"}
+                      </button>
                       <Link href="/post-task" className={styles.editButton}>
                         <iconify-icon icon="lucide:pencil" />
                         Edit Details

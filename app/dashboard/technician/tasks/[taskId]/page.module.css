@@ -369,6 +369,20 @@
   color: #001f3f;
 }
 
+.statusBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid #bbf7d0;
+}
+
 .bidStats {
   display: flex;
   justify-content: space-between;

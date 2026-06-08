@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { formatXOF } from "@/app/lib/format";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 type ServiceType = "onsite" | "remote" | "hybrid";
@@ -19,61 +23,110 @@ const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }
   { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client" },
 ];
 
-const categories = ["Electrical", "Plumbing", "HVAC", "Cleaning", "Carpentry"];
-const subcategories: Record<string, string[]> = {
-  Electrical: ["Wiring & Installation", "Lighting", "Panel Upgrade", "Solar Setup"],
-  Plumbing: ["Pipe Repair", "Drain Cleaning", "Water Heater", "Bathroom Install"],
-  HVAC: ["AC Repair", "AC Installation", "Ventilation", "Maintenance"],
-  Cleaning: ["Deep Cleaning", "Office Cleaning", "Move-out Cleaning", "Post-Reno Cleaning"],
-  Carpentry: ["Furniture", "Doors", "Cabinets", "Wood Repair"],
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const EMPTY_SKILLS: any[] = [];
 
 export default function PostTaskPage() {
+  const router = useRouter();
+  const { data: meData } = useFetch(() => api.getMe(), []);
+  const { data: categoriesData, loading: categoriesLoading } = useFetch(
+    () => api.getCategories(),
+    []
+  );
+
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [serviceType, setServiceType] = useState<ServiceType>("onsite");
   const [urgency, setUrgency] = useState<Urgency>("standard");
   const [budgetMode, setBudgetMode] = useState<BudgetMode>("fixed");
-  const [materialsProvided, setMaterialsProvided] = useState(true);
-  const [contactMethods, setContactMethods] = useState<ContactMethod[]>(["in-app", "phone"]);
+  const [materialsProvided, setMaterialsProvided] = useState(false);
+  const [contactMethods, setContactMethods] = useState<ContactMethod[]>(["in-app"]);
   const [skillInput, setSkillInput] = useState("");
-  const [published, setPublished] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
-    title: "Complete electrical wiring for new apartment",
-    category: "Electrical",
-    subcategory: "Wiring & Installation",
-    description:
-      "I need a certified electrician to completely wire a newly built 3-bedroom apartment. The job includes installing circuit breakers, wiring for all lighting fixtures, and installing wall outlets. All structural conduits are already in place.",
-    address: "Rue des Jardins, Cocody Deux Plateaux",
-    apartment: "Building C, Apt 14",
-    city: "Abidjan",
-    expectedDate: "Oct 24, 2025",
-    timePreference: "Morning (8AM - 12PM)",
-    budget: "85,000",
+    title: "",
+    category: "",
+    subcategory: "",
+    description: "",
+    address: "",
+    apartment: "",
+    city: "",
+    expectedDate: "",
+    timePreference: "",
+    budget: "",
   });
-  const [skills, setSkills] = useState(["Wiring", "Circuit Breakers", "Lighting Installation"]);
-  const [files, setFiles] = useState([
-    { name: "apartment_floor_plan.pdf", size: "2.4 MB", kind: "pdf" },
-    { name: "current_panel_photo.jpg", size: "1.1 MB", kind: "image" },
-  ]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [files, setFiles] = useState<Array<{ name: string; size: string; kind: string }>>([]);
+
+  const categories = useMemo(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (categoriesData ?? []).map((c: any) => ({
+        name: c.name || c.title || c.slug,
+        slug: c.slug || (c.name || "").toString().toLowerCase(),
+        id: c.id,
+      })),
+    [categoriesData]
+  );
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | number | null>(null);
+  const { data: skillsData, loading: skillsLoading } = useFetch(
+    () =>
+      selectedCategoryId != null
+        ? api.getSkills(String(selectedCategoryId))
+        : Promise.resolve(EMPTY_SKILLS),
+    [selectedCategoryId]
+  );
+  const subcategories = useMemo(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (skillsData ?? []).map((s: any) => ({
+        name: s.name || s.title || "",
+        id: s.id,
+      })),
+    [skillsData]
+  );
+
+  useEffect(() => {
+    if (!formData.category && categories.length > 0) {
+      const first = categories[0];
+      setFormData((current) => ({ ...current, category: String(first.id), subcategory: "" }));
+      setSelectedCategoryId(first.id);
+    }
+  }, [categories, formData.category]);
+
+  const selectedCategoryName = useMemo(() => {
+    return categories.find((c) => String(c.id) === formData.category)?.name || formData.category || "—";
+  }, [categories, formData.category]);
 
   const taskSummary = useMemo(
     () => ({
-      categoryLabel: `${formData.category} / ${formData.subcategory}`,
-      scheduleLabel: `${formData.expectedDate} • ${formData.timePreference}`,
-      budgetLabel: budgetMode === "fixed" ? `${formData.budget} XOF fixed` : `${formData.budget} XOF / hr`,
+      categoryLabel: formData.subcategory
+        ? `${selectedCategoryName} / ${formData.subcategory}`
+        : selectedCategoryName,
+      scheduleLabel: formData.expectedDate
+        ? `${formData.expectedDate}${formData.timePreference ? ` • ${formData.timePreference}` : ""}`
+        : "Not scheduled",
+      budgetLabel: formData.budget
+        ? budgetMode === "fixed"
+          ? `${formatXOF(formData.budget)} fixed`
+          : `${formatXOF(formData.budget)} / hr`
+        : "—",
       contactLabel: contactMethods.length ? contactMethods.join(", ") : "No contact methods selected",
     }),
-    [budgetMode, contactMethods, formData]
+    [budgetMode, contactMethods, formData, selectedCategoryName]
   );
 
   const updateField = (field: keyof typeof formData, value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
+  };
 
-    if (field === "category") {
-      const nextSubcategory = subcategories[value]?.[0] ?? "";
-      setFormData((current) => ({ ...current, category: value, subcategory: nextSubcategory }));
-    }
+  const onCategoryChange = (value: string) => {
+    const match = categories.find((c) => String(c.id) === value);
+    setFormData((current) => ({ ...current, category: value, subcategory: "" }));
+    setSelectedCategoryId(match?.id ?? null);
   };
 
   const toggleContactMethod = (method: ContactMethod) => {
@@ -98,9 +151,75 @@ export default function PostTaskPage() {
   };
 
   const saveDraft = () => {
+    const payload = {
+      title: formData.title,
+      category: formData.category,
+      subcategory: formData.subcategory,
+      description: formData.description,
+      address: formData.address,
+      apartment: formData.apartment,
+      city: formData.city,
+      expectedDate: formData.expectedDate,
+      timePreference: formData.timePreference,
+      budget: formData.budget,
+      budgetMode,
+      urgency,
+      serviceType,
+      contactMethods,
+      materialsProvided,
+      skills,
+    };
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("boulotman_post_task_draft", JSON.stringify(payload));
+    }
     setSaved(true);
-    setPublished(false);
   };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const draftPayload = {
+        title: formData.title,
+        category: formData.category,
+        subcategory: formData.subcategory,
+        description: formData.description,
+        address: formData.address,
+        apartment: formData.apartment,
+        city: formData.city,
+        expectedDate: formData.expectedDate,
+        timePreference: formData.timePreference,
+        budget: formData.budget,
+        budgetMode,
+        urgency,
+        serviceType,
+        contactMethods,
+        materialsProvided,
+        skills,
+      };
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("boulotman_post_task_draft", JSON.stringify(draftPayload));
+      }
+
+      router.push("/post-task/review");
+    } catch (e) {
+      setSubmitError((e as Error)?.message || "Failed to continue");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const userInitials = (() => {
+    const first = meData?.first_name || "";
+    const last = meData?.last_name || "";
+    if (first || last) return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+    return "";
+  })();
+  const userName =
+    [meData?.first_name, meData?.last_name].filter(Boolean).join(" ") || meData?.username || "";
+  const userRole = meData?.role ? meData.role.charAt(0).toUpperCase() + meData.role.slice(1) : "";
 
   return (
     <main className={styles.page}>
@@ -156,10 +275,10 @@ export default function PostTaskPage() {
               </button>
 
               <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>JD</div>
+                <div className={styles.userAvatar}>{userInitials}</div>
                 <div>
-                  <p className={styles.userName}>John Doe</p>
-                  <p className={styles.userRole}>Client</p>
+                  <p className={styles.userName}>{userName}</p>
+                  <p className={styles.userRole}>{userRole}</p>
                 </div>
               </div>
             </div>
@@ -191,15 +310,11 @@ export default function PostTaskPage() {
                 </div>
               </section>
 
-              {(published || saved) ? (
-                <section className={`${styles.banner} ${published ? styles.bannerSuccess : styles.bannerDraft}`}>
+              {saved ? (
+                <section className={`${styles.banner} ${styles.bannerDraft}`}>
                   <div>
-                    <strong>{published ? "Task ready to go" : "Draft saved"}</strong>
-                    <p>
-                      {published
-                        ? "Your task has been prepared and is ready to publish to professionals."
-                        : "Your draft is saved locally so you can keep editing before publishing."}
-                    </p>
+                    <strong>Draft saved</strong>
+                    <p>Your draft is saved locally so you can keep editing before publishing.</p>
                   </div>
                   <Link href="/dashboard/client" className={styles.bannerLink}>
                     Back to dashboard
@@ -207,7 +322,16 @@ export default function PostTaskPage() {
                 </section>
               ) : null}
 
-              <div className={styles.twoColumnLayout}>
+              {submitError ? (
+                <section className={`${styles.banner} ${styles.bannerDraft}`} style={{ borderColor: "#ef4444" }}>
+                  <div>
+                    <strong>Could not publish task</strong>
+                    <p>{submitError}</p>
+                  </div>
+                </section>
+              ) : null}
+
+              <form className={styles.twoColumnLayout} onSubmit={handleSubmit}>
                 <div className={styles.mainColumn}>
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
@@ -217,26 +341,65 @@ export default function PostTaskPage() {
                     <div className={styles.formGrid}>
                       <div className={styles.formGroupFull}>
                         <label htmlFor="title" className={styles.label}>Task Title</label>
-                        <input id="title" className={styles.input} value={formData.title} onChange={(event) => updateField("title", event.target.value)} />
+                        <input
+                          id="title"
+                          className={styles.input}
+                          value={formData.title}
+                          onChange={(event) => updateField("title", event.target.value)}
+                          required
+                        />
                       </div>
 
                       <div className={styles.formGroup}>
                         <label htmlFor="category" className={styles.label}>Category</label>
-                        <select id="category" className={styles.select} value={formData.category} onChange={(event) => updateField("category", event.target.value)}>
-                          {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                        <select
+                          id="category"
+                          className={styles.select}
+                          value={formData.category}
+                          onChange={(event) => onCategoryChange(event.target.value)}
+                          required
+                        >
+                          {categoriesLoading ? (
+                            <option>Loading…</option>
+                          ) : categories.length === 0 ? (
+                            <option value="">No categories</option>
+                          ) : (
+                            categories.map((category) => (
+                              <option key={String(category.id)} value={String(category.id)}>{category.name}</option>
+                            ))
+                          )}
                         </select>
                       </div>
 
                       <div className={styles.formGroup}>
                         <label htmlFor="subcategory" className={styles.label}>Sub-Category</label>
-                        <select id="subcategory" className={styles.select} value={formData.subcategory} onChange={(event) => updateField("subcategory", event.target.value)}>
-                          {(subcategories[formData.category] ?? []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+                        <select
+                          id="subcategory"
+                          className={styles.select}
+                          value={formData.subcategory}
+                          onChange={(event) => updateField("subcategory", event.target.value)}
+                        >
+                          {skillsLoading ? (
+                            <option>Loading…</option>
+                          ) : subcategories.length === 0 ? (
+                            <option value="">No subcategories</option>
+                          ) : (
+                            subcategories.map((sub) => (
+                              <option key={String(sub.id)} value={sub.name}>{sub.name}</option>
+                            ))
+                          )}
                         </select>
                       </div>
 
                       <div className={styles.formGroupFull}>
                         <label htmlFor="description" className={styles.label}>Description</label>
-                        <textarea id="description" className={styles.textarea} value={formData.description} onChange={(event) => updateField("description", event.target.value)} />
+                        <textarea
+                          id="description"
+                          className={styles.textarea}
+                          value={formData.description}
+                          onChange={(event) => updateField("description", event.target.value)}
+                          required
+                        />
                       </div>
 
                       <div className={styles.formGroupFull}>
@@ -286,7 +449,7 @@ export default function PostTaskPage() {
                     <div className={styles.formGrid}>
                       <div className={styles.formGroupFull}>
                         <label htmlFor="address" className={styles.label}>Street Address</label>
-                        <input id="address" className={styles.input} value={formData.address} onChange={(event) => updateField("address", event.target.value)} />
+                        <input id="address" className={styles.input} value={formData.address} onChange={(event) => updateField("address", event.target.value)} required />
                       </div>
 
                       <div className={styles.formGroup}>
@@ -296,7 +459,7 @@ export default function PostTaskPage() {
 
                       <div className={styles.formGroup}>
                         <label htmlFor="city" className={styles.label}>City</label>
-                        <input id="city" className={styles.input} value={formData.city} onChange={(event) => updateField("city", event.target.value)} />
+                        <input id="city" className={styles.input} value={formData.city} onChange={(event) => updateField("city", event.target.value)} required />
                       </div>
                     </div>
                   </section>
@@ -360,12 +523,12 @@ export default function PostTaskPage() {
 
                       <div className={styles.formGroup}>
                         <label htmlFor="expectedDate" className={styles.label}>Expected Date</label>
-                        <input id="expectedDate" className={styles.input} value={formData.expectedDate} onChange={(event) => updateField("expectedDate", event.target.value)} />
+                        <input id="expectedDate" type="date" className={styles.input} value={formData.expectedDate} onChange={(event) => updateField("expectedDate", event.target.value)} />
                       </div>
 
                       <div className={styles.formGroup}>
                         <label htmlFor="timePreference" className={styles.label}>Time Preference</label>
-                        <input id="timePreference" className={styles.input} value={formData.timePreference} onChange={(event) => updateField("timePreference", event.target.value)} />
+                        <input id="timePreference" className={styles.input} placeholder="e.g. Morning" value={formData.timePreference} onChange={(event) => updateField("timePreference", event.target.value)} />
                       </div>
 
                       <div className={styles.formGroup}>
@@ -399,7 +562,12 @@ export default function PostTaskPage() {
                         </div>
                         <div className={styles.currencyInput}>
                           <span>XOF</span>
-                          <input value={formData.budget} onChange={(event) => updateField("budget", event.target.value)} />
+                          <input
+                            type="number"
+                            value={formData.budget}
+                            onChange={(event) => updateField("budget", event.target.value)}
+                            placeholder="0"
+                          />
                         </div>
                       </div>
                     </div>
@@ -470,14 +638,14 @@ export default function PostTaskPage() {
                     </div>
 
                     <div className={styles.actionStack}>
-                      <Link href="/post-task/review" className={styles.primaryButtonBlock}>
-                        Review & Publish
-                      </Link>
+                      <button type="submit" className={styles.primaryButtonBlock} disabled={submitting}>
+                        {submitting ? "Publishing…" : "Review & Publish"}
+                      </button>
                       <button type="button" className={styles.secondaryButtonBlock} onClick={saveDraft}>Save as Draft</button>
                     </div>
                   </section>
                 </aside>
-              </div>
+              </form>
             </div>
           </div>
         </div>

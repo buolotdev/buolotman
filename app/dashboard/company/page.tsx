@@ -2,66 +2,92 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { toArray } from "@/app/lib/dataShape";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export default function CompanyDashboard() {
-  const [activeNav, setActiveNav] = useState("dashboard");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
-    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
-    { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase", badge: 12 },
-    { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users" },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square", badge: 5 },
-    { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3" },
-    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
-    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
+    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard", match: (p: string) => p === "/dashboard/company" },
+    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers", match: (p: string) => p.startsWith("/dashboard/company/services") },
+    { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase", match: (p: string) => p.startsWith("/dashboard/company/projects") },
+    { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users", match: (p: string) => p.startsWith("/dashboard/company/teams") },
+    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square", match: (p: string) => p.startsWith("/dashboard/company/messages") },
+    { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3", match: (p: string) => p.startsWith("/dashboard/company/analytics") },
+    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user", match: (p: string) => p.startsWith("/dashboard/company/profile") },
+    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings", match: (p: string) => p.startsWith("/dashboard/company/settings") },
   ];
 
+  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: companyProfile, loading: profileLoading } = useFetch(() => api.getCompanyProfile(), []);
+  const { data: projectsData, loading: projectsLoading } = useFetch(() => api.getCompanyProjects(), []);
+  const { data: servicesData, loading: servicesLoading } = useFetch(() => api.getCompanyServices(), []);
+  const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
+  const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
+
+  const projects = toArray(projectsData);
+  const services = toArray(servicesData);
+  const activeProjects = projects.filter((p: any) => p.status === "in_progress").length;
+  const completedProjects = projects.filter((p: any) => p.status === "completed").length;
+
+  const companyName = companyProfile?.company_name || user?.company_name || "";
+  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
+  const userRole = user?.role || "";
+
   return (
-    <div className={styles.layoutWrapper}>
-      {/* Sidebar */}
+    <div className={`${styles.layoutWrapper} ${mobileSidebarOpen ? styles.sidebarOpenMobile : ""}`}>
+      <div className={styles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
+
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <Link href="/" className={styles.brand}>
-            <Image 
-              src="/boulotman-logo.png" 
-              alt="Boulot Man" 
-              width={180} 
-              height={46} 
-              className={styles.brandImage} 
-              priority 
-            />
+            <Image src="/boulotman-logo.png" alt="Boulot Man" width={180} height={46} className={styles.brandImage} priority />
           </Link>
         </div>
 
         <nav className={styles.navMenu}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${styles.navItem} ${activeNav === item.id ? styles.navItemActive : ""}`}
-            >
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-              {item.badge && <span className={styles.navItemBadge}>{item.badge}</span>}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = item.match(pathname || "");
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                onClick={(e) => {
+                  if (pathname === item.href) {
+                    e.preventDefault();
+                    window.location.reload();
+                  }
+                }}
+              >
+                <iconify-icon icon={item.icon} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <Link href="/login" className={styles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutButton} />
           <p className={styles.copyright}>© 2026 Boulot Man Inc.</p>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={styles.mainWrapper}>
         <header className={styles.topbar}>
+          <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
+            <iconify-icon icon="lucide:menu" />
+          </button>
           <div className={styles.searchBar}>
             <iconify-icon icon="lucide:search" />
             <input type="text" placeholder="Search projects, teams..." />
@@ -75,11 +101,15 @@ export default function CompanyDashboard() {
             
             <div className={styles.companyProfile}>
               <div className={styles.profileImg}>
-                <Image src="/boulotman-logo.png" alt="Company" width={40} height={40} />
+                {userLoading ? (
+                  <SkeletonBlock style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                ) : (
+                  <div className={styles.profileInitials}>{userInitials}</div>
+                )}
               </div>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>TechCorp Solutions</span>
-                <span className={styles.profileRole}>Administrator</span>
+                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 100, height: 14 }} /> : companyName}</div>
+                <span className={styles.profileRole}>{userRole}</span>
               </div>
             </div>
           </div>
@@ -89,61 +119,75 @@ export default function CompanyDashboard() {
           <div className={styles.pageHeader}>
             <div className={styles.headerTitles}>
               <h1>Company Dashboard</h1>
-              <p>Welcome back! Here's what's happening with your projects today.</p>
+              <p>Welcome back! Here&apos;s what&apos;s happening with your projects today.</p>
             </div>
-            <button type="button" className={styles.btnPrimary}>
+            <Link href="/dashboard/company/projects" className={styles.btnPrimary}>
               <iconify-icon icon="lucide:plus" />
               <span>Create New Project</span>
-            </button>
+            </Link>
           </div>
 
-          {/* Dashboard Grid */}
           <div className={styles.topRow}>
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2>Project Overview</h2>
-                <button className={styles.panelAction}>View All</button>
+                <Link href="/dashboard/company/projects" className={styles.panelAction}>View All</Link>
               </div>
               <div className={styles.panelBody}>
-                <div className={styles.statsGrid}>
-                  <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Active Projects</span>
-                    <span className={styles.statValue}>24</span>
-                    <span className={`${styles.statTrend} ${styles.trendUp}`}>+12% from last month</span>
+                {projectsLoading || walletLoading ? (
+                  <div className={styles.statsGrid}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.statCard}><SkeletonStat /></div>
+                    ))}
                   </div>
-                  <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Total Revenue</span>
-                    <span className={styles.statValue}>$128,430</span>
-                    <span className={`${styles.statTrend} ${styles.trendUp}`}>+8.4% from last month</span>
+                ) : (
+                  <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Active Projects</span>
+                      <span className={styles.statValue}>{activeProjects}</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Completed Projects</span>
+                      <span className={styles.statValue}>{completedProjects}</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Available Balance</span>
+                      <span className={styles.statValue}>{wallet ? `${Number(wallet.available_balance).toLocaleString()} XOF` : "0 XOF"}</span>
+                    </div>
                   </div>
-                  <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Completed Tasks</span>
-                    <span className={styles.statValue}>1,204</span>
-                    <span className={`${styles.statTrend} ${styles.trendDown}`}>-2% from last month</span>
-                  </div>
-                </div>
+                )}
               </div>
             </section>
 
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
-                <h2>Team Performance</h2>
+                <h2>Services Offered</h2>
+                <Link href="/dashboard/company/services" className={styles.panelAction}>Manage</Link>
               </div>
               <div className={styles.panelBody}>
-                <div className={styles.teamList}>
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className={styles.teamItem}>
-                      <div className={styles.teamAvatar}>T{i}</div>
-                      <div className={styles.teamInfo}>
-                        <strong>Development Team {i}</strong>
-                        <span>8 members • 12 active tasks</span>
+                {servicesLoading ? (
+                  <div className={styles.teamList}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.teamItem}><SkeletonBlock style={{ width: "100%", height: 48 }} /></div>
+                    ))}
+                  </div>
+                ) : !services || services.length === 0 ? (
+                  <p style={{ color: "#64748b", fontSize: 14 }}>No services added yet.</p>
+                ) : (
+                  <div className={styles.teamList}>
+                    {services.slice(0, 3).map((service: any) => (
+                      <div key={service.id} className={styles.teamItem}>
+                        <div className={styles.teamAvatar}>
+                          <iconify-icon icon="lucide:layers" />
+                        </div>
+                        <div className={styles.teamInfo}>
+                          <strong>{service.name || "Service"}</strong>
+                          <span>{service.description?.slice(0, 40) || "No description"}</span>
+                        </div>
                       </div>
-                      <div className={styles.teamProgress}>
-                        <div className={styles.progressBar} style={{ width: `${70 + i * 5}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -151,22 +195,32 @@ export default function CompanyDashboard() {
           <div className={styles.bottomRow}>
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
-                <h2>Recent Activity</h2>
+                <h2>Recent Projects</h2>
               </div>
               <div className={styles.panelBody}>
-                <div className={styles.activityList}>
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className={styles.activityItem}>
-                      <div className={styles.activityIcon}>
-                        <iconify-icon icon="lucide:check-circle" />
+                {projectsLoading ? (
+                  <div className={styles.activityList}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.activityItem}><SkeletonBlock style={{ width: "100%", height: 48 }} /></div>
+                    ))}
+                  </div>
+                ) : projects.length === 0 ? (
+                  <p style={{ color: "#64748b", fontSize: 14 }}>No projects yet.</p>
+                ) : (
+                  <div className={styles.activityList}>
+                    {projects.slice(0, 4).map((project: any) => (
+                      <div key={project.id} className={styles.activityItem}>
+                        <div className={styles.activityIcon}>
+                          <iconify-icon icon={project.status === "completed" ? "lucide:check-circle" : "lucide:briefcase"} />
+                        </div>
+                        <div className={styles.activityContent}>
+                          <p><strong>{project.title || "Project"}</strong></p>
+                          <span>{project.status || "draft"} • {project.budget ? `${Number(project.budget).toLocaleString()} XOF` : "No budget"}</span>
+                        </div>
                       </div>
-                      <div className={styles.activityContent}>
-                        <p><strong>Project Alpha</strong> task "Database Migration" completed by <strong>John Doe</strong></p>
-                        <span>2 hours ago</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
 
@@ -177,10 +231,10 @@ export default function CompanyDashboard() {
                 </div>
                 <div className={styles.panelBody}>
                   <div className={styles.actionGrid}>
-                    <button className={styles.actionBtn}><iconify-icon icon="lucide:user-plus" /> Add Member</button>
-                    <button className={styles.actionBtn}><iconify-icon icon="lucide:file-text" /> Generate Report</button>
-                    <button className={styles.actionBtn}><iconify-icon icon="lucide:calendar" /> Schedule Meeting</button>
-                    <button className={styles.actionBtn}><iconify-icon icon="lucide:mail" /> Send Invite</button>
+                    <Link href="/dashboard/company/projects" className={styles.actionBtn}><iconify-icon icon="lucide:briefcase" /> New Project</Link>
+                    <Link href="/dashboard/company/services" className={styles.actionBtn}><iconify-icon icon="lucide:layers" /> Add Service</Link>
+                    <Link href="/dashboard/company/messages" className={styles.actionBtn}><iconify-icon icon="lucide:message-square" /> Messages</Link>
+                    <Link href="/dashboard/company/analytics" className={styles.actionBtn}><iconify-icon icon="lucide:bar-chart-3" /> Analytics</Link>
                   </div>
                 </div>
               </section>

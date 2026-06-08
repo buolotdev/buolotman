@@ -5,35 +5,74 @@ import Link from "next/link";
 import { useState } from "react";
 import layoutStyles from "../page.module.css";
 import styles from "./projects.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
+import { useFetch } from "@/app/lib/useFetch";
+import { api } from "@/app/lib/api";
+import { SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import { formatXOF } from "@/app/lib/format";
 
 export default function CompanyProjects() {
   const [activeNav, setActiveNav] = useState("projects");
 
+  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: projectsData, loading: projectsLoading, error } = useFetch(
+    () => api.getCompanyProjects(),
+    []
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const projects = (projectsData?.results ?? []) as any[];
+
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter(
+    (p) => p.status === "active" || p.status === "in_progress"
+  ).length;
+  const completedProjects = projects.filter(
+    (p) => p.status === "completed"
+  ).length;
+  const pendingProjects = projects.filter(
+    (p) => p.status === "pending" || p.status === "draft"
+  ).length;
+
   const navItems = [
     { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
     { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
-    { id: "projects", label: "Projects & Contracts", href: "/dashboard/company/projects", icon: "lucide:briefcase", badge: 12 },
+    { id: "projects", label: "Projects & Contracts", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
     { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users" },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square", badge: 5 },
+    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
     { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3" },
     { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
     { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
   ];
 
+  const statusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+      case "in_progress":
+        return <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>;
+      case "pending":
+      case "draft":
+        return <span className={`${styles.badge} ${styles.badgePending}`}>Pending</span>;
+      case "completed":
+        return <span className={`${styles.badge} ${styles.badgeCompleted}`}>Completed</span>;
+      default:
+        return <span className={`${styles.badge}`}>{status}</span>;
+    }
+  };
+
   return (
     <div className={layoutStyles.layoutWrapper}>
-      {/* Sidebar (Copied from main company dashboard) */}
       <aside className={layoutStyles.sidebar}>
         <div className={layoutStyles.sidebarHeader}>
           <Link href="/" className={layoutStyles.brand}>
-            <Image 
-              src="/boulotman-logo.png" 
-              alt="Boulot Man" 
-              width={180} 
-              height={46} 
-              className={layoutStyles.brandImage} 
+            <Image
+              src="/boulotman-logo.png"
+              alt="Boulot Man"
+              width={180}
+              height={46}
+              className={layoutStyles.brandImage}
               style={{ width: 'auto', height: '46px' }}
-              priority 
+              priority
             />
           </Link>
         </div>
@@ -47,23 +86,17 @@ export default function CompanyProjects() {
             >
               <iconify-icon icon={item.icon} />
               <span>{item.label}</span>
-              {item.badge && <span className={layoutStyles.navItemBadge}>{item.badge}</span>}
             </Link>
           ))}
         </nav>
 
         <div className={layoutStyles.sidebarFooter}>
-          <Link href="/login" className={layoutStyles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={layoutStyles.logoutButton} />
           <p className={layoutStyles.copyright}>© 2026 Boulot Man Inc.</p>
         </div>
       </aside>
 
-      {/* Main Content Wrapper */}
       <div className={layoutStyles.mainWrapper}>
-        {/* Topbar */}
         <header className={styles.topbar}>
           <div className={styles.searchBar}>
             <div style={{ color: "#64748b", display: "flex" }}>
@@ -84,22 +117,23 @@ export default function CompanyProjects() {
 
             <div className={styles.userProfile}>
               <div className={styles.userInfo} style={{ textAlign: "right" }}>
-                <span className={styles.userName}>Apex Construction</span>
-                <span className={styles.userRole}>Company Account</span>
+                <span className={styles.userName}>{user ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || user.username || "" : ""}</span>
+                <span className={styles.userRole}>{user?.role ?? ""}</span>
               </div>
               <div className={styles.avatar}>
-                <Image
-                  src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop&q=80"
-                  alt="Company"
-                  width={36}
-                  height={36}
-                />
+                {user?.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt=""
+                    width={36}
+                    height={36}
+                  />
+                ) : null}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
         <main className={styles.pageContent}>
           <div className={styles.pageHeader}>
             <div>
@@ -120,58 +154,48 @@ export default function CompanyProjects() {
             </div>
           </div>
 
-          {/* Stats Section */}
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div className={styles.statHeader}>
-                <span className={styles.statTitle}>Total Projects</span>
-                <iconify-icon icon="lucide:folder-open" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
+          {projectsLoading ? (
+            <div className={styles.statsGrid}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonStat key={i} />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statHeader}>
+                  <span className={styles.statTitle}>Total Projects</span>
+                  <iconify-icon icon="lucide:folder-open" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
+                </div>
+                <div className={styles.statValue}>{totalProjects}</div>
               </div>
-              <div className={styles.statValue}>24</div>
-              <div className={`${styles.statChange} ${styles.textSuccess}`}>
-                <iconify-icon icon="lucide:trending-up" style={{ fontSize: "14px" }}></iconify-icon>
-                +4 this month
+
+              <div className={styles.statCard}>
+                <div className={styles.statHeader}>
+                  <span className={styles.statTitle}>Active Contracts</span>
+                  <iconify-icon icon="lucide:activity" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
+                </div>
+                <div className={styles.statValue}>{activeProjects}</div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statHeader}>
+                  <span className={styles.statTitle}>Pending</span>
+                  <iconify-icon icon="lucide:clock" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
+                </div>
+                <div className={styles.statValue}>{pendingProjects}</div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statHeader}>
+                  <span className={styles.statTitle}>Completed</span>
+                  <iconify-icon icon="lucide:check-circle" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
+                </div>
+                <div className={styles.statValue}>{completedProjects}</div>
               </div>
             </div>
+          )}
 
-            <div className={styles.statCard}>
-              <div className={styles.statHeader}>
-                <span className={styles.statTitle}>Active Contracts</span>
-                <iconify-icon icon="lucide:activity" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
-              </div>
-              <div className={styles.statValue}>12</div>
-              <div className={`${styles.statChange} ${styles.textWarning}`}>
-                <iconify-icon icon="lucide:clock" style={{ fontSize: "14px" }}></iconify-icon>
-                3 nearing deadline
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statHeader}>
-                <span className={styles.statTitle}>Total Revenue</span>
-                <iconify-icon icon="lucide:dollar-sign" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
-              </div>
-              <div className={styles.statValue}>$45.2K</div>
-              <div className={`${styles.statChange} ${styles.textSuccess}`}>
-                <iconify-icon icon="lucide:trending-up" style={{ fontSize: "14px" }}></iconify-icon>
-                12% vs last month
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statHeader}>
-                <span className={styles.statTitle}>Success Rate</span>
-                <iconify-icon icon="lucide:check-circle" style={{ fontSize: "20px", color: "#64748b" }}></iconify-icon>
-              </div>
-              <div className={styles.statValue}>98%</div>
-              <div className={`${styles.statChange} ${styles.textMuted}`}>
-                <iconify-icon icon="lucide:minus" style={{ fontSize: "14px" }}></iconify-icon>
-                Same as last month
-              </div>
-            </div>
-          </div>
-
-          {/* Toolbar */}
           <div className={styles.toolbarSection}>
             <div className={styles.tabs}>
               <div className={`${styles.tab} ${styles.tabActive}`}>All Projects</div>
@@ -191,252 +215,99 @@ export default function CompanyProjects() {
             </div>
           </div>
 
-          {/* Projects List */}
           <div className={styles.projectsList}>
-            {/* Detailed Project Card 1 */}
-            <div className={styles.projectCard}>
-              <div className={styles.projectHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <h3 className={styles.projectTitle}>Complete Office HVAC Installation</h3>
-                  <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>
-                </div>
-                <button className={styles.btnIconOnly}>
-                  <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
-                </button>
+            {projectsLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))
+            ) : error ? (
+              <div style={{ textAlign: "center", padding: "48px 0", color: "#ef4444" }}>
+                <p>{error}</p>
               </div>
+            ) : projects.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
+                <iconify-icon icon="lucide:folder-open" style={{ fontSize: "48px", marginBottom: "16px", display: "block" }}></iconify-icon>
+                <h3 style={{ margin: "0 0 8px" }}>No projects yet</h3>
+                <p style={{ margin: 0 }}>Create your first project to get started.</p>
+              </div>
+            ) : (
+              projects.map((project) => (
+                <div key={project.id} className={styles.projectCard}>
+                  <div className={styles.projectHeader}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                      <h3 className={styles.projectTitle}>{project.title || project.name || ""}</h3>
+                      {statusBadge(project.status)}
+                    </div>
+                    <button className={styles.btnIconOnly}>
+                      <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
+                    </button>
+                  </div>
 
-              <div className={styles.projectDetailsGrid}>
-                <div className={styles.projectInfoCol}>
-                  <div className={styles.metaGrid}>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Client</span>
-                      <div className={styles.metaValueRich}>
-                        <div className={styles.miniAvatar}>
-                          <Image src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop&q=80" alt="Nexus Tech" width={24} height={24} />
+                  <div className={styles.projectDetailsGrid}>
+                    <div className={styles.projectInfoCol}>
+                      <div className={styles.metaGrid}>
+                        <div className={styles.metaItemBox}>
+                          <span className={styles.metaLabel}>Client</span>
+                          <div className={styles.metaValueRich}>
+                            {project.client_name || ""}
+                          </div>
                         </div>
-                        Nexus Technologies
+                        {project.budget != null && (
+                          <div className={styles.metaItemBox}>
+                            <span className={styles.metaLabel}>Total Budget</span>
+                            <div className={styles.metaValueRich}>{formatXOF(project.budget)}</div>
+                          </div>
+                        )}
+                        {project.start_date && (
+                          <div className={styles.metaItemBox}>
+                            <span className={styles.metaLabel}>Timeline</span>
+                            <div className={styles.metaValueRich}>
+                              {project.start_date}{project.end_date ? ` - ${project.end_date}` : ""}
+                            </div>
+                          </div>
+                        )}
+                        {project.progress != null && (
+                          <div className={styles.metaItemBox}>
+                            <span className={styles.metaLabel}>Progress</span>
+                            <div className={styles.metaValueRich}>{project.progress}%</div>
+                          </div>
+                        )}
+                        {project.location && (
+                          <div className={styles.metaItemBox}>
+                            <span className={styles.metaLabel}>Location</span>
+                            <div className={styles.metaValueRich}>{project.location}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Total Budget</span>
-                      <div className={styles.metaValueRich}>$14,500.00</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Timeline</span>
-                      <div className={styles.metaValueRich}>Oct 10 - Nov 20, 2023</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Milestones</span>
-                      <div className={styles.metaValueRich}>3 / 5 Completed</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Payment Status</span>
-                      <div className={styles.metaValueRich}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }}></div>
-                        Funded in Escrow
+
+                    <div className={styles.projectProgressCol}>
+                      <div className={styles.progressHeader}>
+                        <span>Overall Progress</span>
+                        <span>{project.progress ?? 0}%</span>
+                      </div>
+                      <div className={styles.progressBarBg}>
+                        <div
+                          className={`${styles.progressBarFill} ${styles.fillActive}`}
+                          style={{ width: `${project.progress ?? 0}%` }}
+                        ></div>
                       </div>
                     </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Location</span>
-                      <div className={styles.metaValueRich}>Downtown Office Park</div>
+                  </div>
+
+                  <div className={styles.projectFooter}>
+                    <span className={styles.lastUpdated}>
+                      <iconify-icon icon="lucide:history" style={{ fontSize: "14px" }}></iconify-icon>
+                      {project.updated_at ? `Updated ${new Date(project.updated_at).toLocaleDateString()}` : ""}
+                    </span>
+                    <div className={styles.actionButtons}>
+                      <Link href="/dashboard/company/messages" className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}>Message Client</Link>
+                      <Link href={`/dashboard/company/projects/tracking?projectId=${project.id}`} className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}>Manage Project</Link>
                     </div>
                   </div>
                 </div>
-
-                <div className={styles.projectProgressCol}>
-                  <div className={styles.progressHeader}>
-                    <span>Overall Progress</span>
-                    <span>60%</span>
-                  </div>
-                  <div className={styles.progressBarBg}>
-                    <div className={`${styles.progressBarFill} ${styles.fillActive}`} style={{ width: "60%" }}></div>
-                  </div>
-
-                  <div className={styles.teamSection}>
-                    <span className={styles.teamLabel}>Assigned Team</span>
-                    <div className={styles.avatarGroup}>
-                      <Image src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                      <Image src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                      <Image src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.projectFooter}>
-                <span className={styles.lastUpdated}>
-                  <iconify-icon icon="lucide:history" style={{ fontSize: "14px" }}></iconify-icon>
-                  Last updated 2 days ago by System
-                </span>
-                <div className={styles.actionButtons}>
-                  <Link href="/dashboard/company/messages" className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}>Message Client</Link>
-                  <Link href="/dashboard/company/projects/tracking" className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}>Manage Project</Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Project Card 2 */}
-            <div className={styles.projectCard}>
-              <div className={styles.projectHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <h3 className={styles.projectTitle}>Electrical Wiring for New Retail Store</h3>
-                  <span className={`${styles.badge} ${styles.badgePending}`}>Pending Start</span>
-                </div>
-                <button className={styles.btnIconOnly}>
-                  <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
-                </button>
-              </div>
-
-              <div className={styles.projectDetailsGrid}>
-                <div className={styles.projectInfoCol}>
-                  <div className={styles.metaGrid}>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Client</span>
-                      <div className={styles.metaValueRich}>
-                        <div className={styles.miniAvatar}>
-                          <Image src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop&q=80" alt="FreshMart" width={24} height={24} />
-                        </div>
-                        FreshMart Groceries
-                      </div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Total Budget</span>
-                      <div className={styles.metaValueRich}>$8,200.00</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Timeline</span>
-                      <div className={styles.metaValueRich}>Nov 01 - Nov 15, 2023</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Milestones</span>
-                      <div className={styles.metaValueRich}>0 / 4 Completed</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Payment Status</span>
-                      <div className={styles.metaValueRich}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }}></div>
-                        Awaiting Deposit
-                      </div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Location</span>
-                      <div className={styles.metaValueRich}>Westside Mall, Unit B</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.projectProgressCol}>
-                  <div className={styles.progressHeader}>
-                    <span>Overall Progress</span>
-                    <span>0%</span>
-                  </div>
-                  <div className={styles.progressBarBg}>
-                    <div className={styles.progressBarFill} style={{ width: "0%" }}></div>
-                  </div>
-
-                  <div className={styles.teamSection}>
-                    <span className={styles.teamLabel}>Assigned Team</span>
-                    <div className={styles.avatarGroup}>
-                      <Image src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                      <Image src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.projectFooter}>
-                <span className={styles.lastUpdated}>
-                  <iconify-icon icon="lucide:history" style={{ fontSize: "14px" }}></iconify-icon>
-                  Created yesterday
-                </span>
-                <div className={styles.actionButtons}>
-                  <Link href="/dashboard/company/messages" className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}>Message Client</Link>
-                  <Link href="/dashboard/company/projects/tracking" className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}>Manage Project</Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Project Card 3 */}
-            <div className={styles.projectCard}>
-              <div className={styles.projectHeader}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <h3 className={styles.projectTitle}>Security System Upgrade</h3>
-                  <span className={`${styles.badge} ${styles.badgeCompleted}`}>Completed</span>
-                </div>
-                <button className={styles.btnIconOnly}>
-                  <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
-                </button>
-              </div>
-
-              <div className={styles.projectDetailsGrid}>
-                <div className={styles.projectInfoCol}>
-                  <div className={styles.metaGrid}>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Client</span>
-                      <div className={styles.metaValueRich}>
-                        <div className={styles.miniAvatar}>
-                          <Image src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop&q=80" alt="Blue Sky" width={24} height={24} />
-                        </div>
-                        Blue Sky Finance
-                      </div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Total Budget</span>
-                      <div className={styles.metaValueRich}>$3,400.00</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Timeline</span>
-                      <div className={styles.metaValueRich}>Sep 01 - Sep 10, 2023</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Milestones</span>
-                      <div className={styles.metaValueRich}>2 / 2 Completed</div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Payment Status</span>
-                      <div className={styles.metaValueRich}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }}></div>
-                        Fully Paid
-                      </div>
-                    </div>
-                    <div className={styles.metaItemBox}>
-                      <span className={styles.metaLabel}>Location</span>
-                      <div className={styles.metaValueRich}>Financial District HQ</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.projectProgressCol}>
-                  <div className={styles.progressHeader}>
-                    <span>Overall Progress</span>
-                    <span className={styles.textSuccess}>100%</span>
-                  </div>
-                  <div className={styles.progressBarBg}>
-                    <div className={`${styles.progressBarFill} ${styles.fillSuccess}`} style={{ width: "100%" }}></div>
-                  </div>
-
-                  <div className={styles.teamSection}>
-                    <span className={styles.teamLabel}>Assigned Team</span>
-                    <div className={styles.avatarGroup}>
-                      <Image src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80" alt="Member" width={32} height={32} />
-                      <div className={styles.avatarMore}>+1</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.projectFooter}>
-                <span className={styles.lastUpdated}>
-                  <iconify-icon icon="lucide:check-circle" style={{ fontSize: "14px", color: "#10b981" }}></iconify-icon>
-                  Closed on Sep 12, 2023
-                </span>
-                <div className={styles.actionButtons}>
-                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}>View Invoice</button>
-                  <button className={`${styles.btn} ${styles.btnSm} ${styles.btnOutline}`}>Project Summary</button>
-                </div>
-              </div>
-            </div>
-
+              ))
+            )}
           </div>
         </main>
       </div>

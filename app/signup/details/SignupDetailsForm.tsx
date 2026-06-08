@@ -27,6 +27,8 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
     confirmPassword: "",
     acceptedTerms: true,
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const selectedRole = useMemo(() => roleMeta[role], [role]);
 
@@ -53,6 +55,20 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
     event.preventDefault();
 
     if (!isValid) return;
+
+    try {
+      sessionStorage.setItem(
+        "signup_data",
+        JSON.stringify({
+          role,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        })
+      );
+    } catch {
+    }
 
     const params = new URLSearchParams({
       role,
@@ -166,13 +182,21 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
                 </span>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className={styles.inputBare}
                   placeholder="Minimum 8 characters"
                   value={formData.password}
                   onChange={(event) => handleChange("password", event.target.value)}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
+                </button>
               </div>
             </div>
 
@@ -186,13 +210,21 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
                 </span>
                 <input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   className={styles.inputBare}
                   placeholder="Repeat your password"
                   value={formData.confirmPassword}
                   onChange={(event) => handleChange("confirmPassword", event.target.value)}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex={-1}
+                >
+                  <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
+                </button>
               </div>
             </div>
           </div>
@@ -213,11 +245,11 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
             </span>
             <span className={styles.checkboxLabel}>
               I agree to Boulot Man&apos;s{" "}
-              <Link href="#" className={styles.inlineLink}>
+              <Link href="/terms" className={styles.inlineLink}>
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="#" className={styles.inlineLink}>
+              <Link href="/privacy" className={styles.inlineLink}>
                 Privacy Policy
               </Link>
               .

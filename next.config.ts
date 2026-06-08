@@ -11,7 +11,20 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'storage.googleapis.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'sxmjwjuwfsvjjqcldziw.supabase.co',
+      },
     ],
+  },
+  async rewrites() {
+    const backend = process.env.NEXT_PUBLIC_API_URL;
+    if (backend) {
+      return [
+        { source: '/api/proxy/:path*', destination: `${backend}/api/:path*` },
+      ];
+    }
+    return [];
   },
 };
 

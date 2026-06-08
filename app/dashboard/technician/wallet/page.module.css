@@ -12,10 +12,13 @@
 .profileMeta strong { font-size: 15px; }
 .profileMeta span, .profileMeta small { color: rgba(254,254,255,.72); font-size: 12px; line-height: 1.5; }
 .sidebarNav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.navItem { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-radius: 14px; background: transparent; color: rgba(254,254,255,.82); font-size: 14px; font-weight: 700; text-align: left; text-decoration: none; }
+.navItem { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-radius: 14px; background: transparent; color: rgba(254,254,255,.82); font-size: 14px; font-weight: 700; text-align: left; text-decoration: none; cursor: pointer; }
 .navItemActive { background: #ff4500; color: #fff; }
 .navIcon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex-shrink: 0; }
-.logoutButton { min-height: 46px; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; background: rgba(255,255,255,.06); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 800; text-decoration: none; }
+.logoutButton { min-height: 46px; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; background: rgba(255,255,255,.06); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 800; text-decoration: none; cursor: pointer; }
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 .main { min-width: 0; display: flex; flex-direction: column; }
 .topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 32px; background: rgba(255,255,255,.92); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(14px); }
 .topbarLeft, .topbarActions, .topbarProfile, .pageHeader, .transactionsHeader, .transactionsActions, .tabs, .pagination { display: flex; }

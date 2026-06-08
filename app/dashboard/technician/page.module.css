@@ -124,6 +124,7 @@
   font-size: 14px;
   font-weight: 700;
   text-align: left;
+  cursor: pointer;
 }
 
 .navItemActive {
@@ -180,6 +181,11 @@
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .main {

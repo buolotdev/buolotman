@@ -2,300 +2,245 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import styles from "./edit.module.css";
+import { useFetch } from "@/app/lib/useFetch";
+import { api } from "@/app/lib/api";
+import { useToast } from "@/app/components/Toast";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+
+const COMPANY_SIZES = ["", "1-10", "11-50", "51-200", "201-500", "500+"];
 
 export default function EditCompanyProfile() {
+  const toast = useToast();
+  const { data: profile, loading, refetch } = useFetch(() => api.getCompanyProfile(), []);
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState({
+    company_name: "",
+    registration_number: "",
+    services_offered: "",
+    company_size: "",
+    about: "",
+    website: "",
+    headquarters: "",
+    team_size: "",
+    business_hours: "",
+    response_time: "",
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        company_name: profile.company_name || "",
+        registration_number: profile.registration_number || "",
+        services_offered: profile.services_offered || "",
+        company_size: profile.company_size || "",
+        about: profile.about || "",
+        website: profile.website || "",
+        headquarters: profile.headquarters || "",
+        team_size: profile.team_size?.toString() || "",
+        business_hours: profile.business_hours || "",
+        response_time: profile.response_time || "",
+      });
+    }
+  }, [profile]);
+
+  const handleChange = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    if (!form.company_name.trim()) {
+      toast.warning("Missing required field", "Please enter a company name.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload: Record<string, any> = {
+        company_name: form.company_name,
+        registration_number: form.registration_number,
+        services_offered: form.services_offered,
+        company_size: form.company_size,
+        about: form.about,
+        website: form.website,
+        headquarters: form.headquarters,
+        business_hours: form.business_hours,
+        response_time: form.response_time,
+      };
+      if (form.team_size) {
+        const n = Number(form.team_size);
+        if (!Number.isNaN(n)) payload.team_size = n;
+      }
+      await api.updateCompanyProfile(payload);
+      toast.success("Profile saved", "Your company profile is up to date.");
+      await refetch();
+      window.location.href = "/dashboard/company/profile";
+    } catch (err: any) {
+      toast.error("Save failed", err.message || "Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className={styles.mainWrapper}>
+        <div className={styles.container}>
+          <SkeletonBlock style={{ height: 48, width: "40%", marginBottom: 16 }} />
+          <SkeletonBlock style={{ height: 600, borderRadius: 12 }} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.mainWrapper}>
       <div className={styles.container}>
-        {/* Page Header */}
-        <div className={styles.pageHeader}>
+        <div className={styles.headerRow}>
           <div>
-            <h1 className={styles.pageTitle}>Edit Company Profile</h1>
-            <div className={styles.pageSubtitle}>
-              Update your company details, services, and team information.
-            </div>
-          </div>
-          <div className={styles.headerActions}>
-            <Link href="/dashboard/company/profile" className={styles.btnOutline}>
-              Cancel
+            <Link href="/dashboard/company/profile" className={styles.backLink}>
+              <iconify-icon icon="lucide:arrow-left" /> Back to profile
             </Link>
-            <button type="button" className={styles.btnPrimary}>
-              <iconify-icon icon="lucide:save" style={{ fontSize: '18px' }}></iconify-icon>
-              Save Changes
-            </button>
+            <h1>Edit Company Profile</h1>
+            <p>Update your public company information. Clients will see this on your profile page.</p>
           </div>
         </div>
 
-        {/* Form Container */}
-        <div className={styles.card}>
-          {/* Logo Upload Section */}
-          <div className={styles.logoSection}>
-            <div className={styles.currentLogo}>
-              <Image
-                src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=200&h=200"
-                alt="Current Logo"
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <div className={styles.logoActions}>
-              <h3>Company Logo</h3>
-              <p>Recommended size: 400x400px. Max size 5MB. JPG, PNG or WEBP.</p>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" className={styles.btnOutline}>
-                  <iconify-icon icon="lucide:upload" style={{ fontSize: '16px' }}></iconify-icon>
-                  Change Logo
-                </button>
-                <button type="button" className={styles.btnIcon} style={{ width: '44px', height: '44px' }}>
-                  <iconify-icon icon="lucide:trash-2" style={{ fontSize: '16px' }}></iconify-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Basic Info */}
-          <h2 className={styles.cardTitle}>Basic Information</h2>
-          <div className={styles.grid2} style={{ marginBottom: '20px' }}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Company Name *</label>
-              <div>
+        <form className={styles.form} onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Company Basics</h2>
+            <div className={styles.grid}>
+              <label className={styles.field}>
+                <span className={styles.label}>Company Name <em>*</em></span>
                 <input
                   type="text"
                   className={styles.input}
-                  defaultValue="Apex Construction"
-                  placeholder="Enter company name"
+                  value={form.company_name}
+                  onChange={(e) => handleChange("company_name", e.target.value)}
+                  placeholder="Enter your company name"
+                  required
                 />
-              </div>
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Company Type</label>
-              <div>
-                <select className={`${styles.input} ${styles.selectInput}`}>
-                  <option value="general">General Contractor</option>
-                  <option value="specialty">Specialty Trade Contractor</option>
-                  <option value="arch_eng">Architecture & Engineering</option>
-                  <option value="cleaning">Cleaning Services</option>
+              </label>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Registration Number</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.registration_number}
+                  onChange={(e) => handleChange("registration_number", e.target.value)}
+                  placeholder="Enter registration number"
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Company Size</span>
+                <select
+                  className={styles.input}
+                  value={form.company_size}
+                  onChange={(e) => handleChange("company_size", e.target.value)}
+                >
+                  {COMPANY_SIZES.map((s) => (
+                    <option key={s} value={s}>{s || "Select size"}</option>
+                  ))}
                 </select>
-              </div>
-            </div>
-          </div>
+              </label>
 
-          <div className={styles.formGroup} style={{ marginBottom: '32px' }}>
-            <label className={styles.label}>Company Description *</label>
-            <div>
-              <textarea
-                className={styles.textarea}
-                placeholder="Describe your company's mission, experience, and what makes you unique..."
-                defaultValue={"Apex Construction is an industry-leading general contractor providing comprehensive building solutions for both commercial and residential projects.\n\nWith over 15 years of experience in the region, our team of certified professionals guarantees quality craftsmanship, strict adherence to timelines, and exceptional safety standards."}
-              />
-            </div>
-            <div className={styles.helperText} style={{ marginTop: '6px', textAlign: 'right' }}>
-              342 / 1000 characters
-            </div>
-          </div>
-        </div>
+              <label className={styles.field}>
+                <span className={styles.label}>Team Size</span>
+                <input
+                  type="number"
+                  min="0"
+                  className={styles.input}
+                  value={form.team_size}
+                  onChange={(e) => handleChange("team_size", e.target.value)}
+                  placeholder="e.g. 38"
+                />
+              </label>
 
-        {/* Services & Categories */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Services & Categories</h2>
+              <label className={styles.field}>
+                <span className={styles.label}>Headquarters</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.headquarters}
+                  onChange={(e) => handleChange("headquarters", e.target.value)}
+                  placeholder="e.g. Dakar, Senegal"
+                />
+              </label>
 
-          <div className={styles.formGroup} style={{ marginBottom: '24px' }}>
-            <label className={styles.label}>Primary Service Categories</label>
-            <div className={styles.tagsContainer}>
-              <div className={styles.tag}>
-                Commercial Construction
-                <div className={styles.tagRemove}>
-                  <iconify-icon icon="lucide:x" style={{ fontSize: '12px' }}></iconify-icon>
-                </div>
-              </div>
-              <div className={styles.tag}>
-                Residential Renovation
-                <div className={styles.tagRemove}>
-                  <iconify-icon icon="lucide:x" style={{ fontSize: '12px' }}></iconify-icon>
-                </div>
-              </div>
-              <div className={styles.tag}>
-                Electrical Installs
-                <div className={styles.tagRemove}>
-                  <iconify-icon icon="lucide:x" style={{ fontSize: '12px' }}></iconify-icon>
-                </div>
-              </div>
-              <div className={styles.tag}>
-                Plumbing
-                <div className={styles.tagRemove}>
-                  <iconify-icon icon="lucide:x" style={{ fontSize: '12px' }}></iconify-icon>
-                </div>
-              </div>
-              <input
-                type="text"
-                className={styles.tagsInputField}
-                placeholder="Type and press enter..."
-              />
+              <label className={styles.field}>
+                <span className={styles.label}>Website</span>
+                <input
+                  type="url"
+                  className={styles.input}
+                  value={form.website}
+                  onChange={(e) => handleChange("website", e.target.value)}
+                  placeholder="https://example.com"
+                />
+              </label>
             </div>
-            <div className={styles.helperText} style={{ marginTop: '8px' }}>
-              Add up to 10 categories that best describe your services.
-            </div>
-          </div>
+          </section>
 
-          <div className={styles.grid2}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Service Radius</label>
-              <div>
-                <select className={`${styles.input} ${styles.selectInput}`}>
-                  <option value="50">Up to 50 miles</option>
-                  <option value="100">Up to 100 miles</option>
-                  <option value="state">Statewide</option>
-                  <option value="nation">Nationwide</option>
-                </select>
-              </div>
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Years in Business</label>
-              <div>
-                <input type="number" className={styles.input} defaultValue="15" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Information */}
-        <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Contact Information</h2>
-
-          <div className={styles.grid2} style={{ marginBottom: '20px' }}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Primary Email *</label>
-              <div>
-                <input type="email" className={styles.input} defaultValue="hello@apexconstruction.com" />
-              </div>
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Phone Number *</label>
-              <div>
-                <input type="tel" className={styles.input} defaultValue="(555) 123-4567" />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.grid2} style={{ marginBottom: '20px' }}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Website</label>
-              <div>
-                <input type="url" className={styles.input} defaultValue="https://www.apexconstruction.com" />
-              </div>
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>LinkedIn Profile</label>
-              <div>
-                <input type="url" className={styles.input} placeholder="https://linkedin.com/company/..." />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Headquarters Address</label>
-            <div>
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>About</h2>
+            <label className={styles.field}>
+              <span className={styles.label}>Services Offered</span>
               <input
                 type="text"
                 className={styles.input}
-                defaultValue="123 Builder Lane, Suite 400"
-                style={{ marginBottom: '12px' }}
-                placeholder="Street Address"
+                value={form.services_offered}
+                onChange={(e) => handleChange("services_offered", e.target.value)}
+                placeholder="e.g. Construction, Electrical, Plumbing"
               />
-            </div>
-            <div className={styles.grid2}>
-              <div>
-                <input type="text" className={styles.input} defaultValue="New York" placeholder="City" />
-              </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <div style={{ flex: 1 }}>
-                  <input type="text" className={styles.input} defaultValue="NY" placeholder="State" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <input type="text" className={styles.input} defaultValue="10001" placeholder="ZIP" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              <span className={styles.hint}>Separate multiple services with commas.</span>
+            </label>
+            <label className={styles.field}>
+              <span className={styles.label}>About the Company</span>
+              <textarea
+                className={styles.textarea}
+                rows={6}
+                value={form.about}
+                onChange={(e) => handleChange("about", e.target.value)}
+                placeholder="Tell clients about your company, your team, and what makes you different."
+              />
+            </label>
+          </section>
 
-        {/* Team Details */}
-        <div className={styles.card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px', flexWrap: 'wrap' }}>
-            <h2 className={styles.cardTitle} style={{ marginBottom: 0 }}>Team Details</h2>
-            <button type="button" className={styles.btnOutline} style={{ height: '36px', padding: '0 16px', fontSize: '13px', flex: 'none' }}>
-              <iconify-icon icon="lucide:plus" style={{ fontSize: '16px' }}></iconify-icon>
-              Add Member
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Operations</h2>
+            <div className={styles.grid}>
+              <label className={styles.field}>
+                <span className={styles.label}>Business Hours</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.business_hours}
+                  onChange={(e) => handleChange("business_hours", e.target.value)}
+                  placeholder="e.g. Mon-Fri 8am-6pm"
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Typical Response Time</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.response_time}
+                  onChange={(e) => handleChange("response_time", e.target.value)}
+                  placeholder="e.g. Within 2 hours"
+                />
+              </label>
+            </div>
+          </section>
+
+          <div className={styles.actions}>
+            <Link href="/dashboard/company/profile" className={styles.cancelBtn}>Cancel</Link>
+            <button type="submit" className={styles.saveBtn} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
-
-          <div className={styles.formGroup} style={{ marginBottom: '24px', maxWidth: '300px' }}>
-            <label className={styles.label}>Company Size</label>
-            <div>
-              <select className={`${styles.input} ${styles.selectInput}`} defaultValue="11-50">
-                <option value="1-10">1-10 employees</option>
-                <option value="11-50">11-50 employees</option>
-                <option value="51-200">51-200 employees</option>
-                <option value="201+">201+ employees</option>
-              </select>
-            </div>
-          </div>
-
-          <label className={styles.label}>Key Team Members</label>
-          <div className={styles.teamList}>
-            <div className={styles.teamItem}>
-              <div className={styles.teamMemberInfo}>
-                <div className={styles.teamAvatar}>
-                  <Image
-                    src="https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F35-50%2FEuropean%2F3"
-                    alt="Team Member"
-                    width={40}
-                    height={40}
-                  />
-                </div>
-                <div className={styles.teamDetails}>
-                  <h4>Marcus Johnson</h4>
-                  <span>Lead Electrician</span>
-                </div>
-              </div>
-              <div className={styles.teamActions}>
-                <button type="button" className={styles.btnIcon}>
-                  <iconify-icon icon="lucide:pencil" style={{ fontSize: '16px' }}></iconify-icon>
-                </button>
-                <button type="button" className={styles.btnIcon}>
-                  <iconify-icon icon="lucide:trash-2" style={{ fontSize: '16px' }}></iconify-icon>
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.teamItem}>
-              <div className={styles.teamMemberInfo}>
-                <div className={styles.teamAvatar}>
-                  <Image
-                    src="https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F25-35%2FAfrican%2F1"
-                    alt="Team Member"
-                    width={40}
-                    height={40}
-                  />
-                </div>
-                <div className={styles.teamDetails}>
-                  <h4>Sarah Williams</h4>
-                  <span>Project Manager</span>
-                </div>
-              </div>
-              <div className={styles.teamActions}>
-                <button type="button" className={styles.btnIcon}>
-                  <iconify-icon icon="lucide:pencil" style={{ fontSize: '16px' }}></iconify-icon>
-                </button>
-                <button type="button" className={styles.btnIcon}>
-                  <iconify-icon icon="lucide:trash-2" style={{ fontSize: '16px' }}></iconify-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        </form>
       </div>
     </main>
   );

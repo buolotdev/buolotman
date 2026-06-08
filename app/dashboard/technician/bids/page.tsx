@@ -3,13 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
+import { formatXOF } from "@/app/lib/format";
+import { useToast } from "@/app/components/Toast";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
-type BidStatus = "all" | "pending" | "accepted" | "rejected";
+type BidStatus = "all" | "pending" | "accepted" | "rejected" | "withdrawn";
 type SortOption = "newest" | "highest" | "lowest";
 
 type Bid = {
   id: string;
+  taskId: string;
   taskTitle: string;
   location: string;
   submittedAt: string;
@@ -25,106 +32,65 @@ type Bid = {
   clientRating: string;
   clientInitials: string;
   status: Exclude<BidStatus, "all">;
+  taskStatus: string;
 };
-
-const bids: Bid[] = [
-  {
-    id: "bid-plumbing",
-    taskTitle: "Urgent Plumbing Repair - Leaky Pipe",
-    location: "Brooklyn, NY",
-    submittedAt: "Submitted 2 hours ago",
-    competingBids: 4,
-    description:
-      "Burst pipe in the basement needs immediate repair before water service is restored.",
-    skills: ["Plumbing", "Emergency Service", "Pipe Repair"],
-    proposal:
-      "I can be there in 30 minutes. I handle emergency plumbing daily and carry the parts and tools needed to resolve this immediately.",
-    duration: "2-3 Hours",
-    extra: "Parts & Labor",
-    amount: 150,
-    amountLabel: "$150.00",
-    client: "Sarah Jenkins",
-    clientRating: "4.8 (24 reviews)",
-    clientInitials: "SJ",
-    status: "pending",
-  },
-  {
-    id: "bid-painting",
-    taskTitle: "Complete House Painting (Interior)",
-    location: "Queens, NY",
-    submittedAt: "Submitted 2 days ago",
-    competingBids: 12,
-    description:
-      "Full interior painting for a 3-bedroom house. Paint provided, supplies and crew required.",
-    skills: ["Interior Painting", "Residential", "Team Required"],
-    proposal:
-      "I have a team of 3 painters ready to start this weekend. We can finish the whole house in 2 days with a clean, high-quality finish.",
-    duration: "2 Days",
-    extra: "3 Painters",
-    amount: 1200,
-    amountLabel: "$1,200.00",
-    client: "Michael Chen",
-    clientRating: "5.0 (8 reviews)",
-    clientInitials: "MC",
-    status: "accepted",
-  },
-  {
-    id: "bid-fans",
-    taskTitle: "Install 3 Ceiling Fans",
-    location: "Manhattan, NY",
-    submittedAt: "Submitted 4 days ago",
-    competingBids: 8,
-    description:
-      "Swap light fixtures for ceiling fans in three bedrooms with 10ft ceilings.",
-    skills: ["Electrical", "Installation"],
-    proposal:
-      "Experienced electrician here. I have tall ladders and can install all three fans safely within 4 hours. Fully insured.",
-    duration: "4 Hours",
-    extra: "Fully Insured",
-    amount: 250,
-    amountLabel: "$250.00",
-    client: "Emily Davis",
-    clientRating: "4.9 (15 reviews)",
-    clientInitials: "ED",
-    status: "rejected",
-  },
-  {
-    id: "bid-generator",
-    taskTitle: "Generator Maintenance Check",
-    location: "Bronx, NY",
-    submittedAt: "Submitted yesterday",
-    competingBids: 3,
-    description:
-      "Quarterly generator service and diagnostics before winter load testing.",
-    skills: ["Electrical", "Maintenance", "Commercial"],
-    proposal:
-      "I can perform a full inspection, load test, and preventive maintenance pass with same-day reporting for your facility team.",
-    duration: "1 Day",
-    extra: "Inspection Report",
-    amount: 420,
-    amountLabel: "$420.00",
-    client: "Jordan Blake",
-    clientRating: "4.7 (12 reviews)",
-    clientInitials: "JB",
-    status: "pending",
-  },
-];
 
 const PAGE_SIZE = 2;
 
 export default function TechnicianBidsPage() {
+  const toast = useToast();
+  const { data: bidsData, loading, refetch } = useFetch(() => api.getMyBids(), []);
+  const { data: userData } = useFetch(() => api.getMe(), []);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<BidStatus>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [page, setPage] = useState(1);
-  const [withdrawnIds, setWithdrawnIds] = useState<string[]>([]);
   const [messagedIds, setMessagedIds] = useState<string[]>([]);
+  const [withdrawingBidId, setWithdrawingBidId] = useState<string | null>(null);
+
+  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
+  const userInitials = useMemo(() => {
+    const first = userData?.first_name?.[0] ?? "";
+    const last = userData?.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase();
+  }, [userData]);
+  const userRole = userData?.role ?? "";
+
+  const bids: Bid[] = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = (Array.isArray(bidsData) ? bidsData : bidsData?.results ?? []) as any[];
+    return raw.map((b) => {
+      const cFirst = b.client_first_name?.[0] ?? "";
+      const cLast = b.client_last_name?.[0] ?? "";
+      return {
+        id: String(b.id),
+        taskId: String(b.task_id ?? b.taskId ?? ""),
+        taskTitle: b.task_title ?? b.taskTitle ?? "",
+        location: b.location ?? "",
+        submittedAt: b.submitted_at ?? b.submittedAt ?? "",
+        competingBids: b.competing_bids ?? b.competingBids ?? 0,
+        description: b.description ?? "",
+        skills: b.skills ?? [],
+        proposal: b.proposal ?? "",
+        duration: b.duration ?? "",
+        extra: b.extra ?? "",
+        amount: b.amount ?? 0,
+        amountLabel: b.amount_label ?? b.amountLabel ?? formatXOF(b.amount ?? 0),
+        client: b.client ?? "",
+        clientRating: b.client_rating ?? b.clientRating ?? "",
+        clientInitials: `${cFirst}${cLast}`.toUpperCase(),
+        status: b.status ?? "pending",
+        taskStatus: b.task_status ?? b.taskStatus ?? "",
+      };
+    });
+  }, [bidsData]);
+  const visibleBids = useMemo(() => bids.filter((bid) => bid.status !== "withdrawn"), [bids]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
   const filteredBids = useMemo(() => {
-    let next = bids.filter((bid) => !withdrawnIds.includes(bid.id));
+    let next = visibleBids;
 
     if (activeTab !== "all") {
       next = next.filter((bid) => bid.status === activeTab);
@@ -143,20 +109,29 @@ export default function TechnicianBidsPage() {
     else if (sortBy === "lowest") next = [...next].sort((a, b) => a.amount - b.amount);
 
     return next;
-  }, [activeTab, normalizedQuery, sortBy, withdrawnIds]);
+  }, [visibleBids, activeTab, normalizedQuery, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredBids.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pagedBids = filteredBids.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const pendingCount = bids.filter((bid) => bid.status === "pending").length;
-  const acceptedCount = bids.filter((bid) => bid.status === "accepted").length;
-  const rejectedCount = bids.filter((bid) => bid.status === "rejected").length;
-  const earnedTotal = bids.filter((bid) => bid.status === "accepted").reduce((sum, bid) => sum + bid.amount, 0);
-  const winRate = `${Math.round((acceptedCount / bids.length) * 100)}%`;
+  const pendingCount = visibleBids.filter((bid) => bid.status === "pending").length;
+  const acceptedCount = visibleBids.filter((bid) => bid.status === "accepted").length;
+  const rejectedCount = visibleBids.filter((bid) => bid.status === "rejected").length;
+  const earnedTotal = visibleBids.filter((bid) => bid.status === "accepted").reduce((sum, bid) => sum + bid.amount, 0);
+  const winRate = visibleBids.length ? `${Math.round((acceptedCount / visibleBids.length) * 100)}%` : "0%";
 
-  const withdrawBid = (bidId: string) => {
-    setWithdrawnIds((current) => (current.includes(bidId) ? current : [...current, bidId]));
+  const withdrawBid = async (bidId: string) => {
+    setWithdrawingBidId(bidId);
+    try {
+      await api.withdrawBid(Number(bidId));
+      toast.success("Bid withdrawn", "You can submit a fresh bid for this task now.");
+      await refetch();
+    } catch (err: any) {
+      toast.error("Could not withdraw bid", err?.message || "Please try again.");
+    } finally {
+      setWithdrawingBidId((current) => (current === bidId ? null : current));
+    }
   };
 
   const messageClient = (bidId: string) => {
@@ -182,11 +157,10 @@ export default function TechnicianBidsPage() {
           </div>
 
           <div className={styles.profileCard}>
-            <div className={styles.profileAvatar}>CR</div>
+            <div className={styles.profileAvatar}>{userInitials}</div>
             <div className={styles.profileMeta}>
-              <strong>Carlos R.</strong>
-              <span>Technician</span>
-              <small>Available today</small>
+              <strong>{userName}</strong>
+              <span>{userRole}</span>
             </div>
           </div>
 
@@ -217,10 +191,7 @@ export default function TechnicianBidsPage() {
             </Link>
           </nav>
 
-          <Link href="/login" className={styles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutButton} />
         </aside>
 
         <div className={styles.main}>
@@ -241,10 +212,10 @@ export default function TechnicianBidsPage() {
                 <span className={styles.notificationDot} />
               </button>
               <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>CR</div>
+                <div className={styles.topbarAvatar}>{userInitials}</div>
                 <div className={styles.topbarProfileLines}>
-                  <strong>Carlos R.</strong>
-                  <span>Technician</span>
+                  <strong>{userName}</strong>
+                  <span>{userRole}</span>
                 </div>
               </div>
             </div>
@@ -262,28 +233,37 @@ export default function TechnicianBidsPage() {
               </Link>
             </section>
 
-            <section className={styles.statsGrid}>
-              <article className={styles.statCard}>
-                <span className={styles.statIcon}><iconify-icon icon="lucide:file-stack" /></span>
-                <div><small>Total Bids</small><strong>{bids.length}</strong></div>
-              </article>
-              <article className={styles.statCard}>
-                <span className={styles.statIcon}><iconify-icon icon="lucide:clock" /></span>
-                <div><small>Active Pending</small><strong>{pendingCount}</strong></div>
-              </article>
-              <article className={styles.statCard}>
-                <span className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:check-circle" /></span>
-                <div><small>Win Rate</small><strong>{winRate}</strong></div>
-              </article>
-              <article className={styles.statCard}>
-                <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:coins" /></span>
-                <div><small>Earned via Bids</small><strong>${earnedTotal.toLocaleString()}</strong></div>
-              </article>
-            </section>
+            {loading ? (
+              <section className={styles.statsGrid}>
+                <SkeletonStat />
+                <SkeletonStat />
+                <SkeletonStat />
+                <SkeletonStat />
+              </section>
+            ) : (
+              <section className={styles.statsGrid}>
+                <article className={styles.statCard}>
+                  <span className={styles.statIcon}><iconify-icon icon="lucide:file-stack" /></span>
+                  <div><small>Total Bids</small><strong>{visibleBids.length}</strong></div>
+                </article>
+                <article className={styles.statCard}>
+                  <span className={styles.statIcon}><iconify-icon icon="lucide:clock" /></span>
+                  <div><small>Active Pending</small><strong>{pendingCount}</strong></div>
+                </article>
+                <article className={styles.statCard}>
+                  <span className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:check-circle" /></span>
+                  <div><small>Win Rate</small><strong>{winRate}</strong></div>
+                </article>
+                <article className={styles.statCard}>
+                  <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:coins" /></span>
+                  <div><small>Earned via Bids</small><strong>{formatXOF(earnedTotal)}</strong></div>
+                </article>
+              </section>
+            )}
 
             <section className={styles.toolbar}>
               <div className={styles.tabs}>
-                <button type="button" className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => changeTab("all")}>All Bids ({bids.length})</button>
+                <button type="button" className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => changeTab("all")}>All Bids ({visibleBids.length})</button>
                 <button type="button" className={`${styles.tab} ${activeTab === "pending" ? styles.tabActive : ""}`} onClick={() => changeTab("pending")}>Pending ({pendingCount})</button>
                 <button type="button" className={`${styles.tab} ${activeTab === "accepted" ? styles.tabActive : ""}`} onClick={() => changeTab("accepted")}>Accepted ({acceptedCount})</button>
                 <button type="button" className={`${styles.tab} ${activeTab === "rejected" ? styles.tabActive : ""}`} onClick={() => changeTab("rejected")}>Rejected ({rejectedCount})</button>
@@ -300,14 +280,28 @@ export default function TechnicianBidsPage() {
             </section>
 
             <section className={styles.bidList}>
-              {pagedBids.length ? (
+              {loading ? (
+                Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)
+              ) : pagedBids.length ? (
                 pagedBids.map((bid) => {
+                  const isCompletedTask = bid.taskStatus === "completed";
+                  const displayStatus = isCompletedTask ? "completed" : bid.status;
                   const statusClass =
-                    bid.status === "accepted"
-                      ? styles.statusAccepted
-                      : bid.status === "rejected"
-                        ? styles.statusRejected
-                        : styles.statusPending;
+                    displayStatus === "completed"
+                      ? styles.statusCompleted
+                      : displayStatus === "accepted"
+                        ? styles.statusAccepted
+                        : displayStatus === "rejected"
+                          ? styles.statusRejected
+                          : styles.statusPending;
+                  const statusIcon =
+                    displayStatus === "completed"
+                      ? "lucide:badge-check"
+                      : displayStatus === "accepted"
+                        ? "lucide:check-circle-2"
+                        : displayStatus === "rejected"
+                          ? "lucide:x-circle"
+                          : "lucide:loader-2";
                   const isMessaged = messagedIds.includes(bid.id);
 
                   return (
@@ -322,8 +316,8 @@ export default function TechnicianBidsPage() {
                           </div>
                         </div>
                         <span className={`${styles.statusPill} ${statusClass}`}>
-                          <iconify-icon icon={bid.status === "accepted" ? "lucide:check-circle-2" : bid.status === "rejected" ? "lucide:x-circle" : "lucide:loader-2"} />
-                          {bid.status}
+                          <iconify-icon icon={statusIcon} />
+                          {displayStatus}
                         </span>
                       </div>
 
@@ -361,42 +355,49 @@ export default function TechnicianBidsPage() {
 
                         <div className={styles.actionRow}>
                           {bid.status === "pending" ? (
-                            <button type="button" className={styles.outlineButton} onClick={() => withdrawBid(bid.id)}>
-                              Withdraw Bid
+                            <button
+                              type="button"
+                              className={styles.outlineButton}
+                              disabled={withdrawingBidId === bid.id}
+                              onClick={() => withdrawBid(bid.id)}
+                            >
+                              {withdrawingBidId === bid.id ? "Withdrawing..." : "Withdraw Bid"}
                             </button>
                           ) : null}
-                          {bid.status === "accepted" ? (
+                          {bid.status === "accepted" && !isCompletedTask ? (
                             <Link href="/dashboard/technician/messages" className={styles.outlineButton} onClick={() => messageClient(bid.id)}>
                               <iconify-icon icon="lucide:message-circle" />
                               {isMessaged ? "Message Sent" : "Message"}
                             </Link>
                           ) : null}
-                          <button type="button" className={styles.primarySmallButton}>
-                            {bid.status === "accepted" ? "Manage Task" : "View Details"}
-                          </button>
+                          <Link href={`/dashboard/technician/tasks/${bid.taskId}`} className={styles.primarySmallButton}>
+                            {isCompletedTask ? "View Completed Task" : bid.status === "accepted" ? "Manage Task" : "View Details"}
+                          </Link>
                         </div>
                       </div>
                     </article>
                   );
                 })
               ) : (
-                <div className={styles.emptyState}>No bids match your current filters.</div>
+                <div className={styles.emptyState}>No bids yet</div>
               )}
             </section>
 
-            <div className={styles.pagination}>
-              <button type="button" className={styles.pageButton} disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
-                <iconify-icon icon="lucide:chevron-left" />
-              </button>
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((value) => (
-                <button key={value} type="button" className={`${styles.pageButton} ${value === currentPage ? styles.pageButtonActive : ""}`} onClick={() => setPage(value)}>
-                  {value}
+            {!loading && filteredBids.length > 0 && (
+              <div className={styles.pagination}>
+                <button type="button" className={styles.pageButton} disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
+                  <iconify-icon icon="lucide:chevron-left" />
                 </button>
-              ))}
-              <button type="button" className={styles.pageButton} disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
-                <iconify-icon icon="lucide:chevron-right" />
-              </button>
-            </div>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((value) => (
+                  <button key={value} type="button" className={`${styles.pageButton} ${value === currentPage ? styles.pageButtonActive : ""}`} onClick={() => setPage(value)}>
+                    {value}
+                  </button>
+                ))}
+                <button type="button" className={styles.pageButton} disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+                  <iconify-icon icon="lucide:chevron-right" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

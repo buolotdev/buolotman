@@ -3,76 +3,40 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
+import { SkeletonBlock, SkeletonTable } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin-users.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export default function AdminUsersPage() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const toast = useToast();
+  const dialog = useDialog();
 
-  const users = [
-    {
-      id: "1",
-      name: "Sarah Jenkins",
-      email: "sarah.j@example.com",
-      role: "Client",
-      status: "Active",
-      joinDate: "Oct 12, 2024",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F25-35%2FNorth%20American%2F1",
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      email: "m.chen.tech@example.com",
-      role: "Technician",
-      status: "Active",
-      joinDate: "Oct 10, 2024",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F35-50%2FEuropean%2F2",
-    },
-    {
-      id: "3",
-      name: "Elite Electricals LLC",
-      email: "contact@eliteelectricals.com",
-      role: "Company",
-      status: "Active",
-      joinDate: "Oct 08, 2024",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F50-65%2FNorth%20American%2F3",
-    },
-    {
-      id: "4",
-      name: "Jessica Nkomo",
-      email: "jess.nkomo@example.com",
-      role: "Technician",
-      status: "Suspended",
-      joinDate: "Sep 29, 2024",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Ffemale%2F18-25%2FAfrican%2F4",
-    },
-    {
-      id: "5",
-      name: "Carlos Rodriguez",
-      email: "crodriguez88@example.com",
-      role: "Client",
-      status: "Active",
-      joinDate: "Sep 15, 2024",
-      avatar: "https://storage.googleapis.com/banani-avatars/avatar%2Fmale%2F25-35%2FHispanic%2F5",
-    },
-  ];
+  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: usersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useFetch(() => api.adminListUsers(), []);
+  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
+  const userRole = user?.role || "";
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", href: "/dashboard/admin", icon: "lucide:layout-dashboard" },
     { id: "users", label: "Users", href: "/dashboard/admin/users", icon: "lucide:users" },
     { id: "tasks", label: "Tasks", href: "/dashboard/admin/tasks", icon: "lucide:file-text" },
-    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check", badge: 84 },
+    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check" },
     { id: "payments", label: "Payments", href: "/dashboard/admin/payments", icon: "lucide:credit-card" },
-    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale", badge: 3 },
+    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale" },
     { id: "content", label: "Content", href: "/dashboard/admin/content", icon: "lucide:layers" },
     { id: "settings", label: "Settings", href: "/dashboard/admin/settings", icon: "lucide:settings" },
   ];
 
   return (
     <div className={`${styles.layoutWrapper} ${mobileSidebarOpen ? styles.sidebarOpenMobile : ""}`}>
-      {/* Sidebar Overlay */}
       <div className={styles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
 
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <Link href="/" className={styles.brand}>
@@ -85,20 +49,15 @@ export default function AdminUsersPage() {
             <Link key={item.id} href={item.href} className={`${styles.navItem} ${item.id === "users" ? styles.navItemActive : ""}`}>
               <iconify-icon icon={item.icon} />
               <span>{item.label}</span>
-              {item.badge && <span className={styles.navItemBadge}>{item.badge}</span>}
             </Link>
           ))}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <Link href="/login" className={styles.logoutBtn}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutBtn} />
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={styles.mainContent}>
         <header className={styles.topbar}>
           <div className={styles.topbarLeft}>
@@ -112,10 +71,12 @@ export default function AdminUsersPage() {
           </div>
           <div className={styles.topbarRight}>
             <div className={styles.adminProfile}>
-              <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&q=80" alt="David Miller" width={36} height={36} className={styles.avatar} />
+              <div className={styles.avatar}>
+                {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
+              </div>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>David Miller</span>
-                <span className={styles.profileRole}>Super Admin</span>
+                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
+                <span className={styles.profileRole}>{userRole}</span>
               </div>
             </div>
           </div>
@@ -154,65 +115,84 @@ export default function AdminUsersPage() {
             </div>
 
             <div className={styles.tableWrapper}>
-              <table className={styles.adminTable}>
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Join Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td>
-                        <div className={styles.userCell}>
-                          <Image src={user.avatar} alt={user.name} width={40} height={40} className={styles.userAvatar} />
-                          <div className={styles.userDetails}>
-                            <span className={styles.userName}>{user.name}</span>
-                            <span className={styles.userEmail}>{user.email}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`${styles.roleBadge} ${user.role === "Client" ? styles.roleClient : user.role === "Technician" ? styles.roleTechnician : styles.roleCompany}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={`${styles.statusBadge} ${user.status === "Active" ? styles.statusActive : styles.statusSuspended}`}>
-                          <span className={styles.statusDot} />
-                          {user.status}
-                        </div>
-                      </td>
-                      <td><span className={styles.dateText}>{user.joinDate}</span></td>
-                      <td>
-                        <div className={styles.actions}>
-                          <button className={styles.iconBtn} aria-label="View Profile">
-                            <iconify-icon icon="lucide:eye" />
-                          </button>
-                          <button className={styles.iconBtn} aria-label={user.status === "Active" ? "Suspend Account" : "Activate Account"}>
-                            <iconify-icon icon={user.status === "Active" ? "lucide:ban" : "lucide:rotate-ccw"} />
-                          </button>
-                        </div>
-                      </td>
+              {usersLoading ? (
+                <SkeletonTable />
+              ) : usersError ? (
+                <div style={{ padding: 40, textAlign: "center", color: "#dc2626" }}>
+                  <p>{usersError}</p>
+                </div>
+              ) : usersData && usersData.length > 0 ? (
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Joined</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {usersData.map((u: any) => (
+                      <tr key={u.id}>
+                        <td>{`${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username}</td>
+                        <td>{u.username}</td>
+                        <td>{u.role}</td>
+                        <td>{u.is_active ? "Active" : "Suspended"}</td>
+                        <td>{u.created_at?.slice(0, 10) || ""}</td>
+                        <td style={{ display: "flex", gap: 8 }}>
+                          {!u.is_verified ? (
+                            <button
+                              className={styles.btnOutline}
+                              onClick={async () => {
+                                try {
+                                  await api.adminVerifyUser(u.id);
+                                  refetchUsers();
+                                  toast.success("User verified", `${u.first_name || u.username} is now verified.`);
+                                } catch (err: any) { toast.error("Verify failed", err?.message); }
+                              }}
+                            >
+                              <iconify-icon icon="lucide:badge-check" /> Verify
+                            </button>
+                          ) : null}
+                          <button
+                            className={styles.btnOutline}
+                            onClick={async () => {
+                              const action = u.is_active ? "suspend" : "unsuspend";
+                              const ok = await dialog.confirm({
+                                title: `${action.charAt(0).toUpperCase() + action.slice(1)} user?`,
+                                message: `This will ${action} ${u.first_name || u.username}.`,
+                                confirmText: action.charAt(0).toUpperCase() + action.slice(1),
+                                variant: u.is_active ? "danger" : "default",
+                              });
+                              if (!ok) return;
+                              try {
+                                await api.adminSuspendUser(u.id, action);
+                                refetchUsers();
+                                toast.success(action === "suspend" ? "User suspended" : "User reactivated", `${u.first_name || u.username}`);
+                              } catch (err: any) { toast.error(`${action} failed`, err?.message); }
+                            }}
+                            style={{ color: u.is_active ? "#dc2626" : "#16a34a" }}
+                          >
+                            <iconify-icon icon={u.is_active ? "lucide:ban" : "lucide:rotate-ccw"} />
+                            {u.is_active ? "Suspend" : "Reactivate"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div style={{ padding: 40, textAlign: "center", color: "#94a3b8", fontSize: 14 }}>
+                  <iconify-icon icon="lucide:users" style={{ fontSize: 48, marginBottom: 16, display: "block", opacity: 0.4 }} />
+                  <p>No users yet.</p>
+                </div>
+              )}
             </div>
 
             <div className={styles.pagination}>
-              <div className={styles.paginationInfo}>Showing 1 to 5 of 24,592 entries</div>
-              <div className={styles.paginationControls}>
-                <button className={styles.pageBtn}><iconify-icon icon="lucide:chevron-left" /></button>
-                <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>1</button>
-                <button className={styles.pageBtn}>2</button>
-                <button className={styles.pageBtn}>3</button>
-                <button className={styles.pageBtn}><iconify-icon icon="lucide:chevron-right" /></button>
-              </div>
+              <div className={styles.paginationInfo}>{usersData?.length || 0} users</div>
             </div>
           </div>
         </div>

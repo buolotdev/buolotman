@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./page.module.css";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 
@@ -17,6 +19,17 @@ const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }
 
 export default function TaskPublishSuccessPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { data: meData } = useFetch(() => api.getMe(), []);
+
+  const userInitials = (() => {
+    const first = meData?.first_name || "";
+    const last = meData?.last_name || "";
+    if (first || last) return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+    return "";
+  })();
+  const userName =
+    [meData?.first_name, meData?.last_name].filter(Boolean).join(" ") || meData?.username || "";
+  const userRole = meData?.role ? meData.role.charAt(0).toUpperCase() + meData.role.slice(1) : "";
 
   return (
     <main className={styles.page}>
@@ -72,10 +85,10 @@ export default function TaskPublishSuccessPage() {
               </button>
 
               <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>JD</div>
+                <div className={styles.userAvatar}>{userInitials}</div>
                 <div>
-                  <p className={styles.userName}>John Doe</p>
-                  <p className={styles.userRole}>Client</p>
+                  <p className={styles.userName}>{userName}</p>
+                  <p className={styles.userRole}>{userRole}</p>
                 </div>
               </div>
             </div>

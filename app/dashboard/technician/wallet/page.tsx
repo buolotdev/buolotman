@@ -3,7 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
+import { formatXOF } from "@/app/lib/format";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 type TransactionTab = "all" | "earnings" | "withdrawals";
 
@@ -18,69 +25,45 @@ type Transaction = {
   tab: Exclude<TransactionTab, "all"> | "pending";
 };
 
-const initialTransactions: Transaction[] = [
-  {
-    id: "tx-1",
-    title: 'Payment for "Complete House Painting"',
-    date: "Oct 24, 2024 • 02:30 PM",
-    amount: 1200,
-    amountLabel: "+$1,200.00",
-    kind: "credit",
-    status: "Completed",
-    tab: "earnings",
-  },
-  {
-    id: "tx-2",
-    title: "Withdrawal to Chase Bank (**** 4582)",
-    date: "Oct 22, 2024 • 09:15 AM",
-    amount: -850,
-    amountLabel: "-$850.00",
-    kind: "debit",
-    status: "Processed",
-    tab: "withdrawals",
-  },
-  {
-    id: "tx-3",
-    title: 'Funds in Escrow: "Urgent Plumbing Repair"',
-    date: "Oct 21, 2024 • 11:45 AM",
-    amount: 150,
-    amountLabel: "$150.00",
-    kind: "pending",
-    status: "In Escrow",
-    tab: "pending",
-  },
-  {
-    id: "tx-4",
-    title: 'Payment for "Fix AC Unit"',
-    date: "Oct 18, 2024 • 04:20 PM",
-    amount: 320,
-    amountLabel: "+$320.00",
-    kind: "credit",
-    status: "Completed",
-    tab: "earnings",
-  },
-  {
-    id: "tx-5",
-    title: 'Payment for "Furniture Assembly"',
-    date: "Oct 15, 2024 • 01:00 PM",
-    amount: 180,
-    amountLabel: "+$180.00",
-    kind: "credit",
-    status: "Completed",
-    tab: "earnings",
-  },
-];
-
 const PAGE_SIZE = 4;
 
 export default function TechnicianWalletPage() {
+  const toast = useToast();
+  const dialog = useDialog();
+  const { data: walletData, loading: walletLoading } = useFetch(() => api.getWallet(), []);
+  const { data: transactionsData, loading: txLoading, refetch: refetchTx } = useFetch(() => api.getTransactions(), []);
+
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TransactionTab>("all");
   const [page, setPage] = useState(1);
-  const [availableBalance, setAvailableBalance] = useState(3450);
-  const [pendingEscrow, setPendingEscrow] = useState(850);
-  const [transactions, setTransactions] = useState(initialTransactions);
+
+  const availableBalance = walletData?.available_balance ?? 0;
+  const pendingEscrow = walletData?.pending_balance ?? 0;
+
+  const { data: userData } = useFetch(() => api.getMe(), []);
+  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
+  const userInitials = useMemo(() => {
+    const first = userData?.first_name?.[0] ?? "";
+    const last = userData?.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase();
+  }, [userData]);
+  const userRole = userData?.role ?? "";
+
+  const transactions: Transaction[] = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = (Array.isArray(transactionsData) ? transactionsData : transactionsData?.results ?? []) as any[];
+    return raw.map((t) => ({
+      id: String(t.id),
+      title: t.title ?? "",
+      date: t.date ?? "",
+      amount: t.amount ?? 0,
+      amountLabel: t.amount_label ?? (t.amount >= 0 ? `+${formatXOF(t.amount)}` : `-${formatXOF(Math.abs(t.amount))}`),
+      kind: t.kind ?? (t.amount >= 0 ? "credit" : "debit"),
+      status: t.status ?? "Completed",
+      tab: t.tab ?? (t.kind === "debit" ? "withdrawals" : t.kind === "pending" ? "pending" : "earnings"),
+    }));
+  }, [transactionsData]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -108,63 +91,45 @@ export default function TechnicianWalletPage() {
     .filter((transaction) => transaction.kind === "credit")
     .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
 
-  const withdrawFunds = () => {
-    if (availableBalance <= 0) return;
+  const loading = walletLoading || txLoading;
 
-    const withdrawn = availableBalance;
-    const nextTransaction: Transaction = {
-      id: `tx-${Date.now()}`,
-      title: "Withdrawal to Chase Bank (**** 4582)",
-      date: "Just now",
-      amount: -withdrawn,
-      amountLabel: `-$${withdrawn.toLocaleString()}.00`,
-      kind: "debit",
-      status: "Processed",
-      tab: "withdrawals",
-    };
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("wave");
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
-    setAvailableBalance(0);
-    setTransactions((current) => [nextTransaction, ...current]);
-    setActiveTab("all");
-    setPage(1);
+  const withdrawFunds = async () => {
+    const amount = Number(withdrawAmount);
+    if (!amount || amount <= 0) {
+      setWithdrawError("Enter a valid amount");
+      return;
+    }
+    if (amount > availableBalance) {
+      setWithdrawError("Amount exceeds available balance");
+      return;
+    }
+    setWithdrawing(true);
+    setWithdrawError(null);
+    try {
+      await api.withdraw({
+        amount,
+        account_details: { method: withdrawMethod, phone: withdrawPhone },
+      });
+      setWithdrawAmount("");
+      setWithdrawPhone("");
+      window.location.reload();
+    } catch (err: any) {
+      setWithdrawError(err?.message || "Withdrawal failed");
+    } finally {
+      setWithdrawing(false);
+    }
   };
 
-  const exportTransactions = () => {
-    const nextTransaction: Transaction = {
-      id: `tx-export-${Date.now()}`,
-      title: "Transaction export generated",
-      date: "Just now",
-      amount: 0,
-      amountLabel: "CSV ready",
-      kind: "pending",
-      status: "Processed",
-      tab: "pending",
-    };
-
-    setTransactions((current) => [nextTransaction, ...current]);
-    setPage(1);
-  };
+  const exportTransactions = () => {};
 
   const releaseEscrow = () => {
     if (pendingEscrow <= 0) return;
-
-    const released = pendingEscrow;
-    const nextTransaction: Transaction = {
-      id: `tx-release-${Date.now()}`,
-      title: 'Escrow released from "Urgent Plumbing Repair"',
-      date: "Just now",
-      amount: released,
-      amountLabel: `+$${released.toLocaleString()}.00`,
-      kind: "credit",
-      status: "Completed",
-      tab: "earnings",
-    };
-
-    setPendingEscrow(0);
-    setAvailableBalance((current) => current + released);
-    setTransactions((current) => [nextTransaction, ...current]);
-    setActiveTab("all");
-    setPage(1);
   };
 
   const changeTab = (tab: TransactionTab) => {
@@ -186,11 +151,10 @@ export default function TechnicianWalletPage() {
           </div>
 
           <div className={styles.profileCard}>
-            <div className={styles.profileAvatar}>CR</div>
+            <div className={styles.profileAvatar}>{userInitials}</div>
             <div className={styles.profileMeta}>
-              <strong>Carlos R.</strong>
-              <span>Technician</span>
-              <small>Available today</small>
+              <strong>{userName}</strong>
+              <span>{userRole}</span>
             </div>
           </div>
 
@@ -221,10 +185,7 @@ export default function TechnicianWalletPage() {
             </Link>
           </nav>
 
-          <Link href="/login" className={styles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutButton} />
         </aside>
 
         <div className={styles.main}>
@@ -245,10 +206,10 @@ export default function TechnicianWalletPage() {
                 <span className={styles.notificationDot} />
               </button>
               <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>CR</div>
+                <div className={styles.topbarAvatar}>{userInitials}</div>
                 <div className={styles.topbarProfileLines}>
-                  <strong>Carlos R.</strong>
-                  <span>Technician</span>
+                  <strong>{userName}</strong>
+                  <span>{userRole}</span>
                 </div>
               </div>
             </div>
@@ -260,41 +221,84 @@ export default function TechnicianWalletPage() {
                 <p className={styles.eyebrow}>Earnings</p>
                 <h1>Wallet & Earnings</h1>
               </div>
-              <button type="button" className={styles.primaryButton} onClick={withdrawFunds} disabled={availableBalance <= 0}>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={async () => {
+                  const amountStr = await dialog.prompt({
+                    title: "Withdraw funds",
+                    message: `Available balance: ${availableBalance.toLocaleString()} XOF. How much do you want to withdraw?`,
+                    placeholder: "Amount in XOF",
+                    inputType: "number",
+                    confirmText: "Next",
+                  });
+                  if (!amountStr) return;
+                  const amount = Number(amountStr);
+                  if (!amount || amount <= 0) { toast.warning("Invalid amount", "Please enter a number greater than zero."); return; }
+                  const phone = await dialog.prompt({
+                    title: "Mobile money number",
+                    message: "Enter the mobile money phone number to receive funds (e.g. +22177...).",
+                    placeholder: "+22177...",
+                    confirmText: "Withdraw",
+                  }) || "";
+                  if (!phone) return;
+                  setWithdrawing(true);
+                  try {
+                    await api.withdraw({ amount, account_details: { method: "mobile_money", phone } });
+                    toast.success("Withdrawal initiated", "Your funds are on the way. Refresh to see status.");
+                    window.location.reload();
+                  } catch (err: any) {
+                    toast.error("Withdrawal failed", err?.message || "Please try again.");
+                  } finally {
+                    setWithdrawing(false);
+                  }
+                }}
+                disabled={availableBalance <= 0 || withdrawing}
+              >
                 <iconify-icon icon="lucide:arrow-down-to-line" />
-                Withdraw Funds
+                {withdrawing ? "Processing..." : "Withdraw Funds"}
               </button>
             </section>
 
-            <section className={styles.walletOverview}>
-              <article className={`${styles.balanceCard} ${styles.balanceCardPrimary}`}>
-                <small>Available Balance</small>
-                <strong>${availableBalance.toLocaleString()}.00</strong>
-                <span><iconify-icon icon="lucide:check-circle-2" />Ready to withdraw</span>
-              </article>
-
-              <div className={styles.statGrid}>
-                <article className={styles.statCard}>
-                  <div className={styles.statHeader}>
-                    <small>Pending Escrow</small>
-                    <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:lock" /></span>
-                  </div>
-                  <strong>${pendingEscrow.toLocaleString()}.00</strong>
-                  <button type="button" className={styles.outlineButton} onClick={releaseEscrow} disabled={pendingEscrow <= 0}>
-                    Release Escrow
-                  </button>
+            {loading ? (
+              <section className={styles.walletOverview}>
+                <SkeletonBlock style={{ height: 120, borderRadius: 12 }} />
+                <div className={styles.statGrid}>
+                  <SkeletonStat />
+                  <SkeletonStat />
+                </div>
+              </section>
+            ) : (
+              <section className={styles.walletOverview}>
+                <article className={`${styles.balanceCard} ${styles.balanceCardPrimary}`}>
+                  <small>Available Balance</small>
+                  <strong>{formatXOF(availableBalance)}</strong>
+                  <span><iconify-icon icon="lucide:check-circle-2" />Ready to withdraw</span>
                 </article>
 
-                <article className={styles.statCard}>
-                  <div className={styles.statHeader}>
-                    <small>Total Earnings</small>
-                    <span className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:trending-up" /></span>
-                  </div>
-                  <strong>${totalEarnings.toLocaleString()}.00</strong>
-                  <span className={styles.statNote}>Marketplace lifetime earnings</span>
-                </article>
-              </div>
-            </section>
+                <div className={styles.statGrid}>
+                  <article className={styles.statCard}>
+                    <div className={styles.statHeader}>
+                      <small>Pending Escrow</small>
+                      <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:lock" /></span>
+                    </div>
+                    <strong>{formatXOF(pendingEscrow)}</strong>
+                    <button type="button" className={styles.outlineButton} onClick={releaseEscrow} disabled={pendingEscrow <= 0}>
+                      Release Escrow
+                    </button>
+                  </article>
+
+                  <article className={styles.statCard}>
+                    <div className={styles.statHeader}>
+                      <small>Total Earnings</small>
+                      <span className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:trending-up" /></span>
+                    </div>
+                    <strong>{formatXOF(totalEarnings)}</strong>
+                    <span className={styles.statNote}>Marketplace lifetime earnings</span>
+                  </article>
+                </div>
+              </section>
+            )}
 
             <section className={styles.transactionsCard}>
               <div className={styles.transactionsHeader}>
@@ -313,7 +317,9 @@ export default function TechnicianWalletPage() {
               </div>
 
               <div className={styles.transactionList}>
-                {pagedTransactions.length ? (
+                {txLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+                ) : pagedTransactions.length ? (
                   pagedTransactions.map((transaction) => (
                     <article key={transaction.id} className={styles.transactionItem}>
                       <span className={`${styles.txIcon} ${transaction.kind === "credit" ? styles.txCredit : transaction.kind === "debit" ? styles.txDebit : styles.txPending}`}>
@@ -332,24 +338,26 @@ export default function TechnicianWalletPage() {
                     </article>
                   ))
                 ) : (
-                  <div className={styles.emptyState}>No wallet transactions match your current filter.</div>
+                  <div className={styles.emptyState}>No wallet transactions yet.</div>
                 )}
               </div>
             </section>
 
-            <div className={styles.pagination}>
-              <button type="button" className={styles.pageButton} disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
-                <iconify-icon icon="lucide:chevron-left" />
-              </button>
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((value) => (
-                <button key={value} type="button" className={`${styles.pageButton} ${value === currentPage ? styles.pageButtonActive : ""}`} onClick={() => setPage(value)}>
-                  {value}
+            {!loading && filteredTransactions.length > 0 && (
+              <div className={styles.pagination}>
+                <button type="button" className={styles.pageButton} disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
+                  <iconify-icon icon="lucide:chevron-left" />
                 </button>
-              ))}
-              <button type="button" className={styles.pageButton} disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
-                <iconify-icon icon="lucide:chevron-right" />
-              </button>
-            </div>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((value) => (
+                  <button key={value} type="button" className={`${styles.pageButton} ${value === currentPage ? styles.pageButtonActive : ""}`} onClick={() => setPage(value)}>
+                    {value}
+                  </button>
+                ))}
+                <button type="button" className={styles.pageButton} disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+                  <iconify-icon icon="lucide:chevron-right" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

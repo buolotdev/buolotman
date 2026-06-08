@@ -2,65 +2,68 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
+import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
-const skillSet = [
-  "Electrical Wiring",
-  "Panel Upgrades",
-  "Troubleshooting",
-  "Smart Home Setup",
-  "Lighting Installation",
-  "Generator Install",
-  "Circuit Repair",
-];
-
-const portfolioItems = [
-  { id: "portfolio-1", title: "Commercial Lighting", tone: "toneBlue" },
-  { id: "portfolio-2", title: "Panel Upgrade", tone: "toneGold" },
-  { id: "portfolio-3", title: "Smart Integration", tone: "toneGreen" },
-  { id: "portfolio-4", title: "New Wiring", tone: "toneCoral" },
-  { id: "portfolio-5", title: "Generator Install", tone: "toneSlate" },
-  { id: "portfolio-6", title: "Circuit Repairs", tone: "tonePurple" },
-];
-
-const reviews = [
-  {
-    id: "review-1",
-    name: "Sarah Jenkins",
-    initials: "SJ",
-    date: "October 12, 2024",
-    rating: 5,
-    text:
-      "Carlos arrived on time, diagnosed the circuit breaker issue immediately, and fixed it within the hour. Very professional and explained everything clearly.",
-  },
-  {
-    id: "review-2",
-    name: "Mark Thompson",
-    initials: "MT",
-    date: "September 28, 2024",
-    rating: 5,
-    text:
-      "Hired Carlos for a full panel upgrade on an older home. He handled permits, kept communication clean, and finished with excellent workmanship.",
-  },
-  {
-    id: "review-3",
-    name: "Elena Gomez",
-    initials: "EG",
-    date: "September 15, 2024",
-    rating: 4,
-    text:
-      "Strong work on our smart lighting install. He had to shift by a day because of an emergency call, but the actual execution was clean and reliable.",
-  },
-];
+const toneClasses = ["toneBlue", "toneGold", "toneGreen", "toneCoral", "toneSlate", "tonePurple"];
 
 export default function TechnicianProfilePage() {
+  const toast = useToast();
+  const dialog = useDialog();
+  const { data: userData, loading: userLoading } = useFetch(() => api.getMe(), []);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
+  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
+  const userInitials = useMemo(() => {
+    const first = userData?.first_name?.[0] ?? "";
+    const last = userData?.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase();
+  }, [userData]);
+  const userRole = userData?.role ?? userData?.job_title ?? "";
+  const userLocation = userData?.location ?? "";
+  const userRating = userData?.rating ?? "";
+  const userReviewCount = userData?.review_count ?? userData?.reviews_count ?? 0;
+  const userAbout = userData?.bio ?? userData?.about ?? "";
+  const userSkills: string[] = userData?.skills ?? [];
+  const userCompletedTasks = userData?.completed_tasks ?? userData?.completed_jobs ?? 0;
+  const userSuccessRate = userData?.success_rate ?? "";
+  const userResponseTime = userData?.response_time ?? "";
+  const userMemberSince = userData?.member_since ?? userData?.date_joined ?? "";
+  const portfolioItems: { id: string; title: string; tone: string }[] = useMemo(() => {
+    const raw = userData?.portfolio ?? [];
+    return raw.map((p: any, i: number) => ({
+      id: String(p.id ?? i),
+      title: p.title ?? "",
+      tone: toneClasses[i % toneClasses.length],
+    }));
+  }, [userData]);
+  const reviews: { id: string; name: string; initials: string; date: string; rating: number; text: string }[] = useMemo(() => {
+    const raw = userData?.reviews ?? [];
+    return raw.map((r: any) => {
+      const first = r.first_name?.[0] ?? r.name?.[0] ?? "";
+      const last = r.last_name?.[0] ?? (r.name?.split(" ")[1]?.[0] ?? "");
+      return {
+        id: String(r.id),
+        name: `${r.first_name ?? ""} ${r.last_name ?? ""}`.trim() || r.name || r.reviewer_name || "",
+        initials: `${first}${last}`.toUpperCase(),
+        date: r.date ?? r.created_at ?? "",
+        rating: r.rating ?? 0,
+        text: r.text ?? r.comment ?? "",
+      };
+    });
+  }, [userData]);
+
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3);
+  const loading = userLoading;
 
   const handleShare = async () => {
     try {
@@ -86,11 +89,10 @@ export default function TechnicianProfilePage() {
           </div>
 
           <div className={styles.profileCardMini}>
-            <div className={styles.profileAvatarMini}>CR</div>
+            <div className={styles.profileAvatarMini}>{userInitials}</div>
             <div className={styles.profileMetaMini}>
-              <strong>Carlos R.</strong>
-              <span>Technician</span>
-              <small>Available today</small>
+              <strong>{userName}</strong>
+              <span>{userRole}</span>
             </div>
           </div>
 
@@ -121,10 +123,7 @@ export default function TechnicianProfilePage() {
             </Link>
           </nav>
 
-          <Link href="/login" className={styles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutButton} />
         </aside>
 
         <div className={styles.main}>
@@ -145,10 +144,10 @@ export default function TechnicianProfilePage() {
                 <span className={styles.notificationDot} />
               </button>
               <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>CR</div>
+                <div className={styles.topbarAvatar}>{userInitials}</div>
                 <div className={styles.topbarProfileLines}>
-                  <strong>Carlos R.</strong>
-                  <span>Technician</span>
+                  <strong>{userName}</strong>
+                  <span>{userRole}</span>
                 </div>
               </div>
             </div>
@@ -159,18 +158,30 @@ export default function TechnicianProfilePage() {
               <div className={styles.cover} />
               <div className={styles.heroBody}>
                 <div className={styles.identityBlock}>
-                  <div className={styles.avatarLarge}>CR</div>
+                  {loading ? (
+                    <SkeletonBlock style={{ width: 80, height: 80, borderRadius: "50%" }} />
+                  ) : (
+                    <div className={styles.avatarLarge}>{userInitials}</div>
+                  )}
                   <div className={styles.identityMeta}>
                     <div className={styles.nameRow}>
-                      <h1>Carlos Rodriguez</h1>
-                      <span className={styles.verifiedBadge}>
-                        <iconify-icon icon="lucide:badge-check" />
-                      </span>
+                      {loading ? (
+                        <SkeletonBlock style={{ width: 200, height: 28 }} />
+                      ) : (
+                        <>
+                          <h1>{userName}</h1>
+                          <span className={styles.verifiedBadge}>
+                            <iconify-icon icon="lucide:badge-check" />
+                          </span>
+                        </>
+                      )}
                     </div>
                     <div className={styles.metaList}>
-                      <span><iconify-icon icon="lucide:wrench" />Master Electrician</span>
-                      <span><iconify-icon icon="lucide:map-pin" />Austin, TX</span>
-                      <span><iconify-icon icon="lucide:star" />4.9 (124 Reviews)</span>
+                      {userRole ? <span><iconify-icon icon="lucide:wrench" />{userRole}</span> : null}
+                      {userLocation ? <span><iconify-icon icon="lucide:map-pin" />{userLocation}</span> : null}
+                      {userRating !== "" && userRating !== null && userRating !== undefined ? (
+                        <span><iconify-icon icon="lucide:star" />{userRating} ({userReviewCount} Reviews)</span>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -180,9 +191,31 @@ export default function TechnicianProfilePage() {
                     <iconify-icon icon="lucide:share-2" />
                     {shareCopied ? "Copied" : "Share"}
                   </button>
-                  <button type="button" className={styles.primaryButton} onClick={() => setEditing((value) => !value)}>
-                    <iconify-icon icon="lucide:pencil" />
-                    {editing ? "Editing Enabled" : "Edit Profile"}
+                  <button
+                    type="button"
+                    className={styles.primaryButton}
+                    onClick={async () => {
+                      const ok = await dialog.confirm({
+                        title: "Save profile?",
+                        message: "This will sync your latest info to the database.",
+                        confirmText: "Save",
+                      });
+                      if (!ok) return;
+                      try {
+                        await api.updateProfile({
+                          first_name: userData?.first_name,
+                          last_name: userData?.last_name,
+                          phone: userData?.phone,
+                          country: userData?.country,
+                        });
+                        toast.success("Profile saved", "Your changes are live.");
+                      } catch (err: any) {
+                        toast.error("Save failed", err?.message || "Please try again.");
+                      }
+                    }}
+                  >
+                    <iconify-icon icon="lucide:save" />
+                    Save Profile
                   </button>
                 </div>
               </div>
@@ -192,83 +225,131 @@ export default function TechnicianProfilePage() {
               <div className={styles.leftColumn}>
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:user" />About Me</h2>
-                  <p>
-                    I am a licensed Master Electrician with over 15 years of experience serving residential and commercial clients. I specialize in panel upgrades,
-                    wiring, troubleshooting, and smart home installations. I pride myself on punctuality, transparent pricing, and completing every job to the
-                    highest safety standards.
-                  </p>
+                  {loading ? (
+                    <SkeletonBlock style={{ height: 80 }} />
+                  ) : userAbout ? (
+                    <p>{userAbout}</p>
+                  ) : (
+                    <p>No bio provided yet.</p>
+                  )}
                 </section>
 
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:image" />Portfolio Gallery</h2>
-                  <div className={styles.portfolioGrid}>
-                    {portfolioItems.map((item) => (
-                      <article key={item.id} className={`${styles.portfolioCard} ${styles[item.tone]}`}>
-                        <strong>{item.title}</strong>
-                      </article>
-                    ))}
-                  </div>
+                  {loading ? (
+                    <div className={styles.portfolioGrid}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonBlock key={i} style={{ height: 80, borderRadius: 8 }} />
+                      ))}
+                    </div>
+                  ) : portfolioItems.length ? (
+                    <div className={styles.portfolioGrid}>
+                      {portfolioItems.map((item) => (
+                        <article key={item.id} className={`${styles.portfolioCard} ${styles[item.tone]}`}>
+                          <strong>{item.title}</strong>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No portfolio items yet.</p>
+                  )}
                 </section>
 
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:message-square" />Client Reviews</h2>
-                  <div className={styles.reviewList}>
-                    {visibleReviews.map((review) => (
-                      <article key={review.id} className={styles.reviewItem}>
-                        <div className={styles.reviewHeader}>
-                          <div className={styles.reviewer}>
-                            <div className={styles.reviewerAvatar}>{review.initials}</div>
-                            <div>
-                              <strong>{review.name}</strong>
-                              <span>{review.date}</span>
+                  {loading ? (
+                    <div className={styles.reviewList}>
+                      {Array.from({ length: 2 }).map((_, i) => (
+                        <SkeletonCard key={i} />
+                      ))}
+                    </div>
+                  ) : reviews.length ? (
+                    <>
+                      <div className={styles.reviewList}>
+                        {visibleReviews.map((review) => (
+                          <article key={review.id} className={styles.reviewItem}>
+                            <div className={styles.reviewHeader}>
+                              <div className={styles.reviewer}>
+                                <div className={styles.reviewerAvatar}>{review.initials}</div>
+                                <div>
+                                  <strong>{review.name}</strong>
+                                  <span>{review.date}</span>
+                                </div>
+                              </div>
+                              <div className={styles.reviewStars}>
+                                {Array.from({ length: 5 }, (_, index) => (
+                                  <iconify-icon key={`${review.id}-${index}`} icon={index < review.rating ? "lucide:star" : "lucide:star"} className={index < review.rating ? styles.starFilled : styles.starMuted} />
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                          <div className={styles.reviewStars}>
-                            {Array.from({ length: 5 }, (_, index) => (
-                              <iconify-icon key={`${review.id}-${index}`} icon={index < review.rating ? "lucide:star" : "lucide:star"} className={index < review.rating ? styles.starFilled : styles.starMuted} />
-                            ))}
-                          </div>
-                        </div>
-                        <p>{review.text}</p>
-                      </article>
-                    ))}
-                  </div>
-                  <button type="button" className={styles.outlineButton} onClick={() => setShowAllReviews((value) => !value)}>
-                    {showAllReviews ? "Show Less Reviews" : "View All 124 Reviews"}
-                  </button>
+                            <p>{review.text}</p>
+                          </article>
+                        ))}
+                      </div>
+                      <button type="button" className={styles.outlineButton} onClick={() => setShowAllReviews((value) => !value)}>
+                        {showAllReviews ? "Show Less Reviews" : `View All ${reviews.length} Reviews`}
+                      </button>
+                    </>
+                  ) : (
+                    <p>No reviews yet.</p>
+                  )}
                 </section>
               </div>
 
               <div className={styles.rightColumn}>
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:bar-chart-2" />At a Glance</h2>
-                  <div className={styles.statList}>
-                    <div className={styles.statItem}>
-                      <span className={styles.statIcon}><iconify-icon icon="lucide:check-square" /></span>
-                      <div><strong>158</strong><small>Completed Tasks</small></div>
+                  {loading ? (
+                    <div className={styles.statList}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonBlock key={i} style={{ height: 40, marginBottom: 8 }} />
+                      ))}
                     </div>
-                    <div className={styles.statItem}>
-                      <span className={styles.statIcon}><iconify-icon icon="lucide:trending-up" /></span>
-                      <div><strong>98%</strong><small>Success Rate</small></div>
+                  ) : (
+                    <div className={styles.statList}>
+                      <div className={styles.statItem}>
+                        <span className={styles.statIcon}><iconify-icon icon="lucide:check-square" /></span>
+                        <div><strong>{userCompletedTasks}</strong><small>Completed Tasks</small></div>
+                      </div>
+                      {userSuccessRate ? (
+                        <div className={styles.statItem}>
+                          <span className={styles.statIcon}><iconify-icon icon="lucide:trending-up" /></span>
+                          <div><strong>{userSuccessRate}</strong><small>Success Rate</small></div>
+                        </div>
+                      ) : null}
+                      {userResponseTime ? (
+                        <div className={styles.statItem}>
+                          <span className={styles.statIcon}><iconify-icon icon="lucide:clock" /></span>
+                          <div><strong>{userResponseTime}</strong><small>Avg. Response Time</small></div>
+                        </div>
+                      ) : null}
+                      {userMemberSince ? (
+                        <div className={styles.statItem}>
+                          <span className={styles.statIcon}><iconify-icon icon="lucide:calendar" /></span>
+                          <div><strong>{userMemberSince}</strong><small>Member Since</small></div>
+                        </div>
+                      ) : null}
                     </div>
-                    <div className={styles.statItem}>
-                      <span className={styles.statIcon}><iconify-icon icon="lucide:clock" /></span>
-                      <div><strong>&lt; 2 Hrs</strong><small>Avg. Response Time</small></div>
-                    </div>
-                    <div className={styles.statItem}>
-                      <span className={styles.statIcon}><iconify-icon icon="lucide:calendar" /></span>
-                      <div><strong>2019</strong><small>Member Since</small></div>
-                    </div>
-                  </div>
+                  )}
                 </section>
 
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:award" />Skills & Expertise</h2>
-                  <div className={styles.skillList}>
-                    {skillSet.map((skill) => (
-                      <span key={skill} className={styles.skillPill}>{skill}</span>
-                    ))}
-                  </div>
+                  {loading ? (
+                    <div className={styles.skillList}>
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonBlock key={i} style={{ width: 100, height: 28, borderRadius: 14 }} />
+                      ))}
+                    </div>
+                  ) : userSkills.length ? (
+                    <div className={styles.skillList}>
+                      {userSkills.map((skill) => (
+                        <span key={skill} className={styles.skillPill}>{skill}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No skills listed yet.</p>
+                  )}
                 </section>
 
                 <section className={styles.card}>

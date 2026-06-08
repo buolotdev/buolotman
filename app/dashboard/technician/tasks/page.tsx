@@ -2,9 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { technicianMarketplaceTasks, type TechnicianMarketplaceTask } from "../taskMarketplaceData";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { toArray } from "@/app/lib/dataShape";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 type TaskFilter = "all" | "urgent" | "residential" | "commercial";
 type SortOption = "newest" | "budget" | "match";
@@ -16,38 +21,78 @@ type ActivityItem = {
   time: string;
 };
 
-const tasks = technicianMarketplaceTasks;
+type MarketplaceTask = {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  posted: string;
+  schedule: string;
+  urgent: boolean;
+  type: string;
+  tags: string[];
+  budgetLabel: string;
+  budgetValue: number;
+  match: number;
+  attachments: number;
+  proposals: string[];
+};
 
-const initialActivities: ActivityItem[] = [
-  {
-    id: "activity-1",
-    title: "Shortlisted for generator maintenance check",
-    detail: "Client viewed your profile and kept your bid in the top three.",
-    time: "18 min ago",
-  },
-  {
-    id: "activity-2",
-    title: "Escrow released",
-    detail: "Apartment lighting payout moved into your available wallet.",
-    time: "Today",
-  },
-  {
-    id: "activity-3",
-    title: "Profile visibility increased",
-    detail: "You appeared in 18 searches after updating your availability.",
-    time: "Yesterday",
-  },
+const navItems = [
+  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
+  { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
+  { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
+  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/technician/messages", match: (p: string) => p.startsWith("/dashboard/technician/messages") },
+  { key: "wallet", label: "Wallet", icon: "lucide:wallet", href: "/dashboard/technician/wallet", match: (p: string) => p.startsWith("/dashboard/technician/wallet") },
+  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/technician/profile", match: (p: string) => p.startsWith("/dashboard/technician/profile") },
 ];
 
 export default function TechnicianTasksPage() {
+  const { data: tasksData, loading: tasksLoading } = useFetch(() => api.getTasks(), []);
+  const { data: walletData } = useFetch(() => api.getWallet(), []);
+  const { data: userData } = useFetch(() => api.getMe(), []);
+
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<TaskFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [submittedIds, setSubmittedIds] = useState<string[]>([]);
-  const [activities, setActivities] = useState(initialActivities);
-  const [walletAvailable, setWalletAvailable] = useState(2980);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+
+  const tasks: MarketplaceTask[] = useMemo(() => {
+    const raw = toArray(tasksData);
+    return raw.map((t: any) => ({
+      id: String(t.id),
+      title: t.title ?? "",
+      description: t.description ?? "",
+      location: t.location ?? "",
+      posted: t.posted ?? t.created_at ?? "",
+      schedule: t.schedule ?? "",
+      urgent: t.urgent ?? false,
+      type: t.type ?? "residential",
+      tags: t.tags ?? t.skills ?? [],
+      budgetLabel: t.budget_label ?? `$${t.budget ?? 0}`,
+      budgetValue: t.budget ?? t.budget_value ?? 0,
+      match: t.match ?? 0,
+      attachments: t.attachments ?? 0,
+      proposals: t.proposals ?? [],
+    }));
+  }, [tasksData]);
+
+  const walletAvailable = walletData?.available_balance ?? 0;
+
+  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
+  const userInitials = useMemo(() => {
+    const first = userData?.first_name?.[0] ?? "";
+    const last = userData?.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase();
+  }, [userData]);
+  const userRole = userData?.role ?? "";
+  const userRating = userData?.rating ? `${userData.rating}` : "";
+  const userCompletedJobs = userData?.completed_jobs ?? userData?.completed_tasks ?? "";
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -69,11 +114,11 @@ export default function TechnicianTasksPage() {
     else if (sortBy === "match") next = [...next].sort((a, b) => b.match - a.match);
 
     return next;
-  }, [activeFilter, normalizedQuery, sortBy]);
+  }, [tasks, activeFilter, normalizedQuery, sortBy]);
 
   const activeJobs = tasks.filter((task) => submittedIds.includes(task.id)).length;
   const urgentCount = tasks.filter((task) => task.urgent).length;
-  const averageMatch = Math.round(tasks.reduce((sum, task) => sum + task.match, 0) / tasks.length);
+  const averageMatch = tasks.length ? Math.round(tasks.reduce((sum, task) => sum + task.match, 0) / tasks.length) : 0;
 
   const pushActivity = (title: string, detail: string, time: string) => {
     setActivities((current) => [{ id: `${Date.now()}-${Math.random()}`, title, detail, time }, ...current]);
@@ -89,14 +134,13 @@ export default function TechnicianTasksPage() {
     );
   };
 
-  const submitBid = (task: TechnicianMarketplaceTask) => {
+  const submitBid = (task: MarketplaceTask) => {
     if (submittedIds.includes(task.id)) return;
     setSubmittedIds((current) => [...current, task.id]);
     pushActivity("Bid submitted", `You sent a proposal for ${task.title}.`, "Now");
   };
 
   const addFunds = () => {
-    setWalletAvailable((current) => current + 250);
     pushActivity("Wallet topped up", "Added working capital for travel, materials, and marketplace fees.", "Now");
   };
 
@@ -114,39 +158,33 @@ export default function TechnicianTasksPage() {
           </div>
 
           <div className={styles.profileCard}>
-            <div className={styles.profileAvatar}>DM</div>
+            <div className={styles.profileAvatar}>{userInitials}</div>
             <div className={styles.profileMeta}>
-              <strong>Daniel Mensah</strong>
-              <span>Electrician · Verified Pro</span>
-              <small>4.9 rating · 126 completed jobs</small>
+              <strong>{userName}</strong>
+              <span>{userRole}{userRating ? ` · ${userRating} rating` : ""}{userCompletedJobs ? ` · ${userCompletedJobs} completed jobs` : ""}</span>
             </div>
           </div>
 
           <nav className={styles.sidebarNav} aria-label="Technician navigation">
-            <Link href="/dashboard/technician" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:layout-dashboard" /></span>
-              <span>Dashboard</span>
-            </Link>
-            <Link href="/dashboard/technician/tasks" className={`${styles.navItem} ${styles.navItemActive}`}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:search" /></span>
-              <span>Browse Tasks</span>
-            </Link>
-            <Link href="/dashboard/technician/bids" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:file-text" /></span>
-              <span>My Bids</span>
-            </Link>
-            <Link href="/dashboard/technician/messages" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:messages-square" /></span>
-              <span>Messages</span>
-            </Link>
-            <Link href="/dashboard/technician/wallet" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:wallet" /></span>
-              <span>Wallet</span>
-            </Link>
-            <Link href="/dashboard/technician/profile" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:user-round" /></span>
-              <span>Profile</span>
-            </Link>
+            {navItems.map((item) => {
+              const isActive = item.match(pathname || "");
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                  onClick={(e) => {
+                    if (pathname === item.href) {
+                      e.preventDefault();
+                      window.location.reload();
+                    }
+                  }}
+                >
+                  <span className={styles.navIcon}><iconify-icon icon={item.icon} /></span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className={styles.sidebarCard}>
@@ -154,10 +192,7 @@ export default function TechnicianTasksPage() {
             <p>Use match score, budget, and urgency to prioritize the requests most likely to convert into paid work.</p>
           </div>
 
-          <Link href="/login" className={styles.logoutButton}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutButton} />
         </aside>
 
         <div className={styles.main}>
@@ -178,10 +213,10 @@ export default function TechnicianTasksPage() {
                 <span className={styles.notificationDot} />
               </button>
               <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>DM</div>
+                <div className={styles.topbarAvatar}>{userInitials}</div>
                 <div className={styles.topbarProfileLines}>
-                  <strong>Daniel Mensah</strong>
-                  <span>Available today</span>
+                  <strong>{userName}</strong>
+                  <span>{userRole}</span>
                 </div>
               </div>
             </div>
@@ -200,32 +235,40 @@ export default function TechnicianTasksPage() {
               </Link>
             </section>
 
-            <section className={styles.statsGrid}>
-              <article className={styles.statCard}>
-                <div className={styles.statHeader}>
-                  <span>Available tasks</span>
-                  <span className={styles.statIcon}><iconify-icon icon="lucide:layers-3" /></span>
-                </div>
-                <strong>{tasks.length}</strong>
-                <p>{urgentCount} urgent requests need fast replies.</p>
-              </article>
-              <article className={styles.statCard}>
-                <div className={styles.statHeader}>
-                  <span>Average match</span>
-                  <span className={styles.statIcon}><iconify-icon icon="lucide:target" /></span>
-                </div>
-                <strong>{averageMatch}%</strong>
-                <p>Based on your profile, category fit, and response speed.</p>
-              </article>
-              <article className={styles.statCard}>
-                <div className={styles.statHeader}>
-                  <span>Bids sent</span>
-                  <span className={styles.statIcon}><iconify-icon icon="lucide:send" /></span>
-                </div>
-                <strong>{activeJobs}</strong>
-                <p>Fresh proposals submitted from this marketplace view.</p>
-              </article>
-            </section>
+            {tasksLoading ? (
+              <section className={styles.statsGrid}>
+                <SkeletonStat />
+                <SkeletonStat />
+                <SkeletonStat />
+              </section>
+            ) : (
+              <section className={styles.statsGrid}>
+                <article className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span>Available tasks</span>
+                    <span className={styles.statIcon}><iconify-icon icon="lucide:layers-3" /></span>
+                  </div>
+                  <strong>{tasks.length}</strong>
+                  <p>{urgentCount} urgent requests need fast replies.</p>
+                </article>
+                <article className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span>Average match</span>
+                    <span className={styles.statIcon}><iconify-icon icon="lucide:target" /></span>
+                  </div>
+                  <strong>{averageMatch}%</strong>
+                  <p>Based on your profile, category fit, and response speed.</p>
+                </article>
+                <article className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span>Bids sent</span>
+                    <span className={styles.statIcon}><iconify-icon icon="lucide:send" /></span>
+                  </div>
+                  <strong>{activeJobs}</strong>
+                  <p>Fresh proposals submitted from this marketplace view.</p>
+                </article>
+              </section>
+            )}
 
             <div className={styles.dashboardGrid}>
               <div className={styles.mainColumn}>
@@ -248,7 +291,9 @@ export default function TechnicianTasksPage() {
                 </section>
 
                 <section className={styles.taskList}>
-                  {filteredTasks.length ? (
+                  {tasksLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
+                  ) : filteredTasks.length ? (
                     filteredTasks.map((task) => {
                       const isSaved = savedIds.includes(task.id);
                       const isSubmitted = submittedIds.includes(task.id);
@@ -315,7 +360,7 @@ export default function TechnicianTasksPage() {
                       );
                     })
                   ) : (
-                    <div className={styles.emptyState}>No tasks match your current filters.</div>
+                    <div className={styles.emptyState}>No tasks available yet.</div>
                   )}
                 </section>
               </div>
@@ -340,18 +385,22 @@ export default function TechnicianTasksPage() {
                     <span>{activities.length}</span>
                   </div>
                   <div className={styles.timeline}>
-                    {activities.map((item, index) => (
-                      <div key={item.id} className={styles.timelineItem}>
-                        <span className={`${styles.timelineIcon} ${index === 0 ? styles.timelineIconActive : ""}`}>
-                          <iconify-icon icon={index === 0 ? "lucide:sparkles" : "lucide:file-text"} />
-                        </span>
-                        <div className={styles.timelineContent}>
-                          <strong>{item.title}</strong>
-                          <p>{item.detail}</p>
-                          <span>{item.time}</span>
+                    {activities.length === 0 ? (
+                      <p style={{ fontSize: 14, color: "#6b7280" }}>No recent activity.</p>
+                    ) : (
+                      activities.map((item, index) => (
+                        <div key={item.id} className={styles.timelineItem}>
+                          <span className={`${styles.timelineIcon} ${index === 0 ? styles.timelineIconActive : ""}`}>
+                            <iconify-icon icon={index === 0 ? "lucide:sparkles" : "lucide:file-text"} />
+                          </span>
+                          <div className={styles.timelineContent}>
+                            <strong>{item.title}</strong>
+                            <p>{item.detail}</p>
+                            <span>{item.time}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </section>
 

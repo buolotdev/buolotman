@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { use, useState } from "react";
-import { getBidById, getTaskById } from "../../../../../taskData";
+import { use, useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 
 type PaymentMethod = "card" | "bank" | "mobile";
@@ -20,30 +22,88 @@ function formatXof(value: number) {
 
 export default function ProposalPaymentPage({ params }: { params: Promise<{ taskId: string; bidId: string }> }) {
   const { taskId, bidId } = use(params);
-  const task = getTaskById(taskId);
-  const bid = getBidById(taskId, bidId);
+
+  const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
+  const { data: bidsData, loading: bidLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [note, setNote] = useState("");
-  const [promoInput, setPromoInput] = useState("WELCOME10");
-  const [appliedPromo, setAppliedPromo] = useState("WELCOME10");
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState("");
   const [sameAsTaskAddress, setSameAsTaskAddress] = useState(true);
   const [billingAddress, setBillingAddress] = useState({
-    street: "123 Main St, Apt 4B",
-    city: "Brooklyn",
-    zip: "11201",
+    street: "",
+    city: "",
+    zip: "",
   });
   const [cardForm, setCardForm] = useState({
-    number: "5412 7512 3412 3456",
-    expiry: "11 / 28",
-    cvc: "123",
-    holder: task?.client.name ?? "John Doe",
+    number: "",
+    expiry: "",
+    cvc: "",
+    holder: "",
   });
   const [depositSubmitted, setDepositSubmitted] = useState(false);
+  const [depositing, setDepositing] = useState(false);
+  const [depositError, setDepositError] = useState<string | null>(null);
+
+  const loading = taskLoading || bidLoading;
+
+  const bid = (() => {
+    if (!bidsData) return null;
+    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    return list.find((b: any) => String(b.id) === bidId) || null;
+  })();
+  const acceptedBid = useMemo(() => {
+    if (!bidsData) return null;
+    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    return list.find((b: any) => b.status === "accepted") || null;
+  }, [bidsData]);
+  const lockedToAcceptedBid = Boolean(acceptedBid && String((acceptedBid as any).id) !== bidId);
+
+  if (loading) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.logoBar}>
+          <Link href="/" className={styles.logoLink} aria-label="Boulot Man home">
+            <Image src="/boulotman-logo.png" alt="Boulot Man" width={280} height={72} className={styles.logoImage} priority />
+          </Link>
+        </div>
+        <div className={styles.shell}>
+          <SkeletonBlock style={{ width: "40%", height: 24, marginBottom: 16 }} />
+          <SkeletonBlock style={{ width: "60%", height: 16 }} />
+        </div>
+      </main>
+    );
+  }
 
   if (!task || !bid) notFound();
+  if (lockedToAcceptedBid) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.logoBar}>
+          <Link href="/" className={styles.logoLink} aria-label="Boulot Man home">
+            <Image src="/boulotman-logo.png" alt="Boulot Man" width={280} height={72} className={styles.logoImage} priority />
+          </Link>
+        </div>
+        <div className={styles.shell}>
+          <section className={styles.successCard}>
+            <h2>Proposal already accepted</h2>
+            <p>This task has already been hired. Only the accepted proposal can proceed to escrow and review.</p>
+            <div className={styles.successActions}>
+              <Link href={`/dashboard/client/tasks/${task.id}/proposals`} className={styles.secondaryButton}>
+                View accepted proposal
+              </Link>
+              <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.primaryButton}>
+                Back to task
+              </Link>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
-  const agreedPrice = parseAmount(bid.amount);
+  const agreedPrice = parseAmount((bid as any).amount);
   const platformFee = Math.round(agreedPrice * 0.05);
   const promoDiscount = appliedPromo.trim().toUpperCase() === "WELCOME10" ? Math.round(agreedPrice * 0.1) : 0;
   const total = Math.max(agreedPrice + platformFee - promoDiscount, 0);
@@ -75,7 +135,7 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
           <section className={styles.successCard}>
             <h2>Escrow funded successfully</h2>
             <p>
-              {formatXof(total)} is now held for {bid.bidder}. The task can start, and payment remains locked until you confirm completion.
+              {formatXof(total)} is now held for {(bid as any).bidder || "the professional"}. The task can start, and payment remains locked until you confirm completion.
             </p>
             <div className={styles.successActions}>
               <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.secondaryButton}>
@@ -108,7 +168,7 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                     <span className={styles.stepIndex}>2</span>
                     <div>
                       <strong>Work begins</strong>
-                      <p>{bid.bidder} starts the task with funding already reserved.</p>
+                      <p>{(bid as any).bidder || "The professional"} starts the task with funding already reserved.</p>
                     </div>
                   </div>
                   <div className={styles.stepConnector} />
@@ -128,7 +188,7 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                   className={styles.textarea}
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
-                  placeholder={`Add any final notes, access codes, or instructions for ${bid.bidder.split(" ")[0]}...`}
+                  placeholder={`Add any final notes, access codes, or instructions for ${((bid as any).bidder || "the professional").split(" ")[0]}...`}
                 />
               </article>
 
@@ -292,17 +352,17 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                 <div className={styles.summaryBlock}>
                   <h3>{task.title}</h3>
                   <div className={styles.summaryMeta}>
-                    <div><span>Location</span><strong>{task.location}</strong></div>
-                    <div><span>Schedule</span><strong>{task.logistics.scheduleLabel}</strong></div>
-                    <div><span>Property</span><strong>{task.logistics.propertyType}</strong></div>
+                    <div><span>Location</span><strong>{task.city || task.location || "Not specified"}</strong></div>
+                    <div><span>Schedule</span><strong>{task.logistics?.scheduleLabel || task.schedule || "Flexible"}</strong></div>
+                    <div><span>Property</span><strong>{task.logistics?.propertyType || task.property_type || "Not specified"}</strong></div>
                   </div>
 
                   <div className={styles.proCard}>
-                    <div className={styles.proAvatar}>{bid.initials}</div>
+                    <div className={styles.proAvatar}>{(bid as any).initials || ""}</div>
                     <div>
-                      <strong>{bid.bidder}</strong>
+                      <strong>{(bid as any).bidder || ""}</strong>
                       <p>
-                        {bid.profile.title} • {bid.rating} ({bid.reviews} reviews)
+                        {(bid as any).profile?.title || ""}{(bid as any).rating != null && (bid as any).rating !== "" ? ` • ${(bid as any).rating}${(bid as any).reviews != null ? ` (${(bid as any).reviews} reviews)` : ""}` : ""}
                       </p>
                     </div>
                   </div>
@@ -319,7 +379,7 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                 </div>
 
                 <div className={styles.breakdown}>
-                  <div><span>Agreed price</span><strong>{bid.amount}</strong></div>
+                  <div><span>Agreed price</span><strong>{(bid as any).amount}</strong></div>
                   <div><span>Platform fee (5%)</span><strong>{formatXof(platformFee)}</strong></div>
                   {promoDiscount ? (
                     <div className={styles.discountRow}><span>Promo discount</span><strong>-{formatXof(promoDiscount)}</strong></div>
@@ -330,11 +390,28 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                 <button
                   type="button"
                   className={styles.depositButton}
-                  disabled={!canSubmit}
-                  onClick={() => setDepositSubmitted(true)}
+                  disabled={!canSubmit || depositing}
+                  onClick={async () => {
+                    setDepositing(true);
+                    setDepositError(null);
+                    try {
+                      await api.depositEscrow({
+                        task_id: task.id,
+                        bid_id: Number(bidId),
+                        amount: total,
+                      });
+                      setDepositSubmitted(true);
+                    } catch (err: any) {
+                      setDepositError(err?.message || "Deposit failed");
+                    } finally {
+                      setDepositing(false);
+                    }
+                  }}
                 >
-                  Deposit and start task
+                  {depositing ? "Processing..." : "Deposit and start task"}
                 </button>
+
+                {depositError ? <p className={styles.terms} style={{ color: "#dc2626" }}>{depositError}</p> : null}
 
                 <p className={styles.terms}>
                   By depositing, you agree to the escrow and service terms for this proposal.

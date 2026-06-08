@@ -192,6 +192,30 @@
   flex-shrink: 0;
 }
 
+.passwordToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.passwordToggle:hover {
+  color: #001f3f;
+  background: rgba(0, 31, 63, 0.06);
+}
+
+.passwordToggle iconify-icon {
+  font-size: 16px;
+}
+
 .errorText {
   margin: -6px 0 0;
   color: #dc2626;

@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { use, useState } from "react";
-import { getBidById, getTaskById } from "../../../../../taskData";
+import { use, useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 
 const feedbackOptions = [
@@ -15,23 +17,84 @@ const feedbackOptions = [
   "Went Above & Beyond",
 ] as const;
 
+const computeFirstName = (bid: any) => {
+  const name = bid?.bidder || "";
+  return name ? name.split(" ")[0] : "";
+};
+
 export default function ProposalReviewPage({ params }: { params: Promise<{ taskId: string; bidId: string }> }) {
   const { taskId, bidId } = use(params);
-  const task = getTaskById(taskId);
-  const bid = getBidById(taskId, bidId);
 
-  const [rating, setRating] = useState(4);
-  const [selectedTags, setSelectedTags] = useState<string[]>(["Professional", "Punctual"]);
+  const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
+  const { data: bidsData, loading: bidLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
+
+  const [rating, setRating] = useState(0);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  if (!task || !bid) notFound();
+  const loading = taskLoading || bidLoading;
 
-  const firstName = bid.bidder.split(" ")[0];
+  const bid = (() => {
+    if (!bidsData) return null;
+    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    return list.find((b: any) => String(b.id) === bidId) || null;
+  })();
+  const acceptedBid = useMemo(() => {
+    if (!bidsData) return null;
+    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    return list.find((b: any) => b.status === "accepted") || null;
+  }, [bidsData]);
+  const lockedToAcceptedBid = Boolean(acceptedBid && String((acceptedBid as any).id) !== bidId);
+
+  if (!loading && (!task || !bid)) notFound();
+  if (lockedToAcceptedBid) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.logoBar}>
+          <Link href="/" className={styles.logoLink} aria-label="Boulot Man home">
+            <Image src="/boulotman-logo.png" alt="Boulot Man" width={280} height={72} className={styles.logoImage} priority />
+          </Link>
+        </div>
+        <div className={styles.shell}>
+          <section className={styles.successCard}>
+            <h2>Proposal already accepted</h2>
+            <p>This task already has a hired professional. Review is only available for the accepted proposal.</p>
+            <div className={styles.successActions}>
+              <Link href={`/dashboard/client/tasks/${task?.id}/proposals`} className={styles.secondaryButton}>
+                View accepted proposal
+              </Link>
+              <Link href={`/dashboard/client/tasks/${task?.id}`} className={styles.primaryButton}>
+                Back to task
+              </Link>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  const firstName = computeFirstName(bid);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((current) => (current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]));
   };
+
+  if (loading) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.logoBar}>
+          <Link href="/" className={styles.logoLink} aria-label="Boulot Man home">
+            <Image src="/boulotman-logo.png" alt="Boulot Man" width={280} height={72} className={styles.logoImage} priority />
+          </Link>
+        </div>
+        <div className={styles.shell}>
+          <SkeletonBlock style={{ width: "40%", height: 24, marginBottom: 16 }} />
+          <SkeletonBlock style={{ width: "60%", height: 16 }} />
+        </div>
+      </main>
+    );
+  }
 
   if (submitted) {
     return (
@@ -44,9 +107,11 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
 
         <section className={styles.successCard}>
           <span className={styles.successBadge}>Review submitted</span>
-          <h1>Thanks for rating {firstName}</h1>
+          {firstName ? <h1>Thanks for rating {firstName}</h1> : <h1>Thanks for your review</h1>}
           <p>
-            Your feedback helps other clients evaluate {bid.bidder} and keeps the marketplace trustworthy.
+            {(bid as any)?.bidder
+              ? `Your feedback helps other clients evaluate ${(bid as any).bidder} and keeps the marketplace trustworthy.`
+              : "Your feedback helps the marketplace stay trustworthy."}
           </p>
 
           <div className={styles.successSummary}>
@@ -56,16 +121,16 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
             </div>
             <div>
               <span>Highlights</span>
-              <strong>{selectedTags.length || 1}</strong>
+              <strong>{selectedTags.length}</strong>
             </div>
             <div>
               <span>Task</span>
-              <strong>{task.title}</strong>
+              <strong>{task?.title}</strong>
             </div>
           </div>
 
           <div className={styles.successActions}>
-            <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.secondaryButton}>
+            <Link href={`/dashboard/client/tasks/${task?.id}`} className={styles.secondaryButton}>
               Back to task
             </Link>
             <Link href="/dashboard/client/messages" className={styles.primaryButton}>
@@ -87,7 +152,7 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
 
       <div className={styles.shell}>
         <div className={styles.header}>
-          <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.backLink}>
+          <Link href={`/dashboard/client/tasks/${task?.id}`} className={styles.backLink}>
             Back to task
           </Link>
           <h1 className={styles.title}>Rate your experience</h1>
@@ -96,10 +161,10 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
 
         <section className={styles.card}>
           <div className={styles.proHeader}>
-            <div className={styles.proAvatar}>{bid.initials}</div>
+            <div className={styles.proAvatar}>{(bid as any)?.initials || ""}</div>
             <div className={styles.proMeta}>
-              <strong>{bid.bidder}</strong>
-              <span>{bid.profile.title}</span>
+              <strong>{(bid as any)?.bidder || ""}</strong>
+              <span>{(bid as any)?.profile?.title || ""}</span>
             </div>
           </div>
 
@@ -108,18 +173,18 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
               <iconify-icon icon="lucide:check-circle" />
             </div>
             <div className={styles.summaryText}>
-              <strong>{task.title}</strong>
+              <strong>{task?.title}</strong>
               <span>Completed review for this accepted proposal</span>
             </div>
           </div>
 
           <div className={styles.ratingSection}>
             <div className={styles.ratingCopy}>
-              <h2>How would you rate {firstName}&apos;s work?</h2>
+              {firstName ? <h2>How would you rate {firstName}&apos;s work?</h2> : <h2>How would you rate this work?</h2>}
               <p>Select a rating, choose what stood out, and leave optional comments.</p>
             </div>
 
-            <div className={styles.stars} role="radiogroup" aria-label={`Rate ${bid.bidder}`}>
+            <div className={styles.stars} role="radiogroup" aria-label={firstName ? `Rate ${firstName}` : "Rate this work"}>
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
@@ -135,11 +200,11 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
               ))}
             </div>
 
-            <p className={styles.ratingValue}>{rating === 5 ? "Excellent work" : rating === 4 ? "Very good" : rating === 3 ? "Good" : rating === 2 ? "Needs improvement" : "Poor experience"}</p>
+            <p className={styles.ratingValue}>{rating === 5 ? "Excellent work" : rating === 4 ? "Very good" : rating === 3 ? "Good" : rating === 2 ? "Needs improvement" : rating === 1 ? "Poor experience" : "Select a rating"}</p>
           </div>
 
           <div className={styles.feedbackSection}>
-            <label className={styles.feedbackLabel}>What did you like about {firstName}?</label>
+            <label className={styles.feedbackLabel}>{firstName ? `What did you like about ${firstName}?` : "What stood out?"}</label>
             <div className={styles.tags}>
               {feedbackOptions.map((tag) => {
                 const active = selectedTags.includes(tag);
@@ -166,7 +231,7 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
               className={styles.textarea}
               value={comments}
               onChange={(event) => setComments(event.target.value)}
-              placeholder={`Share details about your experience working with ${firstName}...`}
+              placeholder={firstName ? `Share details about your experience working with ${firstName}...` : "Share details about your experience..."}
             />
           </div>
 
@@ -174,7 +239,7 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
             <button type="button" className={styles.primaryButton} onClick={() => setSubmitted(true)}>
               Submit review
             </button>
-            <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.skipLink}>
+            <Link href={`/dashboard/client/tasks/${task?.id}`} className={styles.skipLink}>
               Skip for now
             </Link>
           </div>

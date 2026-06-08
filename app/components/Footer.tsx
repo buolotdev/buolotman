@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import "./footer.css";
 
@@ -104,10 +106,12 @@ export default function Footer() {
 
           {/* BRAND */}
           <div className="footer-brand">
-            <img
+            <Image
               className="footer-logo"
               src="/boulotman-logo.png"
               alt="Boulot Man Logo"
+              width={160}
+              height={48}
             />
             <p>{t.desc}</p>
             <div className="footer-badges">
@@ -121,71 +125,71 @@ export default function Footer() {
           {/* CLIENTS */}
           <div className="footer-col">
             <h4>{t.clients}</h4>
-            <a href="/post-task">Post a Task</a>
-            <a href="/services">Browse Services</a>
-            <a href="/technicians">Find Technicians</a>
-            <a href="/companies">Hire Companies</a>
-            <a href="/build-team">Build a Team</a>
-            <a href="/concierge">Concierge</a>
-            <a href="/it-on-demand">IT on Demand</a>
+            <Link href="/post-task">Post a Task</Link>
+            <Link href="/search">Browse Services</Link>
+            <Link href="/search?type=technician">Find Technicians</Link>
+            <Link href="/search?type=company">Hire Companies</Link>
+            <Link href="/dashboard/company/projects">Build a Team</Link>
+            <Link href="/search">Concierge</Link>
+            <Link href="/search?category=it">IT on Demand</Link>
           </div>
 
           {/* TECHNICIANS */}
           <div className="footer-col">
             <h4>{t.technicians}</h4>
-            <a href="/technician-register">Join as Technician</a>
-            <a href="/technician-profile">My Profile</a>
-            <a href="/post-service">Post Services</a>
-            <a href="/tasks">Find Tasks</a>
-            <a href="/payments">Earnings</a>
-            <a href="/verification">Verification</a>
-            <a href="/tier-pricing">Upgrade Plan</a>
+            <Link href="/signup?role=technician">Join as Technician</Link>
+            <Link href="/dashboard/technician/profile">My Profile</Link>
+            <Link href="/dashboard/company/services">Post Services</Link>
+            <Link href="/dashboard/technician/tasks">Find Tasks</Link>
+            <Link href="/dashboard/technician/wallet">Earnings</Link>
+            <Link href="/signup/verify">Verification</Link>
+            <Link href="/search">Upgrade Plan</Link>
           </div>
 
           {/* COMPANIES */}
           <div className="footer-col">
             <h4>{t.companies}</h4>
-            <a href="/company-register">Register Company</a>
-            <a href="/company-profile">Company Profile</a>
-            <a href="/company-services">Post Services</a>
-            <a href="/contracts">Contracts</a>
-            <a href="/enterprise">Enterprise</a>
-            <a href="/compliance">Compliance</a>
-            <a href="/partnership">Partnerships</a>
+            <Link href="/signup?role=company">Register Company</Link>
+            <Link href="/dashboard/company/profile">Company Profile</Link>
+            <Link href="/dashboard/company/services">Post Services</Link>
+            <Link href="/dashboard/company/projects">Contracts</Link>
+            <Link href="/search?type=company">Enterprise</Link>
+            <Link href="/dashboard/admin/verification">Compliance</Link>
+            <Link href="/search">Partnerships</Link>
           </div>
 
           {/* PAYMENTS */}
           <div className="footer-col">
             <h4>{t.payments}</h4>
-            <a href="/escrow">Escrow System</a>
-            <a href="/milestones">Milestones</a>
-            <a href="/secure-payments">Secure Payments</a>
-            <a href="/refunds">Refunds</a>
-            <a href="/disputes">Disputes</a>
-            <a href="/trust">Trust &amp; Safety</a>
+            <Link href="/dashboard/client/payments">Escrow System</Link>
+            <Link href="/dashboard/company/projects/tracking">Milestones</Link>
+            <Link href="/dashboard/client/payments">Secure Payments</Link>
+            <Link href="/dashboard/client/payments">Refunds</Link>
+            <Link href="/dashboard/admin/disputes">Disputes</Link>
+            <Link href="/signup/verify">Trust &amp; Safety</Link>
           </div>
 
           {/* RESOURCES */}
           <div className="footer-col">
             <h4>{t.resources}</h4>
-            <a href="/how-it-works">How It Works</a>
-            <a href="/help-center">Help Center</a>
-            <a href="/reviews">Reviews</a>
-            <a href="/press">Press &amp; Media</a>
-            <a href="/developers">Developers</a>
-            <a href="/api">API</a>
+            <Link href="/#how-it-works">How It Works</Link>
+            <Link href="/help-center">Help Center</Link>
+            <Link href="/search">Reviews</Link>
+            <Link href="/">Press &amp; Media</Link>
+            <Link href="/">Developers</Link>
+            <Link href="/search">API</Link>
           </div>
 
           {/* COMPANY */}
           <div className="footer-col">
             <h4>{t.company}</h4>
-            <a href="/about">About Us</a>
-            <a href="/careers">Careers</a>
-            <a href="/investors">Investors</a>
-            <a href="/legal">Legal</a>
-            <a href="/terms">Terms</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/contact">Contact</a>
+            <Link href="/">About Us</Link>
+            <Link href="/">Careers</Link>
+            <Link href="/">Investors</Link>
+            <Link href="/">Legal</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/">Contact</Link>
           </div>
 
         </div>
@@ -231,10 +235,10 @@ export default function Footer() {
           </div>
 
           <div className="footer-socials">
-            <a href="#">LinkedIn</a>
-            <a href="#">Twitter</a>
-            <a href="#">Facebook</a>
-            <a href="#">Instagram</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="https://x.com" target="_blank" rel="noreferrer">Twitter</a>
+            <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
           </div>
         </div>
 

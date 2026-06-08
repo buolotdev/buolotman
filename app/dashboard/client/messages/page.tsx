@@ -1,74 +1,187 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { clientConversations, dashboardNavItems } from "../taskData";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
-function getLatestMessagePreview(messages: Array<{ text: string }>) {
-  return messages[messages.length - 1]?.text ?? "No messages yet.";
+const navItems = [
+  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
+  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
+  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
+  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
+  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
+  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client/profile", match: (p: string) => p.startsWith("/dashboard/client/profile") },
+];
+
+function formatTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = (now.getTime() - d.getTime()) / 1000;
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return d.toLocaleDateString();
+  } catch {
+    return "";
+  }
+}
+
+function formatMessageTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
 }
 
 export default function ClientMessagesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const toast = useToast();
+  const dialog = useDialog();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
   const [draft, setDraft] = useState("");
-  const [conversations, setConversations] = useState(clientConversations);
-  const [activeConversationId, setActiveConversationId] = useState(clientConversations[0]?.id ?? "");
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string>(searchParams.get("c") || "");
+  const [activeMessages, setActiveMessages] = useState<any[]>([]);
+  const [sending, setSending] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+
+  const { data: apiConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
+  const { data: userData } = useFetch(() => api.getMe(), []);
+
+  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
+  const userInitials = useMemo(() => {
+    const first = userData?.first_name?.[0] ?? "";
+    const last = userData?.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase();
+  }, [userData]);
+  const userRole = userData?.role ?? "";
+
+  useEffect(() => {
+    if (apiConversations) {
+      const list = Array.isArray(apiConversations) ? apiConversations : (apiConversations as any)?.results || [];
+      setConversations(list);
+      if (!activeConversationId && list[0]) {
+        setActiveConversationId(String(list[0].id));
+      }
+    }
+  }, [apiConversations]);
+
+  useEffect(() => {
+    const interval = setInterval(() => refetchConvos(), 5000);
+    return () => clearInterval(interval);
+  }, [refetchConvos]);
+
+  useEffect(() => {
+    if (!activeConversationId) return;
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval>;
+
+    const load = () => {
+      api.getConversation(Number(activeConversationId))
+        .then((data: any) => {
+          if (!cancelled) setActiveMessages(data.messages || []);
+        })
+        .catch(() => {});
+    };
+
+    load();
+    interval = setInterval(load, 3000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [activeConversationId]);
+
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
+
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const threshold = 100;
+      isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (el && isNearBottomRef.current) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [activeMessages]);
 
   const filteredConversations = useMemo(() => {
     const normalized = threadSearch.trim().toLowerCase();
     if (!normalized) return conversations;
-
-    return conversations.filter((conversation) =>
-      [conversation.participant.name, conversation.participant.role, conversation.taskTitle, getLatestMessagePreview(conversation.messages)]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalized)
-    );
+    return conversations.filter((conversation: any) => {
+      const name = conversation.other_participant?.name || "";
+      const role = conversation.other_participant?.role || "";
+      const title = conversation.task_title || "";
+      const preview = conversation.last_message?.text || "";
+      return [name, role, title, preview].join(" ").toLowerCase().includes(normalized);
+    });
   }, [conversations, threadSearch]);
 
-  const activeConversation =
-    filteredConversations.find((conversation) => conversation.id === activeConversationId) ??
-    conversations.find((conversation) => conversation.id === activeConversationId) ??
-    filteredConversations[0] ??
-    conversations[0];
+  const activeConversation = filteredConversations.find((c: any) => String(c.id) === activeConversationId) ?? conversations[0];
 
   const selectConversation = (conversationId: string) => {
+    isNearBottomRef.current = true;
     setActiveConversationId(conversationId);
     setMobileConversationOpen(true);
-    setConversations((current) =>
-      current.map((conversation) =>
-        conversation.id === conversationId ? { ...conversation, unreadCount: 0 } : conversation
-      )
-    );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const message = draft.trim();
-    if (!message || !activeConversation) return;
+    if (!message || !activeConversation || sending) return;
 
-    setConversations((current) =>
-      current.map((conversation) =>
-        conversation.id === activeConversation.id
-          ? {
-              ...conversation,
-              updatedAt: "Now",
-              messages: [
-                ...conversation.messages,
-                {
-                  id: `${conversation.id}-${conversation.messages.length + 1}`,
-                  sender: "client",
-                  text: message,
-                  time: "Now",
-                },
-              ],
-            }
-          : conversation
-      )
-    );
+    const tempId = `tmp-${Date.now()}`;
+    const optimistic = {
+      id: tempId,
+      sender: userData?.id,
+      sender_name: userName,
+      text: message,
+      created_at: new Date().toISOString(),
+      read_at: null,
+    };
+    setActiveMessages((prev) => [...prev, optimistic]);
     setDraft("");
+    setSending(true);
+    isNearBottomRef.current = true;
+    requestAnimationFrame(() => {
+      const el = messagesContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+
+    try {
+      const real = await api.sendMessage(Number(activeConversation.id), message);
+      setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
+      refetchConvos();
+    } catch (err: any) {
+      setActiveMessages((prev) => prev.filter((m) => m.id !== tempId));
+      toast.error("Send failed", err?.message || "Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -86,24 +199,30 @@ export default function ClientMessagesPage() {
           </div>
 
           <nav className={styles.sidebarNav} aria-label="Dashboard navigation">
-            {dashboardNavItems.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                className={`${styles.navItem} ${item.key === "messages" ? styles.navItemActive : ""}`}
-                onClick={() => setMobileNavOpen(false)}
-              >
-                <iconify-icon icon={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = item.match(pathname || "");
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                  onClick={(e) => {
+                    setMobileNavOpen(false);
+                    if (pathname === item.href) {
+                      e.preventDefault();
+                      window.location.reload();
+                    }
+                  }}
+                >
+                  <iconify-icon icon={item.icon} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className={styles.sidebarFooter}>
-            <Link href="/login" className={styles.logoutButton}>
-              <iconify-icon icon="lucide:log-out" />
-              <span>Logout</span>
-            </Link>
+            <LogoutButton className={styles.logoutButton} />
           </div>
         </aside>
 
@@ -113,43 +232,32 @@ export default function ClientMessagesPage() {
               <button type="button" className={styles.mobileMenuButton} aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
                 <iconify-icon icon="lucide:menu" />
               </button>
-
               <label className={styles.searchBar}>
                 <iconify-icon icon="lucide:search" />
                 <input type="search" placeholder="Search tasks, professionals..." aria-label="Search tasks and professionals" />
               </label>
             </div>
-
             <div className={styles.topbarActions}>
               <button type="button" className={styles.iconButton} aria-label="Notifications">
                 <iconify-icon icon="lucide:bell" />
                 <span className={styles.notificationDot} />
               </button>
-
               <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>JD</div>
+                <div className={styles.userAvatar}>{userInitials}</div>
                 <div>
-                  <p className={styles.userName}>John Doe</p>
-                  <p className={styles.userRole}>Client</p>
+                  <div className={styles.userName}>{userName}</div>
+                  <div className={styles.userRole}>{userRole}</div>
                 </div>
               </div>
             </div>
           </header>
 
           <div className={styles.chatShell}>
-            <aside
-              className={`${styles.conversationPanel} ${
-                mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""
-              }`}
-            >
+            <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
               <div className={styles.panelHeader}>
                 <div className={styles.panelTitleRow}>
                   <h1 className={styles.panelTitle}>Messages</h1>
-                  <button type="button" className={styles.newMessageButton} aria-label="Start a new message">
-                    <iconify-icon icon="lucide:square-pen" />
-                  </button>
                 </div>
-
                 <label className={styles.threadSearch}>
                   <iconify-icon icon="lucide:search" />
                   <input
@@ -163,47 +271,50 @@ export default function ClientMessagesPage() {
               </div>
 
               <div className={styles.conversationList}>
-                {filteredConversations.length ? (
-                  filteredConversations.map((conversation) => {
-                    const latestMessage = getLatestMessagePreview(conversation.messages);
-                    const isActive = conversation.id === activeConversation?.id;
-
+                {loading ? (
+                  <div className={styles.emptyThreads}>
+                    <SkeletonBlock style={{ width: "100%", height: 60, marginBottom: 8 }} />
+                    <SkeletonBlock style={{ width: "100%", height: 60, marginBottom: 8 }} />
+                    <SkeletonBlock style={{ width: "100%", height: 60 }} />
+                  </div>
+                ) : filteredConversations.length ? (
+                  filteredConversations.map((conversation: any) => {
+                    const isActive = String(conversation.id) === activeConversationId;
+                    const preview = conversation.last_message?.text || "No messages yet.";
                     return (
                       <button
                         key={conversation.id}
                         type="button"
                         className={`${styles.conversationItem} ${isActive ? styles.conversationItemActive : ""}`}
-                        onClick={() => selectConversation(conversation.id)}
+                        onClick={() => selectConversation(String(conversation.id))}
                       >
                         <div className={styles.conversationAvatarWrap}>
-                          <div className={styles.conversationAvatar}>{conversation.participant.initials}</div>
-                          <span
-                            className={`${styles.onlineDot} ${
-                              conversation.participant.status === "online" ? styles.onlineDotActive : ""
-                            }`}
-                          />
+                          <div className={styles.conversationAvatar}>{conversation.other_participant?.initials || "?"}</div>
                         </div>
-
                         <div className={styles.conversationContent}>
                           <div className={styles.conversationMeta}>
-                            <strong>{conversation.participant.name}</strong>
-                            <span>{conversation.updatedAt}</span>
+                            <strong>{conversation.other_participant?.name || ""}</strong>
+                            <span>{formatTime(conversation.last_message_at || conversation.last_message?.time)}</span>
                           </div>
                           <div className={styles.conversationPreviewRow}>
-                            <p className={`${styles.conversationPreview} ${conversation.unreadCount ? styles.conversationPreviewStrong : ""}`}>
-                              {latestMessage}
-                            </p>
-                            {conversation.unreadCount ? (
-                              <span className={styles.unreadPill}>{conversation.unreadCount}</span>
+                            <span className={`${styles.conversationPreview} ${conversation.unread_count ? styles.conversationPreviewStrong : ""}`}>
+                              {preview}
+                            </span>
+                            {conversation.unread_count ? (
+                              <span className={styles.unreadPill}>{conversation.unread_count}</span>
                             ) : null}
                           </div>
-                          <span className={styles.conversationTask}>{conversation.taskTitle}</span>
+                          <span className={styles.conversationTask}>{conversation.task_title || ""}</span>
                         </div>
                       </button>
                     );
                   })
                 ) : (
-                  <div className={styles.emptyThreads}>No conversations match your search.</div>
+                  <div className={styles.emptyThreads}>
+                    <iconify-icon icon="lucide:message-square" style={{ fontSize: 32, opacity: 0.4 }} />
+                    <p>No conversations yet.</p>
+                    <span>Accept a proposal to start chatting with a technician.</span>
+                  </div>
                 )}
               </div>
             </aside>
@@ -213,64 +324,44 @@ export default function ClientMessagesPage() {
                 <>
                   <header className={styles.chatHeader}>
                     <div className={styles.chatUser}>
-                      <button
-                        type="button"
-                        className={styles.mobileBackButton}
-                        aria-label="Back to conversations"
-                        onClick={() => setMobileConversationOpen(false)}
-                      >
+                      <button type="button" className={styles.mobileBackButton} aria-label="Back to conversations" onClick={() => setMobileConversationOpen(false)}>
                         <iconify-icon icon="lucide:arrow-left" />
                       </button>
-
                       <div className={styles.chatAvatarWrap}>
-                        <div className={styles.chatAvatar}>{activeConversation.participant.initials}</div>
-                        <span
-                          className={`${styles.onlineDot} ${
-                            activeConversation.participant.status === "online" ? styles.onlineDotActive : ""
-                          }`}
-                        />
+                        <div className={styles.chatAvatar}>{activeConversation.other_participant?.initials || "?"}</div>
                       </div>
-
                       <div className={styles.chatUserDetails}>
-                        <strong>{activeConversation.participant.name}</strong>
+                        <strong>{activeConversation.other_participant?.name || ""}</strong>
                         <span>
-                          {activeConversation.participant.status === "online" ? "Online" : "Offline"} • {activeConversation.participant.role}
+                          {activeConversation.other_participant?.role ? activeConversation.other_participant.role.toLowerCase() : ""}
+                          {activeConversation.task_title ? ` • ${activeConversation.task_title}` : ""}
                         </span>
                       </div>
                     </div>
-
-                    <div className={styles.chatHeaderActions}>
-                      <button type="button" className={styles.circleIcon} aria-label="Call">
-                        <iconify-icon icon="lucide:phone" />
-                      </button>
-                      <button type="button" className={styles.circleIcon} aria-label="Video call">
-                        <iconify-icon icon="lucide:video" />
-                      </button>
-                      <button type="button" className={styles.circleIcon} aria-label="Conversation options">
-                        <iconify-icon icon="lucide:ellipsis-vertical" />
-                      </button>
-                    </div>
                   </header>
 
-                  <div className={styles.messagesArea}>
-                    <div className={styles.dateRow}>
-                      <span className={styles.datePill}>Today</span>
-                    </div>
-
-                    {activeConversation.messages.map((message) => (
-                      <article
-                        key={message.id}
-                        className={`${styles.messageGroup} ${
-                          message.sender === "client" ? styles.messageGroupSent : styles.messageGroupReceived
-                        }`}
-                      >
-                        <div className={styles.messageBubble}>{message.text}</div>
-                        <div className={styles.messageMeta}>
-                          <span>{message.time}</span>
-                          {message.sender === "client" ? <iconify-icon icon="lucide:check-check" /> : null}
-                        </div>
-                      </article>
-                    ))}
+                  <div className={styles.messagesArea} ref={messagesContainerRef}>
+                    {loadingMessages ? (
+                      <div className={styles.emptyChat}><SkeletonBlock style={{ width: "60%", height: 40, margin: "8px 0" }} /></div>
+                    ) : activeMessages.length === 0 ? (
+                      <div className={styles.emptyChat}>
+                        <iconify-icon icon="lucide:message-circle" style={{ fontSize: 40, opacity: 0.3 }} />
+                        <p>No messages yet. Say hi!</p>
+                      </div>
+                    ) : (
+                      activeMessages.map((message: any) => {
+                        const isMine = message.sender === userData?.id;
+                        return (
+                          <article key={message.id} className={`${styles.messageGroup} ${isMine ? styles.messageGroupSent : styles.messageGroupReceived}`}>
+                            <div className={styles.messageBubble}>{message.text}</div>
+                            <div className={styles.messageMeta}>
+                              <span>{formatMessageTime(message.created_at)}</span>
+                              {isMine ? <iconify-icon icon="lucide:check-check" /> : null}
+                            </div>
+                          </article>
+                        );
+                      })
+                    )}
                   </div>
 
                   <form
@@ -292,14 +383,16 @@ export default function ClientMessagesPage() {
                         <iconify-icon icon="lucide:paperclip" />
                       </button>
                     </label>
-
-                    <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={!draft.trim()}>
+                    <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={!draft.trim() || sending}>
                       <iconify-icon icon="lucide:send-horizontal" />
                     </button>
                   </form>
                 </>
               ) : (
-                <div className={styles.emptyChat}>Select a conversation to start messaging.</div>
+                <div className={styles.emptyChat}>
+                  <iconify-icon icon="lucide:message-square" style={{ fontSize: 48, opacity: 0.3 }} />
+                  <p>Select a conversation to start messaging.</p>
+                </div>
               )}
             </section>
           </div>

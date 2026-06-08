@@ -1,92 +1,85 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { toArray } from "@/app/lib/dataShape";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
 
 export default function AdminDashboard() {
-  const [activeNav, setActiveNav] = useState("dashboard");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/admin", icon: "lucide:layout-dashboard" },
-    { id: "users", label: "Users", href: "/dashboard/admin/users", icon: "lucide:users" },
-    { id: "tasks", label: "Tasks", href: "/dashboard/admin/tasks", icon: "lucide:file-text" },
-    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check", badge: 84 },
-    { id: "payments", label: "Payments", href: "/dashboard/admin/payments", icon: "lucide:credit-card" },
-    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale", badge: 3 },
-    { id: "content", label: "Content", href: "/dashboard/admin/content", icon: "lucide:layers" },
-    { id: "settings", label: "Settings", href: "/dashboard/admin/settings", icon: "lucide:settings" },
+    { id: "dashboard", label: "Dashboard", href: "/dashboard/admin", icon: "lucide:layout-dashboard", match: (p: string) => p === "/dashboard/admin" },
+    { id: "users", label: "Users", href: "/dashboard/admin/users", icon: "lucide:users", match: (p: string) => p.startsWith("/dashboard/admin/users") },
+    { id: "tasks", label: "Tasks", href: "/dashboard/admin/tasks", icon: "lucide:file-text", match: (p: string) => p.startsWith("/dashboard/admin/tasks") },
+    { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check", match: (p: string) => p.startsWith("/dashboard/admin/verification") },
+    { id: "payments", label: "Payments", href: "/dashboard/admin/payments", icon: "lucide:credit-card", match: (p: string) => p.startsWith("/dashboard/admin/payments") },
+    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale", match: (p: string) => p.startsWith("/dashboard/admin/disputes") },
+    { id: "content", label: "Content", href: "/dashboard/admin/content", icon: "lucide:layers", match: (p: string) => p.startsWith("/dashboard/admin/content") },
+    { id: "settings", label: "Settings", href: "/dashboard/admin/settings", icon: "lucide:settings", match: (p: string) => p.startsWith("/dashboard/admin/settings") },
   ];
 
-  const stats = [
-    { title: "Total Users", value: "24,592", trend: "+12.5%", isUp: true, icon: "lucide:users" },
-    { title: "Active Tasks", value: "1,845", trend: "+8.2%", isUp: true, icon: "lucide:briefcase", isOrange: true },
-    { title: "Total Revenue", value: "$142,300", trend: "+15.3%", isUp: true, icon: "lucide:dollar-sign" },
-    { title: "Pending KYC", value: "84", trend: "-2.4%", isUp: false, icon: "lucide:shield-alert" },
-  ];
+  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: tasksData, loading: tasksLoading } = useFetch(() => api.getTasks({}), []);
+  const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
+
+  const tasks = toArray(tasksData);
+  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
+  const userRole = user?.role || "";
 
   return (
     <div className={`${styles.layoutWrapper} ${mobileSidebarOpen ? styles.sidebarOpenMobile : ""}`}>
-      {/* Sidebar Overlay */}
-      <div 
-        className={styles.sidebarOverlay} 
-        onClick={() => setMobileSidebarOpen(false)} 
-      />
+      <div className={styles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
 
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <Link href="/" className={styles.brand}>
-            <Image 
-              src="/boulotman-logo.png" 
-              alt="Boulot Man" 
-              width={180} 
-              height={46} 
-              className={styles.brandImage}
-              priority 
-            />
+            <span className={styles.brandText}>Boulot Man</span>
             <span className={styles.adminBadge}>Admin</span>
           </Link>
-          <button 
-            className={styles.mobileCloseBtn} 
-            onClick={() => setMobileSidebarOpen(false)}
-          >
+          <button className={styles.mobileCloseBtn} onClick={() => setMobileSidebarOpen(false)}>
             <iconify-icon icon="lucide:x" />
           </button>
         </div>
 
         <nav className={styles.navMenu}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${styles.navItem} ${activeNav === item.id ? styles.navItemActive : ""}`}
-            >
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-              {item.badge && <span className={styles.navItemBadge}>{item.badge}</span>}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = item.match(pathname || "");
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                onClick={(e) => {
+                  if (pathname === item.href) {
+                    e.preventDefault();
+                    window.location.reload();
+                  }
+                }}
+              >
+                <iconify-icon icon={item.icon} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <Link href="/login" className={styles.logoutBtn}>
-            <iconify-icon icon="lucide:log-out" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton className={styles.logoutBtn} />
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={styles.mainContent}>
         <header className={styles.topbar}>
           <div className={styles.topbarLeft}>
-            <button 
-              className={styles.mobileMenuBtn} 
-              onClick={() => setMobileSidebarOpen(true)}
-            >
+            <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
               <iconify-icon icon="lucide:menu" />
             </button>
             <div className={styles.searchBar}>
@@ -101,16 +94,12 @@ export default function AdminDashboard() {
               <span className={styles.notificationDot} />
             </button>
             <div className={styles.adminProfile}>
-              <Image 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&q=80" 
-                alt="David Miller" 
-                width={36} 
-                height={36} 
-                className={styles.avatar}
-              />
+              <div className={styles.avatar}>
+                {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
+              </div>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>David Miller</span>
-                <span className={styles.profileRole}>Super Admin</span>
+                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
+                <span className={styles.profileRole}>{userRole}</span>
               </div>
             </div>
           </div>
@@ -120,87 +109,88 @@ export default function AdminDashboard() {
           <div className={styles.pageHeader}>
             <div className={styles.headerContent}>
               <h1>Dashboard Overview</h1>
-              <p>Welcome back, David. Here’s a summary of Boulot Man’s performance.</p>
-            </div>
-            <div className={styles.dateFilter}>
-              <iconify-icon icon="lucide:calendar" />
-              Last 30 Days
-              <iconify-icon icon="lucide:chevron-down" />
+              <p>Welcome back{userName ? `, ${userName}` : ""}. Here&apos;s a summary of Boulot Man&apos;s performance.</p>
             </div>
           </div>
 
           <div className={styles.statsGrid}>
-            {stats.map((stat, i) => (
-              <div key={i} className={styles.statCard}>
-                <div className={styles.statHeader}>
-                  <span className={styles.statTitle}>{stat.title}</span>
-                  <div className={`${styles.statIcon} ${stat.isOrange ? styles.statIconOrange : ""}`}>
-                    <iconify-icon icon={stat.icon} />
-                  </div>
-                </div>
-                <div className={styles.statValue}>{stat.value}</div>
-                <div className={styles.statTrend}>
-                  <iconify-icon 
-                    icon={stat.isUp ? "lucide:trending-up" : "lucide:trending-down"} 
-                    className={stat.isUp ? styles.trendUp : styles.trendDown} 
-                  />
-                  <span className={stat.isUp ? styles.trendUp : styles.trendDown}>{stat.trend}</span>
-                  <span className={styles.trendLabel}>vs last mo.</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.chartsRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Revenue & Transactions</h2>
-                <iconify-icon icon="lucide:more-horizontal" style={{ color: "#64748b", cursor: "pointer" }} />
-              </div>
-              <div className={styles.barChart}>
-                {[40, 60, 85, 50, 70, 95, 80].map((h, i) => (
-                  <div key={i} className={styles.barGroup}>
-                    <div 
-                      className={`${styles.bar} ${i === 5 ? styles.barSecondary : ""}`} 
-                      style={{ height: `${h}%` }} 
-                    />
-                    <span className={styles.barLabel}>{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]}</span>
-                  </div>
+            {tasksLoading ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className={styles.statCard}><SkeletonStat /></div>
                 ))}
-              </div>
-            </div>
-
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>User Distribution</h2>
-                <iconify-icon icon="lucide:more-horizontal" style={{ color: "#64748b", cursor: "pointer" }} />
-              </div>
-              <div className={styles.donutWrapper}>
-                <div className={styles.donutCircle}>
-                  <div className={styles.donutInner}>
-                    <span className={styles.donutTotal}>24.5k</span>
-                    <span className={styles.donutLabel}>Total Users</span>
+              </>
+            ) : (
+              <>
+                <div className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span className={styles.statTitle}>Total Tasks</span>
+                    <div className={styles.statIcon}><iconify-icon icon="lucide:file-text" /></div>
                   </div>
+                  <div className={styles.statValue}>{tasksData?.count || tasks.length}</div>
                 </div>
-                <div className={styles.legend}>
-                  <div className={styles.legendItem}>
-                    <div className={styles.legendDot} style={{ background: "#001f3f" }} />
-                    Clients
+                <div className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span className={styles.statTitle}>Active Tasks</span>
+                    <div className={`${styles.statIcon} ${styles.statIconOrange}`}><iconify-icon icon="lucide:briefcase" /></div>
                   </div>
-                  <div className={styles.legendItem}>
-                    <div className={styles.legendDot} style={{ background: "#ff4500" }} />
-                    Techs
-                  </div>
+                  <div className={styles.statValue}>{tasks.filter((t: any) => t.status === "open" || t.status === "in_progress").length}</div>
                 </div>
-              </div>
-            </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span className={styles.statTitle}>Completed</span>
+                    <div className={styles.statIcon}><iconify-icon icon="lucide:check-circle" /></div>
+                  </div>
+                  <div className={styles.statValue}>{tasks.filter((t: any) => t.status === "completed").length}</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statHeader}>
+                    <span className={styles.statTitle}>Conversations</span>
+                    <div className={styles.statIcon}><iconify-icon icon="lucide:message-square" /></div>
+                  </div>
+                  <div className={styles.statValue}>{Array.isArray(conversations) ? conversations.length : 0}</div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className={styles.bottomGrid}>
             <div className={styles.listCard}>
               <div className={styles.listHeader}>
+                <h2 className={styles.listTitle}>Recent Tasks</h2>
+                <Link href="/dashboard/admin/tasks" className={styles.viewAllLink}>View All</Link>
+              </div>
+              {tasksLoading ? (
+                <div className={styles.activityList}>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className={styles.activityItem}><SkeletonBlock style={{ width: "100%", height: 48 }} /></div>
+                  ))}
+                </div>
+              ) : tasks.length === 0 ? (
+                <p style={{ color: "#64748b", fontSize: 14, padding: 16 }}>No tasks yet.</p>
+              ) : (
+                <div className={styles.activityList}>
+                  {tasks.slice(0, 5).map((task: any) => (
+                    <div key={task.id} className={styles.activityItem}>
+                      <div className={styles.activityIconBox} style={{ background: "rgba(0, 31, 63, 0.1)", color: "#001f3f" }}>
+                        <iconify-icon icon="lucide:file-text" />
+                      </div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.activityHeader}>
+                          <span className={styles.activityText}>{task.title || "Untitled Task"}</span>
+                          <span className={styles.activityTime}>{task.status || "draft"}</span>
+                        </div>
+                        <p className={styles.activitySubtext}>{task.budget_min ? `${Number(task.budget_min).toLocaleString()} XOF` : "No budget"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.listCard}>
+              <div className={styles.listHeader}>
                 <h2 className={styles.listTitle}>Recent Activity</h2>
-                <button className={styles.viewAllLink}>View All</button>
               </div>
               <div className={styles.activityList}>
                 <div className={styles.activityItem}>
@@ -209,59 +199,10 @@ export default function AdminDashboard() {
                   </div>
                   <div className={styles.activityContent}>
                     <div className={styles.activityHeader}>
-                      <span className={styles.activityText}>New Company Registered</span>
-                      <span className={styles.activityTime}>5 min ago</span>
+                      <span className={styles.activityText}>System Running</span>
+                      <span className={styles.activityTime}>Now</span>
                     </div>
-                    <p className={styles.activitySubtext}>"Elite Electricals LLC" signed up and is pending verification.</p>
-                  </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIconBox} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
-                    <iconify-icon icon="lucide:file-check" />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityHeader}>
-                      <span className={styles.activityText}>High Value Task Posted</span>
-                      <span className={styles.activityTime}>12 min ago</span>
-                    </div>
-                    <p className={styles.activitySubtext}>Client "Sarah M." posted a task with a $5,000 budget.</p>
-                  </div>
-                </div>
-                <div className={styles.activityItem}>
-                  <div className={styles.activityIconBox} style={{ background: "rgba(22, 163, 74, 0.1)", color: "#16a34a" }}>
-                    <iconify-icon icon="lucide:arrow-down" />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <div className={styles.activityHeader}>
-                      <span className={styles.activityText}>Large Withdrawal Request</span>
-                      <span className={styles.activityTime}>1 hr ago</span>
-                    </div>
-                    <p className={styles.activitySubtext}>Technician "Michael C." requested withdrawal of $2,450.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.listCard}>
-              <div className={styles.listHeader}>
-                <h2 className={styles.listTitle}>System Alerts</h2>
-                <button className={styles.viewAllLink}>Manage</button>
-              </div>
-              <div className={styles.alertList}>
-                <div className={`${styles.alertItem} ${styles.alertUrgent}`}>
-                  <iconify-icon icon="lucide:alert-octagon" className={styles.alertIcon} />
-                  <div className={styles.alertContent}>
-                    <h4>3 Pending Disputes Unresolved</h4>
-                    <p>Issues have exceeded the 48-hour response SLA.</p>
-                    <span className={styles.alertAction}>Review Disputes</span>
-                  </div>
-                </div>
-                <div className={`${styles.alertItem} ${styles.alertWarning}`}>
-                  <iconify-icon icon="lucide:shield-alert" className={styles.alertIcon} />
-                  <div className={styles.alertContent}>
-                    <h4>KYC Backlog</h4>
-                    <p>84 pending ID verifications waiting for review.</p>
-                    <span className={styles.alertAction}>Process KYC</span>
+                    <p className={styles.activitySubtext}>All systems operational.</p>
                   </div>
                 </div>
               </div>

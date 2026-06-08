@@ -4,48 +4,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "../lib/api";
 import styles from "./login.module.css";
-
-const demoRoles = [
-  {
-    id: "client",
-    label: "Client",
-    helper: "Opens the client dashboard",
-    href: "/dashboard/client",
-    icon: "lucide:user",
-  },
-  {
-    id: "technician",
-    label: "Technician",
-    helper: "Opens the technician dashboard",
-    href: "/dashboard/technician",
-    icon: "lucide:briefcase",
-  },
-  {
-    id: "company",
-    label: "Company",
-    helper: "Opens the company dashboard",
-    href: "/dashboard/company",
-    icon: "lucide:building-2",
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    helper: "Opens the admin portal",
-    href: "/dashboard/admin",
-    icon: "lucide:shield-check",
-  },
-] as const;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<(typeof demoRoles)[number]["id"]>("client");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const activeDemo = demoRoles.find((role) => role.id === selectedRole) ?? demoRoles[0];
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    router.push(activeDemo.href);
+    setError(null);
+    setIsLoading(true);
+
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const data = await api.login(email, password);
+      
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("refresh_token", data.refresh);
+      localStorage.setItem("user_role", data.role?.toLowerCase() || "client");
+
+      // Route based on role returned from backend
+      const role = data.role?.toLowerCase();
+      if (role === "admin") {
+        router.push("/dashboard/admin");
+      } else if (role === "company") {
+        router.push("/dashboard/company");
+      } else if (role === "technician") {
+        router.push("/dashboard/technician");
+      } else {
+        router.push("/dashboard/client");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to log in");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,10 +84,12 @@ export default function LoginPage() {
             </label>
             <input
               id="email"
+              name="email"
               type="email"
               className={styles.input}
               placeholder="Enter your email"
               autoComplete="email"
+              required
             />
           </div>
 
@@ -97,57 +98,39 @@ export default function LoginPage() {
               <label htmlFor="password" className={styles.label}>
                 Password
               </label>
-              <Link href="#" className={styles.inlineLink}>
+              <Link href="/help-center" className={styles.inlineLink}>
                 Forgot Password?
               </Link>
             </div>
-            <input
-              id="password"
-              type="password"
-              className={styles.input}
-              placeholder="Enter your password"
-              autoComplete="current-password"
-            />
+            <div className={styles.passwordWrapper}>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                className={styles.input}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
+              </button>
+            </div>
           </div>
 
-          <button type="submit" className={styles.primaryButton}>
-            Log in as {activeDemo.label}
+          {error && <p style={{ color: "red", fontSize: "14px", marginBottom: "1rem" }}>{error}</p>}
+
+          <button type="submit" className={styles.primaryButton} disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Log in"}
           </button>
         </form>
 
-        <div className={styles.demoBlock}>
-          <div className={styles.demoHeader}>
-            <h2 className={styles.demoTitle}>Demo login as a role</h2>
-            <p className={styles.demoSubtitle}>Use one of the available account types to jump into a working screen.</p>
-          </div>
 
-          <div className={styles.demoRoles} role="list" aria-label="Demo roles">
-            {demoRoles.map((role) => {
-              const selected = role.id === selectedRole;
-
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  className={`${styles.demoRoleCard} ${selected ? styles.demoRoleCardActive : ""}`}
-                  onClick={() => setSelectedRole(role.id)}
-                >
-                  <span className={styles.demoRoleIcon} aria-hidden="true">
-                    <iconify-icon icon={role.icon} />
-                  </span>
-                  <span className={styles.demoRoleCopy}>
-                    <strong>{role.label}</strong>
-                    <small>{role.helper}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <Link href={activeDemo.href} className={styles.demoActionLink}>
-            Continue as demo {activeDemo.label}
-          </Link>
-        </div>
 
         <div className={styles.divider} aria-hidden="true">
           <span>or</span>
