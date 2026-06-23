@@ -350,10 +350,10 @@ export default function TechnicianTasksPage() {
                                 <iconify-icon icon={isSaved ? "lucide:bookmark-check" : "lucide:bookmark"} />
                                 {isSaved ? "Saved" : "Save"}
                               </button>
-                              <button type="button" className={`${styles.primarySmallButton} ${isSubmitted ? styles.successButton : ""}`} onClick={() => submitBid(task)}>
+                              <Link href={`/dashboard/technician/tasks/${task.id}/submit-bid`} className={`${styles.primarySmallButton} ${isSubmitted ? styles.successButton : ""}`}>
                                 <iconify-icon icon={isSubmitted ? "lucide:check-circle-2" : "lucide:send-horizontal"} />
                                 {isSubmitted ? "Bid Submitted" : "Submit Bid"}
-                              </button>
+                              </Link>
                             </div>
                           </div>
                         </article>

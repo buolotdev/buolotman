@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from apps.accounts.models import User
+from apps.accounts.models import TechnicianService
 from apps.accounts.serializers import UserPublicSerializer
 from apps.companies.models import CompanyProfile
 from apps.companies.serializers import CompanyProfileSerializer
@@ -35,6 +36,7 @@ def search(request):
     budget_min = _parse_decimal(request.query_params.get('budgetMin') or request.query_params.get('budget_min'))
     budget_max = _parse_decimal(request.query_params.get('budgetMax') or request.query_params.get('budget_max'))
     include_tasks = tab in ('all', 'tasks')
+    include_services = tab in ('all', 'services')
     include_technicians = professional_type in ('all', 'technician', 'professionals')
     include_companies = professional_type in ('all', 'company', 'companies', 'professionals')
 
@@ -72,6 +74,24 @@ def search(request):
     if min_rating is not None:
         companies = companies.filter(average_rating__gte=min_rating)
 
+    services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True)
+    if query:
+        services = services.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(coverage_area__icontains=query)
+            | Q(category__name__icontains=query)
+            | Q(technician__first_name__icontains=query)
+            | Q(technician__last_name__icontains=query)
+            | Q(technician__username__icontains=query)
+        )
+    if category:
+        services = services.filter(Q(category__slug__iexact=category) | Q(category__name__icontains=category))
+    if location:
+        services = services.filter(Q(coverage_area__icontains=location) | Q(technician__country__icontains=location))
+    if min_rating is not None:
+        services = services.filter(technician__technician_profile__average_rating__gte=min_rating)
+
     results = []
     if include_tasks:
         for task in tasks[:25]:
@@ -85,7 +105,30 @@ def search(request):
             payload['price'] = task.budget_min if task.budget_min is not None else task.budget_max
             results.append(payload)
 
-    if include_technicians:
+    if include_services:
+        for service in services[:25]:
+            profile = getattr(service.technician, 'technician_profile', None)
+            results.append({
+                'id': service.id,
+                'type': 'service',
+                'name': service.title,
+                'role': f"{service.technician.first_name} {service.technician.last_name}".strip() or service.technician.username,
+                'description': service.description,
+                'image': service.technician.avatar_url,
+                'category': service.category.name if service.category else '',
+                'rating': float(profile.average_rating) if profile else None,
+                'reviews': profile.completed_jobs if profile else 0,
+                'location': service.coverage_area or service.technician.country or '',
+                'price': float(service.pricing_min) if service.pricing_min is not None else None,
+                'priceLabel': service.pricing_model,
+                'verified': bool(service.technician.is_verified or (profile and profile.is_verified)),
+                'skills': [skill.name for skill in profile.skills.all()] if profile else [],
+                'serviceType': service.service_type,
+                'pricingModel': service.pricing_model,
+                'profileId': service.technician.id,
+            })
+
+    if include_technicians and tab in ('all', 'technician', 'technicians', 'professionals'):
         for user in users[:25]:
             base = UserPublicSerializer(user).data
             if user.role == 'TECHNICIAN':

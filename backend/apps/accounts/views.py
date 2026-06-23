@@ -22,8 +22,9 @@ from .serializers import (
     UserMeSerializer,
     PortfolioItemSerializer,
     SavedProfessionalSerializer,
+    TechnicianServiceSerializer,
 )
-from .models import PortfolioItem, SavedProfessional, PhoneOTPChallenge
+from .models import PortfolioItem, SavedProfessional, PhoneOTPChallenge, TechnicianService
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -329,6 +330,66 @@ def saved_professional_detail(request, professional_id):
     if deleted:
         return Response(status=status.HTTP_204_NO_CONTENT)
     return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def technician_services(request):
+    if request.user.role != "TECHNICIAN":
+        return Response({"error": "Technician only"}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'GET':
+        items = TechnicianService.objects.filter(technician=request.user).select_related('category')
+        serializer = TechnicianServiceSerializer(items, many=True)
+        return Response(serializer.data)
+
+    serializer = TechnicianServiceSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    service = serializer.save(technician=request.user)
+    create_audit_log(
+        actor=request.user,
+        action="technician_service_created",
+        entity_type="technician_service",
+        entity_id=service.id,
+        summary=service.title,
+        metadata={"service_type": service.service_type, "pricing_model": service.pricing_model},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+    return Response(TechnicianServiceSerializer(service).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def technician_service_detail(request, service_id):
+    if request.user.role != "TECHNICIAN":
+        return Response({"error": "Technician only"}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        service = TechnicianService.objects.select_related('category').get(id=service_id, technician=request.user)
+    except TechnicianService.DoesNotExist:
+        return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(TechnicianServiceSerializer(service).data)
+
+    if request.method == 'DELETE':
+        service.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = TechnicianServiceSerializer(service, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    service = serializer.save()
+    create_audit_log(
+        actor=request.user,
+        action="technician_service_updated",
+        entity_type="technician_service",
+        entity_id=service.id,
+        summary=service.title,
+        metadata={"service_type": service.service_type, "pricing_model": service.pricing_model},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+    return Response(TechnicianServiceSerializer(service).data)
 
 
 def _require_admin(request):

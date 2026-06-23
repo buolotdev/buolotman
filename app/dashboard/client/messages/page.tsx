@@ -55,11 +55,14 @@ export default function ClientMessagesPage() {
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
   const [draft, setDraft] = useState("");
+  const [attachmentDraft, setAttachmentDraft] = useState<any>(null);
+  const [attachmentUploading, setAttachmentUploading] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string>(searchParams.get("c") || "");
   const [activeMessages, setActiveMessages] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
   const { data: apiConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
   const { data: userData } = useFetch(() => api.getMe(), []);
@@ -152,7 +155,7 @@ export default function ClientMessagesPage() {
 
   const handleSendMessage = async () => {
     const message = draft.trim();
-    if (!message || !activeConversation || sending) return;
+    if ((!message && !attachmentDraft) || !activeConversation || sending) return;
 
     const tempId = `tmp-${Date.now()}`;
     const optimistic = {
@@ -160,11 +163,16 @@ export default function ClientMessagesPage() {
       sender: userData?.id,
       sender_name: userName,
       text: message,
+      attachment_url: attachmentDraft?.url || "",
+      attachment_name: attachmentDraft?.name || "",
+      attachment_type: attachmentDraft?.type || "file",
       created_at: new Date().toISOString(),
       read_at: null,
     };
     setActiveMessages((prev) => [...prev, optimistic]);
     setDraft("");
+    const attachment = attachmentDraft;
+    setAttachmentDraft(null);
     setSending(true);
     isNearBottomRef.current = true;
     requestAnimationFrame(() => {
@@ -173,7 +181,15 @@ export default function ClientMessagesPage() {
     });
 
     try {
-      const real = await api.sendMessage(Number(activeConversation.id), message);
+      const real = await api.sendMessage(Number(activeConversation.id), {
+        text: message,
+        attachment_url: attachment?.url || "",
+        attachment_key: attachment?.key || "",
+        attachment_name: attachment?.name || "",
+        attachment_type: attachment?.type || "file",
+        attachment_size: attachment?.size || 0,
+        attachment_content_type: attachment?.content_type || "",
+      });
       setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
       refetchConvos();
     } catch (err: any) {
@@ -181,6 +197,19 @@ export default function ClientMessagesPage() {
       toast.error("Send failed", err?.message || "Please try again.");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleAttachmentPick = async (file?: File | null) => {
+    if (!file || !activeConversation || attachmentUploading) return;
+    setAttachmentUploading(true);
+    try {
+      const uploaded = await api.uploadMessageAttachment(Number(activeConversation.id), file);
+      setAttachmentDraft(uploaded);
+    } catch (err: any) {
+      toast.error("Upload failed", err?.message || "Please try again.");
+    } finally {
+      setAttachmentUploading(false);
     }
   };
 
@@ -354,6 +383,12 @@ export default function ClientMessagesPage() {
                         return (
                           <article key={message.id} className={`${styles.messageGroup} ${isMine ? styles.messageGroupSent : styles.messageGroupReceived}`}>
                             <div className={styles.messageBubble}>{message.text}</div>
+                            {message.attachment_url ? (
+                              <a href={message.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
+                                <iconify-icon icon="lucide:paperclip" />
+                                <span>{message.attachment_name || "Attachment"}</span>
+                              </a>
+                            ) : null}
                             <div className={styles.messageMeta}>
                               <span>{formatMessageTime(message.created_at)}</span>
                               {isMine ? <iconify-icon icon="lucide:check-check" /> : null}
@@ -379,11 +414,34 @@ export default function ClientMessagesPage() {
                         placeholder="Type a message..."
                         aria-label="Type a message"
                       />
-                      <button type="button" className={styles.composerIconButton} aria-label="Attach a file">
+                      <input
+                        ref={attachmentInputRef}
+                        type="file"
+                        hidden
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+                          handleAttachmentPick(file);
+                        }}
+                      />
+                      {attachmentDraft ? (
+                        <button type="button" className={styles.attachmentChip} onClick={() => setAttachmentDraft(null)}>
+                          <iconify-icon icon="lucide:paperclip" />
+                          <span>{attachmentDraft.name}</span>
+                          <iconify-icon icon="lucide:x" />
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className={styles.composerIconButton}
+                        aria-label="Attach a file"
+                        onClick={() => attachmentInputRef.current?.click()}
+                        disabled={attachmentUploading}
+                      >
                         <iconify-icon icon="lucide:paperclip" />
                       </button>
                     </label>
-                    <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={!draft.trim() || sending}>
+                    <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending}>
                       <iconify-icon icon="lucide:send-horizontal" />
                     </button>
                   </form>

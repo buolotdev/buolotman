@@ -142,3 +142,34 @@ class PlatformSetting(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class CmsPage(models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    excerpt = models.CharField(max_length=300, blank=True)
+    content = models.TextField(blank=True)
+    is_published = models.BooleanField(default=False)
+    show_in_footer = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_cms_pages",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "governance_cms_page"
+        ordering = ["sort_order", "title"]
+        indexes = [
+            models.Index(fields=["is_published"]),
+            models.Index(fields=["show_in_footer"]),
+            models.Index(fields=["slug"]),
+        ]
+
+    def __str__(self):
+        return self.title

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, TechnicianProfile, PortfolioItem, SavedProfessional
+from .models import User, TechnicianProfile, TechnicianService, PortfolioItem, SavedProfessional
 
 
 class CustomUserAdmin(UserAdmin):
@@ -24,6 +24,13 @@ class PortfolioItemAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'category', 'completed_date', 'project_value')
     search_fields = ('title', 'user__email')
     list_filter = ('category',)
+
+
+@admin.register(TechnicianService)
+class TechnicianServiceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'technician', 'category', 'service_type', 'pricing_model', 'is_active', 'created_at')
+    list_filter = ('service_type', 'pricing_model', 'is_active', 'category')
+    search_fields = ('title', 'description', 'technician__email')
 
 
 @admin.register(SavedProfessional)

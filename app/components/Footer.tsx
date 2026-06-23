@@ -2,6 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { api } from "../lib/api";
+import { useFetch } from "../lib/useFetch";
 import "./footer.css";
 
 
@@ -79,12 +81,14 @@ export default function Footer() {
   });
   const [langOpen, setLangOpen] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
+  const { data: pagesData } = useFetch(() => api.getPublicPages(), []);
 
   useEffect(() => {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
   const t = translations[lang] || translations["en"];
+  const pages = Array.isArray(pagesData) ? pagesData : [];
 
   const changeLang = (l: string) => {
     setLangState(l);
@@ -178,6 +182,12 @@ export default function Footer() {
             <Link href="/">Press &amp; Media</Link>
             <Link href="/">Developers</Link>
             <Link href="/search">API</Link>
+            {pages.length > 0 ? <h4 style={{ marginTop: 18 }}>Pages</h4> : null}
+            {pages.slice(0, 6).map((page: any) => (
+              <Link key={page.id} href={`/pages/${page.slug}`}>
+                {page.title}
+              </Link>
+            ))}
           </div>
 
           {/* COMPANY */}

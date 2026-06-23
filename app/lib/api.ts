@@ -170,6 +170,12 @@ export const api = {
 
   // Categories & Skills
   getCategories: () => request<any[]>("/tasks/categories/"),
+  createCategory: (data: Record<string, any>) =>
+    request<any>("/tasks/categories/", { method: "POST", body: JSON.stringify(data) }),
+  updateCategory: (id: number, data: Record<string, any>) =>
+    request<any>(`/tasks/categories/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteCategory: (id: number) =>
+    request<void>(`/tasks/categories/${id}/`, { method: "DELETE" }),
   getSkills: (category?: string) => {
     const qs = category ? `?category=${category}` : "";
     return request<any[]>(`/tasks/skills/${qs}`);
@@ -195,11 +201,28 @@ export const api = {
   // Conversations
   getConversations: () => request<any[]>("/conversations/"),
   getConversation: (id: number) => request<any>(`/conversations/${id}/`),
-  sendMessage: (conversationId: number, text: string) =>
+  sendMessage: (conversationId: number, data: string | Record<string, any>) =>
     request<any>(`/conversations/${conversationId}/messages/`, {
       method: "POST",
-      body: JSON.stringify({ text }),
+      body: JSON.stringify(typeof data === "string" ? { text: data } : data),
     }),
+  uploadMessageAttachment: (conversationId: number, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return fetch(`${API_BASE}/conversations/${conversationId}/attachments/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+      },
+      body: form,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+        throw new Error(err.detail || err.error || JSON.stringify(err));
+      }
+      return res.json();
+    });
+  },
   createConversation: (participantId: number, taskId?: number) =>
     request<any>("/conversations/create/", {
       method: "POST",
@@ -237,6 +260,16 @@ export const api = {
     request<any>("/company/certifications/", { method: "POST", body: JSON.stringify(data) }),
   addCompanyReview: (companyId: number, data: { rating: number; text?: string; service?: string }) =>
     request<any>(`/company/${companyId}/reviews/`, { method: "POST", body: JSON.stringify(data) }),
+
+  // Technician services
+  getTechnicianServices: () => request<any[]>("/auth/technician-services/"),
+  getTechnicianService: (serviceId: number) => request<any>(`/auth/technician-services/${serviceId}/`),
+  createTechnicianService: (data: Record<string, any>) =>
+    request<any>("/auth/technician-services/", { method: "POST", body: JSON.stringify(data) }),
+  updateTechnicianService: (serviceId: number, data: Record<string, any>) =>
+    request<any>(`/auth/technician-services/${serviceId}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteTechnicianService: (serviceId: number) =>
+    request<void>(`/auth/technician-services/${serviceId}/`, { method: "DELETE" }),
 
   // Admin
   adminListUsers: (params?: Record<string, string>) => {
@@ -282,6 +315,17 @@ export const api = {
     request<any>("/governance/platform-settings/", { method: "POST", body: JSON.stringify(data) }),
   updatePlatformSetting: (data: Record<string, any>) =>
     request<any>("/governance/platform-settings/", { method: "PATCH", body: JSON.stringify(data) }),
+
+  // CMS Pages
+  getCmsPages: () => request<any[]>("/governance/pages/"),
+  createCmsPage: (data: Record<string, any>) =>
+    request<any>("/governance/pages/", { method: "POST", body: JSON.stringify(data) }),
+  updateCmsPage: (pageId: number, data: Record<string, any>) =>
+    request<any>(`/governance/pages/${pageId}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteCmsPage: (pageId: number) =>
+    request<void>(`/governance/pages/${pageId}/`, { method: "DELETE" }),
+  getPublicPages: () => request<any[]>("/governance/public-pages/", { public: true } as any),
+  getPublicPage: (slug: string) => request<any>(`/governance/public-pages/${slug}/`, { public: true } as any),
 
   // Portfolio
   getPortfolio: () => request<any[]>("/auth/portfolio/"),

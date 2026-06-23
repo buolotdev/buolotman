@@ -3,15 +3,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import styles from "./login.module.css";
 
+const safeNext = (value: string | undefined): string | null => {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+};
+
 export default function LoginPage() {
   const router = useRouter();
+  const [nextPath, setNextPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(safeNext(params.get("next") ?? undefined));
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,7 +43,9 @@ export default function LoginPage() {
 
       // Route based on role returned from backend
       const role = data.role?.toLowerCase();
-      if (role === "admin") {
+      if (nextPath) {
+        router.push(nextPath);
+      } else if (role === "admin") {
         router.push("/dashboard/admin");
       } else if (role === "company") {
         router.push("/dashboard/company");

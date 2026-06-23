@@ -3,10 +3,10 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from .models import Notification, AuditLog, Dispute, DisputeEvidence, PlatformSetting
+from .models import Notification, AuditLog, Dispute, DisputeEvidence, PlatformSetting, CmsPage
 from .serializers import (
     NotificationSerializer,
     AuditLogSerializer,
@@ -17,6 +17,7 @@ from .serializers import (
     DisputeEvidenceSerializer,
     DisputeEvidenceCreateSerializer,
     PlatformSettingSerializer,
+    CmsPageSerializer,
 )
 from .services import create_notification, create_audit_log, notify_users
 
@@ -29,6 +30,10 @@ def _has_dispute_access(user, dispute):
     if _is_admin(user):
         return True
     return user in [dispute.opened_by, dispute.against, dispute.task.client, dispute.task.assigned_to]
+
+
+def _is_page_visible_to_public(page):
+    return page.is_published
 
 
 @api_view(["GET"])
@@ -283,3 +288,93 @@ def platform_settings(request):
         ip_address=request.META.get("REMOTE_ADDR"),
     )
     return Response(PlatformSettingSerializer(setting).data)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def cms_pages(request):
+    if not _is_admin(request.user):
+        return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "GET":
+        qs = CmsPage.objects.select_related("updated_by").all()
+        serializer = CmsPageSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    serializer = CmsPageSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    page = serializer.save(updated_by=request.user)
+    create_audit_log(
+        actor=request.user,
+        action="cms_page_created",
+        entity_type="cms_page",
+        entity_id=page.id,
+        summary=page.title,
+        metadata={"slug": page.slug, "is_published": page.is_published},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+    return Response(CmsPageSerializer(page).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PATCH", "DELETE"])
+@permission_classes([IsAuthenticated])
+def cms_page_detail(request, page_id):
+    if not _is_admin(request.user):
+        return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        page = CmsPage.objects.select_related("updated_by").get(id=page_id)
+    except CmsPage.DoesNotExist:
+        return Response({"error": "Page not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        return Response(CmsPageSerializer(page).data)
+
+    if request.method == "DELETE":
+        title = page.title
+        page.delete()
+        create_audit_log(
+            actor=request.user,
+            action="cms_page_deleted",
+            entity_type="cms_page",
+            entity_id=page_id,
+            summary=title,
+            metadata={},
+            ip_address=request.META.get("REMOTE_ADDR"),
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = CmsPageSerializer(page, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    page = serializer.save(updated_by=request.user)
+    create_audit_log(
+        actor=request.user,
+        action="cms_page_updated",
+        entity_type="cms_page",
+        entity_id=page.id,
+        summary=page.title,
+        metadata={"slug": page.slug, "is_published": page.is_published},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+    return Response(CmsPageSerializer(page).data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_cms_pages(request):
+    qs = CmsPage.objects.filter(is_published=True, show_in_footer=True).order_by("sort_order", "title")
+    serializer = CmsPageSerializer(qs, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_cms_page_detail(request, slug):
+    try:
+        page = CmsPage.objects.get(slug=slug, is_published=True)
+    except CmsPage.DoesNotExist:
+        return Response({"error": "Page not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response(CmsPageSerializer(page).data)

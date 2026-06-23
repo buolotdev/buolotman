@@ -24,13 +24,14 @@ const ratings = [
 
 const tabs = [
   { value: "all", label: "All results" },
+  { value: "services", label: "Services" },
   { value: "technician", label: "Technicians" },
   { value: "company", label: "Companies" },
 ];
 
 type SearchResult = {
   id: string | number;
-  type: "technician" | "company";
+  type: "technician" | "company" | "service";
   name: string;
   role?: string;
   description?: string;
@@ -43,6 +44,8 @@ type SearchResult = {
   priceLabel?: string;
   verified?: boolean;
   skills?: string[];
+  link?: string;
+  serviceType?: string;
 };
 
 export default function SearchPage() {
@@ -84,7 +87,7 @@ export default function SearchPage() {
         const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
         const mapped: SearchResult[] = raw.map((item) => ({
           id: item.id,
-          type: item.type || (item.role === "company" ? "company" : "technician"),
+          type: item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician"),
           name: item.name || item.full_name || item.company_name || "",
           role: item.role || item.specialty || item.title,
           description: item.description || item.bio,
@@ -97,6 +100,8 @@ export default function SearchPage() {
           priceLabel: item.price_label,
           verified: item.verified ?? item.is_verified,
           skills: item.skills ?? [],
+          link: item.type === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : `/profile/${item.id}`,
+          serviceType: item.serviceType,
         }));
         setResults(mapped);
       } catch (e) {
@@ -461,10 +466,10 @@ export default function SearchPage() {
                     </div>
 
                     <Link
-                      href={`/profile/${result.id}`}
+                      href={result.link || `/profile/${result.id}`}
                       className={`${styles.button} ${result.type === "company" ? styles.buttonSecondary : styles.buttonPrimary} ${styles.actionButton}`}
                     >
-                      {result.type === "company" ? "View company" : "View profile"}
+                      {result.type === "company" ? "View company" : result.type === "service" ? "View service" : "View profile"}
                     </Link>
                   </div>
                 </article>

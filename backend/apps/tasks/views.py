@@ -17,14 +17,90 @@ from .serializers import (
 )
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-@cached("categories", ttl=600)
-def category_list(request):
-    categories = Category.objects.filter(is_active=True, parent=None)
-    serializer = CategorySerializer(categories, many=True)
-    return Response(serializer.data)
+from django.utils.text import slugify
 
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def category_list(request):
+    if request.method == 'GET':
+        categories = Category.objects.filter(is_active=True, parent=None)
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        if not request.user.is_authenticated or request.user.role != 'ADMIN':
+            return Response({"error": "Only admins can create categories"}, status=status.HTTP_403_FORBIDDEN)
+        
+        name = request.data.get('name')
+        if not name:
+            return Response({"error": "Name is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        base_slug = slugify(name)
+        slug = base_slug
+        counter = 1
+        while Category.objects.filter(slug=slug).exists():
+            counter += 1
+            slug = f"{base_slug}-{counter}"
+            
+        parent_id = request.data.get('parent_id')
+        parent = None
+        if parent_id:
+            try:
+                parent = Category.objects.get(id=parent_id)
+            except Category.DoesNotExist:
+                return Response({"error": "Parent category not found"}, status=status.HTTP_400_BAD_REQUEST)
+                
+        category = Category.objects.create(
+            name=name,
+            slug=slug,
+            description=request.data.get('description', ''),
+            icon=request.data.get('icon', ''),
+            parent=parent
+        )
+        return Response(CategorySerializer(category).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def category_detail(request, category_id):
+    if request.user.role != 'ADMIN':
+        return Response({"error": "Only admins can delete categories"}, status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    if request.method == 'DELETE':
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    data = request.data
+    if 'name' in data:
+        category.name = data['name'].strip() or category.name
+        if 'slug' not in data or not str(data.get('slug', '')).strip():
+            category.slug = slugify(category.name)
+    if 'slug' in data and str(data['slug']).strip():
+        category.slug = slugify(str(data['slug']).strip())
+    if 'description' in data:
+        category.description = data['description']
+    if 'icon' in data:
+        category.icon = data['icon']
+    if 'is_active' in data:
+        category.is_active = bool(data['is_active'])
+    if 'order' in data:
+        category.order = int(data['order'] or 0)
+    if 'parent_id' in data:
+        parent_id = data.get('parent_id')
+        if parent_id:
+            try:
+                category.parent = Category.objects.get(id=parent_id)
+            except Category.DoesNotExist:
+                return Response({"error": "Parent category not found"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            category.parent = None
+    category.save()
+    return Response(CategorySerializer(category).data)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

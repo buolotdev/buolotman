@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { api } from "./lib/api";
@@ -43,6 +45,12 @@ type PublicCompany = {
 };
 
 export default function Home() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
     []
@@ -64,6 +72,14 @@ export default function Home() {
     () => api.listCompanies({ limit: "3" }),
     []
   );
+  const { data: liveTasksData } = useFetch(
+    () => api.getTasks({ sort: "newest", limit: "8" }),
+    []
+  );
+
+  useEffect(() => {
+    setIsLoggedIn(Boolean(localStorage.getItem("access_token")));
+  }, []);
 
   const categories = (categoriesData && categoriesData.length > 0
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,9 +96,25 @@ export default function Home() {
 
   const pros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
   const companies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
+  const liveTasks = Array.isArray((liveTasksData as any)?.results)
+    ? (liveTasksData as any).results
+    : Array.isArray(liveTasksData)
+      ? liveTasksData
+      : [];
 
   const firstName = meData?.first_name || meData?.firstName || "";
   const greeting = firstName ? `Welcome back, ${firstName}` : "";
+
+  const submitGlobalSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    if (searchCategory) params.set("category", searchCategory);
+    if (searchLocation.trim()) params.set("location", searchLocation.trim());
+    router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
+  const postTaskHref = isLoggedIn ? "/post-task" : "/login?next=%2Fpost-task";
 
   return (
     <div id="homepage-screen">
@@ -106,6 +138,71 @@ export default function Home() {
                 reliable help in minutes. From quick repairs to ongoing
                 business projects, Boulot Man helps you move faster.
               </p>
+
+              <form className="hero-search-card" role="search" onSubmit={submitGlobalSearch}>
+                <label className="hero-input">
+                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
+                    <iconify-icon icon="lucide:search"></iconify-icon>
+                  </div>
+                  <span className="hero-input-stack">
+                    <span className="hero-input-label">Task or service</span>
+                    <input
+                      className="hero-input-control"
+                      type="search"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="Plumbing, website, AC repair..."
+                      aria-label="Search tasks or services"
+                    />
+                  </span>
+                </label>
+
+                <label className="hero-input">
+                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
+                    <iconify-icon icon="lucide:layers-3"></iconify-icon>
+                  </div>
+                  <span className="hero-input-stack">
+                    <span className="hero-input-label">Category</span>
+                    <select
+                      className="hero-input-control"
+                      value={searchCategory}
+                      onChange={(event) => setSearchCategory(event.target.value)}
+                      aria-label="Search by category"
+                    >
+                      <option value="">All categories</option>
+                      {categories.map((category) => (
+                        <option key={category.slug} value={category.slug}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                </label>
+
+                <label className="hero-input">
+                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
+                    <iconify-icon icon="lucide:map-pin"></iconify-icon>
+                  </div>
+                  <span className="hero-input-stack">
+                    <span className="hero-input-label">Location</span>
+                    <input
+                      className="hero-input-control"
+                      type="search"
+                      value={searchLocation}
+                      onChange={(event) => setSearchLocation(event.target.value)}
+                      placeholder="City or country"
+                      aria-label="Search by location"
+                    />
+                  </span>
+                </label>
+
+                <button type="submit" className="btn btn-primary hero-action hero-action-search" data-media-type="banani-button">
+                  <span>Search services</span>
+                  <div className="icon-wrap hero-action-icon" style={{ fontSize: "16px", width: "16px", height: "16px" }}>
+                    <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+                  </div>
+                </button>
+              </form>
             </div>
 
             <div className="hero-side">
@@ -139,7 +236,7 @@ export default function Home() {
                       <p className="dash-name">Post a task</p>
                       <p className="dash-meta">Get matched with pros</p>
                     </div>
-                    <Link href="/post-task" className="dash-price">Start</Link>
+                    <Link href={postTaskHref} className="dash-price">Start</Link>
                   </div>
 
                   <div className="dash-item" data-media-type="banani-button">
@@ -174,6 +271,37 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="activity-ticker" className="section">
+        <div className="container">
+          <div className="activity-ticker-shell">
+            <div className="activity-ticker-head">
+              <div>
+                <div className="eyebrow">Live task activity</div>
+                <h2 className="section-title">Fresh tasks posted right now</h2>
+              </div>
+              <Link href="/search" className="btn btn-secondary" data-media-type="banani-button">
+                Search all
+                <div className="icon-wrap" style={{ fontSize: "16px", width: "16px", height: "16px" }}>
+                  <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+                </div>
+              </Link>
+            </div>
+
+            <div className="activity-ticker-track" aria-label="Recent task activity">
+              {(liveTasks.length > 0 ? liveTasks : [
+                { title: "Loading recent tasks", city: "", category_name: "" },
+              ]).map((task: any, index: number) => (
+                <div key={`${task.id ?? index}`} className="activity-ticker-item">
+                  <span className="activity-ticker-pill">{task.category_name || "Task"}</span>
+                  <strong>{task.title}</strong>
+                  <span>{task.city || task.location || "Location pending"}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

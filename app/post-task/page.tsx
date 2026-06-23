@@ -23,12 +23,18 @@ const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }
   { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client" },
 ];
 
+import { toArray } from "@/app/lib/dataShape";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EMPTY_SKILLS: any[] = [];
 
 export default function PostTaskPage() {
   const router = useRouter();
-  const { data: meData } = useFetch(() => api.getMe(), []);
+  const [authState, setAuthState] = useState<"checking" | "authed" | "guest">("checking");
+  const { data: meData } = useFetch(
+    () => (authState === "authed" ? api.getMe() : Promise.resolve(null)),
+    [authState]
+  );
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
     []
@@ -60,10 +66,21 @@ export default function PostTaskPage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [files, setFiles] = useState<Array<{ name: string; size: string; kind: string }>>([]);
 
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) {
+      setAuthState("guest");
+      router.replace("/login?next=%2Fpost-task");
+      return;
+    }
+
+    setAuthState("authed");
+  }, [router]);
+
   const categories = useMemo(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (categoriesData ?? []).map((c: any) => ({
+      toArray(categoriesData ?? []).map((c: any) => ({
         name: c.name || c.title || c.slug,
         slug: c.slug || (c.name || "").toString().toLowerCase(),
         id: c.id,
@@ -82,7 +99,7 @@ export default function PostTaskPage() {
   const subcategories = useMemo(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (skillsData ?? []).map((s: any) => ({
+      toArray(skillsData ?? []).map((s: any) => ({
         name: s.name || s.title || "",
         id: s.id,
       })),
@@ -220,6 +237,14 @@ export default function PostTaskPage() {
   const userName =
     [meData?.first_name, meData?.last_name].filter(Boolean).join(" ") || meData?.username || "";
   const userRole = meData?.role ? meData.role.charAt(0).toUpperCase() + meData.role.slice(1) : "";
+
+  if (authState !== "authed") {
+    return (
+      <main className={styles.page} style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
+        <div style={{ color: "#001f3f", fontWeight: 700 }}>Redirecting to login...</div>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.page}>

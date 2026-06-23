@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
-from .models import TechnicianProfile, PortfolioItem, SavedProfessional
+from .models import TechnicianProfile, TechnicianService, PortfolioItem, SavedProfessional
 
 User = get_user_model()
 
@@ -25,9 +25,19 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
+    services = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'avatar_url', 'is_verified', 'country']
+        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'avatar_url', 'is_verified', 'country', 'services']
+
+    def get_services(self, obj):
+        if getattr(obj, "role", None) != "TECHNICIAN":
+            return []
+        services = getattr(obj, "technician_services", None)
+        if services is None:
+            return []
+        return TechnicianServicePublicSerializer(services.filter(is_active=True), many=True).data
 
 
 class ClientRegistrationSerializer(serializers.ModelSerializer):
@@ -123,3 +133,49 @@ class SavedProfessionalSerializer(serializers.ModelSerializer):
         model = SavedProfessional
         fields = ['id', 'professional', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class TechnicianServicePublicSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source="category.name", read_only=True, default="")
+
+    class Meta:
+        model = TechnicianService
+        fields = [
+            "id",
+            "title",
+            "category",
+            "category_name",
+            "description",
+            "service_type",
+            "coverage_area",
+            "pricing_model",
+            "pricing_min",
+            "pricing_max",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+
+class TechnicianServiceSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source="category.name", read_only=True, default="")
+
+    class Meta:
+        model = TechnicianService
+        fields = [
+            "id",
+            "title",
+            "category",
+            "category_name",
+            "description",
+            "service_type",
+            "coverage_area",
+            "pricing_model",
+            "pricing_min",
+            "pricing_max",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "category_name", "created_at", "updated_at"]

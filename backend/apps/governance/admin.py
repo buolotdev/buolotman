@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Notification, AuditLog, Dispute, DisputeEvidence
+from .models import Notification, AuditLog, Dispute, DisputeEvidence, PlatformSetting, CmsPage
 
 
 @admin.register(Notification)
@@ -29,3 +29,18 @@ class DisputeEvidenceAdmin(admin.ModelAdmin):
     list_display = ("id", "dispute", "uploaded_by", "file_name", "file_type", "created_at")
     list_filter = ("file_type", "created_at")
     search_fields = ("file_name", "note")
+
+
+@admin.register(PlatformSetting)
+class PlatformSettingAdmin(admin.ModelAdmin):
+    list_display = ("key", "is_sensitive", "updated_by", "updated_at")
+    list_filter = ("is_sensitive", "updated_at")
+    search_fields = ("key", "description")
+
+
+@admin.register(CmsPage)
+class CmsPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "slug", "is_published", "show_in_footer", "sort_order", "updated_by", "updated_at")
+    list_filter = ("is_published", "show_in_footer")
+    search_fields = ("title", "slug", "excerpt", "content")
+    prepopulated_fields = {"slug": ("title",)}

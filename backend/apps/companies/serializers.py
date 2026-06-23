@@ -41,7 +41,7 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyReview
         fields = ['id', 'reviewer', 'reviewer_name', 'rating', 'text', 'service', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'reviewer', 'created_at']
 
     def get_reviewer_name(self, obj):
         return f'{obj.reviewer.first_name} {obj.reviewer.last_name}'.strip() or obj.reviewer.email

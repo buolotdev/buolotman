@@ -1,0 +1,293 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+import LogoutButton from "@/app/components/LogoutButton";
+import styles from "./page.module.css";
+
+type ServiceForm = {
+  title: string;
+  category: string;
+  description: string;
+  service_type: "onsite" | "remote";
+  coverage_area: string;
+  pricing_model: "fixed" | "hourly" | "range";
+  pricing_min: string;
+  pricing_max: string;
+  is_active: boolean;
+};
+
+const initialForm: ServiceForm = {
+  title: "",
+  category: "",
+  description: "",
+  service_type: "onsite",
+  coverage_area: "",
+  pricing_model: "fixed",
+  pricing_min: "",
+  pricing_max: "",
+  is_active: true,
+};
+
+const navItems = [
+  { label: "Dashboard", href: "/dashboard/technician", icon: "lucide:layout-dashboard" },
+  { label: "Browse Tasks", href: "/dashboard/technician/tasks", icon: "lucide:search" },
+  { label: "My Services", href: "/dashboard/technician/services", icon: "lucide:layers-3" },
+  { label: "My Bids", href: "/dashboard/technician/bids", icon: "lucide:send" },
+  { label: "Messages", href: "/dashboard/technician/messages", icon: "lucide:message-square" },
+  { label: "Wallet", href: "/dashboard/technician/wallet", icon: "lucide:wallet" },
+  { label: "Profile", href: "/dashboard/technician/profile", icon: "lucide:user" },
+];
+
+export default function TechnicianServicesPage() {
+  const toast = useToast();
+  const { data: user } = useFetch(() => api.getMe(), []);
+  const { data: servicesData, loading, refetch } = useFetch(() => api.getTechnicianServices(), []);
+  const { data: categoriesData } = useFetch(() => api.getCategories(), []);
+  const [form, setForm] = useState<ServiceForm>(initialForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const services = useMemo(() => (Array.isArray(servicesData) ? servicesData : []), [servicesData]);
+  const categories = useMemo(
+    () => (Array.isArray(categoriesData) ? categoriesData : []).filter((c: any) => !c.parent),
+    [categoriesData]
+  );
+
+  const resetForm = () => {
+    setEditingId(null);
+    setForm(initialForm);
+  };
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        category: form.category ? Number(form.category) : null,
+        pricing_min: form.pricing_min ? Number(form.pricing_min) : null,
+        pricing_max: form.pricing_max ? Number(form.pricing_max) : null,
+      };
+      if (editingId) {
+        await api.updateTechnicianService(editingId, payload);
+        toast.success("Service updated", "Your listing has been saved.");
+      } else {
+        await api.createTechnicianService(payload);
+        toast.success("Service created", "Your service is now listed.");
+      }
+      resetForm();
+      refetch();
+    } catch (err: any) {
+      toast.error("Save failed", err?.message || "Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const editService = (service: any) => {
+    setEditingId(service.id);
+    setForm({
+      title: service.title || "",
+      category: service.category ? String(service.category) : "",
+      description: service.description || "",
+      service_type: service.service_type || "onsite",
+      coverage_area: service.coverage_area || "",
+      pricing_model: service.pricing_model || "fixed",
+      pricing_min: service.pricing_min != null ? String(service.pricing_min) : "",
+      pricing_max: service.pricing_max != null ? String(service.pricing_max) : "",
+      is_active: Boolean(service.is_active),
+    });
+  };
+
+  const removeService = async (serviceId: number) => {
+    if (deletingId) return;
+    setDeletingId(serviceId);
+    try {
+      await api.deleteTechnicianService(serviceId);
+      toast.success("Service deleted", "The listing was removed.");
+      if (editingId === serviceId) resetForm();
+      refetch();
+    } catch (err: any) {
+      toast.error("Delete failed", err?.message || "Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div className={styles.page}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <div className={styles.brandMark}>BM</div>
+          <div>
+            <div className={styles.brandLabel}>Boulot Man</div>
+            <div className={styles.brandSub}>Technician Space</div>
+          </div>
+        </div>
+        <nav className={styles.nav}>
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className={`${styles.navItem} ${item.href === "/dashboard/technician/services" ? styles.navItemActive : ""}`}>
+              <iconify-icon icon={item.icon} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+        <div className={styles.sidebarFooter}>
+          <LogoutButton className={styles.logoutButton} />
+        </div>
+      </aside>
+
+      <main className={styles.main}>
+        <header className={styles.topbar}>
+          <div>
+            <p className={styles.kicker}>Manage your listings</p>
+            <h1>My Services</h1>
+            <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
+          </div>
+          <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+        </header>
+
+        <section className={styles.summaryGrid}>
+          <article className={styles.statCard}>
+            <span>Active services</span>
+            <strong>{services.filter((s: any) => s.is_active).length}</strong>
+          </article>
+          <article className={styles.statCard}>
+            <span>Total listings</span>
+            <strong>{services.length}</strong>
+          </article>
+          <article className={styles.statCard}>
+            <span>Verified account</span>
+            <strong>{user?.is_verified ? "Yes" : "No"}</strong>
+          </article>
+        </section>
+
+        <section className={styles.contentGrid}>
+          <div className={styles.listPanel}>
+            <div className={styles.panelHeader}>
+              <h2>Listed services</h2>
+              <button type="button" className={styles.ghostButton} onClick={resetForm}>New service</button>
+            </div>
+
+            {loading ? (
+              <div className={styles.emptyState}>Loading services...</div>
+            ) : services.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No services yet.</p>
+                <span>Add your first service to appear in search results.</span>
+              </div>
+            ) : (
+              <div className={styles.serviceList}>
+                {services.map((service: any) => (
+                  <article key={service.id} className={`${styles.serviceCard} ${editingId === service.id ? styles.serviceCardActive : ""}`}>
+                    <div className={styles.serviceTop}>
+                      <div>
+                        <h3>{service.title}</h3>
+                        <p>{service.category_name || "Uncategorized"} • {service.service_type} • {service.pricing_model}</p>
+                      </div>
+                      <span className={`${styles.statusPill} ${service.is_active ? styles.statusLive : styles.statusMuted}`}>
+                        {service.is_active ? "Live" : "Hidden"}
+                      </span>
+                    </div>
+                    <p className={styles.serviceDescription}>{service.description || "No description provided."}</p>
+                    <div className={styles.serviceMeta}>
+                      <span>{service.coverage_area || "Coverage not set"}</span>
+                      <span>
+                        {service.pricing_min != null ? Number(service.pricing_min).toLocaleString() : "0"}
+                        {service.pricing_max != null ? ` - ${Number(service.pricing_max).toLocaleString()}` : ""}
+                        {" XOF"}
+                      </span>
+                    </div>
+                    <div className={styles.serviceActions}>
+                      <button type="button" className={styles.secondaryButton} onClick={() => editService(service)}>Edit</button>
+                      <button type="button" className={styles.dangerButton} onClick={() => removeService(service.id)} disabled={deletingId === service.id}>
+                        {deletingId === service.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <form className={styles.formPanel} onSubmit={submit}>
+            <div className={styles.panelHeader}>
+              <h2>{editingId ? "Edit service" : "Create service"}</h2>
+              {editingId ? <button type="button" className={styles.ghostButton} onClick={resetForm}>Cancel</button> : null}
+            </div>
+
+            <label className={styles.field}>
+              <span>Service title</span>
+              <input value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} required />
+            </label>
+
+            <label className={styles.field}>
+              <span>Category</span>
+              <select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}>
+                <option value="">Select category</option>
+                {categories.map((category: any) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className={styles.field}>
+              <span>Description</span>
+              <textarea rows={5} value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} />
+            </label>
+
+            <div className={styles.doubleGrid}>
+              <label className={styles.field}>
+                <span>Service type</span>
+                <select value={form.service_type} onChange={(e) => setForm((prev) => ({ ...prev, service_type: e.target.value as ServiceForm["service_type"] }))}>
+                  <option value="onsite">On-site</option>
+                  <option value="remote">Remote</option>
+                </select>
+              </label>
+
+              <label className={styles.field}>
+                <span>Pricing model</span>
+                <select value={form.pricing_model} onChange={(e) => setForm((prev) => ({ ...prev, pricing_model: e.target.value as ServiceForm["pricing_model"] }))}>
+                  <option value="fixed">Fixed</option>
+                  <option value="hourly">Hourly</option>
+                  <option value="range">Range</option>
+                </select>
+              </label>
+            </div>
+
+            <label className={styles.field}>
+              <span>Coverage area</span>
+              <input value={form.coverage_area} onChange={(e) => setForm((prev) => ({ ...prev, coverage_area: e.target.value }))} placeholder="City, district, or region" />
+            </label>
+
+            <div className={styles.doubleGrid}>
+              <label className={styles.field}>
+                <span>Min price</span>
+                <input type="number" value={form.pricing_min} onChange={(e) => setForm((prev) => ({ ...prev, pricing_min: e.target.value }))} placeholder="0" />
+              </label>
+              <label className={styles.field}>
+                <span>Max price</span>
+                <input type="number" value={form.pricing_max} onChange={(e) => setForm((prev) => ({ ...prev, pricing_max: e.target.value }))} placeholder="0" />
+              </label>
+            </div>
+
+            <label className={styles.toggleRow}>
+              <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.checked }))} />
+              <span>Publish this service</span>
+            </label>
+
+            <button type="submit" className={styles.primaryButton} disabled={saving}>
+              {saving ? "Saving..." : editingId ? "Update service" : "Create service"}
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+  );
+}

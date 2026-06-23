@@ -67,6 +67,43 @@ class TechnicianProfile(models.Model):
         return f'{self.user.email} - Technician Profile'
 
 
+class TechnicianService(models.Model):
+    SERVICE_TYPE_CHOICES = (
+        ("onsite", "On-site"),
+        ("remote", "Remote"),
+    )
+    PRICING_MODEL_CHOICES = (
+        ("fixed", "Fixed"),
+        ("hourly", "Hourly"),
+        ("range", "Range"),
+    )
+
+    technician = models.ForeignKey(User, on_delete=models.CASCADE, related_name="technician_services")
+    title = models.CharField(max_length=255)
+    category = models.ForeignKey("tasks.Category", on_delete=models.SET_NULL, null=True, blank=True, related_name="technician_services")
+    description = models.TextField(blank=True)
+    service_type = models.CharField(max_length=10, choices=SERVICE_TYPE_CHOICES, default="onsite")
+    coverage_area = models.CharField(max_length=255, blank=True)
+    pricing_model = models.CharField(max_length=10, choices=PRICING_MODEL_CHOICES, default="fixed")
+    pricing_min = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    pricing_max = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "accounts_technician_service"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["service_type"]),
+            models.Index(fields=["pricing_model"]),
+            models.Index(fields=["is_active"]),
+        ]
+
+    def __str__(self):
+        return self.title
+
+
 class PortfolioItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='portfolio_items')
     title = models.CharField(max_length=255)

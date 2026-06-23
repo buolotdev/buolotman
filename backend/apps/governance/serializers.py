@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Notification, AuditLog, Dispute, DisputeEvidence, PlatformSetting
+from .models import Notification, AuditLog, Dispute, DisputeEvidence, PlatformSetting, CmsPage
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -53,12 +53,16 @@ class DisputeListSerializer(serializers.ModelSerializer):
     opened_by_name = serializers.SerializerMethodField()
     against_name = serializers.SerializerMethodField()
     evidence_count = serializers.SerializerMethodField()
+    task_title = serializers.CharField(source='task.title', read_only=True)
+    task_budget = serializers.DecimalField(source='task.budget_max', max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = Dispute
         fields = [
             "id",
             "task",
+            "task_title",
+            "task_budget",
             "opened_by",
             "opened_by_name",
             "against",
@@ -90,12 +94,16 @@ class DisputeDetailSerializer(serializers.ModelSerializer):
     against_name = serializers.SerializerMethodField()
     resolution_by_name = serializers.SerializerMethodField()
     evidence = DisputeEvidenceSerializer(many=True, read_only=True)
+    task_title = serializers.CharField(source='task.title', read_only=True)
+    task_budget = serializers.DecimalField(source='task.budget_max', max_digits=12, decimal_places=2, read_only=True)
 
     class Meta:
         model = Dispute
         fields = [
             "id",
             "task",
+            "task_title",
+            "task_budget",
             "opened_by",
             "opened_by_name",
             "against",
@@ -112,7 +120,7 @@ class DisputeDetailSerializer(serializers.ModelSerializer):
             "resolved_at",
             "evidence",
         ]
-        read_only_fields = ["id", "opened_by", "opened_by_name", "against_name", "resolution_by", "resolution_by_name", "opened_at", "updated_at", "resolved_at", "evidence"]
+        read_only_fields = ["id", "task_title", "task_budget", "opened_by", "opened_by_name", "against_name", "resolution_by", "resolution_by_name", "opened_at", "updated_at", "resolved_at", "evidence"]
 
     def get_opened_by_name(self, obj):
         return obj.opened_by.get_full_name() or obj.opened_by.email
@@ -173,6 +181,33 @@ class PlatformSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlatformSetting
         fields = ["id", "key", "value", "description", "is_sensitive", "updated_by", "updated_by_name", "created_at", "updated_at"]
+        read_only_fields = ["id", "updated_by", "updated_by_name", "created_at", "updated_at"]
+
+    def get_updated_by_name(self, obj):
+        if not obj.updated_by:
+            return ""
+        return obj.updated_by.get_full_name() or obj.updated_by.email
+
+
+class CmsPageSerializer(serializers.ModelSerializer):
+    updated_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CmsPage
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "excerpt",
+            "content",
+            "is_published",
+            "show_in_footer",
+            "sort_order",
+            "updated_by",
+            "updated_by_name",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "updated_by", "updated_by_name", "created_at", "updated_at"]
 
     def get_updated_by_name(self, obj):

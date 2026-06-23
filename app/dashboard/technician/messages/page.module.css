@@ -545,6 +545,30 @@
   color: #64748b;
 }
 
+.attachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(0, 31, 63, 0.12);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #fff;
+  color: #001f3f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.attachmentBubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  color: #ff4500;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .sendButton {
   width: 54px;
   height: 54px;

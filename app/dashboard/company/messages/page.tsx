@@ -15,6 +15,9 @@ type Message = {
   sender: number;
   text: string;
   time: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_type?: string;
 };
 
 type Conversation = {
@@ -36,10 +39,13 @@ export default function CompanyMessages() {
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
   const [draft, setDraft] = useState("");
+  const [attachmentDraft, setAttachmentDraft] = useState<any>(null);
+  const [attachmentUploading, setAttachmentUploading] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeMessages, setActiveMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: rawConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
@@ -139,11 +145,13 @@ export default function CompanyMessages() {
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!draft.trim() || !activeId || sending) return;
-    const text = draft;
+    const text = draft.trim();
+    if ((!text && !attachmentDraft) || !activeId || sending) return;
     const tempId = `tmp-${Date.now()}`;
     setActiveMessages((prev) => [...prev, { id: tempId, sender: user?.id || 0, text, time: new Date().toISOString() }]);
     setDraft("");
+    const attachment = attachmentDraft;
+    setAttachmentDraft(null);
     setSending(true);
     isNearBottomRef.current = true;
     requestAnimationFrame(() => {
@@ -151,13 +159,34 @@ export default function CompanyMessages() {
       if (el) el.scrollTop = el.scrollHeight;
     });
     try {
-      await api.sendMessage(Number(activeId), text);
+      await api.sendMessage(Number(activeId), {
+        text,
+        attachment_url: attachment?.url || "",
+        attachment_key: attachment?.key || "",
+        attachment_name: attachment?.name || "",
+        attachment_type: attachment?.type || "file",
+        attachment_size: attachment?.size || 0,
+        attachment_content_type: attachment?.content_type || "",
+      });
       refetchConvos();
     } catch (err: any) {
       setActiveMessages((prev) => prev.filter((m) => m.id !== tempId));
       toast.error("Send failed", err?.message || "Please try again.");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleAttachmentPick = async (file?: File | null) => {
+    if (!file || !activeId || attachmentUploading) return;
+    setAttachmentUploading(true);
+    try {
+      const uploaded = await api.uploadMessageAttachment(Number(activeId), file);
+      setAttachmentDraft(uploaded);
+    } catch (err: any) {
+      toast.error("Upload failed", err?.message || "Please try again.");
+    } finally {
+      setAttachmentUploading(false);
     }
   };
 
@@ -356,6 +385,12 @@ export default function CompanyMessages() {
                         className={`${styles.messageGroup} ${m.sender === user?.id ? styles.messageGroupSent : styles.messageGroupReceived}`}
                       >
                         <div className={styles.messageBubble}>{m.text}</div>
+                        {m.attachment_url ? (
+                          <a href={m.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
+                            <iconify-icon icon="lucide:paperclip" />
+                            <span>{m.attachment_name || "Attachment"}</span>
+                          </a>
+                        ) : null}
                         <div className={styles.messageMeta}>
                           {formatTime(m.time)}
                           {m.sender === user?.id && <iconify-icon icon="lucide:check-check" style={{ fontSize: 14 }} />}
@@ -373,14 +408,36 @@ export default function CompanyMessages() {
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
                     />
-                    <button type="button" className={styles.composerIconButton}>
+                    <input
+                      ref={attachmentInputRef}
+                      type="file"
+                      hidden
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        handleAttachmentPick(file);
+                      }}
+                    />
+                    {attachmentDraft ? (
+                      <button type="button" className={styles.attachmentChip} onClick={() => setAttachmentDraft(null)}>
+                        <iconify-icon icon="lucide:paperclip" />
+                        <span>{attachmentDraft.name}</span>
+                        <iconify-icon icon="lucide:x" />
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className={styles.composerIconButton}
+                      onClick={() => attachmentInputRef.current?.click()}
+                      disabled={attachmentUploading}
+                    >
                       <iconify-icon icon="lucide:paperclip" />
                     </button>
                   </div>
                   <button
                     type="submit"
                     className={styles.sendBtn}
-                    disabled={!draft.trim() || sending}
+                    disabled={(!draft.trim() && !attachmentDraft) || sending}
                   >
                     <iconify-icon icon="lucide:send-horizontal" />
                   </button>
