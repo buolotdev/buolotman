@@ -146,23 +146,6 @@ export default function LoginPage() {
 
 
 
-        <div className={styles.divider} aria-hidden="true">
-          <span>or</span>
-        </div>
-
-        <div className={styles.socials}>
-          <button type="button" className={styles.googleButton}>
-            <Image
-              src="/google-logo.svg"
-              alt=""
-              width={20}
-              height={20}
-              className={styles.googleIcon}
-            />
-            <span>Continue with Google</span>
-          </button>
-        </div>
-
         <p className={styles.footerText}>
           Don&apos;t have an account?{" "}
           <Link href="/signup" className={styles.footerLink}>

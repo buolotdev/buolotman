@@ -9,7 +9,6 @@
     radial-gradient(circle at top left, rgba(255, 69, 0, 0.08), transparent 32%),
     linear-gradient(180deg, #fffdfa 0%, #f8fafc 100%);
   overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .backdrop {
