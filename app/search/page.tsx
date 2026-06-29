@@ -58,6 +58,8 @@ export default function SearchPage() {
   const [activeRating, setActiveRating] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("relevance");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
   const [page, setPage] = useState(1);
 
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -72,8 +74,10 @@ export default function SearchPage() {
     if (activeType && activeType !== "any") params.type = activeType;
     if (activeRating) params.min_rating = activeRating;
     if (sortBy) params.sort = sortBy;
+    if (budgetMin) params.budget_min = budgetMin;
+    if (budgetMax) params.budget_max = budgetMax;
     return params;
-  }, [query, location, activeCategory, activeType, activeRating, sortBy]);
+  }, [query, location, activeCategory, activeType, activeRating, sortBy, budgetMin, budgetMax]);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,6 +212,8 @@ export default function SearchPage() {
                 setActiveRating("");
                 setQuery("");
                 setLocation("");
+                setBudgetMin("");
+                setBudgetMax("");
                 setPage(1);
               }}
             >
@@ -250,16 +256,6 @@ export default function SearchPage() {
             </div>
           </section>
 
-          <section className={styles.filterSection} aria-labelledby="location-title">
-            <h2 id="location-title" className={styles.sectionTitle}>
-              Location
-            </h2>
-            <button type="button" className={styles.selectFake}>
-              <span>{location || "All locations"}</span>
-              <iconify-icon icon="lucide:chevron-down" />
-            </button>
-          </section>
-
           <section className={styles.filterSection} aria-labelledby="budget-title">
             <h2 id="budget-title" className={styles.sectionTitle}>
               Budget (XOF)
@@ -270,7 +266,8 @@ export default function SearchPage() {
                 <input
                   className={styles.inputFake}
                   type="number"
-                  defaultValue=""
+                  value={budgetMin}
+                  onChange={(e) => setBudgetMin(e.target.value)}
                   placeholder="0"
                   aria-label="Minimum budget"
                 />
@@ -280,7 +277,8 @@ export default function SearchPage() {
                 <input
                   className={styles.inputFake}
                   type="number"
-                  defaultValue=""
+                  value={budgetMax}
+                  onChange={(e) => setBudgetMax(e.target.value)}
                   placeholder="Max"
                   aria-label="Maximum budget"
                 />

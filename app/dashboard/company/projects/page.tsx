@@ -13,6 +13,7 @@ import { formatXOF } from "@/app/lib/format";
 
 export default function CompanyProjects() {
   const [activeNav, setActiveNav] = useState("projects");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending" | "completed">("all");
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: projectsData, loading: projectsLoading, error } = useFetch(
@@ -22,6 +23,14 @@ export default function CompanyProjects() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const projects = (projectsData?.results ?? []) as any[];
+
+  const filteredProjects = projects.filter((p) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "active") return p.status === "active" || p.status === "in_progress";
+    if (statusFilter === "pending") return p.status === "pending" || p.status === "draft";
+    if (statusFilter === "completed") return p.status === "completed";
+    return true;
+  });
 
   const totalProjects = projects.length;
   const activeProjects = projects.filter(
@@ -38,9 +47,7 @@ export default function CompanyProjects() {
     { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
     { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
     { id: "projects", label: "Projects & Contracts", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
-    { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users" },
     { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
-    { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3" },
     { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
     { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
   ];
@@ -142,16 +149,6 @@ export default function CompanyProjects() {
                 Manage your active projects and review completed contracts.
               </p>
             </div>
-            <div className={styles.headerActions}>
-              <button className={`${styles.btn} ${styles.btnOutline} ${styles.btnIcon}`}>
-                <iconify-icon icon="lucide:download" style={{ fontSize: "16px" }}></iconify-icon>
-                Export
-              </button>
-              <button className={`${styles.btn} ${styles.btnPrimary}`}>
-                <iconify-icon icon="lucide:plus" style={{ fontSize: "16px" }}></iconify-icon>
-                New Project
-              </button>
-            </div>
           </div>
 
           {projectsLoading ? (
@@ -198,20 +195,10 @@ export default function CompanyProjects() {
 
           <div className={styles.toolbarSection}>
             <div className={styles.tabs}>
-              <div className={`${styles.tab} ${styles.tabActive}`}>All Projects</div>
-              <div className={styles.tab}>Active</div>
-              <div className={styles.tab}>Pending</div>
-              <div className={styles.tab}>Completed</div>
-            </div>
-            <div className={styles.filters}>
-              <button className={styles.filterBtn}>
-                <iconify-icon icon="lucide:filter" style={{ fontSize: "14px" }}></iconify-icon>
-                Filter by Client
-              </button>
-              <button className={styles.filterBtn}>
-                Sort by: Newest
-                <iconify-icon icon="lucide:chevron-down" style={{ fontSize: "14px" }}></iconify-icon>
-              </button>
+              <button type="button" className={`${styles.tab} ${statusFilter === "all" ? styles.tabActive : ""}`} onClick={() => setStatusFilter("all")}>All Projects</button>
+              <button type="button" className={`${styles.tab} ${statusFilter === "active" ? styles.tabActive : ""}`} onClick={() => setStatusFilter("active")}>Active</button>
+              <button type="button" className={`${styles.tab} ${statusFilter === "pending" ? styles.tabActive : ""}`} onClick={() => setStatusFilter("pending")}>Pending</button>
+              <button type="button" className={`${styles.tab} ${statusFilter === "completed" ? styles.tabActive : ""}`} onClick={() => setStatusFilter("completed")}>Completed</button>
             </div>
           </div>
 
@@ -224,14 +211,14 @@ export default function CompanyProjects() {
               <div style={{ textAlign: "center", padding: "48px 0", color: "#ef4444" }}>
                 <p>{error}</p>
               </div>
-            ) : projects.length === 0 ? (
+            ) : filteredProjects.length === 0 ? (
               <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
                 <iconify-icon icon="lucide:folder-open" style={{ fontSize: "48px", marginBottom: "16px", display: "block" }}></iconify-icon>
-                <h3 style={{ margin: "0 0 8px" }}>No projects yet</h3>
-                <p style={{ margin: 0 }}>Create your first project to get started.</p>
+                <h3 style={{ margin: "0 0 8px" }}>No projects found</h3>
+                <p style={{ margin: 0 }}>There are no projects matching this status.</p>
               </div>
             ) : (
-              projects.map((project) => (
+              filteredProjects.map((project) => (
                 <div key={project.id} className={styles.projectCard}>
                   <div className={styles.projectHeader}>
                     <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>

@@ -15,9 +15,33 @@ export default function TechnicianTaskDetailsPage({ params }: { params: Promise<
   const router = useRouter();
   const toast = useToast();
   const dialog = useDialog();
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(() => {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("buolotman_saved_tasks");
+      if (raw) {
+        const ids = JSON.parse(raw);
+        return ids.includes(String(taskId));
+      }
+    }
+    return false;
+  });
   const [messaging, setMessaging] = useState(false);
   const [completing, setCompleting] = useState(false);
+
+  const toggleSaved = () => {
+    const nextSaved = !saved;
+    setSaved(nextSaved);
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("buolotman_saved_tasks");
+      let ids = raw ? JSON.parse(raw) : [];
+      if (nextSaved) {
+        if (!ids.includes(String(taskId))) ids.push(String(taskId));
+      } else {
+        ids = ids.filter((id: string) => id !== String(taskId));
+      }
+      localStorage.setItem("buolotman_saved_tasks", JSON.stringify(ids));
+    }
+  };
 
   const { data: task, loading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: myBids } = useFetch(() => api.getMyBids(), []);
@@ -222,7 +246,7 @@ export default function TechnicianTaskDetailsPage({ params }: { params: Promise<
                 <span>{messaging ? "Opening..." : "Message Client"}</span>
               </button>
 
-              <button type="button" className={styles.secondaryButton} onClick={() => setSaved((c) => !c)}>
+              <button type="button" className={styles.secondaryButton} onClick={toggleSaved}>
                 <iconify-icon icon={saved ? "lucide:bookmark-check" : "lucide:bookmark"} />
                 <span>{saved ? "Saved" : "Save Task"}</span>
               </button>

@@ -16,11 +16,11 @@ type ContactMethod = "in-app" | "phone" | "whatsapp";
 
 const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }> = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client" },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client" },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client" },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client" },
-  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client" },
+  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks" },
+  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages" },
+  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments" },
+  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved" },
+  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client/profile" },
 ];
 
 import { toArray } from "@/app/lib/dataShape";

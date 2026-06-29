@@ -21,9 +21,7 @@ export default function CompanyProfileDashboard() {
     { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
     { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
     { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
-    { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users" },
     { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
-    { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3" },
     { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
     { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
   ];

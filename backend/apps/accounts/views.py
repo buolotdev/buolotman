@@ -249,6 +249,7 @@ def user_public_profile(request, user_id):
     elif user.role == 'COMPANY':
         company = getattr(user, 'company_profile', None)
         if company:
+            data['company_id'] = company.id
             data['company_name'] = company.company_name
             data['registration_number'] = company.registration_number
             data['services_offered'] = company.services_offered

@@ -34,8 +34,6 @@ export default function ClientPaymentsPage() {
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
           <Stat label="Available balance" value={walletLoading ? "Loading..." : formatXOF(wallet?.available_balance || 0)} />
           <Stat label="Pending escrow" value={walletLoading ? "Loading..." : formatXOF(wallet?.pending_escrow || 0)} />
-          <Stat label="Total earnings" value={walletLoading ? "Loading..." : formatXOF(wallet?.total_earnings || 0)} />
-          <Stat label="Total withdrawn" value={walletLoading ? "Loading..." : formatXOF(wallet?.total_withdrawn || 0)} />
         </section>
 
         <section style={{ background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 10px 24px rgba(15,23,42,0.06)" }}>

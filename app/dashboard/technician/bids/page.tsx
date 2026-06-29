@@ -41,6 +41,9 @@ export default function TechnicianBidsPage() {
   const toast = useToast();
   const { data: bidsData, loading, refetch } = useFetch(() => api.getMyBids(), []);
   const { data: userData } = useFetch(() => api.getMe(), []);
+  const { data: conversationsData } = useFetch(() => api.getConversations(), []);
+  const conversations = useMemo(() => Array.isArray(conversationsData) ? conversationsData : [], [conversationsData]);
+
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<BidStatus>("all");
@@ -136,6 +139,15 @@ export default function TechnicianBidsPage() {
 
   const messageClient = (bidId: string) => {
     setMessagedIds((current) => (current.includes(bidId) ? current : [...current, bidId]));
+  };
+
+  const getConvoLink = (clientName: string, taskId: string) => {
+    const convo = conversations.find(
+      (c: any) =>
+        c.other_participant?.name === clientName ||
+        String(c.task_id || c.taskId) === String(taskId)
+    );
+    return convo ? `/dashboard/technician/messages?c=${convo.id}` : `/dashboard/technician/messages`;
   };
 
   const changeTab = (tab: BidStatus) => {
@@ -365,7 +377,7 @@ export default function TechnicianBidsPage() {
                             </button>
                           ) : null}
                           {bid.status === "accepted" && !isCompletedTask ? (
-                            <Link href="/dashboard/technician/messages" className={styles.outlineButton} onClick={() => messageClient(bid.id)}>
+                            <Link href={getConvoLink(bid.client, bid.taskId)} className={styles.outlineButton} onClick={() => messageClient(bid.id)}>
                               <iconify-icon icon="lucide:message-circle" />
                               {isMessaged ? "Message Sent" : "Message"}
                             </Link>

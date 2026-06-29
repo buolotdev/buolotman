@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
@@ -14,6 +14,7 @@ import LogoutButton from "@/app/components/LogoutButton";
 export default function AdminTasksPage() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: tasksData, loading: tasksLoading } = useFetch(() => api.adminListTasks(), []);
@@ -103,28 +104,10 @@ export default function AdminTasksPage() {
               <h1>Task Management</h1>
               <p>Monitor and manage all platform tasks, their statuses, and associated actions.</p>
             </div>
-            <div className={styles.headerActions}>
-              <button className={styles.btnOutline}>
-                <iconify-icon icon="lucide:download" /> Export CSV
-              </button>
-            </div>
           </div>
 
           <div className={styles.tableCard}>
-            <div className={styles.tableToolbar}>
-              <div className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="text" placeholder="Filter by title or category..." />
-              </div>
-              <div className={styles.toolbarFilters}>
-                <div className={styles.filterDropdown}>
-                  Status: All <iconify-icon icon="lucide:chevron-down" />
-                </div>
-                <div className={styles.filterDropdown}>
-                  Date: Last 30 Days <iconify-icon icon="lucide:chevron-down" />
-                </div>
-              </div>
-            </div>
+
 
             <div className={styles.tableWrapper}>
               {tasksLoading ? (
@@ -182,7 +165,11 @@ export default function AdminTasksPage() {
                         </td>
                         <td>
                           <div className={styles.actions}>
-                            <button className={styles.iconBtn} aria-label="View Task Details">
+                            <button
+                              className={styles.iconBtn}
+                              aria-label="View Task Details"
+                              onClick={() => router.push(`/dashboard/client/tasks/${task.id}`)}
+                            >
                               <iconify-icon icon="lucide:eye" />
                             </button>
                             <button

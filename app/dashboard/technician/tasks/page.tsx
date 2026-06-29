@@ -58,7 +58,13 @@ export default function TechnicianTasksPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<TaskFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("buolotman_saved_tasks");
+      if (raw) return JSON.parse(raw);
+    }
+    return [];
+  });
   const [submittedIds, setSubmittedIds] = useState<string[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
 
@@ -126,7 +132,11 @@ export default function TechnicianTasksPage() {
 
   const toggleSaved = (taskId: string) => {
     const isSaved = savedIds.includes(taskId);
-    setSavedIds((current) => (isSaved ? current.filter((id) => id !== taskId) : [...current, taskId]));
+    const next = isSaved ? savedIds.filter((id) => id !== taskId) : [...savedIds, taskId];
+    setSavedIds(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("buolotman_saved_tasks", JSON.stringify(next));
+    }
     pushActivity(
       isSaved ? "Removed task from saved list" : "Saved task for later",
       tasks.find((task) => task.id === taskId)?.title ?? "Marketplace task",
@@ -373,10 +383,6 @@ export default function TechnicianTasksPage() {
                   </div>
                   <strong className={styles.walletValue}>${walletAvailable.toLocaleString()}</strong>
                   <p>Available funds for transport, materials, and fast-turnaround marketplace jobs.</p>
-                  <button type="button" className={styles.outlineButton} onClick={addFunds}>
-                    <iconify-icon icon="lucide:plus-circle" />
-                    Add Funds
-                  </button>
                 </section>
 
                 <section className={styles.panelCard}>
@@ -404,11 +410,6 @@ export default function TechnicianTasksPage() {
                   </div>
                 </section>
 
-                <section className={`${styles.panelCard} ${styles.helpCard}`}>
-                  <h3>Need Help?</h3>
-                  <p>Support can review suspicious requests, payment issues, or task scope questions before you bid.</p>
-                  <button type="button" className={styles.helpButton}>Contact Support</button>
-                </section>
               </aside>
             </div>
           </div>

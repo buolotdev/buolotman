@@ -60,10 +60,6 @@ export default function AdminPaymentsPage() {
             <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
               <iconify-icon icon="lucide:menu" />
             </button>
-            <div className={styles.searchBar}>
-              <iconify-icon icon="lucide:search" />
-              <input type="text" placeholder="Search transactions, payouts, users..." />
-            </div>
           </div>
           <div className={styles.topbarRight}>
             <div className={styles.adminProfile}>
@@ -83,11 +79,6 @@ export default function AdminPaymentsPage() {
             <div className={styles.headerContent}>
               <h1>Payments & Escrow Control</h1>
               <p>Manage pending payouts, monitor escrow holdings, and view platform transactions.</p>
-            </div>
-            <div className={styles.headerActions}>
-              <button className={styles.btnOutline}>
-                <iconify-icon icon="lucide:download" /> Export Report
-              </button>
             </div>
           </div>
 

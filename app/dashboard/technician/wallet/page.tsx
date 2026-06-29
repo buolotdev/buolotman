@@ -283,9 +283,6 @@ export default function TechnicianWalletPage() {
                       <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:lock" /></span>
                     </div>
                     <strong>{formatXOF(pendingEscrow)}</strong>
-                    <button type="button" className={styles.outlineButton} onClick={releaseEscrow} disabled={pendingEscrow <= 0}>
-                      Release Escrow
-                    </button>
                   </article>
 
                   <article className={styles.statCard}>
@@ -309,10 +306,6 @@ export default function TechnicianWalletPage() {
                     <button type="button" className={`${styles.tab} ${activeTab === "earnings" ? styles.tabActive : ""}`} onClick={() => changeTab("earnings")}>Earnings</button>
                     <button type="button" className={`${styles.tab} ${activeTab === "withdrawals" ? styles.tabActive : ""}`} onClick={() => changeTab("withdrawals")}>Withdrawals</button>
                   </div>
-                  <button type="button" className={styles.outlineButton} onClick={exportTransactions}>
-                    <iconify-icon icon="lucide:download" />
-                    Export
-                  </button>
                 </div>
               </div>
 

@@ -142,7 +142,7 @@ export default function ClientDashboardPage() {
               </div>
               <div className={styles.welcomeActions}>
                 <Link href="/post-task" className={styles.primaryButton}><iconify-icon icon="lucide:plus" /> Post a Task</Link>
-                <Link href="/categories/electrical/listings" className={styles.secondaryButton}>Browse electricians</Link>
+                <Link href="/search?q=electrician" className={styles.secondaryButton}>Browse electricians</Link>
               </div>
             </section>
 

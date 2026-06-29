@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { use, useMemo, useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 
@@ -24,22 +25,30 @@ const computeFirstName = (bid: any) => {
 
 export default function ProposalReviewPage({ params }: { params: Promise<{ taskId: string; bidId: string }> }) {
   const { taskId, bidId } = use(params);
+  const toast = useToast();
 
   const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: bidsData, loading: bidLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
+
+  const bid = useMemo(() => {
+    if (!bidsData) return null;
+    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    return list.find((b: any) => String(b.id) === bidId) || null;
+  }, [bidsData, bidId]);
+
+  const { data: prof, loading: profLoading } = useFetch(
+    () => (bid?.technician ? api.getUserProfile(Number(bid.technician)) : Promise.resolve(null)),
+    [bid]
+  );
 
   const [rating, setRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const loading = taskLoading || bidLoading;
+  const loading = taskLoading || bidLoading || profLoading;
 
-  const bid = (() => {
-    if (!bidsData) return null;
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
-    return list.find((b: any) => String(b.id) === bidId) || null;
-  })();
   const acceptedBid = useMemo(() => {
     if (!bidsData) return null;
     const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
@@ -142,6 +151,29 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
     );
   }
 
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      toast.warning("Select rating", "Please choose a star rating first.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      if (prof?.role === "COMPANY" && prof.company_id) {
+        await api.addCompanyReview(Number(prof.company_id), {
+          rating,
+          text: comments,
+          service: task?.title || "",
+        });
+      }
+      toast.success("Review submitted", "Thank you for your feedback.");
+      setSubmitted(true);
+    } catch (err: any) {
+      toast.error("Submission failed", err?.message || "Could not submit review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.logoBar}>
@@ -236,8 +268,8 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
           </div>
 
           <div className={styles.actions}>
-            <button type="button" className={styles.primaryButton} onClick={() => setSubmitted(true)}>
-              Submit review
+            <button type="button" className={styles.primaryButton} onClick={handleSubmitReview} disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit review"}
             </button>
             <Link href={`/dashboard/client/tasks/${task?.id}`} className={styles.skipLink}>
               Skip for now

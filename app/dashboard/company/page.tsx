@@ -20,9 +20,7 @@ export default function CompanyDashboard() {
     { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard", match: (p: string) => p === "/dashboard/company" },
     { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers", match: (p: string) => p.startsWith("/dashboard/company/services") },
     { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase", match: (p: string) => p.startsWith("/dashboard/company/projects") },
-    { id: "teams", label: "Teams", href: "/dashboard/company/teams", icon: "lucide:users", match: (p: string) => p.startsWith("/dashboard/company/teams") },
     { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square", match: (p: string) => p.startsWith("/dashboard/company/messages") },
-    { id: "analytics", label: "Analytics", href: "/dashboard/company/analytics", icon: "lucide:bar-chart-3", match: (p: string) => p.startsWith("/dashboard/company/analytics") },
     { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user", match: (p: string) => p.startsWith("/dashboard/company/profile") },
     { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings", match: (p: string) => p.startsWith("/dashboard/company/settings") },
   ];
@@ -234,7 +232,6 @@ export default function CompanyDashboard() {
                     <Link href="/dashboard/company/projects" className={styles.actionBtn}><iconify-icon icon="lucide:briefcase" /> New Project</Link>
                     <Link href="/dashboard/company/services" className={styles.actionBtn}><iconify-icon icon="lucide:layers" /> Add Service</Link>
                     <Link href="/dashboard/company/messages" className={styles.actionBtn}><iconify-icon icon="lucide:message-square" /> Messages</Link>
-                    <Link href="/dashboard/company/analytics" className={styles.actionBtn}><iconify-icon icon="lucide:bar-chart-3" /> Analytics</Link>
                   </div>
                 </div>
               </section>

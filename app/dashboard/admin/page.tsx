@@ -65,7 +65,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className={styles.bottomGrid}>
+      <div className={styles.bottomGrid} style={{ gridTemplateColumns: "1fr" }}>
         <div className={styles.listCard}>
           <div className={styles.listHeader}>
             <h2 className={styles.listTitle}>Recent Tasks</h2>
@@ -97,26 +97,6 @@ export default function AdminDashboard() {
               ))}
             </div>
           )}
-        </div>
-
-        <div className={styles.listCard}>
-          <div className={styles.listHeader}>
-            <h2 className={styles.listTitle}>Recent Activity</h2>
-          </div>
-          <div className={styles.activityList}>
-            <div className={styles.activityItem}>
-              <div className={styles.activityIconBox} style={{ background: "rgba(0, 31, 63, 0.1)", color: "#001f3f" }}>
-                <iconify-icon icon="lucide:user-plus" />
-              </div>
-              <div className={styles.activityContent}>
-                <div className={styles.activityHeader}>
-                  <span className={styles.activityText}>System Running</span>
-                  <span className={styles.activityTime}>Now</span>
-                </div>
-                <p className={styles.activitySubtext}>All systems operational.</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

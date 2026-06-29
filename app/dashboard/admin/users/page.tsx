@@ -64,10 +64,6 @@ export default function AdminUsersPage() {
             <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
               <iconify-icon icon="lucide:menu" />
             </button>
-            <div className={styles.searchBar}>
-              <iconify-icon icon="lucide:search" />
-              <input type="text" placeholder="Search by name, email, or ID..." />
-            </div>
           </div>
           <div className={styles.topbarRight}>
             <div className={styles.adminProfile}>
@@ -88,31 +84,10 @@ export default function AdminUsersPage() {
               <h1>User Management</h1>
               <p>Manage all platform users, roles, and account statuses.</p>
             </div>
-            <div className={styles.headerActions}>
-              <button className={styles.btnOutline}>
-                <iconify-icon icon="lucide:download" /> Export CSV
-              </button>
-              <button className={styles.btnPrimary}>
-                <iconify-icon icon="lucide:plus" /> Add User
-              </button>
-            </div>
           </div>
 
           <div className={styles.tableCard}>
-            <div className={styles.tableToolbar}>
-              <div className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="text" placeholder="Filter by name or email..." />
-              </div>
-              <div className={styles.toolbarFilters}>
-                <div className={styles.filterDropdown}>
-                  Role: All <iconify-icon icon="lucide:chevron-down" />
-                </div>
-                <div className={styles.filterDropdown}>
-                  Status: All <iconify-icon icon="lucide:chevron-down" />
-                </div>
-              </div>
-            </div>
+
 
             <div className={styles.tableWrapper}>
               {usersLoading ? (

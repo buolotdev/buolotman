@@ -28,8 +28,6 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [note, setNote] = useState("");
-  const [promoInput, setPromoInput] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState("");
   const [sameAsTaskAddress, setSameAsTaskAddress] = useState(true);
   const [billingAddress, setBillingAddress] = useState({
     street: "",
@@ -105,8 +103,7 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
 
   const agreedPrice = parseAmount((bid as any).amount);
   const platformFee = Math.round(agreedPrice * 0.05);
-  const promoDiscount = appliedPromo.trim().toUpperCase() === "WELCOME10" ? Math.round(agreedPrice * 0.1) : 0;
-  const total = Math.max(agreedPrice + platformFee - promoDiscount, 0);
+  const total = Math.max(agreedPrice + platformFee, 0);
 
   const canSubmit =
     paymentMethod !== "card" ||
@@ -368,22 +365,9 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                   </div>
                 </div>
 
-                <div className={styles.promoSection}>
-                  <label htmlFor="promo-code">Promo code</label>
-                  <div className={styles.promoRow}>
-                    <input id="promo-code" value={promoInput} onChange={(event) => setPromoInput(event.target.value.toUpperCase())} />
-                    <button type="button" className={styles.applyButton} onClick={() => setAppliedPromo(promoInput.trim().toUpperCase())}>
-                      {appliedPromo === promoInput.trim().toUpperCase() && appliedPromo ? "Applied" : "Apply"}
-                    </button>
-                  </div>
-                </div>
-
                 <div className={styles.breakdown}>
                   <div><span>Agreed price</span><strong>{(bid as any).amount}</strong></div>
                   <div><span>Platform fee (5%)</span><strong>{formatXof(platformFee)}</strong></div>
-                  {promoDiscount ? (
-                    <div className={styles.discountRow}><span>Promo discount</span><strong>-{formatXof(promoDiscount)}</strong></div>
-                  ) : null}
                   <div className={styles.totalRow}><span>Total to pay</span><strong>{formatXof(total)}</strong></div>
                 </div>
 
