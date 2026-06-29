@@ -46,6 +46,11 @@ def cached(prefix: str, ttl: int = 300):
             try:
                 if hasattr(response, "status_code") and 200 <= response.status_code < 300:
                     if hasattr(response, "render") and callable(response.render):
+                        if getattr(response, "accepted_renderer", None) is None:
+                            from rest_framework.renderers import JSONRenderer
+                            response.accepted_renderer = JSONRenderer()
+                            response.accepted_media_type = "application/json"
+                            response.renderer_context = {}
                         response.render()
                     cache.set(key, response, ttl)
             except Exception as exc:
