@@ -10,6 +10,7 @@ import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 export default function CompanyDashboard() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -82,36 +83,9 @@ export default function CompanyDashboard() {
       </aside>
 
       <main className={styles.mainWrapper}>
-        <header className={styles.topbar}>
-          <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
-            <iconify-icon icon="lucide:menu" />
-          </button>
-          <div className={styles.searchBar}>
-            <iconify-icon icon="lucide:search" />
-            <input type="text" placeholder="Search projects, teams..." />
-          </div>
-
-          <div className={styles.topbarActions}>
-            <button type="button" className={styles.iconBtn}>
-              <iconify-icon icon="lucide:bell" />
-              <span className={styles.notificationDot} />
-            </button>
-            
-            <div className={styles.companyProfile}>
-              <div className={styles.profileImg}>
-                {userLoading ? (
-                  <SkeletonBlock style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                ) : (
-                  <div className={styles.profileInitials}>{userInitials}</div>
-                )}
-              </div>
-              <div className={styles.profileInfo}>
-                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 100, height: 14 }} /> : companyName}</div>
-                <span className={styles.profileRole}>{userRole}</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          onMenuClick={() => setMobileSidebarOpen(true)}
+        />
 
         <div className={styles.content}>
           <div className={styles.pageHeader}>

@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -108,30 +109,12 @@ export default function ClientDashboardPage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <label className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search tasks, professionals..." />
-              </label>
-            </div>
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton}>
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-              <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>{userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}</div>
-                <div>
-                  <div className={styles.userName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
-                  <span className={styles.userRole}>{userRole}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search tasks, professionals..."
+            searchQuery={query}
+            setSearchQuery={setQuery}
+          />
 
           <div className={styles.content}>
             <section className={styles.welcomeSection}>

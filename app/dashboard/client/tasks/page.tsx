@@ -9,6 +9,7 @@ import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -103,33 +104,12 @@ export default function ClientTasksPage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-
-              <label className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks..." />
-              </label>
-            </div>
-
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton} aria-label="Notifications">
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-
-              <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>{userInitials}</div>
-                <div>
-                  <p className={styles.userName}>{userName}</p>
-                  <p className={styles.userRole}>{userRole}</p>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search tasks..."
+            searchQuery={query}
+            setSearchQuery={setQuery}
+          />
 
           <div className={styles.content}>
             <section className={styles.hero}>

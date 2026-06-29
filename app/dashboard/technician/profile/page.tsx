@@ -10,6 +10,7 @@ import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 const toneClasses = ["toneBlue", "toneGold", "toneGreen", "toneCoral", "toneSlate", "tonePurple"];
 
@@ -127,31 +128,9 @@ export default function TechnicianProfilePage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <label className={styles.searchBox}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" placeholder="Search tasks or users..." aria-label="Search tasks or users" />
-              </label>
-            </div>
-
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton} aria-label="Notifications">
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-              <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>{userInitials}</div>
-                <div className={styles.topbarProfileLines}>
-                  <strong>{userName}</strong>
-                  <span>{userRole}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+          />
 
           <div className={styles.content}>
             <section className={styles.heroCard}>

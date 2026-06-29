@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { formatXOF } from "@/app/lib/format";
+import DashboardHeader from "@/app/components/DashboardHeader";
+import LogoutButton from "@/app/components/LogoutButton";
+import styles from "./payments.module.css";
 
 type Transaction = {
   id: number | string;
@@ -14,71 +19,172 @@ type Transaction = {
   status?: string;
 };
 
+const navItems = [
+  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
+  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
+  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
+  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
+  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
+  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client/profile", match: (p: string) => p.startsWith("/dashboard/client/profile") },
+];
+
 export default function ClientPaymentsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions({ limit: "20" }), []);
 
   const transactions: Transaction[] = Array.isArray(txData) ? txData : (txData?.results || []);
 
+  const getStatusClass = (status?: string) => {
+    const s = String(status || "").toLowerCase();
+    if (s === "completed" || s === "success" || s === "released") return styles.statusSuccess;
+    if (s === "pending" || s === "hold") return styles.statusPending;
+    if (s === "failed" || s === "cancelled") return styles.statusFailed;
+    return styles.statusDefault;
+  };
+
   return (
-    <main style={{ padding: 24 }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gap: 20 }}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ margin: 0, color: "#64748b" }}>Client dashboard</p>
-            <h1 style={{ margin: "4px 0 0" }}>Payments</h1>
-          </div>
-          <Link href="/dashboard/client" style={{ color: "#0f172a" }}>Back to dashboard</Link>
-        </header>
-
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-          <Stat label="Available balance" value={walletLoading ? "Loading..." : formatXOF(wallet?.available_balance || 0)} />
-          <Stat label="Pending escrow" value={walletLoading ? "Loading..." : formatXOF(wallet?.pending_escrow || 0)} />
-        </section>
-
-        <section style={{ background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 10px 24px rgba(15,23,42,0.06)" }}>
-          <h2 style={{ marginTop: 0 }}>Transaction History</h2>
-          {txLoading ? (
-            <p>Loading transactions...</p>
-          ) : transactions.length === 0 ? (
-            <p>No transactions yet.</p>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ textAlign: "left", borderBottom: "1px solid #e2e8f0" }}>
-                    <th style={{ padding: 12 }}>Date</th>
-                    <th style={{ padding: 12 }}>Type</th>
-                    <th style={{ padding: 12 }}>Category</th>
-                    <th style={{ padding: 12 }}>Amount</th>
-                    <th style={{ padding: 12 }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                      <td style={{ padding: 12 }}>{String(tx.created_at || "").slice(0, 10)}</td>
-                      <td style={{ padding: 12 }}>{tx.type}</td>
-                      <td style={{ padding: 12 }}>{tx.category}</td>
-                      <td style={{ padding: 12 }}>{formatXOF(tx.amount || 0)}</td>
-                      <td style={{ padding: 12 }}>{tx.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <main className={styles.page}>
+      <div className={styles.layout}>
+        {/* Sidebar */}
+        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
+          <div className={styles.sidebarHeader}>
+            <div>
+              <p className={styles.sidebarEyebrow}>Boulot Man</p>
+              <h2 className={styles.sidebarTitle}>Client Space</h2>
             </div>
-          )}
-        </section>
+            <button
+              type="button"
+              className={styles.sidebarClose}
+              aria-label="Close navigation"
+              onClick={() => setMobileNavOpen(false)}
+            >
+              <iconify-icon icon="lucide:x" />
+            </button>
+          </div>
+
+          <nav className={styles.sidebarNav} aria-label="Main client navigation">
+            {navItems.map((item) => {
+              const active = item.match(pathname);
+              return (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
+                >
+                  <iconify-icon icon={item.icon} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className={styles.sidebarFooter}>
+            <LogoutButton className={styles.logoutButton} />
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className={styles.main}>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+          />
+
+          <div className={styles.content}>
+            <div className={styles.pageHeader}>
+              <div>
+                <h1 className={styles.headerTitle}>Payments & Escrows</h1>
+                <p className={styles.headerSubtitle}>Monitor your available balances, pending deposits, and task payouts.</p>
+              </div>
+            </div>
+
+            {/* Stats Overview */}
+            <section className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={`${styles.statIcon} ${styles.statIconAccent}`}>
+                  <iconify-icon icon="lucide:wallet" />
+                </div>
+                <div>
+                  <h3 className={styles.statLabel}>Available Balance</h3>
+                  <p className={styles.statValue}>
+                    {walletLoading ? "..." : formatXOF(wallet?.available_balance || 0)}
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={`${styles.statIcon} ${styles.statIconSuccess}`}>
+                  <iconify-icon icon="lucide:lock" />
+                </div>
+                <div>
+                  <h3 className={styles.statLabel}>Pending Escrow</h3>
+                  <p className={styles.statValue}>
+                    {walletLoading ? "..." : formatXOF(wallet?.pending_escrow || 0)}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Transaction History Section */}
+            <section className={styles.tableCard}>
+              <h2 className={styles.tableTitle}>Transaction History</h2>
+              
+              {txLoading ? (
+                <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+                  <p>Loading transactions...</p>
+                </div>
+              ) : transactions.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <iconify-icon icon="lucide:file-text" />
+                  <p>No transaction history recorded yet.</p>
+                </div>
+              ) : (
+                <div className={styles.tableWrapper}>
+                  <table className={styles.adminTable}>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((tx) => (
+                        <tr key={tx.id}>
+                          <td>
+                            {tx.created_at
+                              ? new Date(tx.created_at).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                              : "-"}
+                          </td>
+                          <td style={{ textTransform: "capitalize" }}>{tx.type || "-"}</td>
+                          <td style={{ textTransform: "capitalize" }}>{tx.category || "-"}</td>
+                          <td style={{ fontWeight: 700, color: "#001f3f" }}>
+                            {formatXOF(tx.amount || 0)}
+                          </td>
+                          <td>
+                            <span className={`${styles.statusBadge} ${getStatusClass(tx.status)}`}>
+                              {tx.status || "Unknown"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
       </div>
     </main>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ background: "#fff", borderRadius: 18, padding: 18, boxShadow: "0 10px 24px rgba(15,23,42,0.06)" }}>
-      <div style={{ color: "#64748b", fontSize: 13 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 800, marginTop: 8 }}>{value}</div>
-    </div>
   );
 }

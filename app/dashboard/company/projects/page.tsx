@@ -10,10 +10,12 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import { formatXOF } from "@/app/lib/format";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 export default function CompanyProjects() {
   const [activeNav, setActiveNav] = useState("projects");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending" | "completed">("all");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: projectsData, loading: projectsLoading, error } = useFetch(
@@ -68,7 +70,8 @@ export default function CompanyProjects() {
   };
 
   return (
-    <div className={layoutStyles.layoutWrapper}>
+    <div className={`${layoutStyles.layoutWrapper} ${mobileSidebarOpen ? layoutStyles.sidebarOpenMobile : ""}`}>
+      <div className={layoutStyles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
       <aside className={layoutStyles.sidebar}>
         <div className={layoutStyles.sidebarHeader}>
           <Link href="/" className={layoutStyles.brand}>
@@ -82,6 +85,9 @@ export default function CompanyProjects() {
               priority
             />
           </Link>
+          <button className={layoutStyles.mobileCloseBtn} onClick={() => setMobileSidebarOpen(false)}>
+            <iconify-icon icon="lucide:x" />
+          </button>
         </div>
 
         <nav className={layoutStyles.navMenu}>
@@ -104,42 +110,9 @@ export default function CompanyProjects() {
       </aside>
 
       <div className={layoutStyles.mainWrapper}>
-        <header className={styles.topbar}>
-          <div className={styles.searchBar}>
-            <div style={{ color: "#64748b", display: "flex" }}>
-              <iconify-icon icon="lucide:search" style={{ fontSize: "18px" }}></iconify-icon>
-            </div>
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Search projects, clients..."
-            />
-          </div>
-
-          <div className={styles.topbarActions}>
-            <button className={styles.notificationBtn}>
-              <iconify-icon icon="lucide:bell" style={{ fontSize: "20px" }}></iconify-icon>
-              <div className={styles.notificationDot}></div>
-            </button>
-
-            <div className={styles.userProfile}>
-              <div className={styles.userInfo} style={{ textAlign: "right" }}>
-                <span className={styles.userName}>{user ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || user.username || "" : ""}</span>
-                <span className={styles.userRole}>{user?.role ?? ""}</span>
-              </div>
-              <div className={styles.avatar}>
-                {user?.avatar_url ? (
-                  <Image
-                    src={user.avatar_url}
-                    alt=""
-                    width={36}
-                    height={36}
-                  />
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          onMenuClick={() => setMobileSidebarOpen(true)}
+        />
 
         <main className={styles.pageContent}>
           <div className={styles.pageHeader}>

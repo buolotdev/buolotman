@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -72,33 +73,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       <main className={styles.mainContent}>
-        <header className={styles.topbar}>
-          <div className={styles.topbarLeft}>
-            <button className={styles.mobileMenuBtn} onClick={() => setMobileSidebarOpen(true)}>
-              <iconify-icon icon="lucide:menu" />
-            </button>
-            <div className={styles.searchBar}>
-              <iconify-icon icon="lucide:search" />
-              <input type="text" placeholder="Search users, tasks, transactions..." />
-            </div>
-          </div>
-
-          <div className={styles.topbarRight}>
-            <button className={styles.actionBtn}>
-              <iconify-icon icon="lucide:bell" />
-              <span className={styles.notificationDot} />
-            </button>
-            <div className={styles.adminProfile}>
-              <div className={styles.avatar}>
-                {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
-              </div>
-              <div className={styles.profileInfo}>
-                <div className={styles.profileName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
-                <span className={styles.profileRole}>{userRole}</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          onMenuClick={() => setMobileSidebarOpen(true)}
+        />
 
         {children}
       </main>

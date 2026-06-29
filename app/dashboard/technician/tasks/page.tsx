@@ -10,6 +10,7 @@ import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 type TaskFilter = "all" | "urgent" | "residential" | "commercial";
 type SortOption = "newest" | "budget" | "match";
@@ -206,31 +207,12 @@ export default function TechnicianTasksPage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <label className={styles.searchBox}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks or keywords" aria-label="Search tasks" />
-              </label>
-            </div>
-
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton} aria-label="Notifications">
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-              <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>{userInitials}</div>
-                <div className={styles.topbarProfileLines}>
-                  <strong>{userName}</strong>
-                  <span>{userRole}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search tasks or keywords"
+            searchQuery={query}
+            setSearchQuery={setQuery}
+          />
 
           <div className={styles.content}>
             <section className={styles.pageHeader}>

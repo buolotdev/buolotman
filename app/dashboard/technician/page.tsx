@@ -9,6 +9,7 @@ import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
@@ -87,26 +88,12 @@ export default function TechnicianDashboardPage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <div className={styles.searchBox}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search tasks, bids..." />
-              </div>
-            </div>
-            <div className={styles.topbarActions}>
-                <div className={styles.topbarProfile}>
-                <div className={styles.topbarAvatar}>{userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}</div>
-                <div className={styles.topbarProfileLines}>
-                  <div className={styles.topbarName}>{userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}</div>
-                  <span>{userRole}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search tasks, bids..."
+            searchQuery={query}
+            setSearchQuery={setQuery}
+          />
 
           <div className={styles.content}>
             <div className={styles.heroCard}>
