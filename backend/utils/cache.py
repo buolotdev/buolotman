@@ -45,6 +45,8 @@ def cached(prefix: str, ttl: int = 300):
 
             try:
                 if hasattr(response, "status_code") and 200 <= response.status_code < 300:
+                    if hasattr(response, "render") and callable(response.render):
+                        response.render()
                     cache.set(key, response, ttl)
             except Exception as exc:
                 logger.warning("Cache set failed for %s: %s", key, exc)
