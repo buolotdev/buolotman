@@ -10,6 +10,7 @@ import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -256,30 +257,9 @@ export default function ClientMessagesPage() {
         </aside>
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button type="button" className={styles.mobileMenuButton} aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <label className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" placeholder="Search tasks, professionals..." aria-label="Search tasks and professionals" />
-              </label>
-            </div>
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton} aria-label="Notifications">
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-              <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>{userInitials}</div>
-                <div>
-                  <div className={styles.userName}>{userName}</div>
-                  <div className={styles.userRole}>{userRole}</div>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+          />
 
           <div className={styles.chatShell}>
             <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>

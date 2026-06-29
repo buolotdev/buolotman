@@ -7,6 +7,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import LogoutButton from "@/app/components/LogoutButton";
 import styles from "./page.module.css";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 type ServiceForm = {
   title: string;
@@ -44,6 +45,7 @@ const navItems = [
 
 export default function TechnicianServicesPage() {
   const toast = useToast();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: servicesData, loading, refetch } = useFetch(() => api.getTechnicianServices(), []);
   const { data: categoriesData } = useFetch(() => api.getCategories(), []);
@@ -122,12 +124,31 @@ export default function TechnicianServicesPage() {
 
   return (
     <div className={styles.page}>
-      <aside className={styles.sidebar}>
+      <div className={`${styles.sidebarOverlay} ${mobileNavOpen ? styles.sidebarOverlayOpen : ""}`} onClick={() => setMobileNavOpen(false)} />
+      <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
         <div className={styles.brand}>
           <div className={styles.brandMark}>BM</div>
-          <div>
-            <div className={styles.brandLabel}>Boulot Man</div>
-            <div className={styles.brandSub}>Technician Space</div>
+          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div className={styles.brandLabel}>Boulot Man</div>
+              <div className={styles.brandSub}>Technician Space</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(false)}
+              style={{
+                border: 0,
+                background: "transparent",
+                color: "#fff",
+                cursor: "pointer",
+                padding: 4,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <iconify-icon icon="lucide:x" style={{ fontSize: "20px" }} />
+            </button>
           </div>
         </div>
         <nav className={styles.nav}>
@@ -144,14 +165,20 @@ export default function TechnicianServicesPage() {
       </aside>
 
       <main className={styles.main}>
-        <header className={styles.topbar}>
-          <div>
-            <p className={styles.kicker}>Manage your listings</p>
-            <h1>My Services</h1>
-            <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
-          </div>
-          <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
-        </header>
+        <DashboardHeader
+          onMenuClick={() => setMobileNavOpen(true)}
+        />
+
+        <div style={{ padding: "0 0 24px" }}>
+          <header className={styles.topbar}>
+            <div>
+              <p className={styles.kicker}>Manage your listings</p>
+              <h1>My Services</h1>
+              <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
+            </div>
+            <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+          </header>
+        </div>
 
         <section className={styles.summaryGrid}>
           <article className={styles.statCard}>

@@ -9,6 +9,7 @@ import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 export default function AddService() {
   const toast = useToast();
@@ -62,24 +63,13 @@ export default function AddService() {
 
   return (
     <div className={styles.exportWrapper}>
-      <header className={styles.topbar}>
-        <Link href="/dashboard/company" className={styles.brand}>
-          <Image
-            src="/boulotman-logo.png"
-            alt="Boulot Man"
-            width={180}
-            height={46}
-            style={{ width: 'auto', height: '46px' }}
-            priority
-          />
+      <DashboardHeader />
+      <div style={{ padding: "16px 24px 0", textAlign: "right" }}>
+        <Link href="/dashboard/company/profile" className={styles.closeBtn} style={{ textDecoration: "none", color: "#001f3f", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <iconify-icon icon="lucide:arrow-left" style={{ fontSize: '18px' }}></iconify-icon>
+          Back to Profile
         </Link>
-        <div className={styles.topbarActions}>
-          <Link href="/dashboard/company/profile" className={styles.closeBtn}>
-            <iconify-icon icon="lucide:x" style={{ fontSize: '18px' }}></iconify-icon>
-            Back to Profile
-          </Link>
-        </div>
-      </header>
+      </div>
 
       <main className={styles.main}>
         <div className={styles.formContainer}>

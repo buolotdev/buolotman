@@ -9,6 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
 type Message = {
   id: string;
@@ -251,33 +252,9 @@ export default function CompanyMessages() {
       </aside>
 
       <div className={styles.mainWrapper}>
-        <header className={styles.topbar}>
-          <div className={styles.topbarLeft}>
-            <button
-              className={styles.mobileMenuBtn}
-              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            >
-              <iconify-icon icon="lucide:menu" />
-            </button>
-            <div className={styles.searchBar}>
-              <iconify-icon icon="lucide:search" />
-              <input type="text" placeholder="Search messages, participants..." />
-            </div>
-          </div>
-
-          <div className={styles.topbarActions}>
-            <button className={styles.iconBtn}>
-              <iconify-icon icon="lucide:bell" />
-              <span className={styles.notificationDot} />
-            </button>
-            <div className={styles.companyProfile}>
-              <div className={styles.profileImg}>
-                <Image src="/boulotman-logo.png" alt="Company" width={36} height={36} />
-              </div>
-              <div className={styles.profileName}>{user?.first_name ? `${user.first_name} ${user.last_name}` : user?.email ?? "Company"}</div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader
+          onMenuClick={() => setMobileSidebarOpen(true)}
+        />
 
         <div className={styles.chatShell}>
           <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
