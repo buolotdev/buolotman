@@ -190,21 +190,19 @@ export default function OtpVerification({
         payload.company_name = data.fullName.trim() || data.email;
       }
 
-      // BYPASS REGISTRATION FOR NOW
-      // let registerResult: { message: string };
-      // if (data.role === "technician") {
-      //   registerResult = await api.registerTechnician(payload);
-      // } else if (data.role === "company") {
-      //   registerResult = await api.registerCompany(payload);
-      // } else {
-      //   registerResult = await api.registerClient(payload);
-      // }
+      let registerResult: { message: string };
+      if (data.role === "technician") {
+        registerResult = await api.registerTechnician(payload);
+      } else if (data.role === "company") {
+        registerResult = await api.registerCompany(payload);
+      } else {
+        registerResult = await api.registerClient(payload);
+      }
 
-      // BYPASS LOGIN FOR NOW
-      // const tokens = await api.login(data.email, data.password);
+      const tokens = await api.login(data.email, data.password);
       if (typeof window !== "undefined") {
-        localStorage.setItem("access_token", "dummy_access_token");
-        localStorage.setItem("refresh_token", "dummy_refresh_token");
+        localStorage.setItem("access_token", tokens.access);
+        localStorage.setItem("refresh_token", tokens.refresh);
         localStorage.setItem("user_role", data.role);
       }
 
