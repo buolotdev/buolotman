@@ -1,0 +1,646 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 69, 0, 0.08), transparent 28%),
+    linear-gradient(180deg, #fffdfa 0%, #f4f7fb 42%, #f8fafc 100%);
+  color: #0f172a;
+}
+
+.logoBar {
+  display: flex;
+  justify-content: center;
+  padding: 28px 20px 8px;
+}
+
+.logoLink {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoImage {
+  width: auto;
+  height: 64px;
+  object-fit: contain;
+}
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 8px 24px 80px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.backLink {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.title {
+  margin: 0;
+  color: #001f3f;
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 700px;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 500;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 34px;
+  align-items: start;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightColumn {
+  position: relative;
+}
+
+.card,
+.summaryCard,
+.successCard {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(0, 31, 63, 0.08);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 60px rgba(0, 31, 63, 0.08),
+    0 4px 16px rgba(0, 31, 63, 0.03);
+  backdrop-filter: blur(10px);
+}
+
+.card {
+  padding: 28px;
+}
+
+.card h2,
+.summaryCard h2,
+.sectionTitle,
+.successCard h2 {
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #001f3f;
+  letter-spacing: -0.02em;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.secureLabel {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.steps {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.step {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.stepIndex {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #059669;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.step strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.step p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.stepConnector {
+  width: 24px;
+  align-self: center;
+  height: 2px;
+  background: #dbe5f0;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid #dbe5f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 16px 18px;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.6;
+}
+
+.textarea:focus,
+.formField input:focus,
+.promoRow input:focus {
+  outline: none;
+  border-color: #001f3f;
+  box-shadow: 0 0 0 3px rgba(0, 31, 63, 0.08);
+}
+
+.paymentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.methodCard {
+  border: 1px solid #dbe5f0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  overflow: hidden;
+}
+
+.methodCardActive {
+  border-color: #001f3f;
+  box-shadow: 0 0 0 1px #001f3f;
+}
+
+.methodHeader {
+  width: 100%;
+  padding: 22px 24px;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  text-align: left;
+}
+
+.methodTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.radioCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid #cbd5e1;
+  position: relative;
+}
+
+.methodCardActive .radioCircle {
+  border-color: #001f3f;
+}
+
+.methodCardActive .radioCircle::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: #001f3f;
+}
+
+.methodIcon {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.methodBody {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.methodNote {
+  padding: 0 24px 22px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formField label,
+.promoSection label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.formField input,
+.promoRow input {
+  min-height: 48px;
+  border: 1px solid #dbe5f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 0 14px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.formSplit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.billingBlock {
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px dashed #dbe5f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summaryCard {
+  position: sticky;
+  top: 28px;
+  padding: 30px;
+}
+
+.summaryBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.summaryBlock h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.summaryMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dbe5f0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.summaryMeta div,
+.breakdown div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.summaryMeta span,
+.breakdown span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summaryMeta strong,
+.breakdown strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.proCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #dbe5f0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.proAvatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffe7dc 0%, #fff2eb 100%);
+  color: #ff4500;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.proCard strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.proCard p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.promoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed #dbe5f0;
+}
+
+.promoRow {
+  display: flex;
+  gap: 12px;
+}
+
+.applyButton {
+  min-width: 92px;
+  border: 0;
+  border-radius: 14px;
+  background: #001f3f;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.discountRow strong {
+  color: #059669;
+}
+
+.totalRow {
+  margin-top: 6px;
+  padding-top: 18px;
+  border-top: 1px solid #dbe5f0;
+}
+
+.totalRow span {
+  color: #001f3f;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.totalRow strong {
+  color: #001f3f;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.depositButton,
+.primaryButton,
+.secondaryButton {
+  min-height: 54px;
+  padding: 0 24px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.depositButton,
+.primaryButton {
+  border: 0;
+  background: #ff4500;
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(255, 69, 0, 0.22);
+}
+
+.depositButton {
+  width: 100%;
+}
+
+.depositButton:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.secondaryButton {
+  border: 1px solid #dbe5f0;
+  background: #fff;
+  color: #001f3f;
+}
+
+.terms {
+  margin: 16px 0 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.faqSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faqItem {
+  padding: 22px 24px;
+  border: 1px solid rgba(0, 31, 63, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.faqItem strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.faqItem p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.successCard {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 36px 34px;
+  text-align: center;
+}
+
+.successCard p {
+  margin: 0 auto;
+  max-width: 56ch;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.successActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    position: static;
+  }
+
+  .steps {
+    flex-direction: column;
+  }
+
+  .stepConnector {
+    width: 2px;
+    height: 18px;
+    margin-left: 16px;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .logoImage {
+    height: 52px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .card,
+  .summaryCard,
+  .successCard {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .formSplit,
+  .promoRow,
+  .successActions {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .summaryMeta div,
+  .breakdown div,
+  .proCard {
+    align-items: flex-start;
+  }
+
+  .totalRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+
+
+
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brandImage { width: 48px; height: 48px; object-fit: contain; }
+.brandText { display: flex; flex-direction: column; }
+.brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+
+.brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
+
+.sidebar::-webkit-scrollbar { display: none; }
+.sidebar { -ms-overflow-style: none; scrollbar-width: none; }

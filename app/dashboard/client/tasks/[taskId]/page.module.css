@@ -1,0 +1,126 @@
+.page { min-height: 100vh; background: #fefeff; color: #001f3f; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+.sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; background: linear-gradient(180deg, #001f3f 0%, #00172e 100%); color: #fefeff; border-right: 1px solid rgba(255,255,255,.08); }
+.sidebarHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.sidebarEyebrow { margin: 0 0 6px; color: rgba(254,254,255,.66); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebarTitle { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.03em; }
+.sidebarClose { display: none; width: 40px; height: 40px; border: 0; border-radius: 12px; background: rgba(255,255,255,.08); color: #fff; }
+.sidebarClose iconify-icon, .navItem iconify-icon, .mobileMenuButton iconify-icon, .iconButton iconify-icon, .searchBar iconify-icon, .backLink iconify-icon, .iconAction iconify-icon, .attachmentIcon iconify-icon, .infoIcon iconify-icon { font-size: 18px; }
+.sidebarNav { display: flex; flex-direction: column; gap: 8px; padding: 20px 16px; flex: 1; }
+.navItem { display: flex; align-items: center; gap: 12px; border-radius: 14px; padding: 14px 16px; color: rgba(254,254,255,.72); font-size: 15px; font-weight: 600; text-decoration: none; }
+.navItemActive, .navItem:hover { background: rgba(255,255,255,.1); color: #fff; }
+.sidebarFooter { padding: 20px 24px 28px; border-top: 1px solid rgba(255,255,255,.08); }
+.logoutButton { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; width: 100%; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; background: rgba(255,255,255,.06); cursor: pointer; }
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.main { min-width: 0; display: flex; flex-direction: column; }
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 32px; background: rgba(248,250,252,.92); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(14px); }
+.topbarLeft, .topbarActions, .userMenu, .taskHeader, .taskActions, .taskMeta, .sectionHeader, .bidHeader, .bidderInfo, .bidActions, .widgetActions, .clientProfile { display: flex; align-items: center; }
+.topbarLeft, .topbarActions { gap: 16px; }
+.mobileMenuButton { display: none; width: 44px; height: 44px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; color: #001f3f; }
+.searchBar { display: flex; align-items: center; gap: 12px; min-width: min(560px, 100%); min-height: 48px; padding: 0 16px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #64748b; }
+.searchBar input { width: 100%; border: 0; background: transparent; color: #001f3f; font-size: 14px; font-weight: 500; outline: 0; }
+.iconButton { position: relative; width: 44px; height: 44px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; color: #64748b; }
+.notificationDot { position: absolute; top: 10px; right: 10px; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 999px; background: #ff4500; }
+.userMenu { gap: 12px; }
+.userAvatar, .bidderAvatar, .qaAvatar, .clientAvatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; font-weight: 800; }
+.userAvatar { width: 40px; height: 40px; background: linear-gradient(135deg, #001f3f 0%, #003366 100%); color: #fff; font-size: 13px; }
+.userName, .userRole { margin: 0; }
+.userName { font-size: 14px; font-weight: 700; }
+.userRole { color: #64748b; font-size: 12px; font-weight: 600; }
+.content { padding: 32px; background: linear-gradient(180deg, #f1f5f9 0%, #fefeff 180px); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: start; }
+.taskHeader { justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 32px; }
+.backLink { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: #64748b; font-size: 14px; font-weight: 700; text-decoration: none; }
+.taskTitle { margin: 0 0 16px; font-size: 32px; font-weight: 800; line-height: 1.25; letter-spacing: -.03em; }
+.taskMeta { flex-wrap: wrap; gap: 12px 16px; color: #64748b; font-size: 14px; font-weight: 600; }
+.categoryBadge, .skillTag, .statusPill, .replyBadge { display: inline-flex; align-items: center; justify-content: center; }
+.categoryBadge { min-height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(0,31,63,.08); color: #001f3f; font-size: 13px; font-weight: 800; }
+.taskActions { gap: 12px; margin-top: 38px; }
+.iconAction { width: 40px; height: 40px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; }
+.card { margin-bottom: 24px; padding: 28px; border-radius: 24px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 12px 30px rgba(0, 31, 63, 0.05); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(0, 31, 63, 0.12); }
+.sectionTitle { margin: 0 0 20px; font-size: 20px; font-weight: 800; }
+.description { margin: 0 0 18px; color: #64748b; font-size: 15px; line-height: 1.7; }
+.label { margin: 28px 0 12px; color: #001f3f; font-size: 14px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.skillsList { display: flex; flex-wrap: wrap; gap: 8px; }
+.skillTag { min-height: 32px; padding: 0 12px; border-radius: 999px; background: #f1f5f9; color: #64748b; font-size: 13px; font-weight: 700; }
+.attachmentGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.attachmentCard { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 1px solid rgba(226,232,240,0.6); border-radius: 12px; background: rgba(255,255,255,0.4); text-align: left; backdrop-filter: blur(8px); }
+.attachmentIcon { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,31,63,.05); color: #001f3f; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.attachmentInfo { display: flex; flex-direction: column; min-width: 0; }
+.attachmentInfo strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.attachmentInfo span { color: #64748b; font-size: 12px; }
+.infoGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+.infoItem { display: flex; gap: 14px; }
+.infoIcon { width: 40px; height: 40px; border-radius: 999px; background: rgba(0,31,63,.05); color: #001f3f; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.infoItem small { display: block; margin-bottom: 4px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.infoItem strong { font-size: 15px; line-height: 1.5; }
+.extraList { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(226,232,240,0.5); }
+.extraList div, .widgetStats div { display: flex; justify-content: space-between; gap: 16px; }
+.extraList span, .widgetStats span { color: #64748b; font-size: 14px; }
+.extraList strong, .widgetStats strong { font-size: 14px; font-weight: 700; color: #001f3f; }
+.sectionHeader { justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.sortText { color: #64748b; font-size: 14px; }
+.sortText strong { color: #001f3f; }
+.linkCtaInline { color: #ff4500; font-size: 14px; font-weight: 800; text-decoration: none; }
+.bidList { display: flex; flex-direction: column; gap: 16px; }
+.bidCard { padding: 24px; border-radius: 20px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 8px 24px rgba(0, 31, 63, 0.04); transition: transform 0.2s, box-shadow 0.2s; }
+.bidCard:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(0, 31, 63, 0.08); }
+.bidHeader { justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 16px; }
+.bidderInfo { gap: 16px; }
+.bidderAvatar, .qaAvatar, .clientAvatar { width: 48px; height: 48px; background: linear-gradient(135deg, #ffe8de 0%, #fff3ee 100%); color: #ff4500; font-size: 15px; flex-shrink: 0; }
+.bidderInfo h3 { margin: 0 0 6px; font-size: 16px; font-weight: 800; }
+.bidderMeta { display: flex; flex-wrap: wrap; gap: 8px 12px; color: #64748b; font-size: 13px; font-weight: 600; }
+.verified { color: #16a34a; }
+.bidPrice { text-align: right; }
+.bidPrice strong { display: block; font-size: 20px; font-weight: 800; }
+.bidPrice span { color: #64748b; font-size: 13px; }
+.bidMessage { margin: 0 0 16px; padding: 16px; border-radius: 12px; background: rgba(255,255,255,.75); color: #64748b; font-size: 14px; line-height: 1.6; }
+.portfolioRow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.portfolioChip { padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid #e2e8f0; color: #001f3f; font-size: 13px; font-weight: 700; }
+.bidActions, .widgetActions { gap: 12px; flex-wrap: wrap; }
+.primaryButton, .secondaryButton { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 800; }
+.primaryButton { border: 0; background: #ff4500; color: #fff; box-shadow: 0 12px 26px rgba(255,69,0,.18); }
+.secondaryButton { border: 1px solid #e2e8f0; background: #fff; color: #001f3f; }
+.helperText { margin: 0 0 20px; color: #64748b; font-size: 14px; }
+.qaList { display: flex; flex-direction: column; }
+.qaItem { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+.qaItem:last-child { padding-bottom: 0; border-bottom: 0; }
+.qaContent { flex: 1; }
+.qaHeader { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 8px; color: #64748b; font-size: 13px; }
+.qaHeader strong { display: inline-flex; align-items: center; gap: 8px; color: #001f3f; font-size: 14px; }
+.qaContent p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.6; }
+.qaReply { margin-top: 12px; padding: 12px 16px; border-left: 3px solid #001f3f; border-radius: 12px; background: #f1f5f9; }
+.replyBadge { min-height: 20px; padding: 0 8px; border-radius: 999px; background: rgba(0,31,63,.08); color: #001f3f; font-size: 10px; font-weight: 800; }
+.widgetTitle { margin: 0 0 16px; font-size: 16px; font-weight: 800; }
+.statusPill { min-height: 40px; padding: 0 16px; border-radius: 999px; background: rgba(22,163,74,.1); color: #16a34a; font-size: 14px; font-weight: 800; align-self: flex-start; margin-bottom: 20px; }
+.widgetStats { display: flex; flex-direction: column; gap: 16px; }
+.widgetActions { margin-top: 24px; }
+.widgetActions .primaryButton, .widgetActions .secondaryButton { flex: 1; }
+.clientProfile { gap: 16px; margin-bottom: 20px; }
+.clientProfile p { margin: 4px 0 0; color: #64748b; font-size: 13px; }
+.similarList { display: flex; flex-direction: column; }
+.similarTask { display: flex; flex-direction: column; gap: 6px; padding: 16px 0; border-bottom: 1px solid #e2e8f0; }
+.similarTask:last-child { border-bottom: 0; padding-bottom: 0; }
+.similarTask strong { font-size: 14px; font-weight: 700; line-height: 1.4; }
+.similarTask div { display: flex; justify-content: space-between; gap: 12px; color: #64748b; font-size: 13px; }
+.linkCta { display: block; margin-top: 16px; color: #001f3f; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; }
+.emptyState { padding: 18px; border-radius: 14px; background: #f8fafc; color: #64748b; font-size: 14px; }
+@media (max-width: 1180px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } .sidebar { position: fixed; top: 0; left: 0; width: min(320px, calc(100vw - 32px)); transform: translateX(-100%); transition: transform .2s ease; z-index: 50; } .sidebarOpen { transform: translateX(0); } .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; } }
+@media (max-width: 760px) { .topbar, .content { padding-left: 20px; padding-right: 20px; } .topbar { flex-direction: column; align-items: stretch; } .topbarLeft, .topbarActions { width: 100%; } .topbarActions { justify-content: space-between; } .searchBar { min-width: 0; width: 100%; } .taskHeader, .bidHeader, .sectionHeader { flex-direction: column; align-items: flex-start; } .taskActions, .bidActions, .widgetActions { width: 100%; } .primaryButton, .secondaryButton { width: 100%; } .taskTitle { font-size: 28px; } .taskMeta { gap: 10px; } .qaHeader, .similarTask div, .extraList div, .widgetStats div { flex-direction: column; align-items: flex-start; } }
+
+
+
+
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brandImage { width: 48px; height: 48px; object-fit: contain; }
+.brandText { display: flex; flex-direction: column; }
+.brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+
+.brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
+
+.sidebar::-webkit-scrollbar { display: none; }
+.sidebar { -ms-overflow-style: none; scrollbar-width: none; }

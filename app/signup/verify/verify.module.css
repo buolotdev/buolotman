@@ -1,0 +1,258 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 69, 0, 0.08), transparent 34%),
+    linear-gradient(180deg, #fffdfa 0%, #f8fafc 100%);
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glowLeft,
+.glowRight {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(20px);
+  opacity: 0.7;
+}
+
+.glowLeft {
+  width: 280px;
+  height: 280px;
+  background: rgba(255, 69, 0, 0.12);
+  top: 6%;
+  left: -70px;
+}
+
+.glowRight {
+  width: 360px;
+  height: 360px;
+  background: rgba(0, 31, 63, 0.08);
+  right: -110px;
+  bottom: -30px;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  padding: 44px 36px 34px;
+  border: 1px solid rgba(0, 31, 63, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 24px 70px rgba(0, 31, 63, 0.12),
+    0 4px 18px rgba(0, 31, 63, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brandImage {
+  width: auto;
+  height: 72px;
+  object-fit: contain;
+}
+
+.title {
+  margin: 0 0 10px;
+  color: #001f3f;
+  font-size: 32px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.phoneHighlight {
+  color: #001f3f;
+  font-weight: 800;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.otpWrapper {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.otpInput {
+  width: 52px;
+  height: 64px;
+  border: 1px solid rgba(0, 31, 63, 0.12);
+  border-radius: 16px;
+  background: #f8fafc;
+  text-align: center;
+  color: #001f3f;
+  font-size: 24px;
+  font-weight: 800;
+  outline: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.otpInput:focus {
+  border-color: rgba(255, 69, 0, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.12);
+  background: #ffffff;
+}
+
+.otpInputFilled {
+  background: #ffffff;
+}
+
+.resendSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timerText {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resendLink {
+  border: 0;
+  background: transparent;
+  color: #ff4500;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.resendLinkDisabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.primaryButton {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #001f3f 0%, #001833 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(0, 31, 63, 0.2);
+}
+
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.backLink iconify-icon {
+  font-size: 16px;
+}
+
+.errorText {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px;
+    align-items: stretch;
+  }
+
+  .card {
+    max-width: none;
+    margin: auto 0;
+    padding: 28px 20px 24px;
+    border-radius: 24px;
+  }
+
+  .brandImage {
+    height: 56px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .otpWrapper {
+    gap: 8px;
+  }
+
+  .otpInput {
+    width: 44px;
+    height: 56px;
+    border-radius: 14px;
+    font-size: 22px;
+  }
+
+  .primaryButton {
+    min-height: 50px;
+    border-radius: 14px;
+  }
+}

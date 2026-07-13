@@ -1,0 +1,223 @@
+.mainWrapper {
+  padding: 40px 24px 80px;
+  background: #f1f5f9;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.title {
+  margin: 4px 0 0;
+  color: #001f3f;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.backLink {
+  color: #ff4500;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.backLink:hover {
+  opacity: 0.8;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
+  border-radius: 24px;
+  padding: 40px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 16px 48px rgba(0, 31, 63, 0.2);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.summaryLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.averageRating {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+  color: #f59e0b;
+  font-size: 20px;
+}
+
+.reviewCount {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reviewCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(0, 31, 63, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reviewCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 48px rgba(0, 31, 63, 0.08);
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.reviewerInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #001f3f;
+  font-size: 16px;
+}
+
+.reviewerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviewerName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.reviewDate {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.reviewContent {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.replyBtn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.replyBtn:hover {
+  background: #e2e8f0;
+  color: #ff4500;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 40px rgba(0, 31, 63, 0.04);
+}
+
+.emptyIcon {
+  font-size: 56px;
+  color: #cbd5e1;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brandImage { width: 48px; height: 48px; object-fit: contain; }
+.brandText { display: flex; flex-direction: column; }
+.brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
+.brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }

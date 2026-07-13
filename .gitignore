@@ -1,0 +1,84 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/app/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!backend/.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Python (cache, not source)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+db.sqlite3
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Scratch / temp files
+check_out.txt
+seed_out.txt
+server.err.log
+server.log
+*_login.json
+*_login_resp.json
+accept.json
+bid.json
+bid19.json
+bid_resp.json
+deposit.json
+test_*.py
+header_snippet.txt
+scratch.html
+profile.html
+fix_*.py
+inject_*.py
+migrate_*.py
+replace.py
+fix_viewport.js
+
+# Local build artifacts / scratch
+build_out.txt
+app/globals_trimmed.txt

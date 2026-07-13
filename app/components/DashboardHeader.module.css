@@ -1,0 +1,447 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 32px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 31, 63, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.topbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.mobileMenuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(0, 31, 63, 0.04);
+  color: #001f3f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobileMenuButton:hover {
+  background: rgba(0, 31, 63, 0.08);
+}
+
+.mobileMenuButton iconify-icon {
+  font-size: 24px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 31, 63, 0.06);
+  border-radius: 14px;
+  padding: 0 16px;
+  width: 100%;
+  max-width: 380px;
+  height: 44px;
+  transition: all 0.25s ease;
+}
+
+.searchBar:focus-within {
+  border-color: rgba(255, 69, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.08);
+  background: #ffffff;
+}
+
+.searchBar iconify-icon {
+  color: #94a3b8;
+  font-size: 18px;
+}
+
+.searchBar input {
+  border: 0;
+  background: transparent;
+  outline: 0;
+  width: 100%;
+  color: #001f3f;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.searchBar input::placeholder {
+  color: #94a3b8;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.actionWrapper {
+  position: relative;
+}
+
+.iconButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(0, 31, 63, 0.06);
+  border-radius: 14px;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.iconButton:hover,
+.iconButtonActive {
+  color: #ff4500;
+  border-color: rgba(255, 69, 0, 0.15);
+  background: rgba(255, 69, 0, 0.02);
+}
+
+.iconButton iconify-icon {
+  font-size: 20px;
+}
+
+.notificationDot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4500;
+  border: 2px solid #ffffff;
+}
+
+/* User Menu Button */
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.userMenu:hover,
+.userMenuActive {
+  background: rgba(0, 31, 63, 0.02);
+  border-color: rgba(0, 31, 63, 0.04);
+}
+
+.userAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 31, 63, 0.15);
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #001f3f;
+  line-height: 1.2;
+}
+
+.userRole {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Dropdown styling */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0, 31, 63, 0.08);
+  border-radius: 20px;
+  box-shadow:
+    0 16px 36px rgba(0, 31, 63, 0.08),
+    0 4px 12px rgba(0, 31, 63, 0.03);
+  backdrop-filter: blur(10px);
+  transform-origin: top right;
+  animation: dropdownAnim 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+}
+
+@keyframes dropdownAnim {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Notification Dropdown specific */
+.notificationDropdown {
+  width: 360px;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.dropdownTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #001f3f;
+}
+
+.markAllButton {
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff4500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.markAllButton:hover {
+  background: rgba(255, 69, 0, 0.06);
+}
+
+.notificationList {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notificationItem {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0, 31, 63, 0.03);
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notificationItem:hover {
+  background: rgba(0, 31, 63, 0.01);
+}
+
+.notificationUnread {
+  background: rgba(255, 69, 0, 0.02);
+}
+
+.notificationItemIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(0, 31, 63, 0.05);
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notificationUnread .notificationItemIcon {
+  background: rgba(255, 69, 0, 0.1);
+  color: #ff4500;
+}
+
+.notificationItemContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationItemTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #001f3f;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.notificationItemBody {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.notificationItemTime {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+.notificationItemIndicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4500;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  padding: 32px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.emptyState iconify-icon {
+  font-size: 36px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.emptyState p {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Profile Dropdown specific */
+.profileDropdown {
+  width: 260px;
+  padding: 8px;
+}
+
+.profileSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 14px;
+  margin-bottom: 8px;
+}
+
+.profileSummaryAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #001f3f;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.profileMenuLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.profileMenuLink:hover {
+  background: rgba(0, 31, 63, 0.04);
+  color: #001f3f;
+}
+
+.profileMenuLink iconify-icon {
+  font-size: 18px;
+  color: #64748b;
+}
+
+.profileDivider {
+  height: 1px;
+  background: rgba(0, 31, 63, 0.06);
+  margin: 6px 0;
+}
+
+.profileLogoutButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.profileLogoutButton:hover {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.profileLogoutButton iconify-icon {
+  font-size: 18px;
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .mobileMenuButton {
+    display: flex;
+  }
+
+  .searchBar {
+    max-width: none;
+    flex: 1;
+  }
+
+  .userName,
+  .userRole {
+    display: none;
+  }
+
+  .userMenu {
+    padding: 4px;
+  }
+}

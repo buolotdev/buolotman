@@ -1,0 +1,98 @@
+.page { min-height: 100vh; background: #f8fafc; color: #001f3f; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+.sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; background: linear-gradient(180deg, #001f3f 0%, #00172e 100%); color: #fefeff; border-right: 1px solid rgba(255,255,255,.08); }
+.sidebarHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.sidebarEyebrow { margin: 0 0 6px; color: rgba(254,254,255,.66); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebarTitle { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.03em; }
+.sidebarClose { display: none; width: 40px; height: 40px; border: 0; border-radius: 12px; background: rgba(255,255,255,.08); color: #fff; }
+.sidebarClose iconify-icon, .navItem iconify-icon, .mobileMenuButton iconify-icon, .iconButton iconify-icon, .searchBar iconify-icon, .backLink iconify-icon { font-size: 18px; }
+.sidebarNav { display: flex; flex-direction: column; gap: 8px; padding: 20px 16px; flex: 1; }
+.navItem { display: flex; align-items: center; gap: 12px; border-radius: 14px; padding: 14px 16px; color: rgba(254,254,255,.72); font-size: 15px; font-weight: 600; text-decoration: none; }
+.navItemActive, .navItem:hover { background: rgba(255,255,255,.1); color: #fff; }
+.sidebarFooter { padding: 20px 24px 28px; border-top: 1px solid rgba(255,255,255,.08); }
+.logoutButton { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; width: 100%; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; background: rgba(255,255,255,.06); cursor: pointer; }
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.main { min-width: 0; display: flex; flex-direction: column; }
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 32px; background: rgba(248,250,252,.92); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(14px); }
+.topbarLeft, .topbarActions, .userMenu, .hero, .nameRow, .statsRow, .reviewTop, .reviewer, .reviewHeader { display: flex; align-items: center; }
+.topbarLeft, .topbarActions { gap: 16px; }
+.mobileMenuButton { display: none; width: 44px; height: 44px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; color: #001f3f; }
+.searchBar { display: flex; align-items: center; gap: 12px; min-width: min(560px, 100%); min-height: 48px; padding: 0 16px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #64748b; }
+.searchBar input { width: 100%; border: 0; background: transparent; color: #001f3f; font-size: 14px; font-weight: 500; outline: 0; }
+.iconButton { position: relative; width: 44px; height: 44px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; color: #64748b; }
+.notificationDot { position: absolute; top: 10px; right: 10px; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 999px; background: #ff4500; }
+.userMenu { gap: 12px; }
+.userAvatar, .avatar, .reviewerAvatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; font-weight: 800; }
+.userAvatar { width: 40px; height: 40px; background: linear-gradient(135deg, #001f3f 0%, #003366 100%); color: #fff; font-size: 13px; }
+.userName, .userRole { margin: 0; }
+.userName { font-size: 14px; font-weight: 700; }
+.userRole { color: #64748b; font-size: 12px; font-weight: 600; }
+.content { display: flex; flex-direction: column; gap: 24px; padding: 32px; }
+.backLink { display: inline-flex; align-items: center; gap: 8px; color: #64748b; font-size: 14px; font-weight: 700; text-decoration: none; width: fit-content; }
+.profileLayout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.profileMain, .profileSidebar { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.profileSidebar { position: sticky; top: 104px; }
+.card { border: 1px solid #e2e8f0; border-radius: 24px; background: #fff; box-shadow: 0 8px 24px rgba(0,31,63,.04); padding: 32px; }
+.hero { gap: 24px; }
+.avatar { width: 120px; height: 120px; flex-shrink: 0; background: linear-gradient(135deg, #ffe7dc 0%, #fff4ee 100%); color: #ff4500; font-size: 34px; box-shadow: 0 14px 30px rgba(255,69,0,.12); }
+.heroContent { min-width: 0; }
+.nameRow { gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.name { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -.03em; }
+.verifiedBadge { display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px; border-radius: 999px; background: rgba(22,163,74,.12); color: #16a34a; font-size: 12px; font-weight: 800; }
+.title { margin: 0 0 16px; color: #64748b; font-size: 16px; font-weight: 600; }
+.statsRow { gap: 12px 18px; flex-wrap: wrap; color: #001f3f; font-size: 14px; font-weight: 700; }
+.sectionTitle { margin: 0 0 18px; font-size: 20px; font-weight: 800; }
+.aboutBlock { display: flex; flex-direction: column; gap: 14px; }
+.aboutBlock p, .reviewText { margin: 0; color: #64748b; font-size: 15px; line-height: 1.7; }
+.skillsGrid { display: flex; flex-wrap: wrap; gap: 12px; }
+.skillPill { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid #e2e8f0; border-radius: 999px; background: #f1f5f9; color: #001f3f; font-size: 14px; font-weight: 700; }
+.galleryGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.galleryCard { min-height: 188px; padding: 22px; border-radius: 18px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; color: #001f3f; border: 1px solid rgba(0,31,63,.08); overflow: hidden; }
+.galleryCard strong { font-size: 20px; font-weight: 800; }
+.galleryCard span { color: rgba(0,31,63,.76); font-size: 14px; line-height: 1.5; max-width: 24ch; }
+.galleryTone1 { background: linear-gradient(135deg, #d9ecff 0%, #f6fbff 100%); }
+.galleryTone2 { background: linear-gradient(135deg, #fff1d8 0%, #fffaf0 100%); }
+.galleryTone3 { background: linear-gradient(135deg, #dff7eb 0%, #f4fffa 100%); }
+.galleryTone4 { background: linear-gradient(135deg, #efe2ff 0%, #fbf7ff 100%); }
+.reviewHeader { justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+.reviewList { display: flex; flex-direction: column; gap: 24px; }
+.reviewItem { padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+.reviewItem:last-child { padding-bottom: 0; border-bottom: 0; }
+.reviewTop { justify-content: space-between; gap: 18px; margin-bottom: 12px; align-items: flex-start; }
+.reviewer { gap: 12px; }
+.reviewerAvatar { width: 40px; height: 40px; background: #001f3f; color: #fff; font-size: 13px; }
+.reviewer strong { display: block; font-size: 15px; }
+.reviewer p { margin: 4px 0 0; color: #64748b; font-size: 13px; }
+.reviewRating { color: #f59e0b; font-size: 14px; font-weight: 800; }
+.rate { font-size: 34px; font-weight: 800; letter-spacing: -.03em; }
+.rate span { margin-left: 6px; color: #64748b; font-size: 18px; font-weight: 600; }
+.rateLabel { margin: 10px 0 0; color: #64748b; font-size: 14px; font-weight: 600; }
+.actionGroup { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
+.primaryButton, .outlineButton, .secondaryButton { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 18px; border-radius: 14px; text-decoration: none; font-size: 15px; font-weight: 800; }
+.primaryButton { border: 0; background: #ff4500; color: #fff; box-shadow: 0 12px 26px rgba(255,69,0,.18); }
+.outlineButton { border: 1px solid #001f3f; background: transparent; color: #001f3f; }
+.secondaryButton { border: 1px solid #e2e8f0; background: #fff; color: #001f3f; }
+.metrics, .snapshot, .languageList { display: flex; flex-direction: column; gap: 16px; }
+.metrics { padding-top: 24px; border-top: 1px solid #e2e8f0; }
+.metrics div, .snapshot div, .languageList div { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 14px; }
+.metrics span, .snapshot span, .languageList span { color: #64748b; font-weight: 600; }
+.metrics strong, .snapshot strong, .languageList strong { color: #001f3f; font-weight: 800; text-align: right; }
+.sideTitle { margin: 0 0 16px; color: #001f3f; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 1180px) { .profileLayout { grid-template-columns: 1fr; } .profileSidebar { position: static; } }
+@media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } .sidebar { position: fixed; top: 0; left: 0; width: min(320px, calc(100vw - 32px)); transform: translateX(-100%); transition: transform .2s ease; z-index: 50; } .sidebarOpen { transform: translateX(0); } .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; } }
+@media (max-width: 760px) { .topbar, .content { padding-left: 20px; padding-right: 20px; } .topbar { flex-direction: column; align-items: stretch; } .topbarLeft, .topbarActions { width: 100%; } .topbarActions { justify-content: space-between; } .searchBar { min-width: 0; width: 100%; } .hero, .reviewHeader, .reviewTop { flex-direction: column; align-items: flex-start; } .galleryGrid { grid-template-columns: 1fr; } .card { padding: 24px; } .avatar { width: 88px; height: 88px; font-size: 26px; } .name { font-size: 28px; } }
+
+
+
+
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brandImage { width: 48px; height: 48px; object-fit: contain; }
+.brandText { display: flex; flex-direction: column; }
+.brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+
+.brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
+
+.sidebar::-webkit-scrollbar { display: none; }
+.sidebar { -ms-overflow-style: none; scrollbar-width: none; }
