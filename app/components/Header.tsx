@@ -105,7 +105,7 @@ export default function Header() {
     const mainMobileMenu = document.getElementById("bmMainMobileMenu");
     if (mainHamburger && mainMobileMenu) {
       mainHamburger.addEventListener("click", () => {
-        mainMobileMenu.classList.toggle("open");
+        mainMobileMenu.classList.toggle("active");
       });
     }
 
