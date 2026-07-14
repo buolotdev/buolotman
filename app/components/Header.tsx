@@ -72,42 +72,45 @@ export default function Header() {
     document.addEventListener("click", handleDocumentClick);
     document.addEventListener("keydown", handleDocumentKeydown);
 
-    // Mobile hamburger (mega menu strip)
-    const burger = root.querySelector("#bmHamburger");
-    const mobileMenu = root.querySelector("#bmMobileMenu");
-    if (burger && mobileMenu) {
-      burger.addEventListener("click", () => mobileMenu.classList.toggle("active"));
-    }
+    // ===== MOBILE MENU DELEGATION =====
+    // We use event delegation because React re-renders can recreate the DOM nodes
+    // inside dangerouslySetInnerHTML, which would wipe out direct event listeners.
+    const handleMobileMenuClicks = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
 
-    // Mobile accordion sections
-    root.querySelectorAll(".bmMobileTop").forEach((top) => {
-      top.addEventListener("click", () => {
-        const section = top.nextElementSibling;
-        root.querySelectorAll(".bmMobileSection").forEach((sec) => {
+      // Top Mega Menu Hamburger
+      if (target.closest("#bmHamburger")) {
+        const mobileMenu = document.getElementById("bmMobileMenu");
+        if (mobileMenu) mobileMenu.classList.toggle("active");
+      }
+
+      // Main Header Hamburger
+      if (target.closest(".bm-main-hamburger")) {
+        const mainMobileMenu = document.getElementById("bmMainMobileMenu");
+        if (mainMobileMenu) mainMobileMenu.classList.toggle("active");
+      }
+
+      // Mobile Accordion Sections
+      const topBtn = target.closest(".bmMobileTop");
+      if (topBtn) {
+        const section = topBtn.nextElementSibling;
+        document.querySelectorAll(".bmMobileSection").forEach((sec) => {
           if (sec !== section) sec.classList.remove("active");
         });
-        section?.classList.toggle("active");
-      });
-    });
+        if (section) section.classList.toggle("active");
+      }
 
-    root.querySelectorAll(".bmMobileCat").forEach((cat) => {
-      cat.addEventListener("click", () => {
-        const sub = cat.nextElementSibling;
-        root.querySelectorAll(".bmMobileSub").forEach((s) => {
+      const catBtn = target.closest(".bmMobileCat");
+      if (catBtn) {
+        const sub = catBtn.nextElementSibling;
+        document.querySelectorAll(".bmMobileSub").forEach((s) => {
           if (s !== sub) s.classList.remove("active");
         });
-        sub?.classList.toggle("active");
-      });
-    });
+        if (sub) sub.classList.toggle("active");
+      }
+    };
 
-    // ===== MAIN HEADER hamburger =====
-    const mainHamburger = document.querySelector(".bm-main-hamburger");
-    const mainMobileMenu = document.getElementById("bmMainMobileMenu");
-    if (mainHamburger && mainMobileMenu) {
-      mainHamburger.addEventListener("click", () => {
-        mainMobileMenu.classList.toggle("active");
-      });
-    }
+    document.addEventListener("click", handleMobileMenuClicks);
 
     // ===== POST A TASK (Requires Login) =====
     const postTaskLinks = document.querySelectorAll('a[href="/post-task"]');
@@ -126,6 +129,7 @@ export default function Header() {
     return () => {
       document.removeEventListener("click", handleDocumentClick);
       document.removeEventListener("keydown", handleDocumentKeydown);
+      document.removeEventListener("click", handleMobileMenuClicks);
       postTaskLinks.forEach(link => {
         link.removeEventListener("click", handlePostTaskClick);
       });
