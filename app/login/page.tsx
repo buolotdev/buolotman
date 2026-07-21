@@ -58,6 +58,14 @@ export default function LoginPage() {
   const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
+    if (pathname === "/signup") {
+      setStep("account");
+    } else if (pathname === "/login") {
+      setStep("login");
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setNextPath(safeNext(params.get("next") ?? undefined));
     // If URL has ?mode=login, go straight to login
@@ -235,7 +243,7 @@ export default function LoginPage() {
             </div>
             <div className={styles.link}>
               I have an account?{" "}
-              <button className={styles.linkAction} onClick={() => { setError(null); setStep("login"); }}>Login</button>
+              <Link href="/login" className={styles.linkAction} onClick={() => setError(null)}>Login</Link>
             </div>
           </div>
 
@@ -287,7 +295,7 @@ export default function LoginPage() {
 
             <div className={styles.link}>
               Already registered?{" "}
-              <button className={styles.linkAction} onClick={() => { setError(null); setStep("login"); }}>Login</button>
+              <Link href="/login" className={styles.linkAction} onClick={() => setError(null)}>Login</Link>
             </div>
           </div>
 
