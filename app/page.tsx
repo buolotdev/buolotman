@@ -93,10 +93,14 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLiveTaskIndex((prev) => (prev + 1) % 4);
+      setLiveTaskIndex((prev) => {
+        const count = liveTasksData?.results?.length || 0;
+        if (count === 0) return 0;
+        return (prev + 1) % count;
+      });
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [liveTasksData]);
 
   /* ── Intersection Observer for scroll animations ── */
   useEffect(() => {
