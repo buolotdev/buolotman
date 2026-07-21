@@ -168,7 +168,7 @@ export default function AdminSupportPage() {
             </div>
 
             <div className={styles.thread}>
-              {activeTicket.messages.map(msg => (
+              {activeTicket.messages.map((msg: any) => (
                 <div key={msg.id} className={styles.message}>
                   <div className={styles.messageHeader}>
                     <img src={msg.avatar} alt={msg.sender} className={styles.avatar} />
