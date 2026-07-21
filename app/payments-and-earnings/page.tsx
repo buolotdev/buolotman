@@ -39,7 +39,7 @@ export default function PaymentsAndEarningsPage() {
       <div className={styles.container}>
         
         {/* OVERVIEW */}
-        <section className={styles.section} style={{marginTop: '60px'}}>
+        <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Overview</h2>
             <p className={styles.sectionDesc}>
