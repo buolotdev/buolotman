@@ -1,0 +1,317 @@
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ================= HERO SECTION ================= */
+.hero {
+  background: radial-gradient(circle at 50% 0%, #0b3c6f 0%, #001F3F 70%);
+  padding: 100px 24px 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+/* ================= SECTION COMMON ================= */
+.section {
+  margin-top: 80px;
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 10;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #001F3F;
+  margin-bottom: 15px;
+}
+
+/* ================= PRICING CARDS ================= */
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 1200px) {
+  .grid4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 40px 30px;
+  box-shadow: 0 15px 40px rgba(0, 31, 63, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(0, 31, 63, 0.1);
+  border-color: #cbd5e1;
+}
+
+.cardPro {
+  border: 3px solid #FF4500;
+  box-shadow: 0 20px 40px rgba(255, 69, 0, 0.1);
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.cardPro:hover {
+  transform: scale(1.05) translateY(-10px);
+}
+
+.cardEnterprise {
+  border: 2px dashed #001F3F;
+}
+
+.tag {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #FF4500, #ff6b33);
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
+}
+
+.tierName {
+  margin-top: 0;
+  color: #001F3F;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0 0 20px;
+  color: #001F3F;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price span {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.featureList {
+  padding: 0;
+  list-style: none;
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.featureList li {
+  margin-bottom: 15px;
+  color: #475569;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkIcon {
+  color: #FF4500;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.upgradeBtn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: #f1f5f9;
+  color: #001F3F;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upgradeBtn:hover {
+  background: #e2e8f0;
+}
+
+.upgradeBtnAccent {
+  background: #FF4500;
+  color: #fff;
+}
+
+.upgradeBtnAccent:hover {
+  background: #e63e00;
+  box-shadow: 0 10px 20px rgba(255, 69, 0, 0.2);
+}
+
+.upgradeBtnDark {
+  background: #001F3F;
+  color: #fff;
+}
+
+.upgradeBtnDark:hover {
+  background: #0b3c6f;
+}
+
+/* ================= COMPARISON TABLE ================= */
+.compareWrap {
+  background: #ffffff;
+  border-radius: 30px;
+  padding: 40px;
+  box-shadow: 0 15px 40px rgba(0, 31, 63, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compareTable th, .compareTable td {
+  padding: 24px;
+  text-align: left;
+}
+
+.compareTable th {
+  background: #f8fafc;
+  font-weight: 800;
+  color: #001F3F;
+  font-size: 1.1rem;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.compareTable td {
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+  font-size: 1.05rem;
+}
+
+.compareTable tr:last-child td {
+  border-bottom: none;
+}
+
+.compareTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+.compareTable td:first-child {
+  font-weight: 600;
+  color: #001F3F;
+}
+
+/* ================= CTA ================= */
+.cta {
+  background: linear-gradient(135deg, #0b3c6f, #001F3F);
+  color: #fff;
+  border-radius: 40px;
+  padding: 70px;
+  margin-top: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 20px 50px rgba(0, 31, 63, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .cta {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+    padding: 50px 30px;
+  }
+}
+
+.ctaTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.ctaDesc {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  max-width: 650px;
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+.ctaBtn {
+  background: #FF4500;
+  border: none;
+  border-radius: 999px;
+  padding: 20px 45px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.ctaBtn:hover {
+  background: #e63e00;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 69, 0, 0.3);
+}

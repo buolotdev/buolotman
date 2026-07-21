@@ -179,6 +179,7 @@ export default function Footer() {
             <Link href="/#how-it-works">How It Works</Link>
             <Link href="/help-center">Help Center</Link>
             <Link href="/payments-and-earnings">Payments &amp; Earnings</Link>
+            <Link href="/upgrade">Pricing &amp; Upgrades</Link>
             <Link href="/search">Reviews</Link>
             <Link href="/press">Press &amp; Media</Link>
             <Link href="/">Developers</Link>
