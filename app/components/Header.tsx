@@ -363,21 +363,21 @@ export default function Header() {
         </div>
       </div>
       <div class="bmMegaGroup" data-menu-group="help">
-        <div class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">Help Center</div>
+        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:inherit;">Help Center</a>
         <div class="bmMega" id="bmMegaHelp">
           <div class="bmSimple">
-            <div class="bmSimpleCard">
+            <a href="/help-center" class="bmSimpleCard" style="display:block; text-decoration:none; color:inherit;">
               <h4>Help Center</h4>
               <p>Browse guides, FAQs, and platform documentation.</p>
-            </div>
-            <div class="bmSimpleCard">
+            </a>
+            <a href="/help-center" class="bmSimpleCard" style="display:block; text-decoration:none; color:inherit;">
               <h4>Live Chat</h4>
               <p>Chat directly with Boulot Man support team.</p>
-            </div>
-            <div class="bmSimpleCard">
+            </a>
+            <a href="/help-center" class="bmSimpleCard" style="display:block; text-decoration:none; color:inherit;">
               <h4>More Support</h4>
               <p>Tickets, feedback, and account assistance.</p>
-            </div>
+            </a>
           </div>
         </div>
       </div>
