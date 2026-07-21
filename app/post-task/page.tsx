@@ -612,8 +612,7 @@ export default function PostTaskPage() {
                         <div className={styles.stackCompact}>
                           {[
                             { value: "urgent", label: "Urgent" },
-                            { value: "flexible", label: "Flexible" },
-                            { value: "programmed", label: "Programmed" },
+                            { value: "standard", label: "Standard / Flexible" },
                           ].map((option) => (
                             <button key={option.value} type="button" className={`${styles.radioCard} ${urgency === option.value ? styles.radioCardActive : ""}`} onClick={() => setUrgency(option.value as any)}>
                               <span className={styles.radioIndicator} />
