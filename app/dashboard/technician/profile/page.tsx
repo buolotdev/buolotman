@@ -466,7 +466,7 @@ export default function TechnicianProfilePage() {
                       defaultCountry="US" 
                       placeholder="Phone" 
                       value={phone} 
-                      onChange={setPhone} 
+                      onChange={(val) => setPhone(val || "")} 
                     />
                   </div>
                   
