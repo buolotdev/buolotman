@@ -14,12 +14,13 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
   { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
+  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
   { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
   { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
   { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client/profile", match: (p: string) => p.startsWith("/dashboard/client/profile") },
-  { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
-
+  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
+  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
+  { key: "explore", label: "Service Providers", icon: "lucide:users", href: "/service-providers/technicians", match: (p: string) => p.startsWith("/service-providers") },
 ];
 
 function getStatusMeta(status: string) {
@@ -44,6 +45,8 @@ export default function ClientDashboardPage() {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [milestoneConfirmed, setMilestoneConfirmed] = useState(false);
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: tasksData, loading: tasksLoading, refetch: refetchTasks } = useFetch(() => api.getMyTasks(), []);
@@ -133,87 +136,137 @@ export default function ClientDashboardPage() {
               </div>
             </section>
 
+            <div className={styles.alert}>
+              <iconify-icon icon="lucide:alert-triangle" />
+              <span>Milestone 2 is awaiting your confirmation to release payment.</span>
+            </div>
+
             <section className={styles.statsGrid}>
               <article className={styles.statCard}>
                 <div className={`${styles.statIcon} ${styles.statAccent}`}><iconify-icon icon="lucide:briefcase" /></div>
                 <div>
-                  <div className={styles.statValue}>{tasksLoading ? <SkeletonBlock style={{ width: 40, height: 26 }} /> : activeTasks}</div>
-                  <p>Active Tasks</p>
+                  <div className={styles.statValue}>2</div>
+                  <p>Active Projects</p>
                 </div>
               </article>
               <article className={styles.statCard}>
-                <div className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:check-square" /></div>
+                <div className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:shield-check" /></div>
                 <div>
-                  <div className={styles.statValue}>{tasksLoading ? <SkeletonBlock style={{ width: 40, height: 26 }} /> : completedTasks}</div>
-                  <p>Completed Tasks</p>
+                  <div className={styles.statValue}>32,000</div>
+                  <p>Escrow Balance (XOF)</p>
                 </div>
               </article>
               <article className={styles.statCard}>
-                <div className={`${styles.statIcon} ${styles.statPrimary}`}><iconify-icon icon="lucide:wallet" /></div>
+                <div className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:clock" /></div>
                 <div>
-                  <div className={styles.statValue}>{tasksLoading ? <SkeletonBlock style={{ width: 40, height: 26 }} /> : tasks.length}</div>
-                  <p>Total Tasks</p>
+                  <div className={styles.statValue}>8,000</div>
+                  <p>Funds On Hold (XOF)</p>
                 </div>
               </article>
               <article className={styles.statCard}>
-                <div className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:bookmark" /></div>
+                <div className={`${styles.statIcon} ${styles.statPrimary}`}><iconify-icon icon="lucide:message-square" /></div>
                 <div>
-                  <div className={styles.statValue}>{savedLoading ? <SkeletonBlock style={{ width: 40, height: 26 }} /> : (savedList || []).length}</div>
-                  <p>Saved Pros</p>
+                  <div className={styles.statValue}>3</div>
+                  <p>Unread Messages</p>
                 </div>
               </article>
             </section>
 
             <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h3>My Tasks</h3>
-                <Link href="/dashboard/client/tasks" className={styles.linkButton}>View All</Link>
-              </div>
-              {tasksLoading ? (
-                <div className={styles.tasksGrid}>
-                  {[1, 2, 3].map((i) => <div key={i} className={styles.card}><SkeletonCard /></div>)}
-                </div>
-              ) : filteredTasks.length === 0 ? (
-                <div className={`${styles.card} ${styles.emptyState}`}>
-                  <iconify-icon icon="lucide:clipboard-list" style={{ fontSize: 40, color: "#94a3b8" }} />
-                  <p>No tasks yet. <Link href="/post-task">Post your first task</Link></p>
-                </div>
-              ) : (
-                <div className={styles.tasksGrid}>
-                  {filteredTasks.map((task: any) => {
-                    const meta = getStatusMeta(task.status);
-                    return (
-                      <article key={task.id} className={styles.card}>
-                        <div className={styles.cardHeaderRow}>
-                          <span className={`${styles.badge} ${styles[meta.badgeClass]}`}>{meta.label}</span>
-                          <strong className={styles.amount}>{task.budget_min ? `${Number(task.budget_min).toLocaleString()} XOF` : "TBD"}</strong>
-                        </div>
-                        <div className={styles.taskBody}>
-                          <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.taskTitleLink}>
-                            <h4 className={styles.taskTitle}>{task.title}</h4>
-                          </Link>
-                          <div className={styles.metaList}>
-                            <p className={styles.metaItem}><iconify-icon icon="lucide:map-pin" /> {task.city || task.location || "Not specified"}</p>
-                            <p className={styles.metaItem}><iconify-icon icon="lucide:calendar-clock" /> {task.schedule || "Flexible"}</p>
-                          </div>
-                          <div className={styles.progressBlock}>
-                            <div className={styles.progressHeader}>
-                              <span>{task.bids_count || 0} proposals</span>
-                              <strong>{task.views_count || 0} views</strong>
+              <div className={styles.clientCard}>
+                <h3>Active Projects</h3>
+                <div className={styles.clientTableWrapper}>
+                  <table className={styles.clientTable}>
+                    <thead>
+                      <tr>
+                        <th>Project</th>
+                        <th>Executor</th>
+                        <th>Progress</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Residential Renovation</td>
+                        <td>Kigali Prime Constructors</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div className={styles.clientProgress}>
+                              <span className={styles.clientProgressFill} style={{ width: '45%' }}></span>
                             </div>
+                            <span style={{ fontSize: '12px', fontWeight: 600 }}>45%</span>
                           </div>
-                        </div>
-                        <div className={styles.taskFooter}>
-                          <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.outlineSmallButton}>Open Task</Link>
-                          {task.status === "open" && (
-                            <Link href={`/dashboard/client/tasks/${task.id}/proposals`} className={styles.primarySmallButton}>Review Proposals</Link>
-                          )}
-                        </div>
-                      </article>
-                    );
-                  })}
+                        </td>
+                        <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusActive}`}>In Progress</span></td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button className={styles.clientOutlineBtn}>View Workspace</button>
+                            <button className={styles.clientPrimaryBtn} onClick={() => { setShowConfirmModal(true); setMilestoneConfirmed(false); }}>Confirm Milestone</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-              )}
+              </div>
+            </section>
+
+            <section className={styles.section}>
+              <div className={styles.clientCard}>
+                <h3>Escrow & Milestones</h3>
+                <div className={styles.clientTableWrapper}>
+                  <table className={styles.clientTable}>
+                    <thead>
+                      <tr>
+                        <th>Project</th>
+                        <th>Next Milestone</th>
+                        <th>Percentage</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Residential Renovation</td>
+                        <td>Milestone 2</td>
+                        <td>20%</td>
+                        <td>$8,000</td>
+                        <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusPending}`}>Awaiting Confirmation</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section className={styles.section}>
+              <div className={styles.clientCard}>
+                <h3>Recent Messages</h3>
+                <div className={styles.clientTableWrapper}>
+                  <table className={styles.clientTable}>
+                    <thead>
+                      <tr>
+                        <th>From</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Admin</td>
+                        <td>Please confirm milestone progress.</td>
+                        <td>Today</td>
+                      </tr>
+                      <tr>
+                        <td>Kigali Prime Constructors</td>
+                        <td>Milestone 2 work completed.</td>
+                        <td>Yesterday</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </section>
 
             <section className={styles.section}>
@@ -249,6 +302,26 @@ export default function ClientDashboardPage() {
           </div>
         </div>
       </div>
+
+      {showConfirmModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <span className={styles.closeX} onClick={() => setShowConfirmModal(false)}><iconify-icon icon="lucide:x" /></span>
+            <h3>Confirm Milestone Completion</h3>
+            <p>
+              By confirming, you authorize the release of the milestone payment
+              from escrow to the executor.
+            </p>
+            {!milestoneConfirmed ? (
+              <button className={styles.primaryButton} onClick={() => setMilestoneConfirmed(true)}>Confirm & Release</button>
+            ) : (
+              <div className={styles.successMsg}>
+                <iconify-icon icon="lucide:check-circle-2" /> Milestone confirmed and payment released
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

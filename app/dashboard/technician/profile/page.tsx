@@ -12,6 +12,8 @@ import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 const toneClasses = ["toneBlue", "toneGold", "toneGreen", "toneCoral", "toneSlate", "tonePurple"];
 
@@ -34,6 +36,38 @@ export default function TechnicianProfilePage() {
   const { data: rawDocuments, refetch: mutateDocuments } = useFetch(() => api.getTechnicianDocuments(), []);
   const documents = rawDocuments || [];
   const [documentUploading, setDocumentUploading] = useState(false);
+
+  // Form State
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  // Calendar State
+  const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [activeDay, setActiveDay] = useState("");
+  const [timeSaved, setTimeSaved] = useState(false);
+
+  // Disputes State
+  const [disputeModalOpen, setDisputeModalOpen] = useState(false);
+  const [disputeSaved, setDisputeSaved] = useState(false);
+
+  // Sync userData to form state
+  useMemo(() => {
+    if (userData) {
+      setFirstName(userData.first_name || "");
+      setLastName(userData.last_name || "");
+      setEmail(userData.email || "");
+      setPhone(userData.phone || "");
+      setBio(userData.bio || userData.about || "");
+      setSkills(userData.skills || ["Electrical Wiring", "Solar Installation"]);
+    }
+  }, [userData]);
 
   const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
   const userInitials = useMemo(() => {
@@ -100,9 +134,53 @@ export default function TechnicianProfilePage() {
       setCropData({ src: reader.result as string, type });
     };
     reader.readAsDataURL(file);
-    // reset input so the same file can be selected again if needed
-    if (type === 'avatar' && avatarInputRef.current) avatarInputRef.current.value = "";
-    if (type === 'banner' && bannerInputRef.current) bannerInputRef.current.value = "";
+    e.target.value = "";
+  };
+
+  const handleAddSkill = () => {
+    if (!newSkill.trim()) return;
+    setSkills([...skills, newSkill.trim()]);
+    setNewSkill("");
+  };
+
+  const handleRemoveSkill = (idx: number) => {
+    setSkills(skills.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveProfile = () => {
+    setProfileSaving(true);
+    setTimeout(() => {
+      setProfileSaving(false);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3000);
+    }, 800);
+  };
+
+  const openTimeModal = (day: string) => {
+    setActiveDay(day);
+    setTimeSaved(false);
+    setTimeModalOpen(true);
+  };
+
+  const saveTimeModal = () => {
+    setTimeSaved(true);
+    setTimeout(() => {
+      setTimeModalOpen(false);
+      setTimeSaved(false);
+    }, 1500);
+  };
+
+  const openDisputeModal = () => {
+    setDisputeSaved(false);
+    setDisputeModalOpen(true);
+  };
+
+  const saveDisputeModal = () => {
+    setDisputeSaved(true);
+    setTimeout(() => {
+      setDisputeModalOpen(false);
+      setDisputeSaved(false);
+    }, 1500);
   };
 
   const onDocumentSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -215,6 +293,10 @@ export default function TechnicianProfilePage() {
             <Link href="/dashboard/technician/profile" className={`${styles.navItem} ${styles.navItemActive}`}>
               <span className={styles.navIcon}><iconify-icon icon="lucide:user" /></span>
               <span>Profile</span>
+            </Link>
+            <Link href="/dashboard/technician/settings" className={styles.navItem}>
+              <span className={styles.navIcon}><iconify-icon icon="lucide:settings" /></span>
+              <span>Settings</span>
             </Link>
           </nav>
 
@@ -367,15 +449,68 @@ export default function TechnicianProfilePage() {
 
             <div className={styles.profileGrid}>
               <div className={styles.leftColumn}>
+                {/* PROFILE INFORMATION */}
                 <section className={styles.card}>
-                  <h2><iconify-icon icon="lucide:user" />About Me</h2>
-                  {loading ? (
-                    <SkeletonBlock style={{ height: 80 }} />
-                  ) : userAbout ? (
-                    <p>{userAbout}</p>
-                  ) : (
-                    <p>No bio provided yet.</p>
-                  )}
+                  <h2>Profile Information</h2>
+                  
+                  <div className={styles.twoCol}>
+                    <input className={styles.formInput} placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <input className={styles.formInput} placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  </div>
+                  
+                  <div className={styles.twoCol}>
+                    <input className={styles.formInput} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <PhoneInput 
+                      className={styles.phoneInputContainer} 
+                      international 
+                      defaultCountry="US" 
+                      placeholder="Phone" 
+                      value={phone} 
+                      onChange={setPhone} 
+                    />
+                  </div>
+                  
+                  <textarea 
+                    className={styles.formTextarea} 
+                    rows={3} 
+                    placeholder="Brief description about yourself"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                  />
+
+                  <div className={styles.skillsWrapper}>
+                    <h4>Skills</h4>
+                    <div className={styles.skillsListEditable}>
+                      {skills.map((skill, index) => (
+                        <span key={index} className={styles.skillTag}>
+                          {skill}
+                          <button className={styles.skillAction} onClick={() => handleRemoveSkill(index)}>
+                            <iconify-icon icon="lucide:x" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className={styles.skillInputWrapper}>
+                      <input 
+                        className={styles.formInput} 
+                        placeholder="Add new skill" 
+                        value={newSkill} 
+                        onChange={(e) => setNewSkill(e.target.value)}
+                        onKeyDown={(e) => { if(e.key === 'Enter') handleAddSkill(); }}
+                      />
+                      <button className={styles.outlineButton} onClick={handleAddSkill}>Add Skill</button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px' }}>
+                    <button className={styles.primaryButton} onClick={handleSaveProfile}>
+                      {profileSaving ? "Saving..." : "Save Changes"}
+                    </button>
+                    <div className={`${styles.saveMsg} ${profileSaved ? styles.saveMsgVisible : ""}`}>
+                      ✔ Profile updated successfully
+                    </div>
+                  </div>
                 </section>
 
                 <section className={styles.card}>
@@ -438,9 +573,73 @@ export default function TechnicianProfilePage() {
                     <p>No reviews yet.</p>
                   )}
                 </section>
+                <section className={styles.card}>
+                  <div className={styles.calendarHeader}>
+                    <h2>Availability Calendar</h2>
+                    <label className={styles.calendarCheckbox}>
+                      <input type="checkbox" defaultChecked />
+                      Make calendar public
+                    </label>
+                  </div>
+                  <div className={styles.calendarGrid}>
+                    <div className={`${styles.dayBox} ${styles.dayAvailable}`} onClick={() => openTimeModal('Mon')}>Mon</div>
+                    <div className={`${styles.dayBox} ${styles.dayAvailable}`} onClick={() => openTimeModal('Tue')}>Tue</div>
+                    <div className={`${styles.dayBox} ${styles.dayBusy}`} onClick={() => openTimeModal('Wed')}>Wed</div>
+                    <div className={`${styles.dayBox} ${styles.dayAvailable}`} onClick={() => openTimeModal('Thu')}>Thu</div>
+                    <div className={`${styles.dayBox} ${styles.dayAvailable}`} onClick={() => openTimeModal('Fri')}>Fri</div>
+                    <div className={`${styles.dayBox} ${styles.dayBusy}`} onClick={() => openTimeModal('Sat')}>Sat</div>
+                    <div className={`${styles.dayBox} ${styles.dayBusy}`} onClick={() => openTimeModal('Sun')}>Sun</div>
+                  </div>
+                </section>
+
+                <section className={styles.card}>
+                  <h2>Disputes</h2>
+                  
+                  <div className={styles.disputeItem}>
+                    <div className={styles.disputeHeader}>
+                      <strong>Residential Wiring Project</strong>
+                      <span className={`${styles.disputeStatus} ${styles.statusOpen}`}>Open</span>
+                    </div>
+                    <p className={styles.disputeText}>Client requested milestone re-evaluation.</p>
+                    <button className={styles.outlineButton} onClick={openDisputeModal}>Respond</button>
+                  </div>
+
+                  <div className={styles.disputeItem}>
+                    <div className={styles.disputeHeader}>
+                      <strong>Office Renovation</strong>
+                      <span className={`${styles.disputeStatus} ${styles.statusResolved}`}>Resolved</span>
+                    </div>
+                    <p className={styles.disputeText}>Payment released after admin review.</p>
+                  </div>
+                </section>
               </div>
 
               <div className={styles.rightColumn}>
+                <section className={styles.card} style={{ background: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%)', borderColor: '#cfe2ff' }}>
+                  <h2 style={{ color: '#0047ab' }}><iconify-icon icon="lucide:bell-ring" />Notifications</h2>
+                  <div className={styles.notificationItem}>
+                    <iconify-icon icon="lucide:check-circle" style={{ color: '#1e8e3e', fontSize: '18px' }}/>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>Milestone 1 payment released.</span>
+                      <small style={{ color: '#64748b', fontSize: '12px' }}>2 hours ago</small>
+                    </div>
+                  </div>
+                  <div className={styles.notificationItem}>
+                    <iconify-icon icon="lucide:message-square" style={{ color: '#1a73e8', fontSize: '18px' }}/>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>Client confirmed project progress.</span>
+                      <small style={{ color: '#64748b', fontSize: '12px' }}>5 hours ago</small>
+                    </div>
+                  </div>
+                  <div className={styles.notificationItem}>
+                    <iconify-icon icon="lucide:alert-circle" style={{ color: '#f4b400', fontSize: '18px' }}/>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>Admin requested updated documentation.</span>
+                      <small style={{ color: '#64748b', fontSize: '12px' }}>1 day ago</small>
+                    </div>
+                  </div>
+                </section>
+
                 <section className={styles.card}>
                   <h2><iconify-icon icon="lucide:bar-chart-2" />At a Glance</h2>
                   {loading ? (
@@ -566,6 +765,55 @@ export default function TechnicianProfilePage() {
           onCancel={() => setCropData(null)}
         />
       )}
+
+      {/* TIME MODAL */}
+      <div className={`${styles.modalOverlay} ${timeModalOpen ? styles.modalOverlayOpen : ""}`}>
+        <div className={styles.modalContent}>
+          <button className={styles.modalClose} onClick={() => setTimeModalOpen(false)}><iconify-icon icon="lucide:x" /></button>
+          <h3 className={styles.modalTitle}>Set availability for {activeDay}</h3>
+          
+          <div className={styles.formGroup}>
+            <label>Start Time</label>
+            <input type="time" className={styles.formInput} defaultValue="09:00" />
+          </div>
+          
+          <div className={styles.formGroup}>
+            <label>End Time</label>
+            <input type="time" className={styles.formInput} defaultValue="17:00" />
+          </div>
+          
+          <button className={styles.primaryButton} style={{ width: '100%', marginTop: '16px' }} onClick={saveTimeModal}>
+            Save Availability
+          </button>
+          
+          <div className={`${styles.saveMsg} ${timeSaved ? styles.saveMsgVisible : ""}`}>
+            ✔ Availability saved
+          </div>
+        </div>
+      </div>
+
+      {/* DISPUTE MODAL */}
+      <div className={`${styles.modalOverlay} ${disputeModalOpen ? styles.modalOverlayOpen : ""}`}>
+        <div className={styles.modalContent}>
+          <button className={styles.modalClose} onClick={() => setDisputeModalOpen(false)}><iconify-icon icon="lucide:x" /></button>
+          <h3 className={styles.modalTitle}>Respond to Dispute</h3>
+          
+          <textarea 
+            className={styles.formTextarea} 
+            rows={4} 
+            placeholder="Enter your response" 
+            style={{ width: '100%' }}
+          />
+          
+          <button className={styles.primaryButton} style={{ width: '100%' }} onClick={saveDisputeModal}>
+            Send Response
+          </button>
+          
+          <div className={`${styles.saveMsg} ${disputeSaved ? styles.saveMsgVisible : ""}`}>
+            ✔ Response sent
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

@@ -1,0 +1,237 @@
+/* LAYOUT */
+.layout {
+  display: flex;
+  height: calc(100vh - 80px); /* Height minus header */
+  background: #f8fafc;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+/* INBOX COLUMN */
+.inbox {
+  width: 320px;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.inboxHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inboxHeader h3 {
+  font-size: 1.1rem;
+  color: #001F3F;
+  margin: 0;
+}
+
+.newTicketBtn {
+  background: #FF4500;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.newTicketBtn:hover {
+  background: #e63e00;
+}
+
+.ticketList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ticketItem {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ticketItem:hover {
+  background: #f8fafc;
+}
+
+.ticketItemActive {
+  background: #f1f5f9;
+  border-left: 3px solid #FF4500;
+}
+
+.ticketSubject {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #001F3F;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticketMeta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+/* STATUS BADGES */
+.status {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.statusPending { background: #fff7ed; color: #ea580c; }
+.statusAwaiting { background: #eff6ff; color: #2563eb; }
+.statusEscalated { background: #fef2f2; color: #dc2626; }
+.statusResolved { background: #f0fdf4; color: #16a34a; }
+.statusClosed { background: #f1f5f9; color: #64748b; }
+
+/* CHAT AREA */
+.chatArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.chatHeader {
+  background: #ffffff;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chatHeader h2 {
+  font-size: 1.2rem;
+  color: #001F3F;
+  margin: 0 0 8px 0;
+}
+
+.thread {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e2e8f0;
+}
+
+.senderName {
+  font-weight: 600;
+  color: #001F3F;
+  font-size: 0.95rem;
+}
+
+.senderRole {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.messageBody {
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* COMPOSER */
+.composer {
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.textarea {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 100px;
+  font-size: 0.95rem;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+}
+
+.textarea:focus {
+  border-color: #001F3F;
+}
+
+.composerActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sendBtn {
+  background: #FF4500;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.sendBtn:hover {
+  background: #e63e00;
+}
+
+/* EMPTY STATE */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.emptyState iconify-icon {
+  font-size: 48px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}

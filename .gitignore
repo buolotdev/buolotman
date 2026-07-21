@@ -82,3 +82,10 @@ fix_viewport.js
 # Local build artifacts / scratch
 build_out.txt
 app/globals_trimmed.txt
+
+# Temp Archives and Prototypes
+*.zip
+*.tar.gz
+e-zip-boulot man/
+test_extract/
+live_html.txt

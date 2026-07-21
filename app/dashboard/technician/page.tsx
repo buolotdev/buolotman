@@ -8,12 +8,13 @@ import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ProfileProgressBar from "@/app/components/ProfileProgressBar";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
+  { key: "projects", label: "Projects", icon: "lucide:folder-open", href: "/dashboard/technician/projects", match: (p: string) => p.startsWith("/dashboard/technician/projects") },
   { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
   { key: "services", label: "My Services", icon: "lucide:layers-3", href: "/dashboard/technician/services", match: (p: string) => p.startsWith("/dashboard/technician/services") },
   { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
@@ -58,44 +59,7 @@ export default function TechnicianDashboardPage() {
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarTop}>
-            <Link href="/" className={styles.brand}>
-              <span style={{ fontSize: 20, fontWeight: 800 }}>Boulot Man</span>
-            </Link>
-            <button type="button" className={styles.sidebarClose} onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav}>
-            {navItems.map((item) => {
-              const isActive = item.match(pathname || "");
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    if (pathname === item.href) {
-                      window.location.reload();
-                    } else {
-                      router.push(item.href);
-                    }
-                  }}
-                >
-                  <iconify-icon icon={item.icon} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className={styles.sidebarCard}>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        </aside>
+        <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <DashboardHeader
@@ -116,6 +80,18 @@ export default function TechnicianDashboardPage() {
               <div className={styles.heroActions}>
                 <Link href="/dashboard/technician/tasks" className={styles.primaryButton}><iconify-icon icon="lucide:search" /> Browse Tasks</Link>
                 <Link href="/dashboard/technician/wallet" className={styles.secondaryButton}>View Wallet</Link>
+              </div>
+            </div>
+
+            <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: '24px' }}>
+              <h3 className={styles.sectionHeader} style={{ fontSize: '18px', marginBottom: '16px' }}>Account Status</h3>
+              <p className={styles.notice}>
+                Verification Status: <span className={`${styles.statusBadge} ${styles.statusPending}`}>Pending Verification</span><br/><br/>
+                Complete your profile and upload certificates to accept jobs.
+              </p>
+              <div className={styles.toggleRow}>
+                <span>Availability</span>
+                <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
               </div>
             </div>
 
@@ -151,6 +127,77 @@ export default function TechnicianDashboardPage() {
                   </article>
                 </>
               )}
+            </div>
+
+            {/* NEW TABLES */}
+            <div className={styles.tableGrid}>
+              
+              <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: 0 }}>
+                <h3 className={styles.sectionHeader} style={{ fontSize: '18px' }}>Assigned Projects</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Project</th>
+                        <th>Client</th>
+                        <th>Progress</th>
+                        <th>Milestone</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Residential Wiring</td>
+                        <td>John Mukasa</td>
+                        <td>45%</td>
+                        <td>Milestone 1</td>
+                        <td><span className={`${styles.statusBadge} ${styles.statusPending}`}>In Progress</span></td>
+                        <td><button className={styles.btnOutlineSmall}>Update</button></td>
+                      </tr>
+                      <tr>
+                        <td>Office CCTV Installation</td>
+                        <td>Mary Uwase</td>
+                        <td>100%</td>
+                        <td>Final</td>
+                        <td><span className={`${styles.statusBadge} ${styles.statusActive}`}>Completed</span></td>
+                        <td><button className={styles.btnPrimarySmall}>Request</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: 0 }}>
+                <h3 className={styles.sectionHeader} style={{ fontSize: '18px' }}>Payments Overview</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>2026-02-01</td>
+                        <td>Office CCTV Installation</td>
+                        <td>$850</td>
+                        <td><span className={`${styles.statusBadge} ${styles.statusActive}`}>Released</span></td>
+                      </tr>
+                      <tr>
+                        <td>2026-01-22</td>
+                        <td>Residential Wiring</td>
+                        <td>$400</td>
+                        <td><span className={`${styles.statusBadge} ${styles.statusPending}`}>On Hold</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
 
             <div className={styles.dashboardGrid}>

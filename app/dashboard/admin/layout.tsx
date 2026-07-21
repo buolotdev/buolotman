@@ -20,8 +20,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { id: "tasks", label: "Tasks", href: "/dashboard/admin/tasks", icon: "lucide:file-text", match: (p: string) => p.startsWith("/dashboard/admin/tasks") },
     { id: "verification", label: "Verification", href: "/dashboard/admin/verification", icon: "lucide:shield-check", match: (p: string) => p.startsWith("/dashboard/admin/verification") },
     { id: "payments", label: "Payments", href: "/dashboard/admin/payments", icon: "lucide:credit-card", match: (p: string) => p.startsWith("/dashboard/admin/payments") },
-    { id: "disputes", label: "Disputes", href: "/dashboard/admin/disputes", icon: "lucide:scale", match: (p: string) => p.startsWith("/dashboard/admin/disputes") },
+    { id: "disputes", label: "Disputes & Reports", href: "/dashboard/admin/disputes", icon: "lucide:scale", match: (p: string) => p.startsWith("/dashboard/admin/disputes") },
+    { id: "messages", label: "Messages", href: "/dashboard/admin/messages", icon: "lucide:message-square", match: (p: string) => p.startsWith("/dashboard/admin/messages") },
+    { id: "reviews", label: "Reviews", href: "/dashboard/admin/reviews", icon: "lucide:star", match: (p: string) => p.startsWith("/dashboard/admin/reviews") },
+    { id: "support", label: "Support Tickets", href: "/dashboard/admin/support", icon: "lucide:life-buoy", match: (p: string) => p.startsWith("/dashboard/admin/support") },
     { id: "content", label: "Content", href: "/dashboard/admin/content", icon: "lucide:layers", match: (p: string) => p.startsWith("/dashboard/admin/content") },
+    { id: "settings", label: "Platform Settings", href: "/dashboard/admin/settings", icon: "lucide:settings", match: (p: string) => p.startsWith("/dashboard/admin/settings") },
   ];
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);

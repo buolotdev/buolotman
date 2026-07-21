@@ -12,6 +12,8 @@
 .sidebarFooter { padding: 20px 24px 28px; border-top: 1px solid rgba(255,255,255,.08); }
 .sidebarHint { margin: 0 0 10px; color: rgba(254,254,255,.64); font-size: 13px; }
 .sidebarLink { color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+.alert { display: flex; align-items: center; gap: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px 20px; border-radius: 14px; color: #b45309; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+.alert iconify-icon { font-size: 20px; }
 .logoutButton { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; margin-top: 18px; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; background: rgba(255,255,255,.06); cursor: pointer; }
 .logoutButton:hover {
   background: rgba(255, 255, 255, 0.12);
@@ -141,7 +143,41 @@
 .outlineSmallButton:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-1px); }
 .primarySmallButton:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,69,0,0.3); }
 .primarySmallButton { background: #ff4500; color: #fff; }
+.primarySmallButton { background: #ff4500; color: #fff; }
 .successSmallButton { border: 0; background: rgba(22,163,74,.12); color: #16a34a; }
+
+/* Client Style Overrides */
+.clientCard { background: #fff; border-radius: 16px; border: 1px solid #e6e6e6; padding: 24px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.clientCard h3 { color: #001f3f; margin: 0 0 16px; font-size: 18px; font-weight: 700; }
+
+.clientTableWrapper { width: 100%; overflow-x: auto; }
+.clientTable { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+.clientTable th, .clientTable td { padding: 12px; border-bottom: 1px solid #e6e6e6; }
+.clientTable th { color: #555; font-weight: 600; font-size: 14px; }
+.clientTable td { color: #1a1a1a; font-weight: 500; }
+.clientTable tr:last-child td { border-bottom: none; }
+
+.clientStatusBadge { padding: 4px 10px; border-radius: 14px; font-size: 12px; font-weight: 600; display: inline-block; }
+.clientStatusActive { background: #e6f4ea; color: #1e8e3e; }
+.clientStatusPending { background: #fff4e5; color: #f4b400; }
+.clientStatusHold { background: #fdecea; color: #c0392b; }
+
+.clientOutlineBtn { padding: 8px 14px; border-radius: 8px; border: 1px solid #001f3f; background: #fff; color: #001f3f; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.clientOutlineBtn:hover { background: #f8fafc; }
+.clientPrimaryBtn { padding: 8px 14px; border-radius: 8px; border: none; background: #ff4500; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.clientPrimaryBtn:hover { background: #e63e00; }
+
+.clientProgress { background: #eee; height: 8px; border-radius: 6px; overflow: hidden; display: flex; flex: 1; }
+.clientProgressFill { display: block; height: 100%; background: #1e8e3e; }
+
+/* Modals */
+.modalOverlay { position: fixed; inset: 0; background: rgba(0, 31, 63, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modalContent { background: #fff; width: 520px; max-width: 95%; border-radius: 24px; padding: 32px; position: relative; box-shadow: 0 24px 48px rgba(0, 31, 63, 0.2); }
+.closeX { position: absolute; top: 20px; right: 24px; font-size: 24px; color: #64748b; cursor: pointer; transition: color 0.2s; }
+.closeX:hover { color: #001f3f; }
+.modalContent h3 { margin: 0 0 12px; font-size: 22px; font-weight: 800; color: #001f3f; }
+.modalContent p { margin: 0 0 24px; color: #64748b; font-size: 15px; line-height: 1.6; }
+.successMsg { color: #16a34a; font-weight: 700; margin-top: 16px; display: flex; align-items: center; gap: 8px; }
 .twoColumnGrid { grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); }
 .timelineCard { padding: 32px 24px; }
 .timeline { position: relative; display: flex; flex-direction: column; gap: 28px; }

@@ -470,10 +470,54 @@ export default function Header() {
       <img src="/boulotman-logo.png" alt="Boulot Man">
     </div>
     <nav class="bm-main-nav">
-      <a href="/search">Find Tasks</a>
-      <a href="/search?type=technician">Technicians</a>
-      <a href="/search?type=company">Companies</a>
-      <a href="/#how-it-works">How It Works</a>
+      <style>
+        .service-provider-dropdown {
+          display: inline-block;
+          position: relative;
+          margin-right: 20px;
+        }
+        .service-provider-dropdown .bmDropMenu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: #fff;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          border-radius: 8px;
+          padding: 8px 0;
+          min-width: 180px;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(10px);
+          transition: all 0.2s ease;
+          z-index: 1000;
+          margin-top: 10px;
+        }
+        .service-provider-dropdown:hover .bmDropMenu {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+        .service-provider-dropdown .bmDropItem:hover {
+          background-color: #f8fafc;
+          color: #FF4500 !important;
+        }
+      </style>
+
+      <a href="/find-tasks">Find Tasks</a>
+      
+      <div class="service-provider-dropdown">
+        <a href="/service-providers" class="bmDropBtn" style="color: #001F3F; text-decoration: none; font-weight: 500; font-size: 15px;">Service Providers <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
+        <div class="bmDropMenu">
+          <a class="bmDropItem" href="/service-providers/technicians" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Technicians</a>
+          <a class="bmDropItem" href="/search?type=company" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Companies</a>
+        </div>
+      </div>
+
+      <a href="/it-on-demand">IT On-Demand</a>
+      <a href="/concierge">Concierge</a>
+      <a href="/contractors">Enterprise</a>
+      <a href="/build-a-team">Build a Team</a>
+      <a href="/how-it-works">How It Works</a>
       <a href="/login" class="bm-main-btn bm-main-btn-outline">Login</a>
       <a href="/signup" class="bm-main-btn bm-main-btn-outline">Sign Up</a>
       <a href="/post-task" class="bm-main-btn bm-main-btn-primary">Post a Task</a>
@@ -486,9 +530,13 @@ export default function Header() {
     </div>
   </div>
   <div class="bm-main-mobile-menu" id="bmMainMobileMenu">
-    <a href="/search">Find Tasks</a>
-    <a href="/search?type=technician">Technicians</a>
-    <a href="/search?type=company">Companies</a>
+    <a href="/find-tasks">Find Tasks</a>
+    <a href="/service-providers/technicians">Service Providers</a>
+    <a href="/it-on-demand">IT On-Demand</a>
+    <a href="/concierge">Concierge</a>
+    <a href="/contractors">Enterprise</a>
+    <a href="/build-a-team">Build a Team</a>
+    <a href="/how-it-works">How It Works</a>
     <a href="/login">Login</a>
     <a href="/signup">Sign Up</a>
     <a href="/post-task">Post a Task</a>

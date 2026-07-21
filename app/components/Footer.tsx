@@ -134,7 +134,7 @@ export default function Footer() {
             <Link href="/search?type=technician">Find Technicians</Link>
             <Link href="/search?type=company">Hire Companies</Link>
             <Link href="/dashboard/company/projects">Build a Team</Link>
-            <Link href="/search">Concierge</Link>
+            <Link href="/concierge">Concierge</Link>
             <Link href="/search?category=it">IT on Demand</Link>
           </div>
 
@@ -157,7 +157,7 @@ export default function Footer() {
             <Link href="/dashboard/company/profile">Company Profile</Link>
             <Link href="/dashboard/company/services">Post Services</Link>
             <Link href="/dashboard/company/projects">Contracts</Link>
-            <Link href="/search?type=company">Enterprise</Link>
+            <Link href="/contractors">Enterprise</Link>
             <Link href="/dashboard/admin/verification">Compliance</Link>
             <Link href="/search">Partnerships</Link>
           </div>
@@ -169,7 +169,7 @@ export default function Footer() {
             <Link href="/dashboard/company/projects/tracking">Milestones</Link>
             <Link href="/dashboard/client/payments">Secure Payments</Link>
             <Link href="/dashboard/client/payments">Refunds</Link>
-            <Link href="/dashboard/admin/disputes">Disputes</Link>
+            <Link href="/dispute-resolution">Disputes</Link>
             <Link href="/signup/verify">Trust &amp; Safety</Link>
           </div>
 
@@ -179,7 +179,7 @@ export default function Footer() {
             <Link href="/#how-it-works">How It Works</Link>
             <Link href="/help-center">Help Center</Link>
             <Link href="/search">Reviews</Link>
-            <Link href="/">Press &amp; Media</Link>
+            <Link href="/press">Press &amp; Media</Link>
             <Link href="/">Developers</Link>
             <Link href="/search">API</Link>
             {pages.length > 0 ? <h4 style={{ marginTop: 18 }}>Pages</h4> : null}

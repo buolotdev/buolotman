@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.text import slugify
-from .models import Task, TaskAttachment, Bid, Question, Category, Skill
+from .models import Task, TaskAttachment, Bid, Question, Category, Skill, ServiceInquiry
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -279,3 +279,10 @@ class QuestionCreateSerializer(serializers.ModelSerializer):
         validated_data['asker'] = self.context['request'].user
         validated_data['task'] = self.context['task']
         return super().create(validated_data)
+
+
+class ServiceInquirySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceInquiry
+        fields = '__all__'
+        read_only_fields = ['status', 'created_at', 'updated_at']

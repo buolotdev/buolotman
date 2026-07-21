@@ -312,7 +312,19 @@ export default function CompanyMessages() {
                         </p>
                         {conv.unreadCount > 0 && <span className={styles.unreadPill}>{conv.unreadCount}</span>}
                       </div>
-                      {conv.taskTitle && <span className={styles.conversationTask}>{conv.taskTitle}</span>}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {conv.taskTitle && <span className={styles.conversationTask}>{conv.taskTitle}</span>}
+                        {conv.participant.role && (
+                          <span className={`${styles.roleBadge} ${
+                            conv.participant.role.toLowerCase() === 'admin' ? styles.roleAdmin :
+                            conv.participant.role.toLowerCase() === 'technician' ? styles.roleTechnician :
+                            conv.participant.role.toLowerCase() === 'company' ? styles.roleCompany :
+                            styles.roleProject
+                          }`}>
+                            {conv.participant.role}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 ))
@@ -377,47 +389,47 @@ export default function CompanyMessages() {
                     )}
                   </div>
 
-                <form className={styles.composer} onSubmit={handleSendMessage}>
+                <form className={styles.composer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
                   <div className={styles.composerField}>
-                    <input
-                      type="text"
-                      placeholder="Type a message..."
+                    <textarea
+                      className={styles.composerTextarea}
                       value={draft}
-                      onChange={(e) => setDraft(e.target.value)}
-                    />
-                    <input
-                      ref={attachmentInputRef}
-                      type="file"
-                      hidden
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        event.target.value = "";
-                        handleAttachmentPick(file);
+                      onChange={(event) => setDraft(event.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
                       }}
+                      placeholder="Type your message..."
+                      aria-label="Type a message"
+                      rows={3}
                     />
-                    {attachmentDraft ? (
-                      <button type="button" className={styles.attachmentChip} onClick={() => setAttachmentDraft(null)}>
-                        <iconify-icon icon="lucide:paperclip" />
-                        <span>{attachmentDraft.name}</span>
-                        <iconify-icon icon="lucide:x" />
+                    <div className={styles.composerTools}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <input
+                          ref={attachmentInputRef}
+                          type="file"
+                          className={styles.fileInput}
+                          accept="image/*,video/*,.pdf,.doc,.docx"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            handleAttachmentPick(file);
+                          }}
+                        />
+                        {attachmentUploading && <span style={{ fontSize: 12, color: '#64748b' }}>Uploading...</span>}
+                        {attachmentDraft && !attachmentUploading && (
+                          <button type="button" className={styles.attachmentChip} onClick={() => { setAttachmentDraft(null); if (attachmentInputRef.current) attachmentInputRef.current.value = ""; }}>
+                            <span>{attachmentDraft.name}</span>
+                            <iconify-icon icon="lucide:x" style={{ fontSize: 14, marginLeft: 4 }} />
+                          </button>
+                        )}
+                      </div>
+                      <button type="submit" className={styles.sendBtn} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending || attachmentUploading}>
+                        Send
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className={styles.composerIconButton}
-                      onClick={() => attachmentInputRef.current?.click()}
-                      disabled={attachmentUploading}
-                    >
-                      <iconify-icon icon="lucide:paperclip" />
-                    </button>
+                    </div>
                   </div>
-                  <button
-                    type="submit"
-                    className={styles.sendBtn}
-                    disabled={(!draft.trim() && !attachmentDraft) || sending}
-                  >
-                    <iconify-icon icon="lucide:send-horizontal" />
-                  </button>
                 </form>
               </>
             ) : (

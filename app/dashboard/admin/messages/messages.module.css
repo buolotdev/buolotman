@@ -1,0 +1,131 @@
+.page {
+  padding: 0 24px 24px;
+}
+
+.pageHeader {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pageHeader h1 {
+  font-size: 1.5rem;
+  color: #001F3F;
+  margin-bottom: 4px;
+}
+
+.pageHeader p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.broadcastBtn {
+  background: #FF4500;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.broadcastBtn:hover {
+  background: #e63e00;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  color: #001F3F;
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.table th {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.table td {
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 12px;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+}
+
+.userInfo h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #001F3F;
+}
+
+.userInfo span {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusResolved { background: #dcfce7; color: #16a34a; }
+.statusActive { background: #e0f2fe; color: #0284c7; }
+.statusFlagged { background: #fee2e2; color: #dc2626; }
+
+.actionBtn {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.actionBtn:hover {
+  background: #f1f5f9;
+  color: #001F3F;
+}

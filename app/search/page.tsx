@@ -454,21 +454,18 @@ export default function SearchPage() {
                   </div>
 
                   <div className={styles.resultActions}>
-                    <div className={styles.priceBlock}>
-                      <div className={styles.price}>
-                        {result.price != null ? formatXOF(result.price) : "Contact for pricing"}
-                      </div>
-                      <div className={styles.priceLabel}>
-                        {result.priceLabel || "starting price"}
-                      </div>
-                    </div>
-
                     <Link
                       href={result.link || `/profile/${result.id}`}
-                      className={`${styles.button} ${result.type === "company" ? styles.buttonSecondary : styles.buttonPrimary} ${styles.actionButton}`}
+                      className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
-                      {result.type === "company" ? "View company" : result.type === "service" ? "View service" : "View profile"}
+                      View Profile
                     </Link>
+                    <button
+                      type="button"
+                      className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
+                    >
+                      Request Service
+                    </button>
                   </div>
                 </article>
               ))

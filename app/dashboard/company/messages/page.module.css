@@ -483,6 +483,12 @@
   font-weight: 500;
 }
 
+.roleBadge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-top: 6px; }
+.roleAdmin { background: #e8f0fe; color: #1a73e8; }
+.roleTechnician { background: #e6f4ea; color: #1e8e3e; }
+.roleCompany { background: #fff4e5; color: #f4b400; }
+.roleProject { background: rgba(255, 69, 0, 0.1); color: #ff4500; }
+
 .conversationPreviewRow {
   display: flex;
   align-items: center;
@@ -695,40 +701,67 @@
 }
 
 .composer {
-  padding: 24px 32px;
+  padding: 18px 28px;
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .composerField {
-  flex: 1;
+  width: 100%;
   display: flex;
-  align-items: center;
-  background: #f1f5fb;
-  border-radius: 16px;
-  padding: 4px 8px 4px 20px;
-  height: 56px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
+  flex-direction: column;
 }
 
-.composerField:focus-within {
-  background: #ffffff;
-  border-color: #ff4500;
-  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.08);
-}
-
-.composerField input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 15px;
+.composerTextarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 160px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #001f3f;
+  font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
+  resize: none;
+  outline: 0;
+  padding: 12px;
+  font-family: inherit;
+  margin-bottom: 12px;
+}
+
+.composerTextarea::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.composerTools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.fileInput {
+  font-size: 13px;
+  color: #000;
+}
+
+.fileInput::file-selector-button {
+  padding: 4px 10px;
+  border: 1px solid #767676;
+  border-radius: 2px;
+  background: #f0f0f0;
+  color: #000;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.fileInput::file-selector-button:hover {
+  background: #e0e0e0;
 }
 
 .attachmentChip {
@@ -763,29 +796,23 @@
 }
 
 .sendBtn {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
   background: #ff4500;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 8px 16px rgba(255, 69, 0, 0.25);
-  transition: all 0.2s ease;
+  transition: background 0.2s;
 }
 
 .sendBtn:hover:not(:disabled) {
   background: #e63e00;
-  transform: scale(1.05);
 }
 
 .sendBtn:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
-  box-shadow: none;
+  opacity: .45;
   cursor: not-allowed;
 }
 

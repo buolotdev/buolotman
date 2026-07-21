@@ -1,0 +1,280 @@
+.page {
+  background: #f6f8fb;
+  color: #1a1a1a;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 40px auto 150px;
+  padding: 0 24px;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, #001F3F, #0b3c6f);
+  color: #fff;
+  padding: 90px 70px;
+  border-radius: 40px;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 48px;
+}
+
+.heroDesc {
+  margin-top: 18px;
+  font-size: 19px;
+  opacity: 0.96;
+  max-width: 1050px;
+}
+
+/* SECTION */
+.section {
+  margin-top: 100px;
+}
+
+.sectionTitle {
+  font-size: 38px;
+  color: #001F3F;
+  margin-bottom: 24px;
+}
+
+.sectionDesc {
+  color: #6b7280;
+  line-height: 1.9;
+  max-width: 1150px;
+  margin-bottom: 40px;
+}
+
+/* GRIDS */
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+
+@media(max-width: 1100px) {
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CARDS */
+.card {
+  background: #ffffff;
+  border-radius: 34px;
+  padding: 42px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, #FF4500, #ff7b47);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.08);
+  border-color: #eef2ff;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.cardTitle {
+  margin-top: 0;
+  color: #001F3F;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: 800;
+}
+
+.cardList {
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.cardListItem {
+  margin-bottom: 14px;
+  color: #475569;
+  position: relative;
+  padding-left: 24px;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.cardListItem::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #FF4500;
+  font-weight: 900;
+}
+
+.cardListItem:hover {
+  color: #001F3F;
+}
+
+.badge {
+  display: inline-block;
+  background: #FF4500;
+  color: #ffffff;
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* FLOW (How it Works) */
+.flow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 22px;
+  margin-top: 40px;
+}
+
+@media(max-width: 1200px) {
+  .flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.flowStep {
+  background: #fff;
+  border-radius: 26px;
+  padding: 28px;
+  border: 1.5px solid #e4e7ec;
+}
+
+.flowStepBadge {
+  font-weight: 900;
+  color: #FF4500;
+  font-size: 13px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.flowStepDesc {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ACCORDION (FAQ) */
+.accordionItem {
+  border-top: 1px solid #e4e7ec;
+  padding: 26px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.accordionItem:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.accordionTitle {
+  font-weight: 900;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #001F3F;
+  font-size: 16px;
+  margin: 0;
+}
+
+.accordionIcon {
+  font-size: 20px;
+  color: #FF4500;
+  transition: transform 0.2s;
+}
+
+.accordionContent {
+  margin-top: 16px;
+  color: #6b7280;
+  line-height: 1.85;
+}
+
+/* CTA */
+.cta {
+  background: linear-gradient(135deg, #001F3F, #0b3c6f);
+  color: #fff;
+  padding: 80px;
+  border-radius: 42px;
+  margin-top: 120px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+@media(max-width: 1100px) {
+  .cta {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.ctaTitle {
+  margin: 0 0 16px;
+  font-size: 32px;
+}
+
+.ctaDesc {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.ctaButton {
+  background: #FF4500;
+  border: none;
+  border-radius: 28px;
+  padding: 24px 36px;
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  justify-self: end;
+  text-decoration: none;
+  display: inline-block;
+}
+
+@media(max-width: 1100px) {
+  .ctaButton {
+    justify-self: center;
+  }
+}
+
+.ctaButton:hover {
+  background: #e63e00;
+  transform: translateY(-2px);
+}

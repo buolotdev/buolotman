@@ -1,0 +1,415 @@
+/* SEARCH BAR */
+.searchBar {
+  background: #f6f8fb;
+  padding: 30px 0;
+  margin-bottom: 20px;
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 12px;
+}
+
+.searchGrid input,
+.searchGrid select {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+}
+
+.searchBtn {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.searchBtn:hover {
+  background: #e63e00;
+}
+
+/* FILTER PANEL */
+.filterPanel {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 0 0 24px;
+  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 30px;
+}
+
+.filterPanel select,
+.filterPanel input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+}
+
+/* TASK GRID */
+.taskGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media(max-width: 992px) {
+  .taskGrid {
+    grid-template-columns: 1fr;
+  }
+  .searchGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filterPanel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(max-width: 576px) {
+  .searchGrid {
+    grid-template-columns: 1fr;
+  }
+  .filterPanel {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* TASK CARD ENHANCEMENTS */
+.taskCard {
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.taskCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #FF4500, #ff7b47);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.taskCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.08);
+  border-color: #eef2ff;
+}
+
+.taskCard:hover::before {
+  opacity: 1;
+}
+
+.taskHeader {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.clientPic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eef2ff;
+}
+
+.taskTitle {
+  font-weight: 700;
+  color: #001F3F;
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.taskMeta {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metaIcon {
+  font-size: 14px;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: #eef1f5;
+  color: #333;
+}
+
+.tagUrgent {
+  background: #fdecea;
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.tagFlexible {
+  background: #e6f4ea;
+  color: #1e8e3e;
+  font-weight: 700;
+}
+
+.tagProgrammed {
+  background: #fff3e0;
+  color: #d35400;
+  font-weight: 700;
+}
+
+.taskFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.taskPrice {
+  font-weight: 800;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.applyBtn {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 10px rgba(255,69,0,0.2);
+}
+
+.applyBtn:hover {
+  background: #e63e00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(255,69,0,0.3);
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.pageBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 600;
+  color: #475569;
+}
+
+.pageBtn:hover {
+  background: #f1f5f9;
+}
+
+.pageBtnActive {
+  background: #001F3F;
+  color: #fff;
+  border-color: #001F3F;
+}
+
+.pageBtnActive:hover {
+  background: #001F3F;
+}
+
+/* MODAL */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: #fff;
+  width: 900px;
+  max-width: 95%;
+  border-radius: 24px;
+  padding: 36px;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.closeModalBtn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #f1f5f9;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: background 0.2s, color 0.2s;
+}
+
+.closeModalBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modalHeader {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modalHeader img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #eef2ff;
+}
+
+.modalTitle {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: #001F3F;
+  font-weight: 800;
+}
+
+.modalClient {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modalBlock {
+  margin-bottom: 20px;
+}
+
+.modalBlock label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modalBlock p {
+  margin: 0;
+  font-size: 16px;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.modalMap {
+  height: 260px;
+  border-radius: 16px;
+  margin: 24px 0;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.actionBox {
+  display: grid;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.actionBox input,
+.actionBox textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.actionBox input:focus,
+.actionBox textarea:focus {
+  outline: none;
+  border-color: #001F3F;
+}
+
+.actionBox button {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.actionBox button:hover {
+  background: #e63e00;
+  transform: translateY(-2px);
+}

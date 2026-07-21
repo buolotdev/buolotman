@@ -1,0 +1,356 @@
+.page {
+  background: #fff;
+  color: #222;
+  min-height: 100vh;
+}
+
+/* SEARCH BAR */
+.searchBar {
+  background: #f6f8fb;
+  padding: 30px 60px;
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 12px;
+}
+
+.searchGrid input,
+.searchGrid select {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+}
+
+.searchBtn {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.searchBtn:hover {
+  background: #e63e00;
+}
+
+/* FILTER PANEL */
+.filterPanel {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 24px 60px;
+  background: #fafafa;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.filterPanel select,
+.filterPanel input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+}
+
+/* PAGE CONTENT */
+.servicesPage {
+  padding: 60px;
+}
+
+/* TASK GRID */
+.taskGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+@media(max-width: 992px) {
+  .taskGrid {
+    grid-template-columns: 1fr;
+  }
+  .searchGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filterPanel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(max-width: 576px) {
+  .searchGrid {
+    grid-template-columns: 1fr;
+  }
+  .filterPanel {
+    grid-template-columns: 1fr;
+  }
+  .searchBar, .filterPanel, .servicesPage {
+    padding: 20px;
+  }
+}
+
+.taskCard {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.taskCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+  border-color: #d1d5db;
+}
+
+.taskHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.clientPic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.taskTitle {
+  font-weight: 600;
+  color: #001F3F;
+  margin: 0;
+  font-size: 16px;
+}
+
+.taskMeta {
+  font-size: 12px;
+  color: #555;
+  margin-top: 2px;
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #eef1f5;
+  color: #333;
+}
+
+.tagUrgent {
+  background: #fdecea;
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.tagFlexible {
+  background: #e6f4ea;
+  color: #1e8e3e;
+  font-weight: 600;
+}
+
+.tagProgrammed {
+  background: #fff3e0;
+  color: #d35400;
+  font-weight: 600;
+}
+
+.taskFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.taskPrice {
+  font-weight: 700;
+  font-size: 18px;
+  color: #111;
+}
+
+.applyBtn {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.applyBtn:hover {
+  background: #e63e00;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.pageBtn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pageBtn:hover {
+  background: #f3f4f6;
+}
+
+.pageBtnActive {
+  background: #001F3F;
+  color: #fff;
+  border-color: #001F3F;
+}
+
+.pageBtnActive:hover {
+  background: #001F3F;
+}
+
+/* MODAL */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: #fff;
+  width: 900px;
+  max-width: 95%;
+  border-radius: 20px;
+  padding: 30px;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.closeModalBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modalHeader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalHeader img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.modalTitle {
+  margin: 0 0 4px;
+  font-size: 22px;
+  color: #001F3F;
+}
+
+.modalClient {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.modalBlock {
+  margin-bottom: 16px;
+}
+
+.modalBlock label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modalBlock p {
+  margin: 0;
+  font-size: 15px;
+  color: #222;
+  line-height: 1.5;
+}
+
+.modalMap {
+  height: 260px;
+  border-radius: 12px;
+  margin: 18px 0;
+  border: 1px solid #e6e6e6;
+  background: #f0f0f0; /* placeholder background */
+}
+
+.actionBox {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e6e6e6;
+}
+
+.actionBox input,
+.actionBox textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e6e6e6;
+  font-size: 14px;
+}
+
+.actionBox button {
+  background: #FF4500;
+  border: none;
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.actionBox button:hover {
+  background: #e63e00;
+}

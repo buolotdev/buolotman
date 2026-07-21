@@ -43,10 +43,11 @@ const initialForm: ServiceForm = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard/technician", icon: "lucide:layout-dashboard" },
-  { label: "Browse Tasks", href: "/dashboard/technician/tasks", icon: "lucide:search" },
-  { label: "My Services", href: "/dashboard/technician/services", icon: "lucide:layers-3" },
-  { label: "My Bids", href: "/dashboard/technician/bids", icon: "lucide:send" },
+  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
+  { key: "projects", label: "Projects", icon: "lucide:folder-open", href: "/dashboard/technician/projects", match: (p: string) => p.startsWith("/dashboard/technician/projects") },
+  { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
+  { key: "services", label: "My Services", icon: "lucide:layers-3", href: "/dashboard/technician/services", match: (p: string) => p.startsWith("/dashboard/technician/services") },
+  { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
   { label: "Messages", href: "/dashboard/technician/messages", icon: "lucide:message-square" },
   { label: "Wallet", href: "/dashboard/technician/wallet", icon: "lucide:wallet" },
   { label: "Profile", href: "/dashboard/technician/profile", icon: "lucide:user" },
@@ -214,7 +215,10 @@ export default function TechnicianServicesPage() {
               <h1>My Services</h1>
               <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
             </div>
-            <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+              <Link href="/dashboard/technician/services/new" className={styles.primaryButton} style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", textDecoration: "none", display: "inline-flex", whiteSpace: "nowrap", border: "none" }}>+ New service</Link>
+              <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+            </div>
           </header>
         </div>
 
@@ -237,7 +241,6 @@ export default function TechnicianServicesPage() {
           <div className={styles.listPanel}>
             <div className={styles.panelHeader}>
               <h2>Listed services</h2>
-              <button type="button" className={styles.ghostButton} onClick={resetForm}>New service</button>
             </div>
 
             {loading ? (
@@ -281,10 +284,11 @@ export default function TechnicianServicesPage() {
             )}
           </div>
 
+          {editingId ? (
           <form className={styles.formPanel} onSubmit={submit}>
             <div className={styles.panelHeader}>
-              <h2>{editingId ? "Edit service" : "Create service"}</h2>
-              {editingId ? <button type="button" className={styles.ghostButton} onClick={resetForm}>Cancel</button> : null}
+              <h2>Edit service</h2>
+              <button type="button" className={styles.ghostButton} onClick={resetForm}>Cancel</button>
             </div>
 
             <label className={styles.field}>
@@ -437,9 +441,28 @@ export default function TechnicianServicesPage() {
             </div>
 
             <button type="submit" className={styles.primaryButton} disabled={saving || uploadingType !== null}>
-              {saving ? "Saving..." : editingId ? "Update service" : "Create service"}
+              {saving ? "Saving..." : "Update service"}
             </button>
           </form>
+          ) : (
+            <div className={styles.emptyFormPlaceholder} style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              background: "#fff", 
+              borderRadius: 24, 
+              border: "1px dashed #cbd5e1",
+              color: "#64748b",
+              padding: 40,
+              textAlign: "center"
+            }}>
+              <div>
+                <iconify-icon icon="lucide:mouse-pointer-click" style={{ fontSize: 40, marginBottom: 16, color: "#94a3b8" }}></iconify-icon>
+                <h3>Select a service to edit</h3>
+                <p>Click "Edit" on any of your services to modify them here,<br/>or click "New service" to create a fresh one.</p>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>

@@ -8,12 +8,12 @@ from django.utils import timezone
 from utils.cache import cached
 from apps.governance.services import create_notification, create_audit_log, notify_users
 
-from .models import Task, Bid, Question, Category, Skill, TaskView
+from .models import Task, Bid, Question, Category, Skill, TaskView, ServiceInquiry
 from .serializers import (
     TaskListSerializer, TaskDetailSerializer, TaskCreateSerializer,
     BidListSerializer, BidDetailSerializer, BidCreateSerializer,
     QuestionSerializer, QuestionCreateSerializer,
-    CategorySerializer, SkillSerializer,
+    CategorySerializer, SkillSerializer, ServiceInquirySerializer
 )
 
 
@@ -115,6 +115,16 @@ def skill_list(request):
             skills = skills.filter(category__slug=category_param)
     serializer = SkillSerializer(skills, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def submit_inquiry(request):
+    serializer = ServiceInquirySerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Inquiry submitted successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])

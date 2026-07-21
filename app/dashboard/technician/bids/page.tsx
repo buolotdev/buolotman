@@ -9,7 +9,7 @@ import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skel
 import { formatXOF } from "@/app/lib/format";
 import { useToast } from "@/app/components/Toast";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
 type BidStatus = "all" | "pending" | "accepted" | "rejected" | "withdrawn";
@@ -159,53 +159,7 @@ export default function TechnicianBidsPage() {
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarTop}>
-            <Link href="/" className={styles.brand} aria-label="Boulot Man home">
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={220} height={56} className={styles.brandImage} priority />
-            </Link>
-            <button type="button" className={styles.sidebarClose} aria-label="Close navigation" onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <div className={styles.profileCard}>
-            <div className={styles.profileAvatar}>{userInitials}</div>
-            <div className={styles.profileMeta}>
-              <strong>{userName}</strong>
-              <span>{userRole}</span>
-            </div>
-          </div>
-
-          <nav className={styles.sidebarNav} aria-label="Technician navigation">
-            <Link href="/dashboard/technician" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:layout-dashboard" /></span>
-              <span>Dashboard</span>
-            </Link>
-            <Link href="/dashboard/technician/tasks" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:search" /></span>
-              <span>Browse Tasks</span>
-            </Link>
-            <Link href="/dashboard/technician/bids" className={`${styles.navItem} ${styles.navItemActive}`}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:file-text" /></span>
-              <span>My Bids</span>
-            </Link>
-            <Link href="/dashboard/technician/messages" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:message-square" /></span>
-              <span>Messages</span>
-            </Link>
-            <Link href="/dashboard/technician/wallet" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:wallet" /></span>
-              <span>Wallet</span>
-            </Link>
-            <Link href="/dashboard/technician/profile" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:user" /></span>
-              <span>Profile</span>
-            </Link>
-          </nav>
-
-          <LogoutButton className={styles.logoutButton} />
-        </aside>
+        <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <DashboardHeader

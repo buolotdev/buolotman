@@ -92,6 +92,13 @@ export default function CompanyProfileDashboard() {
   const teamSize = profile?.team_size || profile?.number_of_employees || "";
   const location = profile?.location || profile?.service_area || "";
   const category = profile?.category || profile?.company_type || "";
+  const yearFounded = profile?.year_founded || "";
+  const industry = profile?.industry || "";
+  const subjectTitle = profile?.subject_title || "";
+  const country = profile?.country || "";
+  const latitude = profile?.latitude || "";
+  const longitude = profile?.longitude || "";
+  const areasOfExpertise = profile?.areas_of_expertise || "";
 
   return (
     <div className={`${layoutStyles.layoutWrapper} ${mobileSidebarOpen ? layoutStyles.sidebarOpenMobile : ""}`}>
@@ -211,11 +218,22 @@ export default function CompanyProfileDashboard() {
                     <div className={styles.profileTitleRow}>
                       <div>
                         <h1>{companyName}</h1>
+                        {subjectTitle && (
+                          <div style={{ color: '#64748b', fontSize: '15px', marginTop: '4px', marginBottom: '12px' }}>
+                            {subjectTitle}
+                          </div>
+                        )}
                         <div className={styles.profileMetaTags}>
                           {rating != null && (
                             <div className={styles.ratingBadge}>
                               <iconify-icon icon="lucide:star" style={{ fontSize: '14px' }} />
                               {rating} {reviewCount > 0 && <span>({reviewCount} reviews)</span>}
+                            </div>
+                          )}
+                          {industry && (
+                            <div className={styles.profileMetaTag}>
+                              <iconify-icon icon="lucide:building-2" style={{ fontSize: '16px' }} />
+                              {industry}
                             </div>
                           )}
                           {location && (
@@ -259,6 +277,18 @@ export default function CompanyProfileDashboard() {
                         </Link>
                       )}
                     </div>
+                    {areasOfExpertise && (
+                      <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontSize: '14px', color: '#001F3F', marginBottom: '10px' }}>Areas of Expertise</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {areasOfExpertise.split(',').map((tag: string) => (
+                            <span key={tag} style={{ background: '#eef1f5', color: '#0f172a', padding: '6px 12px', borderRadius: '12px', fontSize: '13px', fontWeight: 500 }}>
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {description ? (
                       <p className={styles.aboutText}>{description}</p>
                     ) : (
@@ -327,7 +357,7 @@ export default function CompanyProfileDashboard() {
                 </div>
 
                 <div className={styles.rightCol}>
-                  {(phone || companyEmail || website || address) && (
+                  {(phone || companyEmail || website || address || country || city || latitude) && (
                     <div className={styles.sectionCard}>
                       <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>Contact Information</h2>
@@ -366,14 +396,25 @@ export default function CompanyProfileDashboard() {
                             </div>
                           </div>
                         )}
-                        {address && (
+                        {(address || city || country) && (
                           <div className={styles.infoRow}>
                             <div className={styles.infoIcon}>
                               <iconify-icon icon="lucide:map-pin" style={{ fontSize: '18px' }} />
                             </div>
                             <div className={styles.infoText}>
-                              <span>{[address, city, state, zip].filter(Boolean).join(", ")}</span>
-                              <span>Headquarters</span>
+                              <span>{[address, city, country].filter(Boolean).join(", ")}</span>
+                              <span>Physical Address</span>
+                            </div>
+                          </div>
+                        )}
+                        {latitude && longitude && (
+                          <div className={styles.infoRow}>
+                            <div className={styles.infoIcon}>
+                              <iconify-icon icon="lucide:navigation" style={{ fontSize: '18px' }} />
+                            </div>
+                            <div className={styles.infoText}>
+                              <span>{latitude}, {longitude}</span>
+                              <span>Coordinates</span>
                             </div>
                           </div>
                         )}
@@ -386,6 +427,15 @@ export default function CompanyProfileDashboard() {
                       Company Stats
                     </h2>
                     <div className={styles.statsList}>
+                      {yearFounded && (
+                        <div className={styles.statRow}>
+                          <div className={styles.statLabel}>
+                            <iconify-icon icon="lucide:clock" style={{ fontSize: '18px' }} />
+                            Year Founded
+                          </div>
+                          <div className={styles.statValue}>{yearFounded}</div>
+                        </div>
+                      )}
                       {formattedMemberSince && (
                         <div className={styles.statRow}>
                           <div className={styles.statLabel}>

@@ -14,7 +14,10 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
+  { key: "projects", label: "Projects", icon: "lucide:folder-open", href: "/dashboard/technician/projects", match: (p: string) => p.startsWith("/dashboard/technician/projects") },
   { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
+  { key: "services", label: "My Services", icon: "lucide:layers-3", href: "/dashboard/technician/services", match: (p: string) => p.startsWith("/dashboard/technician/services") },
+  { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
   { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/technician/messages", match: (p: string) => p.startsWith("/dashboard/technician/messages") },
   { key: "wallet", label: "Wallet", icon: "lucide:wallet", href: "/dashboard/technician/wallet", match: (p: string) => p.startsWith("/dashboard/technician/wallet") },
   { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/technician/profile", match: (p: string) => p.startsWith("/dashboard/technician/profile") },
@@ -401,44 +404,46 @@ export default function TechnicianMessagesPage() {
                   sendMessage();
                 }}
               >
-                <label className={styles.composeBox}>
-                  <input
-                    type="text"
+                <div className={styles.composeBox}>
+                  <textarea
+                    className={styles.composerTextarea}
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
-                    placeholder="Type a message..."
-                    aria-label="Type a message"
-                  />
-                  <input
-                    ref={attachmentInputRef}
-                    type="file"
-                    hidden
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      event.target.value = "";
-                      handleAttachmentPick(file);
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
                     }}
+                    placeholder="Type your message..."
+                    aria-label="Type a message"
+                    rows={3}
                   />
-                  {attachmentDraft ? (
-                    <button type="button" className={styles.attachmentChip} onClick={() => setAttachmentDraft(null)}>
-                      <iconify-icon icon="lucide:paperclip" />
-                      <span>{attachmentDraft.name}</span>
-                      <iconify-icon icon="lucide:x" />
+                  <div className={styles.composerTools}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <input
+                        ref={attachmentInputRef}
+                        type="file"
+                        className={styles.fileInput}
+                        accept="image/*,video/*,.pdf,.doc,.docx"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          handleAttachmentPick(file);
+                        }}
+                      />
+                      {attachmentUploading && <span style={{ fontSize: 12, color: '#64748b' }}>Uploading...</span>}
+                      {attachmentDraft && !attachmentUploading && (
+                        <button type="button" className={styles.attachmentChip} onClick={() => { setAttachmentDraft(null); if (attachmentInputRef.current) attachmentInputRef.current.value = ""; }}>
+                          <span>{attachmentDraft.name}</span>
+                          <iconify-icon icon="lucide:x" style={{ fontSize: 14, marginLeft: 4 }} />
+                        </button>
+                      )}
+                    </div>
+                    <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending || attachmentUploading}>
+                      Send
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className={styles.composerIconButton}
-                    aria-label="Attach a file"
-                    onClick={() => attachmentInputRef.current?.click()}
-                    disabled={attachmentUploading}
-                  >
-                    <iconify-icon icon="lucide:paperclip" />
-                  </button>
-                </label>
-                <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending}>
-                  <iconify-icon icon="lucide:send" />
-                </button>
+                  </div>
+                </div>
               </form>
             </>
           ) : (

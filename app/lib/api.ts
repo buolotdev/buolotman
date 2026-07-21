@@ -50,7 +50,27 @@ async function request<T>(
     ...(options.headers as Record<string, string>),
   };
 
-  // MOCK RESPONSES FOR UI TESTING WHEN AUTH IS BYPASSED
+  // MOCK RESPONSES FOR UI TESTING
+  if (endpoint === "/auth/login/" && options.body) {
+    const reqBody = JSON.parse(options.body as string || "{}");
+    const email = reqBody.username || "";
+    // Intercept mock logins
+    if (email.includes("admin") || email.includes("tech") || email.includes("comp") || email.includes("client")) {
+      let role = "client";
+      if (email.includes("admin")) role = "admin";
+      else if (email.includes("tech")) role = "technician";
+      else if (email.includes("comp")) role = "company";
+      
+      return { 
+        access: "dummy_access_token", 
+        refresh: "dummy_refresh", 
+        role, 
+        username: email.split("@")[0], 
+        email 
+      } as any;
+    }
+  }
+
   if (token === "dummy_access_token") {
     if (endpoint.startsWith("/auth/me")) {
       return { id: 1, first_name: "Demo", last_name: "User", role: "client", email: "demo@example.com" } as any;
@@ -72,6 +92,9 @@ async function request<T>(
     if (endpoint.includes("/conversations/")) {
       return { messages: [{ id: 1, text: "Hello there!", sender_name: "Ali Technician", created_at: new Date().toISOString() }] } as any;
     }
+    if (endpoint.includes("/auth/otp/request")) {
+      return { message: "Mock OTP sent", challenge_id: 123456, expires_at: new Date().toISOString() } as any;
+    }
     // Generic fallback for arrays (like /tasks/)
     if (endpoint.includes("/tasks") || endpoint.includes("/users")) return [] as any;
     // Generic fallback for objects
@@ -85,7 +108,12 @@ async function request<T>(
   const opts = { ...options };
   delete (opts as any).public;
 
-  let res = await fetch(`${API_BASE}${endpoint}`, { ...opts, headers });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, { ...opts, headers });
+  } catch (err) {
+    throw new Error("Backend is offline. Please start the backend server.");
+  }
 
   if (res.status === 401 && token) {
     const newToken = await refreshAccessToken();
@@ -243,6 +271,12 @@ export const api = {
     const qs = category ? `?category=${category}` : "";
     return request<any[]>(`/tasks/skills/${qs}`);
   },
+
+  // Inquiries
+  submitInquiry: (data: Record<string, string>) =>
+    request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify(data), public: true } as any),
+  submitContact: (data: Record<string, string>) =>
+    request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify({ ...data, inquiry_type: 'general' }), public: true } as any),
 
   // Wallet
   getWallet: () => request<any>("/wallet/"),

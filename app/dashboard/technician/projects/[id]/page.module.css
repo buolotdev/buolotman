@@ -1,0 +1,284 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  width: 100%;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.content {
+  padding: 32px 40px;
+  max-width: 1200px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  margin-bottom: 32px;
+}
+
+.card h3 {
+  color: #001f3f;
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.info p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.info strong {
+  color: #0f172a;
+}
+
+.progressContainer {
+  margin: 24px 0 8px;
+  height: 12px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: #1e8e3e;
+  border-radius: 999px;
+}
+
+.progressText {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Table */
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th, .table td {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.table th {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges */
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusHold { background: #fdecea; color: #c0392b; }
+.statusReleased { background: #e6f4ea; color: #1e8e3e; }
+.statusPending { background: #fff4e5; color: #f4b400; }
+
+/* Buttons */
+.outlineButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #001f3f;
+  color: #001f3f;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.outlineButton:hover {
+  background: #f1f5f9;
+}
+
+.primaryButton {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #ff4500;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.primaryButton:hover {
+  background: #e63e00;
+}
+
+.smallButton {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Activity Log */
+.logItem {
+  font-size: 14px;
+  color: #334155;
+  border-left: 3px solid #e2e8f0;
+  padding-left: 14px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.logItem:last-child {
+  margin-bottom: 0;
+}
+
+/* Payment Status */
+.paymentRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #334155;
+}
+.paymentRow strong {
+  color: #0f172a;
+}
+.paymentRow:last-child {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modalContent {
+  background: #ffffff;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #64748b;
+  line-height: 1;
+}
+
+.modalContent h3 {
+  margin: 0 0 24px;
+  color: #001f3f;
+  font-size: 20px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.formInput, .formTextarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.formInput:focus, .formTextarea:focus {
+  outline: none;
+  border-color: #001f3f;
+}
+
+.formTextarea {
+  resize: vertical;
+}
+
+.successMessage {
+  margin-top: 16px;
+  padding: 12px;
+  background: #e6f4ea;
+  color: #1e8e3e;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

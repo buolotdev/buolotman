@@ -12,6 +12,7 @@ type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profi
 type ServiceType = "onsite" | "remote" | "hybrid";
 type Urgency = "urgent" | "standard";
 type BudgetMode = "fixed" | "hourly";
+type PaymentOption = "" | "Cash on completion" | "Milestone payment" | "Escrow";
 type ContactMethod = "in-app" | "phone" | "whatsapp";
 
 const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }> = [
@@ -62,7 +63,9 @@ export default function PostTaskPage() {
     city: "",
     expectedDate: "",
     timePreference: "",
-    budget: "",
+    budgetMin: "",
+    budgetMax: "",
+    paymentOption: "" as PaymentOption,
   });
   const [skills, setSkills] = useState<string[]>([]);
   const [files, setFiles] = useState<Array<{ name: string; size: string; kind: string; file: File }>>([]);
@@ -101,6 +104,23 @@ export default function PostTaskPage() {
     [categoriesData]
   );
 
+  // Auto-detect location on mount
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.city) {
+          setFormData((current) => ({
+            ...current,
+            city: `${data.city}, ${data.country_name || ""}`.trim(),
+          }));
+        }
+      })
+      .catch(() => {
+        // silently ignore
+      });
+  }, []);
+
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | number | null>(null);
   const { data: skillsData, loading: skillsLoading } = useFetch(
     () =>
@@ -136,14 +156,12 @@ export default function PostTaskPage() {
       scheduleLabel: formData.expectedDate
         ? `${formData.expectedDate}${formData.timePreference ? ` • ${formData.timePreference}` : ""}`
         : "Not scheduled",
-      budgetLabel: formData.budget
-        ? budgetMode === "fixed"
-          ? `${formatXOF(formData.budget)} fixed`
-          : `${formatXOF(formData.budget)} / hr`
+      budgetLabel: formData.budgetMin || formData.budgetMax
+        ? `${formData.budgetMin ? formatXOF(formData.budgetMin) : "0"} - ${formData.budgetMax ? formatXOF(formData.budgetMax) : "Max"}`
         : "—",
       contactLabel: contactMethods.length ? contactMethods.join(", ") : "No contact methods selected",
     }),
-    [budgetMode, contactMethods, formData, selectedCategoryName]
+    [contactMethods, formData, selectedCategoryName]
   );
 
   const updateField = (field: keyof typeof formData, value: string) => {
@@ -188,8 +206,9 @@ export default function PostTaskPage() {
       city: formData.city,
       expectedDate: formData.expectedDate,
       timePreference: formData.timePreference,
-      budget: formData.budget,
-      budgetMode,
+      budgetMin: formData.budgetMin,
+      budgetMax: formData.budgetMax,
+      paymentOption: formData.paymentOption,
       urgency,
       serviceType,
       contactMethods,
@@ -218,8 +237,9 @@ export default function PostTaskPage() {
         city: formData.city,
         expectedDate: formData.expectedDate,
         timePreference: formData.timePreference,
-        budget: formData.budget,
-        budgetMode,
+        budgetMin: formData.budgetMin,
+        budgetMax: formData.budgetMax,
+        paymentOption: formData.paymentOption,
         urgency,
         serviceType,
         contactMethods,
@@ -591,10 +611,11 @@ export default function PostTaskPage() {
                         <label className={styles.label}>Urgency Level</label>
                         <div className={styles.stackCompact}>
                           {[
-                            { value: "urgent", label: "Urgent (Within 24h)" },
-                            { value: "standard", label: "Standard / Flexible" },
+                            { value: "urgent", label: "Urgent" },
+                            { value: "flexible", label: "Flexible" },
+                            { value: "programmed", label: "Programmed" },
                           ].map((option) => (
-                            <button key={option.value} type="button" className={`${styles.radioCard} ${urgency === option.value ? styles.radioCardActive : ""}`} onClick={() => setUrgency(option.value as Urgency)}>
+                            <button key={option.value} type="button" className={`${styles.radioCard} ${urgency === option.value ? styles.radioCardActive : ""}`} onClick={() => setUrgency(option.value as any)}>
                               <span className={styles.radioIndicator} />
                               <span>{option.label}</span>
                             </button>
@@ -605,26 +626,41 @@ export default function PostTaskPage() {
                       <div className={styles.divider} />
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Budget Options</label>
-                        <div className={styles.segmentedControl}>
-                          {[
-                            { value: "fixed", label: "Fixed Price" },
-                            { value: "hourly", label: "Hourly Rate" },
-                          ].map((option) => (
-                            <button key={option.value} type="button" className={`${styles.segment} ${budgetMode === option.value ? styles.segmentActive : ""}`} onClick={() => setBudgetMode(option.value as BudgetMode)}>
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
-                        <div className={styles.currencyInput}>
-                          <span>XOF</span>
+                        <label className={styles.label}>Budget Range (XOF)</label>
+                        <div className={styles.inlineInputRow}>
                           <input
                             type="number"
-                            value={formData.budget}
-                            onChange={(event) => updateField("budget", event.target.value)}
-                            placeholder="0"
+                            className={styles.input}
+                            value={formData.budgetMin}
+                            onChange={(event) => updateField("budgetMin", event.target.value)}
+                            placeholder="Minimum"
+                          />
+                          <input
+                            type="number"
+                            className={styles.input}
+                            value={formData.budgetMax}
+                            onChange={(event) => updateField("budgetMax", event.target.value)}
+                            placeholder="Maximum"
                           />
                         </div>
+                      </div>
+
+                      <div className={styles.divider} />
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="paymentOption" className={styles.label}>Preferred Payment Option</label>
+                        <select
+                          id="paymentOption"
+                          className={styles.select}
+                          value={formData.paymentOption}
+                          onChange={(event) => updateField("paymentOption", event.target.value)}
+                          required
+                        >
+                          <option value="">Choose payment option</option>
+                          <option value="Cash on completion">Cash on completion</option>
+                          <option value="Milestone payment">Milestone payment</option>
+                          <option value="Escrow">Escrow (recommended)</option>
+                        </select>
                       </div>
                     </div>
                   </section>

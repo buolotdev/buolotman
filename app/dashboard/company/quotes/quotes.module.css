@@ -1,0 +1,104 @@
+.page {
+  padding: 0 24px 24px;
+}
+
+.pageHeader {
+  margin-bottom: 24px;
+}
+
+.pageHeader h1 {
+  font-size: 1.5rem;
+  color: #001F3F;
+  margin-bottom: 4px;
+}
+
+.pageHeader p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.table th {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.declined {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.actionBtn {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #001F3F;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: #f8fafc;
+  border-color: #001F3F;
+}
+
+.actionBtnPrimary {
+  background: #FF4500;
+  color: #fff;
+  border: none;
+}
+
+.actionBtnPrimary:hover {
+  background: #e03e00;
+}

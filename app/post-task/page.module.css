@@ -85,7 +85,7 @@
 .segmentedControl { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #f1f5f9; }
 .segment { flex: 1; min-height: 40px; border: 0; border-radius: 10px; background: transparent; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
 .segment:hover:not(.segmentActive) { background: rgba(255, 255, 255, 0.5); color: #001f3f; }
-.segmentActive { background: #fff; color: #001f3f; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.segmentActive { background: #ff4500; color: #fff; box-shadow: 0 1px 3px rgba(255,69,0,.3); }
 .divider { height: 1px; background: #e2e8f0; }
 .radioCard, .checkboxRow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; color: #001f3f; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s ease; }
 .radioCard:hover:not(.radioCardActive), .checkboxRow:hover { border-color: #cbd5e1; background: #f1f5f9; }

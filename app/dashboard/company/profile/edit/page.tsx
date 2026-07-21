@@ -27,6 +27,14 @@ export default function EditCompanyProfile() {
     team_size: "",
     business_hours: "",
     response_time: "",
+    year_founded: "",
+    industry: "",
+    subject_title: "",
+    country: "",
+    city: "",
+    latitude: "",
+    longitude: "",
+    areas_of_expertise: "",
   });
 
   useEffect(() => {
@@ -42,6 +50,14 @@ export default function EditCompanyProfile() {
         team_size: profile.team_size?.toString() || "",
         business_hours: profile.business_hours || "",
         response_time: profile.response_time || "",
+        year_founded: profile.year_founded || "",
+        industry: profile.industry || "",
+        subject_title: profile.subject_title || "",
+        country: profile.country || "",
+        city: profile.city || "",
+        latitude: profile.latitude?.toString() || "",
+        longitude: profile.longitude?.toString() || "",
+        areas_of_expertise: profile.areas_of_expertise || "",
       });
     }
   }, [profile]);
@@ -67,10 +83,24 @@ export default function EditCompanyProfile() {
         headquarters: form.headquarters,
         business_hours: form.business_hours,
         response_time: form.response_time,
+        year_founded: form.year_founded,
+        industry: form.industry,
+        subject_title: form.subject_title,
+        country: form.country,
+        city: form.city,
+        areas_of_expertise: form.areas_of_expertise,
       };
       if (form.team_size) {
         const n = Number(form.team_size);
         if (!Number.isNaN(n)) payload.team_size = n;
+      }
+      if (form.latitude) {
+        const n = Number(form.latitude);
+        if (!Number.isNaN(n)) payload.latitude = n;
+      }
+      if (form.longitude) {
+        const n = Number(form.longitude);
+        if (!Number.isNaN(n)) payload.longitude = n;
       }
       await api.updateCompanyProfile(payload);
       toast.success("Profile saved", "Your company profile is up to date.");
@@ -132,6 +162,44 @@ export default function EditCompanyProfile() {
                   onChange={(e) => handleChange("registration_number", e.target.value)}
                   placeholder="Enter registration number"
                 />
+              </label>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Subject / Title</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.subject_title}
+                  onChange={(e) => handleChange("subject_title", e.target.value)}
+                  placeholder="e.g. Commercial Building & Infrastructure"
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Year Founded</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.year_founded}
+                  onChange={(e) => handleChange("year_founded", e.target.value)}
+                  placeholder="e.g. 2009"
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span className={styles.label}>Industry</span>
+                <select
+                  className={styles.input}
+                  value={form.industry}
+                  onChange={(e) => handleChange("industry", e.target.value)}
+                >
+                  <option value="">Select industry</option>
+                  <option value="Construction">Construction</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="IT Services">IT Services</option>
+                  <option value="Other">Other</option>
+                </select>
               </label>
 
               <label className={styles.field}>
@@ -197,6 +265,17 @@ export default function EditCompanyProfile() {
               <span className={styles.hint}>Separate multiple services with commas.</span>
             </label>
             <label className={styles.field}>
+              <span className={styles.label}>Areas of Expertise</span>
+              <input
+                type="text"
+                className={styles.input}
+                value={form.areas_of_expertise}
+                onChange={(e) => handleChange("areas_of_expertise", e.target.value)}
+                placeholder="e.g. Civil Works, Commercial Buildings, Renovation"
+              />
+              <span className={styles.hint}>Separate areas with commas.</span>
+            </label>
+            <label className={styles.field}>
               <span className={styles.label}>About the Company</span>
               <textarea
                 className={styles.textarea}
@@ -206,6 +285,52 @@ export default function EditCompanyProfile() {
                 placeholder="Tell clients about your company, your team, and what makes you different."
               />
             </label>
+          </section>
+
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Location & Address</h2>
+            <div className={styles.grid}>
+              <label className={styles.field}>
+                <span className={styles.label}>Country</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.country}
+                  onChange={(e) => handleChange("country", e.target.value)}
+                  placeholder="e.g. Rwanda"
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>City</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.city}
+                  onChange={(e) => handleChange("city", e.target.value)}
+                  placeholder="e.g. Kigali"
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Latitude</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.latitude}
+                  onChange={(e) => handleChange("latitude", e.target.value)}
+                  placeholder="e.g. -1.9441"
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Longitude</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.longitude}
+                  onChange={(e) => handleChange("longitude", e.target.value)}
+                  placeholder="e.g. 30.0619"
+                />
+              </label>
+            </div>
           </section>
 
           <section className={styles.card}>

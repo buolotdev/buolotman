@@ -13,6 +13,7 @@ import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import LogoutButton from "@/app/components/LogoutButton";
+import { TAXONOMY } from "./taxonomy";
 
 export default function AddService() {
   const toast = useToast();
@@ -38,9 +39,18 @@ export default function AddService() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<File[]>([]);
+  const [serviceMode, setServiceMode] = useState("On-site");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [publishing, setPublishing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const handleCategoryChange = (item: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(item) ? prev.filter(c => c !== item) : [...prev, item]
+    );
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -66,11 +76,19 @@ export default function AddService() {
           uploadedUrls.push(res.image_url);
         }
       }
-      await api.createCompanyService({ title: title.trim(), description: description.trim(), images: uploadedUrls });
+      await api.createCompanyService({ 
+        title: title.trim(), 
+        description: description.trim(), 
+        images: uploadedUrls,
+        service_mode: serviceMode,
+        categories: selectedCategories
+      });
       toast.success("Service published", `"${title.trim()}" is now visible on your profile.`);
       setTitle("");
       setDescription("");
       setImages([]);
+      setSelectedCategories([]);
+      setServiceMode("On-site");
       await refetch();
     } catch (err: any) {
       toast.error("Publish failed", err.message || "Please try again.");
@@ -187,6 +205,83 @@ export default function AddService() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Service Delivery Mode</label>
+                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                  {["On-site", "Remote", "Hybrid"].map(mode => (
+                    <label key={mode} style={{ 
+                      border: serviceMode === mode ? '1.5px solid #FF4500' : '1.5px solid #e2e8f0', 
+                      padding: '12px 20px', 
+                      borderRadius: '999px', 
+                      cursor: 'pointer', 
+                      fontWeight: 600, 
+                      background: serviceMode === mode ? '#FF4500' : '#fff',
+                      color: serviceMode === mode ? '#fff' : '#0f172a',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input 
+                        type="radio" 
+                        name="serviceMode" 
+                        value={mode} 
+                        checked={serviceMode === mode}
+                        onChange={() => setServiceMode(mode)}
+                        style={{ display: 'none' }}
+                      />
+                      <span>{mode}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Category Taxonomy</label>
+                
+                {selectedCategories.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+                    {selectedCategories.map(cat => (
+                      <span key={cat} style={{ background: '#eef4ff', color: '#001F3F', padding: '8px 14px', borderRadius: '999px', fontWeight: 600, fontSize: '13px' }}>
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {TAXONOMY.map(cat => (
+                    <div 
+                      key={cat.id} 
+                      style={{ border: '1.5px solid #e2e8f0', borderRadius: '22px', padding: '22px 24px', background: '#fafbfd', cursor: 'pointer' }}
+                      onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
+                    >
+                      <div style={{ fontSize: '18px', fontWeight: 800, color: '#001F3F' }}>
+                        {cat.title}
+                      </div>
+                      
+                      {expandedCategory === cat.id && (
+                        <div style={{ marginTop: '18px' }} onClick={e => e.stopPropagation()}>
+                          {cat.subgroups.map((sub, idx) => (
+                            <div key={idx} style={{ marginBottom: '26px' }}>
+                              <div style={{ fontWeight: 700, margin: '14px 0 10px', color: '#374151' }}>{sub.title}</div>
+                              {sub.items.map(item => (
+                                <label key={item} style={{ display: 'flex', gap: '10px', marginBottom: '8px', cursor: 'pointer', alignItems: 'center' }}>
+                                  <input 
+                                    type="checkbox" 
+                                    checked={selectedCategories.includes(item)}
+                                    onChange={() => handleCategoryChange(item)}
+                                    style={{ width: '16px', height: '16px' }}
+                                  />
+                                  <span style={{ fontSize: '14px' }}>{item}</span>
+                                </label>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.formGroup}>

@@ -50,6 +50,11 @@
 .conversationMeta { justify-content: space-between; gap: 12px; }
 .conversationMeta strong { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversationMeta span, .conversationTask { color: #64748b; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.roleBadge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-top: 6px; }
+.roleAdmin { background: #e8f0fe; color: #1a73e8; }
+.roleTechnician { background: #e6f4ea; color: #1e8e3e; }
+.roleCompany { background: #fff4e5; color: #f4b400; }
+.roleProject { background: rgba(255, 69, 0, 0.1); color: #ff4500; }
 .conversationPreviewRow { justify-content: space-between; gap: 12px; }
 .conversationPreview { margin: 0; flex: 1; color: #64748b; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversationPreviewStrong { color: #001f3f; font-weight: 700; }
@@ -74,9 +79,17 @@
 .messageGroupReceived .messageBubble { background: #fff; color: #001f3f; border: 1px solid rgba(0,31,63,.08); border-bottom-left-radius: 4px; }
 .messageMeta { gap: 6px; color: #7a8699; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .messageMeta iconify-icon { font-size: 14px; }
-.composer { padding: 18px 26px 24px; border-top: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 14px; }
-.composerField { flex: 1; min-width: 0; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 10px 0 18px; border-radius: 999px; background: #f1f5fb; }
-.composerIconButton { width: 38px; height: 38px; border: 0; border-radius: 999px; background: transparent; color: #64748b; flex-shrink: 0; }
+.composer { padding: 18px 26px 24px; border-top: 1px solid #e2e8f0; background: #fff; display: flex; flex-direction: column; gap: 14px; }
+.composerField { width: 100%; display: flex; flex-direction: column; }
+.composerTextarea { width: 100%; min-height: 80px; max-height: 160px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #001f3f; font-size: 14px; font-weight: 500; resize: none; outline: 0; padding: 12px; font-family: inherit; margin-bottom: 12px; }
+.composerTextarea::placeholder { color: #94a3b8; font-weight: 500; }
+.composerTools { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.fileInput { font-size: 13px; color: #000; }
+.fileInput::file-selector-button { padding: 4px 10px; border: 1px solid #767676; border-radius: 2px; background: #f0f0f0; color: #000; font-size: 13px; cursor: pointer; margin-right: 6px; }
+.fileInput::file-selector-button:hover { background: #e0e0e0; }
+.sendButton { padding: 8px 16px; border: 0; border-radius: 8px; background: #ff4500; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; align-self: flex-end; }
+.sendButton:hover { background: #e63e00; }
+.sendButton:disabled { opacity: .45; cursor: not-allowed; }
 .attachmentChip {
   display: inline-flex;
   align-items: center;
@@ -99,8 +112,7 @@
   font-weight: 700;
   text-decoration: none;
 }
-.sendButton { width: 44px; height: 44px; border: 0; border-radius: 999px; background: #ff4500; color: #fff; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(255,69,0,.25); flex-shrink: 0; }
-.sendButton:disabled { opacity: .45; box-shadow: none; }
+
 .emptyThreads, .emptyChat { margin: 24px; padding: 18px; border-radius: 18px; background: #f8fafc; color: #64748b; font-size: 14px; border: 1px solid #e2e8f0; }
 @media (max-width: 1080px) {
   .layout { grid-template-columns: 1fr; }

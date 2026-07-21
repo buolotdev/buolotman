@@ -58,6 +58,8 @@ export default function Home() {
   const [searchCategory, setSearchCategory] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [liveTaskIndex, setLiveTaskIndex] = useState(0);
 
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
@@ -87,6 +89,13 @@ export default function Home() {
 
   useEffect(() => {
     setIsLoggedIn(Boolean(localStorage.getItem("access_token")));
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveTaskIndex((prev) => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   /* ── Intersection Observer for scroll animations ── */
@@ -295,189 +304,176 @@ export default function Home() {
     <div id="homepage-screen">
       <Header />
 
-      <section id="hero" className="section">
-        <div className="container">
-          <div className="hero-shell">
-            <div className="hero-glow hero-glow-left"></div>
-            <div className="hero-glow hero-glow-right"></div>
+      <section id="hero" className="bm-main-hero">
+        <div className="bm-main-hero-grid">
+          <div>
+            <h1>
+              Connecting clients with<br />
+              <span>verified technicians and engineers</span>
+            </h1>
 
-            <div className="hero-content">
-              <div className="eyebrow">
-                Top-rated marketplace for home and business services
+            <p>
+              Join Africa’s growing workforce marketplace connecting professionals,
+              businesses, and communities at scale.
+            </p>
+
+            <form className="bm-main-search" onSubmit={submitGlobalSearch}>
+              <div className="bm-main-search-field">
+                <input
+                  className="bm-main-search-input"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+                {!isSearchFocused && !searchQuery && (
+                  <div className="bm-main-search-marquee">
+                    <span>
+                      What service do you offer or are you looking for? e.g Electrical installation, Web development, Plumbing, Solar systems, CCTV installation, Mobile apps
+                    </span>
+                  </div>
+                )}
               </div>
-              <h1 className="hero-title">
-                {greeting || "Find trusted professionals for any job"}
-              </h1>
-              <p className="hero-copy">
-                Hire skilled technicians, compare verified companies, and book
-                reliable help in minutes. From quick repairs to ongoing
-                business projects, Boulot Man helps you move faster.
-              </p>
 
-              <form className="hero-search-card" role="search" onSubmit={submitGlobalSearch}>
-                <label className="hero-input">
-                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
-                    <iconify-icon icon="lucide:search"></iconify-icon>
-                  </div>
-                  <span className="hero-input-stack">
-                    <span className="hero-input-label">Task or service</span>
-                    <input
-                      className="hero-input-control"
-                      type="search"
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                      placeholder="Plumbing, website, AC repair..."
-                      aria-label="Search tasks or services"
-                    />
-                  </span>
-                </label>
+              <select
+                value={searchCategory}
+                onChange={(event) => setSearchCategory(event.target.value)}
+              >
+                <option value="">All Categories</option>
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
 
-                <label className="hero-input">
-                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
-                    <iconify-icon icon="lucide:layers-3"></iconify-icon>
-                  </div>
-                  <span className="hero-input-stack">
-                    <span className="hero-input-label">Category</span>
-                    <select
-                      className="hero-input-control"
-                      value={searchCategory}
-                      onChange={(event) => setSearchCategory(event.target.value)}
-                      aria-label="Search by category"
-                    >
-                      <option value="">All categories</option>
-                      {categories.map((category) => (
-                        <option key={category.slug} value={category.slug}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </span>
-                </label>
+              <select
+                value={searchLocation}
+                onChange={(event) => setSearchLocation(event.target.value)}
+              >
+                <option value="">All Locations</option>
+                <option value="Kigali">Kigali</option>
+                <option value="Gasabo">Gasabo</option>
+                <option value="Remote">Remote</option>
+              </select>
 
-                <label className="hero-input">
-                  <div className="icon-wrap" style={{ fontSize: "20px" }}>
-                    <iconify-icon icon="lucide:map-pin"></iconify-icon>
-                  </div>
-                  <span className="hero-input-stack">
-                    <span className="hero-input-label">Location</span>
-                    <input
-                      className="hero-input-control"
-                      type="search"
-                      value={searchLocation}
-                      onChange={(event) => setSearchLocation(event.target.value)}
-                      placeholder="City or country"
-                      aria-label="Search by location"
-                    />
-                  </span>
-                </label>
+              <button type="submit">Search</button>
+            </form>
 
-                <button type="submit" className="btn btn-primary hero-action hero-action-search" data-media-type="banani-button">
-                  <span>Search services</span>
-                  <div className="icon-wrap hero-action-icon" style={{ fontSize: "16px", width: "16px", height: "16px" }}>
-                    <iconify-icon icon="lucide:arrow-right"></iconify-icon>
-                  </div>
-                </button>
-              </form>
+            <div className="bm-main-cta">
+              <Link href="/signup" className="bm-main-cta-provider">Sign up as Service Provider</Link>
+              <Link href={postTaskHref} className="bm-main-cta-post">Post a Service</Link>
             </div>
+          </div>
 
-            <div className="hero-side">
-              <div className="hero-dashboard">
-                <div className="dashboard-top">
-                  <h3 className="dashboard-title">Featured matches</h3>
-                  <div className="dashboard-badge">Verified today</div>
-                </div>
-
-                <div className="dash-list">
-                  <div className="dash-item" data-media-type="banani-button">
-                    <div className="dash-thumb">
-                      <div className="icon-wrap" style={{ fontSize: "24px" }}>
-                        <iconify-icon icon="lucide:zap"></iconify-icon>
+          <div className="bm-main-live-box">
+            <h4>🔴 Live Tasks</h4>
+            <div className="bm-main-task-window">
+              <div
+                className="bm-main-task-track"
+                style={{ transform: `translateY(-${liveTaskIndex * 85}px)` }}
+              >
+                {liveTasksData?.results?.length > 0 ? (
+                  [...liveTasksData.results, ...liveTasksData.results].map((task: any, i: number) => (
+                    <div className="bm-main-task" key={`${task.id}-${i}`}>
+                      <div className="bm-main-task-top">
+                        <div className="bm-main-task-user">
+                          <img src={`https://ui-avatars.com/api/?name=${task.client?.first_name || 'U'}&background=random`} alt="User" />
+                          <div className="bm-main-task-title">{task.title}</div>
+                        </div>
+                        <Link href={`/tasks/${task.id}`} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</Link>
                       </div>
+                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? 'Fixed' : 'Hourly'}</div>
                     </div>
-                    <div>
-                      <p className="dash-name">Browse electricians</p>
-                      <p className="dash-meta">Wiring • Lighting • Repairs</p>
-                    </div>
-                    <Link href="/search?category=electrical" className="dash-price">View</Link>
-                  </div>
-
-                  <div className="dash-item" data-media-type="banani-button">
-                    <div className="dash-thumb">
-                      <div className="icon-wrap" style={{ fontSize: "24px" }}>
-                        <iconify-icon icon="lucide:briefcase"></iconify-icon>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="dash-name">Post a task</p>
-                      <p className="dash-meta">Get matched with pros</p>
-                    </div>
-                    <Link href={postTaskHref} className="dash-price">Start</Link>
-                  </div>
-
-                  <div className="dash-item" data-media-type="banani-button">
-                    <div className="dash-thumb">
-                      <div className="icon-wrap" style={{ fontSize: "24px" }}>
-                        <iconify-icon icon="lucide:search"></iconify-icon>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="dash-name">Search services</p>
-                      <p className="dash-meta">Filter by category, rating</p>
-                    </div>
-                    <Link href="/search" className="dash-price">Open</Link>
-                  </div>
-                </div>
-
-                <div className="hero-stats">
-                  <div className="hero-stat">
-                    <div className="hero-stat-value">
-                      {categoriesLoading ? <SkeletonBlock style={{ width: 60, height: 28 }} /> : categories.length}
-                      {categoriesLoading ? null : "+"}
-                    </div>
-                    <p className="hero-stat-label">Categories available</p>
-                  </div>
-                  <div className="hero-stat">
-                    <div className="hero-stat-value">24/7</div>
-                    <p className="hero-stat-label">Support available</p>
-                  </div>
-                  <div className="hero-stat">
-                    <p className="hero-stat-value">Secure</p>
-                    <p className="hero-stat-label">Escrow payments</p>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <div style={{ padding: "20px", color: "#64748b" }}>{liveTasksData ? "No tasks available" : "Loading tasks..."}</div>
+                )}
               </div>
+            </div>
+            <div className="bm-main-live-cta">
+              <Link href="/tasks">See more people finding services around you →</Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="activity-ticker" className="section">
-        <div className="container">
-          <div className="activity-ticker-shell">
-            <div className="activity-ticker-head">
-              <div>
-                <div className="eyebrow">Live task activity</div>
-                <h2 className="section-title">Fresh tasks posted right now</h2>
-              </div>
-              <Link href="/search" className="btn btn-secondary" data-media-type="banani-button">
-                Search all
-                <div className="icon-wrap" style={{ fontSize: "16px", width: "16px", height: "16px" }}>
-                  <iconify-icon icon="lucide:arrow-right"></iconify-icon>
-                </div>
-              </Link>
-            </div>
 
-            <div className="activity-ticker-track" aria-label="Recent task activity">
-              {(liveTasks.length > 0 ? liveTasks : [
-                { title: "Loading recent tasks", city: "", category_name: "" },
-              ]).map((task: any, index: number) => (
-                <div key={`${task.id ?? index}`} className="activity-ticker-item">
-                  <span className="activity-ticker-pill">{task.category_name || "Task"}</span>
-                  <strong>{task.title}</strong>
-                  <span>{task.city || task.location || "Location pending"}</span>
-                </div>
-              ))}
+
+      <section className="bm-stats-section">
+        <div className="bm-stats-inner">
+          <div className="bm-stats-header">
+            <h2>Boulot Man at a Glance</h2>
+            <p>
+              A growing marketplace connecting clients, technicians, and companies
+              through verified services and secure project engagement.
+            </p>
+          </div>
+          <div className="bm-stats-grid">
+            <div className="bm-stat-card">
+              <strong>50,000+</strong>
+              <span>Registered Users</span>
             </div>
+            <div className="bm-stat-card">
+              <strong>12,000+</strong>
+              <span>Verified Technicians</span>
+            </div>
+            <div className="bm-stat-card">
+              <strong>3,500+</strong>
+              <span>Verified Companies</span>
+            </div>
+            <div className="bm-stat-card">
+              <strong>8,000+</strong>
+              <span>Tasks Posted Monthly</span>
+            </div>
+            <div className="bm-stat-card">
+              <strong>95%</strong>
+              <span>Successful Project Completion</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bm-ftx-root">
+        <div className="bm-ftx-container">
+          <div className="bm-ftx-header">
+            <h2 className="bm-ftx-header-title">
+              Boulot Man connects clients with verified technicians and engineers —
+              securely and efficiently.
+            </h2>
+          </div>
+
+          <div className="bm-ftx-grid">
+            {prosLoading ? (
+              <div style={{ padding: "20px", color: "#64748b" }}>Loading technicians...</div>
+            ) : prosData && prosData.length > 0 ? (
+              prosData.slice(0, 4).map((pro: any) => (
+                <div className="bm-ftx-card" key={pro.id}>
+                  <div className="bm-ftx-profile">
+                    <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
+                    <div>
+                      <div className="bm-ftx-name">{pro.first_name} {pro.last_name}</div>
+                      <div className="bm-ftx-role">{pro.title || "Verified Technician"}</div>
+                    </div>
+                  </div>
+                  <div className="bm-ftx-rating">
+                    <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
+                  </div>
+                  <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • Available now</div>
+                  <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {pro.bio || "Professional technical services and support."}
+                  </div>
+                  <div className="bm-ftx-actions">
+                    <Link href={`/technicians/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">View Profile</Link>
+                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">Hire Now</Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+               <div style={{ padding: "20px", color: "#64748b" }}>No featured technicians available.</div>
+            )}
+          </div>
+
+          <div className="bm-ftx-footer">
+            <Link href="/technicians">Hire verified professionals with confidence. See more →</Link>
           </div>
         </div>
       </section>
@@ -584,7 +580,7 @@ export default function Home() {
             100% { opacity: 1; transform: rotateY(0deg) scale(1) translateZ(0); }
           }
           
-          .mb-card { background: linear-gradient(145deg, #0d2137 0%, #0a1628 100%); border-radius: 28px; padding: 44px 36px 36px; color: #fff; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s, background 0.4s; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); height: 510px; opacity: 0; transform-style: preserve-3d; transform-origin: left center; }
+          .mb-card { background: #0F2C4A; border-radius: 28px; padding: 44px 36px 36px; color: #fff; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s, background 0.4s; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); height: 510px; opacity: 0; transform-style: preserve-3d; transform-origin: left center; }
           
           #benefits.animate-in .mb-card { animation: flipIn3D 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
           #benefits.animate-in .mb-card:nth-child(1) { animation-delay: 0.1s; }
@@ -667,8 +663,8 @@ export default function Home() {
           @keyframes fillCircle { from { background: conic-gradient(#ff4500 0% 0%, rgba(255,255,255,0.1) 0% 100%); } to { background: conic-gradient(#ff4500 0% 96%, rgba(255,255,255,0.1) 96% 100%); } }
           .mb-progress-circle { width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(rgba(255,255,255,0.1) 0% 100%); margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; }
           .mb-card:hover .mb-progress-circle { animation: fillCircle 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-          .mb-progress-circle-inner { width: 140px; height: 140px; border-radius: 50%; background: #0d2137; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.5s; }
-          .mb-card:hover .mb-progress-circle-inner { background: #0a1628; }
+          .mb-progress-circle-inner { width: 140px; height: 140px; border-radius: 50%; background: #001F3F; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.5s; }
+          .mb-card:hover .mb-progress-circle-inner { background: #0F2C4A; }
           .mb-progress-val { font-size: 36px; font-weight: 800; color: #fff; line-height: 1; }
           .mb-progress-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #ffaa00; margin-top: 10px; }
           
@@ -825,92 +821,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="technicians" className="section">
-        <div className="container">
-          <div className="section-header-flex">
-            <div className="section-header section-header-left">
-              <div className="eyebrow">Featured technicians</div>
-              <h2 className="section-title">Top-rated professionals near you</h2>
-              <p className="section-copy">
-                Book experts with strong reviews, quick response times, and
-                proven experience in their field.
-              </p>
-            </div>
-            <Link href="/search" className="btn btn-secondary" data-media-type="banani-button">
-              See all technicians
-              <div
-                className="icon-wrap"
-                style={{ fontSize: "16px", width: "16px", height: "16px" }}
-              >
-                <iconify-icon icon="lucide:arrow-right"></iconify-icon>
-              </div>
-            </Link>
-          </div>
-
-          <div className="profile-grid">
-            {prosLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="card profile-card">
-                  <div className="profile-top">
-                    <SkeletonBlock style={{ width: 56, height: 56, borderRadius: "50%" }} />
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <SkeletonBlock style={{ width: "70%", height: 16, marginBottom: 8 }} />
-                      <SkeletonBlock style={{ width: "40%", height: 12 }} />
-                    </div>
-                  </div>
-                  <div className="chips">
-                    <SkeletonBlock style={{ width: 80, height: 22, borderRadius: 12 }} />
-                    <SkeletonBlock style={{ width: 60, height: 22, borderRadius: 12 }} />
-                  </div>
-                  <div className="profile-footer">
-                    <SkeletonBlock style={{ width: 80, height: 14 }} />
-                    <SkeletonBlock style={{ width: 60, height: 14 }} />
-                  </div>
-                </div>
-              ))
-            ) : pros.length === 0 ? (
-              <div style={{ gridColumn: "1 / -1", padding: "32px 0", textAlign: "center", color: "#64748b" }}>
-                <p>No professionals available yet.</p>
-              </div>
-            ) : (
-              pros.map((pro) => {
-                const fullName = `${pro.first_name || ""} ${pro.last_name || ""}`.trim() || pro.username || "";
-                const initials = `${pro.first_name?.[0] || ""}${pro.last_name?.[0] || ""}`.toUpperCase() || "•";
-                return (
-                  <Link
-                    key={pro.id}
-                    href={`/search?type=technician`}
-                    className="card profile-card"
-                    data-media-type="banani-button"
-                  >
-                    <div className="profile-top">
-                      <div className="profile-avatar" style={{ background: "#e2e8f0", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
-                        {initials}
-                      </div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <h3 className="profile-name">{fullName}</h3>
-                        <p className="profile-role">{pro.country || ""}</p>
-                      </div>
-                    </div>
-                    <div className="chips">
-                      {(pro.skills || []).slice(0, 2).map((skill: string) => (
-                        <span key={skill} className="chip">{skill}</span>
-                      ))}
-                    </div>
-                    <div className="profile-footer">
-                      <span>{pro.completed_jobs ?? 0} jobs</span>
-                      <span>{pro.average_rating ? `${pro.average_rating} ★` : ""}</span>
-                    </div>
-                  </Link>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* ══════════ WHY CHOOSE US (MATSOLS STYLE) ══════════ */}
-      <section id="why-choose-us" style={{ background: "#0a1628", color: "#fff", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+      <section id="why-choose-us" style={{ background: "#001F3F", color: "#fff", padding: "100px 0", position: "relative", overflow: "hidden" }}>
         {/* Top-Right Background Circles */}
         <div style={{ position: "absolute", top: "-50px", right: "-20px", width: "250px", height: "250px", borderRadius: "50%", background: "rgba(255, 69, 0, 0.05)", border: "2px solid #ff4500", zIndex: 0, pointerEvents: "none" }}></div>
         <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "350px", height: "350px", borderRadius: "50%", background: "rgba(255, 69, 0, 0.02)", border: "2px solid rgba(255, 69, 0, 0.5)", zIndex: 0, pointerEvents: "none" }}></div>
@@ -1069,7 +981,7 @@ export default function Home() {
           .wcu-card-gradient {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(10,22,40,0.95) 0%, rgba(10,22,40,0.0) 80%);
+            background: linear-gradient(to top, rgba(15,44,74,0.95) 0%, rgba(15,44,74,0.0) 80%);
             z-index: 1;
           }
           .wcu-card-content {
@@ -1301,7 +1213,7 @@ export default function Home() {
       </section>
 
       {/* ══════════ HOW IT WORKS ══════════ */}
-      <section id="how-it-works" style={{ background: "#0a1628", color: "#fff", padding: "0", overflow: "visible", position: "relative" }}>
+      <section id="how-it-works" style={{ background: "#001F3F", color: "#fff", padding: "0", overflow: "visible", position: "relative" }}>
         <style dangerouslySetInnerHTML={{ __html: `
           /* Orange progress line */
           @keyframes hiwLine {

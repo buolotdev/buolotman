@@ -1,0 +1,144 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  width: 100%;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.content {
+  padding: 32px 40px;
+  max-width: 1200px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  margin-bottom: 32px;
+}
+
+.card h2 {
+  color: #001f3f;
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th, .table td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.table th {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table td {
+  color: #334155;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusHold {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.statusReleased {
+  background: #e6f4ea;
+  color: #1e8e3e;
+}
+
+.statusPending {
+  background: #fff4e5;
+  color: #f4b400;
+}
+
+.outlineButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #001f3f;
+  color: #001f3f;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.outlineButton:hover {
+  background: #f1f5f9;
+}
+
+.primaryButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #ff4500;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.primaryButton:hover {
+  background: #e63e00;
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .content {
+    padding: 20px;
+  }
+  .card {
+    padding: 20px;
+  }
+  .table th, .table td {
+    padding: 12px 8px;
+  }
+}

@@ -566,46 +566,68 @@
 }
 
 .inputBar {
-  height: 98px;
-  gap: 16px;
   padding: 18px 28px;
   border-top: 1px solid #e2e8f0;
   background: #fff;
   flex-shrink: 0;
-}
-
-.attachButton,
-.composeIconButton,
-.sendButton {
-  border: 0;
-}
-
-.attachButton {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  background: transparent;
-  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .composeBox {
-  flex: 1;
-  min-width: 0;
-  height: 54px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0 18px 0 20px;
-  border-radius: 999px;
-  background: #f1f5f9;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.composeIconButton {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  background: transparent;
-  color: #64748b;
+.composerTextarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 160px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #001f3f;
+  font-size: 14px;
+  font-weight: 500;
+  resize: none;
+  outline: 0;
+  padding: 12px;
+  font-family: inherit;
+  margin-bottom: 12px;
+}
+
+.composerTextarea::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.composerTools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.fileInput {
+  font-size: 13px;
+  color: #000;
+}
+
+.fileInput::file-selector-button {
+  padding: 4px 10px;
+  border: 1px solid #767676;
+  border-radius: 2px;
+  background: #f0f0f0;
+  color: #000;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.fileInput::file-selector-button:hover {
+  background: #e0e0e0;
 }
 
 .attachmentChip {
@@ -633,20 +655,24 @@
 }
 
 .sendButton {
-  width: 54px;
-  height: 54px;
-  border-radius: 999px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
   background: #ff4500;
   color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 22px rgba(255, 69, 0, 0.24);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sendButton:hover {
+  background: #e63e00;
 }
 
 .sendButton:disabled {
-  opacity: 0.45;
-  box-shadow: none;
+  opacity: .45;
+  cursor: not-allowed;
 }
 
 .emptyState {
