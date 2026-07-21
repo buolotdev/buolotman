@@ -2,7 +2,7 @@ import OtpVerification from "./OtpVerification";
 
 export default async function SignupVerifyPage({
   searchParams,
-}: PageProps<"/signup/verify">) {
+}: any) {
   const params = await searchParams;
 
   const phone =

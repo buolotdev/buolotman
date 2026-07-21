@@ -4,7 +4,7 @@ const validRoles = new Set(["client", "technician", "company"]);
 
 export default async function SignupDetailsPage({
   searchParams,
-}: PageProps<"/signup/details">) {
+}: any) {
   const params = await searchParams;
   const role =
     typeof params.role === "string" && validRoles.has(params.role)
