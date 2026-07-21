@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import styles from "./login.module.css";
@@ -35,7 +35,8 @@ const ALL_CARDS = [...SERVICES, ...SERVICES];
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("login");
+  const pathname = usePathname();
+  const [step, setStep] = useState<Step>(pathname === "/signup" ? "account" : "login");
   const [selectedRole, setSelectedRole] = useState("");
   const [nextPath, setNextPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
