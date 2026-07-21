@@ -82,7 +82,7 @@ export default function Home() {
     () => api.listCompanies({ limit: "3" }),
     []
   );
-  const { data: liveTasksData } = useFetch(
+  const { data: liveTasksData, error: liveTasksError } = useFetch(
     () => api.getTasks({ sort: "newest", limit: "8" }),
     []
   );
