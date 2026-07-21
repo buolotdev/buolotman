@@ -50,56 +50,7 @@ async function request<T>(
     ...(options.headers as Record<string, string>),
   };
 
-  // MOCK RESPONSES FOR UI TESTING
-  if (endpoint === "/auth/login/" && options.body) {
-    const reqBody = JSON.parse(options.body as string || "{}");
-    const email = reqBody.username || "";
-    // Intercept mock logins
-    if (email.includes("admin") || email.includes("tech") || email.includes("comp") || email.includes("client")) {
-      let role = "client";
-      if (email.includes("admin")) role = "admin";
-      else if (email.includes("tech")) role = "technician";
-      else if (email.includes("comp")) role = "company";
-      
-      return { 
-        access: "dummy_access_token", 
-        refresh: "dummy_refresh", 
-        role, 
-        username: email.split("@")[0], 
-        email 
-      } as any;
-    }
-  }
-
-  if (token === "dummy_access_token") {
-    if (endpoint.startsWith("/auth/me")) {
-      return { id: 1, first_name: "Demo", last_name: "User", role: "client", email: "demo@example.com" } as any;
-    }
-    if (endpoint === "/conversations/") {
-      return [
-        {
-          id: 1,
-          other_participant: { name: "Ali Technician", initials: "AT", role: "Technician" },
-          task_title: "Fix AC Unit",
-          last_message: { text: "I will be there in 15 mins.", time: new Date().toISOString() },
-          unread_count: 1
-        }
-      ] as any;
-    }
-    if (endpoint.includes("/messages/")) {
-      return { id: "mock-1", text: "Mock response", created_at: new Date().toISOString() } as any;
-    }
-    if (endpoint.includes("/conversations/")) {
-      return { messages: [{ id: 1, text: "Hello there!", sender_name: "Ali Technician", created_at: new Date().toISOString() }] } as any;
-    }
-    if (endpoint.includes("/auth/otp/request")) {
-      return { message: "Mock OTP sent", challenge_id: 123456, expires_at: new Date().toISOString() } as any;
-    }
-    // Generic fallback for arrays (like /tasks/)
-    if (endpoint.includes("/tasks") || endpoint.includes("/users")) return [] as any;
-    // Generic fallback for objects
-    return {} as any;
-  }
+  // Removed mock responses as backend is now fully functional
 
   if (token && !publicRequest) {
     headers["Authorization"] = `Bearer ${token}`;
