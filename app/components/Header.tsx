@@ -363,7 +363,7 @@ export default function Header() {
         </div>
       </div>
       <div class="bmMegaGroup" data-menu-group="help">
-        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:inherit;">Help Center</a>
+        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:#fff;">Help Center</a>
         <div class="bmMega" id="bmMegaHelp">
           <div class="bmSimple">
             <a href="/help-center" class="bmSimpleCard" style="display:block; text-decoration:none; color:inherit;">
