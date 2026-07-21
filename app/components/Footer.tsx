@@ -178,6 +178,7 @@ export default function Footer() {
             <h4>{t.resources}</h4>
             <Link href="/#how-it-works">How It Works</Link>
             <Link href="/help-center">Help Center</Link>
+            <Link href="/payments-and-earnings">Payments &amp; Earnings</Link>
             <Link href="/search">Reviews</Link>
             <Link href="/press">Press &amp; Media</Link>
             <Link href="/">Developers</Link>
