@@ -57,7 +57,7 @@ export default function UpgradePage() {
                 <CheckItem text="In-app messaging" />
               </ul>
               
-              <button className={styles.upgradeBtn}>Upgrade to Basic</button>
+              <button className={`${styles.upgradeBtn} ${styles.upgradeBtnAccent}`}>Upgrade to Basic</button>
             </div>
 
             {/* ADVANCE */}
@@ -74,7 +74,7 @@ export default function UpgradePage() {
                 <CheckItem text="Earnings analytics dashboard" />
               </ul>
               
-              <button className={styles.upgradeBtnDark}>Upgrade to Advance</button>
+              <button className={`${styles.upgradeBtn} ${styles.upgradeBtnAccent}`}>Upgrade to Advance</button>
             </div>
 
             {/* PRO */}
@@ -112,7 +112,7 @@ export default function UpgradePage() {
                 <CheckItem text="Cross-border workforce access" />
               </ul>
               
-              <button className={styles.upgradeBtn}>Request Access</button>
+              <button className={`${styles.upgradeBtn} ${styles.upgradeBtnAccent}`}>Request Access</button>
             </div>
 
           </div>
