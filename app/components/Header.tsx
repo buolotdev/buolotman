@@ -506,7 +506,7 @@ export default function Header() {
       <a href="/find-tasks">Find Tasks</a>
       
       <div class="service-provider-dropdown">
-        <a href="/service-providers" class="bmDropBtn" style="color: #001F3F; text-decoration: none; font-weight: 500; font-size: 15px;">Service Providers <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
+        <a href="/service-providers" class="bmDropBtn" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 15px;">Service Providers <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
         <div class="bmDropMenu">
           <a class="bmDropItem" href="/service-providers/technicians" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Technicians</a>
           <a class="bmDropItem" href="/search?type=company" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Companies</a>
