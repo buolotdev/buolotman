@@ -389,7 +389,9 @@ export default function Home() {
                     </div>
                   ))
                 ) : (
-                  <div style={{ padding: "20px", color: "#64748b" }}>{liveTasksData ? "No tasks available" : "Loading tasks..."}</div>
+                  <div style={{ padding: "20px", color: "#64748b" }}>
+                    {liveTasksError ? liveTasksError : liveTasksData ? "No tasks available" : "Loading tasks..."}
+                  </div>
                 )}
               </div>
             </div>

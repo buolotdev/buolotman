@@ -75,6 +75,13 @@ async function request<T>(
   }
 
   if (!res.ok) {
+    if (res.status === 401) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_role");
+      }
+    }
     const error = await res.json().catch(() => ({ detail: "Request failed" }));
     throw new Error(error.detail || error.error || JSON.stringify(error));
   }
