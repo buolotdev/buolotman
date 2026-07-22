@@ -47,16 +47,16 @@ def google_login(request):
             'last_name': last_name,
             'username': email.split('@')[0],
             'role': requested_role,
-            'avatar': picture,
+            'avatar_url': picture,
             'is_verified': True, # Google emails are already verified
         })
 
         if not created and not user.first_name:
             user.first_name = first_name
             user.last_name = last_name
-            if not user.avatar:
-                user.avatar = picture
-            user.save(update_fields=['first_name', 'last_name', 'avatar'])
+            if not user.avatar_url:
+                user.avatar_url = picture
+            user.save(update_fields=['first_name', 'last_name', 'avatar_url'])
 
         # Generate tokens
         refresh = RefreshToken.for_user(user)
@@ -71,7 +71,7 @@ def google_login(request):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'role': user.role,
-                'avatar': user.avatar,
+                'avatar': user.avatar_url,
             }
         })
 
