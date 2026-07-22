@@ -271,26 +271,29 @@ export default function TaskReviewPage() {
                         <div className={styles.skillsBlock}>
                           <strong>Attachments</strong>
                           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
-                            {files.map((file, idx) => (
-                              <div key={idx} style={{ 
-                                width: '100px', height: '100px', borderRadius: '8px', overflow: 'hidden', 
-                                border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                backgroundColor: '#f8fafc'
-                              }}>
-                                {(file.kind === 'image' || file.type?.startsWith('image/')) && (file.base64 || file instanceof File) ? (
-                                  <img 
-                                    src={file.base64 || (file instanceof File ? URL.createObjectURL(file as any) : "")} 
-                                    alt={file.name} 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                  />
-                                ) : (
-                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
-                                    <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />
-                                    <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                            {files.map((file, idx) => {
+                              const imgSrc = file.base64 || (file instanceof File ? URL.createObjectURL(file as any) : "");
+                              return (
+                                <a key={idx} href={imgSrc || "#"} target={imgSrc ? "_blank" : "_self"} rel="noreferrer" style={{ 
+                                  width: '100px', height: '100px', borderRadius: '8px', overflow: 'hidden', 
+                                  border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  backgroundColor: '#f8fafc', textDecoration: 'none', cursor: imgSrc ? 'pointer' : 'default'
+                                }}>
+                                  {(file.kind === 'image' || file.type?.startsWith('image/')) && (file.base64 || file instanceof File) ? (
+                                    <img 
+                                      src={imgSrc} 
+                                      alt={file.name} 
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                    />
+                                  ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
+                                      <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />
+                                      <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                                    </div>
+                                  )}
+                                </a>
+                              );
+                            })}
                           </div>
                         </div>
                         <div className={styles.divider} />
