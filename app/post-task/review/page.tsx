@@ -359,8 +359,20 @@ export default function TaskReviewPage() {
                     </div>
 
                     <div className={styles.locationGrid}>
-                      <div className={styles.mapPreview}>
-                        <div className={styles.mapPin}><iconify-icon icon="lucide:map-pin" /></div>
+                      <div className={styles.mapPreview} style={{ padding: 0, overflow: 'hidden' }}>
+                        {address ? (
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                          ></iframe>
+                        ) : (
+                          <div className={styles.mapPin}><iconify-icon icon="lucide:map-pin" /></div>
+                        )}
                       </div>
 
                       <div className={styles.locationInfo}>
