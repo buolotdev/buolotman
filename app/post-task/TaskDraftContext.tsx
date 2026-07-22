@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { saveFilesToDB, getFilesFromDB } from "./idb";
 
 export type ExtendedFile = File & { kind: "image" | "pdf" };
 
@@ -13,7 +14,21 @@ const TaskDraftContext = createContext<TaskDraftContextType | undefined>(undefin
 
 export function TaskDraftProvider({ children }: { children: ReactNode }) {
   const [files, setFiles] = useState<ExtendedFile[]>([]);
-  
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    getFilesFromDB().then((storedFiles) => {
+      setFiles(storedFiles as ExtendedFile[]);
+      setLoaded(true);
+    }).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      saveFilesToDB(files).catch(console.error);
+    }
+  }, [files, loaded]);
+
   return (
     <TaskDraftContext.Provider value={{ files, setFiles }}>
       {children}

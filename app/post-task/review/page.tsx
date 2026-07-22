@@ -8,6 +8,7 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { formatXOF } from "@/app/lib/format";
 import { useTaskDraft } from "../TaskDraftContext";
+import { clearFilesFromDB } from "../idb";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 
@@ -112,7 +113,6 @@ export default function TaskReviewPage() {
         contact_methods: draft.contactMethods || [],
         skills: draft.skills || [],
       });
-      
       if (res && res.id && files.length > 0) {
         await Promise.all(
           files.map((file) => api.uploadTaskAttachment(res.id, file).catch(console.error))
@@ -121,6 +121,7 @@ export default function TaskReviewPage() {
 
       window.localStorage.removeItem(DRAFT_KEY);
       setFiles([]);
+      await clearFilesFromDB();
       router.push("/post-task/success");
     } catch (e) {
       setSubmitError((e as Error)?.message || "Could not publish task");
