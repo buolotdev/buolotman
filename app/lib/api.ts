@@ -98,10 +98,10 @@ export const api = {
       "/auth/login/",
       { method: "POST", body: JSON.stringify({ username: email, password }), public: true } as any
     ),
-  googleLogin: (token: string) =>
+  googleLogin: (token: string, role?: string) =>
     request<{ access: string; refresh: string; role: string; user: any }>(
       "/auth/google-login/",
-      { method: "POST", body: JSON.stringify({ token }), public: true } as any
+      { method: "POST", body: JSON.stringify({ token, role }), public: true } as any
     ),
 
   registerClient: (data: Record<string, string>) =>

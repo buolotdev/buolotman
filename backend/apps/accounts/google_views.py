@@ -33,12 +33,17 @@ def google_login(request):
         if not email:
             return Response({'error': 'Email not provided by Google'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Get requested role
+        requested_role = request.data.get('role', 'client').lower()
+        if requested_role not in ['client', 'technician', 'company', 'admin']:
+            requested_role = 'client'
+
         # Get or create the user
         user, created = User.objects.get_or_create(email=email, defaults={
             'first_name': first_name,
             'last_name': last_name,
             'username': email.split('@')[0],
-            'role': 'client', # Default role for new google users
+            'role': requested_role,
             'avatar': picture,
             'is_verified': True, # Google emails are already verified
         })
