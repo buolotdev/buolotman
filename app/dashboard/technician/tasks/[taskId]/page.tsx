@@ -145,6 +145,30 @@ export default function TechnicianTaskDetailsPage({ params }: { params: Promise<
                 </div>
               </div>
 
+              {task.attachments && task.attachments.length > 0 && (
+                <div className={styles.section}>
+                  <h2>Attachments</h2>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
+                    {task.attachments.map((attachment: any, idx: number) => (
+                      <a key={idx} href={attachment.file_url} target="_blank" rel="noreferrer" style={{ 
+                        width: '100px', height: '100px', borderRadius: '8px', overflow: 'hidden', 
+                        border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backgroundColor: '#f8fafc', textDecoration: 'none'
+                      }}>
+                        {attachment.content_type?.includes('image') || attachment.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                          <img src={attachment.file_url} alt={attachment.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
+                            <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />
+                            <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{attachment.file_name}</span>
+                          </div>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {task.skills_required && task.skills_required.length > 0 && (
                 <div className={styles.section}>
                   <h2>Required Skills</h2>

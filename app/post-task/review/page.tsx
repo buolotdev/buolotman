@@ -7,6 +7,7 @@ import styles from "./page.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { formatXOF } from "@/app/lib/format";
+import { useTaskDraft } from "../TaskDraftContext";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 
@@ -59,6 +60,8 @@ export default function TaskReviewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const { files, setFiles } = useTaskDraft();
+
   useEffect(() => {
     setDraft(readDraft());
   }, []);
@@ -92,7 +95,7 @@ export default function TaskReviewPage() {
     try {
       const categoryId = draft.category && /^\d+$/.test(draft.category) ? Number(draft.category) : null;
       const address = [draft.address, draft.apartment, draft.city].filter(Boolean).join(", ");
-      await api.createTask({
+      const res = await api.createTask({
         title: draft.title,
         description: draft.description,
         category: categoryId,
@@ -109,7 +112,15 @@ export default function TaskReviewPage() {
         contact_methods: draft.contactMethods || [],
         skills: draft.skills || [],
       });
+      
+      if (res && res.id && files.length > 0) {
+        await Promise.all(
+          files.map((file) => api.uploadTaskAttachment(res.id, file).catch(console.error))
+        );
+      }
+
       window.localStorage.removeItem(DRAFT_KEY);
+      setFiles([]);
       router.push("/post-task/success");
     } catch (e) {
       setSubmitError((e as Error)?.message || "Could not publish task");

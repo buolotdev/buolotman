@@ -45,10 +45,11 @@ async function request<T>(
 ): Promise<T> {
   const token = getToken();
   const publicRequest = (options as any)?.public === true;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
+  const headers: Record<string, string> = { ...options.headers as Record<string, string> };
+  
+  if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
   // Removed mock responses as backend is now fully functional
 
@@ -180,6 +181,14 @@ export const api = {
   },
   createTask: (data: Record<string, any>) =>
     request<any>("/tasks/create/", { method: "POST", body: JSON.stringify(data) }),
+  uploadTaskAttachment: (taskId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<any>(`/uploads/task/${taskId}/`, {
+      method: "POST",
+      body: formData,
+    });
+  },
   getTask: (id: number) => request<any>(`/tasks/${id}/`),
   updateTask: (id: number, data: Record<string, any>) =>
     request<any>(`/tasks/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),

@@ -7,6 +7,7 @@ import styles from "./page.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { formatXOF } from "@/app/lib/format";
+import { useTaskDraft } from "./TaskDraftContext";
 
 type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 type ServiceType = "onsite" | "remote" | "hybrid";
@@ -53,6 +54,8 @@ export default function PostTaskPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const { files, setFiles } = useTaskDraft();
+
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -68,17 +71,17 @@ export default function PostTaskPage() {
     paymentOption: "" as PaymentOption,
   });
   const [skills, setSkills] = useState<string[]>([]);
-  const [files, setFiles] = useState<Array<{ name: string; size: string; kind: string; file: File }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    const newFiles = Array.from(e.target.files).map((f) => ({
-      name: f.name,
-      size: (f.size / 1024 / 1024).toFixed(2) + " MB",
-      kind: f.type.includes("pdf") ? "pdf" : "image",
-      file: f,
-    }));
+    const newFiles = Array.from(e.target.files).map((file) => {
+        const kind = file.type === "application/pdf" ? "pdf" : "image";
+        const extendedFile = file as any;
+        extendedFile.kind = kind;
+        extendedFile.sizeFormatted = (file.size / 1024 / 1024).toFixed(2) + " MB";
+        return extendedFile;
+    });
     setFiles((current) => [...current, ...newFiles]);
   };
 
@@ -189,10 +192,6 @@ export default function PostTaskPage() {
 
   const removeSkill = (skill: string) => {
     setSkills((current) => current.filter((item) => item !== skill));
-  };
-
-  const removeFile = (name: string) => {
-    setFiles((current) => current.filter((file) => file.name !== name));
   };
 
   const saveDraft = () => {
@@ -562,16 +561,16 @@ export default function PostTaskPage() {
                     />
 
                     <div className={styles.fileList}>
-                      {files.map((file) => (
+                      {files.map((file: any) => (
                         <div key={file.name} className={styles.fileItem}>
                           <div className={styles.fileIcon}>
                             <iconify-icon icon={file.kind === "pdf" ? "lucide:file-text" : "lucide:image"} />
                           </div>
                           <div className={styles.fileInfo}>
                             <strong>{file.name}</strong>
-                            <span>{file.size}</span>
+                            <span>{file.sizeFormatted || (file.size / 1024 / 1024).toFixed(2) + " MB"}</span>
                           </div>
-                          <button type="button" className={styles.fileRemove} onClick={() => removeFile(file.name)} aria-label={`Remove ${file.name}`}>
+                          <button type="button" className={styles.fileRemove} onClick={() => setFiles(files.filter(f => f.name !== file.name))} aria-label={`Remove ${file.name}`}>
                             <iconify-icon icon="lucide:trash-2" />
                           </button>
                         </div>
