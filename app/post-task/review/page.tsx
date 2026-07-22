@@ -126,7 +126,7 @@ export default function TaskReviewPage() {
       if (res && res.id && files.length > 0) {
         await Promise.all(
           files.map((file) => {
-            const fileObj = dataURLtoFile(file.base64, file.name);
+            const fileObj = file instanceof File ? file : dataURLtoFile(file.base64, file.name);
             return api.uploadTaskAttachment(res.id, fileObj).catch(console.error);
           })
         );
@@ -277,8 +277,12 @@ export default function TaskReviewPage() {
                                 border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 backgroundColor: '#f8fafc'
                               }}>
-                                {file.kind === 'image' ? (
-                                  <img src={file.base64} alt={file.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {(file.kind === 'image' || file.type?.startsWith('image/')) && (file.base64 || file instanceof File) ? (
+                                  <img 
+                                    src={file.base64 || (file instanceof File ? URL.createObjectURL(file as any) : "")} 
+                                    alt={file.name} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  />
                                 ) : (
                                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
                                     <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />
