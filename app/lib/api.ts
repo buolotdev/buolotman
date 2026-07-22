@@ -98,6 +98,11 @@ export const api = {
       "/auth/login/",
       { method: "POST", body: JSON.stringify({ username: email, password }), public: true } as any
     ),
+  googleLogin: (token: string) =>
+    request<{ access: string; refresh: string; role: string; user: any }>(
+      "/auth/google-login/",
+      { method: "POST", body: JSON.stringify({ token }), public: true } as any
+    ),
 
   registerClient: (data: Record<string, string>) =>
     request<{ message: string }>("/auth/register/client/", {
@@ -488,23 +493,6 @@ export const api = {
     const form = new FormData();
     form.append("file", file);
     return fetch(`${API_BASE}/uploads/document/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-      },
-      body: form,
-    }).then(async (res) => {
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
-        throw new Error(err.detail || JSON.stringify(err));
-      }
-      return res.json();
-    });
-  },
-  uploadTaskAttachment: (taskId: number, file: File) => {
-    const form = new FormData();
-    form.append("file", file);
-    return fetch(`${API_BASE}/uploads/task/${taskId}/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,

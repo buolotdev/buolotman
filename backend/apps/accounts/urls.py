@@ -1,9 +1,11 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
+from . import google_views
 
 urlpatterns = [
     path('login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('google-login/', google_views.google_login, name='google_login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('otp/request/', views.request_phone_otp, name='request_phone_otp'),
     path('otp/verify/', views.verify_phone_otp, name='verify_phone_otp'),

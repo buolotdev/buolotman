@@ -6,6 +6,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='1090108678391-00u5aomsoh2gu7rqk2vnfldt9cs4fovq.apps.googleusercontent.com')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
