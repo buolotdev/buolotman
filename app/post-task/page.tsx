@@ -508,10 +508,17 @@ export default function PostTaskPage() {
                       <h3>Location Details</h3>
                     </div>
 
-                    <div className={styles.mapPreview}>
-                      <div className={styles.mapPin}>
-                        <iconify-icon icon="lucide:map-pin" />
-                      </div>
+                    <div className={styles.mapPreview} style={{ padding: 0, overflow: 'hidden' }}>
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        frameBorder="0" 
+                        scrolling="no" 
+                        marginHeight={0} 
+                        marginWidth={0} 
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(formData.address ? `${formData.address}, ${formData.city}` : formData.city || 'Africa')}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                        style={{ border: 0, minHeight: '200px' }}
+                      ></iframe>
                     </div>
 
                     <div className={styles.formGrid}>
