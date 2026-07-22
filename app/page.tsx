@@ -1703,6 +1703,12 @@ export default function Home() {
                 desc: "Cape Town and Johannesburg — Africa's most developed professional service markets."
               },
               {
+                name: "Cameroon",
+                flag: "🇨🇲",
+                img: "/cameroon.png",
+                desc: "Douala and Yaoundé — Central Africa's growing hub for top-tier specialized talent."
+              },
+              {
                 name: "Global",
                 flag: "🌐",
                 img: "/global.jpg",
