@@ -9,6 +9,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from utils.rate_limit import AuthLoginThrottle
 
+import requests as python_requests
+
 User = get_user_model()
 
 @api_view(['POST'])
@@ -20,11 +22,12 @@ def google_login(request):
         return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Verify the token
-        idinfo = id_token.verify_oauth2_token(
-            token, requests.Request(), settings.GOOGLE_CLIENT_ID
-        )
+        # Verify the access token by fetching user info
+        response = python_requests.get(f'https://www.googleapis.com/oauth2/v3/userinfo?access_token={token}')
+        if not response.ok:
+            return Response({'error': 'Invalid or expired Google token'}, status=status.HTTP_400_BAD_REQUEST)
 
+        idinfo = response.json()
         email = idinfo.get('email')
         first_name = idinfo.get('given_name', '')
         last_name = idinfo.get('family_name', '')
