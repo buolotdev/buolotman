@@ -53,6 +53,15 @@ function readDraft(): DraftPayload | null {
   }
 }
 
+function dataURLtoFile(dataurl: string, filename: string) {
+  var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)![1],
+    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
 export default function TaskReviewPage() {
   const router = useRouter();
   const { data: meData } = useFetch(() => api.getMe(), []);
@@ -113,9 +122,13 @@ export default function TaskReviewPage() {
         contact_methods: draft.contactMethods || [],
         skills: draft.skills || [],
       });
+
       if (res && res.id && files.length > 0) {
         await Promise.all(
-          files.map((file) => api.uploadTaskAttachment(res.id, file).catch(console.error))
+          files.map((file) => {
+            const fileObj = dataURLtoFile(file.base64, file.name);
+            return api.uploadTaskAttachment(res.id, fileObj).catch(console.error);
+          })
         );
       }
 
@@ -252,6 +265,33 @@ export default function TaskReviewPage() {
                     )}
 
                     <div className={styles.divider} />
+
+                    {files.length > 0 && (
+                      <>
+                        <div className={styles.skillsBlock}>
+                          <strong>Attachments</strong>
+                          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
+                            {files.map((file, idx) => (
+                              <div key={idx} style={{ 
+                                width: '100px', height: '100px', borderRadius: '8px', overflow: 'hidden', 
+                                border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                backgroundColor: '#f8fafc'
+                              }}>
+                                {file.kind === 'image' ? (
+                                  <img src={file.base64} alt={file.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
+                                    <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />
+                                    <span style={{ maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className={styles.divider} />
+                      </>
+                    )}
 
                     <div className={styles.skillsBlock}>
                       <strong>Required Skills</strong>

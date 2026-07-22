@@ -73,16 +73,28 @@ export default function PostTaskPage() {
   const [skills, setSkills] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    const newFiles = Array.from(e.target.files).map((file) => {
+    const newFiles = await Promise.all(
+      Array.from(e.target.files).map(async (file) => {
         const kind = file.type === "application/pdf" ? "pdf" : "image";
-        const extendedFile = file as any;
-        extendedFile.kind = kind;
-        extendedFile.sizeFormatted = (file.size / 1024 / 1024).toFixed(2) + " MB";
-        return extendedFile;
-    });
-    setFiles((current) => [...current, ...newFiles]);
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+        return {
+          name: file.name,
+          size: file.size,
+          sizeFormatted: (file.size / 1024 / 1024).toFixed(2) + " MB",
+          kind,
+          type: file.type,
+          base64,
+        };
+      })
+    );
+    setFiles((current: any) => [...current, ...newFiles]);
   };
 
   useEffect(() => {

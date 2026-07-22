@@ -3,7 +3,14 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { saveFilesToDB, getFilesFromDB } from "./idb";
 
-export type ExtendedFile = File & { kind: "image" | "pdf" };
+export type ExtendedFile = {
+  name: string;
+  size: number;
+  sizeFormatted: string;
+  kind: "image" | "pdf";
+  type: string;
+  base64: string;
+};
 
 interface TaskDraftContextType {
   files: ExtendedFile[];
