@@ -52,7 +52,7 @@ export default function ClientProfilePage() {
     // Mock save logic for now since updateProfile API is not complete
     setTimeout(() => {
       setProfileSaving(false);
-      toast.show("Profile updated successfully", "success");
+      toast.show("success", "Profile updated successfully");
     }, 1000);
   };
 

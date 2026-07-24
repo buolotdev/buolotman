@@ -25,14 +25,14 @@ export function TaskDraftProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     getFilesFromDB().then((storedFiles) => {
-      setFiles(storedFiles as ExtendedFile[]);
+      setFiles(storedFiles as unknown as ExtendedFile[]);
       setLoaded(true);
     }).catch(console.error);
   }, []);
 
   useEffect(() => {
     if (loaded) {
-      saveFilesToDB(files).catch(console.error);
+      saveFilesToDB(files as unknown as File[]).catch(console.error);
     }
   }, [files, loaded]);
 
