@@ -26,17 +26,18 @@ const HOW_STEPS = [
   { title: "Hire Safely", description: "Confirm the booking and pay securely through escrow." },
 ];
 
-export default function Page() {
+export default function Page({ params }: { params: { categorySlug: string } }) {
+  const { categorySlug } = params;
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
     []
   );
   const { data: tasksData, loading: tasksLoading } = useFetch(
-    () => api.getTasks({ category: "electrical" }),
+    () => api.getTasks({ category: categorySlug }),
     []
   );
   const { data: skillsData, loading: skillsLoading } = useFetch(
-    () => api.getSkills("electrical"),
+    () => api.getSkills(categorySlug),
     []
   );
 
@@ -120,10 +121,10 @@ export default function Page() {
             <span>/</span>
             <span>Categories</span>
             <span>/</span>
-            <strong>Electrical</strong>
+            <strong style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")}</strong>
           </div>
-          <h1>Electrical Services</h1>
-          <p>Find trusted, certified electricians and electrical engineers for residential, commercial, and industrial projects.</p>
+          <h1 style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")} Services</h1>
+          <p>Find trusted, certified professionals for your project.</p>
           <div className={styles.heroStats}>
             {categoriesLoading ? (
               <SkeletonBlock style={{ width: 140, height: 18 }} />
@@ -170,7 +171,7 @@ export default function Page() {
 
       <section className={styles.section}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Popular Services in Electrical</h2>
+          <h2 className={styles.sectionTitle}>Popular Services</h2>
           <div className={styles.servicesGrid}>
             {tasksLoading
               ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
@@ -200,8 +201,8 @@ export default function Page() {
               <p>{tasksLoading ? "Loading…" : `Showing ${featured.length} filtered technicians`}</p>
             </div>
             <div className={styles.headerActions}>
-              <Link href="/categories/electrical/listings" className={styles.primarySmall}>
-                Browse all electricians
+              <Link href={`/categories/${categorySlug}/listings`} className={styles.primarySmall}>
+                Browse all professionals
               </Link>
               <button type="button" className={styles.ghostButton}>Recommended</button>
             </div>
@@ -246,7 +247,7 @@ export default function Page() {
           <section className={styles.banner}>
             <div>
               <h3>Can&apos;t find the perfect match?</h3>
-              <p>Post your job once and let qualified electricians come to you with competitive quotes.</p>
+              <p>Post your job once and let qualified professionals come to you with competitive quotes.</p>
             </div>
             <Link href="/post-task" className={styles.whiteButton}>Post a Job for Free</Link>
           </section>
@@ -327,7 +328,7 @@ export default function Page() {
           </div>
 
           <div className={styles.sidebarPromo}>
-            <h3>Are you a certified Electrician?</h3>
+            <h3>Are you a certified Professional?</h3>
             <p>Join thousands of professionals earning more on Boulot Man. Get verified and access premium clients today.</p>
             <Link href="/signup" className={styles.primaryFull}>Apply as a Pro</Link>
           </div>

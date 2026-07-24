@@ -33,9 +33,10 @@ type Listing = {
   skills: string[];
 };
 
-export default function Page() {
+export default function Page({ params }: { params: { categorySlug: string } }) {
+  const { categorySlug } = params;
   const { data: tasksData, loading } = useFetch(
-    () => api.getTasks({ category: "electrical" }),
+    () => api.getTasks({ category: categorySlug }),
     []
   );
 
@@ -172,14 +173,14 @@ export default function Page() {
           <div className={styles.breadcrumbs}>
             <Link href="/">Home</Link>
             <span>/</span>
-            <Link href="/categories/electrical">Categories</Link>
+            <Link href={`/categories/${categorySlug}`}>Categories</Link>
             <span>/</span>
-            <strong>Electricians</strong>
+            <strong style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")} Professionals</strong>
           </div>
 
           <div className={styles.listingHeader}>
             <div>
-              <h1>Electricians</h1>
+              <h1 style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")} Professionals</h1>
               <p>{loading ? "Loading…" : `${filtered.length} professionals available`}</p>
             </div>
             <div className={styles.listingControls}>

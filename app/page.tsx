@@ -10,22 +10,21 @@ import { useFetch } from "./lib/useFetch";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
 
 const ICON_BY_KEY: Record<string, string> = {
-  electrical: "lucide:zap",
-  plumbing: "lucide:wrench",
-  painting: "lucide:paint-roller",
-  cleaning: "lucide:sofa",
-  carpentry: "lucide:hammer",
-  hvac: "lucide:fan",
-  gardening: "lucide:flower-2",
-  moving: "lucide:truck",
-  "engineering-technology-services": "lucide:cpu",
-  "it-infrastructure-networking": "lucide:network",
+  "software-and-digital-engineering": "lucide:cpu",
+  "it-infrastructure-and-networking": "lucide:network",
   "cybersecurity-services": "lucide:shield-check",
-  "cloud-systems-engineering": "lucide:cloud",
-  "electrical-electronics-engineering": "lucide:zap",
-  "mechanical-civil-industrial": "lucide:hard-hat",
-  "renewable-energy-utilities": "lucide:sun",
-  "specialized-technical-services": "lucide:sliders",
+  "cloud-and-systems-engineering": "lucide:cloud",
+  "electrical-and-electronics-engineering": "lucide:zap",
+  "civil-construction-and-architecture": "lucide:hard-hat",
+  "mechanical-and-industrial-engineering": "lucide:settings",
+  "renewable-energy-and-utilities": "lucide:sun",
+  "automotive-and-heavy-equipment": "lucide:car",
+  "telecom-broadcast-and-security-systems": "lucide:radio-tower",
+  "handyman-and-home-maintenance": "lucide:hammer",
+  "cleaning-outdoor-and-environmental-services": "lucide:leaf",
+  "transport-logistics-and-support-services": "lucide:truck",
+  "health-beauty-and-personal-care": "lucide:heart",
+  "education-language-and-document-services": "lucide:book-open",
   default: "lucide:briefcase",
 };
 
@@ -280,7 +279,7 @@ export default function Home() {
         };
       })
     : []
-  ).slice(0, 8);
+  ).slice(0, 15);
 
   const pros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
   const companies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
