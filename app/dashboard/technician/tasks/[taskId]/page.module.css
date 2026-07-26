@@ -52,6 +52,9 @@
 
 .backButton,
 .topbarLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
   padding: 0 16px;
   border: 1px solid #e2e8f0;

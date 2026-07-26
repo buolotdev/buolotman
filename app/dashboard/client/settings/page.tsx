@@ -79,10 +79,10 @@ export default function ClientSettingsPage() {
 
   // Payment Modal State
   const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
-  const [balance, setBalance] = useState(245.00);
-  const [transactions, setTransactions] = useState([
-    { date: new Date().toLocaleString(), type: 'Credit', desc: 'Initial Top-up', amount: 245.00 }
-  ]);
+  const { data: walletData, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
+  const { data: transData, refetch: refetchTrans } = useFetch(() => api.getTransactions(), []);
+  const balance = walletData?.balance || 0;
+  const transactions = Array.isArray(transData) ? transData : (transData?.results || []);
   const [addAmount, setAddAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
@@ -100,18 +100,19 @@ export default function ClientSettingsPage() {
     }
   };
 
-  const handleAddMoney = () => {
+  const handleAddMoney = async () => {
     const amt = parseFloat(addAmount);
     if (isNaN(amt) || amt < 10) {
-      toast.error("Error", "Minimum top-up amount is $10");
+      toast.error("Error", "Minimum top-up amount is 10 XOF");
       return;
     }
-    setBalance(prev => prev + amt);
-    setTransactions(prev => [{
-      date: new Date().toLocaleString(), type: 'Credit', desc: 'Wallet Top-up', amount: amt
-    }, ...prev]);
-    setAddAmount("");
-    toast.success("Success", "Wallet credited successfully.");
+    try {
+      // API call to add money would go here
+      toast.success("Success", "Add Money requires a payment gateway integration");
+      setAddAmount("");
+    } catch(e) {
+      toast.error("Error", "Payment failed");
+    }
   };
 
   const handleWithdrawMoney = () => {

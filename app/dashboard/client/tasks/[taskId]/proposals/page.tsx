@@ -34,6 +34,7 @@ function parseAmount(value: string) {
 }
 
 export default function TaskProposalsPage({ params }: { params: Promise<{ taskId: string }> }) {
+  const { taskId } = use(params);
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
@@ -42,7 +43,6 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
   const [shortlistedIds, setShortlistedIds] = useState<string[]>([]);
   const [messagingId, setMessagingId] = useState<string | null>(null);
 
-  const { taskId } = use(params);
   const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
   const { data: userData } = useFetch(() => api.getMe(), []);
@@ -265,13 +265,20 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
 
                     <div className={styles.attachmentsBlock}>
                       <h3>Task Attachments</h3>
-                      <div className={styles.attachmentRow}>
-                        {(task.attachments || []).map((attachment: any) => (
-                          <button key={attachment.name} type="button" className={styles.attachmentChip}>
-                            <iconify-icon icon={attachment.type === "image" ? "lucide:image" : "lucide:file-text"} />
-                            <span>{attachment.name}</span>
-                          </button>
-                        ))}
+                      <div className={styles.attachmentRow} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                        {(task.attachments || []).map((attachment: any, idx: number) => {
+                          const isImage = attachment.file_type?.includes('image') || attachment.file_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                          return isImage ? (
+                            <a key={attachment.id || idx} href={attachment.file_url} target="_blank" rel="noopener noreferrer">
+                              <img src={attachment.file_url} alt={attachment.file_name || 'Task Attachment'} style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                            </a>
+                          ) : (
+                            <a href={attachment.file_url} target="_blank" rel="noopener noreferrer" key={attachment.id || idx} className={styles.attachmentChip} style={{ textDecoration: 'none' }}>
+                              <iconify-icon icon="lucide:file-text" />
+                              <span>{attachment.file_name || 'View Attachment'}</span>
+                            </a>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

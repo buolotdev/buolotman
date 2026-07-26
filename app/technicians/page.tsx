@@ -2,36 +2,20 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import styles from "./page.module.css";
-
-// Mock data based on technicians.html
-const MOCK_TECHNICIANS = Array.from({ length: 20 }).map((_, i) => ({
-  id: i + 41,
-  name: `Technician ${i + 41}`,
-  category: "Electrician",
-  rating: 4.8,
-  distance: "3.2 miles away",
-  image: `https://i.pravatar.cc/300?img=${i + 1}`,
-  location: "Kigali, Rwanda",
-  badges: ["Expert", "128 Tasks Completed", "7 Years Experience"],
-  bio: "Certified technician with extensive experience delivering quality services across residential and commercial projects.",
-  pastWorks: [
-    "https://images.unsplash.com/photo-1504307651254-35680f356f12?w=300&q=80",
-    "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&q=80",
-    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=300&q=80",
-    "https://images.unsplash.com/photo-1541888087425-ce81dfc46928?w=300&q=80"
-  ],
-  reviews: [
-    { avatar: "https://i.pravatar.cc/100?img=1", text: "Excellent work, very professional.", stars: "⭐⭐⭐⭐⭐" },
-    { avatar: "https://i.pravatar.cc/100?img=2", text: "Reliable and on time.", stars: "⭐⭐⭐⭐" }
-  ]
-}));
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 
 export default function TechniciansPage() {
-  const [selectedTech, setSelectedTech] = useState<typeof MOCK_TECHNICIANS[0] | null>(null);
+  const [selectedTech, setSelectedTech] = useState<any>(null);
+
+  const { data, loading, error } = useFetch(() => api.listUsers({ role: "TECHNICIAN" }), []);
+  
+  // Safe extraction (data could be array or { results: array })
+  const technicians = Array.isArray(data) ? data : (data?.results || []);
 
   return (
     <div className={styles.page}>
@@ -58,24 +42,37 @@ export default function TechniciansPage() {
       </div>
 
       <div className={styles.container}>
-        <div className={styles.grid}>
-          {MOCK_TECHNICIANS.map((tech) => (
-            <div key={tech.id} className={styles.card}>
-              <div className={styles.cardImageWrapper}>
-                <Image src={tech.image} alt={tech.name} fill className={styles.cardImage} />
+        {loading ? (
+          <div className={styles.grid}>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : error ? (
+          <p style={{ textAlign: "center", color: "red", padding: "40px 0" }}>Failed to load technicians: {error}</p>
+        ) : technicians.length === 0 ? (
+          <p style={{ textAlign: "center", padding: "40px 0", color: "#666" }}>No technicians found.</p>
+        ) : (
+          <div className={styles.grid}>
+            {technicians.map((tech: any) => (
+              <div key={tech.id} className={styles.card}>
+                <div className={styles.cardImageWrapper}>
+                  <img src={tech.avatar_url || `https://i.pravatar.cc/300?img=${(tech.id % 70) + 1}`} alt={tech.first_name || tech.username} className={styles.cardImage} />
+                </div>
+                <h3 className={styles.cardTitle}>{tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : (tech.username || "Unknown Technician")}</h3>
+                <p className={styles.cardCategory}>{tech.category || "Professional"}</p>
+                <div className={styles.cardMeta}>
+                  <span className={styles.rating}>⭐ 4.8</span> • {tech.location || tech.country || "Kigali, Rwanda"}
+                </div>
+                <div className={styles.cardActions}>
+                  <button className={styles.btnOutline} onClick={() => setSelectedTech(tech)}>View Profile</button>
+                  <button className={styles.btnPrimary}>Request Service</button>
+                </div>
               </div>
-              <h3 className={styles.cardTitle}>{tech.name}</h3>
-              <p className={styles.cardCategory}>{tech.category}</p>
-              <div className={styles.cardMeta}>
-                <span className={styles.rating}>⭐ {tech.rating}</span> • {tech.distance}
-              </div>
-              <div className={styles.cardActions}>
-                <button className={styles.btnOutline} onClick={() => setSelectedTech(tech)}>View Profile</button>
-                <button className={styles.btnPrimary}>Request Service</button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className={styles.pagination}>
           <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>1</button>
@@ -95,38 +92,36 @@ export default function TechniciansPage() {
             <button className={styles.closeButton} onClick={() => setSelectedTech(null)}>×</button>
             
             <div className={styles.profileCover}>
-              <img src={selectedTech.image} alt="Profile" className={styles.profilePic} />
+              <img src={selectedTech.avatar_url || `https://i.pravatar.cc/300?img=${(selectedTech.id % 70) + 1}`} alt="Profile" className={styles.profilePic} />
             </div>
 
             <div className={styles.profileBody}>
-              <h2 className={styles.profileName}>{selectedTech.name}</h2>
-              <p className={styles.profileCategory}>{selectedTech.category}</p>
-              <p className={styles.profileLocation}>{selectedTech.location}</p>
+              <h2 className={styles.profileName}>{selectedTech.first_name ? `${selectedTech.first_name} ${selectedTech.last_name || ""}`.trim() : (selectedTech.username || "Unknown Technician")}</h2>
+              <p className={styles.profileCategory}>{selectedTech.category || "Professional Technician"}</p>
+              <p className={styles.profileLocation}>{selectedTech.location || selectedTech.country || "Kigali, Rwanda"}</p>
 
               <div className={styles.badges}>
-                {selectedTech.badges.map(b => <span key={b} className={styles.badge}>{b}</span>)}
+                <span className={styles.badge}>Expert</span>
+                <span className={styles.badge}>Verified</span>
               </div>
 
-              <p className={styles.profileBio}>{selectedTech.bio}</p>
+              <p className={styles.profileBio}>{selectedTech.bio || "Certified technician with extensive experience delivering quality services across residential and commercial projects."}</p>
 
               <h3 className={styles.sectionTitle}>Past Works</h3>
               <div className={styles.worksGrid}>
-                {selectedTech.pastWorks.map((work, i) => (
-                  <img key={i} src={work} alt="Past work" className={styles.workImg} />
-                ))}
+                <img src="https://images.unsplash.com/photo-1504307651254-35680f356f12?w=300&q=80" alt="Past work" className={styles.workImg} />
+                <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&q=80" alt="Past work" className={styles.workImg} />
               </div>
 
               <h3 className={styles.sectionTitle}>Reviews</h3>
               <div className={styles.reviewsList}>
-                {selectedTech.reviews.map((rev, i) => (
-                  <div key={i} className={styles.reviewItem}>
-                    <img src={rev.avatar} alt="Avatar" className={styles.reviewAvatar} />
-                    <div className={styles.reviewContent}>
-                      <div className={styles.reviewStars}>{rev.stars}</div>
-                      <p className={styles.reviewText}>{rev.text}</p>
-                    </div>
+                <div className={styles.reviewItem}>
+                  <img src="https://i.pravatar.cc/100?img=1" alt="Avatar" className={styles.reviewAvatar} />
+                  <div className={styles.reviewContent}>
+                    <div className={styles.reviewStars}>⭐⭐⭐⭐⭐</div>
+                    <p className={styles.reviewText}>Excellent work, very professional.</p>
                   </div>
-                ))}
+                </div>
               </div>
 
               <div className={styles.modalFooter}>

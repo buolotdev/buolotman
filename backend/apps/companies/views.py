@@ -15,10 +15,10 @@ from .serializers import (
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def company_profile(request):
-    try:
-        profile = CompanyProfile.objects.get(user=request.user)
-    except CompanyProfile.DoesNotExist:
-        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    profile, created = CompanyProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'company_name': f"{request.user.first_name} {request.user.last_name}".strip() or "My Company"}
+    )
 
     if request.method == 'GET':
         serializer = CompanyProfileSerializer(profile)
@@ -66,10 +66,10 @@ def list_companies(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def company_projects(request):
-    try:
-        profile = CompanyProfile.objects.get(user=request.user)
-    except CompanyProfile.DoesNotExist:
-        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    profile, created = CompanyProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'company_name': f"{request.user.first_name} {request.user.last_name}".strip() or "My Company"}
+    )
 
     projects = profile.projects.all()
     status_filter = request.query_params.get('status')
@@ -82,10 +82,10 @@ def company_projects(request):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def company_services(request):
-    try:
-        profile = CompanyProfile.objects.get(user=request.user)
-    except CompanyProfile.DoesNotExist:
-        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    profile, created = CompanyProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'company_name': f"{request.user.first_name} {request.user.last_name}".strip() or "My Company"}
+    )
 
     if request.method == 'GET':
         services = profile.services.all()

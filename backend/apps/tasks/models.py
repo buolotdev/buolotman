@@ -232,3 +232,22 @@ class ServiceInquiry(models.Model):
 
     def __str__(self):
         return f"{self.get_inquiry_type_display()} from {self.name}"
+
+class Milestone(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Awaiting Execution', 'Awaiting Execution'),
+        ('Awaiting Client', 'Awaiting Client'),
+        ('Released', 'Released'),
+    )
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='milestones')
+    title = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='Pending')
+    due_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.title} for Task {self.task_id}'

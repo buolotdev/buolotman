@@ -3,50 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProviderBoard.module.css";
-
-// MOCK DATA GENERATOR
-const generateProviders = () => {
-  const providers = [];
-  const roles = [
-    "Certified Electrician",
-    "Senior Plumber",
-    "IT Systems Engineer",
-    "HVAC Specialist",
-    "Solar Installation Expert",
-    "Network Administrator",
-    "Commercial Painter",
-    "Heavy Equipment Mechanic"
-  ];
-  const ratings = [4.9, 4.8, 5.0, 4.7, 4.9, 4.6];
-  const descriptions = [
-    "Residential & commercial electrical installations, repairs, and safety inspections.",
-    "Expert in leak detection, piping, and modern water heater installations.",
-    "Specializes in server setups, cloud migrations, and network security audits.",
-    "Providing top-notch cooling and heating system installations and maintenance.",
-    "Helping businesses transition to green energy with efficient solar setups.",
-    "Setting up enterprise-grade LAN/WAN configurations and firewalls.",
-    "Professional interior and exterior painting for commercial buildings.",
-    "Diagnosing and repairing heavy machinery with over 10 years of experience."
-  ];
-
-  for (let i = 1; i <= 24; i++) {
-    providers.push({
-      id: i,
-      name: `Provider ${i}`,
-      role: roles[i % roles.length],
-      avatar: `https://i.pravatar.cc/150?img=${i + 20}`,
-      rating: ratings[i % ratings.length],
-      location: "Kigali, Rwanda",
-      distance: `${(Math.random() * 10).toFixed(1)} miles away`,
-      description: descriptions[i % descriptions.length]
-    });
-  }
-  return providers;
-};
-
-const PROVIDERS = generateProviders();
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 
 export default function ProviderBoard() {
+  const { data, loading, error } = useFetch(() => api.listUsers({ role: "TECHNICIAN" }), []);
+  
+  // Safe extraction (data could be array or { results: array })
+  const providers = Array.isArray(data) ? data : (data?.results || []);
+
   return (
     <div className={styles.root}>
       <div className={styles.container}>
@@ -79,38 +45,51 @@ export default function ProviderBoard() {
         </div>
 
         {/* GRID */}
-        <div className={styles.grid}>
-          {PROVIDERS.map((pro) => (
-            <div key={pro.id} className={styles.card}>
-              <div className={styles.profile}>
-                <Image src={pro.avatar} alt={pro.name} width={64} height={64} className={styles.avatar} />
-                <div>
-                  <h3 className={styles.name}>{pro.name}</h3>
-                  <div className={styles.role}>{pro.role}</div>
+        {loading ? (
+          <div className={styles.grid}>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : error ? (
+          <p style={{ textAlign: "center", color: "red", padding: "40px 0" }}>Failed to load providers: {error}</p>
+        ) : providers.length === 0 ? (
+          <p style={{ textAlign: "center", padding: "40px 0", color: "#666" }}>No providers found.</p>
+        ) : (
+          <div className={styles.grid}>
+            {providers.map((pro: any) => (
+              <div key={pro.id} className={styles.card}>
+                <div className={styles.profile}>
+                  <img src={pro.avatar_url || `https://i.pravatar.cc/150?img=${(pro.id % 70) + 1}`} alt={pro.first_name || pro.username} className={styles.avatar} />
+                  <div>
+                    <h3 className={styles.name}>{pro.first_name ? `${pro.first_name} ${pro.last_name || ""}`.trim() : (pro.username || "Provider")}</h3>
+                    <div className={styles.role}>{pro.category || "Technician"}</div>
+                  </div>
+                </div>
+                
+                <div className={styles.rating}>
+                  <span className={styles.stars}>★★★★★</span>
+                  <span>(4.8)</span>
+                </div>
+                
+                <div className={styles.meta}>
+                  <iconify-icon icon="lucide:map-pin"></iconify-icon>
+                  {pro.location || pro.country || "Kigali, Rwanda"} &bull; {pro.distance || "3.1 miles away"}
+                </div>
+                
+                <div className={styles.description}>
+                  {pro.bio || "Certified technician ready to help with your next project."}
+                </div>
+                
+                <div className={styles.actions}>
+                  <button className={`${styles.btn} ${styles.btnView}`}>View Profile</button>
+                  <button className={`${styles.btn} ${styles.btnHire}`}>Hire Now</button>
                 </div>
               </div>
-              
-              <div className={styles.rating}>
-                <span className={styles.stars}>★★★★★</span>
-                <span>({pro.rating})</span>
-              </div>
-              
-              <div className={styles.meta}>
-                <iconify-icon icon="lucide:map-pin"></iconify-icon>
-                {pro.location} &bull; {pro.distance}
-              </div>
-              
-              <div className={styles.description}>
-                {pro.description}
-              </div>
-              
-              <div className={styles.actions}>
-                <button className={`${styles.btn} ${styles.btnView}`}>View Profile</button>
-                <button className={`${styles.btn} ${styles.btnHire}`}>Hire Now</button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* PAGINATION */}
         <div className={styles.pagination}>

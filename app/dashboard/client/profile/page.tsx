@@ -47,13 +47,21 @@ export default function ClientProfilePage() {
     }
   }, [userData]);
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     setProfileSaving(true);
-    // Mock save logic for now since updateProfile API is not complete
-    setTimeout(() => {
-      setProfileSaving(false);
+    try {
+      await api.updateMe({
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone,
+        location: location,
+      });
       toast.show("success", "Profile updated successfully");
-    }, 1000);
+    } catch (error) {
+      toast.show("error", "Failed to update profile");
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   return (

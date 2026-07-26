@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React, { useEffect } from "react";
 import "./header.css";
 
@@ -1518,7 +1519,7 @@ return () => {
 <header class="bm-main-header">
   <div class="bm-main-header-inner">
     <div class="bm-main-logo">
-      <img src="/boulotman-logo.png" alt="Boulot Man">
+      <Link href="/"><img src="/boulotman-logo.png" alt="Boulot Man" /></Link>
     </div>
     <nav class="bm-main-nav">
       <style>

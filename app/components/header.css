@@ -42,7 +42,12 @@ body {
 }
 
 .bm-main-logo img {
-  height: 64px;
+  height: 84px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.bm-main-logo img:hover {
+  transform: scale(1.05);
 }
 
 /* NAV */

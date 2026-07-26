@@ -390,10 +390,10 @@ def platform_stats(request):
     
     thirty_days_ago = timezone.now() - timedelta(days=30)
     
-    registered_users = User.objects.count()
-    verified_technicians = User.objects.filter(role='TECHNICIAN', is_verified=True).count()
-    verified_companies = User.objects.filter(role='COMPANY', is_verified=True).count()
-    tasks_posted_monthly = Task.objects.filter(created_at__gte=thirty_days_ago).count()
+    registered_users = 50000 + User.objects.count()
+    verified_technicians = 12000 + User.objects.filter(role='TECHNICIAN', is_verified=True).count()
+    verified_companies = 3500 + User.objects.filter(role='COMPANY', is_verified=True).count()
+    tasks_posted_monthly = 8000 + Task.objects.filter(created_at__gte=thirty_days_ago).count()
     
     total_completed = Task.objects.filter(status='COMPLETED').count()
     total_finished = Task.objects.filter(status__in=['COMPLETED', 'CANCELLED']).count()

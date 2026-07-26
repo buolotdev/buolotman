@@ -1,50 +1,167 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./new.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 
 export default function CreateCompanyProjectPage() {
+  const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const [form, setForm] = useState({
+    companyName: "",
     title: "",
     category: "",
+    subcategory: "",
     budget: "",
+    budget_mode: "Contract-based",
+    service_type: "onsite",
+    country: "",
+    city: "",
     deadline: "",
     description: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { data: categoriesData, loading: categoriesLoading } = useFetch(
+    () => api.getCategories(),
+    []
+  );
+  
+  const { data: subcategoriesData } = useFetch(
+    () => form.category ? api.getSkills(form.category) : Promise.resolve([]),
+    [form.category]
+  );
+  
+  const categories = categoriesData || [];
+  const subcategories = subcategoriesData || [];
+
+  // Auto-detect location
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.country_name || data.city) {
+          setForm(prev => ({
+            ...prev,
+            country: data.country_name || "",
+            city: data.city || ""
+          }));
+        }
+      })
+      .catch(err => console.error("Could not fetch location automatically", err));
+  }, []);
+
+  const handlePreview = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Project submission flow pending backend integration.");
+    setShowPreview(true);
+  };
+
+  const handlePublish = async () => {
+    setSubmitting(true);
+    try {
+      const finalTitle = form.companyName ? `${form.companyName} - ${form.title}` : form.title;
+
+      const payload = {
+        title: finalTitle,
+        description: form.description,
+        category: parseInt(form.category),
+        budget_min: null,
+        budget_max: form.budget ? parseFloat(form.budget) : null,
+        budget_mode: form.budget_mode === 'Hourly / Daily' ? 'hourly' : 'fixed',
+        service_type: form.service_type,
+        location: form.country || "Online",
+        city: form.city || "",
+        deadline: form.deadline || null,
+        urgency: "standard",
+        materials_provided: false,
+        contact_methods: ["in-app"],
+        skills: form.subcategory ? [form.subcategory] : [],
+        schedule: ""
+      };
+
+      await api.createTask(payload as any);
+      router.push("/dashboard/company/projects");
+    } catch (error) {
+      console.error("Failed to create project", error);
+      alert("Error publishing project. Please check your inputs.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <main className={styles.mainWrapper}>
       <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
       <div className={styles.container} style={{ marginTop: 32 }}>
-        <header className={styles.header}>
-          <div className={styles.headerLeft}>
-            <p className={styles.subtitle}>Projects</p>
-            <h1 className={styles.title}>Post a New Project</h1>
-          </div>
-          <Link href="/dashboard/company/projects" className={styles.backLink}>
-            <iconify-icon icon="lucide:arrow-left" /> Back to projects
-          </Link>
-        </header>
+        <div className={styles.hero}>
+          <h1>Post a Company Service</h1>
+          <p>Advertise your company services to clients on Boulot Man</p>
+        </div>
 
-        <form className={styles.formCard} onSubmit={handleSubmit}>
+        <form className={styles.formCard} onSubmit={handlePreview}>
+          <div className={styles.grid2}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Company Name</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                value={form.companyName}
+                onChange={e => setForm({...form, companyName: e.target.value})}
+                required
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Service Title</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                value={form.title}
+                onChange={e => setForm({...form, title: e.target.value})}
+                required
+              />
+            </div>
+          </div>
+
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Project Title</label>
-            <input 
-              type="text" 
-              className={styles.input} 
-              placeholder="e.g., Office Building Electrical Wiring"
-              value={form.title}
-              onChange={e => setForm({...form, title: e.target.value})}
-              required
-            />
+            <label className={styles.label}>Service Delivery Mode</label>
+            <div className={styles.pills}>
+              <label>
+                <input 
+                  type="radio" 
+                  name="serviceMode" 
+                  value="onsite" 
+                  checked={form.service_type === "onsite"}
+                  onChange={e => setForm({...form, service_type: e.target.value})}
+                />
+                <span>On-site</span>
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  name="serviceMode" 
+                  value="remote" 
+                  checked={form.service_type === "remote"}
+                  onChange={e => setForm({...form, service_type: e.target.value})}
+                />
+                <span>Remote</span>
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  name="serviceMode" 
+                  value="hybrid" 
+                  checked={form.service_type === "hybrid"}
+                  onChange={e => setForm({...form, service_type: e.target.value})}
+                />
+                <span>Hybrid</span>
+              </label>
+            </div>
           </div>
 
           <div className={styles.grid2}>
@@ -53,16 +170,77 @@ export default function CreateCompanyProjectPage() {
               <select 
                 className={styles.select}
                 value={form.category}
-                onChange={e => setForm({...form, category: e.target.value})}
+                onChange={e => setForm({...form, category: e.target.value, subcategory: ""})}
                 required
               >
                 <option value="">Select Category</option>
-                <option value="electrical">Electrical</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="construction">Construction</option>
+                {categoriesLoading ? (
+                  <option>Loading...</option>
+                ) : (
+                  categories.map((cat: any) => (
+                    <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+                  ))
+                )}
               </select>
             </div>
-            
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Subcategory</label>
+              <select 
+                className={styles.select}
+                value={form.subcategory}
+                onChange={e => setForm({...form, subcategory: e.target.value})}
+                required
+                disabled={!form.category || subcategories.length === 0}
+              >
+                <option value="">{!form.category ? "Select Category First" : "Select Subcategory"}</option>
+                {subcategories.map((sub: any) => (
+                  <option key={sub.id} value={String(sub.id)}>{sub.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.grid2}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Country (auto-detected)</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                value={form.country}
+                onChange={e => setForm({...form, country: e.target.value})}
+                placeholder="Country"
+                required
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>City (auto-detected)</label>
+              <input 
+                type="text" 
+                className={styles.input} 
+                value={form.city}
+                onChange={e => setForm({...form, city: e.target.value})}
+                placeholder="City"
+                required
+              />
+            </div>
+          </div>
+
+          <div className={styles.grid2}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>Pricing Structure</label>
+              <select 
+                className={styles.select}
+                value={form.budget_mode}
+                onChange={e => setForm({...form, budget_mode: e.target.value})}
+                required
+              >
+                <option value="Contract-based">Contract-based</option>
+                <option value="Project-based">Project-based</option>
+                <option value="Hourly / Daily">Hourly / Daily</option>
+                <option value="Negotiable">Negotiable</option>
+              </select>
+            </div>
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Estimated Budget (XOF)</label>
               <input 
@@ -99,10 +277,53 @@ export default function CreateCompanyProjectPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn}>
-            <iconify-icon icon="lucide:send" /> Publish Project
+            <iconify-icon icon="lucide:eye" /> Preview Project
           </button>
         </form>
       </div>
+
+      {showPreview && (
+        <div className={styles.previewOverlay}>
+          <div className={styles.previewBox}>
+            <h2>Project Preview</h2>
+            <div className={styles.previewGrid}>
+              <div><strong>Company</strong><p>{form.companyName}</p></div>
+              <div><strong>Service Title</strong><p>{form.title}</p></div>
+              <div><strong>Service Mode</strong><p style={{ textTransform: 'capitalize' }}>{form.service_type}</p></div>
+              <div><strong>Country</strong><p>{form.country || "Not specified"}</p></div>
+              <div><strong>City</strong><p>{form.city || "Not specified"}</p></div>
+              <div><strong>Pricing</strong><p>{form.budget_mode} {form.budget ? `- ${form.budget} XOF` : ""}</p></div>
+              <div><strong>Deadline</strong><p>{form.deadline || "No deadline"}</p></div>
+            </div>
+            <div className={styles.previewFull}>
+              <strong>Categories</strong>
+              <p>
+                {categories.find((c: any) => String(c.id) === form.category)?.name || "None"} 
+                {form.subcategory ? " > " + subcategories.find((s: any) => String(s.id) === form.subcategory)?.name : ""}
+              </p>
+            </div>
+            <div className={styles.previewFull}>
+              <strong>Description</strong>
+              <p style={{ whiteSpace: "pre-wrap" }}>{form.description}</p>
+            </div>
+            
+            <div className={styles.previewActions}>
+              <button className={styles.secondaryBtn} onClick={() => setShowPreview(false)}>
+                Edit Details
+              </button>
+              <button className={styles.secondaryBtn} onClick={() => {
+                alert("Draft saved locally. (Backend drafts pending)");
+                setShowPreview(false);
+              }}>
+                Save Draft
+              </button>
+              <button className={styles.submitBtn} onClick={handlePublish} disabled={submitting}>
+                <iconify-icon icon="lucide:send" /> {submitting ? "Publishing..." : "Publish Project"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -19,18 +19,14 @@ export default function TechnicianWalletPage() {
   const [query, setQuery] = useState("");
   
   // Wallet Data
-  const { data: walletData, loading: walletLoading } = useFetch(() => api.getWallet(), []);
+  const { data: walletData, loading: walletLoading, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
+  const { data: txData, loading: txLoading, refetch: refetchTx } = useFetch(() => api.getTransactions(), []);
   
-  // Custom mock transaction data matching the client's HTML requirement
-  // Since our actual API might not have exact 'Project' or 'Type' fields separately.
-  const transactionsData = [
-    { id: "1", date: "2026-02-01", project: "Residential Wiring", type: "Milestone 1", amount: 500, status: "Released" },
-    { id: "2", date: "2026-02-12", project: "Office Renovation", type: "Milestone 2", amount: 450, status: "On Hold" }
-  ];
+  const transactionsData = Array.isArray(txData) ? txData : txData?.results || [];
 
-  const availableBalance = walletData?.available_balance ?? 1250;
-  const pendingEscrow = walletData?.pending_balance ?? 450;
-  const totalEarnings = 3200; // Mocked for display matching the client request
+  const availableBalance = parseFloat(walletData?.available_balance) || 0;
+  const pendingEscrow = parseFloat(walletData?.pending_balance) || 0;
+  const totalEarnings = availableBalance + pendingEscrow; // Estimate total earnings
 
   const { data: userData } = useFetch(() => api.getMe(), []);
   const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "Eric Niyonzima";
@@ -64,17 +60,24 @@ export default function TechnicianWalletPage() {
     }
 
     setWithdrawing(true);
-    // Simulate API call for withdrawal
-    setTimeout(() => {
-      setWithdrawing(false);
+    try {
+      await api.withdraw({
+        amount,
+        method: withdrawMethod
+      });
       setWithdrawSuccess(true);
-      // In a real app we would call api.withdraw() here and update state
+      await refetchWallet();
+      await refetchTx();
       setTimeout(() => {
         setModalOpen(false);
         setWithdrawSuccess(false);
         setWithdrawAmount("");
       }, 2000);
-    }, 1500);
+    } catch (err: any) {
+      setWithdrawError(err.message || "Failed to process withdrawal.");
+    } finally {
+      setWithdrawing(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -147,19 +150,31 @@ export default function TechnicianWalletPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {transactionsData.map((tx) => (
-                      <tr key={tx.id}>
-                        <td>{tx.date}</td>
-                        <td>{tx.project}</td>
-                        <td>{tx.type}</td>
-                        <td>${tx.amount}</td>
-                        <td>
-                          <span className={`${styles.statusBadge} ${getStatusBadge(tx.status)}`}>
-                            {tx.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {txLoading ? (
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>Loading transactions...</td></tr>
+                    ) : transactionsData.length === 0 ? (
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No transactions found.</td></tr>
+                    ) : transactionsData.map((tx: any) => {
+                      const date = new Date(tx.created_at || Date.now()).toLocaleDateString();
+                      const project = tx.task_title || `Task #${tx.task_id || "Unknown"}`;
+                      const type = tx.transaction_type || tx.type || "Transfer";
+                      const amount = parseFloat(tx.amount) || 0;
+                      const status = (tx.status || "Pending").toUpperCase();
+                      
+                      return (
+                        <tr key={tx.id}>
+                          <td>{date}</td>
+                          <td>{project}</td>
+                          <td style={{ textTransform: "capitalize" }}>{type.replace('_', ' ')}</td>
+                          <td>${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td>
+                            <span className={`${styles.statusBadge} ${getStatusBadge(tx.status === 'completed' ? 'Released' : tx.status === 'pending' ? 'Pending' : 'On Hold')}`}>
+                              {status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

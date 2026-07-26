@@ -1,0 +1,887 @@
+[
+    {
+        "id": "software",
+        "title": "Software & Digital Engineering",
+        "icon": "https://img.icons8.com/fluency/96/source-code.png",
+        "subgroups": [
+            {
+                "title": "Web & Application Development",
+                "icon": "https://img.icons8.com/fluency/96/web.png",
+                "items": [
+                    "Website design and development",
+                    "Web application development",
+                    "E-commerce platform development",
+                    "WordPress development",
+                    "Progressive web applications",
+                    "Website maintenance and upgrades"
+                ]
+            },
+            {
+                "title": "Mobile & Product Engineering",
+                "icon": "https://img.icons8.com/fluency/96/android-os.png",
+                "items": [
+                    "Android application development",
+                    "iOS application development",
+                    "Cross-platform mobile applications",
+                    "Product prototyping and MVP development",
+                    "Application publishing support",
+                    "Mobile application maintenance"
+                ]
+            },
+            {
+                "title": "Backend, APIs & Databases",
+                "icon": "https://img.icons8.com/fluency/96/api-settings.png",
+                "items": [
+                    "Backend systems development",
+                    "API design and integration",
+                    "Database architecture",
+                    "Database optimization",
+                    "Third-party system integration",
+                    "Payment gateway integration"
+                ]
+            },
+            {
+                "title": "Business Systems",
+                "icon": "https://img.icons8.com/fluency/96/business.png",
+                "items": [
+                    "ERP implementation",
+                    "CRM implementation",
+                    "Inventory management systems",
+                    "Accounting and finance systems",
+                    "HR and payroll systems",
+                    "Custom workflow automation"
+                ]
+            },
+            {
+                "title": "UI/UX & Digital Design",
+                "icon": "https://img.icons8.com/fluency/96/design.png",
+                "items": [
+                    "User interface design",
+                    "User experience research",
+                    "Wireframes and prototypes",
+                    "Design systems",
+                    "Product usability testing",
+                    "Brand and digital asset design"
+                ]
+            },
+            {
+                "title": "QA, Maintenance & Modernization",
+                "icon": "https://img.icons8.com/fluency/96/test-passed.png",
+                "items": [
+                    "Software quality assurance",
+                    "Manual and automated testing",
+                    "Performance testing",
+                    "Bug fixing and technical support",
+                    "Legacy system modernization",
+                    "Software documentation"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "it",
+        "title": "IT Infrastructure & Networking",
+        "icon": "https://img.icons8.com/fluency/96/network.png",
+        "subgroups": [
+            {
+                "title": "Network Design & Installation",
+                "icon": "https://img.icons8.com/fluency/96/network.png",
+                "items": [
+                    "LAN and WAN design",
+                    "Office network installation",
+                    "Router and switch configuration",
+                    "Structured cabling",
+                    "Wireless network installation",
+                    "Network expansion and upgrades"
+                ]
+            },
+            {
+                "title": "Servers & Data Infrastructure",
+                "icon": "https://img.icons8.com/fluency/96/server.png",
+                "items": [
+                    "Server installation and configuration",
+                    "Windows and Linux server management",
+                    "Data center deployment",
+                    "Rack and equipment installation",
+                    "Storage systems",
+                    "Server maintenance"
+                ]
+            },
+            {
+                "title": "Connectivity & Wi-Fi",
+                "icon": "https://img.icons8.com/fluency/96/wi-fi.png",
+                "items": [
+                    "Wi-Fi coverage planning",
+                    "Hotspot installation",
+                    "Point-to-point wireless links",
+                    "Internet failover systems",
+                    "Bandwidth optimization",
+                    "Network performance troubleshooting"
+                ]
+            },
+            {
+                "title": "IT Support & Maintenance",
+                "icon": "https://img.icons8.com/fluency/96/computer-support.png",
+                "items": [
+                    "Computer installation and configuration",
+                    "Laptop and desktop repair",
+                    "Operating system installation",
+                    "Software installation",
+                    "Remote IT support",
+                    "Managed IT services"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "cybersecurity",
+        "title": "Cybersecurity Services",
+        "icon": "https://img.icons8.com/fluency/96/cyber-security.png",
+        "subgroups": [
+            {
+                "title": "Security Assessment",
+                "icon": "https://img.icons8.com/fluency/96/security-checked.png",
+                "items": [
+                    "Cybersecurity risk assessment",
+                    "Vulnerability assessment",
+                    "Penetration testing",
+                    "Network security audit",
+                    "Application security testing",
+                    "Security architecture review"
+                ]
+            },
+            {
+                "title": "Protection & Monitoring",
+                "icon": "https://img.icons8.com/fluency/96/firewall.png",
+                "items": [
+                    "Firewall configuration",
+                    "System hardening",
+                    "Endpoint protection",
+                    "Security operations center setup",
+                    "Threat monitoring",
+                    "Identity and access management"
+                ]
+            },
+            {
+                "title": "Data Protection & Compliance",
+                "icon": "https://img.icons8.com/fluency/96/data-protection.png",
+                "items": [
+                    "Data encryption",
+                    "Data loss prevention",
+                    "Privacy and data protection readiness",
+                    "ISO 27001 readiness",
+                    "GDPR readiness",
+                    "Security policy development"
+                ]
+            },
+            {
+                "title": "Incident Response & Recovery",
+                "icon": "https://img.icons8.com/fluency/96/recovery.png",
+                "items": [
+                    "Incident investigation",
+                    "Malware removal",
+                    "Compromised account recovery",
+                    "Digital forensics support",
+                    "Business continuity planning",
+                    "Cybersecurity awareness training"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "cloud",
+        "title": "Cloud & Systems Engineering",
+        "icon": "https://img.icons8.com/fluency/96/cloud.png",
+        "subgroups": [
+            {
+                "title": "Cloud Services",
+                "icon": "https://img.icons8.com/fluency/96/cloud-development.png",
+                "items": [
+                    "AWS cloud deployment",
+                    "Microsoft Azure deployment",
+                    "Google Cloud deployment",
+                    "Cloud migration",
+                    "Hybrid cloud architecture",
+                    "Cloud cost optimization"
+                ]
+            },
+            {
+                "title": "Virtualization & Systems",
+                "icon": "https://img.icons8.com/fluency/96/virtual-machine2.png",
+                "items": [
+                    "VMware implementation",
+                    "Proxmox implementation",
+                    "Virtual machine deployment",
+                    "Container infrastructure",
+                    "Linux systems administration",
+                    "Windows systems administration"
+                ]
+            },
+            {
+                "title": "DevOps & Automation",
+                "icon": "https://img.icons8.com/fluency/96/infinity.png",
+                "items": [
+                    "CI/CD pipeline setup",
+                    "Infrastructure as code",
+                    "Application deployment automation",
+                    "Server monitoring",
+                    "Log management",
+                    "Performance optimization"
+                ]
+            },
+            {
+                "title": "Backup & Disaster Recovery",
+                "icon": "https://img.icons8.com/fluency/96/backup.png",
+                "items": [
+                    "Automated backup systems",
+                    "Off-site backup solutions",
+                    "Disaster recovery planning",
+                    "Data restoration",
+                    "High availability systems",
+                    "Infrastructure resilience testing"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "electrical",
+        "title": "Electrical & Electronics Engineering",
+        "icon": "https://img.icons8.com/fluency/96/electrical.png",
+        "subgroups": [
+            {
+                "title": "Electrical Installation",
+                "icon": "https://img.icons8.com/fluency/96/electrical.png",
+                "items": [
+                    "Residential electrical installation",
+                    "Commercial electrical systems",
+                    "Industrial electrical wiring",
+                    "Power distribution systems",
+                    "Lighting systems",
+                    "Electrical renovations"
+                ]
+            },
+            {
+                "title": "Power & Protection",
+                "icon": "https://img.icons8.com/fluency/96/generator.png",
+                "items": [
+                    "Generator installation",
+                    "Generator servicing",
+                    "Inverter and battery systems",
+                    "Automatic changeover systems",
+                    "Earthing systems",
+                    "Surge and lightning protection"
+                ]
+            },
+            {
+                "title": "Electronics & Embedded Systems",
+                "icon": "https://img.icons8.com/fluency/96/electronics.png",
+                "items": [
+                    "Electronics diagnostics and repair",
+                    "Embedded systems development",
+                    "IoT device deployment",
+                    "Control panel assembly",
+                    "Industrial automation",
+                    "Electronic equipment maintenance"
+                ]
+            },
+            {
+                "title": "Smart & Safety Systems",
+                "icon": "https://img.icons8.com/fluency/96/smart-home-connection.png",
+                "items": [
+                    "Smart home installation",
+                    "CCTV systems",
+                    "Access control systems",
+                    "Biometric systems",
+                    "Fire alarm systems",
+                    "Intercom systems"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "construction",
+        "title": "Civil, Construction & Architecture",
+        "icon": "https://img.icons8.com/fluency/96/engineering.png",
+        "subgroups": [
+            {
+                "title": "Architecture & Design",
+                "icon": "https://img.icons8.com/fluency/96/architecture.png",
+                "items": [
+                    "Architectural design",
+                    "Building plans",
+                    "Interior space planning",
+                    "3D architectural visualization",
+                    "Landscape design",
+                    "Building permit drawings"
+                ]
+            },
+            {
+                "title": "Construction & Renovation",
+                "icon": "https://img.icons8.com/fluency/96/construction-worker.png",
+                "items": [
+                    "Building construction",
+                    "Building renovation",
+                    "Commercial remodeling",
+                    "Residential remodeling",
+                    "Block laying",
+                    "Roofing works"
+                ]
+            },
+            {
+                "title": "Civil & Infrastructure Works",
+                "icon": "https://img.icons8.com/fluency/96/bridge.png",
+                "items": [
+                    "Structural design",
+                    "Road construction and repair",
+                    "Drainage systems",
+                    "Retaining walls",
+                    "Concrete works",
+                    "Site development"
+                ]
+            },
+            {
+                "title": "Finishing Services",
+                "icon": "https://img.icons8.com/fluency/96/paint-roller.png",
+                "items": [
+                    "Interior and exterior painting",
+                    "Tiling and flooring",
+                    "Plastering and rendering",
+                    "Ceiling installation",
+                    "Wallpaper installation",
+                    "Decorative finishing"
+                ]
+            },
+            {
+                "title": "Supervision & Cost Control",
+                "icon": "https://img.icons8.com/fluency/96/inspection.png",
+                "items": [
+                    "Construction project management",
+                    "Site supervision",
+                    "Site inspection and reporting",
+                    "Quantity surveying",
+                    "Bill of quantities preparation",
+                    "Construction quality control"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "mechanical",
+        "title": "Mechanical & Industrial Engineering",
+        "icon": "https://img.icons8.com/fluency/96/mechanical-engineering.png",
+        "subgroups": [
+            {
+                "title": "HVAC & Refrigeration",
+                "icon": "https://img.icons8.com/fluency/96/air-conditioner.png",
+                "items": [
+                    "Air conditioner installation",
+                    "Air conditioner servicing",
+                    "Central HVAC systems",
+                    "Cold room installation",
+                    "Commercial refrigeration",
+                    "Ventilation systems"
+                ]
+            },
+            {
+                "title": "Industrial Machinery",
+                "icon": "https://img.icons8.com/fluency/96/factory.png",
+                "items": [
+                    "Industrial machinery installation",
+                    "Preventive maintenance",
+                    "Machine diagnostics",
+                    "Production line maintenance",
+                    "Industrial equipment alignment",
+                    "Mechanical troubleshooting"
+                ]
+            },
+            {
+                "title": "Fabrication & Welding",
+                "icon": "https://img.icons8.com/fluency/96/welder.png",
+                "items": [
+                    "Metal fabrication",
+                    "Arc welding",
+                    "MIG and TIG welding",
+                    "Steel structures",
+                    "Gates and railings",
+                    "Custom metalwork"
+                ]
+            },
+            {
+                "title": "Pumps, Motors & Systems",
+                "icon": "https://img.icons8.com/fluency/96/water-pump.png",
+                "items": [
+                    "Water pump installation",
+                    "Motor installation and repair",
+                    "Compressor installation",
+                    "Hydraulic systems",
+                    "Pneumatic systems",
+                    "Mechanical piping systems"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "energy",
+        "title": "Renewable Energy & Utilities",
+        "icon": "https://img.icons8.com/fluency/96/solar-panel.png",
+        "subgroups": [
+            {
+                "title": "Solar Energy",
+                "icon": "https://img.icons8.com/fluency/96/solar-panel.png",
+                "items": [
+                    "Solar PV system design",
+                    "Solar panel installation",
+                    "Solar water heating",
+                    "Solar street lighting",
+                    "Battery storage systems",
+                    "Solar system maintenance"
+                ]
+            },
+            {
+                "title": "Energy & Utilities",
+                "icon": "https://img.icons8.com/fluency/96/wind-turbine.png",
+                "items": [
+                    "Wind energy systems",
+                    "Energy audits",
+                    "Energy efficiency upgrades",
+                    "Mini-grid systems",
+                    "Utility infrastructure maintenance",
+                    "Power consumption assessments"
+                ]
+            },
+            {
+                "title": "Water & Treatment",
+                "icon": "https://img.icons8.com/fluency/96/water.png",
+                "items": [
+                    "Water treatment systems",
+                    "Water filtration systems",
+                    "Water storage systems",
+                    "Rainwater harvesting",
+                    "Wastewater treatment",
+                    "Water quality testing support"
+                ]
+            },
+            {
+                "title": "Boreholes & Irrigation",
+                "icon": "https://img.icons8.com/fluency/96/well.png",
+                "items": [
+                    "Borehole drilling supervision",
+                    "Borehole pump installation",
+                    "Irrigation system installation",
+                    "Drip irrigation",
+                    "Water distribution networks",
+                    "Septic and sanitation systems"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "automotive",
+        "title": "Automotive & Heavy Equipment",
+        "icon": "https://img.icons8.com/fluency/96/car-service.png",
+        "subgroups": [
+            {
+                "title": "Vehicle Repair & Maintenance",
+                "icon": "https://img.icons8.com/fluency/96/car-service.png",
+                "items": [
+                    "General vehicle servicing",
+                    "Engine diagnostics and repair",
+                    "Brake system repair",
+                    "Suspension repair",
+                    "Transmission services",
+                    "Mobile mechanic services"
+                ]
+            },
+            {
+                "title": "Automotive Electrical",
+                "icon": "https://img.icons8.com/fluency/96/car-battery.png",
+                "items": [
+                    "Auto electrical diagnostics",
+                    "Battery and charging systems",
+                    "Vehicle wiring repair",
+                    "Car alarm installation",
+                    "Tracking system installation",
+                    "Vehicle electronics repair"
+                ]
+            },
+            {
+                "title": "Bodywork & Tyres",
+                "icon": "https://img.icons8.com/fluency/96/car-painting.png",
+                "items": [
+                    "Auto body repair",
+                    "Vehicle painting",
+                    "Dent repair",
+                    "Tyre fitting and repair",
+                    "Wheel alignment",
+                    "Vehicle detailing"
+                ]
+            },
+            {
+                "title": "Heavy Equipment & Fleet",
+                "icon": "https://img.icons8.com/fluency/96/bulldozer.png",
+                "items": [
+                    "Heavy machinery servicing",
+                    "Construction equipment repair",
+                    "Fleet maintenance",
+                    "Forklift repair",
+                    "Generator and engine repair",
+                    "Equipment inspection"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "telecom",
+        "title": "Telecom, Broadcast & Security Systems",
+        "icon": "https://img.icons8.com/fluency/96/radio-tower.png",
+        "subgroups": [
+            {
+                "title": "Fiber & Telecom",
+                "icon": "https://img.icons8.com/fluency/96/fiber-smart-record.png",
+                "items": [
+                    "Fiber optic installation",
+                    "Fiber splicing and testing",
+                    "Telephone system installation",
+                    "PBX and VoIP systems",
+                    "Telecom equipment maintenance",
+                    "Telecom site support"
+                ]
+            },
+            {
+                "title": "Tower, Radio & Satellite",
+                "icon": "https://img.icons8.com/fluency/96/radio-tower.png",
+                "items": [
+                    "Telecom tower installation",
+                    "Tower maintenance",
+                    "Radio communication systems",
+                    "VSAT installation",
+                    "Satellite dish installation",
+                    "Antenna alignment"
+                ]
+            },
+            {
+                "title": "Broadcast & Media Equipment",
+                "icon": "https://img.icons8.com/fluency/96/tv.png",
+                "items": [
+                    "Radio studio setup",
+                    "Television studio setup",
+                    "Broadcast equipment installation",
+                    "Public address systems",
+                    "Conference audio systems",
+                    "Broadcast equipment maintenance"
+                ]
+            },
+            {
+                "title": "Security Systems",
+                "icon": "https://img.icons8.com/fluency/96/security-camera.png",
+                "items": [
+                    "CCTV installation",
+                    "Access control installation",
+                    "Electric fence installation",
+                    "Gate automation",
+                    "Alarm systems",
+                    "Security system maintenance"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "handyman",
+        "title": "Handyman & Home Maintenance",
+        "icon": "https://img.icons8.com/fluency/96/maintenance.png",
+        "subgroups": [
+            {
+                "title": "General Handyman",
+                "icon": "https://img.icons8.com/fluency/96/maintenance.png",
+                "items": [
+                    "Minor home repairs",
+                    "Door and window repairs",
+                    "Lock installation and repair",
+                    "Curtain installation",
+                    "Shelf and wall mounting",
+                    "Property maintenance visits"
+                ]
+            },
+            {
+                "title": "Plumbing",
+                "icon": "https://img.icons8.com/fluency/96/plumbing.png",
+                "items": [
+                    "Leak detection and repair",
+                    "Pipe installation",
+                    "Toilet and sink repair",
+                    "Water heater installation",
+                    "Drain cleaning",
+                    "Bathroom fixture installation"
+                ]
+            },
+            {
+                "title": "Carpentry & Furniture",
+                "icon": "https://img.icons8.com/fluency/96/carpenter.png",
+                "items": [
+                    "Furniture making",
+                    "Furniture repair",
+                    "Furniture assembly",
+                    "Cabinet installation",
+                    "Door and window frames",
+                    "Custom woodwork"
+                ]
+            },
+            {
+                "title": "Painting & Decoration",
+                "icon": "https://img.icons8.com/fluency/96/paint-roller.png",
+                "items": [
+                    "Interior painting",
+                    "Exterior painting",
+                    "Surface preparation",
+                    "Wallpaper installation",
+                    "Decorative painting",
+                    "Minor wall repairs"
+                ]
+            },
+            {
+                "title": "Low-Risk Electrical",
+                "icon": "https://img.icons8.com/fluency/96/electrical.png",
+                "items": [
+                    "Light installation",
+                    "Switch and socket replacement",
+                    "Ceiling fan installation",
+                    "Appliance wiring",
+                    "Basic electrical fault checking",
+                    "Extension and fixture installation"
+                ]
+            },
+            {
+                "title": "Appliance Services",
+                "icon": "https://img.icons8.com/fluency/96/washing-machine.png",
+                "items": [
+                    "Washing machine repair",
+                    "Refrigerator repair",
+                    "Cooker and oven repair",
+                    "Water dispenser repair",
+                    "Small appliance repair",
+                    "Appliance installation"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "cleaning",
+        "title": "Cleaning, Outdoor & Environmental Services",
+        "icon": "https://img.icons8.com/fluency/96/broom.png",
+        "subgroups": [
+            {
+                "title": "Residential & Office Cleaning",
+                "icon": "https://img.icons8.com/fluency/96/broom.png",
+                "items": [
+                    "House cleaning",
+                    "Office cleaning",
+                    "Deep cleaning",
+                    "Move-in and move-out cleaning",
+                    "Window cleaning",
+                    "Recurring cleaning services"
+                ]
+            },
+            {
+                "title": "Specialized Cleaning",
+                "icon": "https://img.icons8.com/fluency/96/cleaning-a-surface.png",
+                "items": [
+                    "Post-construction cleaning",
+                    "Carpet cleaning",
+                    "Upholstery cleaning",
+                    "Industrial cleaning",
+                    "Kitchen extraction cleaning",
+                    "Disinfection services"
+                ]
+            },
+            {
+                "title": "Gardening & Outdoor",
+                "icon": "https://img.icons8.com/fluency/96/garden.png",
+                "items": [
+                    "Lawn mowing",
+                    "Garden maintenance",
+                    "Garden design",
+                    "Tree trimming",
+                    "Irrigation setup",
+                    "Compound and exterior cleaning"
+                ]
+            },
+            {
+                "title": "Sanitation & Pest Control",
+                "icon": "https://img.icons8.com/fluency/96/pest.png",
+                "items": [
+                    "Pest control",
+                    "Fumigation",
+                    "Rodent control",
+                    "Septic tank cleaning",
+                    "Waste collection",
+                    "Environmental sanitation support"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "transport",
+        "title": "Transport, Logistics & Support Services",
+        "icon": "https://img.icons8.com/fluency/96/delivery.png",
+        "subgroups": [
+            {
+                "title": "Moving & Relocation",
+                "icon": "https://img.icons8.com/fluency/96/van.png",
+                "items": [
+                    "Home moving services",
+                    "Office relocation",
+                    "Furniture transport",
+                    "Packing and unpacking",
+                    "Loading and unloading",
+                    "Intercity relocation support"
+                ]
+            },
+            {
+                "title": "Delivery & Logistics",
+                "icon": "https://img.icons8.com/fluency/96/delivery.png",
+                "items": [
+                    "Local delivery services",
+                    "Business delivery support",
+                    "Equipment transportation",
+                    "Material delivery",
+                    "Last-mile delivery",
+                    "Logistics coordination"
+                ]
+            },
+            {
+                "title": "Security Personnel",
+                "icon": "https://img.icons8.com/fluency/96/security-guard.png",
+                "items": [
+                    "Gate keeping",
+                    "Night watch services",
+                    "Event security support",
+                    "Site security personnel",
+                    "Access monitoring",
+                    "Temporary security staffing"
+                ]
+            },
+            {
+                "title": "Event & Operational Support",
+                "icon": "https://img.icons8.com/fluency/96/conference.png",
+                "items": [
+                    "Event setup crews",
+                    "Event support staff",
+                    "Ushers and attendants",
+                    "Warehouse support workers",
+                    "General labor support",
+                    "Temporary operational staffing"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "health",
+        "title": "Health, Beauty & Personal Care",
+        "icon": "https://img.icons8.com/fluency/96/spa.png",
+        "subgroups": [
+            {
+                "title": "Hair & Grooming",
+                "icon": "https://img.icons8.com/fluency/96/barbershop.png",
+                "items": [
+                    "Hairdresser",
+                    "Barber",
+                    "Braiding services",
+                    "Natural hair care",
+                    "Wig installation",
+                    "Wig washing and maintenance"
+                ]
+            },
+            {
+                "title": "Beauty Services",
+                "icon": "https://img.icons8.com/fluency/96/nails.png",
+                "items": [
+                    "Nail technician",
+                    "Manicure and pedicure",
+                    "Make-up artist",
+                    "Facial services",
+                    "Lash and brow services",
+                    "Mobile beauty services"
+                ]
+            },
+            {
+                "title": "Wellness & Personal Care",
+                "icon": "https://img.icons8.com/fluency/96/massage.png",
+                "items": [
+                    "Massage services",
+                    "Personal wellness support",
+                    "Home-based spa services",
+                    "Personal fitness assistance",
+                    "Elderly companionship support",
+                    "Personal care assistance"
+                ]
+            },
+            {
+                "title": "Private Care Professionals",
+                "icon": "https://img.icons8.com/fluency/96/nurse-female.png",
+                "items": [
+                    "Private nurse",
+                    "Home care assistant",
+                    "Patient support attendant",
+                    "Post-treatment home support",
+                    "Elderly home support",
+                    "Mother and baby support"
+                ]
+            }
+        ]
+    },
+    {
+        "id": "education",
+        "title": "Education, Language & Document Services",
+        "icon": "https://img.icons8.com/fluency/96/education.png",
+        "subgroups": [
+            {
+                "title": "Tutoring & Learning",
+                "icon": "https://img.icons8.com/fluency/96/teacher.png",
+                "items": [
+                    "Home tutor",
+                    "Online tutor",
+                    "Exam preparation",
+                    "Homework support",
+                    "Computer literacy training",
+                    "Professional skills training"
+                ]
+            },
+            {
+                "title": "Language Services",
+                "icon": "https://img.icons8.com/fluency/96/language.png",
+                "items": [
+                    "Translator",
+                    "Interpreter",
+                    "Language tutor",
+                    "Document translation",
+                    "Transcription services",
+                    "Subtitling services"
+                ]
+            },
+            {
+                "title": "Writing & Documents",
+                "icon": "https://img.icons8.com/fluency/96/document.png",
+                "items": [
+                    "Script writer",
+                    "Content writer",
+                    "Document compiler",
+                    "Proofreading and editing",
+                    "CV and cover letter preparation",
+                    "Report formatting"
+                ]
+            },
+            {
+                "title": "Administrative Support",
+                "icon": "https://img.icons8.com/fluency/96/administrative-tools.png",
+                "items": [
+                    "Virtual assistant services",
+                    "Data entry",
+                    "Presentation preparation",
+                    "Document digitization",
+                    "Research assistance",
+                    "Business document preparation"
+                ]
+            }
+        ]
+    }
+]

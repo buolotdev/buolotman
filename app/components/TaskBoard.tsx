@@ -1,64 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./TaskBoard.module.css";
-
-// MOCK DATA GENERATOR
-const generateTasks = () => {
-  const tasks = [];
-  const urgencies = ["URGENT", "FLEXIBLE", "PROGRAMMED"];
-  for (let i = 1; i <= 24; i++) {
-    const urgency = urgencies[i % 3];
-    let tagClass = styles.tagUrgent;
-    if (urgency === "FLEXIBLE") tagClass = styles.tagFlexible;
-    if (urgency === "PROGRAMMED") tagClass = styles.tagProgrammed;
-
-    let urgencyText = "Today before 6PM";
-    if (urgency === "FLEXIBLE") urgencyText = "Anytime";
-    if (urgency === "PROGRAMMED") urgencyText = "Before Sunday";
-
-    tasks.push({
-      id: i,
-      title: `Service Task ${i}`,
-      client: "Sarah Jenkins",
-      posted: `Posted ${i} hours ago`,
-      urgency,
-      tagClass,
-      urgencyText,
-      price: `$${300 + i * 10}`,
-      avatar: `https://i.pravatar.cc/150?img=${i + 10}`,
-      description: "Looking for an experienced technician to help with this task. Must have own tools and be able to complete the work efficiently. Please provide a quote if you need more than the budget.",
-      location: "Kigali, Rwanda",
-      date: "August 20, 2026",
-      status: "Open"
-    });
-  }
-  return tasks;
-};
-
-const TASKS = generateTasks();
+import { api } from "../lib/api";
+import { useFetch } from "../lib/useFetch";
+import { SkeletonBlock } from "./skeleton/Skeleton";
+import { useRouter } from "next/navigation";
 
 export default function TaskBoard() {
+  const router = useRouter();
+  const { data: tasksData, loading, error, refetch } = useFetch(() => api.getTasks(), []);
+  
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleApply = (task: any) => {
     setSelectedTask(task);
     setShowSuccess(false);
+    setSubmitError(null);
+    setAmount("");
+    setMessage("");
   };
 
   const closeModal = () => {
     setSelectedTask(null);
   };
 
-  const submitApplication = (e: React.FormEvent) => {
+  const submitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSuccess(true);
-    setTimeout(() => {
-      closeModal();
-    }, 2000);
+    if (!selectedTask) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setShowSuccess(false);
+
+    try {
+      await api.submitBid(selectedTask.id, {
+        amount: parseFloat(amount),
+        message: message,
+      });
+      setShowSuccess(true);
+      setTimeout(() => {
+        closeModal();
+      }, 2000);
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to submit proposal. You may have already applied.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
 
   return (
     <div>
@@ -95,40 +92,47 @@ export default function TaskBoard() {
       </section>
 
       {/* TASK GRID */}
-      <div className={styles.taskGrid}>
-        {TASKS.map((task) => (
-          <div key={task.id} className={styles.taskCard}>
-            <div className={styles.taskHeader}>
-              <Image src={task.avatar} alt="Client" width={50} height={50} className={styles.clientPic} />
-              <div>
-                <h3 className={styles.taskTitle}>{task.title}</h3>
-                <p className={styles.taskMeta}>
-                  <iconify-icon icon="lucide:clock" className={styles.metaIcon}></iconify-icon>
-                  {task.posted}
-                  <span style={{ margin: "0 6px" }}>&bull;</span>
-                  <iconify-icon icon="lucide:map-pin" className={styles.metaIcon}></iconify-icon>
-                  {task.location}
-                </p>
+      {loading ? (
+        <div className={styles.taskGrid}>
+           <SkeletonBlock height="200px" />
+           <SkeletonBlock height="200px" />
+           <SkeletonBlock height="200px" />
+        </div>
+      ) : error ? (
+        <p>Error loading tasks: {error}</p>
+      ) : tasks.length === 0 ? (
+        <p style={{textAlign: 'center', padding: '40px', color: '#666'}}>No tasks available at the moment.</p>
+      ) : (
+        <div className={styles.taskGrid}>
+          {tasks.map((task: any) => (
+            <div key={task.id} className={styles.taskCard}>
+              <div className={styles.taskHeader}>
+                <div style={{width: 50, height: 50, borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <iconify-icon icon="lucide:briefcase" style={{fontSize: 24, color: '#666'}}></iconify-icon>
+                </div>
+                <div>
+                  <h3 className={styles.taskTitle}>{task.title}</h3>
+                  <p className={styles.taskMeta}>
+                    <iconify-icon icon="lucide:clock" className={styles.metaIcon}></iconify-icon>
+                    {new Date(task.created_at).toLocaleDateString()}
+                    <span style={{ margin: "0 6px" }}>&bull;</span>
+                    <iconify-icon icon="lucide:map-pin" className={styles.metaIcon}></iconify-icon>
+                    {task.location || 'Remote'}
+                  </p>
+                </div>
+              </div>
+              <div className={styles.tags}>
+                <span className={`${styles.tag} ${styles.tagFlexible}`}>{task.status}</span>
+                {task.category?.name && <span className={styles.tag}>{task.category.name}</span>}
+              </div>
+              <div className={styles.taskFooter}>
+                <span className={styles.taskPrice}>{task.budget_max ? `${task.budget_max} XOF` : 'Negotiable'}</span>
+                <button className={styles.applyBtn} onClick={() => handleApply(task)}>Apply</button>
               </div>
             </div>
-            <div className={styles.tags}>
-              <span className={`${styles.tag} ${task.tagClass}`}>{task.urgency}</span>
-              <span className={styles.tag}>{task.urgencyText}</span>
-            </div>
-            <div className={styles.taskFooter}>
-              <span className={styles.taskPrice}>{task.price}</span>
-              <button className={styles.applyBtn} onClick={() => handleApply(task)}>Apply</button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* PAGINATION */}
-      <div className={styles.pagination}>
-        <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>1</button>
-        <button className={styles.pageBtn}>2</button>
-        <button className={styles.pageBtn}>3</button>
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* MODAL */}
       {selectedTask && (
@@ -137,48 +141,57 @@ export default function TaskBoard() {
             <button className={styles.closeModalBtn} onClick={closeModal}>&times;</button>
             
             <div className={styles.modalHeader}>
-              <Image src={selectedTask.avatar} alt="Client" width={72} height={72} />
+              <div style={{width: 72, height: 72, borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <iconify-icon icon="lucide:briefcase" style={{fontSize: 32, color: '#666'}}></iconify-icon>
+              </div>
               <div>
                 <h2 className={styles.modalTitle}>{selectedTask.title}</h2>
                 <p className={styles.modalClient}>
                   <iconify-icon icon="lucide:user" style={{ fontSize: 16 }}></iconify-icon>
-                  Posted by {selectedTask.client}
+                  Posted by {selectedTask.client?.first_name || 'Client'}
                 </p>
               </div>
             </div>
 
             <div className={styles.modalBlock}>
               <label>Description</label>
-              <p>{selectedTask.description}</p>
+              <p>{selectedTask.description || "No description provided."}</p>
             </div>
 
             <div className={styles.modalBlock}>
               <label>Location</label>
-              <p>{selectedTask.location}</p>
+              <p>{selectedTask.location || "Remote"}</p>
             </div>
 
             <div className={styles.modalBlock}>
               <label>Date & Urgency</label>
-              <p>{selectedTask.date} - <strong style={{ color: '#c0392b' }}>{selectedTask.urgency}</strong></p>
+              <p>{new Date(selectedTask.created_at).toLocaleDateString()} - <strong style={{ color: '#c0392b' }}>{selectedTask.status}</strong></p>
             </div>
 
             <div className={styles.modalBlock}>
               <label>Budget</label>
-              <p><strong>{selectedTask.price}</strong></p>
-            </div>
-
-            <div className={styles.modalMap}>
-              {/* Map Placeholder */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                <iconify-icon icon="lucide:map" style={{ fontSize: 32 }}></iconify-icon>
-                <span>Interactive Map View</span>
-              </div>
+              <p><strong>{selectedTask.budget_min} - {selectedTask.budget_max} XOF</strong></p>
             </div>
 
             <form className={styles.actionBox} onSubmit={submitApplication}>
-              <input type="number" placeholder="Your Proposed Price ($)" required />
-              <textarea rows={3} placeholder="Why are you the best fit for this task? Include details of your experience." required></textarea>
-              <button type="submit">Submit Application</button>
+              <input 
+                type="number" 
+                placeholder="Your Proposed Price (XOF)" 
+                required 
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              <textarea 
+                rows={3} 
+                placeholder="Why are you the best fit for this task? Include details of your experience." 
+                required
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              ></textarea>
+              <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Application"}
+              </button>
+              {submitError && <p style={{ color: '#e74c3c', fontWeight: 600, marginTop: '8px' }}>{submitError}</p>}
               {showSuccess && <p style={{ color: '#1aa260', fontWeight: 600, marginTop: '8px' }}>Application sent successfully!</p>}
             </form>
 

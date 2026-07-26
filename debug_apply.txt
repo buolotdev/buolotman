@@ -1,0 +1,14 @@
+Function definition:
+                      <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</a>
+                      </div>
+                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? 'Fixed' : 'Hourly'}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: "20px",
+
+Button usage:
+</div>
+                        <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</a>
+                      </div>
+                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -18,46 +20,36 @@ const navItems = [
   { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
 ];
 
-export default function ProjectWorkspace({ params }: { params: { id: string } }) {
+export default function ProjectWorkspace({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifications, setNotifications] = useState<{id: string; title: string; text: string}[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{name: string, type: string}[]>([]);
   
-  // State for project data (Mocked)
-  const [totalCost] = useState(40000);
-  const [released, setReleased] = useState(12000);
+  const { data: task, loading: taskLoading } = useFetch(
+    () => api.getTask(parseInt(id)), 
+    [id]
+  );
   
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "Milestone Submitted", text: "Execution phase submitted by technician" },
-    { id: 2, title: "Client Confirmation Needed", text: "Please confirm milestone progress" },
-    { id: 3, title: "Payment Released", text: "$12,000 released for Planning phase" },
-  ]);
-
-  const [milestone2Status, setMilestone2Status] = useState("Awaiting Client");
-  const [milestone3Status, setMilestone3Status] = useState("Pending");
-
   // Modal State
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmSuccess, setConfirmSuccess] = useState(false);
-
-  // Chat State
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "Executor", text: "Milestone 2 work completed." },
-    { id: 2, sender: "Admin", text: "Please review and confirm." }
-  ]);
+  
   const [chatDraft, setChatDraft] = useState("");
+  const [messages, setMessages] = useState<{id: number, sender: string, text: string}[]>([
+    { id: 1, sender: "Kigali Prime Constructors", text: "We have finished the planning phase." }
+  ]);
+
+  const totalCost = task?.budget ? parseInt(task.budget) : 40000;
+  const released = confirmSuccess ? 20000 : 12000;
+  const milestone2Status = confirmSuccess ? "Released" : "Pending";
+  const milestone3Status = "On Hold";
+
 
   const handleConfirmRelease = () => {
-    setReleased((prev) => prev + 8000);
-    setMilestone2Status("Released");
-    setMilestone3Status("Awaiting Execution");
     setConfirmSuccess(true);
-    
-    setNotifications((prev) => [
-      { id: Date.now(), title: "Payment Released", text: "$8,000 released to executor" },
-      ...prev
-    ]);
-
     setTimeout(() => {
       setConfirmModalOpen(false);
       setConfirmSuccess(false);
@@ -207,15 +199,7 @@ export default function ProjectWorkspace({ params }: { params: { id: string } })
               <h3>Activity Log</h3>
               <div className={styles.log}>
                 <iconify-icon icon="lucide:check-circle-2" className={styles.logIcon} style={{color: '#16a34a'}} />
-                Milestone 1 released (30%)
-              </div>
-              <div className={styles.log}>
-                <iconify-icon icon="lucide:upload" className={styles.logIcon} />
-                Executor submitted Milestone 2
-              </div>
-              <div className={styles.log}>
-                <iconify-icon icon="lucide:bell" className={styles.logIcon} style={{color: '#f4b400'}} />
-                Client notified for confirmation
+                Project created successfully
               </div>
             </div>
 
@@ -228,12 +212,19 @@ export default function ProjectWorkspace({ params }: { params: { id: string } })
                 <a href="#" className={styles.fileItem}>
                   <iconify-icon icon="lucide:image" /> Progress_Photo_01.jpg
                 </a>
+                {uploadedFiles.map((file, i) => (
+                  <a key={i} href="#" className={styles.fileItem}>
+                    <iconify-icon icon={file.type.startsWith('image') ? "lucide:image" : "lucide:file-text"} /> {file.name}
+                  </a>
+                ))}
               </div>
               <input 
                 type="file" 
                 className={styles.fileInput}
                 onChange={(e) => {
                   if(e.target.files?.length) {
+                    const newFiles = Array.from(e.target.files).map(f => ({ name: f.name, type: f.type }));
+                    setUploadedFiles(prev => [...prev, ...newFiles]);
                     setNotifications((prev) => [{ id: Date.now(), title: "File Uploaded", text: "A new project file was uploaded" }, ...prev]);
                     e.target.value = '';
                   }

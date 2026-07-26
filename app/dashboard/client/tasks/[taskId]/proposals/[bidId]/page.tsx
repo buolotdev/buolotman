@@ -20,12 +20,12 @@ const navItems = [
 ];
 
 export default function ProposalProfilePage({ params }: { params: Promise<{ taskId: string; bidId: string }> }) {
+  const { taskId, bidId } = use(params);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [acting, setActing] = useState<"accept" | "reject" | "message" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { taskId, bidId } = use(params);
 
   const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: bidData, loading: bidLoading } = useFetch(() => {

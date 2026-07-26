@@ -51,7 +51,52 @@ type PublicCompany = {
   review_count?: number;
 };
 
+
+const CountUpNumber = ({ end, duration = 2000, suffix = "" }: { end: number, duration?: number, suffix?: string }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (end === 0) {
+      setCount(0);
+      return;
+    }
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      // ease out expo
+      const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(Math.floor(easeOut * end));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
+
+  return <>{count.toLocaleString()}{suffix}</>;
+};
+
 export default function Home() {
+  const handleApplyClick = (e: React.MouseEvent, taskId: number) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setShowLoginPopup(true);
+      } else {
+        router.push('/dashboard/technician/tasks/' + taskId);
+      }
+    }
+  };
+
   
   const [stats, setStats] = useState({
     registered_users: 50000,
@@ -64,16 +109,17 @@ export default function Home() {
   useEffect(() => {
     api.getPlatformStats().then(data => {
       setStats({
-        registered_users: data.registered_users || 50000,
-        verified_technicians: data.verified_technicians || 12000,
-        verified_companies: data.verified_companies || 3500,
-        tasks_posted_monthly: data.tasks_posted_monthly || 8000,
-        successful_completion: data.successful_completion || 95
+        registered_users: data.registered_users ?? 50000,
+        verified_technicians: data.verified_technicians ?? 12000,
+        verified_companies: data.verified_companies ?? 3500,
+        tasks_posted_monthly: data.tasks_posted_monthly ?? 8000,
+        successful_completion: data.successful_completion ?? 95
       });
     }).catch(() => {});
   }, []);
 
   const router = useRouter();
+    const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
@@ -403,7 +449,7 @@ export default function Home() {
                           <img src={`https://ui-avatars.com/api/?name=${task.client?.first_name || 'U'}&background=random`} alt="User" />
                           <div className="bm-main-task-title">{task.title}</div>
                         </div>
-                        <Link href={`/tasks/${task.id}`} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</Link>
+                        <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</a>
                       </div>
                       <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? 'Fixed' : 'Hourly'}</div>
                     </div>
@@ -416,7 +462,7 @@ export default function Home() {
               </div>
             </div>
             <div className="bm-main-live-cta">
-              <Link href="/tasks">See more people finding services around you →</Link>
+              <Link href="/find-tasks">See more people finding services around you →</Link>
             </div>
           </div>
         </div>
@@ -435,23 +481,23 @@ export default function Home() {
           </div>
           <div className="bm-stats-grid">
             <div className="bm-stat-card">
-              <strong>{stats.registered_users.toLocaleString()}+</strong>
+              <strong><CountUpNumber end={stats.registered_users} suffix="+" /></strong>
               <span>Registered Users</span>
             </div>
             <div className="bm-stat-card">
-              <strong>{stats.verified_technicians.toLocaleString()}+</strong>
+              <strong><CountUpNumber end={stats.verified_technicians} suffix="+" /></strong>
               <span>Verified Technicians</span>
             </div>
             <div className="bm-stat-card">
-              <strong>{stats.verified_companies.toLocaleString()}+</strong>
+              <strong><CountUpNumber end={stats.verified_companies} suffix="+" /></strong>
               <span>Verified Companies</span>
             </div>
             <div className="bm-stat-card">
-              <strong>{stats.tasks_posted_monthly.toLocaleString()}+</strong>
+              <strong><CountUpNumber end={stats.tasks_posted_monthly} suffix="+" /></strong>
               <span>Tasks Posted Monthly</span>
             </div>
             <div className="bm-stat-card">
-              <strong>{stats.successful_completion}%</strong>
+              <strong><CountUpNumber end={stats.successful_completion} suffix="%" /></strong>
               <span>Successful Project Completion</span>
             </div>
           </div>
@@ -2039,6 +2085,59 @@ export default function Home() {
       </section>
 
       <Footer />
+    
+      {showLoginPopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+          animation: 'fadeIn 0.2s ease-out'
+        }} onClick={() => setShowLoginPopup(false)}>
+          <div style={{
+            background: '#ffffff', borderRadius: '16px', padding: '32px',
+            width: '90%', maxWidth: '400px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            textAlign: 'center', position: 'relative', transform: 'scale(1)',
+            animation: 'scaleUp 0.3s ease-out'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              width: '64px', height: '64px', background: '#fff3e0', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+              color: 'var(--brand-orange)', fontSize: '32px'
+            }}>
+              <iconify-icon icon="lucide:lock"></iconify-icon>
+            </div>
+            <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>Authentication Required</h3>
+            <p style={{ color: '#64748b', fontSize: '16px', lineHeight: '1.5', marginBottom: '32px' }}>
+              You need to be logged into a Service Provider account to apply for tasks.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setShowLoginPopup(false)}
+                style={{
+                  padding: '12px 24px', borderRadius: '8px', border: '1px solid #e2e8f0',
+                  background: '#fff', color: '#64748b', fontWeight: 600, cursor: 'pointer',
+                  flex: 1
+                }}>
+                Cancel
+              </button>
+              <button 
+                onClick={() => router.push('/login')}
+                style={{
+                  padding: '12px 24px', borderRadius: '8px', border: 'none',
+                  background: 'var(--brand-orange)', color: '#fff', fontWeight: 600, cursor: 'pointer',
+                  flex: 1
+                }}>
+                Login Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      `}} />
+
     </div>
   );
 }

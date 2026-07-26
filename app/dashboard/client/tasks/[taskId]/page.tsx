@@ -22,6 +22,7 @@ const navItems = [
 ];
 
 export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: string }> }) {
+  const { taskId } = use(params);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [acting, setActing] = useState<"complete" | "cancel" | "release" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -29,7 +30,6 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
-  const { taskId } = use(params);
 
   const { data: task, loading, refetch } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: userData } = useFetch(() => api.getMe(), []);

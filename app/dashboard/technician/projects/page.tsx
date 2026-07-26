@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 import Link from "next/link";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
@@ -9,36 +11,10 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 export default function TechnicianProjectsPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Static dummy data as shown in the screenshot
-  const projects = [
-    {
-      id: 1,
-      name: "Residential Wiring",
-      client: "John Mukasa",
-      startDate: "2026-01-10",
-      progress: "45%",
-      milestone: "Milestone 1",
-      paymentStatus: "On Hold",
-    },
-    {
-      id: 2,
-      name: "Office CCTV Installation",
-      client: "Mary Uwase",
-      startDate: "2025-12-20",
-      progress: "100%",
-      milestone: "Final",
-      paymentStatus: "Released",
-    },
-    {
-      id: 3,
-      name: "Solar Panel Setup",
-      client: "Paul Nshimiyimana",
-      startDate: "2026-02-01",
-      progress: "10%",
-      milestone: "Milestone 1",
-      paymentStatus: "Pending",
-    },
-  ];
+  const { data: bidsData, loading } = useFetch(() => api.getMyBids(), []);
+  
+  // Extract bids array from results, and filter for accepted (or ongoing) ones
+  const activeBids = (Array.isArray(bidsData) ? bidsData : bidsData?.results || []).filter((b: any) => b.status === "accepted");
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -79,27 +55,34 @@ export default function TechnicianProjectsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {projects.map((project) => (
-                      <tr key={project.id}>
-                        <td>{project.name}</td>
-                        <td>{project.client}</td>
-                        <td>{project.startDate}</td>
-                        <td>{project.progress}</td>
-                        <td>{project.milestone}</td>
-                        <td>
-                          <span className={`${styles.statusBadge} ${getStatusClass(project.paymentStatus)}`}>
-                            {project.paymentStatus}
-                          </span>
-                        </td>
-                        <td>
-                          {project.progress === "100%" ? (
-                            <Link href={`/dashboard/technician/projects/${project.id}`} className={styles.primaryButton} style={{ textDecoration: 'none', display: 'inline-block' }}>Open Workspace</Link>
-                          ) : (
-                            <Link href={`/dashboard/technician/projects/${project.id}`} className={styles.outlineButton} style={{ textDecoration: 'none', display: 'inline-block' }}>Update Progress</Link>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {loading ? (
+                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>Loading projects...</td></tr>
+                    ) : activeBids.length === 0 ? (
+                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>You have no active projects yet.</td></tr>
+                    ) : activeBids.map((bid: any) => {
+                      const taskName = bid.task_title || bid.task?.title || `Task #${bid.task_id || bid.task?.id || "Unknown"}`;
+                      const clientId = bid.task?.client || "Unknown";
+                      const progress = bid.status === "completed" ? "100%" : "In Progress";
+                      const paymentStatus = bid.status === "completed" ? "Released" : "Pending";
+                      
+                      return (
+                        <tr key={bid.id}>
+                          <td>{taskName}</td>
+                          <td>Client {clientId}</td>
+                          <td>{new Date(bid.created_at || Date.now()).toLocaleDateString()}</td>
+                          <td>{progress}</td>
+                          <td>Initial Phase</td>
+                          <td>
+                            <span className={`${styles.statusBadge} ${getStatusClass(paymentStatus)}`}>
+                              {paymentStatus}
+                            </span>
+                          </td>
+                          <td>
+                            <Link href={`/dashboard/technician/projects/${bid.task_id || bid.task?.id || bid.id}`} className={styles.primaryButton} style={{ textDecoration: 'none', display: 'inline-block' }}>Open Workspace</Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

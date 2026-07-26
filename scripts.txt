@@ -1,0 +1,292 @@
+<script>
+(function(){
+  'use strict';
+
+  const root = document.getElementById('bmHeaderRoot');
+  if(!root) return;
+
+  const megaButtons = root.querySelectorAll('[data-bm-mega]');
+  const megaMenus = {
+    categories: root.querySelector('#bmMegaCategories'),
+    apps: root.querySelector('#bmMegaApps'),
+    help: root.querySelector('#bmMegaHelp')
+  };
+
+  let closeTimer = null;
+
+  function closeAllMega(){
+    Object.values(megaMenus).forEach(menu=>{
+      if(menu) menu.classList.remove('active');
+    });
+
+    megaButtons.forEach(button=>{
+      button.classList.remove('active');
+      button.setAttribute('aria-expanded','false');
+    });
+  }
+
+  function openMega(name, button){
+    window.clearTimeout(closeTimer);
+    closeAllMega();
+
+    const menu = megaMenus[name];
+    if(!menu) return;
+
+    menu.classList.add('active');
+    button.classList.add('active');
+    button.setAttribute('aria-expanded','true');
+  }
+
+  megaButtons.forEach(button=>{
+    const name = button.dataset.bmMega;
+
+    button.setAttribute('aria-expanded','false');
+
+    button.addEventListener('mouseenter',()=>{
+      openMega(name,button);
+    });
+
+    button.addEventListener('click',(event)=>{
+      event.stopPropagation();
+      const targetMenu = megaMenus[name];
+      const isOpen = targetMenu && targetMenu.classList.contains('active');
+
+      if(isOpen){
+        closeAllMega();
+      }else{
+        openMega(name,button);
+      }
+    });
+  });
+
+  Object.values(megaMenus).forEach(menu=>{
+    if(!menu) return;
+
+    menu.addEventListener('mouseenter',()=>{
+      window.clearTimeout(closeTimer);
+    });
+
+    menu.addEventListener('mouseleave',()=>{
+      closeTimer = window.setTimeout(closeAllMega,180);
+    });
+  });
+
+  root.querySelector('.bm-topbar').addEventListener('mouseleave',()=>{
+    closeTimer = window.setTimeout(closeAllMega,180);
+  });
+
+  document.addEventListener('click',(event)=>{
+    if(!root.contains(event.target)){
+      closeAllMega();
+      closeAllDropdowns();
+    }
+  });
+
+  document.addEventListener('keydown',(event)=>{
+    if(event.key === 'Escape'){
+      closeAllMega();
+      closeAllDropdowns();
+      closeMobileDrawer();
+    }
+  });
+
+  /* CATEGORY PANEL SWITCHING */
+  const categoryButtons = root.querySelectorAll('[data-bm-category]');
+  const categoryPanels = root.querySelectorAll('[data-bm-panel]');
+
+  function showCategory(categoryName){
+    categoryButtons.forEach(button=>{
+      button.classList.toggle('active',button.dataset.bmCategory === categoryName);
+    });
+
+    categoryPanels.forEach(panel=>{
+      panel.classList.toggle('active',panel.dataset.bmPanel === categoryName);
+    });
+  }
+
+  categoryButtons.forEach(button=>{
+    button.addEventListener('mouseenter',()=>{
+      showCategory(button.dataset.bmCategory);
+    });
+
+    button.addEventListener('click',()=>{
+      showCategory(button.dataset.bmCategory);
+    });
+  });
+
+  /* COUNTRY AND LANGUAGE DROPDOWNS */
+  const dropdownButtons = root.querySelectorAll('[data-bm-dropdown]');
+
+  function closeAllDropdowns(exception){
+    root.querySelectorAll('.bm-select-menu').forEach(menu=>{
+      if(menu !== exception) menu.classList.remove('active');
+    });
+  }
+
+  dropdownButtons.forEach(button=>{
+    button.addEventListener('click',(event)=>{
+      event.stopPropagation();
+
+      const menu = button.nextElementSibling;
+      const isOpen = menu.classList.contains('active');
+
+      closeAllDropdowns();
+
+      if(!isOpen){
+        menu.classList.add('active');
+      }
+    });
+  });
+
+  root.querySelectorAll('[data-country]').forEach(option=>{
+    option.addEventListener('click',()=>{
+      const label = root.querySelector('#bmCountryLabel');
+      const flag = root.querySelector('#bmCountryFlag');
+
+      label.textContent = option.dataset.country;
+      flag.src = 'https://flagcdn.com/w40/' + option.dataset.flag + '.png';
+      flag.alt = option.dataset.country + ' flag';
+
+      closeAllDropdowns();
+    });
+  });
+
+  root.querySelectorAll('[data-language]').forEach(option=>{
+    option.addEventListener('click',()=>{
+      const label = root.querySelector('#bmLanguageLabel');
+      const flag = root.querySelector('#bmLanguageFlag');
+
+      label.textContent = option.dataset.language;
+      flag.src = 'https://flagcdn.com/w40/' + option.dataset.flag + '.png';
+      flag.alt = option.dataset.language;
+
+      closeAllDropdowns();
+    });
+  });
+
+
+  /* =====================================================
+     SUBCATEGORY IMAGE ICONS
+     Every desktop and mobile service item receives an image
+     icon derived from its own service group or main category.
+  ====================================================== */
+
+  root.querySelectorAll('.bm-service-card').forEach(card=>{
+    const groupIcon = card.querySelector('.bm-service-card-icon');
+    if(!groupIcon) return;
+
+    card.querySelectorAll('.bm-service-link').forEach(link=>{
+      if(link.querySelector('.bm-subcategory-icon')) return;
+
+      const icon = document.createElement('img');
+      icon.className = 'bm-subcategory-icon';
+      icon.src = groupIcon.src;
+      icon.alt = '';
+      icon.loading = 'lazy';
+      icon.setAttribute('aria-hidden','true');
+      link.prepend(icon);
+    });
+  });
+
+  root.querySelectorAll('.bm-mobile-category-toggle').forEach(categoryToggle=>{
+    const categoryIcon = categoryToggle.querySelector('img');
+    const submenu = categoryToggle.nextElementSibling;
+
+    if(!categoryIcon || !submenu || !submenu.classList.contains('bm-mobile-submenu')){
+      return;
+    }
+
+    submenu.querySelectorAll('.bm-mobile-subtitle').forEach(subtitle=>{
+      if(subtitle.querySelector('.bm-mobile-subtitle-icon')) return;
+
+      const icon = document.createElement('img');
+      icon.className = 'bm-mobile-subtitle-icon';
+      icon.src = categoryIcon.src;
+      icon.alt = '';
+      icon.loading = 'lazy';
+      icon.setAttribute('aria-hidden','true');
+      subtitle.prepend(icon);
+    });
+
+    submenu.querySelectorAll('.bm-mobile-service-link').forEach(link=>{
+      if(link.querySelector('.bm-mobile-subcategory-icon')) return;
+
+      const icon = document.createElement('img');
+      icon.className = 'bm-mobile-subcategory-icon';
+      icon.src = categoryIcon.src;
+      icon.alt = '';
+      icon.loading = 'lazy';
+      icon.setAttribute('aria-hidden','true');
+      link.prepend(icon);
+    });
+  });
+
+  /* MOBILE DRAWER */
+  const mobileToggle = root.querySelector('#bmMobileToggle');
+  const mobileDrawer = root.querySelector('#bmMobileDrawer');
+
+  function closeMobileDrawer(){
+    if(!mobileDrawer || !mobileToggle) return;
+    mobileDrawer.classList.remove('active');
+    mobileToggle.setAttribute('aria-expanded','false');
+  }
+
+  if(mobileToggle && mobileDrawer){
+    mobileToggle.addEventListener('click',()=>{
+      const isOpen = mobileDrawer.classList.toggle('active');
+      mobileToggle.setAttribute('aria-expanded',String(isOpen));
+      closeAllMega();
+      closeAllDropdowns();
+    });
+  }
+
+  /* MOBILE TOP-LEVEL ACCORDIONS */
+  root.querySelectorAll('.bm-mobile-group-toggle').forEach(toggle=>{
+    toggle.addEventListener('click',()=>{
+      const section = toggle.nextElementSibling;
+      const symbol = toggle.querySelector('span');
+      const isOpen = section.classList.contains('active');
+
+      root.querySelectorAll('.bm-mobile-section').forEach(otherSection=>{
+        otherSection.classList.remove('active');
+      });
+
+      root.querySelectorAll('.bm-mobile-group-toggle span').forEach(otherSymbol=>{
+        otherSymbol.textContent = '+';
+      });
+
+      if(!isOpen){
+        section.classList.add('active');
+        if(symbol) symbol.textContent = '−';
+      }
+    });
+  });
+
+  /* MOBILE CATEGORY ACCORDIONS */
+  root.querySelectorAll('.bm-mobile-category-toggle').forEach(toggle=>{
+    toggle.addEventListener('click',()=>{
+      const submenu = toggle.nextElementSibling;
+      const isOpen = submenu.classList.contains('active');
+
+      root.querySelectorAll('.bm-mobile-submenu').forEach(otherSubmenu=>{
+        otherSubmenu.classList.remove('active');
+      });
+
+      if(!isOpen){
+        submenu.classList.add('active');
+      }
+    });
+  });
+
+  /* RESET MOBILE MENU WHEN RETURNING TO DESKTOP */
+  window.addEventListener('resize',()=>{
+    if(window.innerWidth > 1050){
+      closeMobileDrawer();
+    }else{
+      closeAllMega();
+      closeAllDropdowns();
+    }
+  });
+
+})();
+</script>

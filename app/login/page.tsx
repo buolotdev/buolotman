@@ -82,7 +82,7 @@ export default function LoginPage() {
       setIsLoading(true);
       try {
         const data = await api.googleLogin(tokenResponse.access_token, selectedRole || 'Client');
-        const role: string = data.role ?? "client";
+        const role: string = (data.role || "client").toLowerCase();
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
         localStorage.setItem("user_role", role);
@@ -133,7 +133,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const data = await api.login(loginEmail, loginPassword);
-      const role: string = data.role ?? "client";
+      const role: string = (data.role || "client").toLowerCase();
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
       localStorage.setItem("user_role", role);
@@ -182,7 +182,7 @@ export default function LoginPage() {
 
       // Auto-login after signup
       const loginData = await api.login(signupEmail, signupPassword);
-      const role: string = loginData.role ?? "client";
+      const role: string = (loginData.role || "client").toLowerCase();
       localStorage.setItem("access_token", loginData.access);
       localStorage.setItem("refresh_token", loginData.refresh);
       localStorage.setItem("user_role", role);

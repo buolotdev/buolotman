@@ -506,7 +506,7 @@ export const api = {
       return res.json();
     });
   },
-};
+
   getPlatformStats: () =>
     request<{
       registered_users: number;
@@ -516,4 +516,4 @@ export const api = {
       successful_completion: number;
     }>("/governance/platform-stats/", { public: true }),
 
-  
+};
