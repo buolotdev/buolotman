@@ -2072,3 +2072,10 @@ body {
     padding: 0 22px
   }
 }
+
+
+/* Hide mega menu when scrolling */
+#bmMegaRoot.hide-mega .bmMega,
+#bmMegaRoot.hide-mega .bmDropMenu {
+  display: none !important;
+}

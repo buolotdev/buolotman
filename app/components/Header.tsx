@@ -143,7 +143,39 @@ export default function Header() {
     }
   };
 
-  return () => {
+  
+    // Scroll handling to hide mega menu
+    let isScrolling = false;
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      const root = document.getElementById("bmMegaRoot");
+      if (root) {
+        root.classList.add("hide-mega");
+        isScrolling = true;
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          isScrolling = false;
+        }, 250);
+      }
+    };
+
+    const handleMouseMove = () => {
+      if (!isScrolling) {
+        const root = document.getElementById("bmMegaRoot");
+        if (root && root.classList.contains("hide-mega")) {
+          root.classList.remove("hide-mega");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+
+return () => {
+
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("click", handleDocumentClick);
       document.removeEventListener("keydown", handleDocumentKeydown);
       document.removeEventListener("click", handleMobileMenuClicks);
