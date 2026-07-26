@@ -1702,6 +1702,12 @@ export default function Home() {
                 desc: "Cape Town and Johannesburg — Africa's most developed professional service markets."
               },
               {
+                name: "Ivory Coast",
+                flag: "🇨🇮",
+                img: "/ivory-coast.png",
+                desc: "Abidjan's dynamic business environment connecting francophone Africa's best talent."
+              },
+              {
                 name: "Cameroon",
                 flag: "🇨🇲",
                 img: "/cameroon.png",
