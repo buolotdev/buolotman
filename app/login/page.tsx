@@ -34,6 +34,24 @@ const SERVICES = [
 // Duplicate for seamless scroll
 const ALL_CARDS = [...SERVICES, ...SERVICES];
 
+
+const parseErrorMsg = (errMessage: string) => {
+  try {
+    const parsed = JSON.parse(errMessage);
+    if (typeof parsed === 'object' && parsed !== null) {
+      const values = Object.values(parsed);
+      if (values.length > 0 && Array.isArray(values[0])) {
+        return values[0][0];
+      } else if (values.length > 0 && typeof values[0] === 'string') {
+        return values[0];
+      }
+    }
+  } catch(e) {
+    // not json
+  }
+  return errMessage;
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -80,7 +98,7 @@ export default function LoginPage() {
           router.push("/dashboard/client");
         }
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Google login failed.");
+        setError(parseErrorMsg(err instanceof Error ? err.message : "Google login failed."));
       } finally {
         setIsLoading(false);
       }
@@ -131,7 +149,7 @@ export default function LoginPage() {
         router.push("/dashboard/client");
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid credentials. Please try again.");
+      setError(parseErrorMsg(err instanceof Error ? err.message : "Invalid credentials. Please try again."));
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +197,7 @@ export default function LoginPage() {
         router.push("/dashboard/client");
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create account. Please try again.");
+      setError(parseErrorMsg(err instanceof Error ? err.message : "Failed to create account. Please try again."));
     } finally {
       setIsLoading(false);
     }
