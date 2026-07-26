@@ -507,3 +507,13 @@ export const api = {
     });
   },
 };
+  getPlatformStats: () =>
+    request<{
+      registered_users: number;
+      verified_technicians: number;
+      verified_companies: number;
+      tasks_posted_monthly: number;
+      successful_completion: number;
+    }>("/governance/platform-stats/", { public: true }),
+
+  

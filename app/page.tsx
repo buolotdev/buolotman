@@ -52,6 +52,27 @@ type PublicCompany = {
 };
 
 export default function Home() {
+  
+  const [stats, setStats] = useState({
+    registered_users: 50000,
+    verified_technicians: 12000,
+    verified_companies: 3500,
+    tasks_posted_monthly: 8000,
+    successful_completion: 95
+  });
+
+  useEffect(() => {
+    api.getPlatformStats().then(data => {
+      setStats({
+        registered_users: data.registered_users || 50000,
+        verified_technicians: data.verified_technicians || 12000,
+        verified_companies: data.verified_companies || 3500,
+        tasks_posted_monthly: data.tasks_posted_monthly || 8000,
+        successful_completion: data.successful_completion || 95
+      });
+    }).catch(() => {});
+  }, []);
+
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
@@ -414,23 +435,23 @@ export default function Home() {
           </div>
           <div className="bm-stats-grid">
             <div className="bm-stat-card">
-              <strong>50,000+</strong>
+              <strong>{stats.registered_users.toLocaleString()}+</strong>
               <span>Registered Users</span>
             </div>
             <div className="bm-stat-card">
-              <strong>12,000+</strong>
+              <strong>{stats.verified_technicians.toLocaleString()}+</strong>
               <span>Verified Technicians</span>
             </div>
             <div className="bm-stat-card">
-              <strong>3,500+</strong>
+              <strong>{stats.verified_companies.toLocaleString()}+</strong>
               <span>Verified Companies</span>
             </div>
             <div className="bm-stat-card">
-              <strong>8,000+</strong>
+              <strong>{stats.tasks_posted_monthly.toLocaleString()}+</strong>
               <span>Tasks Posted Monthly</span>
             </div>
             <div className="bm-stat-card">
-              <strong>95%</strong>
+              <strong>{stats.successful_completion}%</strong>
               <span>Successful Project Completion</span>
             </div>
           </div>

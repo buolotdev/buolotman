@@ -378,3 +378,34 @@ def public_cms_page_detail(request, slug):
     except CmsPage.DoesNotExist:
         return Response({"error": "Page not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response(CmsPageSerializer(page).data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def platform_stats(request):
+    from django.utils import timezone
+    from datetime import timedelta
+    from apps.accounts.models import User
+    from apps.tasks.models import Task
+    
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    registered_users = User.objects.count()
+    verified_technicians = User.objects.filter(role='TECHNICIAN', is_verified=True).count()
+    verified_companies = User.objects.filter(role='COMPANY', is_verified=True).count()
+    tasks_posted_monthly = Task.objects.filter(created_at__gte=thirty_days_ago).count()
+    
+    total_completed = Task.objects.filter(status='COMPLETED').count()
+    total_finished = Task.objects.filter(status__in=['COMPLETED', 'CANCELLED']).count()
+    
+    successful_completion = 95
+    if total_finished > 0:
+        successful_completion = int((total_completed / total_finished) * 100)
+    
+    return Response({
+        'registered_users': registered_users,
+        'verified_technicians': verified_technicians,
+        'verified_companies': verified_companies,
+        'tasks_posted_monthly': tasks_posted_monthly,
+        'successful_completion': successful_completion
+    })

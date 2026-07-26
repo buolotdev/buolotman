@@ -11,6 +11,7 @@ urlpatterns = [
     path("disputes/<int:dispute_id>/evidence/", views.dispute_evidence, name="dispute_evidence"),
     path("audit-logs/", views.audit_logs, name="audit_logs"),
     path("platform-settings/", views.platform_settings, name="platform_settings"),
+    path("platform-stats/", views.platform_stats, name="platform_stats"),
     path("pages/", views.cms_pages, name="cms_pages"),
     path("pages/<int:page_id>/", views.cms_page_detail, name="cms_page_detail"),
     path("public-pages/", views.public_cms_pages, name="public_cms_pages"),
