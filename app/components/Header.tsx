@@ -952,12 +952,12 @@ export default function Header() {
             <div class="bmSimpleCard">
               <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Get the Boulot Man App on Play Store</h3>
               <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Download the Boulot Man app for Android devices. Access thousands of service professionals from your smartphone.</p>
-              <img class="bmStoreButton" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/320px-Google_Play_Store_badge_EN.svg.png" alt="Google Play" style="width:160px; max-width:100%; display:block; margin:12px auto;" />
+              <a href="#" class="bmStoreButton" style="width:160px; max-width:100%; margin:12px auto; display:inline-flex; box-sizing:border-box; gap:10px; color:#fff;"><img src="https://img.icons8.com/color/48/google-play.png" alt="" style="width:24px; height:24px; flex-shrink:0;" /><span>Google Play</span></a>
             </div>
             <div class="bmSimpleCard">
               <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Get the Boulot Man App on App Store</h3>
               <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Download the Boulot Man app for iOS devices. Book and manage tasks easily on your iPhone or iPad.</p>
-              <img class="bmStoreButton" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/320px-Download_on_the_App_Store_Badge.svg.png" alt="App Store" style="width:160px; max-width:100%; display:block; margin:12px auto;" />
+              <a href="#" class="bmStoreButton" style="width:160px; max-width:100%; margin:12px auto; display:inline-flex; box-sizing:border-box; gap:10px; color:#fff;"><img src="https://img.icons8.com/ios-filled/50/ffffff/mac-os.png" alt="" style="width:24px; height:24px; flex-shrink:0;" /><span>App Store</span></a>
             </div>
             <div class="bmSimpleCard">
               <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Follow Us on Social Media</h3>
