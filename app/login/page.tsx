@@ -142,13 +142,17 @@ export default function LoginPage() {
     setError(null);
     setIsLoading(true);
     try {
-      const payload = {
+      const payload: any = {
         email: signupEmail,
         password: signupPassword,
         first_name: signupName.split(" ")[0] || signupName,
         last_name: signupName.split(" ").slice(1).join(" ") || "",
         country: signupCountry,
       };
+
+      if (selectedRole === "Company") {
+        payload.company_name = signupName;
+      }
 
       if (selectedRole === "Client") {
         await api.registerClient(payload);
