@@ -124,7 +124,26 @@ export default function Header() {
       link.addEventListener("click", handlePostTaskClick);
     });
 
-    return () => {
+    const handleMegaHover = (e: React.MouseEvent) => {
+    let target = e.target as HTMLElement;
+    if (target.nodeType === 3) target = target.parentNode as HTMLElement;
+    if (!target || !target.closest) return;
+    const btn = target.closest('.bmSideBtn');
+    if (btn) {
+      const root = document.getElementById('bmMegaRoot');
+      if (!root || !root.contains(btn)) return;
+      root.querySelectorAll('.bmSideBtn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = (btn as HTMLElement).dataset.cat;
+      root.querySelectorAll('.bmPanel').forEach((g: Element) => {
+        (g as HTMLElement).style.display = 'none';
+      });
+      const panel = root.querySelector(`.bmPanel[data-panel="${cat}"]`) as HTMLElement | null;
+      if (panel) panel.style.display = 'block';
+    }
+  };
+
+  return () => {
       document.removeEventListener("click", handleDocumentClick);
       document.removeEventListener("keydown", handleDocumentKeydown);
       document.removeEventListener("click", handleMobileMenuClicks);
@@ -134,8 +153,27 @@ export default function Header() {
     };
   }, []);
 
+  const handleMegaHover = (e: React.MouseEvent) => {
+    let target = e.target as HTMLElement;
+    if (target.nodeType === 3) target = target.parentNode as HTMLElement;
+    if (!target || !target.closest) return;
+    const btn = target.closest('.bmSideBtn');
+    if (btn) {
+      const root = document.getElementById('bmMegaRoot');
+      if (!root || !root.contains(btn)) return;
+      root.querySelectorAll('.bmSideBtn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = (btn as HTMLElement).dataset.cat;
+      root.querySelectorAll('.bmPanel').forEach((g: Element) => {
+        (g as HTMLElement).style.display = 'none';
+      });
+      const panel = root.querySelector(`.bmPanel[data-panel="${cat}"]`) as HTMLElement | null;
+      if (panel) panel.style.display = 'block';
+    }
+  };
+
   return (
-    <>
+    <div onMouseOver={handleMegaHover}>
       <div
         dangerouslySetInnerHTML={{
           __html: `
@@ -1538,6 +1576,6 @@ export default function Header() {
 `
         }}
       />
-    </>
+    </div>
   );
 }
