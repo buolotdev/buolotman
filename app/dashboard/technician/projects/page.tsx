@@ -14,7 +14,7 @@ export default function TechnicianProjectsPage() {
   const { data: bidsData, loading } = useFetch(() => api.getMyBids(), []);
   
   // Extract bids array from results, and filter for accepted (or ongoing) ones
-  const activeBids = (Array.isArray(bidsData) ? bidsData : bidsData?.results || []).filter((b: any) => b.status === "accepted");
+  const activeBids = (Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || []).filter((b: any) => b.status === "accepted");
 
   const getStatusClass = (status: string) => {
     switch (status) {

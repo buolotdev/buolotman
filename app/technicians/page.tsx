@@ -15,7 +15,7 @@ export default function TechniciansPage() {
   const { data, loading, error } = useFetch(() => api.listUsers({ role: "TECHNICIAN" }), []);
   
   // Safe extraction (data could be array or { results: array })
-  const technicians = Array.isArray(data) ? data : (data?.results || []);
+  const technicians = Array.isArray(data) ? data : ((data as any)?.results || []);
 
   return (
     <div className={styles.page}>

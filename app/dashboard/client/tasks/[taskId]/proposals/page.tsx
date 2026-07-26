@@ -56,7 +56,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
   const userRole = userData?.role ?? "";
 
   const bidsList = useMemo(() => {
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    const list = Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || [];
     const ranked = [...list];
     if (sortBy === "lowest-price") {
       ranked.sort((a: any, b: any) => parseAmount(a.amount) - parseAmount(b.amount));

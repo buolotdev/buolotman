@@ -41,7 +41,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit & { public?: boolean } = {}
 ): Promise<T> {
   const token = getToken();
   const publicRequest = (options as any)?.public === true;

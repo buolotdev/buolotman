@@ -55,7 +55,7 @@ export default function TaskBoard() {
     }
   };
 
-  const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
+  const tasks = Array.isArray(tasksData) ? tasksData : ((tasksData as any)?.results || []);
 
   return (
     <div>
@@ -94,9 +94,9 @@ export default function TaskBoard() {
       {/* TASK GRID */}
       {loading ? (
         <div className={styles.taskGrid}>
-           <SkeletonBlock height="200px" />
-           <SkeletonBlock height="200px" />
-           <SkeletonBlock height="200px" />
+           <SkeletonBlock style={{ height: "200px" }} />
+           <SkeletonBlock style={{ height: "200px" }} />
+           <SkeletonBlock style={{ height: "200px" }} />
         </div>
       ) : error ? (
         <p>Error loading tasks: {error}</p>

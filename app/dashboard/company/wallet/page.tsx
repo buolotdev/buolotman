@@ -12,7 +12,7 @@ export default function CompanyWalletPage() {
   const { data: wallet, loading: walletLoading, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions(), []);
 
-  const transactions = txData?.results || [];
+  const transactions = (txData as any)?.results || [];
 
   return (
     <main className={styles.mainWrapper}>

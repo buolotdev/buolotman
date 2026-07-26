@@ -126,7 +126,7 @@ export default function AdminPaymentsPage() {
             <div style={{ padding: 24 }}>
               {txLoading ? (
                 <p style={{ textAlign: "center", color: "#94a3b8" }}>Loading transactions...</p>
-              ) : txData && (Array.isArray(txData) ? txData : txData.results || []).length > 0 ? (
+              ) : txData && (Array.isArray(txData) ? txData : (txData as any)?.results || []).length > 0 ? (
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                   <thead>
                     <tr style={{ background: "#f8fafc" }}>
@@ -138,7 +138,7 @@ export default function AdminPaymentsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(Array.isArray(txData) ? txData : txData.results || []).map((tx: any) => (
+                    {(Array.isArray(txData) ? txData : (txData as any)?.results || []).map((tx: any) => (
                       <tr key={tx.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
                         <td style={{ padding: 12 }}>{(tx.created_at || "").slice(0, 10)}</td>
                         <td style={{ padding: 12 }}>{tx.type}</td>

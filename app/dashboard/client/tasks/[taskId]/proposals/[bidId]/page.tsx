@@ -88,12 +88,12 @@ export default function ProposalProfilePage({ params }: { params: Promise<{ task
 
   const bid = (() => {
     if (!bidData) return null;
-    const list = Array.isArray(bidData) ? bidData : bidData?.results || [];
+    const list = Array.isArray(bidData) ? bidData : (bidData as any)?.results || [];
     return list.find((b: any) => String(b.id) === bidId) || null;
   })();
   const acceptedBid = useMemo(() => {
     if (!bidData) return null;
-    const list = Array.isArray(bidData) ? bidData : bidData?.results || [];
+    const list = Array.isArray(bidData) ? bidData : (bidData as any)?.results || [];
     return list.find((b: any) => b.status === "accepted") || null;
   }, [bidData]);
   const isLockedToAcceptedBid = Boolean(acceptedBid && String((acceptedBid as any).id) !== bidId);

@@ -48,12 +48,12 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
 
   const bid = (() => {
     if (!bidsData) return null;
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    const list = Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || [];
     return list.find((b: any) => String(b.id) === bidId) || null;
   })();
   const acceptedBid = useMemo(() => {
     if (!bidsData) return null;
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    const list = Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || [];
     return list.find((b: any) => b.status === "accepted") || null;
   }, [bidsData]);
   const lockedToAcceptedBid = Boolean(acceptedBid && String((acceptedBid as any).id) !== bidId);

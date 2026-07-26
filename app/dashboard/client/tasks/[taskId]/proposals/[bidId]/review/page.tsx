@@ -32,7 +32,7 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
 
   const bid = useMemo(() => {
     if (!bidsData) return null;
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    const list = Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || [];
     return list.find((b: any) => String(b.id) === bidId) || null;
   }, [bidsData, bidId]);
 
@@ -51,7 +51,7 @@ export default function ProposalReviewPage({ params }: { params: Promise<{ taskI
 
   const acceptedBid = useMemo(() => {
     if (!bidsData) return null;
-    const list = Array.isArray(bidsData) ? bidsData : bidsData?.results || [];
+    const list = Array.isArray(bidsData) ? bidsData : (bidsData as any)?.results || [];
     return list.find((b: any) => b.status === "accepted") || null;
   }, [bidsData]);
   const lockedToAcceptedBid = Boolean(acceptedBid && String((acceptedBid as any).id) !== bidId);

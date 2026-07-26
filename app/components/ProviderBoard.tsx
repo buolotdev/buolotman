@@ -11,7 +11,7 @@ export default function ProviderBoard() {
   const { data, loading, error } = useFetch(() => api.listUsers({ role: "TECHNICIAN" }), []);
   
   // Safe extraction (data could be array or { results: array })
-  const providers = Array.isArray(data) ? data : (data?.results || []);
+  const providers = Array.isArray(data) ? data : ((data as any)?.results || []);
 
   return (
     <div className={styles.root}>

@@ -41,7 +41,7 @@ export default function ClientPaymentsPage() {
   const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions({ limit: "20" }), []);
 
-  const transactions: Transaction[] = Array.isArray(txData) ? txData : (txData?.results || []);
+  const transactions: Transaction[] = Array.isArray(txData) ? txData : ((txData as any)?.results || []);
 
   const getStatusClass = (status?: string) => {
     const s = String(status || "").toLowerCase();

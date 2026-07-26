@@ -22,7 +22,7 @@ export default function TechnicianWalletPage() {
   const { data: walletData, loading: walletLoading, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading, refetch: refetchTx } = useFetch(() => api.getTransactions(), []);
   
-  const transactionsData = Array.isArray(txData) ? txData : txData?.results || [];
+  const transactionsData = Array.isArray(txData) ? txData : (txData as any)?.results || [];
 
   const availableBalance = parseFloat(walletData?.available_balance) || 0;
   const pendingEscrow = parseFloat(walletData?.pending_balance) || 0;

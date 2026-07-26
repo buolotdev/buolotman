@@ -45,7 +45,7 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
   const totalCost = task?.budget ? parseInt(task.budget) : 40000;
   const released = confirmSuccess ? 20000 : 12000;
   const milestone2Status = confirmSuccess ? "Released" : "Pending";
-  const milestone3Status = "On Hold";
+  const milestone3Status: string = "On Hold";
 
 
   const handleConfirmRelease = () => {
@@ -63,7 +63,7 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
     setChatDraft("");
     
     setNotifications((prev) => [
-      { id: Date.now(), title: "New Message", text: "A new project message was sent" },
+      { id: String(Date.now()), title: "New Message", text: "A new project message was sent" },
       ...prev
     ]);
   };
@@ -225,7 +225,7 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
                   if(e.target.files?.length) {
                     const newFiles = Array.from(e.target.files).map(f => ({ name: f.name, type: f.type }));
                     setUploadedFiles(prev => [...prev, ...newFiles]);
-                    setNotifications((prev) => [{ id: Date.now(), title: "File Uploaded", text: "A new project file was uploaded" }, ...prev]);
+                    setNotifications((prev) => [{ id: String(Date.now()), title: "File Uploaded", text: `${newFiles.length} file(s) added` }, ...prev]);
                     e.target.value = '';
                   }
                 }}

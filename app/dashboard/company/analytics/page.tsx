@@ -9,7 +9,7 @@ export default function CompanyAnalyticsPage() {
   const { data: projectsData } = useFetch(() => api.getCompanyProjects(), []);
   const { data: servicesData } = useFetch(() => api.getCompanyServices(), []);
 
-  const projects = Array.isArray(projectsData) ? projectsData : projectsData?.results || [];
+  const projects = Array.isArray(projectsData) ? projectsData : (projectsData as any)?.results || [];
   const services = Array.isArray(servicesData) ? servicesData : [];
 
   return (

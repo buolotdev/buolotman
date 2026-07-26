@@ -82,7 +82,7 @@ export default function ClientSettingsPage() {
   const { data: walletData, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
   const { data: transData, refetch: refetchTrans } = useFetch(() => api.getTransactions(), []);
   const balance = walletData?.balance || 0;
-  const transactions = Array.isArray(transData) ? transData : (transData?.results || []);
+  const transactions = Array.isArray(transData) ? transData : ((transData as any)?.results || []);
   const [addAmount, setAddAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
@@ -115,7 +115,7 @@ export default function ClientSettingsPage() {
     }
   };
 
-  const handleWithdrawMoney = () => {
+  const handleWithdrawMoney = async () => {
     const amt = parseFloat(withdrawAmount);
     if (isNaN(amt) || amt <= 0) {
       toast.error("Error", "Enter a valid amount");
@@ -125,12 +125,15 @@ export default function ClientSettingsPage() {
       toast.error("Error", "Insufficient balance");
       return;
     }
-    setBalance(prev => prev - amt);
-    setTransactions(prev => [{
-      date: new Date().toLocaleString(), type: 'Debit', desc: 'Wallet Withdrawal', amount: amt
-    }, ...prev]);
-    setWithdrawAmount("");
-    toast.success("Success", "Withdrawal successful.");
+    try {
+      await api.withdraw({ amount: amt, method: 'Mobile Money' });
+      await refetchWallet();
+      await refetchTrans();
+      setWithdrawAmount("");
+      toast.success("Success", "Withdrawal successful.");
+    } catch(err) {
+      toast.error("Error", "Withdrawal failed");
+    }
   };
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
@@ -449,7 +452,7 @@ export default function ClientSettingsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((t, i) => (
+                  {transactions.map((t: any, i: number) => (
                     <tr key={i}>
                       <td>{t.date}</td>
                       <td>{t.type}</td>
