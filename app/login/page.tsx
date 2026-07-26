@@ -313,6 +313,8 @@ export default function LoginPage() {
                 <option>Kenya</option>
                 <option>Ghana</option>
                 <option>South Africa</option>
+                <option>Ivory Coast</option>
+                <option>Cameroon</option>
                 <option>Uganda</option>
               </select>
 
