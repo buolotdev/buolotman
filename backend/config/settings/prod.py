@@ -4,10 +4,13 @@ DEBUG = False
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 import dj_database_url
+DATABASE_URL = config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+ssl_require = DATABASE_URL.startswith('postgres')
 DATABASES = {
     'default': dj_database_url.config(
+        default=DATABASE_URL,
         conn_max_age=600,
-        ssl_require=True,
+        ssl_require=ssl_require,
     )
 }
 
