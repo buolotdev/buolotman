@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const backendUrl = 'http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com';
     return [
       { source: '/api/:path*', destination: `${backendUrl}/api/:path*` },
     ];
