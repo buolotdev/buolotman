@@ -29,9 +29,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const backendUrl = 'http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com';
     return [
-      { source: '/api/:path*', destination: `${backendUrl}/api/:path*` },
+      { source: '/api/:path*/', destination: `${backendUrl}/api/:path*/` },
+      { source: '/api/:path*', destination: `${backendUrl}/api/:path*/` },
     ];
   },
+  trailingSlash: true,
   output: 'standalone',
 };
 
