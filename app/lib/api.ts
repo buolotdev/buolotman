@@ -381,7 +381,7 @@ export const api = {
   },
   markNotificationRead: (notificationId: number) =>
     request<any>(`/governance/notifications/${notificationId}/read/`, { method: "POST" }),
-  getPlatformSettings: () => request<any[]>('/governance/platform-settings/'),
+
   updatePlatformSettings: (data: any) => request<any>('/governance/platform-settings/', { method: 'POST', body: JSON.stringify(data) }),
   getAdminDashboardStats: () =>
     request<any>(`/governance/admin-dashboard-stats/`),
@@ -538,4 +538,9 @@ export const api = {
       successful_completion: number;
     }>("/governance/platform-stats/", { public: true }),
 
+  changePassword: (data: any) =>
+    request("/accounts/change-password/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
