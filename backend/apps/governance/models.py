@@ -173,3 +173,36 @@ class CmsPage(models.Model):
 
     def __str__(self):
         return self.title
+
+class SupportTicket(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('awaiting_response', 'Awaiting response'),
+        ('escalated', 'Escalated'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
+    )
+    subject = models.CharField(max_length=255)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='support_tickets')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "governance_support_ticket"
+
+    def __str__(self):
+        return f"{self.id} - {self.subject}"
+
+class SupportMessage(models.Model):
+    ticket = models.ForeignKey(SupportTicket, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='support_messages')
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "governance_support_message"
+
+    def __str__(self):
+        return f"Message on {self.ticket.id} by {self.sender.username}"
+

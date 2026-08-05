@@ -66,10 +66,22 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("q")) setQuery(urlParams.get("q") || "");
+      if (urlParams.has("location")) setLocation(urlParams.get("location") || "");
+      if (urlParams.has("category")) setActiveCategory(urlParams.get("category") || "any");
+      if (urlParams.has("type")) setActiveType(urlParams.get("type") || "any");
+    }
+  }, []);
+
   const searchParams = useMemo(() => {
     const params: Record<string, string> = {};
     if (query) params.q = query;
-    if (location) params.location = location;
+    if (location && location.toLowerCase() !== "global" && location.toLowerCase() !== "all locations" && location.toLowerCase() !== "any") {
+      params.location = location;
+    }
     if (activeCategory && activeCategory !== "any") params.category = activeCategory;
     if (activeType && activeType !== "any") params.type = activeType;
     if (activeRating) params.min_rating = activeRating;
@@ -174,13 +186,18 @@ export default function SearchPage() {
                 <span className={styles.iconWrap} aria-hidden="true">
                   <iconify-icon icon="lucide:map-pin" />
                 </span>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Location"
-                  aria-label="Location"
-                />
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    aria-label="Location"
+                  >
+                    <option value="Global">Global</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Rwanda">Rwanda</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="Ghana">Ghana</option>
+                    <option value="South Africa">South Africa</option>
+                  </select>
               </label>
               <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
                 Search
@@ -384,8 +401,8 @@ export default function SearchPage() {
                 <p>No results found. Try adjusting your filters.</p>
               </div>
             ) : (
-              filteredByTab.map((result) => (
-                <article key={result.id} className={styles.resultCard}>
+              filteredByTab.map((result, idx) => (
+                <article key={`${result.type}-${result.id}-${idx}`} className={styles.resultCard}>
                   <div className={styles.resultMedia}>
                     {result.image ? (
                       <Image

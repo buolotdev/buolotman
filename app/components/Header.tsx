@@ -144,39 +144,7 @@ export default function Header() {
     }
   };
 
-  
-    // Scroll handling to hide mega menu
-    let isScrolling = false;
-    let scrollTimeout: NodeJS.Timeout;
-
-    const handleScroll = () => {
-      const root = document.getElementById("bmMegaRoot");
-      if (root) {
-        root.classList.add("hide-mega");
-        isScrolling = true;
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          isScrolling = false;
-        }, 250);
-      }
-    };
-
-    const handleMouseMove = () => {
-      if (!isScrolling) {
-        const root = document.getElementById("bmMegaRoot");
-        if (root && root.classList.contains("hide-mega")) {
-          root.classList.remove("hide-mega");
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-
-return () => {
-
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
+  return () => {
       document.removeEventListener("click", handleDocumentClick);
       document.removeEventListener("keydown", handleDocumentKeydown);
       document.removeEventListener("click", handleMobileMenuClicks);
@@ -186,10 +154,35 @@ return () => {
     };
   }, []);
 
-  const handleMegaHover = (e: React.MouseEvent) => {
+  const handleMegaClick = (e: React.MouseEvent) => {
     let target = e.target as HTMLElement;
     if (target.nodeType === 3) target = target.parentNode as HTMLElement;
     if (!target || !target.closest) return;
+
+    // 1. Close button logic
+    const closeBtn = target.closest('.bmMegaClose');
+    if (closeBtn) {
+      document.querySelectorAll('.bmMega').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.bmNavItem').forEach(n => n.classList.remove('active'));
+      return;
+    }
+
+    // 2. Open Mega Menu logic ("All Categories" click)
+    const navItem = target.closest('.bmNavItem[data-menu="cats"]');
+    if (navItem) {
+      const mega = document.getElementById('bmMegaCats');
+      if (mega) {
+        const isActive = mega.classList.toggle('active');
+        if (isActive) {
+          navItem.classList.add('active');
+        } else {
+          navItem.classList.remove('active');
+        }
+      }
+      return;
+    }
+
+    // 3. Side Buttons (Category change) logic
     const btn = target.closest('.bmSideBtn');
     if (btn) {
       const root = document.getElementById('bmMegaRoot');
@@ -206,7 +199,7 @@ return () => {
   };
 
   return (
-    <div onMouseOver={handleMegaHover}>
+    <div onClick={handleMegaClick}>
       <div
         dangerouslySetInnerHTML={{
           __html: `
@@ -221,6 +214,7 @@ return () => {
         <div class="bmNavItem" data-menu="cats" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">All Categories</div>
         <div class="bmMega" id="bmMegaCats">
           <div class="bmMegaInner">
+            <button class="bmMegaClose" aria-label="Close menu" style="position:absolute; top:20px; right:20px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50%; width:36px; height:36px; cursor:pointer; color:#475569; z-index:10060; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05);">&#10005;</button>
             <div class="bmSidebar">
               <button type="button" class="bmSideBtn active" data-cat="cat-0" style="display:flex; align-items:center; font-size:0.8rem; min-height:52px; padding:9px 16px 9px 14px;"><img src="https://img.icons8.com/fluency/96/source-code.png" style="width:34px;height:34px;margin-right:12px;border-radius:8px;border:1px solid #e5e7eb;padding:4px;background:#fff;" alt="" />Software & Digital Engineering</button>
               <button type="button" class="bmSideBtn" data-cat="cat-1" style="display:flex; align-items:center; font-size:0.8rem; min-height:52px; padding:9px 16px 9px 14px;"><img src="https://img.icons8.com/fluency/96/network.png" style="width:34px;height:34px;margin-right:12px;border-radius:8px;border:1px solid #e5e7eb;padding:4px;background:#fff;" alt="" />IT Infrastructure & Networking</button>
@@ -1519,7 +1513,7 @@ return () => {
 <header class="bm-main-header">
   <div class="bm-main-header-inner">
     <div class="bm-main-logo">
-      <Link href="/"><img src="/boulotman-logo.png" alt="Boulot Man" /></Link>
+      <a href="/"><img src="/boulotman-logo.png" alt="Boulot Man" /></a>
     </div>
     <nav class="bm-main-nav">
       <style>

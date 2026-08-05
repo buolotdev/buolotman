@@ -43,10 +43,35 @@ export default function AdminDisputesPage() {
     try {
       const params: any = {};
       if (activeFilter !== "all") {
-        params.status = activeFilter.replace("-", " ");
+        params.status = activeFilter.replace("-", "_");
       }
       const data = await api.getDisputes(params);
-      setDisputes(data);
+      const mapped = data.map((d: any) => {
+        let st = d.status || "open";
+        st = st.replace("_", " ");
+        st = st.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+        
+        return {
+          id: String(d.id),
+          created_at: d.opened_at || d.created_at || new Date().toISOString(),
+          task: { title: d.task_title || `Task #${d.task}`, id: d.task },
+          raised_by: { 
+            first_name: d.opened_by_name?.split(' ')[0] || "Unknown", 
+            last_name: d.opened_by_name?.split(' ').slice(1).join(' ') || "", 
+            email: "" 
+          },
+          against: d.against_name ? { 
+            first_name: d.against_name.split(' ')[0] || "", 
+            last_name: d.against_name.split(' ').slice(1).join(' ') || "", 
+            email: "" 
+          } : undefined,
+          reason: d.reason || d.title || "No reason provided",
+          status: st,
+          description: d.description || d.title || "No description",
+          resolution: d.resolution
+        };
+      });
+      setDisputes(mapped);
     } catch (err) {
       console.error("Failed to fetch disputes", err);
     } finally {
@@ -98,7 +123,7 @@ export default function AdminDisputesPage() {
 
     try {
       await api.updateDispute(parseInt(selectedDispute.id), {
-        status: newStatus.toLowerCase(),
+        status: newStatus.toLowerCase().replace(" ", "_"),
         resolution: finalResolution,
       });
       setSubmitted(true);

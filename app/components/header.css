@@ -523,15 +523,8 @@ body {
   margin-bottom: -35px;
 }
 
-#bmMegaRoot .bmMegaGroup:hover .bmNavItem,
-#bmMegaRoot .bmMegaGroup:focus-within .bmNavItem,
 #bmMegaRoot .bmMega.active {
   color: #fff;
-}
-
-#bmMegaRoot .bmMegaGroup:hover .bmMega,
-#bmMegaRoot .bmMegaGroup:focus-within .bmMega {
-  display: block;
 }
 
 #bmMegaRoot .bmMegaInner {

@@ -164,6 +164,7 @@ export const api = {
   },
 
   // User
+
   getMe: () => request<any>("/auth/me/"),
   updateMe: (data: Record<string, any>) =>
     request<any>("/auth/me/", { method: "PATCH", body: JSON.stringify(data) }),
@@ -380,6 +381,29 @@ export const api = {
   },
   markNotificationRead: (notificationId: number) =>
     request<any>(`/governance/notifications/${notificationId}/read/`, { method: "POST" }),
+  getPlatformSettings: () => request<any[]>('/governance/platform-settings/'),
+  updatePlatformSettings: (data: any) => request<any>('/governance/platform-settings/', { method: 'POST', body: JSON.stringify(data) }),
+  getAdminDashboardStats: () =>
+    request<any>(`/governance/admin-dashboard-stats/`),
+  getAdminSupportTickets: () => request<any[]>('/governance/admin-support/'),
+  replySupportTicket: (ticketId: number, body: string) => request<any>(`/governance/admin-support/${ticketId}/reply/`, { method: "POST", body: JSON.stringify({ body }) }),
+  getAdminConversations: () => request<any[]>('/messaging/admin/conversations/'),
+  getAdminProjects: () =>
+    request<any>(`/governance/admin-projects-monitoring/`),
+  releaseProjectMilestone: (taskId: number) =>
+    request<any>(`/governance/admin-projects-monitoring/${taskId}/release/`, { method: "POST" }),
+  holdProjectMilestone: (taskId: number) =>
+    request<any>(`/governance/admin-projects-monitoring/${taskId}/hold/`, { method: "POST" }),
+  
+  getAdminReviews: () =>
+    request<any[]>(`/governance/admin-reviews/`),
+  publishReview: (reviewId: number) =>
+    request<any>(`/governance/admin-reviews/${reviewId}/publish/`, { method: "POST" }),
+  hideReview: (reviewId: number) =>
+    request<any>(`/governance/admin-reviews/${reviewId}/hide/`, { method: "POST" }),
+  deleteReview: (reviewId: number) =>
+    request<any>(`/governance/admin-reviews/${reviewId}/delete/`, { method: "DELETE" }),
+
   getDisputes: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any[]>(`/governance/disputes/${qs}`);

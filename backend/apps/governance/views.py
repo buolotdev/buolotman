@@ -409,3 +409,300 @@ def platform_stats(request):
         'tasks_posted_monthly': tasks_posted_monthly,
         'successful_completion': successful_completion
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_dashboard_stats(request):
+    if request.user.role != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.accounts.models import User
+    from apps.tasks.models import Task, Milestone
+    from .models import Dispute
+    
+    total_users = User.objects.count()
+    active_projects = Task.objects.filter(status__in=['open', 'in_progress']).count()
+    pending_validations = Milestone.objects.filter(status='Awaiting Client').count()
+    open_disputes = Dispute.objects.filter(status='OPEN').count()
+    
+    recent_tasks = Task.objects.order_by('-created_at')[:5]
+    tasks_data = [
+        {
+            'id': t.id,
+            'title': t.title,
+            'client_name': f"{t.client.first_name} {t.client.last_name}" if t.client else 'Unknown',
+            'technician_name': f"{t.technician.first_name} {t.technician.last_name}" if t.technician else 'Pending',
+            'progress': 'Pending',  # Mock progress for now
+            'status': t.status
+        }
+        for t in recent_tasks
+    ]
+    
+    recent_activities = [
+        {'message': f"New user {u.first_name} {u.last_name} joined."} 
+        for u in User.objects.order_by('-date_joined')[:3]
+    ]
+
+    return Response({
+        'metrics': {
+            'total_users': total_users,
+            'active_projects': active_projects,
+            'pending_validations': pending_validations,
+            'open_disputes': open_disputes,
+        },
+        'alerts': [
+            {'type': 'warning', 'title': 'Pending Client Confirmations', 'description': f'{pending_validations} project milestones awaiting   validation.'},
+            {'type': 'danger', 'title': 'Disputed Projects', 'description': f'{open_disputes} projects flagged due to   complaints.'}
+        ],
+        'active_projects': tasks_data,
+        'recent_activity': recent_activities
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_projects_monitoring(request):
+    if request.user.role != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.tasks.models import Task, Milestone
+    
+    # Stats
+    active_count = Task.objects.filter(status__in=['open', 'in_progress']).count()
+    completed_count = Task.objects.filter(status='completed').count()
+    awaiting_validation_count = Milestone.objects.filter(status='Awaiting Client').count()
+    on_hold_count = Milestone.objects.filter(status='On Hold').count() if hasattr(Milestone, 'status') else 0
+    
+    # Projects List
+    tasks = Task.objects.all().order_by('-created_at')
+    projects_data = []
+    
+    for t in tasks:
+        # Determine active milestone
+        milestone = t.milestones.filter(status__in=['Pending', 'Awaiting Execution', 'Awaiting Client', 'On Hold']).first()
+        milestone_title = milestone.title if milestone else 'No Active Milestone'
+        m_status = milestone.status if milestone else 'None'
+        
+        executor_type = t.technician.role.lower() if t.technician and hasattr(t.technician, 'role') else 'tech'
+        
+        projects_data.append({
+            'id': t.id,
+            'project': t.title,
+            'client': f"{t.client.first_name} {t.client.last_name}" if t.client else 'Unknown',
+            'executor': f"{t.technician.first_name} {t.technician.last_name}" if t.technician else 'Unassigned',
+            'type': executor_type,
+            'progress': 50, # Mock progress 
+            'milestone': milestone_title,
+            'status': m_status,
+            'task_status': t.status
+        })
+
+    return Response({
+        'stats': {
+            'active_projects': active_count,
+            'awaiting_validation': awaiting_validation_count,
+            'on_hold': on_hold_count,
+            'completed': completed_count,
+        },
+        'projects': projects_data
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_project_release(request, task_id):
+    if request.user.role != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from apps.tasks.models import Milestone
+    # Just mock releasing the first active milestone
+    milestone = Milestone.objects.filter(task_id=task_id).exclude(status='Released').first()
+    if milestone:
+        milestone.status = 'Released'
+        milestone.save()
+        return Response({'detail': 'Milestone validated and payment released.'})
+    return Response({'detail': 'No active milestone found to release.'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_project_hold(request, task_id):
+    if request.user.role != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from apps.tasks.models import Milestone
+    milestone = Milestone.objects.filter(task_id=task_id).exclude(status='Released').first()
+    if milestone:
+        milestone.status = 'On Hold' # Assuming 'On Hold' is valid or will just be a string
+        milestone.save()
+        return Response({'detail': 'Project payment placed on hold.'})
+    return Response({'detail': 'No active milestone found to hold.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_reviews(request):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.tasks.models import TaskReview
+    
+    reviews = TaskReview.objects.all().order_by('-created_at')
+    data = []
+    
+    for r in reviews:
+        # Determine target type (user or company name)
+        target_name = f"{r.target_user.first_name} {r.target_user.last_name}"
+        if hasattr(r.target_user, 'company_profile') and getattr(r.target_user, 'company_profile', None):
+            target_name = getattr(r.target_user, 'company_profile').company_name
+            
+        data.append({
+            'id': r.id,
+            'author': f"{r.reviewer.first_name} {r.reviewer.last_name}",
+            'target': target_name,
+            'project': r.task.title,
+            'rating': r.rating,
+            'comment': r.comment,
+            'date': r.created_at.strftime("%d %b %Y"),
+            'status': r.get_status_display() if hasattr(r, 'get_status_display') else r.status
+        })
+
+    return Response(data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_review_publish(request, review_id):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from apps.tasks.models import TaskReview
+    review = TaskReview.objects.filter(id=review_id).first()
+    if review:
+        review.status = 'Published'
+        review.save()
+        return Response({'detail': 'Review published successfully.'})
+    return Response({'detail': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_review_hide(request, review_id):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from apps.tasks.models import TaskReview
+    review = TaskReview.objects.filter(id=review_id).first()
+    if review:
+        review.status = 'Hidden'
+        review.save()
+        return Response({'detail': 'Review hidden successfully.'})
+    return Response({'detail': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def admin_review_delete(request, review_id):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from apps.tasks.models import TaskReview
+    review = TaskReview.objects.filter(id=review_id).first()
+    if review:
+        review.delete()
+        return Response({'detail': 'Review deleted successfully.'})
+    return Response({'detail': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_support_tickets(request):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.governance.models import SupportTicket
+    
+    tickets = SupportTicket.objects.prefetch_related('messages__sender').all().order_by('-created_at')
+    data = []
+    
+    for t in tickets:
+        messages = []
+        for m in t.messages.all().order_by('created_at'):
+            messages.append({
+                'id': m.id,
+                'sender': f"{m.sender.first_name} {m.sender.last_name}" if m.sender.first_name else m.sender.username,
+                'role': m.sender.get_role_display() if hasattr(m.sender, 'get_role_display') else str(m.sender.role),
+                'avatar': m.sender.avatar_url if hasattr(m.sender, 'avatar_url') and m.sender.avatar_url else "https://i.pravatar.cc/150?img=1",
+                'time': m.created_at.strftime("%d %b %Y, %I:%M %p"),
+                'body': m.body
+            })
+            
+        data.append({
+            'id': f"BM-{t.created_at.year}-{t.id:06d}",
+            'db_id': t.id,
+            'subject': t.subject,
+            'client': f"{t.client.first_name} {t.client.last_name}" if t.client.first_name else t.client.username,
+            'role': t.client.get_role_display() if hasattr(t.client, 'get_role_display') else str(t.client.role),
+            'status': t.get_status_display(),
+            'messages': messages
+        })
+        
+    return Response(data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_support_ticket_reply(request, ticket_id):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.governance.models import SupportTicket, SupportMessage
+    
+    ticket = SupportTicket.objects.filter(id=ticket_id).first()
+    if not ticket:
+        return Response({'detail': 'Ticket not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+    body = request.data.get('body')
+    if not body:
+        return Response({'detail': 'Message body is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    msg = SupportMessage.objects.create(
+        ticket=ticket,
+        sender=request.user,
+        body=body
+    )
+    
+    ticket.status = 'awaiting_response'
+    ticket.save()
+    
+    return Response({
+        'id': msg.id,
+        'sender': "Support Team",
+        'role': "Admin",
+        'avatar': "/boulotman-logo.png",
+        'time': msg.created_at.strftime("%d %b %Y, %I:%M %p"),
+        'body': msg.body
+    })
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def platform_settings_list(request):
+    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+        return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+        
+    from apps.governance.models import PlatformSetting
+    
+    if request.method == 'GET':
+        settings = PlatformSetting.objects.all()
+        data = [{'key': s.key, 'value': s.value} for s in settings]
+        return Response(data)
+        
+    elif request.method == 'POST':
+        # Expecting a list of dicts: [{'key': 'site_name', 'value': 'Boulot Man'}, ...]
+        data = request.data
+        if not isinstance(data, list):
+            return Response({'detail': 'Expected a list of settings objects.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        updated_settings = []
+        for item in data:
+            key = item.get('key')
+            val = item.get('value')
+            if key:
+                obj, created = PlatformSetting.objects.update_or_create(
+                    key=key,
+                    defaults={'value': val, 'updated_by': request.user}
+                )
+                updated_settings.append({'key': obj.key, 'value': obj.value})
+                
+        return Response(updated_settings)

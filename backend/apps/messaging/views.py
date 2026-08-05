@@ -166,3 +166,13 @@ def mark_read(request, conversation_id):
 
     updated = conversation.messages.filter(read_at__isnull=True).exclude(sender=request.user).update(read_at=timezone.now())
     return Response({"marked_read": updated})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_conversations(request):
+    if getattr(request.user, 'role', None) != 'ADMIN':
+        return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
+    
+    conversations = Conversation.objects.prefetch_related('participants', 'messages', 'task').all().order_by('-created_at')
+    serializer = ConversationListSerializer(conversations, many=True, context={'request': request})
+    return Response(serializer.data)

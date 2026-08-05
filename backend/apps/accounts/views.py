@@ -506,8 +506,20 @@ def admin_list_users(request):
         qs = qs.filter(is_verified=True)
     elif verified == 'false':
         qs = qs.filter(is_verified=False)
-    from .serializers import UserPublicSerializer
-    return Response(UserPublicSerializer(qs, many=True).data)
+    data = []
+    for u in qs:
+        data.append({
+            'id': u.id,
+            'email': u.email,
+            'first_name': u.first_name,
+            'last_name': u.last_name,
+            'role': u.role,
+            'created_at': u.date_joined,
+            'is_active': u.is_active,
+            'is_verified': u.is_verified,
+            'avatar_url': u.avatar_url,
+        })
+    return Response(data)
 
 
 @api_view(['GET'])
@@ -565,3 +577,20 @@ def technician_document_detail(request, document_id):
 
     doc.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+    
+    if not current_password or not new_password:
+        return Response({'detail': 'current_password and new_password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    user = request.user
+    if not user.check_password(current_password):
+        return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    user.set_password(new_password)
+    user.save()
+    
+    return Response({'detail': 'Password updated successfully.'})

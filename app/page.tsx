@@ -419,10 +419,12 @@ export default function Home() {
                 value={searchLocation}
                 onChange={(event) => setSearchLocation(event.target.value)}
               >
-                <option value="">All Locations</option>
-                <option value="Kigali">Kigali</option>
-                <option value="Gasabo">Gasabo</option>
-                <option value="Remote">Remote</option>
+                <option value="Global">Global</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Rwanda">Rwanda</option>
+                <option value="Kenya">Kenya</option>
+                <option value="Ghana">Ghana</option>
+                <option value="South Africa">South Africa</option>
               </select>
 
               <button type="submit">Search</button>
@@ -545,7 +547,56 @@ export default function Home() {
           </div>
 
           <div className="bm-ftx-footer">
-            <Link href="/technicians">Hire verified professionals with confidence. See more →</Link>
+            <Link href="/technicians">Hire verified professionals with confidence. See more &rarr;</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="bm-enterprise-root">
+        <div className="bm-enterprise-container">
+          <div className="bm-enterprise-header">
+            <h2 className="bm-enterprise-header-title">
+              Partner with Top Enterprise & Maintenance Companies
+            </h2>
+            <p className="bm-enterprise-header-subtitle">
+              Connect with highly rated enterprise firms capable of executing large scale projects securely and efficiently.
+            </p>
+          </div>
+
+          <div className="bm-enterprise-grid">
+            {companiesLoading ? (
+              <div style={{ padding: "20px", color: "#94a3b8" }}>Loading companies...</div>
+            ) : companiesData && companiesData.length > 0 ? (
+              companiesData.slice(0, 4).map((company: any) => (
+                <div className="bm-enterprise-card" key={company.id}>
+                  <div className="bm-enterprise-profile">
+                    <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
+                    <div>
+                      <div className="bm-enterprise-name">{company.company_name}</div>
+                      <div className="bm-enterprise-role">Registered Company</div>
+                    </div>
+                  </div>
+                  <div className="bm-enterprise-rating">
+                    <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
+                  </div>
+                  <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} Projects</div>
+                  <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {company.description || "Comprehensive enterprise and maintenance services."}
+                  </div>
+                  <div className="bm-enterprise-actions">
+                    <Link href={`/search?type=company&q=${company.company_name}`} className="bm-enterprise-btn bm-enterprise-btn-view">View Profile</Link>
+                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">Request Quote</Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: "20px", color: "#94a3b8" }}>No companies available at the moment.</div>
+            )}
+          </div>
+          <div style={{ textAlign: "center", marginTop: "40px" }}>
+            <Link href="/search?type=company" className="bm-enterprise-explore">
+              Explore all registered companies &rarr;
+            </Link>
           </div>
         </div>
       </section>
@@ -2136,6 +2187,36 @@ export default function Home() {
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- Enterprise Companies Section --- */
+        .bm-enterprise-root { background: linear-gradient(145deg, #001F3F 0%, #001224 100%); padding: 100px 0; position: relative; overflow: hidden; color: #fff; }
+        .bm-enterprise-root::before { content: ""; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px; background: radial-gradient(circle, rgba(255, 69, 0, 0.15) 0%, rgba(0, 31, 63, 0) 70%); border-radius: 50%; pointer-events: none; }
+        .bm-enterprise-container { max-width: 1300px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 1; }
+        .bm-enterprise-header { text-align: center; margin-bottom: 60px; }
+        .bm-enterprise-header-title { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; background: linear-gradient(to right, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bm-enterprise-header-subtitle { font-size: 1.15rem; color: #94a3b8; max-width: 650px; margin: 0 auto; line-height: 1.6; }
+        .bm-enterprise-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+        .bm-enterprise-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 30px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; overflow: hidden; }
+        .bm-enterprise-card:hover { transform: translateY(-8px); border-color: rgba(255, 69, 0, 0.4); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 69, 0, 0.15); background: rgba(255, 255, 255, 0.06); }
+        .bm-enterprise-profile { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .bm-enterprise-avatar { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); background: #fff; }
+        .bm-enterprise-name { font-size: 1.25rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 6px; }
+        .bm-enterprise-role { font-size: 0.85rem; color: #38bdf8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bm-enterprise-rating { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; margin-bottom: 12px; color: #e2e8f0; }
+        .bm-enterprise-stars { color: #facc15; }
+        .bm-enterprise-meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
+        .bm-enterprise-description { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 26px; flex: 1; }
+        .bm-enterprise-actions { display: flex; gap: 12px; margin-top: auto; }
+        .bm-enterprise-btn { flex: 1; padding: 12px; font-size: 0.9rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; transition: all 0.3s ease; }
+        .bm-enterprise-btn-view { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .bm-enterprise-btn-view:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.35); }
+        .bm-enterprise-btn-hire { background: #FF4500; color: #fff; border: 1px solid #FF4500; box-shadow: 0 4px 14px rgba(255, 69, 0, 0.3); }
+        .bm-enterprise-btn-hire:hover { background: #e63e00; border-color: #e63e00; box-shadow: 0 6px 18px rgba(255, 69, 0, 0.45); }
+        .bm-enterprise-explore { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-weight: 600; text-decoration: none; font-size: 1.1rem; padding: 16px 32px; border-radius: 50px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; backdrop-filter: blur(8px); }
+        .bm-enterprise-explore:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 69, 0, 0.6); color: #FF4500; transform: translateX(4px); }
+        @media(max-width: 1200px) { .bm-enterprise-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media(max-width: 900px) { .bm-enterprise-grid { grid-template-columns: repeat(2, 1fr); } .bm-enterprise-header-title { font-size: 2.2rem; } }
+        @media(max-width: 600px) { .bm-enterprise-grid { grid-template-columns: 1fr; } .bm-enterprise-header-title { font-size: 1.8rem; } .bm-enterprise-explore { width: 100%; justify-content: center; } }
       `}} />
 
     </div>

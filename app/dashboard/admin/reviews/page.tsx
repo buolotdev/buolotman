@@ -1,45 +1,67 @@
 "use client";
 
 import React, { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./reviews.module.css";
 
-const MOCK_REVIEWS = [
-  {
-    id: "REV-1021",
-    author: "John Mukasa",
-    target: "Kigali Prime Constructors",
-    project: "Residential Renovation",
-    rating: 5,
-    comment: "Excellent work! Highly recommended.",
-    date: "12 Oct 2026",
-    status: "Published",
-    statusClass: styles.statusPublished,
-  },
-  {
-    id: "REV-1022",
-    author: "Mary Uwase",
-    target: "Eric Niyonzima",
-    project: "Office Electrical Upgrade",
-    rating: 2,
-    comment: "He arrived late and the wiring looks messy.",
-    date: "10 Oct 2026",
-    status: "Pending Review",
-    statusClass: styles.statusPending,
-  },
-  {
-    id: "REV-1023",
-    author: "Paul Nshimiyimana",
-    target: "Mike Doe",
-    project: "Plumbing Fix",
-    rating: 1,
-    comment: "Abusive language used. Avoid this technician.",
-    date: "08 Oct 2026",
-    status: "Hidden",
-    statusClass: styles.statusHidden,
-  }
-];
-
 export default function AdminReviewsPage() {
+  const { data: reviews, loading, refetch } = useFetch(() => api.getAdminReviews(), []);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  const handlePublish = async (id: number) => {
+    setActionLoading(id);
+    try {
+      await api.publishReview(id);
+      refetch();
+    } catch (err) {
+      alert("Failed to publish review.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleHide = async (id: number) => {
+    setActionLoading(id);
+    try {
+      await api.hideReview(id);
+      refetch();
+    } catch (err) {
+      alert("Failed to hide review.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to permanently delete this review?")) return;
+    setActionLoading(id);
+    try {
+      await api.deleteReview(id);
+      refetch();
+    } catch (err) {
+      alert("Failed to delete review.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <SkeletonBlock style={{ height: 100, marginBottom: 30, borderRadius: 16 }} />
+        <SkeletonBlock style={{ height: 400, borderRadius: 16 }} />
+      </div>
+    );
+  }
+
+  const getStatusClass = (status: string) => {
+    if (status === "Published") return styles.statusPublished;
+    if (status === "Hidden") return styles.statusHidden;
+    return styles.statusPending;
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
@@ -49,46 +71,77 @@ export default function AdminReviewsPage() {
 
       <div className={styles.card}>
         <h3>Recent Reviews</h3>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Author</th>
-              <th>Reviewed User/Company</th>
-              <th>Project</th>
-              <th>Rating</th>
-              <th>Comment</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MOCK_REVIEWS.map((review) => (
-              <tr key={review.id}>
-                <td><strong>{review.author}</strong></td>
-                <td>{review.target}</td>
-                <td>{review.project}</td>
-                <td>
-                  <span className={styles.stars}>
-                    {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
-                  </span>
-                </td>
-                <td style={{ maxWidth: 300 }}>{review.comment}</td>
-                <td><span className={`${styles.status} ${review.statusClass}`}>{review.status}</span></td>
-                <td>
-                  <div className={styles.tableActions}>
-                    {review.status !== "Published" && (
-                      <button className={styles.actionBtn}>Publish</button>
-                    )}
-                    {review.status !== "Hidden" && (
-                      <button className={styles.actionBtn}>Hide</button>
-                    )}
-                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`}>Delete</button>
-                  </div>
-                </td>
+        <div style={{ overflowX: "auto" }}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Reviewed User/Company</th>
+                <th>Project</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {reviews && reviews.map((review: any) => (
+                <tr key={review.id}>
+                  <td className={styles.nowrap}><strong>{review.author}</strong></td>
+                  <td className={styles.nowrap}>{review.target}</td>
+                  <td className={styles.nowrap}>{review.project}</td>
+                  <td className={styles.nowrap}>
+                    <span className={styles.stars}>
+                      {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+                    </span>
+                  </td>
+                  <td style={{ maxWidth: 300 }}>{review.comment}</td>
+                  <td>
+                    <span className={`${styles.status} ${getStatusClass(review.status)}`}>
+                      {review.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.tableActions}>
+                      {review.status !== "Published" && (
+                        <button 
+                          className={styles.actionBtn} 
+                          onClick={() => handlePublish(review.id)}
+                          disabled={actionLoading === review.id}
+                        >
+                          {actionLoading === review.id ? '...' : 'Publish'}
+                        </button>
+                      )}
+                      {review.status !== "Hidden" && (
+                        <button 
+                          className={styles.actionBtn} 
+                          onClick={() => handleHide(review.id)}
+                          disabled={actionLoading === review.id}
+                        >
+                          {actionLoading === review.id ? '...' : 'Hide'}
+                        </button>
+                      )}
+                      <button 
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                        onClick={() => handleDelete(review.id)}
+                        disabled={actionLoading === review.id}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {(!reviews || reviews.length === 0) && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "20px", color: "#666" }}>
+                    No reviews found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

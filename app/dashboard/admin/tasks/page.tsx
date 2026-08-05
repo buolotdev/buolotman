@@ -1,178 +1,199 @@
 "use client";
 
 import React, { useState } from "react";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin-tasks.module.css";
-
-// MOCK DATA FOR ADMIN PROJECTS
-const MOCK_PROJECTS = [
-  {
-    id: "P-001",
-    project: "Residential Renovation",
-    client: "John Mukasa",
-    executor: "Kigali Prime Constructors",
-    type: "company",
-    progress: 45,
-    milestone: "Milestone 2",
-    status: "Awaiting",
-    statusClass: styles.statusPending,
-  },
-  {
-    id: "P-002",
-    project: "Office Electrical Upgrade",
-    client: "Sarah Johnson",
-    executor: "Eric Niyonzima",
-    type: "tech",
-    progress: 70,
-    milestone: "Milestone 3",
-    status: "Active",
-    statusClass: styles.statusActive,
-  },
-  {
-    id: "P-003",
-    project: "Commercial Complex",
-    client: "Africa Holdings Ltd",
-    executor: "Kigali Prime Constructors",
-    type: "company",
-    progress: 60,
-    milestone: "Milestone 2",
-    status: "Active",
-    statusClass: styles.statusActive,
-  },
-  {
-    id: "P-004",
-    project: "Plumbing Fix",
-    client: "Mike Doe",
-    executor: "Jean Paul",
-    type: "tech",
-    progress: 100,
-    milestone: "Completed",
-    status: "Completed",
-    statusClass: styles.statusActive,
-  },
-];
 
 export default function AdminTasksPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const { data, loading, refetch } = useFetch(() => api.getAdminProjects(), []);
 
-  const filteredProjects = MOCK_PROJECTS.filter((p) => {
+  // Modals state
+  const [holdModalOpen, setHoldModalOpen] = useState(false);
+  const [releaseModalOpen, setReleaseModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [releaseSuccess, setReleaseSuccess] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <SkeletonBlock style={{ height: 100, marginBottom: 30, borderRadius: 16 }} />
+        <SkeletonBlock style={{ height: 400, borderRadius: 16 }} />
+      </div>
+    );
+  }
+
+  const stats = data?.stats || { active_projects: 0, awaiting_validation: 0, on_hold: 0, completed: 0 };
+  const projects = data?.projects || [];
+
+  const filteredProjects = projects.filter((p: any) => {
     if (activeTab === "all") return true;
     return p.type === activeTab;
   });
 
+  const openReleaseModal = (id: number) => {
+    setSelectedTaskId(id);
+    setReleaseSuccess(false);
+    setReleaseModalOpen(true);
+  };
+
+  const openHoldModal = (id: number) => {
+    setSelectedTaskId(id);
+    setHoldModalOpen(true);
+  };
+
+  const handleConfirmRelease = async () => {
+    if (!selectedTaskId) return;
+    setActionLoading(true);
+    try {
+      await api.releaseProjectMilestone(selectedTaskId);
+      setReleaseSuccess(true);
+      refetch(); // Refresh data
+    } catch (err) {
+      console.error(err);
+      alert("Failed to release milestone.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleConfirmHold = async () => {
+    if (!selectedTaskId) return;
+    setActionLoading(true);
+    try {
+      await api.holdProjectMilestone(selectedTaskId);
+      setHoldModalOpen(false);
+      refetch();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to put on hold.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
-      <div className={styles.pageHeader}>
-        <h1>Projects Monitoring</h1>
-        <p>Monitor and manage all platform tasks, their statuses, and associated actions.</p>
-      </div>
-
+      
       {/* STATS */}
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <span>Active Projects</span>
-          <h3>186</h3>
-        </div>
-        <div className={styles.statCard}>
-          <span>Awaiting Validation</span>
-          <h3>12</h3>
-        </div>
-        <div className={styles.statCard}>
-          <span>On Hold</span>
-          <h3>2</h3>
-        </div>
-        <div className={styles.statCard}>
-          <span>Completed</span>
-          <h3>1,024</h3>
-        </div>
+        <div className={styles.statCard}><span>Active Projects</span><h3>{stats.active_projects}</h3></div>
+        <div className={styles.statCard}><span>Awaiting Validation</span><h3>{stats.awaiting_validation}</h3></div>
+        <div className={styles.statCard}><span>On Hold</span><h3>{stats.on_hold}</h3></div>
+        <div className={styles.statCard}><span>Completed</span><h3>{stats.completed}</h3></div>
       </div>
 
-      {/* HIGHLIGHTS */}
-      <div className={styles.highlightsGrid}>
-        <div className={styles.highlightCard}>
-          <h4>Pending Client Confirmations</h4>
-          <p>7 project milestones awaiting client validation.</p>
-          <button className={styles.actionBtn}>Review</button>
-        </div>
-        <div className={`${styles.highlightCard} ${styles.red}`}>
-          <h4>Disputed Projects</h4>
-          <p>3 projects flagged due to client complaints.</p>
-          <button className={styles.actionBtn}>Resolve</button>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT CARD */}
-      <div className={styles.mainCard}>
-        <h3>Active Projects Snapshot</h3>
+      {/* PROJECTS CARD */}
+      <div className={styles.card}>
+        <h3>Projects Monitoring</h3>
 
         <div className={styles.tabs}>
-          <button className={`${styles.tab} ${activeTab === "all" ? styles.active : ""}`} onClick={() => setActiveTab("all")}>All Projects</button>
-          <button className={`${styles.tab} ${activeTab === "tech" ? styles.active : ""}`} onClick={() => setActiveTab("tech")}>Technician Projects</button>
-          <button className={`${styles.tab} ${activeTab === "company" ? styles.active : ""}`} onClick={() => setActiveTab("company")}>Company Projects</button>
+          <button className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => setActiveTab("all")}>All Projects</button>
+          <button className={`${styles.tab} ${activeTab === "tech" ? styles.tabActive : ""}`} onClick={() => setActiveTab("tech")}>Technician Projects</button>
+          <button className={`${styles.tab} ${activeTab === "company" ? styles.tabActive : ""}`} onClick={() => setActiveTab("company")}>Company Projects</button>
         </div>
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Client</th>
-              <th>Executor</th>
-              <th>Progress</th>
-              <th>Milestone</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjects.map((p) => (
-              <tr key={p.id}>
-                <td>{p.project}</td>
-                <td>{p.client}</td>
-                <td>{p.executor}</td>
-                <td>
-                  <div className={styles.progressWrapper}>
-                    <div className={styles.progressBar}>
-                      <div className={styles.progressFill} style={{ width: `${p.progress}%` }} />
-                    </div>
-                    <span className={styles.progressText}>{p.progress}%</span>
-                  </div>
-                </td>
-                <td>{p.milestone}</td>
-                <td><span className={`${styles.status} ${p.statusClass}`}>{p.status}</span></td>
-                <td>
-                  <div className={styles.tableActions}>
-                    <button className={styles.btnPrimary}>Validate & Release</button>
-                    <button className={styles.btnWarning}>Hold</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredProjects.length === 0 && (
+        <div style={{ overflowX: "auto" }}>
+          <table className={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "40px" }}>No projects found.</td>
+                <th>Project</th>
+                {activeTab !== 'tech' && activeTab !== 'company' && <th>Client</th>}
+                {activeTab !== 'company' && <th>Technician</th>}
+                {activeTab === 'company' && <th>Company</th>}
+                <th>Progress</th>
+                <th>Milestone</th>
+                {activeTab === 'all' && <th>Status</th>}
+                <th>Action</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredProjects.map((p: any) => (
+                <tr key={p.id}>
+                  <td>{p.project}</td>
+                  {activeTab !== 'tech' && activeTab !== 'company' && <td>{p.client}</td>}
+                  <td>{p.executor}</td>
+                  <td>
+                    <div className={styles.progressWrapper}>
+                      <div className={styles.progressFill} style={{ width: p.progress + "%" }}></div>
+                    </div>
+                  </td>
+                  <td>{p.milestone}</td>
+                  
+                  {activeTab === 'all' && (
+                    <td>
+                      <span className={`${styles.status} ${p.status === 'Released' ? styles.statusActive : p.status === 'On Hold' ? styles.statusHold : styles.statusPending}`}>
+                        {p.status}
+                      </span>
+                    </td>
+                  )}
 
-      {/* RECENT ACTIVITY */}
-      <div className={styles.activityCard}>
-        <h3>Recent Platform Activity</h3>
-        <div className={styles.activityList}>
-          <div className={styles.activityItem}>
-            <iconify-icon icon="lucide:check" className={styles.activityIcon} />
-            <span><strong>Technician</strong> updated milestone progress on <strong>Project RM-10234</strong></span>
-          </div>
-          <div className={styles.activityItem}>
-            <iconify-icon icon="lucide:check" className={styles.activityIcon} />
-            <span><strong>Client</strong> confirmed progress for <strong>Residential Renovation</strong></span>
-          </div>
-          <div className={styles.activityItem}>
-            <iconify-icon icon="lucide:alert-triangle" className={styles.activityIcon} style={{ color: "#ea580c" }} />
-            <span><strong>Client</strong> reported issue on <strong>Office Complex Build</strong></span>
-          </div>
+                  <td>
+                    {p.status !== 'Released' ? (
+                      <>
+                        <button className={styles.btnPrimary} onClick={() => openReleaseModal(p.id)}>Confirm & Release</button>
+                        <button className={styles.btnWarning} onClick={() => openHoldModal(p.id)}>Hold</button>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: 12, color: '#1e8e3e', fontWeight: 600 }}>✔ Released</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {filteredProjects.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "20px", color: "#666" }}>No projects found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* HOLD MODAL */}
+      {holdModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <button className={styles.closeBtn} onClick={() => setHoldModalOpen(false)}>×</button>
+            <h3>Payment On Hold</h3>
+            <div className={styles.alertBox}>
+              Are you sure you want to place the active milestone payment on hold?
+            </div>
+            <div style={{ marginTop: 20 }}>
+               <button className={styles.btnWarning} onClick={handleConfirmHold} disabled={actionLoading}>
+                 {actionLoading ? "Processing..." : "Confirm Hold"}
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RELEASE MODAL */}
+      {releaseModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <button className={styles.closeBtn} onClick={() => setReleaseModalOpen(false)}>×</button>
+            <h3>Milestone Payment Release</h3>
+            <p>This action will release the milestone payment from the client's escrow account to the executor's wallet.</p>
+            
+            {!releaseSuccess && (
+              <button className={styles.btnPrimary} onClick={handleConfirmRelease} disabled={actionLoading}>
+                {actionLoading ? "Processing..." : "Release Payment"}
+              </button>
+            )}
+
+            {releaseSuccess && (
+              <div className={styles.successBox}>
+                <iconify-icon icon="lucide:check-circle"></iconify-icon>
+                Milestone confirmed and payment released successfully
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

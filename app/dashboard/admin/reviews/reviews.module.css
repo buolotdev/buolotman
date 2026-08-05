@@ -64,6 +64,8 @@
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .statusPublished { background: #dcfce7; color: #16a34a; }
@@ -84,6 +86,8 @@
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
+  min-width: 75px;
+  text-align: center;
 }
 
 .actionBtn:hover {
@@ -99,4 +103,8 @@
 .deleteBtn:hover {
   background: #fef2f2;
   color: #dc2626;
+}
+
+.nowrap {
+  white-space: nowrap;
 }

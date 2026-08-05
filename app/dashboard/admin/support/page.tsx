@@ -4,126 +4,53 @@ import React, { useState } from "react";
 import styles from "@/app/components/Tickets.module.css";
 import adminStyles from "@/app/dashboard/admin/admin.module.css";
 
-// INITIAL MOCK DATA
-const INITIAL_TICKETS = [
-  {
-    id: "BM-2026-000451",
-    subject: "Payment not released",
-    client: "John Mukasa",
-    role: "Client",
-    status: "Pending",
-    statusClass: styles.statusPending,
-    messages: [
-      {
-        id: 1,
-        sender: "John Mukasa",
-        role: "Client",
-        avatar: "https://i.pravatar.cc/150?img=11",
-        time: "Today, 10:30 AM",
-        body: "My milestone payment is still on hold even though the technician finished the job."
-      }
-    ]
-  },
-  {
-    id: "BM-2026-000452",
-    subject: "Account verification issue",
-    client: "Mary Uwase",
-    role: "Technician",
-    status: "Awaiting response",
-    statusClass: styles.statusAwaiting,
-    messages: [
-      {
-        id: 1,
-        sender: "Mary Uwase",
-        role: "Technician",
-        avatar: "https://i.pravatar.cc/150?img=5",
-        time: "Yesterday, 2:15 PM",
-        body: "I uploaded my ID card but my account is still not verified. What else do I need to provide?"
-      },
-      {
-        id: 2,
-        sender: "Support Team",
-        role: "Admin",
-        avatar: "/boulotman-logo.png",
-        time: "Yesterday, 3:00 PM",
-        body: "Hi Mary, your ID image was blurry. Could you please re-upload a clear picture?"
-      }
-    ]
-  },
-  {
-    id: "BM-2026-000453",
-    subject: "Project dispute",
-    client: "Paul Nshimiyimana",
-    role: "Company",
-    status: "Escalated",
-    statusClass: styles.statusEscalated,
-    messages: [
-      {
-        id: 1,
-        sender: "Paul Nshimiyimana",
-        role: "Company",
-        avatar: "https://i.pravatar.cc/150?img=33",
-        time: "2 days ago",
-        body: "The client cancelled the project halfway but we already bought materials."
-      }
-    ]
-  }
-];
+
+
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 
 export default function AdminSupportPage() {
-  const [tickets, setTickets] = useState<any[]>([]);
+  const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getAdminSupportTickets(), []);
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
 
   React.useEffect(() => {
-    const loadTickets = () => {
-      const saved = localStorage.getItem("mock_support_tickets");
-      let currentTickets = INITIAL_TICKETS;
-      if (saved) {
-        currentTickets = JSON.parse(saved);
-      } else {
-        localStorage.setItem("mock_support_tickets", JSON.stringify(INITIAL_TICKETS));
-      }
-      
-      setTickets(currentTickets);
-      
-      // Update active ticket to match the newly loaded data
+    if (fetchedTickets && fetchedTickets.length > 0) {
       setActiveTicket((prev: any) => {
-        if (!prev) return currentTickets[0];
-        const updated = currentTickets.find((t: any) => t.id === prev.id);
-        return updated || currentTickets[0];
+        if (!prev) return fetchedTickets[0];
+        const updated = fetchedTickets.find((t: any) => t.id === prev.id);
+        return updated || fetchedTickets[0];
       });
-    };
-    
-    loadTickets();
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "mock_support_tickets") {
-        loadTickets();
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    } else {
+      setActiveTicket(null);
+    }
+  }, [fetchedTickets]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
-    const newMsg = {
-      id: Date.now(),
-      sender: "Support Team",
-      role: "Admin",
-      avatar: "/boulotman-logo.png",
-      time: "Just now",
-      body: replyText
-    };
-    
-    const updatedTicket = { ...activeTicket, messages: [...activeTicket.messages, newMsg] };
-    const updatedTickets = tickets.map(t => t.id === activeTicket.id ? updatedTicket : t);
-    
-    setTickets(updatedTickets);
-    setActiveTicket(updatedTicket);
-    setReplyText("");
-    localStorage.setItem("mock_support_tickets", JSON.stringify(updatedTickets));
+    setSending(true);
+    try {
+      await api.replySupportTicket(activeTicket.db_id, replyText);
+      setReplyText("");
+      refetch();
+    } catch (err) {
+      alert("Failed to send reply");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const tickets = fetchedTickets || [];
+
+  const getStatusClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending": return styles.statusPending;
+      case "awaiting response": return styles.statusAwaiting;
+      case "escalated": return styles.statusEscalated;
+      case "resolved": return styles.statusPublished; // or similar
+      default: return styles.statusPending;
+    }
   };
 
   return (
@@ -142,7 +69,7 @@ export default function AdminSupportPage() {
             <h3>All Tickets ({tickets.length})</h3>
           </div>
           <div className={styles.ticketList}>
-            {tickets.map(ticket => (
+            {tickets.map((ticket: any) => (
               <div 
                 key={ticket.id} 
                 className={`${styles.ticketItem} ${activeTicket?.id === ticket.id ? styles.ticketItemActive : ""}`}
@@ -150,7 +77,7 @@ export default function AdminSupportPage() {
               >
                 <div className={styles.ticketSubject}>{ticket.subject}</div>
                 <div className={styles.ticketMeta}>{ticket.client}</div>
-                <span className={`${styles.status} ${ticket.statusClass}`}>{ticket.status}</span>
+                <span className={`${styles.status} ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
               </div>
             ))}
           </div>
@@ -163,7 +90,7 @@ export default function AdminSupportPage() {
               <h2>{activeTicket.subject} — {activeTicket.id}</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <span style={{ fontSize: "0.9rem", color: "#64748b" }}>Status:</span>
-                <span className={`${styles.status} ${activeTicket.statusClass}`}>{activeTicket.status}</span>
+                <span className={`${styles.status} ${getStatusClass(activeTicket.status)}`}>{activeTicket.status}</span>
               </div>
             </div>
 

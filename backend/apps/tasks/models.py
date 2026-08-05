@@ -251,3 +251,24 @@ class Milestone(models.Model):
 
     def __str__(self):
         return f'{self.title} for Task {self.task_id}'
+
+class TaskReview(models.Model):
+    STATUS_CHOICES = (
+        ('Published', 'Published'),
+        ('Pending Review', 'Pending Review'),
+        ('Hidden', 'Hidden'),
+    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='given_reviews')
+    target_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_reviews')
+    rating = models.PositiveIntegerField()
+    comment = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending Review')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'tasks_task_review'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Review by {self.reviewer.email} for {self.target_user.email} (Task: {self.task.id})'

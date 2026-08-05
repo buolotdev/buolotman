@@ -24,10 +24,14 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
         port: '8000',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
   },
   async rewrites() {
-    const backendUrl = 'http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com';
     return [
       { source: '/api/:path*/', destination: `${backendUrl}/api/:path*/` },
       { source: '/api/:path*', destination: `${backendUrl}/api/:path*/` },
