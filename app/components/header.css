@@ -572,11 +572,13 @@ body {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  color: #334155;
 }
 
 #bmMegaRoot .bmSideBtn.active {
   background: #e2e8f0;
   border-left-color: var(--bm-primary);
+  color: #001F3F;
 }
 
 /* ================= CONTENT ================= */

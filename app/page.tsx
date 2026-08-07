@@ -425,6 +425,8 @@ export default function Home() {
                 <option value="Kenya">Kenya</option>
                 <option value="Ghana">Ghana</option>
                 <option value="South Africa">South Africa</option>
+                <option value="Ivory Coast">Ivory Coast</option>
+                <option value="Cameroon">Cameroon</option>
               </select>
 
               <button type="submit">Search</button>

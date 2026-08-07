@@ -240,6 +240,8 @@ export default function Footer() {
                   <button onClick={() => changeCountry("Nigeria")}>Nigeria</button>
                   <button onClick={() => changeCountry("Ghana")}>Ghana</button>
                   <button onClick={() => changeCountry("South Africa")}>South Africa</button>
+                  <button onClick={() => changeCountry("Ivory Coast")}>Ivory Coast</button>
+                  <button onClick={() => changeCountry("Cameroon")}>Cameroon</button>
                   <button onClick={() => changeCountry("Global")}>Global</button>
                 </div>
               )}

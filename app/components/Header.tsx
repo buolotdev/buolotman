@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useEffect } from "react";
 import "./header.css";
 
-export default function Header() {
+function Header() {
   useEffect(() => {
     // ===== MEGA MENU (top strip) =====
     const root = document.getElementById("bmMegaRoot");
@@ -22,7 +22,7 @@ export default function Header() {
         if (panel) panel.style.display = "block";
       };
 
-      btn.addEventListener("mouseenter", activateSidebar);
+
       btn.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         activateSidebar();
@@ -125,24 +125,6 @@ export default function Header() {
       link.addEventListener("click", handlePostTaskClick);
     });
 
-    const handleMegaHover = (e: React.MouseEvent) => {
-    let target = e.target as HTMLElement;
-    if (target.nodeType === 3) target = target.parentNode as HTMLElement;
-    if (!target || !target.closest) return;
-    const btn = target.closest('.bmSideBtn');
-    if (btn) {
-      const root = document.getElementById('bmMegaRoot');
-      if (!root || !root.contains(btn)) return;
-      root.querySelectorAll('.bmSideBtn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = (btn as HTMLElement).dataset.cat;
-      root.querySelectorAll('.bmPanel').forEach((g: Element) => {
-        (g as HTMLElement).style.display = 'none';
-      });
-      const panel = root.querySelector(`.bmPanel[data-panel="${cat}"]`) as HTMLElement | null;
-      if (panel) panel.style.display = 'block';
-    }
-  };
 
   return () => {
       document.removeEventListener("click", handleDocumentClick);
@@ -1036,7 +1018,10 @@ export default function Header() {
         <div class="bmDropMenu">
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ke.png"> Kenya</div>
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ng.png"> Nigeria</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ca.png"> Canada</div>
+          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/gh.png"> Ghana</div>
+          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/za.png"> South Africa</div>
+          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ci.png"> Ivory Coast</div>
+          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/cm.png"> Cameroon</div>
         </div>
       </div>
       <!-- LANGUAGE -->
@@ -1606,3 +1591,5 @@ export default function Header() {
     </div>
   );
 }
+
+export default React.memo(Header);
