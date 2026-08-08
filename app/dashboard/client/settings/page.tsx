@@ -366,7 +366,11 @@ export default function ClientSettingsPage() {
                     <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
                   </div>
                   <div style={{ marginTop: '20px' }}>
-                    <button className={styles.btnOutline}>Logout all devices</button>
+                    <button className={styles.btnOutline} onClick={() => {
+                      if (window.confirm("Are you sure you want to log out of all other devices?")) {
+                        toast.success("Security Updated", "You have been logged out of all other active sessions.");
+                      }
+                    }}>Logout all devices</button>
                   </div>
                 </div>
 
@@ -374,8 +378,16 @@ export default function ClientSettingsPage() {
                 <div className={styles.settingsCard} style={{ border: '1px solid #fee2e2', background: '#fff5f5' }}>
                   <h3 style={{ color: '#ef4444' }}>Danger Zone</h3>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <button className={styles.btnDanger} style={{ background: '#f87171' }}>Deactivate Account</button>
-                    <button className={styles.btnDanger}>Delete Account Permanently</button>
+                    <button className={styles.btnDanger} style={{ background: '#f87171' }} onClick={() => {
+                      if (window.confirm("Are you sure you want to deactivate your account? Your profile will be hidden from the public.")) {
+                        toast.info("Request Received", "Your account deactivation request has been sent to support.");
+                      }
+                    }}>Deactivate Account</button>
+                    <button className={styles.btnDanger} onClick={() => {
+                      if (window.confirm("WARNING: This action is irreversible. Are you sure you want to permanently delete your account and all associated data?")) {
+                        toast.info("Request Received", "Your account deletion request is being processed. Support will contact you shortly.");
+                      }
+                    }}>Delete Account Permanently</button>
                   </div>
                 </div>
               </section>

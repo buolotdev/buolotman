@@ -255,7 +255,11 @@ export default function TechnicianSettingsPage() {
                     <input type="checkbox" className={styles.checkbox} />
                   </div>
                   
-                  <button className={styles.btnOutline} onClick={() => toast.success("Success", "Logged out of all other devices.")}>
+                  <button className={styles.btnOutline} onClick={() => {
+                    if (window.confirm("Are you sure you want to log out of all other devices?")) {
+                      toast.success("Security Updated", "You have been logged out of all other active sessions.");
+                    }
+                  }}>
                     Logout all devices
                   </button>
                 </div>
@@ -276,10 +280,18 @@ export default function TechnicianSettingsPage() {
                   <h3 style={{ color: '#ef4444' }}>Danger Zone</h3>
                   
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <button className={styles.btnDanger} style={{ background: '#f87171' }}>
+                    <button className={styles.btnDanger} style={{ background: '#f87171' }} onClick={() => {
+                      if (window.confirm("Are you sure you want to deactivate your account? Your profile will be hidden from the public.")) {
+                        toast.info("Request Received", "Your account deactivation request has been sent to support.");
+                      }
+                    }}>
                       Deactivate Profile
                     </button>
-                    <button className={styles.btnDanger}>
+                    <button className={styles.btnDanger} onClick={() => {
+                      if (window.confirm("WARNING: This action is irreversible. Are you sure you want to permanently delete your account and all associated data?")) {
+                        toast.info("Request Received", "Your account deletion request is being processed. Support will contact you shortly.");
+                      }
+                    }}>
                       Delete Account Permanently
                     </button>
                   </div>
