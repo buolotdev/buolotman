@@ -76,7 +76,7 @@ def search(request):
     if min_rating is not None:
         companies = companies.filter(average_rating__gte=min_rating)
     if category:
-        companies = companies.filter(Q(services__category__slug__iexact=category) | Q(services__category__name__icontains=category)).distinct()
+        companies = companies.filter(Q(services__title__icontains=category) | Q(services__description__icontains=category)).distinct()
 
     services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True)
     if query:
