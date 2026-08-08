@@ -11,6 +11,13 @@ import { useRouter } from "next/navigation";
 export default function TaskBoard() {
   const router = useRouter();
   const { data: tasksData, loading, error, refetch } = useFetch(() => api.getTasks(), []);
+  const [isAuth, setIsAuth] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAuth(!!localStorage.getItem("access_token"));
+    }
+  }, []);
   
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -173,28 +180,41 @@ export default function TaskBoard() {
               <p><strong>{selectedTask.budget_min} - {selectedTask.budget_max} XOF</strong></p>
             </div>
 
-            <form className={styles.actionBox} onSubmit={submitApplication}>
-              <input 
-                type="number" 
-                placeholder="Your Proposed Price (XOF)" 
-                required 
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-              <textarea 
-                rows={3} 
-                placeholder="Why are you the best fit for this task? Include details of your experience." 
-                required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              ></textarea>
-              <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </button>
-              {submitError && <p style={{ color: '#e74c3c', fontWeight: 600, marginTop: '8px' }}>{submitError}</p>}
-              {showSuccess && <p style={{ color: '#1aa260', fontWeight: 600, marginTop: '8px' }}>Application sent successfully!</p>}
-            </form>
-
+            {isAuth ? (
+              <form className={styles.actionBox} onSubmit={submitApplication}>
+                <input 
+                  type="number" 
+                  placeholder="Your Proposed Price (XOF)" 
+                  required 
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <textarea 
+                  rows={3} 
+                  placeholder="Why are you the best fit for this task? Include details of your experience." 
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                ></textarea>
+                <button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                </button>
+                {submitError && <p style={{ color: '#e74c3c', fontWeight: 600, marginTop: '8px' }}>{submitError}</p>}
+                {showSuccess && <p style={{ color: '#1aa260', fontWeight: 600, marginTop: '8px' }}>Application sent successfully!</p>}
+              </form>
+            ) : (
+              <div className={styles.actionBox} style={{ textAlign: 'center', padding: '30px', background: '#f8fafc', borderRadius: 12, marginTop: 24 }}>
+                <iconify-icon icon="lucide:lock" style={{ fontSize: 40, color: '#94a3b8', marginBottom: 16 }}></iconify-icon>
+                <h3 style={{ margin: '0 0 8px', color: '#0f172a', fontSize: 18 }}>Please login first</h3>
+                <p style={{ color: '#64748b', marginBottom: 20 }}>You must be logged in as a Technician or Company to apply for this task.</p>
+                <button 
+                  onClick={() => router.push("/login?redirect=/find-tasks")}
+                  style={{ background: '#ff5722', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', width: '100%' }}
+                >
+                  Go to Login
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

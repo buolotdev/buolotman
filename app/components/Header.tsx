@@ -125,6 +125,38 @@ function Header() {
       link.addEventListener("click", handlePostTaskClick);
     });
 
+    // ===== AUTHENTICATION STATE =====
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("user_role");
+    
+    if (token) {
+      let dashboardUrl = "/dashboard/client";
+      if (role === "TECHNICIAN") dashboardUrl = "/dashboard/technician";
+      else if (role === "COMPANY") dashboardUrl = "/dashboard/company";
+
+      // Update Desktop Nav
+      const mainNav = document.querySelector(".bm-main-nav");
+      if (mainNav) {
+        const loginBtn = mainNav.querySelector('a[href="/login"]');
+        const signupBtn = mainNav.querySelector('a[href="/signup"]');
+        
+        if (loginBtn) {
+          loginBtn.outerHTML = `<a href="${dashboardUrl}" class="bm-main-btn" style="background:#e0e7ff; color:#3730a3; border:none; padding:8px 16px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon> Dashboard</a>`;
+        }
+        if (signupBtn) signupBtn.remove();
+      }
+
+      // Update Mobile Nav
+      const mobileNav = document.getElementById("bmMainMobileMenu");
+      if (mobileNav) {
+        const mLoginBtn = mobileNav.querySelector('a[href="/login"]');
+        const mSignupBtn = mobileNav.querySelector('a[href="/signup"]');
+        
+        if (mLoginBtn) mLoginBtn.outerHTML = `<a href="${dashboardUrl}" style="background:#e0e7ff; color:#3730a3; font-weight:600;"><iconify-icon icon="lucide:layout-dashboard" style="margin-right:8px;"></iconify-icon>Dashboard</a>`;
+        if (mSignupBtn) mSignupBtn.remove();
+      }
+    }
+
 
   return () => {
       document.removeEventListener("click", handleDocumentClick);
