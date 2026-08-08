@@ -201,7 +201,7 @@ export default function ClientDashboardPage() {
                         <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusActive}`}>In Progress</span></td>
                         <td>
                           <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className={styles.clientOutlineBtn}>View Workspace</button>
+                            <button className={styles.clientOutlineBtn} onClick={() => router.push('/dashboard/client/projects')}>View Workspace</button>
                             <button className={styles.clientPrimaryBtn} onClick={() => { setShowConfirmModal(true); setMilestoneConfirmed(false); }}>Confirm Milestone</button>
                           </div>
                         </td>
