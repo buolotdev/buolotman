@@ -134,27 +134,59 @@ function Header() {
       if (role === "TECHNICIAN") dashboardUrl = "/dashboard/technician";
       else if (role === "COMPANY") dashboardUrl = "/dashboard/company";
 
-      // Update Desktop Nav
-      const mainNav = document.querySelector(".bm-main-nav");
-      if (mainNav) {
-        const loginBtn = mainNav.querySelector('a[href="/login"]');
-        const signupBtn = mainNav.querySelector('a[href="/signup"]');
-        
-        if (loginBtn) {
-          loginBtn.outerHTML = `<a href="${dashboardUrl}" class="bm-main-btn" style="background:#e0e7ff; color:#3730a3; border:none; padding:8px 16px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon> Dashboard</a>`;
-        }
-        if (signupBtn) signupBtn.remove();
-      }
+      // Async function to fetch user data and update UI
+      const updateHeaderWithUser = async () => {
+        try {
+          const { api } = await import('@/app/lib/api');
+          const user = await api.getMe();
+          
+          let name = user.first_name ? `${user.first_name} ${user.last_name || ''}` : user.company_name || 'Dashboard';
+          if (!user.first_name && !user.company_name) name = user.email ? user.email.split('@')[0] : 'User';
+          
+          let initials = 'U';
+          if (user.first_name) initials = user.first_name.charAt(0).toUpperCase() + (user.last_name ? user.last_name.charAt(0).toUpperCase() : '');
+          else if (user.company_name) initials = user.company_name.substring(0, 2).toUpperCase();
 
-      // Update Mobile Nav
-      const mobileNav = document.getElementById("bmMainMobileMenu");
-      if (mobileNav) {
-        const mLoginBtn = mobileNav.querySelector('a[href="/login"]');
-        const mSignupBtn = mobileNav.querySelector('a[href="/signup"]');
-        
-        if (mLoginBtn) mLoginBtn.outerHTML = `<a href="${dashboardUrl}" style="background:#e0e7ff; color:#3730a3; font-weight:600;"><iconify-icon icon="lucide:layout-dashboard" style="margin-right:8px;"></iconify-icon>Dashboard</a>`;
-        if (mSignupBtn) mSignupBtn.remove();
-      }
+          const avatarUrl = user.avatar_url || user.logo_url;
+          const avatarHtml = avatarUrl 
+            ? `<img src="${avatarUrl}" alt="User" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />` 
+            : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px;">${initials}</div>`;
+
+          const profileBtnHtml = `
+            <a href="${dashboardUrl}" style="display:flex; align-items:center; gap:10px; text-decoration:none; padding: 6px 12px; border-radius: 30px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;">
+              ${avatarHtml}
+              <div style="display:flex; flex-direction:column; line-height:1.2; padding-right:8px;">
+                <span style="color:#0f172a; font-weight:700; font-size:14px; white-space:nowrap;">${name}</span>
+                <span style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:600;">${role || 'User'}</span>
+              </div>
+            </a>
+          `;
+
+          // Update Desktop Nav
+          const mainNav = document.querySelector(".bm-main-nav");
+          if (mainNav) {
+            const loginBtn = mainNav.querySelector('a[href="/login"]');
+            const signupBtn = mainNav.querySelector('a[href="/signup"]');
+            
+            if (loginBtn) loginBtn.outerHTML = profileBtnHtml;
+            if (signupBtn) signupBtn.remove();
+          }
+
+          // Update Mobile Nav
+          const mobileNav = document.getElementById("bmMainMobileMenu");
+          if (mobileNav) {
+            const mLoginBtn = mobileNav.querySelector('a[href="/login"]');
+            const mSignupBtn = mobileNav.querySelector('a[href="/signup"]');
+            
+            if (mLoginBtn) mLoginBtn.outerHTML = `<a href="${dashboardUrl}" style="background:#f8fafc; color:#0f172a; font-weight:700; display:flex; align-items:center; gap:10px;">${avatarHtml} Go to Dashboard</a>`;
+            if (mSignupBtn) mSignupBtn.remove();
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data for header", error);
+        }
+      };
+      
+      updateHeaderWithUser();
     }
 
 
