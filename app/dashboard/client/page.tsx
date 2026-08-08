@@ -127,7 +127,7 @@ export default function ClientDashboardPage() {
             <section className={styles.welcomeSection}>
               <div className={styles.welcomeContent}>
                 <p className={styles.eyebrow}>Dashboard overview</p>
-                <h2 className={styles.welcomeTitle}>Welcome back, ready to get things done?</h2>
+                <h2 className={styles.welcomeTitle}>Welcome{userName ? `, ${userName}` : ''}! Ready to get things done?</h2>
                 <p className={styles.welcomeSubtitle}>Track active jobs, review quotes, manage saved professionals, and move faster on your next project.</p>
               </div>
               <div className={styles.welcomeActions}>

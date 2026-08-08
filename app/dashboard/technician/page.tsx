@@ -74,7 +74,7 @@ export default function TechnicianDashboardPage() {
             <div className={styles.heroCard}>
               <div className={styles.heroCopy}>
                 <span className={styles.heroEyebrow}><iconify-icon icon="lucide:zap" /> Dashboard overview</span>
-                <h1>Welcome back{userName ? `, ${userName}` : ""}!</h1>
+                <h1>Welcome{userName ? `, ${userName}` : ""}!</h1>
                 <p>Find new tasks, manage your bids, track earnings, and grow your reputation.</p>
               </div>
               <div className={styles.heroActions}>
