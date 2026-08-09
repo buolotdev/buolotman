@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
         port: '8000',
       },
       {
+        protocol: 'http',
+        hostname: 'BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'boulotman-api.onrender.com',
+      },
+      {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
       },
