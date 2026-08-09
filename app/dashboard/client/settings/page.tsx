@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import DashboardHeader from "@/app/components/DashboardHeader";
