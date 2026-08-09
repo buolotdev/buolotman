@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
@@ -127,7 +127,7 @@ export default function TechnicianSettingsPage() {
                     ) : (
                       <div className={styles.avatarLarge} onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: "pointer" }}>
                         {userData?.avatar_url ? (
-                          <Image src={userData?.avatar_url} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
+                          <Image src={getImageUrl(userData?.avatar_url)} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
                         ) : userInitials}
                         <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} />
                       </div>

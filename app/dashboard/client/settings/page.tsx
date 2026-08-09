@@ -227,7 +227,7 @@ export default function ClientSettingsPage() {
                   title="Click to change banner"
                   style={{
                     cursor: "pointer",
-                    backgroundImage: me?.banner_url ? `url(${me?.banner_url})` : undefined,
+                    backgroundImage: me?.banner_url ? `url(${getImageUrl(me?.banner_url)})` : undefined,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
@@ -252,7 +252,7 @@ export default function ClientSettingsPage() {
                     ) : (
                       <div className={styles.avatarLarge} onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: "pointer" }}>
                         {me?.avatar_url ? (
-                          <Image src={me?.avatar_url} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
+                          <Image src={getImageUrl(me?.avatar_url)} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
                         ) : initials}
                         <div style={{
                           position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", opacity: avatarUploading ? 1 : 0, transition: "opacity 0.2s", color: "#fff",

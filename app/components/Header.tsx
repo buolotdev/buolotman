@@ -137,7 +137,7 @@ function Header() {
       // Async function to fetch user data and update UI
       const updateHeaderWithUser = async () => {
         try {
-          const { api } = await import('@/app/lib/api');
+          const { api, getImageUrl } = await import('@/app/lib/api');
           const user = await api.getMe();
           
           let name = user.first_name ? `${user.first_name} ${user.last_name || ''}` : user.company_name || 'Dashboard';
@@ -147,7 +147,7 @@ function Header() {
           if (user.first_name) initials = user.first_name.charAt(0).toUpperCase() + (user.last_name ? user.last_name.charAt(0).toUpperCase() : '');
           else if (user.company_name) initials = user.company_name.substring(0, 2).toUpperCase();
 
-          const avatarUrl = user.avatar_url || user.logo_url;
+          const avatarUrl = getImageUrl(user.avatar_url || user.logo_url);
           const avatarHtml = avatarUrl 
             ? `<img src="${avatarUrl}" alt="User" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />` 
             : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px;">${initials}</div>`;

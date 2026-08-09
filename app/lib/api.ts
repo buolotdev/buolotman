@@ -1,5 +1,21 @@
 const API_BASE = "/api";
 
+export function getImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com';
+  
+  if (url.startsWith("http://localhost:8000")) {
+    return url.replace("http://localhost:8000", backendUrl);
+  }
+  
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  
+  if (url.startsWith("/media/")) {
+    return `${backendUrl}${url}`;
+  }
+  return url;
+}
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
