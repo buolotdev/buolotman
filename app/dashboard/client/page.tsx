@@ -65,6 +65,7 @@ export default function ClientDashboardPage() {
 
   const activeTasks = tasks.filter((t: any) => t.status === "in_progress" || t.status === "open").length;
   const completedTasks = tasks.filter((t: any) => t.status === "completed").length;
+  const unreadMessagesCount = convList.reduce((acc: number, conv: any) => acc + (conv.unread_count || 0), 0);
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
@@ -145,7 +146,7 @@ export default function ClientDashboardPage() {
               <article className={styles.statCard}>
                 <div className={`${styles.statIcon} ${styles.statAccent}`}><iconify-icon icon="lucide:briefcase" /></div>
                 <div>
-                  <div className={styles.statValue}>2</div>
+                  <div className={styles.statValue}>{activeTasks}</div>
                   <p>Active Projects</p>
                 </div>
               </article>
@@ -166,7 +167,7 @@ export default function ClientDashboardPage() {
               <article className={styles.statCard}>
                 <div className={`${styles.statIcon} ${styles.statPrimary}`}><iconify-icon icon="lucide:message-square" /></div>
                 <div>
-                  <div className={styles.statValue}>3</div>
+                  <div className={styles.statValue}>{unreadMessagesCount}</div>
                   <p>Unread Messages</p>
                 </div>
               </article>
