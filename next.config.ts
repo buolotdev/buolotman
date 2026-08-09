@@ -26,6 +26,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'http',
+        hostname: 'boulotman-api-env.eba-exncce63.eu-north-1.elasticbeanstalk.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'boulotman-api-env.eba-exncce63.eu-north-1.elasticbeanstalk.com',
+      },
+      {
+        protocol: 'http',
         hostname: 'BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com',
       },
       {
