@@ -148,8 +148,9 @@ function Header() {
           else if (user.company_name) initials = user.company_name.substring(0, 2).toUpperCase();
 
           const avatarUrl = getImageUrl(user.avatar_url || user.logo_url);
-          const avatarHtml = avatarUrl 
-            ? `<img src="${avatarUrl}" alt="User" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />` 
+          const proxiedAvatarUrl = avatarUrl ? `/_next/image?url=${encodeURIComponent(avatarUrl)}&w=64&q=75` : "";
+          const avatarHtml = proxiedAvatarUrl 
+            ? `<img src="${proxiedAvatarUrl}" alt="User" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />` 
             : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px;">${initials}</div>`;
 
           const profileBtnHtml = `
