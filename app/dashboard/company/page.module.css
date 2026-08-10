@@ -1,4 +1,4 @@
-.content { display: flex; flex-direction: column; gap: 40px; padding: 32px; background: linear-gradient(180deg, #f1f5f9 0%, #fefeff 180px); min-height: 100vh; }
+﻿.content { display: flex; flex-direction: column; gap: 40px; padding: 32px; background: linear-gradient(180deg, #f1f5f9 0%, #fefeff 180px); min-height: 100vh; }
 
 .welcomeSection { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%); padding: 40px; border-radius: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15); }
 .welcomeSection::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); opacity: 0.5; pointer-events: none; }
@@ -23,7 +23,7 @@
 .statCard { display: flex; align-items: center; gap: 20px; padding: 24px; }
 .card { padding: 32px 24px; }
 .cardHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.cardHeader h3 { margin: 0; font-size: 22px; font-weight: 800; color: #001f3f; }
+.cardHeader h3 { margin: 0; font-size: 22px; font-weight: 800; color: #1e3a8a; }
 .linkButton { border: 0; background: transparent; font-size: 14px; font-weight: 700; cursor: pointer; color: #ff4500; text-decoration: none; transition: color 0.2s ease; }
 .linkButton:hover { color: #cc3700; }
 
@@ -41,7 +41,7 @@
 .tableWrapper { width: 100%; overflow-x: auto; }
 .table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
 .table th, .table td { padding: 16px 12px; border-bottom: 1px solid #e6e6e6; }
-.table th { color: #555; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+.table th { color: #1e3a8a; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
 .table td { color: #1a1a1a; font-weight: 500; }
 .table tr:last-child td { border-bottom: none; }
 .emptyState { text-align: center; color: #64748b; font-size: 14px; padding: 24px; font-style: italic; }
@@ -90,3 +90,4 @@
 
 @media (max-width: 1280px) { .statsGrid, .twoColumnGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .content { padding: 20px; } .statsGrid, .twoColumnGrid { grid-template-columns: 1fr; } .welcomeActions { width: 100%; flex-direction: column; } .primaryButton, .secondaryButton { width: 100%; } }
+
