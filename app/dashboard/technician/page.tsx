@@ -129,76 +129,7 @@ export default function TechnicianDashboardPage() {
               )}
             </div>
 
-            {/* NEW TABLES */}
-            <div className={styles.tableGrid}>
-              
-              <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: 0 }}>
-                <h3 className={styles.sectionHeader} style={{ fontSize: '18px' }}>Assigned Projects</h3>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className={styles.dataTable}>
-                    <thead>
-                      <tr>
-                        <th>Project</th>
-                        <th>Client</th>
-                        <th>Progress</th>
-                        <th>Milestone</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Residential Wiring</td>
-                        <td>John Mukasa</td>
-                        <td>45%</td>
-                        <td>Milestone 1</td>
-                        <td><span className={`${styles.statusBadge} ${styles.statusPending}`}>In Progress</span></td>
-                        <td><button className={styles.btnOutlineSmall}>Update</button></td>
-                      </tr>
-                      <tr>
-                        <td>Office CCTV Installation</td>
-                        <td>Mary Uwase</td>
-                        <td>100%</td>
-                        <td>Final</td>
-                        <td><span className={`${styles.statusBadge} ${styles.statusActive}`}>Completed</span></td>
-                        <td><button className={styles.btnPrimarySmall}>Request</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
 
-              <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: 0 }}>
-                <h3 className={styles.sectionHeader} style={{ fontSize: '18px' }}>Payments Overview</h3>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className={styles.dataTable}>
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Project</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>2026-02-01</td>
-                        <td>Office CCTV Installation</td>
-                        <td>$850</td>
-                        <td><span className={`${styles.statusBadge} ${styles.statusActive}`}>Released</span></td>
-                      </tr>
-                      <tr>
-                        <td>2026-01-22</td>
-                        <td>Residential Wiring</td>
-                        <td>$400</td>
-                        <td><span className={`${styles.statusBadge} ${styles.statusPending}`}>On Hold</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-            </div>
 
             <div className={styles.dashboardGrid}>
               <div className={styles.leftColumn}>
