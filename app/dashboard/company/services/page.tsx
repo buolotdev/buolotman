@@ -356,7 +356,6 @@ export default function AddService() {
                 <p>No services published yet. Add your first service above.</p>
               </div>
             )}
-          </div>
         </div>
       </div>
     </div>
