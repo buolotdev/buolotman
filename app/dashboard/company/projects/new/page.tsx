@@ -183,7 +183,7 @@ export default function CreateCompanyProjectPage() {
                 onChange={e => setForm({...form, category: e.target.value, subcategory: ""})}
                 required
               >
-                <option value="">Select Category</option>
+                <option value="">👉 Click here to select Category</option>
                 {categoriesLoading ? (
                   <option>Loading...</option>
                 ) : (
@@ -203,7 +203,7 @@ export default function CreateCompanyProjectPage() {
                 required
                 disabled={!form.category || subcategories.length === 0}
               >
-                <option value="">{!form.category ? "Select Category First" : "Select Subcategory"}</option>
+                <option value="">{!form.category ? "👈 Click 'Category' on the left first" : "Select Subcategory"}</option>
                 {subcategories.map((sub: any) => (
                   <option key={sub.id} value={String(sub.id)}>{sub.name}</option>
                 ))}
