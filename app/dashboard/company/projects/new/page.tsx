@@ -8,6 +8,17 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
+const COUNTRIES = [
+  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", "Cameroon", 
+  "Central African Republic", "Chad", "Comoros", "Congo", "Democratic Republic of the Congo", 
+  "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", 
+  "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast (Côte d'Ivoire)", "Kenya", "Lesotho", "Liberia", "Libya", 
+  "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", 
+  "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", 
+  "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", 
+  "Zambia", "Zimbabwe", "United States", "United Kingdom", "France", "Canada", "Other"
+];
+
 export default function CreateCompanyProjectPage() {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -204,14 +215,17 @@ export default function CreateCompanyProjectPage() {
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Country (auto-detected)</label>
-              <input 
-                type="text" 
-                className={styles.input} 
+              <select 
+                className={styles.select} 
                 value={form.country}
                 onChange={e => setForm({...form, country: e.target.value})}
-                placeholder="Country"
                 required
-              />
+              >
+                <option value="">Select Country</option>
+                {COUNTRIES.map(country => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </select>
             </div>
             <div className={styles.fieldGroup}>
               <label className={styles.label}>City (auto-detected)</label>
