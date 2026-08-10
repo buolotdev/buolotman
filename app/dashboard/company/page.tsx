@@ -56,7 +56,7 @@ export default function CompanyDashboard() {
           </div>
           <div className={styles.welcomeActions}>
             <Link href="/dashboard/company/projects/new" className={styles.primaryButton}>
-              <iconify-icon icon="lucide:plus" /> Create New Project
+              <iconify-icon icon="lucide:plus" /> Post a Service
             </Link>
             <Link href="/dashboard/company/services" className={styles.secondaryButton}>
               Manage Services
@@ -312,8 +312,8 @@ export default function CompanyDashboard() {
                 <h3>Quick Actions</h3>
               </div>
               <div className={styles.actionGrid}>
-                <Link href="/dashboard/company/projects" className={styles.actionBtn}>
-                  <iconify-icon icon="lucide:briefcase" /> New Project
+                <Link href="/dashboard/company/projects/new" className={styles.actionBtn}>
+                  <iconify-icon icon="lucide:briefcase" /> Post a Service
                 </Link>
                 <Link href="/dashboard/company/services" className={styles.actionBtn}>
                   <iconify-icon icon="lucide:layers" /> Add Service
