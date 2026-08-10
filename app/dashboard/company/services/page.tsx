@@ -111,22 +111,17 @@ export default function AddService() {
   return (
     <div className={layoutStyles.content}>
       <div className={styles.container}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
-          <div>
-            <p style={{ margin: 0, color: "#64748b", fontSize: 15, fontWeight: 500 }}>Company dashboard</p>
-            <h1 style={{ margin: "4px 0 0", color: "#001f3f", fontSize: 32, fontWeight: 800 }}>Manage Services</h1>
-          </div>
-          <Link href="/dashboard/company" style={{ color: "#ff4500", fontWeight: 600, textDecoration: "none", fontSize: 15, display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <iconify-icon icon="lucide:arrow-left" /> Back to dashboard
-          </Link>
-        </header>
-
         <div className={styles.formContainer}>
-          <div className={styles.formHeader} style={{ display: "none" }}>
-            <h1 className={styles.pageTitle}>Manage Services</h1>
-            <p className={styles.pageSubtitle}>
-              Publish the services your company offers. Clients will see these on your public profile.
-            </p>
+          <div className={styles.formHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <h1 className={styles.pageTitle}>Manage Services</h1>
+              <p className={styles.pageSubtitle}>
+                Publish the services your company offers. Clients will see these on your public profile.
+              </p>
+            </div>
+            <Link href="/dashboard/company" style={{ color: "#ffffff", background: "#ff4500", fontWeight: 600, textDecoration: "none", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 16px", borderRadius: "8px", transition: "opacity 0.2s" }}>
+              <iconify-icon icon="lucide:arrow-left" /> Back to dashboard
+            </Link>
           </div>
 
           <div className={styles.formBody}>
