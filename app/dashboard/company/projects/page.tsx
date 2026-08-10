@@ -10,12 +10,12 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import { formatXOF } from "@/app/lib/format";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 export default function CompanyProjects() {
   const [activeNav, setActiveNav] = useState("projects");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending" | "completed">("all");
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: projectsData, loading: projectsLoading, error } = useFetch(
@@ -45,14 +45,7 @@ export default function CompanyProjects() {
     (p) => p.status === "pending" || p.status === "draft"
   ).length;
 
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
-    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
-    { id: "projects", label: "Projects & Contracts", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
-    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
-    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
-  ];
+  
 
   const statusBadge = (status: string) => {
     switch (status) {
@@ -70,59 +63,17 @@ export default function CompanyProjects() {
   };
 
   return (
-    <div className={`${layoutStyles.layoutWrapper} ${mobileSidebarOpen ? layoutStyles.sidebarOpenMobile : ""}`}>
-      <div className={layoutStyles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
-      <aside className={layoutStyles.sidebar}>
-        <div className={layoutStyles.sidebarHeader}>
-          <Link href="/" className={layoutStyles.brand}>
-            <Image
-              src="/boulotman-logo.png"
-              alt="Boulot Man"
-              width={180}
-              height={46}
-              className={layoutStyles.brandImage}
-              style={{ width: 'auto', height: '46px' }}
-              priority
-            />
-          </Link>
-          <button className={layoutStyles.mobileCloseBtn} onClick={() => setMobileSidebarOpen(false)}>
-            <iconify-icon icon="lucide:x" />
-          </button>
-        </div>
+    <>
 
-        <nav className={layoutStyles.navMenu}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${layoutStyles.navItem} ${activeNav === item.id ? layoutStyles.navItemActive : ""}`}
-            >
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className={layoutStyles.sidebarFooter}>
-          <LogoutButton className={layoutStyles.logoutButton} />
-          <p className={layoutStyles.copyright}>© 2026 Boulot Man Inc.</p>
-        </div>
-      </aside>
-
-      <div className={layoutStyles.mainWrapper}>
-        <DashboardHeader
-          onMenuClick={() => setMobileSidebarOpen(true)}
-        />
-
-        <main className={styles.pageContent}>
-          <div className={styles.pageHeader}>
-            <div>
-              <h1 className={styles.pageTitle}>Projects & Contracts</h1>
-              <p className={styles.pageSubtitle}>
-                Manage your active projects and review completed contracts.
-              </p>
-            </div>
+      <main className={styles.pageContent}>
+        <div className={styles.pageHeader}>
+          <div>
+            <h1 className={styles.pageTitle}>Projects & Contracts</h1>
+            <p className={styles.pageSubtitle}>
+              Manage your active projects and review completed contracts.
+            </p>
           </div>
+        </div>
 
           {projectsLoading ? (
             <div className={styles.statsGrid}>
@@ -270,7 +221,6 @@ export default function CompanyProjects() {
             )}
           </div>
         </main>
-      </div>
-    </div>
+    </>
   );
 }

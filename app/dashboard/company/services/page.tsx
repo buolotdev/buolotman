@@ -11,28 +11,18 @@ import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 import LogoutButton from "@/app/components/LogoutButton";
 import { TAXONOMY } from "./taxonomy";
 
 export default function AddService() {
   const toast = useToast();
   const dialog = useDialog();
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const router = useRouter();
   const pathname = usePathname();
 
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard", match: (p: string) => p === "/dashboard/company" },
-    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers", match: (p: string) => p.startsWith("/dashboard/company/services") },
-    { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase", match: (p: string) => p.startsWith("/dashboard/company/projects") },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square", match: (p: string) => p.startsWith("/dashboard/company/messages") },
-    { id: "wallet", label: "Wallet", href: "/dashboard/company/wallet", icon: "lucide:wallet", match: (p: string) => p.startsWith("/dashboard/company/wallet") },
-    { id: "team", label: "Team", href: "/dashboard/company/team", icon: "lucide:users", match: (p: string) => p.startsWith("/dashboard/company/team") },
-    { id: "reviews", label: "Reviews", href: "/dashboard/company/reviews", icon: "lucide:star", match: (p: string) => p.startsWith("/dashboard/company/reviews") },
-    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user", match: (p: string) => p.startsWith("/dashboard/company/profile") },
-    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings", match: (p: string) => p.startsWith("/dashboard/company/settings") },
-  ];
+  
 
   const { data: services, loading: servicesLoading, refetch } = useFetch(() => api.getCompanyServices(), []);
 
@@ -119,52 +109,7 @@ export default function AddService() {
   };
 
   return (
-    <div className={`${layoutStyles.layoutWrapper} ${mobileSidebarOpen ? layoutStyles.sidebarOpenMobile : ""}`}>
-      <div className={layoutStyles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
-
-      <aside className={layoutStyles.sidebar}>
-        <div className={layoutStyles.sidebarHeader}>
-          <Link href="/" className={layoutStyles.brand}>
-            <Image src="/boulotman-logo.png" alt="Boulot Man" width={54} height={54} className={layoutStyles.brandImage} priority />
-            <div className={layoutStyles.brandText}>
-              <span className={layoutStyles.brandEyebrow}>Boulot Man</span>
-              <span className={layoutStyles.brandTitle}>Company Space</span>
-            </div>
-          </Link>
-        </div>
-
-        <nav className={layoutStyles.navMenu}>
-          {navItems.map((item) => {
-            const isActive = item.match(pathname || "");
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={`${layoutStyles.navItem} ${isActive ? layoutStyles.navItemActive : ""}`}
-                onClick={(e) => {
-                  if (pathname === item.href) {
-                    e.preventDefault();
-                    window.location.reload();
-                  }
-                }}
-              >
-                <iconify-icon icon={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className={layoutStyles.sidebarFooter}>
-          <LogoutButton className={layoutStyles.logoutButton} />
-          <p className={layoutStyles.copyright}>© 2026 Boulot Man Inc.</p>
-        </div>
-      </aside>
-
-      <main className={layoutStyles.mainWrapper}>
-        <DashboardHeader
-          onMenuClick={() => setMobileSidebarOpen(true)}
-        />
+    <>
         <div className={styles.exportWrapper}>
           <div style={{ padding: "16px 24px 0", textAlign: "right" }}>
         <Link href="/dashboard/company/profile" className={styles.closeBtn} style={{ textDecoration: "none", color: "#001f3f", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -412,7 +357,7 @@ export default function AddService() {
           </div>
         </main>
       </div>
-    </main>
-  </div>
+    
+    </>
   );
 }

@@ -9,7 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 type Message = {
   id: string;
@@ -36,7 +36,7 @@ type Conversation = {
 
 export default function CompanyMessages() {
   const toast = useToast();
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
   const [draft, setDraft] = useState("");
@@ -124,14 +124,7 @@ export default function CompanyMessages() {
     }
   }, [activeMessages]);
 
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
-    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
-    { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
-    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
-    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
-  ];
+  
 
   const activeConv = conversations.find((c) => c.id === activeId) || conversations[0];
 
@@ -213,48 +206,7 @@ export default function CompanyMessages() {
   };
 
   return (
-    <div className={`${styles.layoutWrapper} ${mobileSidebarOpen ? styles.sidebarOpenMobile : ""}`}>
-      <div className={styles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
-
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarHeader}>
-          <Link href="/" className={styles.brand}>
-            <Image
-              src="/boulotman-logo.png"
-              alt="Boulot Man"
-              width={180}
-              height={46}
-              className={styles.brandImage}
-              priority
-            />
-          </Link>
-          <button
-            className={styles.sidebarCloseBtn}
-            onClick={() => setMobileSidebarOpen(false)}
-            aria-label="Close Sidebar"
-          >
-            <iconify-icon icon="lucide:x" />
-          </button>
-        </div>
-
-        <nav className={styles.navMenu}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${styles.navItem} ${item.id === "messages" ? styles.navItemActive : ""}`}
-            >
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <div className={styles.mainWrapper}>
-        <DashboardHeader
-          onMenuClick={() => setMobileSidebarOpen(true)}
-        />
+    <>
 
         <div className={styles.chatShell}>
           <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
@@ -442,8 +394,7 @@ export default function CompanyMessages() {
               </div>
             )}
           </section>
-        </div>
-      </div>
-    </div>
+            </div>
+    </>
   );
 }

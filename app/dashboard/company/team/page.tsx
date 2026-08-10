@@ -4,22 +4,19 @@ import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import Link from "next/link";
+import layoutStyles from "../page.module.css";
 import styles from "./team.module.css";
-import DashboardHeader from "@/app/components/DashboardHeader";
 
-const mockTeam = [
-  { id: 1, name: "Ali Ahmad Ramzan", role: "Owner", email: "ali@boulotman.com", status: "active", initials: "AA" },
-  { id: 2, name: "Sarah Connor", role: "Manager", email: "sarah@boulotman.com", status: "active", initials: "SC" },
-  { id: 3, name: "John Smith", role: "Technician", email: "john@boulotman.com", status: "pending", initials: "JS" },
-];
+
+const mockTeam: any[] = [];
 
 export default function CompanyTeamPage() {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const team = mockTeam;
 
   return (
-    <main className={styles.mainWrapper}>
-      <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+    <>
+      <div className={layoutStyles.content}>
       <div className={styles.container} style={{ marginTop: 32 }}>
         <header className={styles.header}>
           <div className={styles.headerLeft}>
@@ -64,6 +61,8 @@ export default function CompanyTeamPage() {
           ))}
         </div>
       </div>
-    </main>
+    
+      </div>
+    </>
   );
 }

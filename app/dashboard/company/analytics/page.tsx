@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import layoutStyles from "../page.module.css";
 
 export default function CompanyAnalyticsPage() {
   const { data: profile } = useFetch(() => api.getCompanyProfile(), []);
@@ -13,6 +14,7 @@ export default function CompanyAnalyticsPage() {
   const services = Array.isArray(servicesData) ? servicesData : [];
 
   return (
+    <div className={layoutStyles.content}>
     <main style={{ padding: 24 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gap: 20 }}>
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
@@ -30,12 +32,10 @@ export default function CompanyAnalyticsPage() {
           <Card label="Rating" value={profile?.average_rating ? String(profile.average_rating) : "0"} />
         </section>
 
-        <section style={{ background: "#fff", borderRadius: 20, padding: 24 }}>
-          <h2 style={{ marginTop: 0 }}>Company Snapshot</h2>
-          <pre style={{ whiteSpace: "pre-wrap", margin: 0 }}>{JSON.stringify(profile || {}, null, 2)}</pre>
-        </section>
+        
       </div>
     </main>
+    </div>
   );
 }
 

@@ -6,7 +6,7 @@ import { useState, useRef } from "react";
 import layoutStyles from "../page.module.css";
 import styles from "./profile.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { SkeletonBlock, SkeletonStat } from "@/app/components/skeleton/Skeleton";
@@ -14,7 +14,7 @@ import { useToast } from "@/app/components/Toast";
 
 export default function CompanyProfileDashboard() {
   const [activeNav, setActiveNav] = useState("profile");
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -61,14 +61,7 @@ export default function CompanyProfileDashboard() {
     }
   };
 
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", href: "/dashboard/company", icon: "lucide:layout-dashboard" },
-    { id: "services", label: "Services", href: "/dashboard/company/services", icon: "lucide:layers" },
-    { id: "projects", label: "Projects", href: "/dashboard/company/projects", icon: "lucide:briefcase" },
-    { id: "messages", label: "Messages", href: "/dashboard/company/messages", icon: "lucide:message-square" },
-    { id: "profile", label: "Profile", href: "/dashboard/company/profile", icon: "lucide:user" },
-    { id: "settings", label: "Settings", href: "/dashboard/company/settings", icon: "lucide:settings" },
-  ];
+  
 
   const companyName = profile?.company_name || `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || user?.username || "";
   const companyEmail = user?.email || profile?.email || "";
@@ -101,43 +94,7 @@ export default function CompanyProfileDashboard() {
   const areasOfExpertise = profile?.areas_of_expertise || "";
 
   return (
-    <div className={`${layoutStyles.layoutWrapper} ${mobileSidebarOpen ? layoutStyles.sidebarOpenMobile : ""}`}>
-      <div className={layoutStyles.sidebarOverlay} onClick={() => setMobileSidebarOpen(false)} />
-      <aside className={layoutStyles.sidebar}>
-        <div className={layoutStyles.sidebarHeader}>
-          <Link href="/" className={layoutStyles.brand}>
-            <Image
-              src="/boulotman-logo.png"
-              alt="Boulot Man Logo"
-              width={180}
-              height={46}
-              className={layoutStyles.brandImage}
-              priority
-            />
-          </Link>
-        </div>
-
-        <nav className={layoutStyles.navMenu}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${layoutStyles.navItem} ${activeNav === item.id ? layoutStyles.navItemActive : ""}`}
-            >
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className={layoutStyles.sidebarFooter}>
-          <LogoutButton className={layoutStyles.logoutButton} />
-          <p className={layoutStyles.copyright}>© 2026 Boulot Man Inc.</p>
-        </div>
-      </aside>
-
-      <main className={layoutStyles.mainWrapper}>
-        <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+    <>
 
         <div className={styles.content}>
           {profileLoading ? (
@@ -470,7 +427,7 @@ export default function CompanyProfileDashboard() {
             </>
           )}
         </div>
-      </main>
-    </div>
+      
+    </>
   );
 }

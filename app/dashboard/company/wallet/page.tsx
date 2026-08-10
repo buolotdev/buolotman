@@ -4,19 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import layoutStyles from "../page.module.css";
 import styles from "./wallet.module.css";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 export default function CompanyWalletPage() {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const { data: wallet, loading: walletLoading, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions(), []);
 
   const transactions = (txData as any)?.results || [];
 
   return (
-    <main className={styles.mainWrapper}>
-      <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+    <>
+      <div className={layoutStyles.content}>
       <div className={styles.container} style={{ marginTop: 32 }}>
         <header className={styles.header}>
           <div>
@@ -79,6 +80,7 @@ export default function CompanyWalletPage() {
           )}
         </section>
       </div>
-    </main>
+      </div>
+    </>
   );
 }

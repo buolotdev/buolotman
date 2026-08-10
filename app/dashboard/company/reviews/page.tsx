@@ -4,39 +4,21 @@ import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import Link from "next/link";
+import layoutStyles from "../page.module.css";
 import styles from "./reviews.module.css";
-import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 // Mock data since backend is pending
-const mockReviews = [
-  {
-    id: 1,
-    clientName: "John Doe",
-    initials: "JD",
-    rating: 5,
-    date: "2026-06-15",
-    text: "Excellent service! The team was very professional and completed the plumbing repair ahead of schedule.",
-    service: "Plumbing Services"
-  },
-  {
-    id: 2,
-    clientName: "Sarah Smith",
-    initials: "SS",
-    rating: 4,
-    date: "2026-06-10",
-    text: "Good work on the electrical wiring. A bit of delay but the quality is great.",
-    service: "Electrical Installation"
-  }
-];
+const mockReviews: any[] = [];
 
 export default function CompanyReviewsPage() {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
   const reviews = mockReviews;
   const avgRating = 4.5;
 
   return (
-    <main className={styles.mainWrapper}>
-      <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+    <>
+      <div className={layoutStyles.content}>
       <div className={styles.container} style={{ marginTop: 32 }}>
         <header className={styles.header}>
           <div>
@@ -96,6 +78,7 @@ export default function CompanyReviewsPage() {
           </div>
         )}
       </div>
-    </main>
+      </div>
+    </>
   );
 }
