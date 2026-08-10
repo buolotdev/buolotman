@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -74,16 +74,16 @@ export default function CompanyDashboard() {
                     <tr>
                       <td>James M.</td>
                       <td>Commercial Building</td>
-                      <td>,000 – ,000</td>
+                      <td>$50,000 – $70,000</td>
                       <td>Feb 20, 2026</td>
-                      <td><span className={${styles.status} }>Pending</span></td>
+                      <td><span className={`${styles.status} ${styles.pending}`}>Pending</span></td>
                     </tr>
                     <tr>
                       <td>Linda K.</td>
                       <td>Renovation</td>
-                      <td>,000 – ,000</td>
+                      <td>$8,000 – $12,000</td>
                       <td>Feb 10, 2026</td>
-                      <td><span className={${styles.status} }>Approved</span></td>
+                      <td><span className={`${styles.status} ${styles.approved}`}>Approved</span></td>
                     </tr>
                   </tbody>
                 </table>
