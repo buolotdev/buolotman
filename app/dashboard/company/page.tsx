@@ -3,157 +3,168 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
-import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
+import LogoutButton from "@/app/components/LogoutButton";
+
 
 export default function CompanyDashboard() {
+  
   const router = useRouter();
+  const pathname = usePathname();
+
+  
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: companyProfile, loading: profileLoading } = useFetch(() => api.getCompanyProfile(), []);
   const { data: projectsData, loading: projectsLoading } = useFetch(() => api.getCompanyProjects(), []);
+  const { data: servicesData, loading: servicesLoading } = useFetch(() => api.getCompanyServices(), []);
+  const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
   const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
 
   const projects = toArray(projectsData);
+  const services = toArray(servicesData);
+  const activeProjects = projects.filter((p: any) => p.status === "in_progress").length;
   const completedProjects = projects.filter((p: any) => p.status === "completed").length;
-  
-  // Real messages count
-  const messagesCount = Array.isArray(conversations) ? conversations.length : 0;
-  
-  // Note: Profile views and Quote requests are mocked for now as APIs don't exist yet
-  const profileViews = "1,248";
-  const quoteRequests = "36";
 
-  const companyName = companyProfile?.company_name || user?.company_name || "Company";
+  const companyName = companyProfile?.company_name || user?.company_name || "";
+  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
+  const userRole = user?.role || "";
 
   return (
     <>
-      <div className={styles.content}>
-        {/* KPIs */}
-        <div className={styles.kpis}>
-          <div className={styles.kpi}>
-            <span>Profile Views</span>
-            <h3>{profileViews}</h3>
-          </div>
-          <div className={styles.kpi}>
-            <span>Quote Requests</span>
-            <h3>{quoteRequests}</h3>
-          </div>
-          <div className={styles.kpi}>
-            <span>Messages</span>
-            <h3>{convLoading ? "..." : messagesCount}</h3>
-          </div>
-          <div className={styles.kpi}>
-            <span>Hires Completed</span>
-            <h3>{projectsLoading ? "..." : completedProjects}</h3>
-          </div>
-        </div>
 
-        {/* GRID */}
-        <div className={styles.grid}>
-          {/* LEFT */}
-          <div>
-            {/* QUOTES */}
-            <div className={styles.card}>
-              <h3>Recent Quote Requests</h3>
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Client</th>
-                      <th>Service</th>
-                      <th>Budget</th>
-                      <th>Deadline</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>James M.</td>
-                      <td>Commercial Building</td>
-                      <td>$50,000 – $70,000</td>
-                      <td>Feb 20, 2026</td>
-                      <td><span className={`${styles.status} ${styles.pending}`}>Pending</span></td>
-                    </tr>
-                    <tr>
-                      <td>Linda K.</td>
-                      <td>Renovation</td>
-                      <td>$8,000 – $12,000</td>
-                      <td>Feb 10, 2026</td>
-                      <td><span className={`${styles.status} ${styles.approved}`}>Approved</span></td>
-                    </tr>
-                  </tbody>
-                </table>
+        <div className={styles.content}>
+          <div className={styles.pageHeader}>
+            <div className={styles.headerTitles}>
+              <h1>Company Dashboard</h1>
+              <p>Welcome! Here&apos;s what&apos;s happening with your projects today.</p>
+            </div>
+            <Link href="/dashboard/company/projects/new" className={styles.btnPrimary}>
+              <iconify-icon icon="lucide:plus" />
+              <span>Create New Project</span>
+            </Link>
+          </div>
+
+          <div className={styles.topRow}>
+            <section className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h2>Project Overview</h2>
+                <Link href="/dashboard/company/projects" className={styles.panelAction}>View All</Link>
               </div>
-            </div>
+              <div className={styles.panelBody}>
+                {projectsLoading || walletLoading ? (
+                  <div className={styles.statsGrid}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.statCard}><SkeletonStat /></div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Active Projects</span>
+                      <span className={styles.statValue}>{activeProjects}</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Completed Projects</span>
+                      <span className={styles.statValue}>{completedProjects}</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Available Balance</span>
+                      <span className={styles.statValue}>{wallet ? `${Number(wallet.available_balance).toLocaleString()} XOF` : "0 XOF"}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
 
-            {/* ACTIVITY */}
-            <div className={styles.card} style={{ marginTop: '24px' }}>
-              <h3>Recent Activity</h3>
-              <div className={styles.activity}>✔ Your profile was viewed by a client (2 hours ago)</div>
-              <div className={styles.activity}>📩 New quote request received (Yesterday)</div>
-              <div className={styles.activity}>⭐ New 5-star review received (2 days ago)</div>
-              <div className={styles.activity}>🤝 Project marked as completed (Last week)</div>
-            </div>
+            <section className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h2>Services Offered</h2>
+                <Link href="/dashboard/company/services" className={styles.panelAction}>Manage</Link>
+              </div>
+              <div className={styles.panelBody}>
+                {servicesLoading ? (
+                  <div className={styles.teamList}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.teamItem}><SkeletonBlock style={{ width: "100%", height: 48 }} /></div>
+                    ))}
+                  </div>
+                ) : !services || services.length === 0 ? (
+                  <p style={{ color: "#64748b", fontSize: 14 }}>No services added yet.</p>
+                ) : (
+                  <div className={styles.teamList}>
+                    {services.slice(0, 3).map((service: any) => (
+                      <div key={service.id} className={styles.teamItem}>
+                        <div className={styles.teamAvatar}>
+                          <iconify-icon icon="lucide:layers" />
+                        </div>
+                        <div className={styles.teamInfo}>
+                          <strong>{service.name || "Service"}</strong>
+                          <span>{service.description?.slice(0, 40) || "No description"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
 
-          {/* RIGHT */}
-          <div>
-            {/* MESSAGES */}
-            <div className={styles.card}>
-              <h3>Recent Messages</h3>
-              {convLoading ? (
-                <div>
-                  <SkeletonBlock style={{ height: 40, width: "100%", marginBottom: 12 }} />
-                  <SkeletonBlock style={{ height: 40, width: "100%" }} />
+          <div className={styles.bottomRow}>
+            <section className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h2>Recent Projects</h2>
+              </div>
+              <div className={styles.panelBody}>
+                {projectsLoading ? (
+                  <div className={styles.activityList}>
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className={styles.activityItem}><SkeletonBlock style={{ width: "100%", height: 48 }} /></div>
+                    ))}
+                  </div>
+                ) : projects.length === 0 ? (
+                  <p style={{ color: "#64748b", fontSize: 14 }}>No projects yet.</p>
+                ) : (
+                  <div className={styles.activityList}>
+                    {projects.slice(0, 4).map((project: any) => (
+                      <div key={project.id} className={styles.activityItem}>
+                        <div className={styles.activityIcon}>
+                          <iconify-icon icon={project.status === "completed" ? "lucide:check-circle" : "lucide:briefcase"} />
+                        </div>
+                        <div className={styles.activityContent}>
+                          <p><strong>{project.title || "Project"}</strong></p>
+                          <span>{project.status || "draft"} • {project.budget ? `${Number(project.budget).toLocaleString()} XOF` : "No budget"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className={styles.rightColumn}>
+              <section className={styles.panel}>
+                <div className={styles.panelHeader}>
+                  <h2>Quick Actions</h2>
                 </div>
-              ) : Array.isArray(conversations) && conversations.length > 0 ? (
-                conversations.slice(0, 3).map((conv: any) => (
-                  <div key={conv.id} className={styles.message}>
-                    <strong>{conv.other_participant?.name || "Client"}</strong>
-                    <small>{conv.last_message?.content?.substring(0, 40) || "No messages yet"}...</small>
+                <div className={styles.panelBody}>
+                  <div className={styles.actionGrid}>
+                    <Link href="/dashboard/company/projects" className={styles.actionBtn}><iconify-icon icon="lucide:briefcase" /> New Project</Link>
+                    <Link href="/dashboard/company/services" className={styles.actionBtn}><iconify-icon icon="lucide:layers" /> Add Service</Link>
+                    <Link href="/dashboard/company/messages" className={styles.actionBtn}><iconify-icon icon="lucide:message-square" /> Messages</Link>
                   </div>
-                ))
-              ) : (
-                <>
-                  <div className={styles.message}>
-                    <strong>John M.</strong>
-                    <small>Can you visit the site this week?</small>
-                  </div>
-                  <div className={styles.message}>
-                    <strong>Sarah K.</strong>
-                    <small>Please send updated quotation.</small>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* RATINGS */}
-            <div className={styles.card} style={{ marginTop: '24px' }}>
-              <h3>Rating Snapshot</h3>
-              <div className={styles.stars}>★★★★★ 4.7 / 5</div>
-              
-              <div className={styles.ratingRow}>
-                <div className={styles.ratingLabel}>5 Stars</div>
-                <div className={styles.bar}><span style={{ width: '70%' }}></span></div>
-              </div>
-              
-              <div className={styles.ratingRow}>
-                <div className={styles.ratingLabel}>4 Stars</div>
-                <div className={styles.bar}><span style={{ width: '20%' }}></span></div>
-              </div>
-              
-              <div className={styles.ratingRow}>
-                <div className={styles.ratingLabel}>3 Stars</div>
-                <div className={styles.bar}><span style={{ width: '10%' }}></span></div>
-              </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
-      </div>
+      
     </>
   );
 }
