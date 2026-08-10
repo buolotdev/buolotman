@@ -134,12 +134,20 @@ function ProjectTrackingContent() {
                 </div>
               </div>
             )}
-            {project.end_date && (
+            {(project.end_date || project.timeline) ? (
               <div className={styles.statItem}>
                 <span className={styles.statLabel}>Estimated Deadline</span>
                 <div className={styles.statValue}>
                   <iconify-icon icon="lucide:calendar" style={{ fontSize: '16px', color: '#64748b' }}></iconify-icon>
-                  {new Date(project.end_date).toLocaleDateString()}
+                  {project.end_date ? new Date(project.end_date).toLocaleDateString() : project.timeline}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Estimated Deadline</span>
+                <div className={styles.statValue}>
+                  <iconify-icon icon="lucide:calendar" style={{ fontSize: '16px', color: '#64748b' }}></iconify-icon>
+                  <span style={{ color: '#94a3b8' }}>Not set</span>
                 </div>
               </div>
             )}
