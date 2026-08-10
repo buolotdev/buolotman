@@ -24,7 +24,7 @@ export default function CompanyProjects() {
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projects = (projectsData?.results ?? []) as any[];
+  const projects = (Array.isArray(projectsData) ? projectsData : projectsData?.results ?? []) as any[];
 
   const filteredProjects = projects.filter((p) => {
     if (statusFilter === "all") return true;
