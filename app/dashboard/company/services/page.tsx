@@ -109,18 +109,20 @@ export default function AddService() {
   };
 
   return (
-    <>
-        <div className={styles.exportWrapper}>
-          <div style={{ padding: "16px 24px 0", textAlign: "right" }}>
-        <Link href="/dashboard/company/profile" className={styles.closeBtn} style={{ textDecoration: "none", color: "#001f3f", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <iconify-icon icon="lucide:arrow-left" style={{ fontSize: '18px' }}></iconify-icon>
-          Back to Profile
-        </Link>
-      </div>
+    <div className={layoutStyles.content}>
+      <div className={styles.container}>
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
+          <div>
+            <p style={{ margin: 0, color: "#64748b", fontSize: 15, fontWeight: 500 }}>Company dashboard</p>
+            <h1 style={{ margin: "4px 0 0", color: "#001f3f", fontSize: 32, fontWeight: 800 }}>Manage Services</h1>
+          </div>
+          <Link href="/dashboard/company" style={{ color: "#ff4500", fontWeight: 600, textDecoration: "none", fontSize: 15, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <iconify-icon icon="lucide:arrow-left" /> Back to dashboard
+          </Link>
+        </header>
 
-      <main className={styles.main}>
         <div className={styles.formContainer}>
-          <div className={styles.formHeader}>
+          <div className={styles.formHeader} style={{ display: "none" }}>
             <h1 className={styles.pageTitle}>Manage Services</h1>
             <p className={styles.pageSubtitle}>
               Publish the services your company offers. Clients will see these on your public profile.
@@ -355,9 +357,8 @@ export default function AddService() {
               </div>
             )}
           </div>
-        </main>
+        </div>
       </div>
-    
-    </>
+    </div>
   );
 }
