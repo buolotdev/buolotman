@@ -9,6 +9,7 @@ from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCerti
 from .serializers import (
     CompanyProfileSerializer, CompanyProjectSerializer,
     CompanyServiceSerializer, CompanyCertificationSerializer, CompanyReviewSerializer,
+    QuoteRequestSerializer, CompanyActivitySerializer
 )
 
 
@@ -175,3 +176,29 @@ def add_company_review(request, company_id):
     profile.save(update_fields=['average_rating', 'review_count'])
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def company_quotes(request):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+    except CompanyProfile.DoesNotExist:
+        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    quotes = profile.quote_requests.all()
+    serializer = QuoteRequestSerializer(quotes, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def company_activities(request):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+    except CompanyProfile.DoesNotExist:
+        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    activities = profile.activities.all()
+    serializer = CompanyActivitySerializer(activities, many=True)
+    return Response(serializer.data)

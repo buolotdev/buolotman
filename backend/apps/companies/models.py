@@ -20,6 +20,7 @@ class CompanyProfile(models.Model):
     team_size = models.PositiveIntegerField(default=0)
     completed_tasks = models.PositiveIntegerField(default=0)
     response_time = models.CharField(max_length=50, blank=True)
+    profile_views = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -125,3 +126,41 @@ class CompanyTeamMember(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.company.company_name}'
+
+
+class QuoteRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+
+    company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='quote_requests')
+    client_name = models.CharField(max_length=255)
+    service = models.CharField(max_length=255)
+    budget = models.CharField(max_length=100, blank=True)
+    deadline = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'companies_quote_request'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.client_name} - {self.service}'
+
+
+class CompanyActivity(models.Model):
+    company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='activities')
+    text = models.CharField(max_length=500)
+    icon_type = models.CharField(max_length=50, blank=True) # e.g. 'view', 'quote', 'review', 'project'
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'companies_activity'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.text
