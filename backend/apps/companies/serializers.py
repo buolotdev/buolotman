@@ -63,7 +63,11 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
 class QuoteRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuoteRequest
-        fields = ['id', 'client_name', 'service', 'budget', 'deadline', 'status', 'created_at']
+        fields = [
+            'id', 'client_name', 'client_email', 'client_phone', 'service', 
+            'budget', 'deadline', 'location', 'priority', 'project_summary', 
+            'technical_details', 'attachments', 'status', 'created_at'
+        ]
         read_only_fields = ['id', 'created_at']
 
 

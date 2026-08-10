@@ -137,10 +137,17 @@ class QuoteRequest(models.Model):
 
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='quote_requests')
     client_name = models.CharField(max_length=255)
+    client_email = models.EmailField(blank=True, null=True)
+    client_phone = models.CharField(max_length=50, blank=True, null=True)
     service = models.CharField(max_length=255)
     budget = models.CharField(max_length=100, blank=True)
     deadline = models.CharField(max_length=100, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    location = models.CharField(max_length=255, blank=True, null=True)
+    priority = models.CharField(max_length=50, blank=True, null=True)
+    project_summary = models.TextField(blank=True, null=True)
+    technical_details = models.TextField(blank=True, null=True)
+    attachments = models.JSONField(blank=True, null=True, default=list)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
