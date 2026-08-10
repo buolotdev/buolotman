@@ -9,14 +9,14 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
 const COUNTRIES = [
-  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", "Cameroon", 
-  "Central African Republic", "Chad", "Comoros", "Congo", "Democratic Republic of the Congo", 
-  "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", 
-  "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast (Côte d'Ivoire)", "Kenya", "Lesotho", "Liberia", "Libya", 
-  "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", 
-  "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", 
-  "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", 
-  "Zambia", "Zimbabwe", "United States", "United Kingdom", "France", "Canada", "Other"
+  "Rwanda", 
+  "Kenya", 
+  "Nigeria", 
+  "Ghana", 
+  "South Africa", 
+  "Ivory Coast", 
+  "Cameroon", 
+  "Global"
 ];
 
 export default function CreateCompanyProjectPage() {
@@ -107,8 +107,7 @@ export default function CreateCompanyProjectPage() {
   };
 
   return (
-    <main className={styles.mainWrapper}>
-      <DashboardHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+    <>
       <div className={styles.container} style={{ marginTop: 32 }}>
         <div className={styles.hero}>
           <h1>Post a Company Service</h1>
@@ -338,6 +337,6 @@ export default function CreateCompanyProjectPage() {
           </div>
         </div>
       )}
-    </main>
+    </>
   );
 }
