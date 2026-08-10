@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import layoutStyles from "../page.module.css";
 import styles from "./settings.module.css";
 
 type CompanyProfile = {
@@ -32,7 +33,7 @@ export default function CompanySettingsPage() {
   };
 
   return (
-    <main className={styles.mainWrapper}>
+    <div className={layoutStyles.content}>
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
@@ -58,7 +59,7 @@ export default function CompanySettingsPage() {
           />
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 
