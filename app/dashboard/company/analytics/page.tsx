@@ -17,12 +17,14 @@ export default function CompanyAnalyticsPage() {
     <div className={layoutStyles.content}>
     <main style={{ padding: 24 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gap: 20 }}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ margin: 0, color: "#64748b" }}>Company dashboard</p>
-            <h1 style={{ margin: "4px 0 0" }}>Analytics</h1>
+            <p style={{ margin: 0, color: "#64748b", fontSize: 15, fontWeight: 500 }}>Company dashboard</p>
+            <h1 style={{ margin: "4px 0 0", color: "#001f3f", fontSize: 32, fontWeight: 800 }}>Analytics</h1>
           </div>
-          <Link href="/dashboard/company" style={{ color: "#0f172a" }}>Back to dashboard</Link>
+          <Link href="/dashboard/company" style={{ color: "#ff4500", fontWeight: 600, textDecoration: "none", fontSize: 15, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <iconify-icon icon="lucide:arrow-left" /> Back to dashboard
+          </Link>
         </header>
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
