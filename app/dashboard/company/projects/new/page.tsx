@@ -80,23 +80,18 @@ export default function CreateCompanyProjectPage() {
 
       const payload = {
         title: finalTitle,
-        description: form.description,
-        category: parseInt(form.category),
-        budget_min: null,
-        budget_max: form.budget ? parseFloat(form.budget) : null,
-        budget_mode: form.budget_mode === 'Hourly / Daily' ? 'hourly' : 'fixed',
-        service_type: form.service_type,
-        location: form.country || "Online",
-        city: form.city || "",
-        deadline: form.deadline || null,
-        urgency: "standard",
-        materials_provided: false,
-        contact_methods: ["in-app"],
-        skills: form.subcategory ? [form.subcategory] : [],
-        schedule: ""
+        client_name: form.companyName || "New Client",
+        budget: form.budget ? parseFloat(form.budget) : null,
+        timeline: form.deadline ? `Deadline: ${form.deadline}` : "",
+        location: form.country ? `${form.city ? form.city + ', ' : ''}${form.country}` : "Online",
+        status: "active",
+        progress: 0,
+        milestones_total: 1,
+        milestones_completed: 0,
+        payment_status: "awaiting"
       };
 
-      await api.createTask(payload as any);
+      await api.createCompanyProject(payload);
       router.push("/dashboard/company/projects");
     } catch (error) {
       console.error("Failed to create project", error);
