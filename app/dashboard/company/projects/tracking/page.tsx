@@ -43,22 +43,7 @@ function ProjectTrackingContent() {
   if (loading) {
     return (
       <div className={styles.exportWrapper}>
-        <header className={styles.topNav}>
-          <div className={styles.navContainer}>
-            <div className={styles.navLeft}>
-              <Link href="/dashboard/company" className={styles.brand}>
-                <Image
-                  src="/boulotman-logo.png"
-                  alt="Boulot Man"
-                  width={180}
-                  height={46}
-                  style={{ width: 'auto', height: '46px' }}
-                  priority
-                />
-              </Link>
-            </div>
-          </div>
-        </header>
+
         <main className={styles.pageContainer}>
           <SkeletonBlock style={{ height: 24, width: 200, marginBottom: 24 }} />
           <SkeletonBlock style={{ height: 180, borderRadius: 12, marginBottom: 32 }} />
@@ -72,22 +57,7 @@ function ProjectTrackingContent() {
   if (!project) {
     return (
       <div className={styles.exportWrapper}>
-        <header className={styles.topNav}>
-          <div className={styles.navContainer}>
-            <div className={styles.navLeft}>
-              <Link href="/dashboard/company" className={styles.brand}>
-                <Image
-                  src="/boulotman-logo.png"
-                  alt="Boulot Man"
-                  width={180}
-                  height={46}
-                  style={{ width: 'auto', height: '46px' }}
-                  priority
-                />
-              </Link>
-            </div>
-          </div>
-        </header>
+
         <main className={styles.pageContainer}>
           <Link href="/dashboard/company/projects" className={styles.backLink}>
             <iconify-icon icon="lucide:arrow-left" style={{ fontSize: '16px' }}></iconify-icon>
@@ -105,37 +75,7 @@ function ProjectTrackingContent() {
 
   return (
     <div className={styles.exportWrapper}>
-      <header className={styles.topNav}>
-        <div className={styles.navContainer}>
-          <div className={styles.navLeft}>
-            <Link href="/dashboard/company" className={styles.brand}>
-              <Image
-                src="/boulotman-logo.png"
-                alt="Boulot Man"
-                width={180}
-                height={46}
-                style={{ width: 'auto', height: '46px' }}
-                priority
-              />
-            </Link>
-          </div>
-          <div className={styles.navRight}>
-            <button className={styles.btnIcon}>
-              <iconify-icon icon="lucide:bell" style={{ fontSize: '20px' }}></iconify-icon>
-            </button>
-            <div className={styles.avatar}>
-              {userData?.avatar_url ? (
-                <Image
-                  src={userData.avatar_url}
-                  alt=""
-                  width={36}
-                  height={36}
-                />
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </header>
+
 
       <main className={styles.pageContainer}>
         <Link href="/dashboard/company/projects" className={styles.backLink}>
