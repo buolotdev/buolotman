@@ -52,10 +52,10 @@ const parseErrorMsg = (errMessage: string) => {
   return errMessage;
 };
 
-export default function LoginPage() {
+export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [step, setStep] = useState<Step>(pathname === "/signup" ? "account" : "login");
+  const [step, setStep] = useState<Step>(initialStep || (pathname?.startsWith("/signup") ? "account" : "login"));
   const [selectedRole, setSelectedRole] = useState("");
   const [nextPath, setNextPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -107,9 +107,9 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (pathname === "/signup") {
+    if (pathname?.startsWith("/signup")) {
       setStep("account");
-    } else if (pathname === "/login") {
+    } else if (pathname?.startsWith("/login")) {
       setStep("login");
     }
   }, [pathname]);
@@ -304,7 +304,7 @@ export default function LoginPage() {
 
             <div className={styles.link} style={{ marginTop: '1rem' }}>
               I have an account?{" "}
-              <Link href="/login" className={styles.linkAction} onClick={() => setError(null)}>Login</Link>
+              <span onClick={() => { setError(null); setStep("login"); router.push("/login"); }} className={styles.linkAction} style={{cursor: "pointer"}}>Login</span>
             </div>
           </div>
 
@@ -396,7 +396,7 @@ export default function LoginPage() {
 
             <div className={styles.link}>
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className={styles.linkAction}>Sign up</Link>
+              <span onClick={() => { setError(null); setStep("account"); router.push("/signup"); }} className={styles.linkAction} style={{cursor: "pointer"}}>Sign up</span>
             </div>
           </div>
 
