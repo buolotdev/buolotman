@@ -132,14 +132,16 @@ export default function CompanyProfileDashboard() {
 
   return (
     <div className={layoutStyles.content}>
-      <div className={layoutStyles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className={layoutStyles.headerTitles}>
-          <h1>Profile Management</h1>
+      {/* BLUE BANNER HEADER */}
+      <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
+        <div className={layoutStyles.welcomeContent}>
+          <p className={layoutStyles.eyebrow}>Profile & Settings</p>
+          <h2 className={layoutStyles.welcomeTitle}>Profile Management</h2>
+          <p className={layoutStyles.welcomeSubtitle}>
+            Update your company information, location, expertise, and branding.
+          </p>
         </div>
-        <div>
-          <strong style={{ color: '#001f3f' }}>{profile?.company_name || user?.username || "Company"}</strong>
-        </div>
-      </div>
+      </section>
 
       {isEditing ? (
         // EDIT MODE (HTML MOCKUP)
