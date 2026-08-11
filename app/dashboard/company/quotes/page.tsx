@@ -29,15 +29,14 @@ export default function CompanyQuotesPage() {
     <>
       <div className={layoutStyles.content}>
         
-        {/* TOPBAR equivalent */}
-        <div className={layoutStyles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className={layoutStyles.headerTitles}>
-            <h1>Quote Requests Inbox</h1>
+        {/* BLUE BANNER HEADER */}
+        <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
+          <div className={layoutStyles.welcomeContent}>
+            <p className={layoutStyles.eyebrow}>Quote Management</p>
+            <h2 className={layoutStyles.welcomeTitle}>Quote Requests Inbox</h2>
+            <p className={layoutStyles.welcomeSubtitle}>Manage incoming requests for quotations from clients for {companyName}.</p>
           </div>
-          <div>
-            <strong style={{ color: '#001f3f' }}>{companyName}</strong>
-          </div>
-        </div>
+        </section>
 
         {/* OVERVIEW STATS */}
         <div className={styles.overview}>
