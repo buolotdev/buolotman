@@ -12,7 +12,9 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
                   'logo_url', 'cover_url', 'about', 'website', 'headquarters', 'business_hours',
                   'is_verified', 'average_rating', 'review_count', 'team_size', 'completed_tasks',
                   'response_time', 'profile_views', 'traffic_search', 'traffic_direct', 
-                  'traffic_recommendations', 'traffic_external', 'rating_distribution', 'created_at']
+                  'traffic_recommendations', 'traffic_external', 'rating_distribution', 'created_at',
+                  'currency', 'auto_accept_visits', 'notif_email', 'notif_sms', 'notif_inapp',
+                  'privacy_public', 'privacy_show_phone', 'privacy_show_email', 'privacy_search', 'sec_2fa']
         read_only_fields = ['id', 'is_verified', 'average_rating', 'review_count', 'profile_views', 'created_at']
 
     def get_rating_distribution(self, obj):

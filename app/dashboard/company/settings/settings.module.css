@@ -164,3 +164,163 @@
 .brandText { display: flex; flex-direction: column; }
 .brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
 .brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+/* Toggles & Modals */
+.toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.toggle input[type="checkbox"] {
+  width: 48px;
+  height: 24px;
+  appearance: none;
+  background: #cbd5e1;
+  border-radius: 24px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.toggle input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: #10b981;
+}
+
+.toggle input[type="checkbox"]:checked::after {
+  transform: translateX(24px);
+}
+
+.dangerBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: all 0.2s;
+}
+.dangerBtn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.outlineBtn {
+  background: white;
+  color: #001f3f;
+  border: 2px solid #001f3f;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.outlineBtn:hover {
+  background: #f8fafc;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: white;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.closeBtn:hover { color: #0f172a; }
+
+.select {
+  width: 100%;
+  padding: 0 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 500;
+  height: 48px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  margin-bottom: 24px;
+}
+
+.select:focus {
+  border-color: #ff4500;
+  box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.15);
+}
+
+.balance {
+  font-size: 32px;
+  font-weight: 800;
+  color: #001f3f;
+  margin-bottom: 8px;
+}
+.notice {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+.hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 32px 0;
+}

@@ -33,6 +33,19 @@ class CompanyProfile(models.Model):
     traffic_direct = models.PositiveIntegerField(default=0)
     traffic_recommendations = models.PositiveIntegerField(default=0)
     traffic_external = models.PositiveIntegerField(default=0)
+    
+    # Preferences & Settings
+    currency = models.CharField(max_length=10, default='USD')
+    auto_accept_visits = models.BooleanField(default=False)
+    notif_email = models.BooleanField(default=True)
+    notif_sms = models.BooleanField(default=False)
+    notif_inapp = models.BooleanField(default=True)
+    privacy_public = models.BooleanField(default=True)
+    privacy_show_phone = models.BooleanField(default=False)
+    privacy_show_email = models.BooleanField(default=False)
+    privacy_search = models.BooleanField(default=True)
+    sec_2fa = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
