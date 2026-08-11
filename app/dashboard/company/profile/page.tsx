@@ -210,7 +210,7 @@ export default function CompanyProfileDashboard() {
             <div className={styles.tags}>
               {form.areas_of_expertise.map(tag => (
                 <span key={tag} className={styles.tag}>
-                  {tag} <iconify-icon icon="lucide:x" class={styles.tagRemove} onClick={() => removeTag('expertise', tag)}></iconify-icon>
+                  {tag} <iconify-icon icon="lucide:x" className={styles.tagRemove} onClick={() => removeTag('expertise', tag)}></iconify-icon>
                 </span>
               ))}
             </div>
@@ -229,7 +229,7 @@ export default function CompanyProfileDashboard() {
             <div className={styles.tags}>
               {form.services_offered.map(tag => (
                 <span key={tag} className={styles.tag}>
-                  {tag} <iconify-icon icon="lucide:x" class={styles.tagRemove} onClick={() => removeTag('service', tag)}></iconify-icon>
+                  {tag} <iconify-icon icon="lucide:x" className={styles.tagRemove} onClick={() => removeTag('service', tag)}></iconify-icon>
                 </span>
               ))}
             </div>
