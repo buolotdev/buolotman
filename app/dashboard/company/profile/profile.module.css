@@ -746,3 +746,126 @@
 .brandText { display: flex; flex-direction: column; }
 .brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
 .brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+/* ===================== FORM ===================== */
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #001f3f;
+  font-size: 20px;
+  font-weight: 800;
+}
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  display: block;
+  margin-bottom: 8px;
+}
+.input, .textarea, .select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #1e293b;
+  transition: border-color 0.2s;
+}
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: #001f3f;
+}
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ===================== TAGS ===================== */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.tag {
+  background: #f1f5f9;
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tagRemove {
+  cursor: pointer;
+  color: #94a3b8;
+}
+.tagRemove:hover {
+  color: #ef4444;
+}
+
+/* ===================== UPLOAD ===================== */
+.upload {
+  border: 2px dashed #cbd5e1;
+  padding: 32px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.upload:hover {
+  border-color: #001f3f;
+  background: #f1f5f9;
+}
+.upload iconify-icon {
+  font-size: 32px;
+  color: #94a3b8;
+}
+
+/* ===================== ACTIONS ===================== */
+.actions {
+  display: flex;
+  gap: 16px;
+}
+.primary {
+  background: #ff4500;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.primary:hover {
+  background: #e63e00;
+}
+.secondary {
+  background: #fff;
+  border: 1px solid #001f3f;
+  color: #001f3f;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.secondary:hover {
+  background: #f8fafc;
+}

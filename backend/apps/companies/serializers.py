@@ -8,6 +8,7 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
         fields = ['id', 'company_name', 'registration_number', 'services_offered', 'company_size',
+                  'year_founded', 'industry', 'subject_title', 'country', 'city', 'latitude', 'longitude', 'areas_of_expertise',
                   'logo_url', 'cover_url', 'about', 'website', 'headquarters', 'business_hours',
                   'is_verified', 'average_rating', 'review_count', 'team_size', 'completed_tasks',
                   'response_time', 'profile_views', 'rating_distribution', 'created_at']

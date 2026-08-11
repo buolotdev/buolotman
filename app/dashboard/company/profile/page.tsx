@@ -1,29 +1,76 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import layoutStyles from "../page.module.css";
 import styles from "./profile.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
-
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
-import { SkeletonBlock, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import { useToast } from "@/app/components/Toast";
 
 export default function CompanyProfileDashboard() {
-  const [activeNav, setActiveNav] = useState("profile");
-  
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(true); // Default to form view per mockup
   const toast = useToast();
 
-  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: user } = useFetch(() => api.getMe(), []);
   const { data: profile, loading: profileLoading, refetch: refetchProfile } = useFetch(() => api.getCompanyProfile(), []);
-  const { data: services, loading: servicesLoading } = useFetch(() => api.getCompanyServices(), []);
+
+  // Form State
+  const [form, setForm] = useState({
+    company_name: "",
+    year_founded: "",
+    industry: "",
+    subject_title: "",
+    about: "",
+    country: "",
+    city: "",
+    headquarters: "", // physical address
+    latitude: "",
+    longitude: "",
+    areas_of_expertise: [] as string[],
+    services_offered: [] as string[],
+  });
+
+  const [expertiseInput, setExpertiseInput] = useState("");
+  const [serviceInput, setServiceInput] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (profile && !profileLoading) {
+      setForm({
+        company_name: profile.company_name || "",
+        year_founded: profile.year_founded || "",
+        industry: profile.industry || "",
+        subject_title: profile.subject_title || "",
+        about: profile.about || "",
+        country: profile.country || "",
+        city: profile.city || "",
+        headquarters: profile.headquarters || "",
+        latitude: profile.latitude || "",
+        longitude: profile.longitude || "",
+        areas_of_expertise: Array.isArray(profile.areas_of_expertise) ? profile.areas_of_expertise : [],
+        services_offered: Array.isArray(profile.services_offered) ? profile.services_offered : [],
+      });
+    }
+  }, [profile, profileLoading]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.updateCompanyProfile(form);
+      await refetchProfile();
+      toast.success("Success", "Profile updated successfully.");
+    } catch (err: any) {
+      toast.error("Error", err.message || "Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,7 +79,7 @@ export default function CompanyProfileDashboard() {
     try {
       const res = await api.uploadCompanyServiceImage(file);
       if (res.image_url) {
-        await api.updateCompanyProfile({ logo: res.image_url });
+        await api.updateCompanyProfile({ logo_url: res.image_url });
         await refetchProfile();
         toast.success("Success", "Company logo updated successfully.");
       }
@@ -61,373 +108,301 @@ export default function CompanyProfileDashboard() {
     }
   };
 
-  
+  const addTag = (type: 'expertise' | 'service', val: string) => {
+    if (!val.trim()) return;
+    setForm(prev => {
+      const arr = type === 'expertise' ? prev.areas_of_expertise : prev.services_offered;
+      if (arr.includes(val.trim())) return prev;
+      return { ...prev, [type === 'expertise' ? 'areas_of_expertise' : 'services_offered']: [...arr, val.trim()] };
+    });
+    type === 'expertise' ? setExpertiseInput("") : setServiceInput("");
+  };
 
-  const companyName = profile?.company_name || `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() || user?.username || "";
-  const companyEmail = user?.email || profile?.email || "";
-  const description = profile?.description || profile?.about || "";
-  const phone = profile?.phone || profile?.phone_number || "";
-  const website = profile?.website || "";
-  const address = profile?.address || profile?.headquarters || "";
-  const city = profile?.city || "";
-  const state = profile?.state || "";
-  const zip = profile?.zip_code || "";
-  const rating = profile?.rating ?? null;
-  const reviewCount = profile?.review_count ?? profile?.total_reviews ?? 0;
-  const memberSinceRaw = profile?.member_since || profile?.created_at || "";
-  let formattedMemberSince = memberSinceRaw;
-  if (memberSinceRaw) {
-    try {
-      formattedMemberSince = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(memberSinceRaw));
-    } catch(e) {}
-  }
-  const jobsCompleted = profile?.jobs_completed ?? profile?.completed_projects ?? 0;
-  const teamSize = profile?.team_size || profile?.number_of_employees || "";
-  const location = profile?.location || profile?.service_area || "";
-  const category = profile?.category || profile?.company_type || "";
-  const yearFounded = profile?.year_founded || "";
-  const industry = profile?.industry || "";
-  const subjectTitle = profile?.subject_title || "";
-  const country = profile?.country || "";
-  const latitude = profile?.latitude || "";
-  const longitude = profile?.longitude || "";
-  const areasOfExpertise = profile?.areas_of_expertise || "";
+  const removeTag = (type: 'expertise' | 'service', val: string) => {
+    setForm(prev => {
+      const key = type === 'expertise' ? 'areas_of_expertise' : 'services_offered';
+      return { ...prev, [key]: prev[key].filter((t: string) => t !== val) };
+    });
+  };
+
+  if (profileLoading) return <div style={{ padding: 40 }}>Loading profile...</div>;
+
+  const displayLogo = profile?.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=100&q=80";
+  const displayCover = profile?.cover_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80";
 
   return (
-    <>
+    <div className={layoutStyles.content}>
+      <div className={layoutStyles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={layoutStyles.headerTitles}>
+          <h1>Profile Management</h1>
+        </div>
+        <div>
+          <strong style={{ color: '#001f3f' }}>{profile?.company_name || user?.username || "Company"}</strong>
+        </div>
+      </div>
 
-        <div className={styles.content}>
-          {profileLoading ? (
-            <div style={{ padding: "24px" }}>
-              <SkeletonBlock style={{ height: 200, borderRadius: 12, marginBottom: 24 }} />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-                <SkeletonBlock style={{ height: 300, borderRadius: 12 }} />
-                <SkeletonBlock style={{ height: 300, borderRadius: 12 }} />
+      {isEditing ? (
+        // EDIT MODE (HTML MOCKUP)
+        <div>
+          {/* COMPANY INFO */}
+          <div className={styles.card}>
+            <h3>Company Information</h3>
+            <label className={styles.label}>Company Name</label>
+            <input className={styles.input} value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} />
+
+            <div className={styles.twoCol}>
+              <div>
+                <label className={styles.label}>Year Founded</label>
+                <input className={styles.input} type="text" value={form.year_founded} onChange={e => setForm({...form, year_founded: e.target.value})} />
+              </div>
+              <div>
+                <label className={styles.label}>Industry</label>
+                <select className={styles.select} value={form.industry} onChange={e => setForm({...form, industry: e.target.value})}>
+                  <option value="">Select Industry</option>
+                  <option value="Construction">Construction</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Technology">Technology</option>
+                </select>
               </div>
             </div>
-          ) : (
-            <>
-              <div className={styles.profileHeaderCard}>
-                <div 
-                  className={styles.profileCover}
-                  style={profile?.cover_url ? { backgroundImage: `url(${profile.cover_url})` } : {}}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    ref={coverInputRef}
-                    onChange={handleCoverUpload}
-                  />
-                  <button 
-                    type="button" 
-                    className={styles.profileCoverAction}
-                    onClick={() => coverInputRef.current?.click()}
-                    disabled={uploadingCover}
-                  >
-                    {uploadingCover ? (
-                      <>
-                        <iconify-icon icon="lucide:loader-2" style={{ fontSize: '16px', animation: 'spin 1s linear infinite' }} />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <iconify-icon icon="lucide:camera" style={{ fontSize: '16px' }} />
-                        Edit Cover
-                      </>
-                    )}
-                  </button>
-                </div>
 
-                <div className={styles.profileMainInfo}>
-                  <div className={styles.profileLogoLarge}>
-                    {profile?.logo || profile?.logo_url ? (
-                      <Image src={profile.logo || profile.logo_url} alt={companyName} width={140} height={140} />
-                    ) : (
-                      <div style={{ width: 140, height: 140, borderRadius: "50%", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, fontWeight: 800, color: "#ffffff", letterSpacing: "-1px" }}>
-                        {companyName.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                    
-                    <input
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      ref={logoInputRef}
-                      onChange={handleLogoUpload}
-                    />
-                    <button 
-                      type="button" 
-                      className={styles.logoUploadBtn}
-                      onClick={() => logoInputRef.current?.click()}
-                      title="Update company logo"
-                      disabled={uploadingLogo}
-                    >
-                      {uploadingLogo ? (
-                         <iconify-icon icon="lucide:loader-2" style={{ animation: "spin 1s linear infinite" }} />
-                      ) : (
-                         <iconify-icon icon="lucide:camera" />
-                      )}
-                    </button>
-                  </div>
+            <label className={styles.label}>Subject / Title</label>
+            <input className={styles.input} value={form.subject_title} onChange={e => setForm({...form, subject_title: e.target.value})} />
 
-                  <div className={styles.profileDetails}>
-                    <div className={styles.profileTitleRow}>
-                      <div>
-                        <h1>{companyName}</h1>
-                        {subjectTitle && (
-                          <div style={{ color: '#64748b', fontSize: '15px', marginTop: '4px', marginBottom: '12px' }}>
-                            {subjectTitle}
-                          </div>
-                        )}
-                        <div className={styles.profileMetaTags}>
-                          {rating != null && (
-                            <div className={styles.ratingBadge}>
-                              <iconify-icon icon="lucide:star" style={{ fontSize: '14px' }} />
-                              {rating} {reviewCount > 0 && <span>({reviewCount} reviews)</span>}
-                            </div>
-                          )}
-                          {industry && (
-                            <div className={styles.profileMetaTag}>
-                              <iconify-icon icon="lucide:building-2" style={{ fontSize: '16px' }} />
-                              {industry}
-                            </div>
-                          )}
-                          {location && (
-                            <div className={styles.profileMetaTag}>
-                              <iconify-icon icon="lucide:map-pin" style={{ fontSize: '16px' }} />
-                              {location}
-                            </div>
-                          )}
-                          {category && (
-                            <div className={styles.profileMetaTag}>
-                              <iconify-icon icon="lucide:briefcase" style={{ fontSize: '16px' }} />
-                              {category}
-                            </div>
-                          )}
-                          <div className={styles.profileMetaTag}>
-                            <iconify-icon icon="lucide:shield-check" style={{ fontSize: '16px', color: '#10b981' }} />
-                            <span style={{ color: '#10b981', fontWeight: 500 }}>Verified Company</span>
-                          </div>
-                        </div>
-                      </div>
+            <label className={styles.label}>Company Biography</label>
+            <textarea className={styles.textarea} value={form.about} onChange={e => setForm({...form, about: e.target.value})} />
+          </div>
 
-                      <div className={styles.headerActions}>
-                        <Link href="/dashboard/company/profile/edit" className={styles.btnPrimary}>
-                          <iconify-icon icon="lucide:pencil" style={{ fontSize: '18px' }}></iconify-icon>
-                          Edit Profile
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* LOCATION */}
+          <div className={styles.card}>
+            <h3>Location & Address</h3>
+            <div className={styles.twoCol}>
+              <div>
+                <label className={styles.label}>Country</label>
+                <input className={styles.input} value={form.country} onChange={e => setForm({...form, country: e.target.value})} />
               </div>
-
-              <div className={styles.profileBody}>
-                <div className={styles.leftCol}>
-                  <div className={styles.sectionCard}>
-                    <div className={styles.sectionHeader}>
-                      <h2 className={styles.sectionTitle}>About Company</h2>
-                      {description && (
-                        <Link href="/dashboard/company/profile/edit" className={styles.sectionAction}>
-                          <iconify-icon icon="lucide:pencil" /> Edit
-                        </Link>
-                      )}
-                    </div>
-                    {areasOfExpertise && (
-                      <div style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontSize: '14px', color: '#001F3F', marginBottom: '10px' }}>Areas of Expertise</h3>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                          {areasOfExpertise.split(',').map((tag: string) => (
-                            <span key={tag} style={{ background: '#eef1f5', color: '#0f172a', padding: '6px 12px', borderRadius: '12px', fontSize: '13px', fontWeight: 500 }}>
-                              {tag.trim()}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {description ? (
-                      <p className={styles.aboutText}>{description}</p>
-                    ) : (
-                      <div className={styles.emptyState}>
-                        <iconify-icon icon="lucide:file-text" className={styles.emptyStateIcon}></iconify-icon>
-                        <p className={styles.emptyStateText}>Tell clients about your company, your experience, and what makes you unique.</p>
-                        <Link href="/dashboard/company/profile/edit" style={{ textDecoration: 'none' }}>
-                          <button className={styles.emptyStateBtn}>
-                            <iconify-icon icon="lucide:plus" /> Add Description
-                          </button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  {!servicesLoading && (
-                    <div className={styles.sectionCard}>
-                      <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Services Offered</h2>
-                        {services && services.length > 0 && (
-                          <Link href="/dashboard/company/services" className={styles.sectionAction}>
-                            <iconify-icon icon="lucide:settings" /> Manage
-                          </Link>
-                        )}
-                      </div>
-                      {services && services.length > 0 ? (
-                        <div className={styles.servicesGrid}>
-                          {services.map((svc: any) => (
-                            <div key={svc.id} className={styles.serviceCard}>
-                              <div className={styles.serviceIcon}>
-                                <iconify-icon icon={svc.icon || "lucide:wrench"} style={{ fontSize: '20px' }} />
-                              </div>
-                              <div className={styles.serviceTitle}>{svc.name || svc.title}</div>
-                              {svc.description && <div className={styles.serviceDesc}>{svc.description}</div>}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className={styles.emptyState}>
-                          <iconify-icon icon="lucide:layers" className={styles.emptyStateIcon}></iconify-icon>
-                          <p className={styles.emptyStateText}>You haven't listed any services yet. Adding services helps clients find you.</p>
-                          <Link href="/dashboard/company/services" style={{ textDecoration: 'none' }}>
-                            <button className={styles.emptyStateBtn}>
-                              <iconify-icon icon="lucide:plus" /> Add Services
-                            </button>
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className={styles.sectionCard}>
-                    <div className={styles.sectionHeader}>
-                      <h2 className={styles.sectionTitle}>Past Projects</h2>
-                    </div>
-                    <div className={styles.emptyState}>
-                      <iconify-icon icon="lucide:briefcase" className={styles.emptyStateIcon}></iconify-icon>
-                      <p className={styles.emptyStateText}>Showcase your best work by adding past projects to your portfolio.</p>
-                      <Link href="/dashboard/company/projects/new" style={{ textDecoration: 'none' }}>
-                        <button className={styles.emptyStateBtn}>
-                          <iconify-icon icon="lucide:plus" /> Add Project
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.rightCol}>
-                  {(phone || companyEmail || website || address || country || city || latitude) && (
-                    <div className={styles.sectionCard}>
-                      <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Contact Information</h2>
-                      </div>
-                      <div className={styles.infoList}>
-                        {phone && (
-                          <div className={styles.infoRow}>
-                            <div className={styles.infoIcon}>
-                              <iconify-icon icon="lucide:phone" style={{ fontSize: '18px' }} />
-                            </div>
-                            <div className={styles.infoText}>
-                              <span>{phone}</span>
-                              <span>Primary Phone</span>
-                            </div>
-                          </div>
-                        )}
-                        {companyEmail && (
-                          <div className={styles.infoRow}>
-                            <div className={styles.infoIcon}>
-                              <iconify-icon icon="lucide:mail" style={{ fontSize: '18px' }} />
-                            </div>
-                            <div className={styles.infoText}>
-                              <span>{companyEmail}</span>
-                              <span>Email Address</span>
-                            </div>
-                          </div>
-                        )}
-                        {website && (
-                          <div className={styles.infoRow}>
-                            <div className={styles.infoIcon}>
-                              <iconify-icon icon="lucide:globe" style={{ fontSize: '18px' }} />
-                            </div>
-                            <div className={styles.infoText}>
-                              <span>{website}</span>
-                              <span>Company Website</span>
-                            </div>
-                          </div>
-                        )}
-                        {(address || city || country) && (
-                          <div className={styles.infoRow}>
-                            <div className={styles.infoIcon}>
-                              <iconify-icon icon="lucide:map-pin" style={{ fontSize: '18px' }} />
-                            </div>
-                            <div className={styles.infoText}>
-                              <span>{[address, city, country].filter(Boolean).join(", ")}</span>
-                              <span>Physical Address</span>
-                            </div>
-                          </div>
-                        )}
-                        {latitude && longitude && (
-                          <div className={styles.infoRow}>
-                            <div className={styles.infoIcon}>
-                              <iconify-icon icon="lucide:navigation" style={{ fontSize: '18px' }} />
-                            </div>
-                            <div className={styles.infoText}>
-                              <span>{latitude}, {longitude}</span>
-                              <span>Coordinates</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className={styles.sectionCard}>
-                    <h2 className={styles.sectionTitle} style={{ marginBottom: '24px' }}>
-                      Company Stats
-                    </h2>
-                    <div className={styles.statsList}>
-                      {yearFounded && (
-                        <div className={styles.statRow}>
-                          <div className={styles.statLabel}>
-                            <iconify-icon icon="lucide:clock" style={{ fontSize: '18px' }} />
-                            Year Founded
-                          </div>
-                          <div className={styles.statValue}>{yearFounded}</div>
-                        </div>
-                      )}
-                      {formattedMemberSince && (
-                        <div className={styles.statRow}>
-                          <div className={styles.statLabel}>
-                            <iconify-icon icon="lucide:calendar-days" style={{ fontSize: '18px' }} />
-                            Member Since
-                          </div>
-                          <div className={styles.statValue}>{formattedMemberSince}</div>
-                        </div>
-                      )}
-                      {jobsCompleted > 0 && (
-                        <div className={styles.statRow}>
-                          <div className={styles.statLabel}>
-                            <iconify-icon icon="lucide:check-circle" style={{ fontSize: '18px' }} />
-                            Jobs Completed
-                          </div>
-                          <div className={styles.statValue}>{jobsCompleted}</div>
-                        </div>
-                      )}
-                      {teamSize && (
-                        <div className={styles.statRow}>
-                          <div className={styles.statLabel}>
-                            <iconify-icon icon="lucide:users" style={{ fontSize: '18px' }} />
-                            Team Size
-                          </div>
-                          <div className={styles.statValue}>{teamSize}</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <label className={styles.label}>City</label>
+                <input className={styles.input} value={form.city} onChange={e => setForm({...form, city: e.target.value})} />
               </div>
-            </>
-          )}
+            </div>
+            <label className={styles.label}>Physical Address</label>
+            <input className={styles.input} value={form.headquarters} onChange={e => setForm({...form, headquarters: e.target.value})} />
+
+            <div className={styles.twoCol}>
+              <div>
+                <label className={styles.label}>Latitude</label>
+                <input className={styles.input} value={form.latitude} onChange={e => setForm({...form, latitude: e.target.value})} />
+              </div>
+              <div>
+                <label className={styles.label}>Longitude</label>
+                <input className={styles.input} value={form.longitude} onChange={e => setForm({...form, longitude: e.target.value})} />
+              </div>
+            </div>
+          </div>
+
+          {/* EXPERTISE */}
+          <div className={styles.card}>
+            <h3>Areas of Expertise</h3>
+            <div className={styles.tags}>
+              {form.areas_of_expertise.map(tag => (
+                <span key={tag} className={styles.tag}>
+                  {tag} <iconify-icon icon="lucide:x" class={styles.tagRemove} onClick={() => removeTag('expertise', tag)}></iconify-icon>
+                </span>
+              ))}
+            </div>
+            <input 
+              className={styles.input} 
+              placeholder="Add new expertise and press Enter" 
+              value={expertiseInput}
+              onChange={e => setExpertiseInput(e.target.value)}
+              onKeyDown={e => { if(e.key === 'Enter') addTag('expertise', expertiseInput) }}
+            />
+          </div>
+
+          {/* SERVICES */}
+          <div className={styles.card}>
+            <h3>Services Offered</h3>
+            <div className={styles.tags}>
+              {form.services_offered.map(tag => (
+                <span key={tag} className={styles.tag}>
+                  {tag} <iconify-icon icon="lucide:x" class={styles.tagRemove} onClick={() => removeTag('service', tag)}></iconify-icon>
+                </span>
+              ))}
+            </div>
+            <input 
+              className={styles.input} 
+              placeholder="Add new service and press Enter"
+              value={serviceInput}
+              onChange={e => setServiceInput(e.target.value)}
+              onKeyDown={e => { if(e.key === 'Enter') addTag('service', serviceInput) }}
+            />
+          </div>
+
+          {/* BRANDING */}
+          <div className={styles.card}>
+            <h3>Branding</h3>
+            <label className={styles.label}>Company Logo</label>
+            <div className={styles.upload} onClick={() => logoInputRef.current?.click()}>
+              {uploadingLogo ? "Uploading..." : (
+                <>
+                  <iconify-icon icon="lucide:image"></iconify-icon>
+                  Drag & drop logo or click to upload
+                </>
+              )}
+            </div>
+            <input type="file" ref={logoInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleLogoUpload} />
+
+            <label className={styles.label} style={{ marginTop: 20 }}>Cover Photo</label>
+            <div className={styles.upload} onClick={() => coverInputRef.current?.click()}>
+              {uploadingCover ? "Uploading..." : (
+                <>
+                  <iconify-icon icon="lucide:monitor"></iconify-icon>
+                  Drag & drop cover image or click to upload
+                </>
+              )}
+            </div>
+            <input type="file" ref={coverInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleCoverUpload} />
+          </div>
+
+          {/* ACTIONS */}
+          <div className={styles.card}>
+            <h3>Save Changes</h3>
+            <div className={styles.actions}>
+              <button className={styles.primary} onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save Profile"}
+              </button>
+              <button className={styles.secondary} onClick={() => setIsEditing(false)}>
+                Preview Public Profile
+              </button>
+            </div>
+          </div>
         </div>
-      
-    </>
+
+      ) : (
+
+        // PREVIEW MODE (FIRST SCREENSHOT)
+        <div>
+          <div className={styles.coverWrapper}>
+            <div className={styles.coverPhoto}>
+              <Image src={displayCover} alt="Cover" fill style={{ objectFit: "cover" }} />
+              <div className={styles.coverOverlay}></div>
+            </div>
+            
+            <div className={styles.headerContent}>
+              <div className={styles.profileAvatar}>
+                <Image src={displayLogo} alt="Logo" fill style={{ objectFit: "cover" }} />
+              </div>
+              
+              <div className={styles.companyMeta}>
+                <div>
+                  <h1 className={styles.companyName}>{form.company_name || "Company Name"}</h1>
+                  {profile?.is_verified && (
+                    <span className={styles.verifiedBadge}>
+                      <iconify-icon icon="lucide:check-circle-2"></iconify-icon> Verified Company
+                    </span>
+                  )}
+                </div>
+                <button className={styles.primary} onClick={() => setIsEditing(true)}>
+                  <iconify-icon icon="lucide:edit"></iconify-icon> Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.profileGrid}>
+            <div className={styles.mainCol}>
+              <section className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3>About Company</h3>
+                </div>
+                <div className={styles.cardBody}>
+                  {form.about ? (
+                    <p style={{ lineHeight: 1.6, color: '#475569' }}>{form.about}</p>
+                  ) : (
+                    <div className={styles.emptyState}>
+                      <iconify-icon icon="lucide:file-text"></iconify-icon>
+                      <p>Tell clients about your company, your experience, and what makes you unique.</p>
+                      <button className={styles.outlineButton} onClick={() => setIsEditing(true)}>
+                        <iconify-icon icon="lucide:plus"></iconify-icon> Add Description
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3>Services Offered</h3>
+                </div>
+                <div className={styles.cardBody}>
+                  {form.services_offered.length > 0 ? (
+                    <div className={styles.tags}>
+                      {form.services_offered.map((t: string) => <span key={t} className={styles.tag}>{t}</span>)}
+                    </div>
+                  ) : (
+                    <div className={styles.emptyState}>
+                      <iconify-icon icon="lucide:layers"></iconify-icon>
+                      <p>You haven't listed any services yet. Adding services helps clients find you.</p>
+                      <button className={styles.outlineButton} onClick={() => setIsEditing(true)}>
+                        <iconify-icon icon="lucide:plus"></iconify-icon> Add Services
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <div className={styles.sideCol}>
+              <section className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3>Contact Information</h3>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.contactItem}>
+                    <iconify-icon icon="lucide:mail"></iconify-icon>
+                    <div>
+                      <strong>{user?.email || "Email Address"}</strong>
+                      <span>Email</span>
+                    </div>
+                  </div>
+                  {form.headquarters && (
+                    <div className={styles.contactItem}>
+                      <iconify-icon icon="lucide:map-pin"></iconify-icon>
+                      <div>
+                        <strong>{form.headquarters}</strong>
+                        <span>Address</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3>Company Stats</h3>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.statRow}>
+                    <div className={styles.statLabel}>
+                      <iconify-icon icon="lucide:calendar"></iconify-icon> Member Since
+                    </div>
+                    <strong>{profile?.created_at ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(profile.created_at)) : "New"}</strong>
+                  </div>
+                  <div className={styles.statRow}>
+                    <div className={styles.statLabel}>
+                      <iconify-icon icon="lucide:briefcase"></iconify-icon> Industry
+                    </div>
+                    <strong>{form.industry || "N/A"}</strong>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+      )}
+    </div>
   );
 }
