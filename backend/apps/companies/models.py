@@ -77,6 +77,9 @@ class CompanyProject(models.Model):
 class CompanyService(models.Model):
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='services')
     title = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, blank=True)
+    pricing_model = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=50, default='Active')
     description = models.TextField(blank=True)
     images = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

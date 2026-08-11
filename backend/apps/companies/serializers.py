@@ -41,7 +41,7 @@ class CompanyProjectSerializer(serializers.ModelSerializer):
 class CompanyServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyService
-        fields = ['id', 'title', 'description', 'images', 'created_at']
+        fields = ['id', 'title', 'category', 'pricing_model', 'status', 'description', 'images', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class CompanyCertificationSerializer(serializers.ModelSerializer):
