@@ -11,7 +11,8 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
                   'year_founded', 'industry', 'subject_title', 'country', 'city', 'latitude', 'longitude', 'areas_of_expertise',
                   'logo_url', 'cover_url', 'about', 'website', 'headquarters', 'business_hours',
                   'is_verified', 'average_rating', 'review_count', 'team_size', 'completed_tasks',
-                  'response_time', 'profile_views', 'rating_distribution', 'created_at']
+                  'response_time', 'profile_views', 'traffic_search', 'traffic_direct', 
+                  'traffic_recommendations', 'traffic_external', 'rating_distribution', 'created_at']
         read_only_fields = ['id', 'is_verified', 'average_rating', 'review_count', 'profile_views', 'created_at']
 
     def get_rating_distribution(self, obj):
@@ -41,7 +42,7 @@ class CompanyProjectSerializer(serializers.ModelSerializer):
 class CompanyServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyService
-        fields = ['id', 'title', 'category', 'pricing_model', 'status', 'description', 'images', 'created_at']
+        fields = ['id', 'title', 'category', 'pricing_model', 'status', 'views', 'quotes_count', 'acceptance_rate', 'description', 'images', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class CompanyCertificationSerializer(serializers.ModelSerializer):

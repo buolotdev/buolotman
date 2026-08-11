@@ -9,18 +9,32 @@ export default function CompanyAnalyticsPage() {
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: profile } = useFetch(() => api.getCompanyProfile(), []);
   const { data: quotesData } = useFetch(() => api.getCompanyQuotes(), []);
+  const { data: servicesData } = useFetch(() => api.getCompanyServices(), []);
 
   const quotes = Array.isArray(quotesData) ? quotesData : [];
+  const services = Array.isArray(servicesData) ? servicesData : [];
   
-  // Stats calculations
-  const profileViews = profile?.profile_views || 4218; // Defaulting to mockup if 0
-  const quoteRequests = quotes.length > 0 ? quotes.length : 126;
-  const completedHires = profile?.completed_tasks || 22;
-  const avgRating = profile?.average_rating || 4.7;
+  // Base Stats
+  const profileViews = profile?.profile_views || 0;
+  const quoteRequests = quotes.length;
+  const completedHires = profile?.completed_tasks || 0;
+  const avgRating = profile?.average_rating || 0;
   
-  // Calculate conversion rate mockup/real
+  // Funnel calculations
   const acceptedQuotes = quotes.filter((q: any) => q.status === 'approved' || q.status === 'accepted').length;
-  const conversionRate = quoteRequests > 0 ? Math.round((acceptedQuotes / quoteRequests) * 100) : 18;
+  const conversionRate = quoteRequests > 0 ? Math.round((acceptedQuotes / quoteRequests) * 100) : 0;
+  const completedHiresPct = quoteRequests > 0 ? Math.round((completedHires / quoteRequests) * 100) : 0;
+
+  // Traffic Sources
+  const tSearch = profile?.traffic_search || 0;
+  const tDirect = profile?.traffic_direct || 0;
+  const tRec = profile?.traffic_recommendations || 0;
+  const tExt = profile?.traffic_external || 0;
+
+  // Rating Distribution
+  const dist = profile?.rating_distribution || { '5': 0, '4': 0, '3': 0, '2': 0, '1': 0, 'total': 0 };
+  const totalReviews = dist.total || 1; // avoid divide by zero
+  const getPct = (stars: string) => Math.round((dist[stars] / totalReviews) * 100) + '%';
 
   return (
     <div className={layoutStyles.content}>
@@ -70,14 +84,14 @@ export default function CompanyAnalyticsPage() {
             <div className={styles.label}><span>Profile Views</span> <span>100%</span></div>
             <div className={styles.bar}><span style={{ width: '100%' }}></span></div>
 
-            <div className={styles.label}><span>Quote Requests</span> <span>30%</span></div>
-            <div className={styles.bar}><span style={{ width: '30%' }}></span></div>
+            <div className={styles.label}><span>Quote Requests</span> <span>{quoteRequests > 0 ? '100' : '0'}%</span></div>
+            <div className={styles.bar}><span style={{ width: quoteRequests > 0 ? '100%' : '0%' }}></span></div>
 
-            <div className={styles.label}><span>Accepted Quotes</span> <span>18%</span></div>
-            <div className={styles.bar}><span style={{ width: '18%' }}></span></div>
+            <div className={styles.label}><span>Accepted Quotes</span> <span>{conversionRate}%</span></div>
+            <div className={styles.bar}><span style={{ width: `${conversionRate}%` }}></span></div>
 
-            <div className={styles.label}><span>Hires Completed</span> <span>10%</span></div>
-            <div className={styles.bar}><span style={{ width: '10%' }}></span></div>
+            <div className={styles.label}><span>Hires Completed</span> <span>{completedHiresPct}%</span></div>
+            <div className={styles.bar}><span style={{ width: `${completedHiresPct}%` }}></span></div>
           </div>
 
           {/* SERVICES */}
@@ -94,18 +108,18 @@ export default function CompanyAnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Commercial Construction</td>
-                    <td>1,820</td>
-                    <td>54</td>
-                    <td>22%</td>
-                  </tr>
-                  <tr>
-                    <td>Renovation</td>
-                    <td>980</td>
-                    <td>32</td>
-                    <td>18%</td>
-                  </tr>
+                  {services.length > 0 ? services.map((svc: any) => (
+                    <tr key={svc.id}>
+                      <td>{svc.title}</td>
+                      <td>{svc.views?.toLocaleString() || 0}</td>
+                      <td>{svc.quotes_count || 0}</td>
+                      <td>{svc.acceptance_rate || 0}%</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: 'center', color: '#666', padding: 20 }}>No services active.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -118,16 +132,16 @@ export default function CompanyAnalyticsPage() {
           <div className={styles.card}>
             <h3>Traffic Sources</h3>
             <div className={styles.label}><span>Search</span></div>
-            <div className={styles.bar}><span style={{ width: '45%' }}></span></div>
+            <div className={styles.bar}><span style={{ width: `${tSearch}%` }}></span></div>
             
             <div className={styles.label}><span>Direct</span></div>
-            <div className={styles.bar}><span style={{ width: '30%' }}></span></div>
+            <div className={styles.bar}><span style={{ width: `${tDirect}%` }}></span></div>
             
             <div className={styles.label}><span>Recommendations</span></div>
-            <div className={styles.bar}><span style={{ width: '15%' }}></span></div>
+            <div className={styles.bar}><span style={{ width: `${tRec}%` }}></span></div>
             
             <div className={styles.label}><span>External Links</span></div>
-            <div className={styles.bar}><span style={{ width: '10%' }}></span></div>
+            <div className={styles.bar}><span style={{ width: `${tExt}%` }}></span></div>
           </div>
 
           {/* REVIEWS */}
@@ -135,14 +149,20 @@ export default function CompanyAnalyticsPage() {
             <h3>Reputation Overview</h3>
             <div className={styles.stars}>★★★★★ {avgRating} / 5</div>
 
-            <div className={styles.label}><span>5 Stars</span></div>
-            <div className={styles.bar}><span style={{ width: '70%' }}></span></div>
+            <div className={styles.label}><span>5 Stars</span> <span>{dist['5']}</span></div>
+            <div className={styles.bar}><span style={{ width: getPct('5') }}></span></div>
 
-            <div className={styles.label}><span>4 Stars</span></div>
-            <div className={styles.bar}><span style={{ width: '20%' }}></span></div>
+            <div className={styles.label}><span>4 Stars</span> <span>{dist['4']}</span></div>
+            <div className={styles.bar}><span style={{ width: getPct('4') }}></span></div>
 
-            <div className={styles.label}><span>3 Stars</span></div>
-            <div className={styles.bar}><span style={{ width: '10%' }}></span></div>
+            <div className={styles.label}><span>3 Stars</span> <span>{dist['3']}</span></div>
+            <div className={styles.bar}><span style={{ width: getPct('3') }}></span></div>
+            
+            <div className={styles.label}><span>2 Stars</span> <span>{dist['2']}</span></div>
+            <div className={styles.bar}><span style={{ width: getPct('2') }}></span></div>
+
+            <div className={styles.label}><span>1 Star</span> <span>{dist['1']}</span></div>
+            <div className={styles.bar}><span style={{ width: getPct('1') }}></span></div>
           </div>
         </div>
 
