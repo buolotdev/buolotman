@@ -25,15 +25,14 @@ export default function CompanyAnalyticsPage() {
   return (
     <div className={layoutStyles.content}>
 
-      {/* TOPBAR equivalent */}
-      <div className={layoutStyles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className={layoutStyles.headerTitles}>
-          <h1>Analytics Dashboard</h1>
+      {/* BLUE BANNER HEADER */}
+      <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
+        <div className={layoutStyles.welcomeContent}>
+          <p className={layoutStyles.eyebrow}>Analytics & Insights</p>
+          <h2 className={layoutStyles.welcomeTitle}>Analytics Dashboard</h2>
+          <p className={layoutStyles.welcomeSubtitle}>Track your profile views, quote requests, and overall performance metrics.</p>
         </div>
-        <div>
-          <strong style={{ color: '#001f3f' }}>{profile?.company_name || user?.username || "Company"}</strong>
-        </div>
-      </div>
+      </section>
 
       {/* KPIs */}
       <div className={styles.kpis}>
