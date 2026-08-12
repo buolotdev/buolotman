@@ -1,10 +1,17 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./header.css";
 
 function Header() {
+  const [lang, setLang] = useState("en");
+  const [country, setCountry] = useState("Rwanda");
+
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLang(localStorage.getItem("lang") || "en");
+      setCountry(localStorage.getItem("country") || "Rwanda");
+    }
     // ===== MEGA MENU (top strip) =====
     const root = document.getElementById("bmMegaRoot");
     if (!root) return;
@@ -52,6 +59,27 @@ function Header() {
         if (menu) menu.style.display = menu.style.display === "block" ? "none" : "block";
       });
     });
+
+    const dropWraps = root.querySelectorAll(".bmNavRight .bmDropWrap");
+    if (dropWraps[0]) {
+      dropWraps[0].querySelectorAll(".bmDropItem").forEach((item) => {
+        item.addEventListener("click", () => {
+          const text = (item.textContent || "").trim();
+          localStorage.setItem("country", text);
+          window.location.reload();
+        });
+      });
+    }
+    if (dropWraps[1]) {
+      dropWraps[1].querySelectorAll(".bmDropItem").forEach((item) => {
+        item.addEventListener("click", () => {
+          const text = (item.textContent || "").trim();
+          const code = text === "Français" ? "fr" : "en";
+          localStorage.setItem("lang", code);
+          window.location.reload();
+        });
+      });
+    }
 
     const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target as Node | null;
@@ -1078,9 +1106,18 @@ function Header() {
       <!-- COUNTRY -->
       <div class="bmDropWrap">
         <div class="bmDropBtn">
-          <img class="bmFlag" src="https://flagcdn.com/w20/rw.png"> Rwanda
+          <img class="bmFlag" src="${
+            country === 'Kenya' ? 'https://flagcdn.com/w20/ke.png' :
+            country === 'Nigeria' ? 'https://flagcdn.com/w20/ng.png' :
+            country === 'Ghana' ? 'https://flagcdn.com/w20/gh.png' :
+            country === 'South Africa' ? 'https://flagcdn.com/w20/za.png' :
+            country === 'Ivory Coast' ? 'https://flagcdn.com/w20/ci.png' :
+            country === 'Cameroon' ? 'https://flagcdn.com/w20/cm.png' :
+            'https://flagcdn.com/w20/rw.png'
+          }"> ${country}
         </div>
         <div class="bmDropMenu">
+          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/rw.png"> Rwanda</div>
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ke.png"> Kenya</div>
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ng.png"> Nigeria</div>
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/gh.png"> Ghana</div>
@@ -1092,7 +1129,7 @@ function Header() {
       <!-- LANGUAGE -->
       <div class="bmDropWrap">
         <div class="bmDropBtn">
-          <img class="bmFlag" src="https://flagcdn.com/w20/gb.png"> English
+          <img class="bmFlag" src="${lang === 'fr' ? 'https://flagcdn.com/w20/fr.png' : 'https://flagcdn.com/w20/gb.png'}"> ${lang === 'fr' ? 'Français' : 'English'}
         </div>
         <div class="bmDropMenu">
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/gb.png"> English</div>

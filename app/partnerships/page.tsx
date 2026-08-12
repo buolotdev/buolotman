@@ -8,8 +8,72 @@ import { useFetch } from "@/app/lib/useFetch";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    heroTitle: "Join Africa’s growing workforce marketplace and collaborate with a trusted platform connecting professionals, businesses, and communities at scale.",
+    heroSubtitle: "Search live service requests posted by clients around you and get hired securely.",
+    searchPlaceholder: "What service are you looking for?",
+    searchWho: "Who are you searching for?",
+    searchWhoTech: "Technicians",
+    searchWhoComp: "Companies",
+    searchWhoClient: "Clients",
+    searchLocation: "Select location",
+    searchBtn: "Search",
+    btnFindTasks: "Find Tasks",
+    btnPostService: "Post Your Service",
+    liveTasksTitle: "🔴 Live Tasks",
+    liveTasksError: "Failed to load live requests.",
+    liveTasksLoading: "Loading tasks...",
+    liveTasksCta: "See more people finding services around you →",
+    apply: "Apply",
+    quoteRequired: "Quote required",
+    fixedPrice: "Fixed",
+    hourlyRate: "Hourly",
+  },
+  fr: {
+    heroTitle: "Rejoignez le marché du travail en pleine croissance en Afrique et collaborez avec une plateforme de confiance reliant les professionnels, les entreprises et les communautés à grande échelle.",
+    heroSubtitle: "Recherchez des demandes de services en direct publiées par des clients autour de vous et soyez embauché en toute sécurité.",
+    searchPlaceholder: "Quel service recherchez-vous ?",
+    searchWho: "Qui recherchez-vous ?",
+    searchWhoTech: "Techniciens",
+    searchWhoComp: "Entreprises",
+    searchWhoClient: "Clients",
+    searchLocation: "Sélectionnez l'emplacement",
+    searchBtn: "Rechercher",
+    btnFindTasks: "Trouver des tâches",
+    btnPostService: "Publiez votre service",
+    liveTasksTitle: "🔴 Demandes en direct",
+    liveTasksError: "Échec du chargement des demandes en direct.",
+    liveTasksLoading: "Chargement des tâches...",
+    liveTasksCta: "Voir plus de personnes cherchant des services autour de vous →",
+    apply: "Postuler",
+    quoteRequired: "Devis requis",
+    fixedPrice: "Fixe",
+    hourlyRate: "Horaire",
+  },
+};
+
 export default function PartnershipsPage() {
   const router = useRouter();
+
+  // Language state
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem("lang") || "en";
+      // Support Kinyarwanda/Arabic fallbacks to French or English if translation not explicitly defined
+      if (savedLang === "fr" || savedLang === "en") {
+        setLang(savedLang);
+      } else if (savedLang === "rw") {
+        setLang("fr"); // Fallback to French for Rwanda
+      } else {
+        setLang("en"); // Default fallback
+      }
+    }
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,14 +131,9 @@ export default function PartnershipsPage() {
       <section id="hero" className="bm-main-hero">
         <div className="bm-main-hero-grid">
           <div>
-            <h1>
-              Join Africa’s growing workforce marketplace and collaborate with a trusted
-              platform connecting professionals, businesses, and communities at scale.
-            </h1>
+            <h1>{t.heroTitle}</h1>
 
-            <p>
-              Search live service requests posted by clients around you and get hired securely.
-            </p>
+            <p>{t.heroSubtitle}</p>
 
             <form className="bm-main-search" onSubmit={handleSearchSubmit}>
               <div className="bm-main-search-field">
@@ -88,17 +147,17 @@ export default function PartnershipsPage() {
                 {!isSearchFocused && !searchQuery && (
                   <div className="bm-main-search-marquee">
                     <span>
-                      What service do you offer or are you looking for? e.g Electrical installation, Web development, Plumbing, Solar systems, CCTV installation, Mobile apps
+                      {t.searchPlaceholder} e.g Electrical installation, Web development, Plumbing, Solar systems, CCTV installation, Mobile apps
                     </span>
                   </div>
                 )}
               </div>
 
               <select value={searchRole} onChange={(e) => setSearchRole(e.target.value)}>
-                <option value="">Who are you searching for?</option>
-                <option value="technician">Technicians</option>
-                <option value="company">Companies</option>
-                <option value="client">Clients</option>
+                <option value="">{t.searchWho}</option>
+                <option value="technician">{t.searchWhoTech}</option>
+                <option value="company">{t.searchWhoComp}</option>
+                <option value="client">{t.searchWhoClient}</option>
               </select>
 
               <select value={searchLocation} onChange={(e) => setSearchLocation(e.target.value)}>
@@ -112,21 +171,21 @@ export default function PartnershipsPage() {
                 <option value="Cameroon">Cameroon</option>
               </select>
 
-              <button type="submit">Search</button>
+              <button type="submit">{t.searchBtn}</button>
             </form>
 
             <div className="bm-main-cta">
               <Link href="/search" className="bm-main-cta-provider" style={{ textDecoration: "none" }}>
-                Find Tasks
+                {t.btnFindTasks}
               </Link>
               <Link href="/signup?role=technician" className="bm-main-cta-post" style={{ textDecoration: "none" }}>
-                Post Your Service
+                {t.btnPostService}
               </Link>
             </div>
           </div>
 
           <div className="bm-main-live-box">
-            <h4>🔴 Live Tasks</h4>
+            <h4>{t.liveTasksTitle}</h4>
             <div className="bm-main-task-window">
               <div
                 className="bm-main-task-track"
@@ -154,24 +213,24 @@ export default function PartnershipsPage() {
                           className="bm-main-task-apply"
                           style={{ textDecoration: "none" }}
                         >
-                          Apply
+                          {t.apply}
                         </a>
                       </div>
                       <div className="bm-main-task-meta">
-                        📍 {task.location || "Remote"} &bull; {task.budget_type === "fixed" ? "Fixed" : "Hourly"}
+                        📍 {task.location || "Remote"} &bull; {task.budget_type === "fixed" ? t.fixedPrice : t.hourlyRate}
                       </div>
                     </div>
                   ))
                 ) : (
                   <div style={{ padding: "20px", color: "#64748b" }}>
-                    {liveTasksError ? "Failed to load live requests." : "Loading tasks..."}
+                    {liveTasksError ? t.liveTasksError : t.liveTasksLoading}
                   </div>
                 )}
               </div>
             </div>
             <div className="bm-main-live-cta">
               <Link href="/find-tasks" style={{ textDecoration: "none" }}>
-                See more people finding services around you &rarr;
+                {t.liveTasksCta}
               </Link>
             </div>
           </div>

@@ -538,7 +538,7 @@ export default function Home() {
                     {pro.bio || "Professional technical services and support."}
                   </div>
                   <div className="bm-ftx-actions">
-                    <Link href={`/technicians/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">View Profile</Link>
+                    <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">View Profile</Link>
                     <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">Hire Now</Link>
                   </div>
                 </div>

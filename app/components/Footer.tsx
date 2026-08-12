@@ -95,6 +95,9 @@ export default function Footer() {
     localStorage.setItem("lang", l);
     document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
     setLangOpen(false);
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   };
 
   const changeCountry = (c: string) => {

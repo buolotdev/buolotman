@@ -65,7 +65,7 @@ def _local_upload(file_obj, prefix: str) -> dict:
     with open(dest_path, "wb") as f:
         f.write(file_obj.read())
 
-    public_url = f"http://localhost:8000/media/{key}"
+    public_url = f"/media/{key}"
     logger.info("Local upload saved to %s", dest_path)
     return {
         "key": key,

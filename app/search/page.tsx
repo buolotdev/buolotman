@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
 import { api } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
+import Header from "../components/Header";
 import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
@@ -49,6 +50,34 @@ type SearchResult = {
 };
 
 export default function SearchPage() {
+
+  const [userInitials, setUserInitials] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("user_role");
+    if (token) {
+      setIsAuth(true);
+      setUserRole(role || "client");
+      api.getMe().then(user => {
+        const initials = `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase();
+        setUserInitials(initials || user.username?.[0]?.toUpperCase() || "U");
+      }).catch(() => {
+        // Handle error silently
+      });
+    }
+  }, []);
+
+  const getDashboardLink = () => {
+    const role = userRole.toLowerCase();
+    if (role === "admin") return "/dashboard/admin";
+    if (role === "company") return "/dashboard/company";
+    if (role === "technician") return "/dashboard/technician";
+    return "/dashboard/client";
+  };
+
   const { data: categoriesData } = useFetch(() => api.getCategories(), []);
 
   const [query, setQuery] = useState("");
@@ -72,7 +101,11 @@ export default function SearchPage() {
       if (urlParams.has("q")) setQuery(urlParams.get("q") || "");
       if (urlParams.has("location")) setLocation(urlParams.get("location") || "");
       if (urlParams.has("category")) setActiveCategory(urlParams.get("category") || "any");
-      if (urlParams.has("type")) setActiveType(urlParams.get("type") || "any");
+      if (urlParams.has("type")) {
+        const t = urlParams.get("type") || "any";
+        setActiveType(t);
+        if (t === "company" || t === "technician") setActiveTab(t);
+      }
     }
   }, []);
 
@@ -151,72 +184,46 @@ export default function SearchPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.container}>
-          <div className={styles.headerGrid}>
-            <Link href="/" className={styles.brand} aria-label="Boulot Man home">
-              <Image
-                src="/boulotman-logo.png"
-                alt="Boulot Man"
-                width={168}
-                height={42}
-                className={styles.brandImage}
-                priority
-              />
-            </Link>
-
-            <div className={styles.mobileProfile} aria-hidden="true">
-              <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
-            </div>
-
-            <form className={styles.searchBar} role="search" onSubmit={submitSearch}>
-              <label className={styles.searchField}>
-                <span className={styles.iconWrap} aria-hidden="true">
-                  <iconify-icon icon="lucide:search" />
-                </span>
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Service"
-                  aria-label="Service"
-                />
-              </label>
-              <label className={styles.searchField}>
-                <span className={styles.iconWrap} aria-hidden="true">
-                  <iconify-icon icon="lucide:map-pin" />
-                </span>
-                  <select
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    aria-label="Location"
-                  >
-                    <option value="Global">Global</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Rwanda">Rwanda</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="Ivory Coast">Ivory Coast</option>
-                    <option value="Cameroon">Cameroon</option>
-                  </select>
-              </label>
-              <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
-                Search
-              </button>
-            </form>
-
-            <div className={styles.headerActions}>
-              <Link href="/post-task" className={`${styles.button} ${styles.buttonSecondary}`}>
-                Post a job
-              </Link>
-              <div className={styles.avatar} aria-hidden="true">
-                <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
+      <div className={styles.container} style={{ paddingTop: 24, paddingBottom: 0 }}>
+        <form className={styles.searchBar} style={{ maxWidth: 800, margin: '0 auto', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} role="search" onSubmit={submitSearch}>
+          <label className={styles.searchField}>
+            <span className={styles.iconWrap} aria-hidden="true">
+              <iconify-icon icon="lucide:search" />
+            </span>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Service"
+              aria-label="Service"
+            />
+          </label>
+          <label className={styles.searchField}>
+            <span className={styles.iconWrap} aria-hidden="true">
+              <iconify-icon icon="lucide:map-pin" />
+            </span>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                aria-label="Location"
+                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none' }}
+              >
+                <option value="Global">Global</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Rwanda">Rwanda</option>
+                <option value="Kenya">Kenya</option>
+                <option value="Ghana">Ghana</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Ivory Coast">Ivory Coast</option>
+                <option value="Cameroon">Cameroon</option>
+              </select>
+          </label>
+          <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
+            Search
+          </button>
+        </form>
+      </div>
 
       <main className={`${styles.container} ${styles.main}`}>
         <aside className={styles.sidebar}>

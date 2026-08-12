@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+import styles from "./profile.module.css";
 
 type PublicProfile = {
+  id?: number;
   role?: string;
   company_name?: string;
   first_name?: string;
@@ -15,6 +19,7 @@ type PublicProfile = {
   avatar_url?: string;
   logo_url?: string;
   country?: string;
+  city?: string;
   headquarters?: string;
   is_verified?: boolean;
   average_rating?: number | string;
@@ -41,93 +46,170 @@ export default function PublicProfilePage() {
   const avatarSrc = profile?.avatar_url || profile?.logo_url || "";
   const displayName = isCompany
     ? profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim()
-    : `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Profile";
-  const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || "BM";
+    : `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Unknown Profile";
+  const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || (displayName?.[0]?.toUpperCase()) || "U";
+  const location = profile?.city ? `${profile.city}, ${profile.country || ''}` : (profile?.country || profile?.headquarters || "Location not set");
 
   if (validId === null) {
-    return <main style={{ padding: 32 }}>Invalid profile id.</main>;
+    return (
+      <div className={styles.page}>
+        <Header />
+        <div className={styles.mainContent}>
+          <h2>Invalid profile ID.</h2>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f8fafc", padding: 24 }}>
-      <div style={{ maxWidth: 960, margin: "0 auto" }}>
-        <div style={{ marginBottom: 24 }}>
-          <Link href="/search" style={{ color: "#0f172a", textDecoration: "none" }}>
-            ← Back to search
-          </Link>
-        </div>
+    <div className={styles.page}>
+      <Header />
+      
+      <main className={styles.mainContent}>
+        <Link href="/search" className={styles.backLink}>
+          <iconify-icon icon="lucide:arrow-left" /> Back to Search
+        </Link>
 
-        <section style={{ background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)" }}>
-          {loading ? (
-            <p>Loading profile...</p>
-          ) : error ? (
-            <p style={{ color: "#dc2626" }}>{error}</p>
-          ) : profile ? (
-            <>
-              <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 24, flexWrap: "wrap" }}>
-                <div style={{ width: 88, height: 88, borderRadius: "50%", background: "#e2e8f0", display: "grid", placeItems: "center", overflow: "hidden" }}>
-                  {avatarSrc ? (
-                    <Image src={avatarSrc} alt={displayName} width={88} height={88} style={{ objectFit: "cover" }} />
-                  ) : (
-                    <strong style={{ fontSize: 30, color: "#0f172a" }}>{initials}</strong>
-                  )}
+        {loading ? (
+          <div className={styles.skeletonCard}>
+            <div style={{ width: 100, height: 100, borderRadius: '50%', background: '#e2e8f0', margin: '0 auto 20px' }}></div>
+            <div style={{ height: 30, width: 200, background: '#e2e8f0', margin: '0 auto 10px', borderRadius: 8 }}></div>
+            <div style={{ height: 16, width: 150, background: '#e2e8f0', margin: '0 auto', borderRadius: 4 }}></div>
+          </div>
+        ) : error ? (
+          <div className={styles.skeletonCard} style={{ animation: 'none', color: '#dc2626' }}>
+            <iconify-icon icon="lucide:alert-circle" style={{ fontSize: 48, marginBottom: 16 }} />
+            <h2>Error loading profile</h2>
+            <p>{error}</p>
+          </div>
+        ) : profile ? (
+          <>
+            <div className={styles.hero}>
+              <div className={styles.coverPhoto}>
+                {/* Optional: Add a patterned overlay or cover image here */}
+              </div>
+              <div className={styles.profileInfo}>
+                <div className={styles.avatarWrapper}>
+                  <div className={styles.avatarInner}>
+                    {avatarSrc ? (
+                      <Image src={avatarSrc} alt={displayName} width={128} height={128} style={{ objectFit: "cover" }} />
+                    ) : (
+                      <span className={styles.initials}>{initials}</span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <p style={{ margin: 0, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em" }}>{profile.role}</p>
-                  <h1 style={{ margin: "6px 0", fontSize: 32 }}>{displayName}</h1>
-                  <p style={{ margin: 0, color: "#475569" }}>{profile.country || profile.headquarters || "Location not set"}</p>
+                
+                <div className={styles.headerRow}>
+                  <div className={styles.nameRole}>
+                    <span className={styles.roleBadge}>{profile.role || "Professional"}</span>
+                    <h1 className={styles.name}>{displayName}</h1>
+                    <div className={styles.location}>
+                      <iconify-icon icon="lucide:map-pin" />
+                      {location}
+                      {profile.is_verified && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#10b981', marginLeft: 12 }}>
+                          <iconify-icon icon="lucide:shield-check" /> Verified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={styles.actionButtons}>
+                    <Link href={`/dashboard/client/tasks/create?invite=${profile.id}`} className={styles.btnPrimary}>
+                      Hire {isCompany ? "Company" : "Pro"}
+                    </Link>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-                <InfoCard label="Verified" value={profile.is_verified ? "Yes" : "No"} />
-                <InfoCard label="Rating" value={profile.average_rating ? String(profile.average_rating) : "N/A"} />
-                <InfoCard label="Profile Type" value={profile.role || "Unknown"} />
-                <InfoCard label="Response Time" value={profile.response_time || "Not set"} />
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}><iconify-icon icon="lucide:star" /></div>
+                <div className={styles.statInfo}>
+                  <h3>Rating</h3>
+                  <p>{profile.average_rating ? `${profile.average_rating} / 5` : "No ratings yet"}</p>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}><iconify-icon icon="lucide:clock" /></div>
+                <div className={styles.statInfo}>
+                  <h3>Response Time</h3>
+                  <p>{profile.response_time || "Not available"}</p>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}><iconify-icon icon="lucide:check-circle-2" /></div>
+                <div className={styles.statInfo}>
+                  <h3>Jobs Completed</h3>
+                  <p>12+</p>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.contentGrid}>
+              <div className={styles.mainCol}>
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>
+                    <iconify-icon icon="lucide:user" /> {isCompany ? "About Company" : "About Me"}
+                  </h2>
+                  <p className={styles.sectionText}>
+                    {profile.bio || profile.about || "No details provided by this professional yet."}
+                  </p>
+                </section>
+
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>
+                    <iconify-icon icon="lucide:wrench" /> {isCompany ? "Services Offered" : "Skills & Expertise"}
+                  </h2>
+                  <div className={styles.skillsContainer}>
+                    {isCompany ? (
+                      (profile.services_offered && profile.services_offered.length > 0) ? (
+                        profile.services_offered.map((s, i) => <span key={i} className={styles.skillChip}>{s}</span>)
+                      ) : (
+                        <p className={styles.sectionText}>No specific services listed.</p>
+                      )
+                    ) : (
+                      (profile.skills && profile.skills.length > 0) ? (
+                        profile.skills.map((s, i) => <span key={i} className={styles.skillChip}>{s}</span>)
+                      ) : (
+                        <p className={styles.sectionText}>No skills listed.</p>
+                      )
+                    )}
+                  </div>
+                </section>
+                
+                {isTechnician && profile.portfolio && (profile.portfolio.length > 0) && (
+                  <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>
+                      <iconify-icon icon="lucide:briefcase" /> Portfolio
+                    </h2>
+                    <p className={styles.sectionText}>Portfolio items will be displayed here.</p>
+                  </section>
+                )}
               </div>
 
-              <div style={{ marginTop: 24, display: "grid", gap: 16 }}>
-                {isTechnician ? (
-                  <>
-                    <Block title="Bio" value={profile.bio || "No bio provided."} />
-                    <Block title="Skills" value={(profile.skills || []).join(", ") || "No skills listed."} />
-                    <Block title="Portfolio" value={JSON.stringify(profile.portfolio || [], null, 2)} mono />
-                  </>
-                ) : null}
-
-                {isCompany ? (
-                  <>
-                    <Block title="About" value={profile.about || "No company description provided."} />
-                    <Block title="Services Offered" value={(profile.services_offered || []).join(", ") || "No services listed."} />
-                    <Block title="Headquarters" value={profile.headquarters || "Not set"} />
-                    <Block title="Business Hours" value={JSON.stringify(profile.business_hours || [], null, 2)} mono />
-                  </>
-                ) : null}
+              <div className={styles.sideCol}>
+                <div className={styles.contactBox}>
+                  <h3 className={styles.contactTitle}>Ready to get started?</h3>
+                  <p className={styles.contactText}>Hire this professional directly for your next project and get it done right.</p>
+                  <Link href={`/dashboard/client/tasks/create?invite=${profile.id}`} className={styles.contactBtn}>
+                    Request Quote
+                  </Link>
+                </div>
               </div>
-            </>
-          ) : (
-            <p>Profile not found.</p>
-          )}
-        </section>
-      </div>
-    </main>
-  );
-}
-
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ border: "1px solid #e2e8f0", borderRadius: 16, padding: 16, background: "#f8fafc" }}>
-      <div style={{ color: "#64748b", fontSize: 13, marginBottom: 8 }}>{label}</div>
-      <div style={{ fontWeight: 700, color: "#0f172a" }}>{value}</div>
-    </div>
-  );
-}
-
-function Block({ title, value, mono = false }: { title: string; value: string; mono?: boolean }) {
-  return (
-    <div style={{ border: "1px solid #e2e8f0", borderRadius: 16, padding: 16 }}>
-      <h2 style={{ margin: "0 0 8px", fontSize: 18 }}>{title}</h2>
-      <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: mono ? "monospace" : "inherit", color: "#334155" }}>{value}</pre>
+            </div>
+          </>
+        ) : (
+          <div className={styles.skeletonCard} style={{ animation: 'none' }}>
+            <h2>Profile not found</h2>
+            <p style={{ color: '#64748b' }}>The professional you are looking for does not exist or has been removed.</p>
+          </div>
+        )}
+      </main>
+      
+      <Footer />
     </div>
   );
 }
