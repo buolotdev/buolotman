@@ -84,7 +84,159 @@ const CountUpNumber = ({ end, duration = 2000, suffix = "" }: { end: number, dur
   return <>{count.toLocaleString()}{suffix}</>;
 };
 
+
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    heroTitle1: "Connecting clients with",
+    heroTitle2: "verified technicians and engineers",
+    heroDesc: "Join Africa’s growing workforce marketplace connecting professionals, businesses, and communities at scale.",
+    searchPlaceholder: "What service do you offer or are you looking for? e.g Electrical installation, Web development, Plumbing, Solar systems, CCTV installation, Mobile apps",
+    allCategories: "All Categories",
+    btnSearch: "Search",
+    btnSignUpProvider: "Sign up as Service Provider",
+    btnPostService: "Post a Service",
+    liveTasksTitle: "🔴 Live Tasks",
+    liveTasksLoading: "Loading tasks...",
+    liveTasksNoTasks: "No tasks available",
+    liveTasksCta: "See more people finding services around you →",
+    statsTitle: "Boulot Man at a Glance",
+    statsDesc: "A growing marketplace connecting clients, technicians, and companies through verified services and secure project engagement.",
+    statUsers: "Registered Users",
+    statTechs: "Verified Technicians",
+    statComps: "Verified Companies",
+    statMonthly: "Tasks Posted Monthly",
+    statCompletion: "Successful Project Completion",
+    ftxTitle: "Boulot Man connects clients with verified technicians and engineers — securely and efficiently.",
+    ftxRoleTech: "Verified Technician",
+    ftxMeta: "Available now",
+    ftxBtnView: "View Profile",
+    ftxBtnHire: "Hire Now",
+    ftxFooterLink: "Hire verified professionals with confidence. See more →",
+    prosLoading: "Loading technicians...",
+    prosNoTasks: "No featured technicians available.",
+    entHeaderTitle: "Partner with Top Enterprise & Maintenance Companies",
+    entHeaderSubtitle: "Connect with highly rated enterprise firms capable of executing large scale projects securely and efficiently.",
+    entRoleComp: "Registered Company",
+    entMeta: "Projects",
+    entDescFallback: "Comprehensive enterprise and maintenance services.",
+    entBtnView: "View Profile",
+    entBtnHire: "Request Quote",
+    entExplore: "Explore all registered companies →",
+    companiesLoading: "Loading companies...",
+    companiesNoTasks: "No companies available at the moment.",
+    catEyebrow: "Popular categories",
+    catTitle: "Browse services by category",
+    catDesc: "Discover vetted experts across the most requested home, office, and commercial service categories.",
+    catViewAll: "{t.catViewAll}",
+    catExplorePrefix: "Explore verified",
+    catExploreSuffix: "professionals ready to help.",
+    catBrowse: "Browse category",
+    catLoading: "Loading categories...",
+    catNone: "No categories available yet.",
+    hiwEyebrow: "Why choose us",
+    hiwTitle: "Built for trust and efficiency",
+    hiwDesc: "{t.hiwDesc}",
+    hiwCard1Title: "Verified Professionals",
+    hiwCard1Desc: "{t.hiwCard1Desc}",
+    hiwCard2Title: "Success Rate",
+    hiwCard2Desc: "{t.hiwCard2Desc}",
+    hiwCard3Title: "Secure Payments",
+    hiwCard3Desc: "{t.hiwCard3Desc}",
+    hiwCard4Title: "Tailored Pathways",
+    hiwCard4Desc: "{t.hiwCard4Desc}",
+    promoTitle: "Let experts find the right professional for you",
+    promoList1: "{t.promoList1}",
+    promoList2: "{t.promoList2}",
+    promoList3: "{t.promoList3}",
+    promoBtn: "Discover expert sourcing",
+    promoGuarantee: "{t.promoGuarantee}"
+  },
+  fr: {
+    heroTitle1: "Connecter les clients avec des",
+    heroTitle2: "techniciens et ingénieurs vérifiés",
+    heroDesc: "Rejoignez le marché du travail en pleine croissance en Afrique reliant les professionnels, les entreprises et les communautés à grande échelle.",
+    searchPlaceholder: "Quel service proposez-vous ou recherchez-vous ? Ex: Installation électrique, Développement Web, Plomberie, Systèmes solaires, Installation de caméras, Applications mobiles",
+    allCategories: "Toutes les catégories",
+    btnSearch: "Rechercher",
+    btnSignUpProvider: "S'inscrire comme prestataire",
+    btnPostService: "Publier un service",
+    liveTasksTitle: "🔴 Demandes en direct",
+    liveTasksLoading: "Chargement des tâches...",
+    liveTasksNoTasks: "Aucune tâche disponible",
+    liveTasksCta: "Voir plus de personnes cherchant des services autour de vous →",
+    statsTitle: "Boulot Man en un coup d'œil",
+    statsDesc: "Un marché en pleine croissance reliant clients, techniciens et entreprises grâce à des services vérifiés et un engagement de projet sécurisé.",
+    statUsers: "Utilisateurs enregistrés",
+    statTechs: "Techniciens vérifiés",
+    statComps: "Entreprises vérifiées",
+    statMonthly: "Tâches publiées par mois",
+    statCompletion: "Taux de réussite des projets",
+    ftxTitle: "Boulot Man connecte les clients avec des techniciens et des ingénieurs vérifiés — de manière sécurisée et efficace.",
+    ftxRoleTech: "Technicien vérifié",
+    ftxMeta: "Disponible maintenant",
+    ftxBtnView: "Voir le profil",
+    ftxBtnHire: "Recruter",
+    ftxFooterLink: "Embauchez des professionnels vérifiés en toute confiance. En savoir plus →",
+    prosLoading: "Chargement des techniciens...",
+    prosNoTasks: "Aucun technicien vedette disponible.",
+    entHeaderTitle: "Associez-vous aux meilleures entreprises",
+    entHeaderSubtitle: "Connectez-vous avec des entreprises hautement qualifiées capables d'exécuter de grands projets de manière sécurisée et efficace.",
+    entRoleComp: "Entreprise enregistrée",
+    entMeta: "Projets",
+    entDescFallback: "Services complets d'entreprise et de maintenance.",
+    entBtnView: "Voir le profil",
+    entBtnHire: "Demander un devis",
+    entExplore: "Découvrir toutes les entreprises enregistrées →",
+    companiesLoading: "Chargement des entreprises...",
+    companiesNoTasks: "Aucune entreprise disponible pour le moment.",
+    catEyebrow: "Catégories populaires",
+    catTitle: "Parcourir les services par catégorie",
+    catDesc: "Découvrez des experts qualifiés dans les catégories de services résidentiels, professionnels et commerciaux les plus demandées.",
+    catViewAll: "Voir tout",
+    catExplorePrefix: "Découvrez des professionnels en",
+    catExploreSuffix: "vérifiés et prêts à vous aider.",
+    catBrowse: "Parcourir la catégorie",
+    catLoading: "Chargement des catégories...",
+    catNone: "Aucune catégorie disponible pour le moment.",
+    hiwEyebrow: "Pourquoi nous choisir",
+    hiwTitle: "Conçu pour la confiance et l'efficacité",
+    hiwDesc: "Nous veillons à ce que chaque interaction sur la plateforme soit sécurisée, transparente et axée sur la fourniture de résultats de haute qualité.",
+    hiwCard1Title: "Professionnels vérifiés",
+    hiwCard1Desc: "Chaque technicien et entreprise est rigoureusement évalué pour ses compétences, sa qualité et sa sécurité. Notre plateforme garantit le respect de normes strictes.",
+    hiwCard2Title: "Taux de réussite",
+    hiwCard2Desc: "Avec un historique éprouvé, des milliers de clients ont réussi leurs projets grâce à ProMatch. Nos experts se concentrent sur l'atteinte de résultats solides.",
+    hiwCard3Title: "Paiements sécurisés",
+    hiwCard3Desc: "Nous respectons votre vie privée et assurons un soutien professionnel et sécurisé. ProMatch garantit la sécurité et l'intégrité de tous vos paiements.",
+    hiwCard4Title: "Parcours sur mesure",
+    hiwCard4Desc: "Chaque projet est unique, tout comme notre accompagnement. ProMatch conçoit des parcours de service personnalisés selon vos objectifs et votre budget.",
+    promoTitle: "Laissez nos experts trouver le bon professionnel pour vous",
+    promoList1: "Travaillez avec des experts qui recherchent, interviewent et évaluent les professionnels pour vous",
+    promoList2: "Obtenez un rapport avec des recommandations claires",
+    promoList3: "Embauchez des talents techniques vérifiés en toute confiance",
+    promoBtn: "Découvrir la recherche d'experts",
+    promoGuarantee: "Garantie de remboursement à 100%"
+  }
+};
+
 export default function Home() {
+  // Language state
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem("lang") || "en";
+      if (savedLang === "fr" || savedLang === "en") {
+        setLang(savedLang);
+      } else if (savedLang === "rw") {
+        setLang("fr");
+      } else {
+        setLang("en");
+      }
+    }
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const handleApplyClick = (e: React.MouseEvent, taskId: number) => {
     e.preventDefault();
     if (typeof window !== 'undefined') {
@@ -378,14 +530,14 @@ export default function Home() {
         <div className="bm-main-hero-grid">
           <div>
             <h1>
-              Connecting clients with<br />
-              <span>verified technicians and engineers</span>
+              {lang === 'fr' ? (
+                <>Connecter les clients avec des<br /><span>techniciens et ingénieurs vérifiés</span></>
+              ) : (
+                <>Connecting clients with<br /><span>verified technicians and engineers</span></>
+              )}
             </h1>
 
-            <p>
-              Join Africa’s growing workforce marketplace connecting professionals,
-              businesses, and communities at scale.
-            </p>
+            <p>{t.heroDesc}</p>
 
             <form className="bm-main-search" onSubmit={submitGlobalSearch}>
               <div className="bm-main-search-field">
@@ -409,7 +561,7 @@ export default function Home() {
                 value={searchCategory}
                 onChange={(event) => setSearchCategory(event.target.value)}
               >
-                <option value="">All Categories</option>
+                <option value="">{t.allCategories}</option>
                 {categories.map((c) => (
                   <option key={c.slug} value={c.slug}>{c.name}</option>
                 ))}
@@ -429,17 +581,17 @@ export default function Home() {
                 <option value="Cameroon">Cameroon</option>
               </select>
 
-              <button type="submit">Search</button>
+              <button type="submit">{t.btnSearch}</button>
             </form>
 
             <div className="bm-main-cta">
-              <Link href="/signup" className="bm-main-cta-provider">Sign up as Service Provider</Link>
-              <Link href={postTaskHref} className="bm-main-cta-post">Post a Service</Link>
+              <Link href="/signup" className="bm-main-cta-provider">{t.btnSignUpProvider}</Link>
+              <Link href={postTaskHref} className="bm-main-cta-post">{t.btnPostService}</Link>
             </div>
           </div>
 
           <div className="bm-main-live-box">
-            <h4>🔴 Live Tasks</h4>
+            <h4>{t.liveTasksTitle}</h4>
             <div className="bm-main-task-window">
               <div
                 className="bm-main-task-track"
@@ -453,20 +605,20 @@ export default function Home() {
                           <img src={`https://ui-avatars.com/api/?name=${task.client?.first_name || 'U'}&background=random`} alt="User" />
                           <div className="bm-main-task-title">{task.title}</div>
                         </div>
-                        <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>Apply</a>
+                        <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>{lang === 'fr' ? 'Postuler' : 'Apply'}</a>
                       </div>
-                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? 'Fixed' : 'Hourly'}</div>
+                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? (lang === 'fr' ? 'Fixe' : 'Fixed') : (lang === 'fr' ? 'Horaire' : 'Hourly')}</div>
                     </div>
                   ))
                 ) : (
                   <div style={{ padding: "20px", color: "#64748b" }}>
-                    {liveTasksError ? liveTasksError : liveTasksData ? "No tasks available" : "Loading tasks..."}
+                    {liveTasksError ? liveTasksError : liveTasksData ? t.liveTasksNoTasks : t.liveTasksLoading}
                   </div>
                 )}
               </div>
             </div>
             <div className="bm-main-live-cta">
-              <Link href="/find-tasks">See more people finding services around you →</Link>
+              <Link href="/find-tasks">{t.liveTasksCta}</Link>
             </div>
           </div>
         </div>
@@ -477,32 +629,29 @@ export default function Home() {
       <section className="bm-stats-section">
         <div className="bm-stats-inner">
           <div className="bm-stats-header">
-            <h2>Boulot Man at a Glance</h2>
-            <p>
-              A growing marketplace connecting clients, technicians, and companies
-              through verified services and secure project engagement.
-            </p>
+            <h2>{t.statsTitle}</h2>
+            <p>{t.statsDesc}</p>
           </div>
           <div className="bm-stats-grid">
             <div className="bm-stat-card">
               <strong><CountUpNumber end={stats.registered_users} suffix="+" /></strong>
-              <span>Registered Users</span>
+              <span>{t.statUsers}</span>
             </div>
             <div className="bm-stat-card">
               <strong><CountUpNumber end={stats.verified_technicians} suffix="+" /></strong>
-              <span>Verified Technicians</span>
+              <span>{t.statTechs}</span>
             </div>
             <div className="bm-stat-card">
               <strong><CountUpNumber end={stats.verified_companies} suffix="+" /></strong>
-              <span>Verified Companies</span>
+              <span>{t.statComps}</span>
             </div>
             <div className="bm-stat-card">
               <strong><CountUpNumber end={stats.tasks_posted_monthly} suffix="+" /></strong>
-              <span>Tasks Posted Monthly</span>
+              <span>{t.statMonthly}</span>
             </div>
             <div className="bm-stat-card">
               <strong><CountUpNumber end={stats.successful_completion} suffix="%" /></strong>
-              <span>Successful Project Completion</span>
+              <span>{t.statCompletion}</span>
             </div>
           </div>
         </div>
@@ -511,15 +660,12 @@ export default function Home() {
       <section className="bm-ftx-root">
         <div className="bm-ftx-container">
           <div className="bm-ftx-header">
-            <h2 className="bm-ftx-header-title">
-              Boulot Man connects clients with verified technicians and engineers —
-              securely and efficiently.
-            </h2>
+            <h2 className="bm-ftx-header-title">{t.ftxTitle}</h2>
           </div>
 
           <div className="bm-ftx-grid">
             {prosLoading ? (
-              <div style={{ padding: "20px", color: "#64748b" }}>Loading technicians...</div>
+              <div style={{ padding: "20px", color: "#64748b" }}>{t.prosLoading}</div>
             ) : prosData && prosData.length > 0 ? (
               prosData.slice(0, 4).map((pro: any) => (
                 <div className="bm-ftx-card" key={pro.id}>
@@ -527,29 +673,29 @@ export default function Home() {
                     <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
                     <div>
                       <div className="bm-ftx-name">{pro.first_name} {pro.last_name}</div>
-                      <div className="bm-ftx-role">{pro.title || "Verified Technician"}</div>
+                      <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
                     </div>
                   </div>
                   <div className="bm-ftx-rating">
                     <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
                   </div>
-                  <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • Available now</div>
+                  <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • {t.ftxMeta}</div>
                   <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {pro.bio || "Professional technical services and support."}
                   </div>
                   <div className="bm-ftx-actions">
-                    <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">View Profile</Link>
-                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">Hire Now</Link>
+                    <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">{t.ftxBtnView}</Link>
+                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">{t.ftxBtnHire}</Link>
                   </div>
                 </div>
               ))
             ) : (
-               <div style={{ padding: "20px", color: "#64748b" }}>No featured technicians available.</div>
+               <div style={{ padding: "20px", color: "#64748b" }}>{t.prosNoTasks}</div>
             )}
           </div>
 
           <div className="bm-ftx-footer">
-            <Link href="/technicians">Hire verified professionals with confidence. See more &rarr;</Link>
+            <Link href="/technicians">{t.ftxFooterLink}</Link>
           </div>
         </div>
       </section>
@@ -557,17 +703,13 @@ export default function Home() {
       <section className="bm-enterprise-root">
         <div className="bm-enterprise-container">
           <div className="bm-enterprise-header">
-            <h2 className="bm-enterprise-header-title">
-              Partner with Top Enterprise & Maintenance Companies
-            </h2>
-            <p className="bm-enterprise-header-subtitle">
-              Connect with highly rated enterprise firms capable of executing large scale projects securely and efficiently.
-            </p>
+            <h2 className="bm-enterprise-header-title">{t.entHeaderTitle}</h2>
+            <p className="bm-enterprise-header-subtitle">{t.entHeaderSubtitle}</p>
           </div>
 
           <div className="bm-enterprise-grid">
             {companiesLoading ? (
-              <div style={{ padding: "20px", color: "#94a3b8" }}>Loading companies...</div>
+              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
             ) : companiesData && companiesData.length > 0 ? (
               companiesData.slice(0, 4).map((company: any) => (
                 <div className="bm-enterprise-card" key={company.id}>
@@ -575,29 +717,29 @@ export default function Home() {
                     <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
                     <div>
                       <div className="bm-enterprise-name">{company.company_name}</div>
-                      <div className="bm-enterprise-role">Registered Company</div>
+                      <div className="bm-enterprise-role">{t.entRoleComp}</div>
                     </div>
                   </div>
                   <div className="bm-enterprise-rating">
                     <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
                   </div>
-                  <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} Projects</div>
+                  <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
                   <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {company.description || "Comprehensive enterprise and maintenance services."}
+                    {company.description || t.entDescFallback}
                   </div>
                   <div className="bm-enterprise-actions">
-                    <Link href={`/search?type=company&q=${company.company_name}`} className="bm-enterprise-btn bm-enterprise-btn-view">View Profile</Link>
-                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">Request Quote</Link>
+                    <Link href={`/search?type=company&q=${company.company_name}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
+                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">{t.entBtnHire}</Link>
                   </div>
                 </div>
               ))
             ) : (
-              <div style={{ padding: "20px", color: "#94a3b8" }}>No companies available at the moment.</div>
+              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesNoTasks}</div>
             )}
           </div>
           <div style={{ textAlign: "center", marginTop: "40px" }}>
             <Link href="/search?type=company" className="bm-enterprise-explore">
-              Explore all registered companies &rarr;
+              {t.entExplore}
             </Link>
           </div>
         </div>
@@ -607,15 +749,12 @@ export default function Home() {
         <div className="container">
           <div className="section-header-flex">
             <div className="section-header section-header-left">
-              <div className="eyebrow">Popular categories</div>
-              <h2 className="section-title">Browse services by category</h2>
-              <p className="section-copy">
-                Discover vetted experts across the most requested home,
-                office, and commercial service categories.
-              </p>
+              <div className="eyebrow">{t.catEyebrow}</div>
+              <h2 className="section-title">{t.catTitle}</h2>
+              <p className="section-copy">{t.catDesc}</p>
             </div>
             <Link href="/search" className="btn btn-secondary" data-media-type="banani-button">
-              View all
+              {t.catViewAll}
               <div
                 className="icon-wrap"
                 style={{ fontSize: "16px", width: "16px", height: "16px" }}
@@ -640,7 +779,7 @@ export default function Home() {
               : categories.length === 0
                 ? (
                   <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "32px 0", color: "#64748b" }}>
-                    <p>No categories available yet.</p>
+                    <p>{t.catNone}</p>
                   </div>
                 )
                 : categories.map((category) => {
@@ -653,9 +792,9 @@ export default function Home() {
                         </div>
                         <h3 className="category-title">{category.name}</h3>
                         <p className="category-copy">
-                          Explore verified {category.name.toLowerCase()} professionals ready to help.
+                          {t.catExplorePrefix} {lang === 'fr' ? category.name : category.name.toLowerCase()} {t.catExploreSuffix}
                         </p>
-                        <div className="category-count">Browse category</div>
+                        <div className="category-count">{t.catBrowse}</div>
                       </>
                     );
 
@@ -818,11 +957,10 @@ export default function Home() {
         </div>
 
         <div className="mb-header">
-          <div className="mb-eyebrow">Why choose us</div>
-          <h2 className="mb-title">Built for trust and efficiency</h2>
+          <div className="mb-eyebrow">{t.hiwEyebrow}</div>
+          <h2 className="mb-title">{t.hiwTitle}</h2>
           <p className="mb-copy">
-            We ensure every interaction on the platform is secure,
-            transparent, and focused on delivering high-quality results.
+            {t.hiwDesc}
           </p>
         </div>
 
@@ -830,12 +968,12 @@ export default function Home() {
           {/* Card 1 */}
           <div className="mb-card">
             <div className="mb-card-header">
-              <h3 className="mb-card-title">Verified<br/>Professionals</h3>
+              <h3 className="mb-card-title">{lang === 'fr' ? <>Professionnels<br/>Vérifiés</> : <>Verified<br/>Professionals</>}</h3>
               <div className="mb-card-icon"><iconify-icon icon="lucide:globe"></iconify-icon></div>
             </div>
             <div className="mb-hidden-content">
               <p className="mb-card-content">
-                Every technician and company is thoroughly vetted for quality, skills, and background safety. Our platform ensures that professionals meet strict standards before they connect with clients.
+                {t.hiwCard1Desc}
               </p>
             </div>
             <div className="mb-faint-icon"><iconify-icon icon="lucide:globe"></iconify-icon></div>
@@ -844,7 +982,7 @@ export default function Home() {
           {/* Card 2 */}
           <div className="mb-card">
             <div className="mb-card-header">
-              <h3 className="mb-card-title">Success Rate</h3>
+              <h3 className="mb-card-title">{t.hiwCard2Title}</h3>
               <div className="mb-card-icon"><iconify-icon icon="lucide:line-chart"></iconify-icon></div>
             </div>
             <div className="mb-hidden-content">
@@ -855,7 +993,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="mb-card-content">
-                With a proven track record, thousands of clients have successfully completed jobs through ProMatch. Our professionals focus on achieving strong results.
+                {t.hiwCard2Desc}
               </p>
             </div>
           </div>
@@ -863,12 +1001,12 @@ export default function Home() {
           {/* Card 3 */}
           <div className="mb-card">
             <div className="mb-card-header">
-              <h3 className="mb-card-title">Secure<br/>Payments</h3>
+              <h3 className="mb-card-title">{lang === 'fr' ? <>Paiements<br/>Sécurisés</> : <>Secure<br/>Payments</>}</h3>
               <div className="mb-card-icon"><iconify-icon icon="lucide:shield"></iconify-icon></div>
             </div>
             <div className="mb-hidden-content">
               <p className="mb-card-content">
-                We respect your privacy and provide professional, secure support throughout your journey. As a trusted platform, ProMatch ensures that all your payments are handled with full security and integrity.
+                {t.hiwCard3Desc}
               </p>
             </div>
             <div className="mb-faint-icon"><iconify-icon icon="lucide:fingerprint"></iconify-icon></div>
@@ -877,7 +1015,7 @@ export default function Home() {
           {/* Card 4 */}
           <div className="mb-card">
             <div className="mb-card-header">
-              <h3 className="mb-card-title">Tailored<br/>Pathways</h3>
+              <h3 className="mb-card-title">{lang === 'fr' ? <>Parcours<br/>sur Mesure</> : <>Tailored<br/>Pathways</>}</h3>
               <div className="mb-card-icon"><iconify-icon icon="lucide:git-pull-request"></iconify-icon></div>
             </div>
             <div className="mb-hidden-content">
@@ -885,7 +1023,7 @@ export default function Home() {
                 <div className="mb-progress-bar-fill"></div>
               </div>
               <p className="mb-card-content">
-                Every job is unique, and so is our guidance. ProMatch designs personalized service pathways based on your goals, requirements, and budget constraints.
+                {t.hiwCard4Desc}
               </p>
             </div>
           </div>
@@ -900,20 +1038,16 @@ export default function Home() {
                 <div className="promo-banner-brand">
                   Boulot Man <span>Pro.</span>
                 </div>
-                <h2 className="promo-banner-title">
-                  Let experts find the right professional for you
-                </h2>
+                <h2 className="promo-banner-title">{t.promoTitle}</h2>
                 <ul className="promo-banner-list">
-                  <li>Work with experts who will source, interview, and vet professionals for you</li>
-                  <li>Get a report with clear recommendations</li>
-                  <li>Hire vetted technical talent with confidence</li>
+                  <li>{t.promoList1}</li>
+                  <li>{t.promoList2}</li>
+                  <li>{t.promoList3}</li>
                 </ul>
-                <Link href="/search" className="promo-banner-btn" data-media-type="banani-button">
-                  Discover expert sourcing
-                </Link>
+                <Link href="/search" className="promo-banner-btn" data-media-type="banani-button">{t.promoBtn}</Link>
                 <div className="promo-banner-guarantee">
                   <iconify-icon icon="lucide:shield-check" style={{ fontSize: "18px", color: "#fff" }}></iconify-icon>
-                  100% money-back guarantee
+                  {t.promoGuarantee}
                 </div>
               </div>
               <div className="promo-banner-right">
@@ -1260,7 +1394,7 @@ export default function Home() {
               </p>
             </div>
             <Link href="/search" className="btn btn-secondary" data-media-type="banani-button">
-              View all companies
+              {t.catViewAll} companies
               <div
                 className="icon-wrap"
                 style={{ fontSize: "16px", width: "16px", height: "16px" }}
