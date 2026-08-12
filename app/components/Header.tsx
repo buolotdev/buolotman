@@ -242,7 +242,7 @@ function Header() {
       return;
     }
 
-    // 2. Open Mega Menu logic ("All Categories" click)
+    // 2. Open Mega Menu logic ("${lang === 'fr' ? 'Toutes les catégories' : 'All Categories'}" click)
     const navItem = target.closest('.bmNavItem[data-menu="cats"]');
     if (navItem) {
       const mega = document.getElementById('bmMegaCats');
@@ -286,7 +286,7 @@ function Header() {
 
     <div class="bmNavLeft">
       <div class="bmMegaGroup" data-menu-group="cats">
-        <div class="bmNavItem" data-menu="cats" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">All Categories</div>
+        <div class="bmNavItem" data-menu="cats" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">${lang === 'fr' ? 'Toutes les catégories' : 'All Categories'}</div>
         <div class="bmMega" id="bmMegaCats">
           <div class="bmMegaInner">
             <button class="bmMegaClose" aria-label="Close menu" style="position:absolute; top:20px; right:20px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50%; width:36px; height:36px; cursor:pointer; color:#475569; z-index:10060; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05);">&#10005;</button>
@@ -1048,22 +1048,22 @@ function Header() {
         </div>
       </div>
       <div class="bmMegaGroup" data-menu-group="apps">
-        <div class="bmNavItem" data-menu="apps" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">Apps</div>
+        <div class="bmNavItem" data-menu="apps" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">${lang === 'fr' ? 'Applications' : 'Apps'}</div>
         <div class="bmMega" id="bmMegaApps">
           <div class="bmSimple">
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Get the Boulot Man App on Play Store</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Download the Boulot Man app for Android devices. Access thousands of service professionals from your smartphone.</p>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? "Téléchargez l'application Boulot Man sur le Play Store" : 'Get the Boulot Man App on Play Store'}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? "Téléchargez l'application Boulot Man pour les appareils Android. Accédez à des milliers de professionnels de services depuis votre smartphone." : 'Download the Boulot Man app for Android devices. Access thousands of service professionals from your smartphone.'}</p>
               <a href="#" class="bmStoreButton" style="width:160px; max-width:100%; margin:12px auto; display:inline-flex; box-sizing:border-box; gap:10px; color:#fff;"><img src="https://img.icons8.com/color/48/google-play.png" alt="" style="width:24px; height:24px; flex-shrink:0;" /><span>Google Play</span></a>
             </div>
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Get the Boulot Man App on App Store</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Download the Boulot Man app for iOS devices. Book and manage tasks easily on your iPhone or iPad.</p>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? "Téléchargez l'application Boulot Man sur l'App Store" : 'Get the Boulot Man App on App Store'}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? "Téléchargez l'application Boulot Man pour les appareils iOS. Réservez et gérez facilement vos tâches sur votre iPhone ou iPad." : 'Download the Boulot Man app for iOS devices. Book and manage tasks easily on your iPhone or iPad.'}</p>
               <a href="#" class="bmStoreButton" style="width:160px; max-width:100%; margin:12px auto; display:inline-flex; box-sizing:border-box; gap:10px; color:#fff;"><img src="https://img.icons8.com/ios-filled/50/ffffff/mac-os.png" alt="" style="width:24px; height:24px; flex-shrink:0;" /><span>App Store</span></a>
             </div>
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Follow Us on Social Media</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Connect with us for updates, tips, and promotions. Join the growing Boulot Man community online.</p>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? 'Suivez-nous sur les réseaux sociaux' : 'Follow Us on Social Media'}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? 'Connectez-vous avec nous pour les mises à jour, conseils et promotions. Rejoignez la communauté en pleine croissance.' : 'Connect with us for updates, tips, and promotions. Join the growing Boulot Man community online.'}</p>
               <div class="bmSocial" style="display:flex; justify-content:center; gap:10px; margin-top:16px;">
                 <a href="https://www.facebook.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">f</a>
                 <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">in</a>
@@ -1075,23 +1075,23 @@ function Header() {
         </div>
       </div>
       <div class="bmMegaGroup" data-menu-group="help">
-        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:#ffffff;">Help Center</a>
+        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:#ffffff;">${lang === 'fr' ? "Centre d'aide" : 'Help Center'}</a>
         <div class="bmMega" id="bmMegaHelp">
           <div class="bmSimple">
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Help Center</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Read platform guides, account instructions, payment information, safety guidance, and frequently asked questions.</p>
-              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">Visit Help Center</a>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? "Centre d'aide" : "Help Center"}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? 'Lisez les guides de la plateforme, les instructions de compte, les informations de paiement et la FAQ.' : 'Read platform guides, account instructions, payment information, safety guidance, and frequently asked questions.'}</p>
+              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">Visit ${lang === 'fr' ? "Centre d'aide" : 'Help Center'}</a>
             </div>
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Live Support</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Chat with the Boulot Man support team about your account, task, technician, company, project, or payment.</p>
-              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">Start Live Chat</a>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? 'Support en direct' : 'Live Support'}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? "Discutez avec l'équipe de support de Boulot Man pour votre compte, tâche, technicien, entreprise, projet ou paiement." : 'Chat with the Boulot Man support team about your account, task, technician, company, project, or payment.'}</p>
+              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">${lang === 'fr' ? 'Lancer le chat en direct' : 'Start Live Chat'}</a>
             </div>
             <div class="bmSimpleCard">
-              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">Tickets & Feedback</h3>
-              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">Submit a support ticket, report a problem, send feedback, or request assistance with an unresolved issue.</p>
-              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">Submit a Ticket</a>
+              <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? 'Tickets et commentaires' : 'Tickets & Feedback'}</h3>
+              <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? "Soumettez un ticket de support, signalez un problème, envoyez vos commentaires ou demandez de l'aide." : 'Submit a support ticket, report a problem, send feedback, or request assistance with an unresolved issue.'}</p>
+              <a href="/help-center" style="display:block; max-width:240px; margin:8px auto 0; padding:10px 14px; border-radius:8px; background:#001F3F; color:#fff; font-size:0.78rem; font-weight:600; text-decoration:none;">${lang === 'fr' ? 'Soumettre un ticket' : 'Submit a Ticket'}</a>
             </div>
           </div>
         </div>
@@ -1142,7 +1142,7 @@ function Header() {
 
 <!-- ================= MOBILE MENU ================= -->
 <div class="bmMobileMenu" id="bmMobileMenu">
-  <div class="bmMobileTop">All Categories</div>
+  <div class="bmMobileTop">${lang === 'fr' ? 'Toutes les catégories' : 'All Categories'}</div>
   <div class="bmMobileSection">
     <div class="bmMobileCat"><img src="https://img.icons8.com/fluency/96/source-code.png" style="width:20px;height:20px;margin-right:8px;vertical-align:middle;" alt="" />Software & Digital Engineering</div>
     <div class="bmMobileSub">
@@ -1580,15 +1580,15 @@ function Header() {
       <a class="bmMobileLink" href="/search?category=education-language-and-document-services"><img src="https://img.icons8.com/fluency/96/administrative-tools.png" style="width:16px;height:16px;margin-right:6px;vertical-align:middle;" alt="" />Business document preparation</a>
     </div>
   </div>
-  <div class="bmMobileTop">Apps</div>
+  <div class="bmMobileTop">${lang === 'fr' ? 'Applications' : 'Apps'}</div>
   <div class="bmMobileSection">
-    <a class="bmMobileLink" href="/search">Get the Boulot Man App on Play Store</a>
-    <a class="bmMobileLink" href="/search">Get the Boulot Man App on App Store</a>
-    <a class="bmMobileLink" href="/search">Follow Us on Social Media</a>
+    <a class="bmMobileLink" href="/search">${lang === 'fr' ? "Téléchargez l'application Boulot Man sur le Play Store" : 'Get the Boulot Man App on Play Store'}</a>
+    <a class="bmMobileLink" href="/search">${lang === 'fr' ? "Téléchargez l'application Boulot Man sur l'App Store" : 'Get the Boulot Man App on App Store'}</a>
+    <a class="bmMobileLink" href="/search">${lang === 'fr' ? 'Suivez-nous sur les réseaux sociaux' : 'Follow Us on Social Media'}</a>
   </div>
   <div class="bmMobileTop">Help Center</div>
   <div class="bmMobileSection">
-    <a class="bmMobileLink" href="/help-center">Help Center</a>
+    <a class="bmMobileLink" href="/help-center">${lang === 'fr' ? "Centre d'aide" : 'Help Center'}</a>
     <a class="bmMobileLink" href="/help-center">Live Chat</a>
     <a class="bmMobileLink" href="/help-center">More Support</a>
   </div>
@@ -1648,24 +1648,24 @@ function Header() {
         }
       </style>
 
-      <a href="/find-tasks">Find Tasks</a>
+      <a href="/find-tasks">${lang === 'fr' ? 'Trouver des tâches' : 'Find Tasks'}</a>
       
       <div class="service-provider-dropdown">
-        <a href="/service-providers" class="bmDropBtn" style="color: #ffffff; text-decoration: none; font-weight: 500; font-size: 15px;">Service Providers <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
+        <a href="/service-providers" class="bmDropBtn" style="color: #ffffff; text-decoration: none; font-weight: 500; font-size: 15px;">${lang === 'fr' ? 'Prestataires' : 'Service Providers'} <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
         <div class="bmDropMenu">
-          <a class="bmDropItem" href="/service-providers/technicians" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Technicians</a>
-          <a class="bmDropItem" href="/search?type=company" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">Find Companies</a>
+          <a class="bmDropItem" href="/service-providers/technicians" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">${lang === 'fr' ? 'Trouver des techniciens' : 'Find Technicians'}</a>
+          <a class="bmDropItem" href="/search?type=company" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">${lang === 'fr' ? 'Trouver des entreprises' : 'Find Companies'}</a>
         </div>
       </div>
 
-      <a href="/it-on-demand">IT On-Demand</a>
-      <a href="/concierge">Concierge</a>
-      <a href="/contractors">Enterprise</a>
-      <a href="/build-a-team">Build a Team</a>
-      <a href="/how-it-works">How It Works</a>
-      <a href="/login" class="bm-main-btn bm-main-btn-outline">Login</a>
-      <a href="/signup" class="bm-main-btn bm-main-btn-outline">Sign Up</a>
-      <a href="/post-task" class="bm-main-btn bm-main-btn-primary">Post a Task</a>
+      <a href="/it-on-demand">${lang === 'fr' ? 'IT sur Demande' : 'IT On-Demand'}</a>
+      <a href="/concierge">${lang === 'fr' ? 'Concierge' : 'Concierge'}</a>
+      <a href="/contractors">${lang === 'fr' ? 'Entreprise' : 'Enterprise'}</a>
+      <a href="/build-a-team">${lang === 'fr' ? 'Créer une équipe' : 'Build a Team'}</a>
+      <a href="/how-it-works">${lang === 'fr' ? 'Comment ça marche' : 'How It Works'}</a>
+      <a href="/login" class="bm-main-btn bm-main-btn-outline">${lang === 'fr' ? 'Connexion' : 'Login'}</a>
+      <a href="/signup" class="bm-main-btn bm-main-btn-outline">${lang === 'fr' ? 'Inscription' : 'Sign Up'}</a>
+      <a href="/post-task" class="bm-main-btn bm-main-btn-primary">${lang === 'fr' ? 'Publier une tâche' : 'Post a Task'}</a>
     </nav>
     <div class="bm-main-hamburger" id="bmMainHamburger">
       <div class="bm-main-hamburger-bars">
@@ -1675,16 +1675,16 @@ function Header() {
     </div>
   </div>
   <div class="bm-main-mobile-menu" id="bmMainMobileMenu">
-    <a href="/find-tasks">Find Tasks</a>
+    <a href="/find-tasks">${lang === 'fr' ? 'Trouver des tâches' : 'Find Tasks'}</a>
     <a href="/service-providers/technicians">Service Providers</a>
-    <a href="/it-on-demand">IT On-Demand</a>
-    <a href="/concierge">Concierge</a>
-    <a href="/contractors">Enterprise</a>
-    <a href="/build-a-team">Build a Team</a>
-    <a href="/how-it-works">How It Works</a>
-    <a href="/login">Login</a>
-    <a href="/signup">Sign Up</a>
-    <a href="/post-task">Post a Task</a>
+    <a href="/it-on-demand">${lang === 'fr' ? 'IT sur Demande' : 'IT On-Demand'}</a>
+    <a href="/concierge">${lang === 'fr' ? 'Concierge' : 'Concierge'}</a>
+    <a href="/contractors">${lang === 'fr' ? 'Entreprise' : 'Enterprise'}</a>
+    <a href="/build-a-team">${lang === 'fr' ? 'Créer une équipe' : 'Build a Team'}</a>
+    <a href="/how-it-works">${lang === 'fr' ? 'Comment ça marche' : 'How It Works'}</a>
+    <a href="/login">${lang === 'fr' ? 'Connexion' : 'Login'}</a>
+    <a href="/signup">${lang === 'fr' ? 'Inscription' : 'Sign Up'}</a>
+    <a href="/post-task">${lang === 'fr' ? 'Publier une tâche' : 'Post a Task'}</a>
   </div>
 </header>
 `
