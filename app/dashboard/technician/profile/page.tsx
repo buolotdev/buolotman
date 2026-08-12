@@ -3,13 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useMemo, useState } from "react";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
 import PhoneInput from 'react-phone-number-input';
@@ -251,57 +251,7 @@ export default function TechnicianProfilePage() {
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarTop}>
-            <Link href="/" className={styles.brand} aria-label="Boulot Man home">
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={220} height={56} className={styles.brandImage} priority />
-            </Link>
-            <button type="button" className={styles.sidebarClose} aria-label="Close navigation" onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <div className={styles.profileCardMini}>
-            <div className={styles.profileAvatarMini}>{userInitials}</div>
-            <div className={styles.profileMetaMini}>
-              <strong>{userName}</strong>
-              <span>{userRole}</span>
-            </div>
-          </div>
-
-          <nav className={styles.sidebarNav} aria-label="Technician navigation">
-            <Link href="/dashboard/technician" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:layout-dashboard" /></span>
-              <span>Dashboard</span>
-            </Link>
-            <Link href="/dashboard/technician/tasks" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:search" /></span>
-              <span>Browse Tasks</span>
-            </Link>
-            <Link href="/dashboard/technician/bids" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:file-text" /></span>
-              <span>My Bids</span>
-            </Link>
-            <Link href="/dashboard/technician/messages" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:message-square" /></span>
-              <span>Messages</span>
-            </Link>
-            <Link href="/dashboard/technician/wallet" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:wallet" /></span>
-              <span>Wallet</span>
-            </Link>
-            <Link href="/dashboard/technician/profile" className={`${styles.navItem} ${styles.navItemActive}`}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:user" /></span>
-              <span>Profile</span>
-            </Link>
-            <Link href="/dashboard/technician/settings" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:settings" /></span>
-              <span>Settings</span>
-            </Link>
-          </nav>
-
-          <LogoutButton className={styles.logoutButton} />
-        </aside>
+        <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <DashboardHeader
@@ -318,8 +268,8 @@ export default function TechnicianProfilePage() {
                   cursor: "pointer",
                   position: "relative",
                   backgroundImage: (bannerUrl || userData?.banner_url)
-                    ? `url(${bannerUrl || userData?.banner_url})`
-                    : undefined,
+                    ? `url(${getImageUrl(bannerUrl || userData?.banner_url)})`
+                    : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -363,7 +313,7 @@ export default function TechnicianProfilePage() {
                     >
                       {avatarUrl || userData?.avatar_url ? (
                         <Image
-                          src={avatarUrl || userData?.avatar_url}
+                          src={getImageUrl(avatarUrl || userData?.avatar_url)}
                           alt="Profile photo"
                           fill
                           style={{ objectFit: "cover", borderRadius: "50%" }}

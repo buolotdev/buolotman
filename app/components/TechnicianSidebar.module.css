@@ -21,9 +21,42 @@
 }
 
 .brand {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  gap: 12px;
   text-decoration: none;
+  color: #ffffff;
+}
+
+.brandMark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ff4500;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandLabel {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.brandSub {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .sidebarClose {

@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import styles from "./page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
@@ -42,16 +42,7 @@ const initialForm: ServiceForm = {
   media: [],
 };
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
-  { key: "projects", label: "Projects", icon: "lucide:folder-open", href: "/dashboard/technician/projects", match: (p: string) => p.startsWith("/dashboard/technician/projects") },
-  { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
-  { key: "services", label: "My Services", icon: "lucide:layers-3", href: "/dashboard/technician/services", match: (p: string) => p.startsWith("/dashboard/technician/services") },
-  { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
-  { label: "Messages", href: "/dashboard/technician/messages", icon: "lucide:message-square" },
-  { label: "Wallet", href: "/dashboard/technician/wallet", icon: "lucide:wallet" },
-  { label: "Profile", href: "/dashboard/technician/profile", icon: "lucide:user" },
-];
+
 
 export default function TechnicianServicesPage() {
   const toast = useToast();
@@ -163,45 +154,7 @@ export default function TechnicianServicesPage() {
 
   return (
     <div className={styles.page}>
-      <div className={`${styles.sidebarOverlay} ${mobileNavOpen ? styles.sidebarOverlayOpen : ""}`} onClick={() => setMobileNavOpen(false)} />
-      <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.brand}>
-          <div className={styles.brandMark}>BM</div>
-          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <div className={styles.brandLabel}>Boulot Man</div>
-              <div className={styles.brandSub}>Technician Space</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setMobileNavOpen(false)}
-              style={{
-                border: 0,
-                background: "transparent",
-                color: "#fff",
-                cursor: "pointer",
-                padding: 4,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-            >
-              <iconify-icon icon="lucide:x" style={{ fontSize: "20px" }} />
-            </button>
-          </div>
-        </div>
-        <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={`${styles.navItem} ${item.href === "/dashboard/technician/services" ? styles.navItemActive : ""}`}>
-              <iconify-icon icon={item.icon} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className={styles.sidebarFooter}>
-          <LogoutButton className={styles.logoutButton} />
-        </div>
-      </aside>
+      <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
       <main className={styles.main}>
         <DashboardHeader

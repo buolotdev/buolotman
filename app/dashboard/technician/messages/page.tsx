@@ -9,19 +9,10 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/technician", match: (p: string) => p === "/dashboard/technician" },
-  { key: "projects", label: "Projects", icon: "lucide:folder-open", href: "/dashboard/technician/projects", match: (p: string) => p.startsWith("/dashboard/technician/projects") },
-  { key: "tasks", label: "Browse Tasks", icon: "lucide:search", href: "/dashboard/technician/tasks", match: (p: string) => p.startsWith("/dashboard/technician/tasks") },
-  { key: "services", label: "My Services", icon: "lucide:layers-3", href: "/dashboard/technician/services", match: (p: string) => p.startsWith("/dashboard/technician/services") },
-  { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids", match: (p: string) => p.startsWith("/dashboard/technician/bids") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/technician/messages", match: (p: string) => p.startsWith("/dashboard/technician/messages") },
-  { key: "wallet", label: "Wallet", icon: "lucide:wallet", href: "/dashboard/technician/wallet", match: (p: string) => p.startsWith("/dashboard/technician/wallet") },
-  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/technician/profile", match: (p: string) => p.startsWith("/dashboard/technician/profile") },
-];
+
 
 function formatTime(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -237,40 +228,7 @@ export default function TechnicianMessagesPage() {
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
-        {/* Standard Navigation Sidebar */}
-        <aside className={`${styles.navSidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarTop}>
-            <Link href="/" className={styles.brand}>
-              <span style={{ fontSize: 20, fontWeight: 800 }}>Boulot Man</span>
-            </Link>
-            <button type="button" className={styles.sidebarClose} onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav}>
-            {navItems.map((item) => {
-              const isActive = item.match(searchParams.toString() ? `/dashboard/technician/messages?${searchParams.toString()}` : "/dashboard/technician/messages");
-              // We'll just hardcode isActive logic for now
-              const isItemActive = item.key === 'messages';
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={`${styles.navItem} ${isItemActive ? styles.navItemActive : ""}`}
-                  onClick={() => setMobileNavOpen(false)}
-                >
-                  <iconify-icon icon={item.icon} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className={styles.sidebarCard}>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        </aside>
+        <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.mainArea}>
           <DashboardHeader

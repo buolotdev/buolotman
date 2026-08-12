@@ -9,7 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
 export default function TechnicianSettingsPage() {
@@ -44,49 +44,7 @@ export default function TechnicianSettingsPage() {
   return (
     <main className={styles.page}>
       <div className={styles.layoutWrapper}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarTop}>
-            <Link href="/" className={styles.brand} aria-label="Boulot Man home">
-              <span style={{ fontSize: 20, fontWeight: 800 }}>Boulot Man</span>
-            </Link>
-            <button type="button" className={styles.sidebarClose} aria-label="Close navigation" onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav} aria-label="Technician navigation">
-            <Link href="/dashboard/technician" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:layout-dashboard" /></span>
-              <span>Dashboard</span>
-            </Link>
-            <Link href="/dashboard/technician/tasks" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:search" /></span>
-              <span>Browse Tasks</span>
-            </Link>
-            <Link href="/dashboard/technician/bids" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:file-text" /></span>
-              <span>My Bids</span>
-            </Link>
-            <Link href="/dashboard/technician/messages" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:message-square" /></span>
-              <span>Messages</span>
-            </Link>
-            <Link href="/dashboard/technician/wallet" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:wallet" /></span>
-              <span>Payments</span>
-            </Link>
-            <Link href="/dashboard/technician/profile" className={styles.navItem}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:user" /></span>
-              <span>Profile</span>
-            </Link>
-            <Link href="/dashboard/technician/settings" className={`${styles.navItem} ${styles.navItemActive}`}>
-              <span className={styles.navIcon}><iconify-icon icon="lucide:settings" /></span>
-              <span>Settings</span>
-            </Link>
-          </nav>
-
-          <LogoutButton className={styles.logoutButton} />
-        </aside>
+        <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <DashboardHeader
