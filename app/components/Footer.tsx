@@ -159,7 +159,7 @@ export default function Footer() {
             <Link href="/dashboard/company/projects">Contracts</Link>
             <Link href="/contractors">Enterprise</Link>
             <Link href="/dashboard/admin/verification">Compliance</Link>
-            <Link href="/search">Partnerships</Link>
+            <Link href="/partnerships">Partnerships</Link>
           </div>
 
           {/* PAYMENTS */}
