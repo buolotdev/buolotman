@@ -147,7 +147,7 @@ export default function Footer() {
             <Link href="/dashboard/technician/tasks">Find Tasks</Link>
             <Link href="/dashboard/technician/wallet">Earnings</Link>
             <Link href="/signup/verify">Verification</Link>
-            <Link href="/search">Upgrade Plan</Link>
+            <Link href="/upgrade">Upgrade Plan</Link>
           </div>
 
           {/* COMPANIES */}
