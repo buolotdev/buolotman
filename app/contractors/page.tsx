@@ -7,6 +7,17 @@ import Footer from "@/app/components/Footer";
 import styles from "./contractors.module.css";
 import { api } from "@/app/lib/api";
 
+function CheckItem({ text }: { text: string }) {
+  return (
+    <li className={styles.checkItem}>
+      <div className={styles.checkIcon}>
+        <iconify-icon icon="lucide:check-circle-2"></iconify-icon>
+      </div>
+      <span>{text}</span>
+    </li>
+  );
+}
+
 export default function ContractorsPage() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", company_name: "", details: "" });
@@ -32,12 +43,12 @@ export default function ContractorsPage() {
   };
 
   return (
-    <div className={styles.pageWrapper}>
+    <div style={{ background: "#f5f7fb", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Header />
 
-      <main className={styles.mainContent}>
-        {/* HERO */}
-        <div className={styles.hero}>
+      {/* HERO */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>Contractors & Enterprise Solutions</h1>
           <p className={styles.heroSubtitle}>
             Boulot Man Contractors is the enterprise-grade execution arm of the Boulot Man platform.
@@ -45,91 +56,101 @@ export default function ContractorsPage() {
             through verified professionals, structured teams, and strict project governance.
           </p>
         </div>
+      </section>
 
+      <main className={styles.container}>
         {/* OVERVIEW */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>What Is Boulot Man Contractors?</h2>
-          <p className={styles.sectionDesc}>
-            Boulot Man Contractors provides <strong>end-to-end project execution</strong> for organizations
-            that require reliability, compliance, and accountability.
-            This service is designed for enterprises, governments, NGOs, developers,
-            and institutions that cannot rely on informal labor or unmanaged teams.
-          </p>
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>What Is Boulot Man Contractors?</h2>
+            <p className={styles.sectionDesc}>
+              Boulot Man Contractors provides <strong>end-to-end project execution</strong> for organizations
+              that require reliability, compliance, and accountability.
+              This service is designed for enterprises, governments, NGOs, developers,
+              and institutions that cannot rely on informal labor or unmanaged teams.
+            </p>
+          </div>
 
           <div className={styles.grid3}>
             <div className={styles.card}>
               <span className={styles.badge}>Who We Serve</span>
-              <ul>
-                <li>Large contractors & engineering firms</li>
-                <li>Infrastructure & construction companies</li>
-                <li>Government agencies & public institutions</li>
-                <li>NGOs & international organizations</li>
-                <li>Hotels, factories & warehouses</li>
-                <li>Diaspora-led development projects</li>
+              <ul className={styles.featureList}>
+                <CheckItem text="Large contractors & engineering firms" />
+                <CheckItem text="Infrastructure & construction companies" />
+                <CheckItem text="Government agencies & public institutions" />
+                <CheckItem text="NGOs & international organizations" />
+                <CheckItem text="Hotels, factories & warehouses" />
+                <CheckItem text="Diaspora-led development projects" />
               </ul>
             </div>
 
             <div className={styles.card}>
               <span className={styles.badge}>What We Deliver</span>
-              <ul>
-                <li>Full project execution</li>
-                <li>Certified technical workforce</li>
-                <li>Engineering supervision</li>
-                <li>Compliance & documentation</li>
-                <li>Quality assurance</li>
+              <ul className={styles.featureList}>
+                <CheckItem text="Full project execution" />
+                <CheckItem text="Certified technical workforce" />
+                <CheckItem text="Engineering supervision" />
+                <CheckItem text="Compliance & documentation" />
+                <CheckItem text="Quality assurance" />
               </ul>
             </div>
 
             <div className={styles.card}>
               <span className={styles.badge}>Why Enterprises Choose Us</span>
-              <ul>
-                <li>Verified professionals only</li>
-                <li>Structured governance</li>
-                <li>Escrow & milestone payments</li>
-                <li>Clear accountability</li>
-                <li>Cross-border readiness</li>
+              <ul className={styles.featureList}>
+                <CheckItem text="Verified professionals only" />
+                <CheckItem text="Structured governance" />
+                <CheckItem text="Escrow & milestone payments" />
+                <CheckItem text="Clear accountability" />
+                <CheckItem text="Cross-border readiness" />
               </ul>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* SERVICES */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Contracting Services</h2>
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Contracting Services</h2>
+          </div>
+
           <div className={styles.grid3}>
             <div className={styles.card}>
-              <h3>Construction & Civil Works</h3>
-              <ul>
-                <li>Residential & commercial construction</li>
-                <li>Renovation & remodeling</li>
-                <li>Finishing & interior works</li>
-                <li>Structural & masonry works</li>
+              <h3 className={styles.cardTitle}>Construction & Civil Works</h3>
+              <ul className={styles.featureList}>
+                <CheckItem text="Residential & commercial construction" />
+                <CheckItem text="Renovation & remodeling" />
+                <CheckItem text="Finishing & interior works" />
+                <CheckItem text="Structural & masonry works" />
               </ul>
             </div>
             <div className={styles.card}>
-              <h3>Electrical, Mechanical & Energy</h3>
-              <ul>
-                <li>Industrial & residential wiring</li>
-                <li>HVAC & mechanical installations</li>
-                <li>Solar & hybrid power systems</li>
-                <li>Generators & backup power</li>
+              <h3 className={styles.cardTitle}>Electrical, Mechanical & Energy</h3>
+              <ul className={styles.featureList}>
+                <CheckItem text="Industrial & residential wiring" />
+                <CheckItem text="HVAC & mechanical installations" />
+                <CheckItem text="Solar & hybrid power systems" />
+                <CheckItem text="Generators & backup power" />
               </ul>
             </div>
             <div className={styles.card}>
-              <h3>ICT & Security Infrastructure</h3>
-              <ul>
-                <li>CCTV & access control</li>
-                <li>Enterprise networking</li>
-                <li>Server rooms & data cabling</li>
-                <li>Smart building integration</li>
+              <h3 className={styles.cardTitle}>ICT & Security Infrastructure</h3>
+              <ul className={styles.featureList}>
+                <CheckItem text="CCTV & access control" />
+                <CheckItem text="Enterprise networking" />
+                <CheckItem text="Server rooms & data cabling" />
+                <CheckItem text="Smart building integration" />
               </ul>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* HOW IT WORKS */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>How Enterprise Engagement Works</h2>
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>How Enterprise Engagement Works</h2>
+          </div>
+
           <div className={styles.flow}>
             <div className={styles.flowStep}>
               <span className={styles.stepLabel}>STEP 1</span>
@@ -156,13 +177,16 @@ export default function ContractorsPage() {
               <p>Completion, handover & warranty</p>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* ENTERPRISE TIERS */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Enterprise Access Model</h2>
-          <div className={styles.compare}>
-            <table className={styles.table}>
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Enterprise Access Model</h2>
+          </div>
+
+          <div className={styles.compareWrap}>
+            <table className={styles.compareTable}>
               <thead>
                 <tr>
                   <th>Tier</th>
@@ -172,35 +196,35 @@ export default function ContractorsPage() {
               </thead>
               <tbody>
                 <tr>
-                  <td>Pro</td>
+                  <td style={{ fontWeight: 600 }}>Pro</td>
                   <td>Subscription</td>
                   <td>Mid-size companies & contractors</td>
                 </tr>
                 <tr>
-                  <td><strong>Enterprise</strong></td>
+                  <td style={{ fontWeight: 700, color: "#FF4500" }}>Enterprise</td>
                   <td>Approval Only</td>
                   <td>Large organizations & governments</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
         {/* CTA */}
-        <div className={styles.cta}>
+        <section className={styles.cta}>
           <div>
-            <h2>Partner With Us</h2>
-            <p>
-              Require reliable execution for your next large-scale project? 
-              Contact our Enterprise team today.
+            <h2 className={styles.ctaTitle}>Request Enterprise Access</h2>
+            <p className={styles.ctaDesc}>
+              Enterprise access is by request only. Speak directly with Boulot Man management to discuss workforce needs, compliance requirements, and project scope.
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <button className={styles.ctaBtn} onClick={() => setShowModal(true)}>
-              Request Enterprise Consultation
+              Chat with Management
+              <iconify-icon icon="lucide:arrow-up-right" style={{ fontSize: "22px" }}></iconify-icon>
             </button>
           </div>
-        </div>
+        </section>
       </main>
 
       <Footer />
@@ -208,35 +232,64 @@ export default function ContractorsPage() {
       {/* Inquiry Modal */}
       {showModal && (
         <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <button className={styles.modalClose} onClick={() => setShowModal(false)}>×</button>
-            <h2>Enterprise Consultation</h2>
-            
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={() => setShowModal(false)}>
+              &times;
+            </button>
+            <h2 className={styles.modalTitle}>Enterprise Consultation</h2>
+
             {success ? (
               <div className={styles.successMsg}>
                 Your request has been received. Our Enterprise team will contact you shortly!
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className={styles.modalForm}>
                 <div className={styles.formGroup}>
                   <label>Full Name</label>
-                  <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Your name" />
+                  <input
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Your name"
+                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Company / Organization</label>
-                  <input required value={formData.company_name} onChange={e => setFormData({...formData, company_name: e.target.value})} placeholder="Company Name" />
+                  <input
+                    required
+                    value={formData.company_name}
+                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                    placeholder="Company Name"
+                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Email</label>
-                  <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="your@email.com" />
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="your@email.com"
+                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Phone Number</label>
-                  <input required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+123..." />
+                  <input
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+123..."
+                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>Project Details</label>
-                  <textarea required value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} rows={4} placeholder="Describe your project needs..." />
+                  <textarea
+                    required
+                    value={formData.details}
+                    onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                    rows={4}
+                    placeholder="Describe your project needs..."
+                  />
                 </div>
                 <button type="submit" className={styles.submitBtn} disabled={loading}>
                   {loading ? "Submitting..." : "Send Request"}

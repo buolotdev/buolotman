@@ -156,7 +156,7 @@ export default function Footer() {
             <Link href="/signup?role=company">Register Company</Link>
             <Link href="/dashboard/company/profile">Company Profile</Link>
             <Link href="/dashboard/company/services">Post Services</Link>
-            <Link href="/dashboard/company/projects">Contracts</Link>
+            <Link href="/contractors">Contracts</Link>
             <Link href="/contractors">Enterprise</Link>
             <Link href="/dashboard/admin/verification">Compliance</Link>
             <Link href="/partnerships">Partnerships</Link>
