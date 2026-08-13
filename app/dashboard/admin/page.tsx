@@ -71,22 +71,35 @@ export default function AdminDashboard() {
       <div className={styles.alerts}>
         {alerts.map((alert: any, i: number) => (
           <div key={i} className={`${styles.alert} ${alert.type === 'danger' ? styles.alertDanger : styles.alertWarning}`}>
-            <h4>{alert.title}</h4>
-            <p>{alert.description}</p>
-            <button className={styles.btnOutline}>{alert.type === 'danger' ? 'Resolve' : 'Review'}</button>
+            <div className={styles.alertIconBox}>
+              <iconify-icon icon={alert.type === 'danger' ? "lucide:alert-octagon" : "lucide:alert-triangle"} style={{ fontSize: "24px" }}></iconify-icon>
+            </div>
+            <div className={styles.alertContent}>
+              <h4>{alert.title}</h4>
+              <p>{alert.description}</p>
+            </div>
+            <button className={styles.btnAction}>{alert.type === 'danger' ? 'Resolve Now' : 'Review'}</button>
           </div>
         ))}
         {alerts.length === 0 && (
-          <div className={styles.alert}>
-            <h4>All Clear!</h4>
-            <p>There are no pending alerts or disputes to resolve.</p>
+          <div className={styles.allClearBanner}>
+            <div className={styles.allClearIcon}>
+              <iconify-icon icon="lucide:sparkles" style={{ fontSize: "28px" }}></iconify-icon>
+            </div>
+            <div className={styles.allClearText}>
+              <h4>All Systems Functional</h4>
+              <p>No pending alerts, urgent disputes, or verification tickets require your attention right now.</p>
+            </div>
           </div>
         )}
       </div>
 
       {/* ACTIVE PROJECTS */}
       <div className={styles.section}>
-        <h3>Active Projects Snapshot</h3>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleIndicator}></div>
+          <h3>Active Projects Snapshot</h3>
+        </div>
         {activeProjects.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
             <table className={styles.table}>
@@ -103,7 +116,7 @@ export default function AdminDashboard() {
               <tbody>
                 {activeProjects.map((project: any) => (
                   <tr key={project.id}>
-                    <td>{project.title}</td>
+                    <td><strong>{project.title}</strong></td>
                     <td>{project.client_name}</td>
                     <td>{project.technician_name}</td>
                     <td>{project.progress}</td>
@@ -112,29 +125,42 @@ export default function AdminDashboard() {
                         {project.status}
                       </span>
                     </td>
-                    <td><button className={styles.btnOutline}>Open</button></td>
+                    <td><button className={styles.btnTable}>Open Workspace</button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p style={{ color: '#666', fontSize: 14 }}>No active projects at the moment.</p>
+          <div className={styles.emptyState}>
+            <iconify-icon icon="lucide:folder-open" style={{ fontSize: "36px", color: "#94a3b8" }}></iconify-icon>
+            <p>No active projects at the moment.</p>
+          </div>
         )}
       </div>
 
       {/* RECENT ACTIVITY */}
       <div className={styles.section}>
-        <h3>Recent Platform Activity</h3>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitleIndicator}></div>
+          <h3>Recent Platform Activity</h3>
+        </div>
         {recentActivities.length > 0 ? (
-          recentActivities.map((activity: any, i: number) => (
-            <div key={i} className={styles.activity}>
-              <iconify-icon icon="lucide:check-circle" style={{ color: '#1e8e3e' }}></iconify-icon>
-              <span>{activity.message}</span>
-            </div>
-          ))
+          <div className={styles.activityList}>
+            {recentActivities.map((activity: any, i: number) => (
+              <div key={i} className={styles.activityItem}>
+                <div className={styles.activityIconBox}>
+                  <iconify-icon icon="lucide:info" style={{ fontSize: "16px", color: "#001F3F" }}></iconify-icon>
+                </div>
+                <span>{activity.message}</span>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p style={{ color: '#666', fontSize: 14 }}>No recent activity.</p>
+          <div className={styles.emptyState}>
+            <iconify-icon icon="lucide:activity" style={{ fontSize: "36px", color: "#94a3b8" }}></iconify-icon>
+            <p>No recent activity logs available.</p>
+          </div>
         )}
       </div>
 
