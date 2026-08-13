@@ -55,6 +55,12 @@ function Header() {
         root.querySelectorAll(".bmDropMenu").forEach((m) => {
           (m as HTMLElement).style.display = "none";
         });
+        root.querySelectorAll('.bmMega').forEach((m) => {
+          m.classList.remove('active');
+        });
+        root.querySelectorAll('.bmNavItem').forEach((n) => {
+          n.classList.remove('active');
+        });
       }
     };
 
@@ -62,6 +68,12 @@ function Header() {
       if (event.key === "Escape") {
         root.querySelectorAll(".bmDropMenu").forEach((m) => {
           (m as HTMLElement).style.display = "none";
+        });
+        root.querySelectorAll('.bmMega').forEach((m) => {
+          m.classList.remove('active');
+        });
+        root.querySelectorAll('.bmNavItem').forEach((n) => {
+          n.classList.remove('active');
         });
       }
     };
@@ -244,16 +256,28 @@ function Header() {
       return;
     }
 
-    // 2. Open Mega Menu logic ("${lang === 'fr' ? 'Toutes les catégories' : 'All Categories'}" click)
-    const navItem = target.closest('.bmNavItem[data-menu="cats"]');
+    // 2. Open Mega Menu logic ("All Categories" or "Apps" click)
+    const navItem = target.closest('.bmNavItem[data-menu]');
     if (navItem) {
-      const mega = document.getElementById('bmMegaCats');
-      if (mega) {
-        const isActive = mega.classList.toggle('active');
-        if (isActive) {
-          navItem.classList.add('active');
-        } else {
-          navItem.classList.remove('active');
+      const menuType = navItem.getAttribute('data-menu');
+      if (menuType === 'cats' || menuType === 'apps') {
+        const megaId = menuType === 'cats' ? 'bmMegaCats' : 'bmMegaApps';
+        const mega = document.getElementById(megaId);
+        if (mega) {
+          // Close other mega menus
+          document.querySelectorAll('.bmMega').forEach((m) => {
+            if (m.id !== megaId) m.classList.remove('active');
+          });
+          document.querySelectorAll('.bmNavItem').forEach((n) => {
+            if (n !== navItem) n.classList.remove('active');
+          });
+
+          const isActive = mega.classList.toggle('active');
+          if (isActive) {
+            navItem.classList.add('active');
+          } else {
+            navItem.classList.remove('active');
+          }
         }
       }
       return;
