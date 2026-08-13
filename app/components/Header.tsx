@@ -48,38 +48,6 @@ function Header() {
       });
     });
 
-    // Country/Language dropdowns
-    root.querySelectorAll(".bmDropBtn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const menu = btn.nextElementSibling as HTMLElement | null;
-        root.querySelectorAll(".bmDropMenu").forEach((m) => {
-          if (m !== menu) (m as HTMLElement).style.display = "none";
-        });
-        if (menu) menu.style.display = menu.style.display === "block" ? "none" : "block";
-      });
-    });
-
-    const dropWraps = root.querySelectorAll(".bmNavRight .bmDropWrap");
-    if (dropWraps[0]) {
-      dropWraps[0].querySelectorAll(".bmDropItem").forEach((item) => {
-        item.addEventListener("click", () => {
-          const text = (item.textContent || "").trim();
-          localStorage.setItem("country", text);
-          window.location.reload();
-        });
-      });
-    }
-    if (dropWraps[1]) {
-      dropWraps[1].querySelectorAll(".bmDropItem").forEach((item) => {
-        item.addEventListener("click", () => {
-          const text = (item.textContent || "").trim();
-          const code = text === "Français" ? "fr" : "en";
-          localStorage.setItem("lang", code);
-          window.location.reload();
-        });
-      });
-    }
 
     const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target as Node | null;
@@ -233,6 +201,40 @@ function Header() {
     let target = e.target as HTMLElement;
     if (target.nodeType === 3) target = target.parentNode as HTMLElement;
     if (!target || !target.closest) return;
+
+    // Dropdown toggle click
+    const dropBtn = target.closest('.bmDropBtn');
+    if (dropBtn) {
+      e.stopPropagation();
+      const menu = dropBtn.nextElementSibling as HTMLElement | null;
+      document.querySelectorAll(".bmDropMenu").forEach((m) => {
+        if (m !== menu) (m as HTMLElement).style.display = "none";
+      });
+      if (menu) {
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+      }
+      return;
+    }
+
+    // Dropdown item click
+    const dropItem = target.closest('.bmDropItem');
+    if (dropItem) {
+      const text = (dropItem.textContent || "").trim();
+      const parentWrap = dropItem.closest('.bmDropWrap');
+      if (parentWrap) {
+        const allWraps = Array.from(document.querySelectorAll('.bmNavRight .bmDropWrap'));
+        const index = allWraps.indexOf(parentWrap);
+        if (index === 0) {
+          localStorage.setItem("country", text);
+          window.location.reload();
+        } else if (index === 1) {
+          const code = text === "Français" ? "fr" : "en";
+          localStorage.setItem("lang", code);
+          window.location.reload();
+        }
+      }
+      return;
+    }
 
     // 1. Close button logic
     const closeBtn = target.closest('.bmMegaClose');
