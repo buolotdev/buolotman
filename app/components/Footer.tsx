@@ -252,10 +252,10 @@ export default function Footer() {
           </div>
 
           <div className="footer-socials">
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
-            <a href="https://x.com" target="_blank" rel="noreferrer">Twitter</a>
-            <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://cm.linkedin.com/company/boulotman" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="https://x.com/boulotman" target="_blank" rel="noreferrer">Twitter</a>
+            <a href="https://www.facebook.com/boulotman.inc/" target="_blank" rel="noreferrer">Facebook</a>
+            <a href="https://www.instagram.com/boulotman?igsh=M3NmZWFiemt1ZHly" target="_blank" rel="noreferrer">Instagram</a>
           </div>
         </div>
 

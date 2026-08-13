@@ -1091,10 +1091,10 @@ function Header() {
               <h3 style="margin:0 0 8px; color:#001F3F; font-size:1rem;">${lang === 'fr' ? 'Suivez-nous sur les réseaux sociaux' : 'Follow Us on Social Media'}</h3>
               <p style="margin:0 0 15px; color:#112f5cdc; font-size:0.8rem; line-height:1.5;">${lang === 'fr' ? 'Connectez-vous avec nous pour les mises à jour, conseils et promotions. Rejoignez la communauté en pleine croissance.' : 'Connect with us for updates, tips, and promotions. Join the growing Boulot Man community online.'}</p>
               <div class="bmSocial" style="display:flex; justify-content:center; gap:10px; margin-top:16px;">
-                <a href="https://www.facebook.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">f</a>
-                <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">in</a>
-                <a href="https://www.instagram.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">ig</a>
-                <a href="https://x.com" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">x</a>
+                <a href="https://www.facebook.com/boulotman.inc/" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">f</a>
+                <a href="https://cm.linkedin.com/company/boulotman" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">in</a>
+                <a href="https://www.instagram.com/boulotman?igsh=M3NmZWFiemt1ZHly" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">ig</a>
+                <a href="https://x.com/boulotman" target="_blank" rel="noreferrer" style="width:40px;height:40px;border:1px solid #e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#001F3F;font-weight:700;text-decoration:none;">x</a>
               </div>
             </div>
           </div>
