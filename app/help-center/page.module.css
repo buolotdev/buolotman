@@ -7,7 +7,7 @@
 
 /* ================= HERO SECTION ================= */
 .hero {
-  background: radial-gradient(circle at 50% 0%, #0b3c6f 0%, #001F3F 70%);
+  background: linear-gradient(180deg, #0b3c6f 0%, #001F3F 100%);
   padding: 100px 24px 140px;
   text-align: center;
   position: relative;
@@ -111,7 +111,7 @@
 
 .categoryCard {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 6px;
   padding: 32px;
   box-shadow: 0 10px 30px rgba(0, 31, 63, 0.05);
   border: 1px solid #e2e8f0;
@@ -132,7 +132,7 @@
   height: 56px;
   background: #eef2ff;
   color: #001F3F;
-  border-radius: 16px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,7 +208,7 @@
 .accordionItem {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 6px;
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -286,7 +286,7 @@
 /* ================= CONTACT BANNER ================= */
 .contactBanner {
   background: #001F3F;
-  border-radius: 24px;
+  border-radius: 6px;
   padding: 60px 40px;
   text-align: center;
   color: white;
