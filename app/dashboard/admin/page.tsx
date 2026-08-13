@@ -30,20 +30,40 @@ export default function AdminDashboard() {
       {/* METRICS */}
       <div className={styles.metrics}>
         <div className={styles.metric}>
-          <span>Total Users</span>
-          <h3>{metrics.total_users.toLocaleString()}</h3>
+          <div className={styles.metricInfo}>
+            <span>Total Users</span>
+            <h3>{metrics.total_users.toLocaleString()}</h3>
+          </div>
+          <div className={`${styles.metricIcon} ${styles.iconBlue}`}>
+            <iconify-icon icon="lucide:users" style={{ fontSize: "24px" }}></iconify-icon>
+          </div>
         </div>
         <div className={styles.metric}>
-          <span>Active Projects</span>
-          <h3>{metrics.active_projects.toLocaleString()}</h3>
+          <div className={styles.metricInfo}>
+            <span>Active Projects</span>
+            <h3>{metrics.active_projects.toLocaleString()}</h3>
+          </div>
+          <div className={`${styles.metricIcon} ${styles.iconGreen}`}>
+            <iconify-icon icon="lucide:briefcase" style={{ fontSize: "24px" }}></iconify-icon>
+          </div>
         </div>
         <div className={styles.metric}>
-          <span>Pending Validations</span>
-          <h3>{metrics.pending_validations.toLocaleString()}</h3>
+          <div className={styles.metricInfo}>
+            <span>Pending Validations</span>
+            <h3>{metrics.pending_validations.toLocaleString()}</h3>
+          </div>
+          <div className={`${styles.metricIcon} ${styles.iconOrange}`}>
+            <iconify-icon icon="lucide:shield-check" style={{ fontSize: "24px" }}></iconify-icon>
+          </div>
         </div>
         <div className={styles.metric}>
-          <span>Open Disputes</span>
-          <h3>{metrics.open_disputes.toLocaleString()}</h3>
+          <div className={styles.metricInfo}>
+            <span>Open Disputes</span>
+            <h3>{metrics.open_disputes.toLocaleString()}</h3>
+          </div>
+          <div className={`${styles.metricIcon} ${styles.iconRed}`}>
+            <iconify-icon icon="lucide:alert-triangle" style={{ fontSize: "24px" }}></iconify-icon>
+          </div>
         </div>
       </div>
 

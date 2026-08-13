@@ -682,22 +682,66 @@
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 .metric {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e6e6e6;
-  padding: 22px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.02);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.metric span {
+.metric:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 31, 63, 0.06), 0 0 16px rgba(255, 69, 0, 0.04);
+  border-color: rgba(255, 69, 0, 0.2);
+}
+.metricInfo {
+  display: flex;
+  flex-direction: column;
+}
+.metricInfo span {
   font-size: 0.8rem;
-  color: #666;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
-.metric h3 {
-  font-size: 1.8rem;
-  margin-top: 6px;
-  color: #001F3F;
+.metricInfo h3 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 6px 0 0;
+  color: #0f172a;
+  line-height: 1.1;
+}
+.metricIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.iconBlue {
+  background: rgba(0, 31, 63, 0.06);
+  color: #001f3f;
+}
+.iconGreen {
+  background: rgba(22, 163, 74, 0.15);
+  color: #16a34a;
+}
+.iconOrange {
+  background: rgba(255, 69, 0, 0.1);
+  color: #ff4500;
+}
+.iconRed {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
 }
 
 .alerts {
