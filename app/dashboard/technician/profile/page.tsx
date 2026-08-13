@@ -45,6 +45,10 @@ export default function TechnicianProfilePage() {
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [address, setAddress] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [expertiseLevel, setExpertiseLevel] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
 
@@ -66,6 +70,10 @@ export default function TechnicianProfilePage() {
       setPhone(userData.phone || "");
       setBio(userData.bio || userData.about || "");
       setSkills(userData.skills || ["Electrical Wiring", "Solar Installation"]);
+      setDateOfBirth(userData.date_of_birth || "");
+      setAddress(userData.address || "");
+      setEducationLevel(userData.education_level || "");
+      setExpertiseLevel(userData.expertise_level || "");
     }
   }, [userData]);
 
@@ -147,13 +155,29 @@ export default function TechnicianProfilePage() {
     setSkills(skills.filter((_, i) => i !== idx));
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     setProfileSaving(true);
-    setTimeout(() => {
-      setProfileSaving(false);
+    try {
+      await api.updateProfile({
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone: phone,
+        bio: bio,
+        skills: skills,
+        date_of_birth: dateOfBirth || null,
+        address: address,
+        education_level: educationLevel,
+        expertise_level: expertiseLevel,
+      });
       setProfileSaved(true);
+      toast.success("Profile Saved", "Your profile details have been updated successfully.");
       setTimeout(() => setProfileSaved(false), 3000);
-    }, 800);
+    } catch (err: any) {
+      toast.error("Save failed", err?.message || "Please try again.");
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   const openTimeModal = (day: string) => {
@@ -427,6 +451,34 @@ export default function TechnicianProfilePage() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                   />
+
+                  <div className={styles.twoCol} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} style={{ fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px', display: 'block' }}>Date of Birth</label>
+                      <input type="date" className={styles.formInput} value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} style={{ fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px', display: 'block' }}>Expertise Level</label>
+                      <select className={styles.formInput} value={expertiseLevel} onChange={(e) => setExpertiseLevel(e.target.value)} style={{ width: '100%', height: '42px', padding: '0 12px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
+                        <option value="">Select Level</option>
+                        <option value="Junior">Junior</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Senior">Senior</option>
+                        <option value="Expert">Expert</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className={styles.twoCol} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px', marginBottom: '16px' }}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} style={{ fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px', display: 'block' }}>Education Level</label>
+                      <input type="text" className={styles.formInput} placeholder="E.g. Bachelor's Degree, Technical License" value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} style={{ fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px', display: 'block' }}>Address</label>
+                      <input type="text" className={styles.formInput} placeholder="E.g. 123 Main St, Kigali" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    </div>
+                  </div>
 
                   <div className={styles.skillsWrapper}>
                     <h4>Skills</h4>

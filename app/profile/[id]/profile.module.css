@@ -325,3 +325,53 @@
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
+
+.detailsCard {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  margin-bottom: 24px;
+}
+
+.detailsTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b203b;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.detailsItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailsLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.detailsValue {
+  font-size: 15px;
+  color: #1e293b;
+  font-weight: 500;
+}
+

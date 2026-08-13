@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useFetch } from "@/app/lib/useFetch";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import styles from "./profile.module.css";
@@ -17,6 +17,7 @@ type PublicProfile = {
   last_name?: string;
   username?: string;
   avatar_url?: string;
+  banner_url?: string;
   logo_url?: string;
   country?: string;
   city?: string;
@@ -30,6 +31,10 @@ type PublicProfile = {
   about?: string;
   services_offered?: string[];
   business_hours?: unknown[];
+  date_of_birth?: string;
+  address?: string;
+  education_level?: string;
+  expertise_level?: string;
 };
 
 export default function PublicProfilePage() {
@@ -44,11 +49,29 @@ export default function PublicProfilePage() {
   const isCompany = profile?.role === "COMPANY";
   const isTechnician = profile?.role === "TECHNICIAN";
   const avatarSrc = profile?.avatar_url || profile?.logo_url || "";
+  const coverSrc = getImageUrl(profile?.banner_url || (profile as any)?.cover_url || "");
   const displayName = isCompany
     ? profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim()
     : `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Unknown Profile";
   const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || (displayName?.[0]?.toUpperCase()) || "U";
   const location = profile?.city ? `${profile.city}, ${profile.country || ''}` : (profile?.country || profile?.headquarters || "Location not set");
+  const getAge = (dobString?: string) => {
+    if (!dobString) return null;
+    try {
+      const birthDate = new Date(dobString);
+      const today = new Date();
+      let ageValue = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        ageValue--;
+      }
+      return isNaN(ageValue) ? null : ageValue;
+    } catch {
+      return null;
+    }
+  };
+  const age = profile ? getAge(profile.date_of_birth) : null;
+  const hasDetails = profile && (profile.expertise_level || profile.education_level || profile.date_of_birth || profile.address);
 
   if (validId === null) {
     return (
@@ -86,7 +109,7 @@ export default function PublicProfilePage() {
         ) : profile ? (
           <>
             <div className={styles.hero}>
-              <div className={styles.coverPhoto}>
+              <div className={styles.coverPhoto} style={coverSrc ? { backgroundImage: `url(${coverSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
                 {/* Optional: Add a patterned overlay or cover image here */}
               </div>
               <div className={styles.profileInfo}>
@@ -191,6 +214,40 @@ export default function PublicProfilePage() {
               </div>
 
               <div className={styles.sideCol}>
+                {hasDetails && (
+                  <div className={styles.detailsCard}>
+                    <h3 className={styles.detailsTitle}>
+                      <iconify-icon icon="lucide:user-check" /> Professional Info
+                    </h3>
+                    <ul className={styles.detailsList}>
+                      {profile.expertise_level && (
+                        <li className={styles.detailsItem}>
+                          <span className={styles.detailsLabel}>Expertise Level</span>
+                          <span className={styles.detailsValue}>{profile.expertise_level}</span>
+                        </li>
+                      )}
+                      {profile.education_level && (
+                        <li className={styles.detailsItem}>
+                          <span className={styles.detailsLabel}>Education Level</span>
+                          <span className={styles.detailsValue}>{profile.education_level}</span>
+                        </li>
+                      )}
+                      {age !== null && (
+                        <li className={styles.detailsItem}>
+                          <span className={styles.detailsLabel}>Age</span>
+                          <span className={styles.detailsValue}>{age} years old</span>
+                        </li>
+                      )}
+                      {profile.address && (
+                        <li className={styles.detailsItem}>
+                          <span className={styles.detailsLabel}>Address</span>
+                          <span className={styles.detailsValue}>{profile.address}</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
                 <div className={styles.contactBox}>
                   <h3 className={styles.contactTitle}>Ready to get started?</h3>
                   <p className={styles.contactText}>Hire this professional directly for your next project and get it done right.</p>

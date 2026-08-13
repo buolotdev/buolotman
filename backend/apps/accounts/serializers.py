@@ -20,7 +20,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserMeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'username', 'role', 'phone', 'avatar_url', 'is_verified', 'language_preference', 'country', 'created_at']
+        fields = ['id', 'first_name', 'last_name', 'email', 'username', 'role', 'phone', 'avatar_url', 'banner_url', 'is_verified', 'language_preference', 'country', 'date_of_birth', 'address', 'education_level', 'expertise_level', 'created_at']
         read_only_fields = ['id', 'role', 'is_verified', 'created_at']
 
 
@@ -29,7 +29,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'avatar_url', 'is_verified', 'country', 'services']
+        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'avatar_url', 'banner_url', 'is_verified', 'country', 'date_of_birth', 'address', 'education_level', 'expertise_level', 'services']
 
     def get_services(self, obj):
         if getattr(obj, "role", None) != "TECHNICIAN":
