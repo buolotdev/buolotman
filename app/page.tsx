@@ -667,7 +667,7 @@ export default function Home() {
             {prosLoading ? (
               <div style={{ padding: "20px", color: "#64748b" }}>{t.prosLoading}</div>
             ) : prosData && prosData.length > 0 ? (
-              prosData.slice(0, 4).map((pro: any) => (
+              prosData.slice(0, 3).map((pro: any) => (
                 <div className="bm-ftx-card" key={pro.id}>
                   <div className="bm-ftx-profile">
                     <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
@@ -680,7 +680,7 @@ export default function Home() {
                     <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
                   </div>
                   <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • {t.ftxMeta}</div>
-                  <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {pro.bio || "Professional technical services and support."}
                   </div>
                   <div className="bm-ftx-actions">
@@ -711,7 +711,7 @@ export default function Home() {
             {companiesLoading ? (
               <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
             ) : companiesData && companiesData.length > 0 ? (
-              companiesData.slice(0, 4).map((company: any) => (
+              companiesData.slice(0, 3).map((company: any) => (
                 <div className="bm-enterprise-card" key={company.id}>
                   <div className="bm-enterprise-profile">
                     <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
@@ -724,7 +724,7 @@ export default function Home() {
                     <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
                   </div>
                   <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
-                  <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {company.description || t.entDescFallback}
                   </div>
                   <div className="bm-enterprise-actions">
@@ -2331,17 +2331,17 @@ export default function Home() {
         .bm-enterprise-header { text-align: center; margin-bottom: 60px; }
         .bm-enterprise-header-title { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; background: linear-gradient(to right, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .bm-enterprise-header-subtitle { font-size: 1.15rem; color: #94a3b8; max-width: 650px; margin: 0 auto; line-height: 1.6; }
-        .bm-enterprise-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
-        .bm-enterprise-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 30px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; overflow: hidden; }
+        .bm-enterprise-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .bm-enterprise-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 24px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; overflow: hidden; }
         .bm-enterprise-card:hover { transform: translateY(-8px); border-color: rgba(255, 69, 0, 0.4); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 69, 0, 0.15); background: rgba(255, 255, 255, 0.06); }
-        .bm-enterprise-profile { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .bm-enterprise-profile { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
         .bm-enterprise-avatar { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); background: #fff; }
         .bm-enterprise-name { font-size: 1.25rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 6px; }
         .bm-enterprise-role { font-size: 0.85rem; color: #38bdf8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .bm-enterprise-rating { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; margin-bottom: 12px; color: #e2e8f0; }
         .bm-enterprise-stars { color: #facc15; }
-        .bm-enterprise-meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
-        .bm-enterprise-description { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 26px; flex: 1; }
+        .bm-enterprise-meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .bm-enterprise-description { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 18px; flex: 1; }
         .bm-enterprise-actions { display: flex; gap: 12px; margin-top: auto; }
         .bm-enterprise-btn { flex: 1; padding: 12px; font-size: 0.9rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; transition: all 0.3s ease; }
         .bm-enterprise-btn-view { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }

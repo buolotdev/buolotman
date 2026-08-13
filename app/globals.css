@@ -4160,14 +4160,14 @@ body {
 }
 .bm-ftx-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:32px;
 }
 .bm-ftx-card{
   background:#ffffff;
   border:1px solid #e6ebf2;
   border-radius:20px;
-  padding:26px;
+  padding:20px;
   display:flex;
   flex-direction:column;
   transition:all .25s ease;
@@ -4211,13 +4211,13 @@ body {
 .bm-ftx-meta{
   font-size:.85rem;
   color:#6b7a90;
-  margin-bottom:14px;
+  margin-bottom:10px;
 }
 .bm-ftx-description{
   font-size:.95rem;
   color:#44536a;
   line-height:1.55;
-  margin-bottom:22px;
+  margin-bottom:14px;
 }
 .bm-ftx-actions{
   margin-top:auto;
