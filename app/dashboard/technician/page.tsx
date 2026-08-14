@@ -10,7 +10,7 @@ import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skel
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import ProfileProgressBar from "@/app/components/ProfileProgressBar";
+import ProfileCompletionModal from "@/app/components/ProfileCompletionModal";
 
 
 
@@ -24,7 +24,7 @@ export default function TechnicianDashboardPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: user, loading: userLoading, refetch: refetchUser } = useFetch(() => api.getMe(), []);
   const { data: tasksData, loading: tasksLoading } = useFetch(() => api.getTasks({}), []);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getMyBids(), []);
   const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
@@ -61,7 +61,7 @@ export default function TechnicianDashboardPage() {
           />
 
           <div className={styles.content}>
-            <ProfileProgressBar user={user} />
+            <ProfileCompletionModal user={user} onUpdate={() => refetchUser()} />
             <div className={styles.heroCard}>
               <div className={styles.heroCopy}>
                 <span className={styles.heroEyebrow}><iconify-icon icon="lucide:zap" /> Dashboard overview</span>
