@@ -1,4 +1,4 @@
-﻿
+
 .layoutWrapper {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -26,8 +26,8 @@
 .navMenu { display: flex; flex-direction: column; gap: 8px; padding: 20px 16px; flex: 1; }
 .navMenu::-webkit-scrollbar { display: none; }
 .navMenu { -ms-overflow-style: none; scrollbar-width: none; }
-.navItem { display: flex; align-items: center; gap: 12px; border-radius: 14px; padding: 14px 16px; color: rgba(254,254,255,.72); font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.2s;}
-.navItemActive, .navItem:hover { background: rgba(255,255,255,.1); color: #fff; }
+.navItem:hover { background: rgba(255,255,255,.1); color: #fff; }
+.navItemActive { background: #ff4500 !important; color: #ffffff !important; font-weight: 700; box-shadow: 0 4px 14px rgba(255, 69, 0, 0.35); }
 .navItem iconify-icon { font-size: 18px; }
 .sidebarFooter { padding: 20px 24px 28px; border-top: 1px solid rgba(255,255,255,.08); }
 .logoutButton { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; width: 100%; padding: 0 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; background: rgba(255,255,255,.06); cursor: pointer; }
