@@ -1,24 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./TaskBoard.module.css";
 import { api } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
 import { SkeletonBlock } from "./skeleton/Skeleton";
-import { useRouter } from "next/navigation";
 
 export default function TaskBoard() {
   const router = useRouter();
-  const { data: tasksData, loading, error, refetch } = useFetch(() => api.getTasks(), []);
-  const [isAuth, setIsAuth] = useState(false);
   
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedUrgency, setSelectedUrgency] = useState("all");
+  const [activePill, setActivePill] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Fetch tasks and categories
+  const { data: tasksData, loading, error, refetch } = useFetch(() => api.getTasks({}), []);
+  const { data: categoriesData } = useFetch(() => api.getCategories(), []);
+
+  const [isAuth, setIsAuth] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsAuth(!!localStorage.getItem("access_token"));
     }
   }, []);
-  
+
+  // Modal State
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -30,7 +42,7 @@ export default function TaskBoard() {
     setSelectedTask(task);
     setShowSuccess(false);
     setSubmitError(null);
-    setAmount("");
+    setAmount(task.budget_max ? String(task.budget_max) : "");
     setMessage("");
   };
 
@@ -41,7 +53,7 @@ export default function TaskBoard() {
   const submitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTask) return;
-    
+
     setIsSubmitting(true);
     setSubmitError(null);
     setShowSuccess(false);
@@ -62,154 +74,424 @@ export default function TaskBoard() {
     }
   };
 
-  const tasks = Array.isArray(tasksData) ? tasksData : ((tasksData as any)?.results || []);
+  const rawTasks = Array.isArray(tasksData) ? tasksData : ((tasksData as any)?.results || []);
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+
+  // Filter & Sort Tasks in real-time
+  const filteredTasks = useMemo(() => {
+    let result = [...rawTasks];
+
+    // Search Query (Title or Description)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (t) =>
+          (t.title && t.title.toLowerCase().includes(q)) ||
+          (t.description && t.description.toLowerCase().includes(q)) ||
+          (t.category_name && t.category_name.toLowerCase().includes(q)) ||
+          (t.category?.name && t.category.name.toLowerCase().includes(q))
+      );
+    }
+
+    // Category Filter
+    if (selectedCategory !== "all") {
+      result = result.filter(
+        (t) =>
+          t.category?.slug === selectedCategory ||
+          t.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
+          String(t.category) === selectedCategory
+      );
+    }
+
+    // Location Filter
+    if (selectedLocation !== "all") {
+      if (selectedLocation === "remote") {
+        result = result.filter((t) => t.is_remote || (t.location && t.location.toLowerCase().includes("remote")));
+      } else {
+        result = result.filter(
+          (t) =>
+            (t.city && t.city.toLowerCase().includes(selectedLocation.toLowerCase())) ||
+            (t.location && t.location.toLowerCase().includes(selectedLocation.toLowerCase()))
+        );
+      }
+    }
+
+    // Urgency Filter
+    if (selectedUrgency !== "all") {
+      result = result.filter((t) => (t.urgency || "").toLowerCase() === selectedUrgency.toLowerCase());
+    }
+
+    // Quick Pill Filter
+    if (activePill === "urgent") {
+      result = result.filter((t) => (t.urgency || "").toLowerCase() === "urgent");
+    } else if (activePill === "kigali") {
+      result = result.filter(
+        (t) => (t.city && t.city.toLowerCase().includes("kigali")) || (t.location && t.location.toLowerCase().includes("kigali"))
+      );
+    } else if (activePill === "remote") {
+      result = result.filter((t) => t.is_remote || (t.location && t.location.toLowerCase().includes("remote")));
+    } else if (activePill === "high_budget") {
+      result = result.filter((t) => Number(t.budget_max || t.budget_min || 0) >= 50000);
+    }
+
+    // Sorting
+    if (sortBy === "budget_high") {
+      result.sort((a, b) => Number(b.budget_max || b.budget_min || 0) - Number(a.budget_max || a.budget_min || 0));
+    } else if (sortBy === "budget_low") {
+      result.sort((a, b) => Number(a.budget_min || a.budget_max || 0) - Number(b.budget_min || b.budget_max || 0));
+    } else {
+      // Newest
+      result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    }
+
+    return result;
+  }, [rawTasks, searchQuery, selectedCategory, selectedLocation, selectedUrgency, activePill, sortBy]);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSelectedLocation("all");
+    setSelectedUrgency("all");
+    setActivePill("all");
+    setSortBy("newest");
+  };
 
   return (
-    <div>
-      {/* SEARCH BAR */}
-      <section className={styles.searchBar}>
-        <div className={styles.searchGrid}>
-          <input placeholder="Find tasks near you" />
-          <select>
-            <option>All</option>
-            <option>Open only</option>
-          </select>
-          <select><option>Rwanda</option></select>
-          <select><option>Kigali</option></select>
-          <select>
-            <option>All Categories</option>
-            <option>Software & IT</option>
-            <option>Construction</option>
-            <option>Electrical</option>
-            <option>Cleaning</option>
-            <option>Logistics</option>
-          </select>
-          <button className={styles.searchBtn}>Search</button>
+    <div className={styles.taskBoardContainer}>
+      {/* MODERN FILTER & SEARCH CARD */}
+      <section className={styles.filterCard}>
+        <div className={styles.searchRow}>
+          {/* Keyword Search */}
+          <div className={styles.inputGroup}>
+            <iconify-icon icon="lucide:search" className={styles.inputIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search by title, skill, or keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          {/* Location Dropdown */}
+          <div className={styles.inputGroup}>
+            <iconify-icon icon="lucide:map-pin" className={styles.inputIcon} />
+            <select
+              className={styles.filterSelect}
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            >
+              <option value="all">All Locations</option>
+              <option value="kigali">Kigali, Rwanda</option>
+              <option value="rubavu">Rubavu</option>
+              <option value="huye">Huye</option>
+              <option value="musanze">Musanze</option>
+              <option value="remote">Remote Work</option>
+            </select>
+          </div>
+
+          {/* Category Dropdown */}
+          <div className={styles.inputGroup}>
+            <iconify-icon icon="lucide:layout-grid" className={styles.inputIcon} />
+            <select
+              className={styles.filterSelect}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories.map((c: any) => (
+                <option key={c.id || c.slug} value={c.slug || c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Urgency Selector */}
+          <div className={styles.inputGroup}>
+            <iconify-icon icon="lucide:zap" className={styles.inputIcon} />
+            <select
+              className={styles.filterSelect}
+              value={selectedUrgency}
+              onChange={(e) => setSelectedUrgency(e.target.value)}
+            >
+              <option value="all">Any Timeline</option>
+              <option value="urgent">⚡ Urgent</option>
+              <option value="flexible">Flexible</option>
+              <option value="scheduled">Scheduled</option>
+            </select>
+          </div>
+
+          {/* Action Button */}
+          <button className={styles.searchSubmitBtn} onClick={() => refetch()}>
+            <iconify-icon icon="lucide:search" /> Find Tasks
+          </button>
+        </div>
+
+        {/* QUICK FILTER PILLS */}
+        <div className={styles.quickFiltersRow}>
+          <div className={styles.pillList}>
+            <button
+              className={`${styles.filterPill} ${activePill === "all" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("all")}
+            >
+              All Tasks
+            </button>
+            <button
+              className={`${styles.filterPill} ${activePill === "urgent" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("urgent")}
+            >
+              ⚡ Urgent Only
+            </button>
+            <button
+              className={`${styles.filterPill} ${activePill === "kigali" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("kigali")}
+            >
+              📍 Kigali
+            </button>
+            <button
+              className={`${styles.filterPill} ${activePill === "remote" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("remote")}
+            >
+              🌐 Remote
+            </button>
+            <button
+              className={`${styles.filterPill} ${activePill === "high_budget" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("high_budget")}
+            >
+              💰 High Budget (&gt;50k)
+            </button>
+          </div>
+
+          {(searchQuery || selectedCategory !== "all" || selectedLocation !== "all" || selectedUrgency !== "all" || activePill !== "all") && (
+            <button className={styles.resetBtn} onClick={handleResetFilters}>
+              <iconify-icon icon="lucide:rotate-ccw" /> Reset Filters
+            </button>
+          )}
         </div>
       </section>
 
-      {/* FILTER PANEL */}
-      <section className={styles.filterPanel}>
-        <input placeholder="Max Budget" />
-        <select><option>Onsite</option><option>Remote</option></select>
-        <select><option>Flexible</option><option>Programmed</option><option>Urgent</option></select>
-        <select><option>Open</option><option>Assigned</option><option>Completed</option></select>
-        <select><option>Any Date</option><option>Today</option><option>This Week</option></select>
-        <select><option>Any Category</option></select>
-      </section>
+      {/* TOOLBAR META */}
+      <div className={styles.toolbarMeta}>
+        <p className={styles.resultCount}>
+          Showing <strong>{filteredTasks.length}</strong> available {filteredTasks.length === 1 ? "task" : "tasks"}
+        </p>
 
-      {/* TASK GRID */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: "12.5px", color: "#64748b", fontWeight: 600 }}>Sort by:</span>
+          <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="newest">Newest First</option>
+            <option value="budget_high">Budget: High to Low</option>
+            <option value="budget_low">Budget: Low to High</option>
+          </select>
+        </div>
+      </div>
+
+      {/* TASK GRID / LIST */}
       {loading ? (
         <div className={styles.taskGrid}>
-           <SkeletonBlock style={{ height: "200px" }} />
-           <SkeletonBlock style={{ height: "200px" }} />
-           <SkeletonBlock style={{ height: "200px" }} />
+          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
+          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
+          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
+          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
         </div>
       ) : error ? (
-        <p>Error loading tasks: {error}</p>
-      ) : tasks.length === 0 ? (
-        <p style={{textAlign: 'center', padding: '40px', color: '#666'}}>No tasks available at the moment.</p>
+        <div className={styles.emptyCard}>
+          <div className={styles.emptyIconWrap} style={{ background: "#fef2f2", color: "#dc2626" }}>
+            <iconify-icon icon="lucide:alert-circle" />
+          </div>
+          <h3 className={styles.emptyTitle}>Error loading tasks</h3>
+          <p className={styles.emptyText}>{error}</p>
+          <button className={styles.emptyResetBtn} onClick={() => refetch()}>
+            <iconify-icon icon="lucide:refresh-cw" /> Retry
+          </button>
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className={styles.emptyCard}>
+          <div className={styles.emptyIconWrap}>
+            <iconify-icon icon="lucide:search-x" />
+          </div>
+          <h3 className={styles.emptyTitle}>No matching tasks found</h3>
+          <p className={styles.emptyText}>
+            Try clearing your search keyword, changing location, or resetting the filters to discover more opportunities.
+          </p>
+          <button className={styles.emptyResetBtn} onClick={handleResetFilters}>
+            <iconify-icon icon="lucide:rotate-ccw" /> Clear All Filters
+          </button>
+        </div>
       ) : (
         <div className={styles.taskGrid}>
-          {tasks.map((task: any) => (
-            <div key={task.id} className={styles.taskCard}>
-              <div className={styles.taskHeader}>
-                <div style={{width: 50, height: 50, borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <iconify-icon icon="lucide:briefcase" style={{fontSize: 24, color: '#666'}}></iconify-icon>
-                </div>
+          {filteredTasks.map((task: any) => {
+            const clientInitial = task.client_initials || (task.client_name ? task.client_name[0].toUpperCase() : "C");
+            const catName = task.category_name || task.category?.name || "General";
+            const budgetDisplay = task.budget_max
+              ? `${Number(task.budget_min || 0).toLocaleString()} - ${Number(task.budget_max).toLocaleString()} XOF`
+              : task.budget_min
+              ? `${Number(task.budget_min).toLocaleString()} XOF`
+              : "Negotiable";
+
+            return (
+              <div key={task.id} className={styles.taskCard}>
                 <div>
-                  <h3 className={styles.taskTitle}>{task.title}</h3>
-                  <p className={styles.taskMeta}>
-                    <iconify-icon icon="lucide:clock" className={styles.metaIcon}></iconify-icon>
-                    {new Date(task.created_at).toLocaleDateString()}
-                    <span style={{ margin: "0 6px" }}>&bull;</span>
-                    <iconify-icon icon="lucide:map-pin" className={styles.metaIcon}></iconify-icon>
-                    {task.location || 'Remote'}
-                  </p>
+                  {/* CARD HEADER */}
+                  <div className={styles.cardHeader}>
+                    <div className={styles.clientMeta}>
+                      <div className={styles.clientAvatar}>{clientInitial}</div>
+                      <div className={styles.clientDetails}>
+                        <strong className={styles.clientName}>{task.client_name || "Verified Client"}</strong>
+                        <span className={styles.clientLabel}>Posted by Client</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.badgesGroup}>
+                      <span className={styles.categoryBadge}>{catName}</span>
+                      {task.urgency === "urgent" ? (
+                        <span className={`${styles.urgencyBadge} ${styles.urgencyUrgent}`}>⚡ Urgent</span>
+                      ) : (
+                        <span className={`${styles.urgencyBadge} ${styles.urgencyFlexible}`}>Flexible</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CARD BODY */}
+                  <div className={styles.taskBody} style={{ marginTop: 14 }}>
+                    <Link
+                      href={`/dashboard/technician/tasks/${task.id}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <h3 className={styles.taskTitle}>{task.title}</h3>
+                    </Link>
+
+                    <div className={styles.metaRow}>
+                      <span className={styles.metaItem}>
+                        <iconify-icon icon="lucide:map-pin" />
+                        {task.city ? `${task.city}, ${task.location || ""}`.trim() : task.location || "Remote"}
+                      </span>
+                      <span className={styles.metaItem}>
+                        <iconify-icon icon="lucide:clock" />
+                        {new Date(task.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                      <span className={styles.metaItem}>
+                        <iconify-icon icon="lucide:users" />
+                        {task.bids_count || 0} proposals
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD FOOTER */}
+                <div className={styles.cardFooter}>
+                  <div className={styles.budgetBox}>
+                    <span className={styles.budgetAmount}>{budgetDisplay}</span>
+                    <span className={styles.budgetLabel}>{task.budget_mode === "hourly" ? "Hourly Budget" : "Estimated Budget"}</span>
+                  </div>
+
+                  <div className={styles.cardActions}>
+                    <Link href={`/dashboard/technician/tasks/${task.id}`} className={styles.detailsBtn}>
+                      Details
+                    </Link>
+                    <button className={styles.applyBtn} onClick={() => handleApply(task)}>
+                      Apply Now
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className={styles.tags}>
-                <span className={`${styles.tag} ${styles.tagFlexible}`}>{task.status}</span>
-                {task.category?.name && <span className={styles.tag}>{task.category.name}</span>}
-              </div>
-              <div className={styles.taskFooter}>
-                <span className={styles.taskPrice}>{task.budget_max ? `${task.budget_max} XOF` : 'Negotiable'}</span>
-                <button className={styles.applyBtn} onClick={() => handleApply(task)}>Apply</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* MODAL */}
+      {/* PROPOSAL APPLICATION MODAL */}
       {selectedTask && (
         <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <button className={styles.closeModalBtn} onClick={closeModal}>&times;</button>
-            
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.closeModalBtn} onClick={closeModal} title="Close">
+              <iconify-icon icon="lucide:x" />
+            </button>
+
             <div className={styles.modalHeader}>
-              <div style={{width: 72, height: 72, borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <iconify-icon icon="lucide:briefcase" style={{fontSize: 32, color: '#666'}}></iconify-icon>
+              <div className={styles.clientAvatar} style={{ width: 48, height: 48, fontSize: 18 }}>
+                {selectedTask.client_initials || "C"}
               </div>
               <div>
                 <h2 className={styles.modalTitle}>{selectedTask.title}</h2>
                 <p className={styles.modalClient}>
-                  <iconify-icon icon="lucide:user" style={{ fontSize: 16 }}></iconify-icon>
-                  Posted by {selectedTask.client?.first_name || 'Client'}
+                  <iconify-icon icon="lucide:user" />
+                  Client: {selectedTask.client_name || "Verified Client"} &bull; {selectedTask.location || "Remote"}
                 </p>
               </div>
             </div>
 
             <div className={styles.modalBlock}>
-              <label>Description</label>
-              <p>{selectedTask.description || "No description provided."}</p>
+              <label>Task Description</label>
+              <p>{selectedTask.description || "No specific details provided."}</p>
             </div>
 
-            <div className={styles.modalBlock}>
-              <label>Location</label>
-              <p>{selectedTask.location || "Remote"}</p>
-            </div>
-
-            <div className={styles.modalBlock}>
-              <label>Date & Urgency</label>
-              <p>{new Date(selectedTask.created_at).toLocaleDateString()} - <strong style={{ color: '#c0392b' }}>{selectedTask.status}</strong></p>
-            </div>
-
-            <div className={styles.modalBlock}>
-              <label>Budget</label>
-              <p><strong>{selectedTask.budget_min} - {selectedTask.budget_max} XOF</strong></p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className={styles.modalBlock}>
+                <label>Client Budget</label>
+                <p style={{ fontWeight: 800, color: "#001f3f" }}>
+                  {selectedTask.budget_min || 0} - {selectedTask.budget_max || "N/A"} XOF
+                </p>
+              </div>
+              <div className={styles.modalBlock}>
+                <label>Urgency</label>
+                <p style={{ textTransform: "capitalize" }}>{selectedTask.urgency || "Flexible"}</p>
+              </div>
             </div>
 
             {isAuth ? (
               <form className={styles.actionBox} onSubmit={submitApplication}>
-                <input 
-                  type="number" 
-                  placeholder="Your Proposed Price (XOF)" 
-                  required 
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-                <textarea 
-                  rows={3} 
-                  placeholder="Why are you the best fit for this task? Include details of your experience." 
-                  required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                ></textarea>
-                <button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "#475569" }}>
+                    Your Proposed Price (XOF)
+                  </label>
+                  <input
+                    type="number"
+                    className={styles.modalInput}
+                    placeholder="Enter amount in XOF"
+                    required
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "#475569" }}>
+                    Cover Message / Proposal Pitch
+                  </label>
+                  <textarea
+                    rows={3}
+                    className={styles.modalTextarea}
+                    placeholder="Describe your qualifications, equipment, and when you can start..."
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </div>
+
+                <button type="submit" className={styles.modalSubmitBtn} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <><iconify-icon icon="lucide:loader" style={{ animation: "spin 1s linear infinite" }} /> Submitting Proposal...</>
+                  ) : (
+                    <><iconify-icon icon="lucide:send" /> Submit Proposal</>
+                  )}
                 </button>
-                {submitError && <p style={{ color: '#e74c3c', fontWeight: 600, marginTop: '8px' }}>{submitError}</p>}
-                {showSuccess && <p style={{ color: '#1aa260', fontWeight: 600, marginTop: '8px' }}>Application sent successfully!</p>}
+
+                {submitError && <p style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: 0 }}>{submitError}</p>}
+                {showSuccess && (
+                  <p style={{ color: "#16a34a", fontSize: 13, fontWeight: 700, margin: 0 }}>
+                    ✔ Proposal submitted successfully!
+                  </p>
+                )}
               </form>
             ) : (
-              <div className={styles.actionBox} style={{ textAlign: 'center', padding: '30px', background: '#f8fafc', borderRadius: 12, marginTop: 24 }}>
-                <iconify-icon icon="lucide:lock" style={{ fontSize: 40, color: '#94a3b8', marginBottom: 16 }}></iconify-icon>
-                <h3 style={{ margin: '0 0 8px', color: '#0f172a', fontSize: 18 }}>Please login first</h3>
-                <p style={{ color: '#64748b', marginBottom: 20 }}>You must be logged in as a Technician or Company to apply for this task.</p>
-                <button 
+              <div style={{ textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: 12 }}>
+                <p style={{ color: "#64748b", margin: "0 0 14px" }}>Please log in to submit a proposal on this task.</p>
+                <button
                   onClick={() => router.push("/login?redirect=/find-tasks")}
-                  style={{ background: '#ff5722', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', width: '100%' }}
+                  className={styles.modalSubmitBtn}
+                  style={{ width: "100%" }}
                 >
                   Go to Login
                 </button>
