@@ -93,6 +93,7 @@ export default function Footer() {
   const changeLang = (l: string) => {
     setLangState(l);
     localStorage.setItem("lang", l);
+    localStorage.setItem("user_selected_lang", "true");
     document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
     setLangOpen(false);
     if (typeof window !== "undefined") {
@@ -103,6 +104,7 @@ export default function Footer() {
   const changeCountry = (c: string) => {
     setCountryState(c);
     localStorage.setItem("country", c);
+    localStorage.setItem("user_selected_country", "true");
     setCountryOpen(false);
   };
 

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import "./header.css";
+import { detectAndSetGeoLanguage } from "@/app/lib/geoDetector";
 
 function Header() {
   const [lang, setLang] = useState("en");
@@ -11,6 +12,11 @@ function Header() {
     if (typeof window !== "undefined") {
       setLang(localStorage.getItem("lang") || "en");
       setCountry(localStorage.getItem("country") || "Rwanda");
+
+      detectAndSetGeoLanguage().then(({ country: c, lang: l, changed }) => {
+        setCountry(c);
+        setLang(l);
+      });
     }
     // ===== MEGA MENU (top strip) =====
     const root = document.getElementById("bmMegaRoot");
@@ -238,10 +244,12 @@ function Header() {
         const index = allWraps.indexOf(parentWrap);
         if (index === 0) {
           localStorage.setItem("country", text);
+          localStorage.setItem("user_selected_country", "true");
           window.location.reload();
         } else if (index === 1) {
           const code = text === "Français" ? "fr" : "en";
           localStorage.setItem("lang", code);
+          localStorage.setItem("user_selected_lang", "true");
           window.location.reload();
         }
       }
