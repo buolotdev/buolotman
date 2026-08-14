@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import LogoutButton from "./LogoutButton";
 import styles from "./CompanySidebar.module.css";
@@ -9,7 +8,7 @@ import styles from "./CompanySidebar.module.css";
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/company" },
   { key: "profile", label: "Profile Management", icon: "lucide:user", href: "/dashboard/company/profile" },
-  { key: "services", label: "Services", icon: "lucide:layers", href: "/dashboard/company/services" },
+  { key: "services", label: "Services", icon: "lucide:layers-3", href: "/dashboard/company/services" },
   { key: "projects", label: "Projects & Gallery", icon: "lucide:briefcase", href: "/dashboard/company/projects" },
   { key: "quotes", label: "Quote Requests", icon: "lucide:file-text", href: "/dashboard/company/quotes" },
   { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/company/messages" },
@@ -28,9 +27,7 @@ export default function CompanySidebar({ isOpen, onClose }: { isOpen: boolean; o
     <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}>
       <div className={styles.sidebarTop}>
         <Link href="/" className={styles.brand} aria-label="Boulot Man home">
-          <div className={styles.brandMark}>
-            <Image src="/boulotman-logo.png" alt="BM" width={32} height={32} style={{ objectFit: "contain" }} />
-          </div>
+          <div className={styles.brandMark}>BM</div>
           <div className={styles.brandText}>
             <div className={styles.brandLabel}>Boulot Man</div>
             <div className={styles.brandSub}>Company Space</div>
@@ -59,7 +56,7 @@ export default function CompanySidebar({ isOpen, onClose }: { isOpen: boolean; o
         })}
       </nav>
 
-      <div style={{ marginTop: "auto", paddingTop: "20px" }}>
+      <div style={{ marginTop: "auto" }}>
         <LogoutButton className={styles.logoutButton} />
       </div>
     </aside>
