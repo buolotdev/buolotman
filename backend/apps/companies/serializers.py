@@ -3,6 +3,9 @@ from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCerti
 
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
+    logo_url = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    cover_url = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    website = serializers.CharField(max_length=500, required=False, allow_blank=True)
     rating_distribution = serializers.SerializerMethodField()
 
     class Meta:

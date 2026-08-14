@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import layoutStyles from "../page.module.css";
 import styles from "./profile.module.css";
 import { useFetch } from "@/app/lib/useFetch";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 
 export default function CompanyProfileDashboard() {
@@ -127,8 +127,8 @@ export default function CompanyProfileDashboard() {
 
   if (profileLoading) return <div style={{ padding: 40 }}>Loading profile...</div>;
 
-  const displayLogo = profile?.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=100&q=80";
-  const displayCover = profile?.cover_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80";
+  const displayLogo = getImageUrl(profile?.logo_url) || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=100&q=80";
+  const displayCover = getImageUrl(profile?.cover_url) || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80";
 
   return (
     <div className={layoutStyles.content}>
@@ -246,8 +246,13 @@ export default function CompanyProfileDashboard() {
           <div className={styles.card}>
             <h3>Branding</h3>
             <label className={styles.label}>Company Logo</label>
-            <div className={styles.upload} onClick={() => logoInputRef.current?.click()}>
-              {uploadingLogo ? "Uploading..." : (
+            <div className={styles.upload} onClick={() => logoInputRef.current?.click()} style={{ position: "relative", minHeight: 90, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {uploadingLogo ? "Uploading..." : profile?.logo_url ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <img src={getImageUrl(profile.logo_url)} alt="Logo" style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover" }} />
+                  <span style={{ fontWeight: 600 }}>Click to change logo</span>
+                </div>
+              ) : (
                 <>
                   <iconify-icon icon="lucide:image"></iconify-icon>
                   Drag & drop logo or click to upload
@@ -257,8 +262,13 @@ export default function CompanyProfileDashboard() {
             <input type="file" ref={logoInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleLogoUpload} />
 
             <label className={styles.label} style={{ marginTop: 20 }}>Cover Photo</label>
-            <div className={styles.upload} onClick={() => coverInputRef.current?.click()}>
-              {uploadingCover ? "Uploading..." : (
+            <div className={styles.upload} onClick={() => coverInputRef.current?.click()} style={{ position: "relative", minHeight: 110, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {uploadingCover ? "Uploading..." : profile?.cover_url ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <img src={getImageUrl(profile.cover_url)} alt="Cover" style={{ width: 100, height: 50, borderRadius: 8, objectFit: "cover" }} />
+                  <span style={{ fontWeight: 600 }}>Click to change cover image</span>
+                </div>
+              ) : (
                 <>
                   <iconify-icon icon="lucide:monitor"></iconify-icon>
                   Drag & drop cover image or click to upload
@@ -288,13 +298,13 @@ export default function CompanyProfileDashboard() {
         <div>
           <div className={styles.coverWrapper}>
             <div className={styles.coverPhoto}>
-              <Image src={displayCover} alt="Cover" fill style={{ objectFit: "cover" }} />
+              <Image src={displayCover} alt="Cover" fill unoptimized style={{ objectFit: "cover" }} />
               <div className={styles.coverOverlay}></div>
             </div>
             
             <div className={styles.headerContent}>
               <div className={styles.profileAvatar}>
-                <Image src={displayLogo} alt="Logo" fill style={{ objectFit: "cover" }} />
+                <Image src={displayLogo} alt="Logo" fill unoptimized style={{ objectFit: "cover" }} />
               </div>
               
               <div className={styles.companyMeta}>
