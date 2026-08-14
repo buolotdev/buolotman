@@ -182,7 +182,7 @@ class TechnicianDocument(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technician_documents')
     title = models.CharField(max_length=255)
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='id')
-    file_url = models.URLField(max_length=500)
+    file_url = models.CharField(max_length=500)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

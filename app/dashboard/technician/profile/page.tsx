@@ -738,7 +738,7 @@ export default function TechnicianProfilePage() {
                               <span>{doc.is_verified ? "Verified" : "Pending Verification"}</span>
                             </div>
                             <div className={styles.docActions}>
-                              <a href={doc.file_url} target="_blank" rel="noreferrer" title="View">
+                              <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" title="View">
                                 <iconify-icon icon="lucide:eye" />
                               </a>
                               <button onClick={() => deleteDocument(doc.id)} title="Delete" className={styles.deleteBtn}>

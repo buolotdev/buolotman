@@ -184,6 +184,8 @@ class TechnicianServiceSerializer(serializers.ModelSerializer):
 
 
 class TechnicianDocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.CharField(max_length=500)
+
     class Meta:
         model = TechnicianDocument
         fields = ['id', 'title', 'document_type', 'file_url', 'is_verified', 'created_at']
