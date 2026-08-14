@@ -85,7 +85,7 @@ export default function TechnicianSettingsPage() {
                     ) : (
                       <div className={styles.avatarLarge} onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: "pointer" }}>
                         {userData?.avatar_url ? (
-                          <Image src={getImageUrl(userData?.avatar_url)} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
+                          <Image src={getImageUrl(userData?.avatar_url)} alt="Profile photo" fill unoptimized style={{ objectFit: "cover", borderRadius: "50%" }} />
                         ) : userInitials}
                         <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} />
                       </div>

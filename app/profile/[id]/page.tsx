@@ -48,7 +48,7 @@ export default function PublicProfilePage() {
 
   const isCompany = profile?.role === "COMPANY";
   const isTechnician = profile?.role === "TECHNICIAN";
-  const avatarSrc = profile?.avatar_url || profile?.logo_url || "";
+  const avatarSrc = getImageUrl(profile?.avatar_url || profile?.logo_url || "");
   const coverSrc = getImageUrl(profile?.banner_url || (profile as any)?.cover_url || "");
   const displayName = isCompany
     ? profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim()
@@ -116,7 +116,7 @@ export default function PublicProfilePage() {
                 <div className={styles.avatarWrapper}>
                   <div className={styles.avatarInner}>
                     {avatarSrc ? (
-                      <Image src={avatarSrc} alt={displayName} width={128} height={128} style={{ objectFit: "cover" }} />
+                      <Image src={avatarSrc} alt={displayName} width={128} height={128} unoptimized style={{ objectFit: "cover" }} />
                     ) : (
                       <span className={styles.initials}>{initials}</span>
                     )}

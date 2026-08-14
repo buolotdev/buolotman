@@ -340,6 +340,7 @@ export default function TechnicianProfilePage() {
                           src={getImageUrl(avatarUrl || userData?.avatar_url)}
                           alt="Profile photo"
                           fill
+                          unoptimized
                           style={{ objectFit: "cover", borderRadius: "50%" }}
                         />
                       ) : (

@@ -252,7 +252,7 @@ export default function ClientSettingsPage() {
                     ) : (
                       <div className={styles.avatarLarge} onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: "pointer" }}>
                         {me?.avatar_url ? (
-                          <Image src={getImageUrl(me?.avatar_url)} alt="Profile photo" fill style={{ objectFit: "cover", borderRadius: "50%" }} />
+                          <Image src={getImageUrl(me?.avatar_url)} alt="Profile photo" fill unoptimized style={{ objectFit: "cover", borderRadius: "50%" }} />
                         ) : initials}
                         <div style={{
                           position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", opacity: avatarUploading ? 1 : 0, transition: "opacity 0.2s", color: "#fff",
