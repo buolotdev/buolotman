@@ -539,9 +539,6 @@ def admin_list_tasks(request):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def technician_documents(request):
-    if request.user.role != "TECHNICIAN":
-        return Response({"error": "Technician only"}, status=status.HTTP_403_FORBIDDEN)
-
     if request.method == 'GET':
         items = TechnicianDocument.objects.filter(user=request.user)
         serializer = TechnicianDocumentSerializer(items, many=True)
@@ -567,9 +564,6 @@ def technician_documents(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def technician_document_detail(request, document_id):
-    if request.user.role != "TECHNICIAN":
-        return Response({"error": "Technician only"}, status=status.HTTP_403_FORBIDDEN)
-    
     try:
         doc = TechnicianDocument.objects.get(id=document_id, user=request.user)
     except TechnicianDocument.DoesNotExist:

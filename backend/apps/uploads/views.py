@@ -185,8 +185,8 @@ def upload_company_service_image(request):
 @parser_classes([MultiPartParser, FormParser])
 @throttle_classes([UploadThrottle])
 def upload_technician_document(request):
-    if request.user.role != 'TECHNICIAN':
-        return Response({"error": "Only technicians can upload documents"}, status=403)
+    # Allow any authenticated user (technician, company, client) to upload verification documents
+    pass
 
     file_obj = request.FILES.get("file") or request.FILES.get("document")
     if not file_obj:
