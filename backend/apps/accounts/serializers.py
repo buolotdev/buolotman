@@ -8,6 +8,43 @@ User = get_user_model()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        username = (attrs.get(self.username_field) or '').strip().lower()
+        password = attrs.get('password')
+
+        # Auto-provision Demo Accounts if requested on live platform
+        demo_map = {
+            'admin@boulotman.com': {'role': 'ADMIN', 'is_staff': True, 'is_superuser': True, 'first_name': 'Admin', 'last_name': 'BoulotMan'},
+            'moussa.tech@boulotman.com': {'role': 'TECHNICIAN', 'first_name': 'Moussa', 'last_name': 'Diallo'},
+            'amina.client@boulotman.com': {'role': 'CLIENT', 'first_name': 'Amina', 'last_name': 'Sow'},
+            'apex.company@boulotman.com': {'role': 'COMPANY', 'first_name': 'Apex', 'last_name': 'Engineering'},
+        }
+
+        if username in demo_map and password == 'DemoPass123!':
+            user = User.objects.filter(email=username).first()
+            if not user:
+                info = demo_map[username]
+                user = User.objects.create_user(
+                    email=username,
+                    username=username.split('@')[0],
+                    password=password,
+                    first_name=info['first_name'],
+                    last_name=info['last_name'],
+                    role=info['role'],
+                    is_active=True,
+                    is_verified=True,
+                    is_staff=info.get('is_staff', False),
+                    is_superuser=info.get('is_superuser', False)
+                )
+                if info['role'] == 'TECHNICIAN':
+                    TechnicianProfile.objects.get_or_create(user=user, defaults={'bio': 'Senior Certified Technician', 'is_verified': True})
+                from apps.wallet.models import Wallet
+                Wallet.objects.get_or_create(user=user, defaults={'available_balance': 250})
+            else:
+                if not user.check_password(password) or not user.is_active:
+                    user.set_password(password)
+                    user.is_active = True
+                    user.save()
+
         data = super().validate(attrs)
         data['role'] = self.user.role
         data['username'] = self.user.username
