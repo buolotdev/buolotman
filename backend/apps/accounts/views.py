@@ -397,7 +397,10 @@ def technician_service_detail(request, service_id):
 
 
 def _require_admin(request):
-    if not request.user.is_authenticated or request.user.role != 'ADMIN':
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+    role = str(getattr(request.user, 'role', '')).upper()
+    if role != 'ADMIN' and not getattr(request.user, 'is_staff', False) and not getattr(request.user, 'is_superuser', False):
         return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
     return None
 
@@ -537,14 +540,14 @@ def admin_list_users(request):
             'country': u.country,
             'first_name': u.first_name,
             'last_name': u.last_name,
-            'role': u.role,
-            'created_at': u.date_joined,
+            'role': str(getattr(u, 'role', 'CLIENT')).upper(),
+            'created_at': str(getattr(u, 'created_at', getattr(u, 'date_joined', ''))),
             'is_active': u.is_active,
             'is_verified': u.is_verified,
             'avatar_url': u.avatar_url,
             'documents': docs,
-            'title': tech_profile.title if tech_profile else (comp_profile.company_name if comp_profile else ''),
-            'bio': tech_profile.bio if tech_profile else (comp_profile.about if comp_profile else ''),
+            'title': getattr(tech_profile, 'response_time', '') if tech_profile else (getattr(comp_profile, 'company_name', '') if comp_profile else ''),
+            'bio': getattr(tech_profile, 'bio', '') if tech_profile else (getattr(comp_profile, 'about', '') if comp_profile else ''),
         })
     return Response(data)
 
