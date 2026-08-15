@@ -69,8 +69,11 @@
 }
 
 .navItemActive {
-  background: #ff4500;
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-left: 3px solid #38bdf8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .sidebarFooter {

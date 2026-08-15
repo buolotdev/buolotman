@@ -101,10 +101,11 @@
 }
 
 .navItemActive {
-  background: #ff4500 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.2);
+  font-weight: 700;
+  border-left: 3px solid #38bdf8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .navItemBadge {
@@ -728,20 +729,20 @@
   flex-shrink: 0;
 }
 .iconBlue {
-  background: rgba(0, 31, 63, 0.06);
+  background: rgba(0, 31, 63, 0.08);
   color: #001f3f;
 }
 .iconGreen {
-  background: rgba(22, 163, 74, 0.15);
-  color: #16a34a;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
 }
 .iconOrange {
-  background: rgba(255, 69, 0, 0.1);
-  color: #ff4500;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
 }
 .iconRed {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
 }
 
 .alerts {
@@ -762,10 +763,10 @@
   position: relative;
 }
 .alertWarning {
-  border-left: 5px solid #f59e0b;
+  border-left: 4px solid #001f3f;
 }
 .alertDanger {
-  border-left: 5px solid #dc2626;
+  border-left: 4px solid #001f3f;
 }
 .alertIconBox {
   width: 44px;
@@ -777,19 +778,19 @@
   flex-shrink: 0;
 }
 .alertWarning .alertIconBox {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
 }
 .alertDanger .alertIconBox {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
 }
 .alertContent {
   flex: 1;
 }
 .alertContent h4 {
   font-size: 1rem;
-  color: #0f172a;
+  color: #001f3f;
   font-weight: 700;
   margin: 0 0 4px;
 }
@@ -800,22 +801,23 @@
   line-height: 1.4;
 }
 .btnAction {
-  background: #001F3F;
+  background: #001f3f;
   color: #ffffff;
   border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .alertDanger .btnAction {
-  background: #dc2626;
+  background: #001f3f;
 }
 .btnAction:hover {
-  opacity: 0.9;
+  background: #0b3c6f;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.2);
 }
 
 .allClearBanner {
