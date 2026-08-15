@@ -13,7 +13,7 @@ const navItems = [
   { key: "bids", label: "My Bids", icon: "lucide:send", href: "/dashboard/technician/bids" },
   { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/technician/messages" },
   { key: "wallet", label: "Wallet", icon: "lucide:wallet", href: "/dashboard/technician/wallet" },
-  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/technician/profile" },
+  { key: "profile", label: "Edit Profile", icon: "lucide:user-cog", href: "/dashboard/technician/profile" },
   { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/technician/settings" },
 ];
 

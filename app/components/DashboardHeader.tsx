@@ -92,8 +92,8 @@ export default function DashboardHeader({
   const getProfileLink = () => {
     const role = userRole.toLowerCase();
     if (role === "admin") return "/dashboard/admin/settings";
-    if (role === "company") return "/dashboard/company/profile";
-    if (role === "technician") return "/dashboard/technician/profile";
+    if (role === "company") return user?.id ? `/profile/${user.id}` : "/dashboard/company/profile";
+    if (role === "technician") return user?.id ? `/profile/${user.id}` : "/dashboard/technician/profile";
     return "/dashboard/client/profile";
   };
 
@@ -101,8 +101,8 @@ export default function DashboardHeader({
     const role = userRole.toLowerCase();
     if (role === "admin") return "/dashboard/admin/settings";
     if (role === "company") return "/dashboard/company/settings";
-    if (role === "technician") return "/dashboard/technician/profile";
-    return "/dashboard/client/profile";
+    if (role === "technician") return "/dashboard/technician/settings";
+    return "/dashboard/client/settings";
   };
 
   return (
@@ -243,8 +243,8 @@ export default function DashboardHeader({
                 </div>
               </div>
               <Link href={getProfileLink()} className={styles.profileMenuLink} onClick={() => setProfileOpen(false)}>
-                <iconify-icon icon="lucide:user" />
-                <span>View Profile</span>
+                <iconify-icon icon="lucide:eye" />
+                <span>View Public Profile</span>
               </Link>
               <Link href={getSettingsLink()} className={styles.profileMenuLink} onClick={() => setProfileOpen(false)}>
                 <iconify-icon icon="lucide:settings" />
