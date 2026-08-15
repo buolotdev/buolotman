@@ -43,6 +43,7 @@ export default function AdminVerificationPage() {
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<{ title: string; url: string; type: string } | null>(null);
+  const [selectedUserModal, setSelectedUserModal] = useState<VerificationUser | null>(null);
 
   const { data: usersData, loading, refetch } = useFetch(
     () => api.adminListUsers(),
@@ -105,6 +106,9 @@ export default function AdminVerificationPage() {
     try {
       await api.adminVerifyUser(u.id);
       toast.success("User Verified", `${name} is now verified on the marketplace.`);
+      if (selectedUserModal && selectedUserModal.id === u.id) {
+        setSelectedUserModal(null);
+      }
       refetch();
     } catch (err: any) {
       toast.error("Verification Failed", err?.message || "Could not verify user.");
@@ -123,6 +127,9 @@ export default function AdminVerificationPage() {
     try {
       await api.adminSuspendUser(u.id, "suspend");
       toast.info("Account Suspended", `${name} verification has been flagged.`);
+      if (selectedUserModal && selectedUserModal.id === u.id) {
+        setSelectedUserModal(null);
+      }
       refetch();
     } catch (err: any) {
       toast.error("Action Failed", err?.message || "Could not update user status.");
@@ -357,11 +364,15 @@ export default function AdminVerificationPage() {
                     )}
                   </div>
 
-                  {/* Card Actions with Stylish Orange Approve Button */}
+                  {/* Card Actions with Dossier Details & Stylish Orange Approve Button */}
                   <div className={styles.cardActions}>
-                    <Link href={`/profile/${u.id}`} target="_blank" className={styles.btnView}>
-                      <iconify-icon icon="lucide:external-link" /> Profile
-                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUserModal(u)}
+                      className={styles.btnView}
+                    >
+                      <iconify-icon icon="lucide:file-text" /> Details
+                    </button>
 
                     {!u.is_verified ? (
                       <>
@@ -385,9 +396,178 @@ export default function AdminVerificationPage() {
         )}
       </div>
 
+      {/* ADMIN APPLICANT DOSSIER MODAL */}
+      {selectedUserModal && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedUserModal(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 700 }}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 20, color: "#001f3f", fontWeight: 800 }}>Applicant Dossier & KYC Details</h3>
+                <span style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>Internal Admin Verification Inspector</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUserModal(null)}
+                className={styles.modalCloseBtn}
+              >
+                <iconify-icon icon="lucide:x" />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: 6 }}>
+              {/* User Overview Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", background: "#f8fafc", borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 20 }}>
+                {selectedUserModal.avatar_url ? (
+                  <img src={getImageUrl(selectedUserModal.avatar_url)} alt="Avatar" style={{ width: 64, height: 64, borderRadius: 16, objectFit: "cover" }} />
+                ) : (
+                  <div style={{ width: 64, height: 64, borderRadius: 16, background: "#001f3f", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800 }}>
+                    {((selectedUserModal.first_name || "")[0] || selectedUserModal.username?.[0] || "U").toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h4 style={{ margin: "0 0 4px", fontSize: 18, color: "#001f3f", fontWeight: 800 }}>
+                    {`${selectedUserModal.first_name || ""} ${selectedUserModal.last_name || ""}`.trim() || selectedUserModal.username}
+                  </h4>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    <span style={{ background: "#001f3f", color: "#fff", fontSize: 11, padding: "2px 8px", borderRadius: 6, fontWeight: 700 }}>
+                      {selectedUserModal.role}
+                    </span>
+                    <span style={{ color: "#64748b", fontSize: 12 }}>
+                      Country: <strong>{selectedUserModal.country || "Global"}</strong>
+                    </span>
+                    <span style={{ color: "#64748b", fontSize: 12 }}>
+                      Joined: <strong>{selectedUserModal.created_at ? new Date(selectedUserModal.created_at).toLocaleDateString() : "—"}</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Information Table */}
+              <div style={{ marginBottom: 20 }}>
+                <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  Contact Information
+                </strong>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, background: "#ffffff", border: "1px solid #e2e8f0", padding: 16, borderRadius: 12 }}>
+                  <div>
+                    <span style={{ fontSize: 11, color: "#64748b", display: "block" }}>Email Address</span>
+                    <strong style={{ fontSize: 13, color: "#0f172a" }}>{selectedUserModal.email}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: "#64748b", display: "block" }}>Phone Number</span>
+                    <strong style={{ fontSize: 13, color: "#0f172a" }}>{selectedUserModal.phone || "Not provided"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: "#64748b", display: "block" }}>Username</span>
+                    <strong style={{ fontSize: 13, color: "#0f172a" }}>@{selectedUserModal.username}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 11, color: "#64748b", display: "block" }}>Verification Status</span>
+                    <strong style={{ fontSize: 13, color: selectedUserModal.is_verified ? "#16a34a" : "#d97706" }}>
+                      {selectedUserModal.is_verified ? "Verified Active" : "Pending Vetting"}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio & Professional Statement */}
+              {(selectedUserModal.title || selectedUserModal.bio) && (
+                <div style={{ marginBottom: 20 }}>
+                  <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Professional Bio & Credentials
+                  </strong>
+                  <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", padding: 16, borderRadius: 12 }}>
+                    {selectedUserModal.title && <h5 style={{ margin: "0 0 6px", fontSize: 14, color: "#001f3f" }}>{selectedUserModal.title}</h5>}
+                    {selectedUserModal.bio && <p style={{ margin: 0, fontSize: 13, color: "#475569", lineHeight: 1.5 }}>{selectedUserModal.bio}</p>}
+                  </div>
+                </div>
+              )}
+
+              {/* Identity & KYC Documents */}
+              <div style={{ marginBottom: 24 }}>
+                <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  Identity & Compliance Documents ({selectedUserModal.documents?.length || 0})
+                </strong>
+                {(!selectedUserModal.documents || selectedUserModal.documents.length === 0) ? (
+                  <div style={{ padding: 20, textAlign: "center", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 13 }}>
+                    No KYC documents uploaded by this user.
+                  </div>
+                ) : (
+                  <div>
+                    {selectedUserModal.documents.map((doc) => (
+                      <div key={doc.id} className={styles.documentItem} style={{ marginBottom: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
+                          <div>
+                            <strong style={{ display: "block", fontSize: 14, color: "#001f3f" }}>{doc.title || "KYC Credential"}</strong>
+                            <small style={{ color: "#64748b", fontSize: 12 }}>{getDocTypeLabel(doc.document_type)}</small>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.docActionBtn}
+                          onClick={() => {
+                            setSelectedDoc({
+                              title: doc.title || getDocTypeLabel(doc.document_type),
+                              url: getImageUrl(doc.file_url),
+                              type: doc.document_type,
+                            });
+                          }}
+                        >
+                          <iconify-icon icon="lucide:maximize-2" /> Inspect Document
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* In-Modal Admin Decision Actions */}
+            <div style={{ display: "flex", gap: 12, paddingTop: 16, borderTop: "1px solid #e2e8f0" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedUserModal(null)}
+                style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer" }}
+              >
+                Close
+              </button>
+              {!selectedUserModal.is_verified ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleReject(selectedUserModal)}
+                    className={styles.btnReject}
+                    style={{ flex: 1 }}
+                  >
+                    <iconify-icon icon="lucide:x-circle" /> Reject Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApprove(selectedUserModal)}
+                    className={styles.btnApprove}
+                    style={{ flex: 1.5 }}
+                  >
+                    <iconify-icon icon="lucide:check-circle" /> Approve & Verify
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleReject(selectedUserModal)}
+                  className={styles.btnReject}
+                  style={{ flex: 1 }}
+                >
+                  <iconify-icon icon="lucide:ban" /> Suspend Account
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Full Document Viewer Modal */}
       {selectedDoc && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedDoc(null)}>
+        <div className={styles.modalOverlay} onClick={() => setSelectedDoc(null)} style={{ zIndex: 1100 }}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div>
