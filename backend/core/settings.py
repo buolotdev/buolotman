@@ -153,5 +153,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://boulotman.com",
     "https://www.boulotman.com",
+    "https://admin.boulotman.com",
     "https://main.d33t34h059zav1.amplifyapp.com",
 ]
