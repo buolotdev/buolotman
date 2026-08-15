@@ -345,19 +345,32 @@ export default function AdminVerificationPage() {
                                 <small style={{ color: "#64748b", fontSize: 11 }}>{getDocTypeLabel(doc.document_type)}</small>
                               </div>
                             </div>
-                            <button
-                              type="button"
-                              className={styles.docActionBtn}
-                              onClick={() => {
-                                setSelectedDoc({
-                                  title: doc.title || getDocTypeLabel(doc.document_type),
-                                  url: getImageUrl(doc.file_url),
-                                  type: doc.document_type,
-                                });
-                              }}
-                            >
-                              <iconify-icon icon="lucide:eye" /> View
-                            </button>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              <button
+                                type="button"
+                                className={styles.docActionBtn}
+                                onClick={() => {
+                                  setSelectedDoc({
+                                    title: doc.title || getDocTypeLabel(doc.document_type),
+                                    url: getImageUrl(doc.file_url),
+                                    type: doc.document_type,
+                                  });
+                                }}
+                              >
+                                <iconify-icon icon="lucide:eye" /> View
+                              </button>
+                              <a
+                                href={getImageUrl(doc.file_url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                download
+                                className={styles.docActionBtn}
+                                style={{ background: "#ffffff", color: "#001f3f", border: "1px solid #cbd5e1" }}
+                                title="Download document"
+                              >
+                                <iconify-icon icon="lucide:download" />
+                              </a>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -502,19 +515,31 @@ export default function AdminVerificationPage() {
                             <small style={{ color: "#64748b", fontSize: 12 }}>{getDocTypeLabel(doc.document_type)}</small>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          className={styles.docActionBtn}
-                          onClick={() => {
-                            setSelectedDoc({
-                              title: doc.title || getDocTypeLabel(doc.document_type),
-                              url: getImageUrl(doc.file_url),
-                              type: doc.document_type,
-                            });
-                          }}
-                        >
-                          <iconify-icon icon="lucide:maximize-2" /> Inspect Document
-                        </button>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            type="button"
+                            className={styles.docActionBtn}
+                            onClick={() => {
+                              setSelectedDoc({
+                                title: doc.title || getDocTypeLabel(doc.document_type),
+                                url: getImageUrl(doc.file_url),
+                                type: doc.document_type,
+                              });
+                            }}
+                          >
+                            <iconify-icon icon="lucide:maximize-2" /> Inspect
+                          </button>
+                          <a
+                            href={getImageUrl(doc.file_url)}
+                            target="_blank"
+                            rel="noreferrer"
+                            download
+                            className={styles.docActionBtn}
+                            style={{ background: "#ffffff", color: "#001f3f", border: "1px solid #cbd5e1" }}
+                          >
+                            <iconify-icon icon="lucide:download" /> Download
+                          </a>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -574,13 +599,24 @@ export default function AdminVerificationPage() {
                 <h3 style={{ margin: 0, fontSize: 19, color: "#001f3f", fontWeight: 800 }}>{selectedDoc.title}</h3>
                 <span style={{ fontSize: 12.5, color: "#64748b", fontWeight: 600 }}>{getDocTypeLabel(selectedDoc.type)}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedDoc(null)}
-                className={styles.modalCloseBtn}
-              >
-                <iconify-icon icon="lucide:x" />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <a
+                  href={selectedDoc.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#ff4500", color: "#ffffff", padding: "8px 16px", borderRadius: "10px", fontSize: "12.5px", fontWeight: "700", textDecoration: "none" }}
+                >
+                  <iconify-icon icon="lucide:download" /> Download File
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDoc(null)}
+                  className={styles.modalCloseBtn}
+                >
+                  <iconify-icon icon="lucide:x" />
+                </button>
+              </div>
             </div>
 
             <div style={{ flex: 1, overflow: "auto", minHeight: 280, display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc", borderRadius: 16, border: "1px solid #e2e8f0", padding: 12 }}>

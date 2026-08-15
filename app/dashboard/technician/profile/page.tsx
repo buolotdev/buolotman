@@ -32,10 +32,14 @@ export default function TechnicianProfilePage() {
   const [bannerUploading, setBannerUploading] = useState(false);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+  const idFrontInputRef = useRef<HTMLInputElement>(null);
+  const idBackInputRef = useRef<HTMLInputElement>(null);
+  const certInputRef = useRef<HTMLInputElement>(null);
   const [cropData, setCropData] = useState<{ src: string; type: 'avatar' | 'banner' } | null>(null);
   const { data: rawDocuments, refetch: mutateDocuments } = useFetch(() => api.getTechnicianDocuments(), []);
   const documents = rawDocuments || [];
   const [documentUploading, setDocumentUploading] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
 
   // Form State
   const [firstName, setFirstName] = useState("");
@@ -207,27 +211,29 @@ export default function TechnicianProfilePage() {
     }, 1500);
   };
 
-  const onDocumentSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onDocumentSelect = async (e: React.ChangeEvent<HTMLInputElement>, customTitle?: string, customType?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setDocumentUploading(true);
+    if (customTitle) setUploadingSlot(customTitle);
     try {
       // First upload the file
       const result = await api.uploadTechnicianDocument(file);
       // Then link the uploaded file to the profile
       await api.createTechnicianDocument({
-        title: file.name,
-        document_type: "id", // default, could add a UI for selecting type
+        title: customTitle || file.name,
+        document_type: customType || "id",
         file_url: result.file_url,
       });
-      toast.success("Document uploaded", "Your document has been sent for verification.");
+      toast.success("Document uploaded", `${customTitle || "Document"} has been sent for admin verification.`);
       mutateDocuments();
     } catch (err: any) {
       toast.error("Upload failed", err?.message || "Please try again.");
     } finally {
       setDocumentUploading(false);
-      if (documentInputRef.current) documentInputRef.current.value = "";
+      setUploadingSlot(null);
+      e.target.value = "";
     }
   };
 
@@ -699,57 +705,220 @@ export default function TechnicianProfilePage() {
                 </section>
 
                 <section className={styles.card}>
-                  <h2><iconify-icon icon="lucide:shield-check" />Verifications & Documents</h2>
+                  <h2><iconify-icon icon="lucide:shield-check" />Identity & Credential Verification</h2>
+                  <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>
+                    Upload clear photos or scans of your National ID / Passport (Front and Back) to obtain the official Verified Pro badge.
+                  </p>
+
                   <div className={styles.verifyList}>
-                    {["Identity", "Phone Number", "Email Address"].map((item) => (
+                    {["Identity Documents", "Phone Number", "Email Address"].map((item) => (
                       <div key={item} className={styles.verifyItem}>
                         <span>{item}</span>
                         <iconify-icon icon="lucide:check-circle-2" />
                       </div>
                     ))}
                   </div>
-                  
-                  <div className={styles.documentsArea}>
-                    <div className={styles.documentsHeader}>
-                      <h3>Uploaded Documents</h3>
-                      <button 
-                        className={styles.outlineButton} 
-                        style={{ padding: "6px 12px", fontSize: "14px" }}
-                        onClick={() => documentInputRef.current?.click()}
-                        disabled={documentUploading}
-                      >
-                        {documentUploading ? "Uploading..." : "Upload Document"}
-                      </button>
-                      <input
-                        ref={documentInputRef}
-                        type="file"
-                        accept=".pdf,.png,.jpg,.jpeg"
-                        style={{ display: "none" }}
-                        onChange={onDocumentSelect}
-                      />
-                    </div>
-                    {documents.length > 0 ? (
-                      <div className={styles.documentList}>
-                        {documents.map((doc: any) => (
-                          <div key={doc.id} className={styles.documentItem}>
-                            <iconify-icon icon="lucide:file-text" className={styles.docIcon} />
-                            <div className={styles.docInfo}>
-                              <strong>{doc.title}</strong>
-                              <span>{doc.is_verified ? "Verified" : "Pending Verification"}</span>
+
+                  {/* DEDICATED ID CARD & PASSPORT UPLOAD BOXES */}
+                  <div className={styles.idCardGrid}>
+                    {/* ID FRONT SLOT */}
+                    {(() => {
+                      const frontDoc = documents.find((d: any) =>
+                        d.title?.toLowerCase().includes("front") || (d.document_type === "id" && !d.title?.toLowerCase().includes("back"))
+                      );
+
+                      return frontDoc ? (
+                        <div className={`${styles.idUploadBox} ${styles.idUploadBoxFilled}`}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                            <div className={styles.idBoxIcon} style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a' }}>
+                              <iconify-icon icon="lucide:id-card" />
                             </div>
-                            <div className={styles.docActions}>
-                              <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" title="View">
-                                <iconify-icon icon="lucide:eye" />
-                              </a>
-                              <button onClick={() => deleteDocument(doc.id)} title="Delete" className={styles.deleteBtn}>
-                                <iconify-icon icon="lucide:trash-2" />
-                              </button>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <h4 className={styles.idBoxTitle}>National ID / Passport (Front)</h4>
+                              <span style={{ fontSize: 11.5, color: frontDoc.is_verified ? '#16a34a' : '#d97706', fontWeight: 700 }}>
+                                {frontDoc.is_verified ? "✔ Verified by Admin" : "⏳ Pending Verification"}
+                              </span>
                             </div>
                           </div>
-                        ))}
+                          <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 8 }}>
+                            <a
+                              href={getImageUrl(frontDoc.file_url)}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ flex: 1, padding: '7px 10px', background: '#f1f5f9', borderRadius: 8, fontSize: 12, fontWeight: 700, textAlign: 'center', textDecoration: 'none', color: '#001f3f' }}
+                            >
+                              <iconify-icon icon="lucide:eye" /> View
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => idFrontInputRef.current?.click()}
+                              style={{ flex: 1, padding: '7px 10px', background: '#001f3f', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              Replace
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteDocument(frontDoc.id)}
+                              style={{ padding: '7px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+                            >
+                              <iconify-icon icon="lucide:trash-2" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.idUploadBox}>
+                          <div className={styles.idBoxIcon}>
+                            <iconify-icon icon="lucide:id-card" />
+                          </div>
+                          <div>
+                            <h4 className={styles.idBoxTitle}>ID / Passport (Front Side)</h4>
+                            <p className={styles.idBoxSub}>Clear photo of front side of your ID card or passport</p>
+                          </div>
+                          <button
+                            type="button"
+                            className={styles.idUploadBtn}
+                            onClick={() => idFrontInputRef.current?.click()}
+                            disabled={documentUploading}
+                          >
+                            <iconify-icon icon="lucide:upload" /> {uploadingSlot === "National ID (Front)" ? "Uploading..." : "Upload Front Side"}
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    {/* ID BACK SLOT */}
+                    {(() => {
+                      const backDoc = documents.find((d: any) =>
+                        d.title?.toLowerCase().includes("back")
+                      );
+
+                      return backDoc ? (
+                        <div className={`${styles.idUploadBox} ${styles.idUploadBoxFilled}`}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                            <div className={styles.idBoxIcon} style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a' }}>
+                              <iconify-icon icon="lucide:credit-card" />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <h4 className={styles.idBoxTitle}>National ID Card (Back)</h4>
+                              <span style={{ fontSize: 11.5, color: backDoc.is_verified ? '#16a34a' : '#d97706', fontWeight: 700 }}>
+                                {backDoc.is_verified ? "✔ Verified by Admin" : "⏳ Pending Verification"}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 8 }}>
+                            <a
+                              href={getImageUrl(backDoc.file_url)}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ flex: 1, padding: '7px 10px', background: '#f1f5f9', borderRadius: 8, fontSize: 12, fontWeight: 700, textAlign: 'center', textDecoration: 'none', color: '#001f3f' }}
+                            >
+                              <iconify-icon icon="lucide:eye" /> View
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => idBackInputRef.current?.click()}
+                              style={{ flex: 1, padding: '7px 10px', background: '#001f3f', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              Replace
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteDocument(backDoc.id)}
+                              style={{ padding: '7px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+                            >
+                              <iconify-icon icon="lucide:trash-2" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={styles.idUploadBox}>
+                          <div className={styles.idBoxIcon}>
+                            <iconify-icon icon="lucide:credit-card" />
+                          </div>
+                          <div>
+                            <h4 className={styles.idBoxTitle}>ID Card (Back Side)</h4>
+                            <p className={styles.idBoxSub}>Clear photo of back side of your ID card</p>
+                          </div>
+                          <button
+                            type="button"
+                            className={styles.idUploadBtn}
+                            onClick={() => idBackInputRef.current?.click()}
+                            disabled={documentUploading}
+                          >
+                            <iconify-icon icon="lucide:upload" /> {uploadingSlot === "National ID (Back)" ? "Uploading..." : "Upload Back Side"}
+                          </button>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Hidden file inputs for structured uploads */}
+                  <input
+                    ref={idFrontInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    style={{ display: "none" }}
+                    onChange={(e) => onDocumentSelect(e, "National ID (Front)", "id")}
+                  />
+                  <input
+                    ref={idBackInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    style={{ display: "none" }}
+                    onChange={(e) => onDocumentSelect(e, "National ID (Back)", "id")}
+                  />
+                  <input
+                    ref={certInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    style={{ display: "none" }}
+                    onChange={(e) => onDocumentSelect(e, "Trade Certificate / License", "certificate")}
+                  />
+                  <input
+                    ref={documentInputRef}
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    style={{ display: "none" }}
+                    onChange={(e) => onDocumentSelect(e, "Supporting Credential", "other")}
+                  />
+
+                  {/* Additional Certifications & Supporting Docs */}
+                  <div className={styles.documentsArea}>
+                    <div className={styles.documentsHeader}>
+                      <h3>Additional Certificates & Licenses</h3>
+                      <button
+                        className={styles.outlineButton}
+                        style={{ padding: "6px 12px", fontSize: "13px" }}
+                        onClick={() => certInputRef.current?.click()}
+                        disabled={documentUploading}
+                      >
+                        <iconify-icon icon="lucide:plus" /> Add Certificate
+                      </button>
+                    </div>
+                    {documents.filter((d: any) => d.document_type === "certificate" || d.document_type === "other" || (!d.title?.toLowerCase().includes("front") && !d.title?.toLowerCase().includes("back"))).length > 0 ? (
+                      <div className={styles.documentList}>
+                        {documents
+                          .filter((d: any) => d.document_type === "certificate" || d.document_type === "other" || (!d.title?.toLowerCase().includes("front") && !d.title?.toLowerCase().includes("back")))
+                          .map((doc: any) => (
+                            <div key={doc.id} className={styles.documentItem}>
+                              <iconify-icon icon="lucide:award" className={styles.docIcon} style={{ color: '#ff4500' }} />
+                              <div className={styles.docInfo}>
+                                <strong>{doc.title}</strong>
+                                <span>{doc.is_verified ? "✔ Verified by Admin" : "⏳ Pending Verification"}</span>
+                              </div>
+                              <div className={styles.docActions}>
+                                <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" title="View">
+                                  <iconify-icon icon="lucide:eye" />
+                                </a>
+                                <button onClick={() => deleteDocument(doc.id)} title="Delete" className={styles.deleteBtn}>
+                                  <iconify-icon icon="lucide:trash-2" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     ) : (
-                      <p className={styles.noDocuments}>No documents uploaded yet. Upload your ID or certifications.</p>
+                      <p className={styles.noDocuments}>No additional licenses or certificates uploaded.</p>
                     )}
                   </div>
                 </section>

@@ -246,3 +246,95 @@
 .modalTitle { margin: 0 0 24px; font-size: 18px; font-weight: 800; color: #001f3f; }
 .formGroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .formGroup label { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+
+/* Identity & ID Card Upload Suite */
+.idCardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .idCardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.idUploadBox {
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 20px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.idUploadBox:hover {
+  border-color: #ff4500;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 31, 63, 0.05);
+}
+
+.idUploadBoxFilled {
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #16a34a;
+  background: #ffffff;
+  align-items: stretch;
+  text-align: left;
+}
+
+.idBoxIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(0, 31, 63, 0.08);
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.idBoxTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #001f3f;
+  margin: 0;
+}
+
+.idBoxSub {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.idUploadBtn {
+  background: #001f3f;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.idUploadBtn:hover {
+  background: #ff4500;
+  transform: translateY(-1px);
+}
+
