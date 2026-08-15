@@ -300,3 +300,130 @@ def release_escrow(request, task_id):
             )
 
     return Response({"message": "Escrow released", "amount": str(amount)})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def deposit_funds(request):
+    wallet, _ = Wallet.objects.get_or_create(user=request.user)
+    amount = request.data.get('amount')
+    payment_method = request.data.get('payment_method', 'Card / Mobile Money')
+    if not amount:
+        return Response({"error": "amount is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    from decimal import Decimal
+    try:
+        amount = Decimal(str(amount))
+        if amount <= 0:
+            raise ValueError()
+    except Exception:
+        return Response({"error": "Invalid deposit amount"}, status=status.HTTP_400_BAD_REQUEST)
+
+    with db_transaction.atomic():
+        wallet.available_balance += amount
+        wallet.save(update_fields=['available_balance', 'updated_at'])
+
+        Transaction.objects.create(
+            wallet=wallet,
+            amount=amount,
+            type='credit',
+            category='earnings',
+            description=f"Wallet Top-Up via {payment_method}",
+            status='completed',
+            metadata={'payment_method': payment_method},
+        )
+        create_audit_log(
+            actor=request.user,
+            action="wallet_deposit",
+            entity_type="wallet",
+            entity_id=wallet.id,
+            summary=f"Deposited {amount} {wallet.currency} via {payment_method}",
+            metadata={"amount": str(amount), "payment_method": payment_method},
+            ip_address=request.META.get("REMOTE_ADDR"),
+        )
+        create_notification(
+            user=request.user,
+            category="payment",
+            title="Wallet Deposit Successful",
+            body=f"Your wallet has been credited with {amount} {wallet.currency}.",
+            link="/dashboard/technician/wallet",
+            metadata={"amount": str(amount)},
+        )
+
+    return Response({
+        "message": "Deposit successful",
+        "available_balance": str(wallet.available_balance),
+        "currency": wallet.currency,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upgrade_subscription_plan(request):
+    tier = request.data.get('tier', 'PRO').upper()
+    billing_cycle = request.data.get('billing_cycle', 'monthly')
+    payment_source = request.data.get('payment_source', 'wallet')
+
+    price_map = {
+        'BASIC': {'monthly': 9, 'yearly': 90},
+        'PRO': {'monthly': 19, 'yearly': 190},
+        'ELITE': {'monthly': 49, 'yearly': 490},
+        'ENTERPRISE': {'monthly': 149, 'yearly': 1490},
+    }
+
+    if tier not in price_map:
+        return Response({"error": "Invalid tier selected"}, status=status.HTTP_400_BAD_REQUEST)
+
+    cost = price_map[tier].get(billing_cycle, price_map[tier]['monthly'])
+    from decimal import Decimal
+    cost_dec = Decimal(str(cost))
+
+    wallet, _ = Wallet.objects.get_or_create(user=request.user)
+
+    with db_transaction.atomic():
+        if payment_source == 'wallet':
+            if wallet.available_balance < cost_dec:
+                return Response({"error": f"Insufficient wallet balance. You need ${cost} USD. Please top up your wallet first."}, status=status.HTTP_400_BAD_REQUEST)
+            wallet.available_balance -= cost_dec
+            wallet.save(update_fields=['available_balance', 'updated_at'])
+
+            Transaction.objects.create(
+                wallet=wallet,
+                amount=cost_dec,
+                type='debit',
+                category='withdrawal',
+                description=f"Subscription upgrade to {tier} ({billing_cycle})",
+                status='completed',
+                metadata={'tier': tier, 'billing_cycle': billing_cycle},
+            )
+
+        tech_prof = getattr(request.user, 'technician_profile', None)
+        if tech_prof:
+            tech_prof.is_verified = True
+            tech_prof.save(update_fields=['is_verified'])
+
+        create_audit_log(
+            actor=request.user,
+            action="subscription_upgraded",
+            entity_type="user",
+            entity_id=request.user.id,
+            summary=f"Upgraded to {tier} ({billing_cycle})",
+            metadata={"tier": tier, "billing_cycle": billing_cycle, "cost": str(cost)},
+            ip_address=request.META.get("REMOTE_ADDR"),
+        )
+        create_notification(
+            user=request.user,
+            category="system",
+            title=f"Plan Upgraded to {tier}!",
+            body=f"Congratulations! You are now enjoying all {tier} features, higher daily post limits, and priority exposure.",
+            link="/upgrade",
+            metadata={"tier": tier},
+        )
+
+    return Response({
+        "message": f"Successfully upgraded to {tier}!",
+        "tier": tier,
+        "billing_cycle": billing_cycle,
+        "available_balance": str(wallet.available_balance),
+    })
+

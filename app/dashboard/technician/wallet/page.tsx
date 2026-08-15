@@ -7,7 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
-import { formatXOF } from "@/app/lib/format";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
@@ -25,25 +24,24 @@ export default function TechnicianWalletPage() {
   const transactionsData = Array.isArray(txData) ? txData : (txData as any)?.results || [];
 
   const availableBalance = parseFloat(walletData?.available_balance) || 0;
-  const pendingEscrow = parseFloat(walletData?.pending_balance) || 0;
-  const totalEarnings = availableBalance + pendingEscrow; // Estimate total earnings
-
-  const { data: userData } = useFetch(() => api.getMe(), []);
-  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "Eric Niyonzima";
-  const userInitials = useMemo(() => {
-    const first = userData?.first_name?.[0] ?? "E";
-    const last = userData?.last_name?.[0] ?? "N";
-    return `${first}${last}`.toUpperCase();
-  }, [userData]);
-  const userRole = userData?.role ?? "Technician";
+  const pendingEscrow = parseFloat(walletData?.pending_escrow || walletData?.pending_balance) || 0;
+  const totalEarnings = parseFloat(walletData?.total_earnings) || (availableBalance + pendingEscrow);
 
   // Withdraw Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawMethod, setWithdrawMethod] = useState("Mobile Money");
+  const [withdrawMethod, setWithdrawMethod] = useState("Mobile Money (Orange/MTN/Wave)");
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+
+  // Deposit Modal State
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("50");
+  const [depositMethod, setDepositMethod] = useState("Credit / Debit Card");
+  const [depositing, setDepositing] = useState(false);
+  const [depositError, setDepositError] = useState<string | null>(null);
+  const [depositSuccess, setDepositSuccess] = useState(false);
 
   const handleWithdraw = async () => {
     setWithdrawError(null);
@@ -61,9 +59,9 @@ export default function TechnicianWalletPage() {
 
     setWithdrawing(true);
     try {
-      await api.withdraw({
+      await api.withdrawFunds({
         amount,
-        method: withdrawMethod
+        account_details: { method: withdrawMethod }
       });
       setWithdrawSuccess(true);
       await refetchWallet();
@@ -80,12 +78,46 @@ export default function TechnicianWalletPage() {
     }
   };
 
+  const handleDeposit = async () => {
+    setDepositError(null);
+    setDepositSuccess(false);
+
+    const amount = Number(depositAmount);
+    if (!amount || amount <= 0) {
+      setDepositError("Enter a valid deposit amount.");
+      return;
+    }
+
+    setDepositing(true);
+    try {
+      await api.depositFunds({
+        amount,
+        payment_method: depositMethod,
+      });
+      setDepositSuccess(true);
+      await refetchWallet();
+      await refetchTx();
+      setTimeout(() => {
+        setDepositOpen(false);
+        setDepositSuccess(false);
+      }, 2000);
+    } catch (err: any) {
+      setDepositError(err.message || "Failed to process deposit.");
+    } finally {
+      setDepositing(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'Released': return styles.statusReleased;
-      case 'On Hold': return styles.statusHold;
-      case 'Pending': return styles.statusPending;
-      default: return styles.statusPending;
+      case 'Released':
+      case 'COMPLETED':
+        return styles.statusReleased;
+      case 'On Hold':
+      case 'PENDING':
+        return styles.statusHold;
+      default:
+        return styles.statusPending;
     }
   };
 
@@ -97,7 +129,7 @@ export default function TechnicianWalletPage() {
         <div className={styles.main}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search..."
+            searchPlaceholder="Search wallet history..."
             searchQuery={query}
             setSearchQuery={setQuery}
           />
@@ -105,8 +137,27 @@ export default function TechnicianWalletPage() {
           <div className={styles.content}>
             <section className={styles.pageHeader}>
               <div>
-                <p className={styles.eyebrow}>Payments</p>
-                <h1>Wallet Overview</h1>
+                <p className={styles.eyebrow}>Payments & Wallet</p>
+                <h1>Wallet & Payouts</h1>
+              </div>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <Link
+                  href="/upgrade"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 18px",
+                    background: "rgba(255, 69, 0, 0.1)",
+                    color: "#ff4500",
+                    borderRadius: "10px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    border: "1px solid rgba(255, 69, 0, 0.2)"
+                  }}
+                >
+                  <iconify-icon icon="lucide:sparkles" /> Upgrade Tier
+                </Link>
               </div>
             </section>
 
@@ -115,35 +166,61 @@ export default function TechnicianWalletPage() {
               <article className={styles.statCard}>
                 <span>Available Balance</span>
                 <h3>${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <small style={{ color: "#16a34a", fontWeight: 600 }}>Ready for withdrawal / upgrade</small>
               </article>
               <article className={styles.statCard}>
-                <span>Funds On Hold</span>
+                <span>Held in Escrow</span>
                 <h3>${pendingEscrow.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <small style={{ color: "#64748b" }}>Released upon milestone sign-off</small>
               </article>
               <article className={styles.statCard}>
-                <span>Total Earned</span>
+                <span>Total Lifetime Earnings</span>
                 <h3>${totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <small style={{ color: "#001f3f", fontWeight: 600 }}>100% Escrow Protected</small>
               </article>
             </section>
 
-            {/* WITHDRAW CARD */}
-            <section className={styles.withdrawCard}>
-              <h3>Withdraw Funds</h3>
-              <p className={styles.notice}>Withdrawals are processed after admin & client milestone approval.</p>
-              <button className={styles.primaryButton} onClick={() => setModalOpen(true)}>
-                Withdraw Money
-              </button>
+            {/* ACTIONS BAR */}
+            <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 30 }}>
+              <div className={styles.withdrawCard} style={{ margin: 0 }}>
+                <h3>Add Funds to Wallet</h3>
+                <p className={styles.notice}>Top up your balance via Mobile Money or Card to fund upgrades or tasks.</p>
+                <button
+                  className={styles.primaryButton}
+                  style={{ background: "#001f3f" }}
+                  onClick={() => setDepositOpen(true)}
+                >
+                  <iconify-icon icon="lucide:plus-circle" /> Add Money (Deposit)
+                </button>
+              </div>
+
+              <div className={styles.withdrawCard} style={{ margin: 0 }}>
+                <h3>Withdraw Earnings</h3>
+                <p className={styles.notice}>Instant transfers to Mobile Money wallets or direct bank accounts.</p>
+                <button className={styles.primaryButton} onClick={() => setModalOpen(true)}>
+                  <iconify-icon icon="lucide:arrow-down-circle" /> Withdraw Money
+                </button>
+              </div>
             </section>
 
             {/* TRANSACTIONS TABLE */}
             <section className={styles.transactionsCard}>
-              <h3>Transaction History</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <h3 style={{ margin: 0 }}>Transaction History</h3>
+                <button
+                  onClick={() => { refetchWallet(); refetchTx(); }}
+                  style={{ border: "none", background: "transparent", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 13 }}
+                >
+                  <iconify-icon icon="lucide:refresh-cw" /> Refresh
+                </button>
+              </div>
+
               <div className={styles.tableWrapper}>
                 <table className={styles.dataTable}>
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Project</th>
+                      <th>Description</th>
                       <th>Type</th>
                       <th>Amount</th>
                       <th>Status</th>
@@ -153,22 +230,26 @@ export default function TechnicianWalletPage() {
                     {txLoading ? (
                       <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>Loading transactions...</td></tr>
                     ) : transactionsData.length === 0 ? (
-                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No transactions found.</td></tr>
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No transactions found yet.</td></tr>
                     ) : transactionsData.map((tx: any) => {
                       const date = new Date(tx.created_at || Date.now()).toLocaleDateString();
-                      const project = tx.task_title || `Task #${tx.task_id || "Unknown"}`;
-                      const type = tx.transaction_type || tx.type || "Transfer";
+                      const desc = tx.description || tx.task_title || `Transaction #${tx.id}`;
+                      const type = tx.type || "credit";
                       const amount = parseFloat(tx.amount) || 0;
-                      const status = (tx.status || "Pending").toUpperCase();
+                      const status = (tx.status || "completed").toUpperCase();
                       
                       return (
                         <tr key={tx.id}>
                           <td>{date}</td>
-                          <td>{project}</td>
-                          <td style={{ textTransform: "capitalize" }}>{type.replace('_', ' ')}</td>
+                          <td><strong>{desc}</strong></td>
+                          <td style={{ textTransform: "capitalize" }}>
+                            <span style={{ color: type === "credit" ? "#16a34a" : "#dc2626", fontWeight: 700 }}>
+                              {type === "credit" ? "+ " : "- "} {type}
+                            </span>
+                          </td>
                           <td>${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                           <td>
-                            <span className={`${styles.statusBadge} ${getStatusBadge(tx.status === 'completed' ? 'Released' : tx.status === 'pending' ? 'Pending' : 'On Hold')}`}>
+                            <span className={`${styles.statusBadge} ${getStatusBadge(status)}`}>
                               {status}
                             </span>
                           </td>
@@ -193,11 +274,11 @@ export default function TechnicianWalletPage() {
             
             <h3>Withdraw Funds</h3>
             <p className={styles.notice} style={{ marginBottom: '16px' }}>
-              Available balance only. On-hold funds cannot be withdrawn.
+              Available balance only. On-hold escrow funds cannot be withdrawn until task sign-off.
             </p>
 
             <div className={styles.formGroup}>
-              <label>Amount (Max: ${availableBalance})</label>
+              <label>Amount (Available: ${availableBalance.toFixed(2)} USD)</label>
               <input 
                 type="number" 
                 className={styles.formInput} 
@@ -214,8 +295,9 @@ export default function TechnicianWalletPage() {
                 value={withdrawMethod}
                 onChange={(e) => setWithdrawMethod(e.target.value)}
               >
-                <option value="Mobile Money">Mobile Money</option>
-                <option value="Bank Account">Bank Account</option>
+                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange / MTN / Wave)</option>
+                <option value="Direct Bank Wire Transfer">Direct Bank Wire Transfer</option>
+                <option value="PayPal / Stripe">PayPal / International Transfer</option>
               </select>
             </div>
 
@@ -240,6 +322,71 @@ export default function TechnicianWalletPage() {
                 disabled={withdrawing || withdrawSuccess}
               >
                 {withdrawing ? "Processing..." : "Confirm Withdrawal"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DEPOSIT MODAL */}
+      {depositOpen && (
+        <div className={styles.modalOverlay} onClick={() => setDepositOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={() => setDepositOpen(false)}>
+              <iconify-icon icon="lucide:x" />
+            </button>
+            
+            <h3>Deposit Money into Wallet</h3>
+            <p className={styles.notice} style={{ marginBottom: '16px' }}>
+              Add funds to pay for plan upgrades, bid packages, or task escrow.
+            </p>
+
+            <div className={styles.formGroup}>
+              <label>Deposit Amount (USD)</label>
+              <input 
+                type="number" 
+                className={styles.formInput} 
+                placeholder="50" 
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Payment Method</label>
+              <select 
+                className={styles.formInput}
+                value={depositMethod}
+                onChange={(e) => setDepositMethod(e.target.value)}
+              >
+                <option value="Credit / Debit Card">Credit / Debit Card (Visa, Mastercard)</option>
+                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange, MTN, Wave)</option>
+                <option value="Direct Bank Deposit">Direct Bank Transfer</option>
+              </select>
+            </div>
+
+            {depositError && (
+              <div className={styles.errorMessage}>
+                <iconify-icon icon="lucide:alert-circle" />
+                {depositError}
+              </div>
+            )}
+            
+            {depositSuccess && (
+              <div className={styles.successMessage}>
+                <iconify-icon icon="lucide:check-circle-2" />
+                Funds added to wallet successfully!
+              </div>
+            )}
+
+            <div className={styles.modalActions}>
+              <button 
+                className={`${styles.primaryButton} ${styles.fullButton}`} 
+                style={{ background: "#16a34a" }}
+                onClick={handleDeposit}
+                disabled={depositing || depositSuccess}
+              >
+                {depositing ? "Processing..." : `Deposit $${depositAmount} Now`}
               </button>
             </div>
           </div>

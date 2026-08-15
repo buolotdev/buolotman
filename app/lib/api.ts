@@ -270,14 +270,20 @@ export const api = {
   submitContact: (data: Record<string, string>) =>
     request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify({ ...data, inquiry_type: 'general' }), public: true } as any),
 
-  // Wallet
+  // Wallet & Subscriptions
   getWallet: () => request<any>("/wallet/"),
   withdraw: (data: Record<string, any>) =>
     request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
+  withdrawFunds: (data: { amount: number | string; account_details?: Record<string, any> }) =>
+    request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
+  depositFunds: (data: { amount: number | string; payment_method?: string }) =>
+    request<any>("/wallet/add-funds/", { method: "POST", body: JSON.stringify(data) }),
   depositEscrow: (data: { task_id: number; bid_id: number; amount: number }) =>
     request<any>("/wallet/deposit/", { method: "POST", body: JSON.stringify(data) }),
   releaseEscrow: (taskId: number) =>
     request<any>(`/wallet/release-escrow/${taskId}/`, { method: "POST" }),
+  upgradeSubscriptionPlan: (data: { tier: string; billing_cycle?: string; payment_source?: string }) =>
+    request<any>("/wallet/upgrade-plan/", { method: "POST", body: JSON.stringify(data) }),
   getTransactions: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any>(`/wallet/transactions/${qs}`);
@@ -567,3 +573,4 @@ export const api = {
       body: JSON.stringify(data),
     }),
 };
+

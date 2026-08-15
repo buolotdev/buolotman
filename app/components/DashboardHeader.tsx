@@ -127,6 +127,33 @@ export default function DashboardHeader({
       </div>
 
       <div className={styles.topbarActions}>
+        {/* Subscription Tier Badge */}
+        {(userRole === "TECHNICIAN" || userRole === "COMPANY" || userRole === "CLIENT") && (
+          <Link
+            href="/upgrade"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 14px",
+              background: user?.technician_profile?.is_verified ? "rgba(255, 69, 0, 0.12)" : "#f8fafc",
+              color: user?.technician_profile?.is_verified ? "#ff4500" : "#001f3f",
+              borderRadius: 999,
+              fontSize: "0.78rem",
+              fontWeight: 800,
+              textDecoration: "none",
+              border: user?.technician_profile?.is_verified ? "1px solid rgba(255, 69, 0, 0.25)" : "1px solid #e2e8f0",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <iconify-icon
+              icon={user?.technician_profile?.is_verified ? "lucide:sparkles" : "lucide:arrow-up-circle"}
+              style={{ color: "#ff4500", fontSize: 15 }}
+            />
+            <span>{user?.technician_profile?.is_verified ? "Pro Plan" : "Free Tier • Upgrade"}</span>
+          </Link>
+        )}
+
         {/* Notifications button and dropdown */}
         <div className={styles.actionWrapper} ref={notifRef}>
           <button
