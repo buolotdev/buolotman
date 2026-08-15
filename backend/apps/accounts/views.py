@@ -415,6 +415,13 @@ def admin_verify_user(request, user_id):
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     user.is_verified = True
     user.save(update_fields=['is_verified'])
+    user.technician_documents.all().update(is_verified=True)
+    if hasattr(user, 'technician_profile'):
+        user.technician_profile.is_verified = True
+        user.technician_profile.save(update_fields=['is_verified'])
+    if hasattr(user, 'company_profile'):
+        user.company_profile.is_verified = True
+        user.company_profile.save(update_fields=['is_verified'])
     create_audit_log(
         actor=request.user,
         action="user_verified",
@@ -428,7 +435,7 @@ def admin_verify_user(request, user_id):
         user=user,
         category="verification",
         title="Account verified",
-        body="Your account has been verified by the admin team.",
+        body="Your account and credentials have been verified by the admin team.",
         link="/dashboard/client",
         metadata={"user_id": user.id},
     )
@@ -497,7 +504,7 @@ def admin_list_users(request):
     if err: return err
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    qs = User.objects.all().order_by('-created_at')
+    qs = User.objects.all().prefetch_related('technician_documents', 'technician_profile', 'company_profile').order_by('-created_at')
     role = request.query_params.get('role', '').upper()
     if role in ('TECHNICIAN', 'CLIENT', 'COMPANY', 'ADMIN'):
         qs = qs.filter(role=role)
@@ -508,9 +515,26 @@ def admin_list_users(request):
         qs = qs.filter(is_verified=False)
     data = []
     for u in qs:
+        docs = []
+        for doc in u.technician_documents.all():
+            docs.append({
+                'id': doc.id,
+                'title': doc.title,
+                'document_type': doc.document_type,
+                'file_url': doc.file_url,
+                'is_verified': doc.is_verified,
+                'created_at': doc.created_at,
+            })
+        
+        tech_profile = getattr(u, 'technician_profile', None)
+        comp_profile = getattr(u, 'company_profile', None)
+
         data.append({
             'id': u.id,
             'email': u.email,
+            'username': u.username,
+            'phone': u.phone,
+            'country': u.country,
             'first_name': u.first_name,
             'last_name': u.last_name,
             'role': u.role,
@@ -518,6 +542,9 @@ def admin_list_users(request):
             'is_active': u.is_active,
             'is_verified': u.is_verified,
             'avatar_url': u.avatar_url,
+            'documents': docs,
+            'title': tech_profile.title if tech_profile else (comp_profile.company_name if comp_profile else ''),
+            'bio': tech_profile.bio if tech_profile else (comp_profile.about if comp_profile else ''),
         })
     return Response(data)
 
