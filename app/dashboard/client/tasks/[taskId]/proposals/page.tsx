@@ -9,7 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import ClientSidebar from "@/app/components/ClientSidebar";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -96,41 +96,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <Link href="/" className={styles.brand}>
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={54} height={54} className={styles.brandImage} priority />
-              <div className={styles.brandText}>
-                <span className={styles.brandEyebrow}>Boulot Man</span>
-                <span className={styles.brandTitle}>Client Space</span>
-              </div>
-            </Link>
-            <button type="button" className={styles.sidebarClose} aria-label="Close navigation" onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav} aria-label="Dashboard navigation">
-            {navItems.map((item) => {
-              const isActive = item.match ? item.match(pathname || "") : item.key === "tasks";
-              return (
-              <Link
-                key={item.key}
-                href={item.href || "#"}
-                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-                onClick={() => setMobileNavOpen(false)}
-              >
-                <iconify-icon icon={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-              );
-            })}
-          </nav>
-
-          <div className={styles.sidebarFooter}>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        </aside>
+        <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <header className={styles.topbar}>

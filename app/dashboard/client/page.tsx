@@ -8,7 +8,7 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
 const navItems = [
@@ -73,48 +73,7 @@ export default function ClientDashboardPage() {
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <Link href="/" className={styles.brand}>
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={54} height={54} className={styles.brandImage} priority />
-              <div className={styles.brandText}>
-                <span className={styles.brandEyebrow}>Boulot Man</span>
-                <span className={styles.brandTitle}>Client Space</span>
-              </div>
-            </Link>
-            <button type="button" className={styles.sidebarClose} onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav}>
-            {navItems.map((item) => {
-              const isActive = item.match(pathname || "");
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    if (pathname === item.href) {
-                      window.location.reload();
-                    } else {
-                      router.push(item.href);
-                    }
-                  }}
-                >
-                  <iconify-icon icon={item.icon} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className={styles.sidebarFooter}>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        </aside>
+        <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <DashboardHeader

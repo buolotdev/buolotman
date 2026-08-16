@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./page.module.css";
-import LogoutButton from "@/app/components/LogoutButton";
+import ClientSidebar from "@/app/components/ClientSidebar";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
@@ -71,36 +71,7 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <Link href="/" className={styles.brand}>
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={54} height={54} className={styles.brandImage} priority />
-              <div className={styles.brandText}>
-                <span className={styles.brandEyebrow}>Boulot Man</span>
-                <span className={styles.brandTitle}>Client Space</span>
-              </div>
-            </Link>
-            <button type="button" className={styles.sidebarClose} aria-label="Close navigation" onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav}>
-            {navItems.map((item) => {
-              const isActive = item.match(pathname || "");
-              return (
-                <Link key={item.key} href={item.href} className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`} onClick={() => setMobileNavOpen(false)}>
-                  <iconify-icon icon={item.icon} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className={styles.sidebarFooter}>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        </aside>
+        <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
           <header className={styles.header}>

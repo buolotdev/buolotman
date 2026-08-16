@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import styles from "@/app/components/Tickets.module.css";
 import pageStyles from "@/app/dashboard/client/page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import LogoutButton from "@/app/components/LogoutButton";
+import ClientSidebar from "@/app/components/ClientSidebar";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
@@ -176,45 +176,7 @@ export default function ClientSupportPage() {
   return (
     <main className={pageStyles.page}>
       <div className={pageStyles.layout}>
-        {/* SIDEBAR */}
-        <aside className={`${pageStyles.sidebar} ${mobileNavOpen ? pageStyles.sidebarOpen : ""}`}>
-          <div className={pageStyles.sidebarHeader}>
-            <Link href="/" className={pageStyles.brand}>
-              <Image src="/boulotman-logo.png" alt="Boulot Man" width={54} height={54} className={pageStyles.brandImage} priority />
-              <div className={pageStyles.brandText}>
-                <span className={pageStyles.brandEyebrow}>Boulot Man</span>
-                <span className={pageStyles.brandTitle}>Client Space</span>
-              </div>
-            </Link>
-            <button type="button" className={pageStyles.sidebarClose} onClick={() => setMobileNavOpen(false)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={pageStyles.sidebarNav}>
-            {navItems.map((item) => {
-              const isActive = item.match(pathname || "");
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  className={`${pageStyles.navItem} ${isActive ? pageStyles.navItemActive : ""}`}
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    router.push(item.href);
-                  }}
-                >
-                  <iconify-icon icon={item.icon} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className={pageStyles.sidebarFooter}>
-            <LogoutButton className={pageStyles.logoutButton} />
-          </div>
-        </aside>
+        <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         {/* MAIN CONTENT */}
         <div className={pageStyles.main}>
