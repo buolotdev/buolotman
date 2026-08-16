@@ -37,9 +37,11 @@ def google_login(request):
             return Response({'error': 'Email not provided by Google'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get requested role
-        requested_role = request.data.get('role', 'client').lower()
-        if requested_role not in ['client', 'technician', 'company', 'admin']:
-            requested_role = 'client'
+        explicit_role = request.data.get('role')
+        if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'ADMIN']:
+            requested_role = str(explicit_role).upper()
+        else:
+            requested_role = 'CLIENT'
 
         # Get or create the user
         user, created = User.objects.get_or_create(email=email, defaults={
@@ -51,12 +53,29 @@ def google_login(request):
             'is_verified': True, # Google emails are already verified
         })
 
-        if not created and not user.first_name:
-            user.first_name = first_name
-            user.last_name = last_name
-            if not user.avatar_url:
+        from apps.accounts.models import TechnicianProfile
+        if user.role == 'TECHNICIAN':
+            TechnicianProfile.objects.get_or_create(user=user)
+
+        if not created:
+            updated_fields = []
+            # Only update role if an explicit new role was provided in the request (e.g. from signup flow)
+            if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'CLIENT'] and str(user.role).upper() != str(explicit_role).upper():
+                user.role = str(explicit_role).upper()
+                updated_fields.append('role')
+                if user.role == 'TECHNICIAN':
+                    TechnicianProfile.objects.get_or_create(user=user)
+            if not user.first_name and first_name:
+                user.first_name = first_name
+                updated_fields.append('first_name')
+            if not user.last_name and last_name:
+                user.last_name = last_name
+                updated_fields.append('last_name')
+            if not user.avatar_url and picture:
                 user.avatar_url = picture
-            user.save(update_fields=['first_name', 'last_name', 'avatar_url'])
+                updated_fields.append('avatar_url')
+            if updated_fields:
+                user.save(update_fields=updated_fields)
 
         # Generate tokens
         refresh = RefreshToken.for_user(user)

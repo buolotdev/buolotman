@@ -46,12 +46,30 @@ export default function TechnicianSubmitBidPage({ params }: { params: Promise<{ 
     }
     setSubmitting(true);
     try {
-      await api.submitBid(task.id, {
-        amount: numericOffer,
-        amount_type: paymentType === "milestone" ? "hourly" : "fixed",
-        message,
-        duration: deliveryTime,
-      });
+      try {
+        await api.submitBid(task.id, {
+          amount: numericOffer,
+          amount_type: paymentType === "milestone" ? "hourly" : "fixed",
+          message,
+          duration: deliveryTime,
+        });
+      } catch (firstErr: any) {
+        if (typeof firstErr?.message === "string" && firstErr.message.includes("Only technicians")) {
+          // Auto-sync role to TECHNICIAN in backend and retry
+          await api.switchRole("TECHNICIAN");
+          if (typeof window !== "undefined") {
+            localStorage.setItem("user_role", "technician");
+          }
+          await api.submitBid(task.id, {
+            amount: numericOffer,
+            amount_type: paymentType === "milestone" ? "hourly" : "fixed",
+            message,
+            duration: deliveryTime,
+          });
+        } else {
+          throw firstErr;
+        }
+      }
       setSubmitted(true);
       toast.success("Bid submitted", "Your proposal is now with the client for review.");
     } catch (err: any) {

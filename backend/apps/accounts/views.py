@@ -186,11 +186,37 @@ def me(request):
         serializer = UserMeSerializer(request.user)
         return Response(serializer.data)
     elif request.method == 'PATCH':
+        role_to_set = request.data.get('role')
+        if role_to_set and str(role_to_set).upper() in ['CLIENT', 'TECHNICIAN', 'COMPANY']:
+            new_role = str(role_to_set).upper()
+            request.user.role = new_role
+            request.user.save(update_fields=['role'])
+            if new_role == 'TECHNICIAN':
+                from apps.accounts.models import TechnicianProfile
+                TechnicianProfile.objects.get_or_create(user=request.user)
         serializer = UserMeSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def switch_role(request):
+    new_role = str(request.data.get('role', '')).upper()
+    if new_role not in ['CLIENT', 'TECHNICIAN', 'COMPANY']:
+        return Response({"error": "Invalid role. Choose CLIENT, TECHNICIAN, or COMPANY."}, status=status.HTTP_400_BAD_REQUEST)
+    user = request.user
+    user.role = new_role
+    user.save(update_fields=['role'])
+    if new_role == 'TECHNICIAN':
+        from apps.accounts.models import TechnicianProfile
+        TechnicianProfile.objects.get_or_create(user=user)
+    elif new_role == 'COMPANY':
+        from apps.companies.models import CompanyProfile
+        CompanyProfile.objects.get_or_create(user=user, defaults={'company_name': user.get_full_name() or user.username})
+    return Response({"message": f"Role updated to {new_role}", "role": new_role})
 
 
 @api_view(['GET'])

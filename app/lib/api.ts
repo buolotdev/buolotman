@@ -144,6 +144,12 @@ export const api = {
       public: true,
     } as any),
 
+  switchRole: (role: string) =>
+    request<{ message: string; role: string }>("/auth/switch-role/", {
+      method: "POST",
+      body: JSON.stringify({ role }),
+    }),
+
   requestPhoneOtp: (data: { phone: string; email?: string; purpose?: string }) =>
     request<{ message: string; challenge_id: number; expires_at: string }>("/auth/otp/request/", {
       method: "POST",
