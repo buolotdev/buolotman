@@ -508,9 +508,9 @@ def admin_list_users(request):
     from django.contrib.auth import get_user_model
     User = get_user_model()
     qs = User.objects.all().prefetch_related('technician_documents', 'technician_profile', 'company_profile').order_by('-created_at')
-    role = request.query_params.get('role', '').upper()
-    if role in ('TECHNICIAN', 'CLIENT', 'COMPANY', 'ADMIN'):
-        qs = qs.filter(role=role)
+    role = request.query_params.get('role', '').strip()
+    if role and role.upper() in ('TECHNICIAN', 'CLIENT', 'COMPANY', 'ADMIN'):
+        qs = qs.filter(role__iexact=role)
     verified = request.query_params.get('verified')
     if verified == 'true':
         qs = qs.filter(is_verified=True)

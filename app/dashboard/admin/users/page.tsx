@@ -6,22 +6,19 @@ import { api } from "@/app/lib/api";
 
 export default function AdminUsersPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const [users, setUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUsers();
-  }, [activeTab]);
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params: any = {};
-      if (activeTab !== "all") {
-        params.role = activeTab.toUpperCase();
-      }
-      const data = await api.adminListUsers(params);
-      setUsers(Array.isArray(data) ? data : []);
+      const data = await api.adminListUsers();
+      setAllUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch users", err);
     } finally {
@@ -42,12 +39,30 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Fixed stats across entire user base
   const totals = {
-    total: users.length,
-    technicians: users.filter((u) => u.role === "TECHNICIAN").length,
-    clients: users.filter((u) => u.role === "CLIENT").length,
-    companies: users.filter((u) => u.role === "COMPANY").length,
+    total: allUsers.length,
+    technicians: allUsers.filter((u) => (u.role || "").toUpperCase() === "TECHNICIAN").length,
+    clients: allUsers.filter((u) => (u.role || "").toUpperCase() === "CLIENT").length,
+    companies: allUsers.filter((u) => (u.role || "").toUpperCase() === "COMPANY").length,
   };
+
+  // Accurate filtering by active tab & search query
+  const filteredUsers = allUsers.filter((u) => {
+    const roleUpper = (u.role || "CLIENT").toUpperCase();
+    if (activeTab === "client" && roleUpper !== "CLIENT") return false;
+    if (activeTab === "technician" && roleUpper !== "TECHNICIAN") return false;
+    if (activeTab === "company" && roleUpper !== "COMPANY") return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const name = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      return name.includes(q) || email.includes(q);
+    }
+
+    return true;
+  });
 
   return (
     <div className={styles.page}>
@@ -121,9 +136,9 @@ export default function AdminUsersPage() {
           <div className={styles.filterPillGroup}>
             {[
               { key: "all", label: "All Users" },
-              { key: "client", label: "Clients" },
-              { key: "technician", label: "Technicians" },
-              { key: "company", label: "Companies" }
+              { key: "client", label: `Clients (${totals.clients})` },
+              { key: "technician", label: `Technicians (${totals.technicians})` },
+              { key: "company", label: `Companies (${totals.companies})` }
             ].map((f) => (
               <button
                 key={f.key}
@@ -142,7 +157,7 @@ export default function AdminUsersPage() {
               <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
               <p style={{ marginTop: 12, fontWeight: 600 }}>Loading user directory...</p>
             </div>
-          ) : users.length === 0 ? (
+          ) : filteredUsers.length === 0 ? (
             <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
               <iconify-icon icon="lucide:user-x" style={{ fontSize: 52, color: "#94a3b8", marginBottom: 12 }} />
               <h4 style={{ margin: "0 0 6px", fontSize: 18, color: "#001f3f", fontWeight: 800 }}>No Users Found</h4>
@@ -160,7 +175,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr key={u.id}>
                     <td>
                       <div className={styles.userCell}>
@@ -174,9 +189,9 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td>
-                      <strong style={{ color: "#001f3f", fontSize: 12.5 }}>{u.role}</strong>
+                      <strong style={{ color: "#001f3f", fontSize: 12.5 }}>{u.role || "CLIENT"}</strong>
                     </td>
-                    <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>{(u.created_at || "").slice(0, 10) || "Recent"}</td>
                     <td>
                       <span className={`${styles.status} ${u.is_active ? styles.statusActive : styles.statusSuspended}`}>
                         {u.is_active ? "✔ Active" : "⛔ Suspended"}
