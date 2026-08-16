@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
-import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import styles from "./admin-tasks.module.css";
 
 export default function AdminTasksPage() {
@@ -17,21 +16,14 @@ export default function AdminTasksPage() {
   const [releaseSuccess, setReleaseSuccess] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  if (loading) {
-    return (
-      <div className={styles.page}>
-        <SkeletonBlock style={{ height: 100, marginBottom: 30, borderRadius: 16 }} />
-        <SkeletonBlock style={{ height: 400, borderRadius: 16 }} />
-      </div>
-    );
-  }
-
   const stats = data?.stats || { active_projects: 0, awaiting_validation: 0, on_hold: 0, completed: 0 };
   const projects = data?.projects || [];
 
   const filteredProjects = projects.filter((p: any) => {
     if (activeTab === "all") return true;
-    return p.type === activeTab;
+    if (activeTab === "tech") return p.type === "tech" || !p.type;
+    if (activeTab === "company") return p.type === "company";
+    return true;
   });
 
   const openReleaseModal = (id: number) => {
@@ -51,7 +43,7 @@ export default function AdminTasksPage() {
     try {
       await api.releaseProjectMilestone(selectedTaskId);
       setReleaseSuccess(true);
-      refetch(); // Refresh data
+      refetch();
     } catch (err) {
       console.error(err);
       alert("Failed to release milestone.");
@@ -77,124 +69,235 @@ export default function AdminTasksPage() {
 
   return (
     <div className={styles.page}>
-      
-      {/* STATS */}
+      {/* ROYAL BLUE HERO BANNER */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTag}>
+            <iconify-icon icon="lucide:kanban" /> Real-Time Task & Milestone Tracking
+          </div>
+          <h1 className={styles.heroTitle}>Projects & Task Monitoring</h1>
+          <p className={styles.heroSubtitle}>
+            Audit ongoing job deliverables, validate milestone completion evidence, and manage escrow disbursements for clients and technicians.
+          </p>
+        </div>
+        <div className={styles.heroDecoIcon}>
+          <iconify-icon icon="lucide:activity" />
+        </div>
+      </div>
+
+      {/* 4 STATS OVERVIEW CARDS */}
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}><span>Active Projects</span><h3>{stats.active_projects}</h3></div>
-        <div className={styles.statCard}><span>Awaiting Validation</span><h3>{stats.awaiting_validation}</h3></div>
-        <div className={styles.statCard}><span>On Hold</span><h3>{stats.on_hold}</h3></div>
-        <div className={styles.statCard}><span>Completed</span><h3>{stats.completed}</h3></div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(14, 165, 233, 0.12)", color: "#0284c7" }}>
+            <iconify-icon icon="lucide:play-circle" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Active Projects</div>
+            <div className={styles.statValue}>{stats.active_projects}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(255, 69, 0, 0.12)", color: "#ff4500" }}>
+            <iconify-icon icon="lucide:clock" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Awaiting Validation</div>
+            <div className={styles.statValue}>{stats.awaiting_validation}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(234, 179, 8, 0.12)", color: "#ca8a04" }}>
+            <iconify-icon icon="lucide:pause-circle" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>On Hold</div>
+            <div className={styles.statValue}>{stats.on_hold}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(34, 197, 94, 0.12)", color: "#16a34a" }}>
+            <iconify-icon icon="lucide:check-circle-2" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Completed</div>
+            <div className={styles.statValue}>{stats.completed}</div>
+          </div>
+        </div>
       </div>
 
       {/* PROJECTS CARD */}
       <div className={styles.card}>
-        <h3>Projects Monitoring</h3>
+        <div className={styles.cardHeaderRow}>
+          <h3>
+            <iconify-icon icon="lucide:layout-grid" style={{ color: "#ff4500" }} /> Projects Monitoring Queue
+          </h3>
 
-        <div className={styles.tabs}>
-          <button className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => setActiveTab("all")}>All Projects</button>
-          <button className={`${styles.tab} ${activeTab === "tech" ? styles.tabActive : ""}`} onClick={() => setActiveTab("tech")}>Technician Projects</button>
-          <button className={`${styles.tab} ${activeTab === "company" ? styles.tabActive : ""}`} onClick={() => setActiveTab("company")}>Company Projects</button>
+          {/* Filter Pills */}
+          <div className={styles.filterPillGroup}>
+            {[
+              { key: "all", label: "All Projects" },
+              { key: "tech", label: "Technician Projects" },
+              { key: "company", label: "Company Projects" }
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActiveTab(f.key)}
+                className={`${styles.filterPill} ${activeTab === f.key ? styles.filterPillActive : ""}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div style={{ overflowX: "auto" }}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Project</th>
-                {activeTab !== 'tech' && activeTab !== 'company' && <th>Client</th>}
-                {activeTab !== 'company' && <th>Technician</th>}
-                {activeTab === 'company' && <th>Company</th>}
-                <th>Progress</th>
-                <th>Milestone</th>
-                {activeTab === 'all' && <th>Status</th>}
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.map((p: any) => (
-                <tr key={p.id}>
-                  <td>{p.project}</td>
-                  {activeTab !== 'tech' && activeTab !== 'company' && <td>{p.client}</td>}
-                  <td>{p.executor}</td>
-                  <td>
-                    <div className={styles.progressWrapper}>
-                      <div className={styles.progressFill} style={{ width: p.progress + "%" }}></div>
-                    </div>
-                  </td>
-                  <td>{p.milestone}</td>
-                  
-                  {activeTab === 'all' && (
+        <div className={styles.tableWrapper}>
+          {loading ? (
+            <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+              <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
+              <p style={{ marginTop: 12, fontWeight: 600 }}>Loading project monitoring data...</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+              <iconify-icon icon="lucide:folder-x" style={{ fontSize: 52, color: "#94a3b8", marginBottom: 12 }} />
+              <h4 style={{ margin: "0 0 6px", fontSize: 18, color: "#001f3f", fontWeight: 800 }}>No Projects Found</h4>
+              <p style={{ margin: 0, fontSize: 13.5 }}>There are no active projects matching this filter criteria.</p>
+            </div>
+          ) : (
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Client</th>
+                  <th>Technician</th>
+                  <th>Progress</th>
+                  <th>Milestone</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((p: any) => (
+                  <tr key={p.id}>
                     <td>
-                      <span className={`${styles.status} ${p.status === 'Released' ? styles.statusActive : p.status === 'On Hold' ? styles.statusHold : styles.statusPending}`}>
+                      <div>
+                        <strong style={{ color: "#001f3f", display: "block" }}>{p.title}</strong>
+                        <small style={{ color: "#64748b" }}>ID: #{p.id}</small>
+                      </div>
+                    </td>
+                    <td>{p.client}</td>
+                    <td>{p.tech}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div className={styles.progressWrapper}>
+                          <div className={styles.progressFill} style={{ width: `${p.progress}%` }}></div>
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#001f3f" }}>{p.progress}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 600, color: "#475569" }}>{p.milestone}</span>
+                    </td>
+                    <td>
+                      <span className={`${styles.status} ${p.status?.toLowerCase().includes("hold") ? styles.statusHold : p.status?.toLowerCase().includes("active") ? styles.statusActive : styles.statusPending}`}>
                         {p.status}
                       </span>
                     </td>
-                  )}
-
-                  <td>
-                    {p.status !== 'Released' ? (
-                      <>
-                        <button className={styles.btnPrimary} onClick={() => openReleaseModal(p.id)}>Confirm & Release</button>
-                        <button className={styles.btnWarning} onClick={() => openHoldModal(p.id)}>Hold</button>
-                      </>
-                    ) : (
-                      <span style={{ fontSize: 12, color: '#1e8e3e', fontWeight: 600 }}>✔ Released</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filteredProjects.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "20px", color: "#666" }}>No projects found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <button className={styles.btnPrimary} onClick={() => openReleaseModal(p.id)}>
+                          <iconify-icon icon="lucide:check" /> Release
+                        </button>
+                        <button className={styles.btnWarning} onClick={() => openHoldModal(p.id)}>
+                          <iconify-icon icon="lucide:pause" /> Hold
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
-      {/* HOLD MODAL */}
-      {holdModalOpen && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <button className={styles.closeBtn} onClick={() => setHoldModalOpen(false)}>×</button>
-            <h3>Payment On Hold</h3>
-            <div className={styles.alertBox}>
-              Are you sure you want to place the active milestone payment on hold?
-            </div>
-            <div style={{ marginTop: 20 }}>
-               <button className={styles.btnWarning} onClick={handleConfirmHold} disabled={actionLoading}>
-                 {actionLoading ? "Processing..." : "Confirm Hold"}
-               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* RELEASE MODAL */}
       {releaseModalOpen && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <button className={styles.closeBtn} onClick={() => setReleaseModalOpen(false)}>×</button>
-            <h3>Milestone Payment Release</h3>
-            <p>This action will release the milestone payment from the client's escrow account to the executor's wallet.</p>
-            
-            {!releaseSuccess && (
-              <button className={styles.btnPrimary} onClick={handleConfirmRelease} disabled={actionLoading}>
-                {actionLoading ? "Processing..." : "Release Payment"}
-              </button>
-            )}
-
-            {releaseSuccess && (
+        <div className={styles.modal} onClick={() => setReleaseModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.closeBtn} onClick={() => setReleaseModalOpen(false)}>
+              <iconify-icon icon="lucide:x" />
+            </button>
+            <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "#001f3f", fontWeight: 800 }}>Confirm Milestone Escrow Release</h3>
+            <p style={{ color: "#64748b", fontSize: 14 }}>
+              Are you sure you want to release the escrow funds for Project #{selectedTaskId}? This will immediately transfer payout to the technician wallet.
+            </p>
+            <div className={styles.alertBox}>
+              <strong>⚡ Instant Action:</strong> Escrow payout cannot be automatically undone once confirmed.
+            </div>
+            {releaseSuccess ? (
               <div className={styles.successBox}>
-                <iconify-icon icon="lucide:check-circle"></iconify-icon>
-                Milestone confirmed and payment released successfully
+                <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 20 }} />
+                <span>Milestone escrow released successfully!</span>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+                <button
+                  type="button"
+                  onClick={() => setReleaseModalOpen(false)}
+                  style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #cbd5e1", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  style={{ flex: 1.5, justifyContent: "center", padding: "12px 18px", fontSize: 13 }}
+                  onClick={handleConfirmRelease}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Processing..." : "Confirm & Release Escrow"}
+                </button>
               </div>
             )}
           </div>
         </div>
       )}
 
+      {/* HOLD MODAL */}
+      {holdModalOpen && (
+        <div className={styles.modal} onClick={() => setHoldModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.closeBtn} onClick={() => setHoldModalOpen(false)}>
+              <iconify-icon icon="lucide:x" />
+            </button>
+            <h3 style={{ margin: "0 0 8px", fontSize: 20, color: "#001f3f", fontWeight: 800 }}>Put Milestone on Hold</h3>
+            <p style={{ color: "#64748b", fontSize: 14 }}>
+              Placing Project #{selectedTaskId} on hold freezes milestone automatic releases and alerts both client and contractor.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+              <button
+                type="button"
+                onClick={() => setHoldModalOpen(false)}
+                style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #cbd5e1", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                style={{ flex: 1.5, justifyContent: "center", padding: "12px 18px", fontSize: 13, background: "#dc2626" }}
+                onClick={handleConfirmHold}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Processing..." : "Confirm Hold Status"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

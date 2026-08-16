@@ -248,12 +248,69 @@ export default function AdminContentPage() {
     }
   };
 
+  const totalCategories = categories.length;
+  const totalSubcategories = flatCategories.length - totalCategories;
+  const totalPages = pages.length;
+  const publishedPages = pages.filter((p) => p.is_published).length;
+
   return (
-    <div className={adminStyles.dashboardBody}>
-      <div className={adminStyles.pageHeader}>
-        <div className={adminStyles.headerContent}>
-          <h1>Content Management</h1>
-          <p>Manage categories and public pages. Changes show up on the frontend without hard-coded content.</p>
+    <div className={styles.page}>
+      {/* ROYAL BLUE HERO BANNER */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTag}>
+            <iconify-icon icon="lucide:layout" /> CMS & Marketplace Architecture
+          </div>
+          <h1 className={styles.heroTitle}>Content & Category Management</h1>
+          <p className={styles.heroSubtitle}>
+            Structure marketplace categories, configure technical specializations, and manage dynamic policy pages, terms, and help articles.
+          </p>
+        </div>
+        <div className={styles.heroDecoIcon}>
+          <iconify-icon icon="lucide:file-code" />
+        </div>
+      </div>
+
+      {/* 4 STATS OVERVIEW CARDS */}
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(0, 31, 63, 0.08)", color: "#001f3f" }}>
+            <iconify-icon icon="lucide:grid" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Main Categories</div>
+            <div className={styles.statValue}>{totalCategories}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(14, 165, 233, 0.12)", color: "#0284c7" }}>
+            <iconify-icon icon="lucide:git-branch" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Subcategories</div>
+            <div className={styles.statValue}>{Math.max(0, totalSubcategories)}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(34, 197, 94, 0.12)", color: "#16a34a" }}>
+            <iconify-icon icon="lucide:file-check" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Published Pages</div>
+            <div className={styles.statValue}>{publishedPages}</div>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(255, 69, 0, 0.12)", color: "#ff4500" }}>
+            <iconify-icon icon="lucide:files" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Total CMS Pages</div>
+            <div className={styles.statValue}>{totalPages}</div>
+          </div>
         </div>
       </div>
 

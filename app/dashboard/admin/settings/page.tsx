@@ -153,24 +153,35 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className={adminStyles.dashboardBody} style={{ padding: "0 24px 24px" }}>
-      <div className={styles.pageHeader}>
-        <h1>Platform Settings</h1>
-        <p>Manage your personal profile and global website settings.</p>
+    <div className={styles.page}>
+      {/* ROYAL BLUE HERO BANNER */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTag}>
+            <iconify-icon icon="lucide:settings" /> System & Security Preferences
+          </div>
+          <h1 className={styles.heroTitle}>Platform & Account Settings</h1>
+          <p className={styles.heroSubtitle}>
+            Configure marketplace commission rates, platform branding metadata, administrator credentials, and security settings.
+          </p>
+        </div>
+        <div className={styles.heroDecoIcon}>
+          <iconify-icon icon="lucide:shield-check" />
+        </div>
       </div>
 
-      <div className={styles.tabs}>
+      <div className={styles.filterPillGroup}>
         <button 
-          className={`${styles.tab} ${activeTab === "profile" ? styles.tabActive : ""}`}
+          className={`${styles.filterPill} ${activeTab === "profile" ? styles.filterPillActive : ""}`}
           onClick={() => setActiveTab("profile")}
         >
-          My Profile
+          My Profile & Security
         </button>
         <button 
-          className={`${styles.tab} ${activeTab === "platform" ? styles.tabActive : ""}`}
+          className={`${styles.filterPill} ${activeTab === "platform" ? styles.filterPillActive : ""}`}
           onClick={() => setActiveTab("platform")}
         >
-          Global Settings
+          Global Marketplace Settings
         </button>
       </div>
 

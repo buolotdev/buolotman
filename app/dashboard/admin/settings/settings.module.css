@@ -1,61 +1,137 @@
-﻿.page {
-  padding: 0 24px 24px;
-}
-
-.pageHeader {
-  margin-bottom: 24px;
-}
-
-.pageHeader h1 {
-  font-size: 1.5rem;
-  color: #001F3F;
-  margin-bottom: 4px;
-}
-
-.pageHeader p {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.tabs {
+.page {
   display: flex;
-  gap: 32px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 8px 0 32px;
+  animation: fadeIn 0.3s ease;
 }
 
-.tab {
-  padding: 12px 4px;
-  background: none;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= ROYAL BLUE HERO BANNER ================= */
+.heroBanner {
+  background: linear-gradient(135deg, #001f3f 0%, #0b3c6f 70%, #174b85 100%);
+  border-radius: 24px;
+  padding: 36px 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 31, 63, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  color: #ffffff;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+}
+
+.heroTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 69, 0, 0.2);
+  color: #ff6b33;
+  border: 1px solid rgba(255, 69, 0, 0.35);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+}
+
+.heroTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.heroDecoIcon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: #38bdf8;
+  flex-shrink: 0;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
+  animation: pulseGlow 4s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
+  100% { transform: scale(1.06); box-shadow: 0 0 45px rgba(56, 189, 248, 0.4); }
+}
+
+/* ================= SETTINGS TABS & CARDS ================= */
+.filterPillGroup {
+  display: flex;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 5px;
+  gap: 6px;
+  width: fit-content;
+}
+
+.filterPill {
   border: none;
-  border-bottom: 2px solid transparent;
-  color: #64748b;
-  font-size: 0.95rem;
-  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
   cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s ease;
 }
 
-.tab:hover {
-  color: #001F3F;
-}
-
-.tabActive {
-  color: #ea580c;
-  border-bottom-color: #ea580c;
+.filterPillActive {
+  background: #001f3f !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 31, 63, 0.15);
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  padding: 24px;
-  max-width: 600px;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 680px;
+  box-shadow: 0 4px 18px rgba(0, 31, 63, 0.03);
 }
 
 .card h3 {
-  font-size: 1.2rem;
-  color: #001F3F;
-  margin-bottom: 20px;
+  font-size: 19px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .formGroup {
@@ -64,42 +140,49 @@
 
 .formGroup label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #001f3f;
+  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
 .input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  color: #001F3F;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #001f3f;
+  background: #f8fafc;
+  outline: none;
   transition: all 0.2s;
 }
 
 .input:focus {
-  outline: none;
-  border-color: #ea580c;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  border-color: #ff4500;
+  background: #ffffff;
 }
 
 .submitBtn {
-  background: #ea580c;
-  color: white;
+  background: linear-gradient(135deg, #ff4500 0%, #ff6b33 100%);
+  color: #ffffff;
   border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 13.5px;
   cursor: pointer;
-  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
+  transition: all 0.2s ease;
 }
 
 .submitBtn:hover {
-  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 69, 0, 0.4);
 }
 
 .submitBtn:disabled {
@@ -111,22 +194,23 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   padding-bottom: 24px;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .avatarWrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   overflow: hidden;
   background: #f1f5f9;
-  border: 2px solid #e2e8f0;
+  border: 3px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .avatarImg {
@@ -137,19 +221,15 @@
 
 .avatarOverlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 40%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.2rem;
+  font-size: 24px;
   opacity: 0;
   transition: opacity 0.2s;
-  cursor: pointer;
 }
 
 .avatarWrapper:hover .avatarOverlay {
@@ -157,23 +237,20 @@
 }
 
 .avatarInfo h4 {
-  margin: 0 0 4px 0;
-  color: #001F3F;
-  font-size: 1.1rem;
+  margin: 0 0 4px;
+  color: #001f3f;
+  font-size: 16px;
+  font-weight: 800;
 }
 
 .avatarInfo p {
   margin: 0;
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: 13px;
 }
 
 .passwordSection {
-  margin-top: 40px;
-  padding-top: 32px;
+  margin-top: 36px;
+  padding-top: 28px;
   border-top: 1px solid #e2e8f0;
-}
-
-.passwordSection h3 {
-  margin-bottom: 20px;
 }
