@@ -26,6 +26,21 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.dashboardBody}>
+      {/* ROYAL BLUE HERO BANNER */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTag}>
+            <iconify-icon icon="lucide:layout-dashboard" /> Admin Command & Governance Center
+          </div>
+          <h1 className={styles.heroTitle}>Administrative Command Center</h1>
+          <p className={styles.heroSubtitle}>
+            Real-time marketplace oversight, active project monitoring, escrow governance, and critical platform alerts.
+          </p>
+        </div>
+        <div className={styles.heroDecoIcon}>
+          <iconify-icon icon="lucide:activity" />
+        </div>
+      </div>
       
       {/* METRICS */}
       <div className={styles.metrics}>
@@ -69,18 +84,24 @@ export default function AdminDashboard() {
 
       {/* ALERTS */}
       <div className={styles.alerts}>
-        {alerts.map((alert: any, i: number) => (
-          <div key={i} className={`${styles.alert} ${alert.type === 'danger' ? styles.alertDanger : styles.alertWarning}`}>
-            <div className={styles.alertIconBox}>
-              <iconify-icon icon={alert.type === 'danger' ? "lucide:alert-octagon" : "lucide:alert-triangle"} style={{ fontSize: "24px" }}></iconify-icon>
+        {alerts.map((alert: any, i: number) => {
+          const targetHref = alert.type === 'danger' ? '/dashboard/admin/disputes' : '/dashboard/admin/tasks';
+          return (
+            <div key={i} className={`${styles.alert} ${alert.type === 'danger' ? styles.alertDanger : styles.alertWarning}`}>
+              <div className={styles.alertIconBox}>
+                <iconify-icon icon={alert.type === 'danger' ? "lucide:alert-octagon" : "lucide:alert-triangle"} style={{ fontSize: "24px" }}></iconify-icon>
+              </div>
+              <div className={styles.alertContent}>
+                <h4>{alert.title}</h4>
+                <p>{alert.description}</p>
+              </div>
+              <a href={targetHref} className={styles.btnAction}>
+                <iconify-icon icon={alert.type === 'danger' ? "lucide:gavel" : "lucide:eye"} />
+                {alert.type === 'danger' ? 'Resolve Now' : 'Review'}
+              </a>
             </div>
-            <div className={styles.alertContent}>
-              <h4>{alert.title}</h4>
-              <p>{alert.description}</p>
-            </div>
-            <button className={styles.btnAction}>{alert.type === 'danger' ? 'Resolve Now' : 'Review'}</button>
-          </div>
-        ))}
+          );
+        })}
         {alerts.length === 0 && (
           <div className={styles.allClearBanner}>
             <div className={styles.allClearIcon}>
