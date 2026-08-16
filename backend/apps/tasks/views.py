@@ -260,8 +260,11 @@ def task_bids(request, task_id):
     elif request.method == 'POST':
         if not request.user.is_authenticated:
             return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-        if request.user.role != 'TECHNICIAN':
-            return Response({"error": "Only technicians can submit bids"}, status=status.HTTP_403_FORBIDDEN)
+        user_role = str(getattr(request.user, 'role', '')).upper()
+        if user_role not in ['TECHNICIAN', 'COMPANY']:
+            return Response({"error": "Only technicians and service providers can submit bids"}, status=status.HTTP_403_FORBIDDEN)
+        if request.user == task.client:
+            return Response({"error": "You cannot submit a bid on your own task"}, status=status.HTTP_400_BAD_REQUEST)
         if task.status != 'open' or task.bids.filter(status='accepted').exists():
             return Response({"error": "This task is no longer accepting bids"}, status=status.HTTP_400_BAD_REQUEST)
         if Bid.objects.filter(task=task, technician=request.user).exclude(status='withdrawn').exists():
