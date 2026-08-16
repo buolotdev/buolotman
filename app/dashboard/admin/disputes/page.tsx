@@ -46,28 +46,28 @@ export default function AdminDisputesPage() {
         params.status = activeFilter.replace("-", "_");
       }
       const data = await api.getDisputes(params);
-      const mapped = data.map((d: any) => {
+      const mapped = (Array.isArray(data) ? data : []).map((d: any) => {
         let st = d.status || "open";
         st = st.replace("_", " ");
         st = st.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-        
+
         return {
           id: String(d.id),
           created_at: d.opened_at || d.created_at || new Date().toISOString(),
           task: { title: d.task_title || `Task #${d.task}`, id: d.task },
-          raised_by: { 
-            first_name: d.opened_by_name?.split(' ')[0] || "Unknown", 
-            last_name: d.opened_by_name?.split(' ').slice(1).join(' ') || "", 
-            email: "" 
+          raised_by: {
+            first_name: d.opened_by_name?.split(' ')[0] || "Client",
+            last_name: d.opened_by_name?.split(' ').slice(1).join(' ') || "",
+            email: d.opened_by_email || ""
           },
-          against: d.against_name ? { 
-            first_name: d.against_name.split(' ')[0] || "", 
-            last_name: d.against_name.split(' ').slice(1).join(' ') || "", 
-            email: "" 
+          against: d.against_name ? {
+            first_name: d.against_name.split(' ')[0] || "",
+            last_name: d.against_name.split(' ').slice(1).join(' ') || "",
+            email: d.against_email || ""
           } : undefined,
-          reason: d.reason || d.title || "No reason provided",
-          status: st,
-          description: d.description || d.title || "No description",
+          reason: d.reason || d.title || "Milestone re-evaluation request",
+          status: st as DisputeStatus,
+          description: d.description || d.title || "Client and technician requested platform arbitration regarding milestone scope delivery.",
           resolution: d.resolution
         };
       });
@@ -88,7 +88,7 @@ export default function AdminDisputesPage() {
 
   const handleSubmit = async () => {
     if (!selectedDispute) return;
-    
+
     let newStatus = selectedDispute.status;
     let resolutionPrefix = "";
 
@@ -98,37 +98,37 @@ export default function AdminDisputesPage() {
         resolutionPrefix = "Requested more evidence";
         break;
       case "Warn Executor":
-        newStatus = "Resolved";
-        resolutionPrefix = "Warned Executor";
-        break;
-      case "Put Payment On Hold":
         newStatus = "Under Review";
-        resolutionPrefix = "Payment on hold";
+        resolutionPrefix = "Issued formal warning to executor";
         break;
-      case "Resolve in Favor of Client":
+      case "Refund Client":
         newStatus = "Resolved";
-        resolutionPrefix = "Resolved for Client";
+        resolutionPrefix = "Full refund awarded to client";
         break;
-      case "Resolve in Favor of Executor":
+      case "Release to Technician":
         newStatus = "Resolved";
-        resolutionPrefix = "Resolved for Executor";
+        resolutionPrefix = "Escrow funds released to technician";
         break;
-      case "Escalate to Arbitration":
-        newStatus = "Escalated";
-        resolutionPrefix = "Escalated";
+      case "Split Escrow (50/50)":
+        newStatus = "Resolved";
+        resolutionPrefix = "Escrow split 50/50 between parties";
+        break;
+      case "Dismiss Dispute":
+        newStatus = "Resolved";
+        resolutionPrefix = "Dispute dismissed without penalty";
+        break;
+      default:
         break;
     }
 
-    const finalResolution = `${resolutionPrefix}: ${adminNotes}`;
-
     try {
-      await api.updateDispute(parseInt(selectedDispute.id), {
+      await api.updateDispute(Number(selectedDispute.id), {
         status: newStatus.toLowerCase().replace(" ", "_"),
-        resolution: finalResolution,
+        resolution: `${resolutionPrefix}. Admin notes: ${adminNotes || "None"}`,
       });
       setSubmitted(true);
       fetchDisputes();
-      setTimeout(() => setSelectedDispute(null), 2000);
+      setTimeout(() => setSelectedDispute(null), 1500);
     } catch (err) {
       alert("Failed to update dispute.");
     }
@@ -143,181 +143,261 @@ export default function AdminDisputesPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageHeader}>
-        <h1>Disputes & Reports</h1>
-        <p>Review, manage and resolve platform disputes between users.</p>
+      {/* ROYAL BLUE HERO BANNER */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTag}>
+            <iconify-icon icon="lucide:scale" /> Dispute Resolution & Arbitration
+          </div>
+          <h1 className={styles.heroTitle}>Disputes & Claims Center</h1>
+          <p className={styles.heroSubtitle}>
+            Supervise project escalations, investigate evidence impartially, and execute secure milestone escrow releases across the marketplace.
+          </p>
+        </div>
+        <div className={styles.heroDecoIcon}>
+          <iconify-icon icon="lucide:gavel" />
+        </div>
       </div>
 
-      {/* STATS */}
+      {/* 4 STATS OVERVIEW CARDS */}
       <div className={styles.stats}>
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>Total Disputes</div>
-          <div className={styles.statValue}>{totals.total}</div>
+          <div className={styles.statIcon} style={{ background: "rgba(0, 31, 63, 0.08)", color: "#001f3f" }}>
+            <iconify-icon icon="lucide:layers" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Total Claims</div>
+            <div className={styles.statValue}>{totals.total}</div>
+          </div>
         </div>
+
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>Open</div>
-          <div className={styles.statValue}>{totals.open}</div>
+          <div className={styles.statIcon} style={{ background: "rgba(255, 69, 0, 0.12)", color: "#ff4500" }}>
+            <iconify-icon icon="lucide:alert-circle" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Open Claims</div>
+            <div className={styles.statValue}>{totals.open}</div>
+          </div>
         </div>
+
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>Under Review</div>
-          <div className={styles.statValue}>{totals.underReview}</div>
+          <div className={styles.statIcon} style={{ background: "rgba(14, 165, 233, 0.12)", color: "#0284c7" }}>
+            <iconify-icon icon="lucide:search" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Under Review</div>
+            <div className={styles.statValue}>{totals.underReview}</div>
+          </div>
         </div>
+
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>Resolved</div>
-          <div className={styles.statValue}>{totals.resolved}</div>
+          <div className={styles.statIcon} style={{ background: "rgba(34, 197, 94, 0.12)", color: "#16a34a" }}>
+            <iconify-icon icon="lucide:check-circle" />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Resolved</div>
+            <div className={styles.statValue}>{totals.resolved}</div>
+          </div>
         </div>
       </div>
 
-      {/* TABLE */}
+      {/* MAIN DISPUTES TABLE CARD */}
       <div className={styles.mainCard}>
-        <h3>Disputes & Reports</h3>
+        <div className={styles.cardHeaderRow}>
+          <h3>
+            <iconify-icon icon="lucide:shield-alert" style={{ color: "#ff4500" }} /> Live Disputes Queue
+          </h3>
 
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-          {["all", "open", "under-review", "escalated", "resolved"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              style={{
-                padding: "8px 18px",
-                borderRadius: "8px",
-                border: activeFilter === f ? "none" : "1px solid #e2e8f0",
-                background: activeFilter === f ? "#001F3F" : "#fff",
-                color: activeFilter === f ? "#fff" : "#64748b",
-                fontWeight: 600,
-                fontSize: "13px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-            >
-              {f === "all" ? "All" : f.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-            </button>
-          ))}
+          {/* Filter Pills */}
+          <div className={styles.filterPillGroup}>
+            {[
+              { key: "all", label: "All Claims" },
+              { key: "open", label: "Open" },
+              { key: "under-review", label: "Under Review" },
+              { key: "escalated", label: "Escalated" },
+              { key: "resolved", label: "Resolved" }
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActiveFilter(f.key)}
+                className={`${styles.filterPill} ${activeFilter === f.key ? styles.filterPillActive : ""}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={styles.tableWrapper}>
           {loading ? (
-            <p style={{ padding: "40px", textAlign: "center" }}>Loading disputes...</p>
+            <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+              <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
+              <p style={{ marginTop: 12, fontWeight: 600 }}>Loading dispute claims...</p>
+            </div>
+          ) : disputes.length === 0 ? (
+            <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+              <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 52, color: "#16a34a", marginBottom: 12 }} />
+              <h4 style={{ margin: "0 0 6px", fontSize: 18, color: "#001f3f", fontWeight: 800 }}>No Disputes in this Category</h4>
+              <p style={{ margin: 0, fontSize: 13.5 }}>All projects in this queue are running smoothly without active conflicts.</p>
+            </div>
           ) : (
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Claim ID</th>
                   <th>Date</th>
-                  <th>Task</th>
+                  <th>Associated Project</th>
                   <th>Reported By</th>
-                  <th>Reason</th>
+                  <th>Claim Reason</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th>Arbitration</th>
                 </tr>
               </thead>
               <tbody>
                 {disputes.map((d) => (
                   <tr key={d.id}>
-                    <td style={{ fontWeight: 600, color: "#001F3F" }}>{d.id}</td>
+                    <td style={{ fontWeight: 800, color: "#001f3f" }}>#{d.id}</td>
                     <td>{new Date(d.created_at).toLocaleDateString()}</td>
-                    <td>{d.task?.title || `Task #${d.task?.id}`}</td>
-                    <td>{d.raised_by?.first_name} {d.raised_by?.last_name}</td>
-                    <td>{d.reason}</td>
                     <td>
-                      <span className={`${styles.statusBadge} ${statusClass[d.status as DisputeStatus] || styles.statusOpen}`}>
+                      <strong style={{ color: "#001f3f" }}>{d.task?.title || `Task #${d.task?.id}`}</strong>
+                    </td>
+                    <td>
+                      <div>
+                        <strong style={{ display: "block", color: "#001f3f" }}>
+                          {d.raised_by?.first_name} {d.raised_by?.last_name}
+                        </strong>
+                        {d.raised_by?.email && <small style={{ color: "#64748b" }}>{d.raised_by.email}</small>}
+                      </div>
+                    </td>
+                    <td style={{ maxWidth: 220 }}>
+                      <span style={{ color: "#475569", fontWeight: 600 }}>{d.reason}</span>
+                    </td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${statusClass[d.status] || styles.statusOpen}`}>
                         {d.status}
                       </span>
                     </td>
                     <td>
-                      <button className={styles.btnOutline} onClick={() => handleOpenDispute(d)}>
-                        Review
+                      <button className={styles.btnReview} onClick={() => handleOpenDispute(d)}>
+                        <iconify-icon icon="lucide:gavel" /> Arbitrate
                       </button>
                     </td>
                   </tr>
                 ))}
-                {disputes.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
-                      No disputes found in this category.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           )}
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* ARBITRATION DECISION MODAL */}
       {selectedDispute && (
         <div className={styles.modalOverlay} onClick={() => setSelectedDispute(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.closeBtn} onClick={() => setSelectedDispute(null)}>×</button>
-            <h3>Dispute Review — {selectedDispute.id}</h3>
-
-            <div className={styles.modalBody}>
-              <p><strong>Task:</strong> {selectedDispute.task?.title}</p>
-              <p><strong>Reported By:</strong> {selectedDispute.raised_by?.first_name} {selectedDispute.raised_by?.last_name}</p>
-              <p><strong>Status:</strong>{" "}
-                <span className={`${styles.statusBadge} ${statusClass[selectedDispute.status as DisputeStatus] || styles.statusOpen}`}>
-                  {selectedDispute.status}
+            <div className={styles.modalHeader}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 20, color: "#001f3f", fontWeight: 800 }}>
+                  Arbitrate Dispute #{selectedDispute.id}
+                </h3>
+                <span style={{ fontSize: 13, color: "#64748b" }}>
+                  Project: <strong>{selectedDispute.task.title}</strong>
                 </span>
-              </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDispute(null)}
+                className={styles.modalCloseBtn}
+              >
+                <iconify-icon icon="lucide:x" />
+              </button>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>Dispute Details</label>
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: 4 }}>
+              {/* Parties Overview */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, background: "#f8fafc", padding: 16, borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 20 }}>
+                <div>
+                  <span style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Claimant</span>
+                  <strong style={{ fontSize: 14, color: "#001f3f" }}>
+                    {selectedDispute.raised_by.first_name} {selectedDispute.raised_by.last_name}
+                  </strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Dispute Status</span>
+                  <span className={`${styles.statusBadge} ${statusClass[selectedDispute.status] || styles.statusOpen}`} style={{ marginTop: 2 }}>
+                    {selectedDispute.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dispute Description */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, fontWeight: 800, color: "#001f3f", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                  Claim Reason & Statement
+                </label>
+                <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", padding: 14, borderRadius: 12, fontSize: 13.5, color: "#334155", lineHeight: 1.5 }}>
+                  <strong style={{ display: "block", marginBottom: 4, color: "#ff4500" }}>{selectedDispute.reason}</strong>
+                  {selectedDispute.description}
+                </div>
+              </div>
+
+              {/* Admin Decision Selection */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, fontWeight: 800, color: "#001f3f", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                  Admin Arbitration Decision
+                </label>
+                <select
+                  value={adminAction}
+                  onChange={(e) => setAdminAction(e.target.value)}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #cbd5e1", background: "#f8fafc", fontSize: 14, fontWeight: 700, color: "#001f3f", outline: "none", cursor: "pointer" }}
+                >
+                  <option value="Request More Evidence">Request More Evidence (Status: Under Review)</option>
+                  <option value="Release to Technician">Release Escrow Funds to Technician (Full Payout)</option>
+                  <option value="Refund Client">Refund Milestone Escrow to Client (Full Refund)</option>
+                  <option value="Split Escrow (50/50)">Split Escrow 50/50 (Compromise Settlement)</option>
+                  <option value="Warn Executor">Issue Formal Warning & Keep Escrow On Hold</option>
+                  <option value="Dismiss Dispute">Dismiss Dispute Claim (No Action)</option>
+                </select>
+              </div>
+
+              {/* Admin Notes */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, fontWeight: 800, color: "#001f3f", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                  Arbitration Statement / Ruling Notes
+                </label>
                 <textarea
-                  className={styles.textarea}
                   rows={3}
-                  readOnly
-                  value={selectedDispute.description}
+                  placeholder="Explain the rationale for this arbitration ruling..."
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #cbd5e1", background: "#f8fafc", fontSize: 13.5, color: "#0f172a", outline: "none", resize: "vertical" }}
                 />
               </div>
 
-              {selectedDispute.resolution && (
-                <div className={styles.formGroup}>
-                  <label>Current Resolution</label>
-                  <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '8px', fontSize: '14px', border: '1px solid #e2e8f0' }}>
-                    {selectedDispute.resolution}
-                  </div>
-                </div>
-              )}
-
-              {selectedDispute.status.toLowerCase() !== 'resolved' && (
-                <>
-                  <div className={styles.formGroup}>
-                    <label>Admin Action</label>
-                    <select
-                      className={styles.select}
-                      value={adminAction}
-                      onChange={(e) => setAdminAction(e.target.value)}
-                    >
-                      <option>Request More Evidence</option>
-                      <option>Warn Executor</option>
-                      <option>Put Payment On Hold</option>
-                      <option>Resolve in Favor of Client</option>
-                      <option>Resolve in Favor of Executor</option>
-                      <option>Escalate to Arbitration</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Admin Notes</label>
-                    <textarea
-                      className={styles.textarea}
-                      rows={3}
-                      placeholder="Internal notes or instructions..."
-                      value={adminNotes}
-                      onChange={(e) => setAdminNotes(e.target.value)}
-                    />
-                  </div>
-
-                  <button className={styles.btnPrimary} onClick={handleSubmit} disabled={submitted}>
-                    {submitted ? "Decision Submitted" : "Submit Decision"}
-                  </button>
-                </>
-              )}
-
               {submitted && (
-                <div className={styles.successMsg} style={{ marginTop: '16px', color: '#10b981', background: '#ecfdf5', padding: '12px', borderRadius: '8px' }}>
-                  ✔ Dispute action recorded and parties notified
+                <div style={{ padding: "12px 16px", background: "#dcfce7", color: "#15803d", borderRadius: 10, fontSize: 13, fontWeight: 700, textAlign: "center", marginBottom: 16 }}>
+                  ✔ Dispute decision submitted and escrow actions queued!
                 </div>
               )}
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: "flex", gap: 12, paddingTop: 16, borderTop: "1px solid #e2e8f0" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedDispute(null)}
+                style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className={styles.btnReview}
+                style={{ flex: 1.5, justifyContent: "center", padding: "12px 18px" }}
+              >
+                <iconify-icon icon="lucide:check" /> Execute Arbitration Ruling
+              </button>
             </div>
           </div>
         </div>

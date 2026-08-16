@@ -247,30 +247,24 @@
 .formGroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .formGroup label { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
-/* Identity & ID Card Upload Suite */
+/* Identity & ID Card Upload Suite (Compact for Right Column) */
 .idCardGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-@media (max-width: 600px) {
-  .idCardGrid {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .idUploadBox {
-  border: 2px dashed #cbd5e1;
-  border-radius: 16px;
-  padding: 20px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 14px 16px;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.25s ease;
   position: relative;
 }
@@ -278,7 +272,7 @@
 .idUploadBox:hover {
   border-color: #ff4500;
   background: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 31, 63, 0.05);
+  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.04);
 }
 
 .idUploadBoxFilled {
@@ -290,39 +284,40 @@
 }
 
 .idBoxIcon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: rgba(0, 31, 63, 0.08);
   color: #001f3f;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
 .idBoxTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #001f3f;
   margin: 0;
+  line-height: 1.2;
 }
 
 .idBoxSub {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #64748b;
-  margin: 0;
-  line-height: 1.4;
+  margin: 2px 0 0;
+  line-height: 1.3;
 }
 
 .idUploadBtn {
   background: #001f3f;
   color: #ffffff;
   border: none;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 12.5px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
