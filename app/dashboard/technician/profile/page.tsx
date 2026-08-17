@@ -377,9 +377,12 @@ export default function TechnicianProfilePage() {
                       ) : (
                         <>
                           <h1>{userName}</h1>
-                          <span className={styles.verifiedBadge}>
-                            <iconify-icon icon="lucide:badge-check" />
-                          </span>
+                          {Boolean(userData?.is_verified || userData?.technician_profile?.is_verified) && (
+                            <span className={styles.verifiedBadge} title="Verified by Boulot Man Admin">
+                              <iconify-icon icon="lucide:badge-check" />
+                              <span style={{ fontSize: '11px', fontWeight: 800, marginLeft: '3px' }}>Verified</span>
+                            </span>
+                          )}
                         </>
                       )}
                     </div>

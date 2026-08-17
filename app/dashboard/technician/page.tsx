@@ -65,7 +65,15 @@ export default function TechnicianDashboardPage() {
             <div className={styles.heroCard}>
               <div className={styles.heroCopy}>
                 <span className={styles.heroEyebrow}><iconify-icon icon="lucide:zap" /> Dashboard overview</span>
-                <h1>Welcome{userName ? `, ${userName}` : ""}!</h1>
+                <h1>
+                  Welcome{userName ? `, ${userName}` : ""}!
+                  {Boolean(user?.is_verified || user?.technician_profile?.is_verified) && (
+                    <span className={styles.heroVerifiedBadge} title="Verified Technician">
+                      <iconify-icon icon="lucide:badge-check" style={{ fontSize: '17px', color: '#16a34a' }} />
+                      <span>Verified</span>
+                    </span>
+                  )}
+                </h1>
                 <p>Find new tasks, manage your bids, track earnings, and grow your reputation.</p>
               </div>
               <div className={styles.heroActions}>
@@ -75,14 +83,52 @@ export default function TechnicianDashboardPage() {
             </div>
 
             <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: '24px' }}>
-              <h3 className={styles.sectionHeader} style={{ fontSize: '18px', marginBottom: '16px' }}>Account Status</h3>
-              <p className={styles.notice}>
-                Verification Status: <span className={`${styles.statusBadge} ${styles.statusPending}`}>Pending Verification</span><br/><br/>
-                Complete your profile and upload certificates to accept jobs.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                <h3 className={styles.sectionHeader} style={{ fontSize: '18px', margin: 0 }}>Account Status</h3>
+                {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? (
+                  <span className={styles.verifiedPill}>
+                    <iconify-icon icon="lucide:shield-check" style={{ fontSize: '16px' }} />
+                    Verified Account
+                  </span>
+                ) : (
+                  <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+                    <iconify-icon icon="lucide:clock" style={{ fontSize: '14px', marginRight: '4px' }} />
+                    Pending Verification
+                  </span>
+                )}
+              </div>
+
+              {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? (
+                <div className={styles.verifiedNotice}>
+                  <div className={styles.verifiedNoticeIcon}>
+                    <iconify-icon icon="lucide:check-circle-2" />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '15px', color: '#14532d', marginBottom: '4px' }}>
+                      Identity & Credentials Approved! 🎉
+                    </strong>
+                    <p style={{ margin: 0, fontSize: '13.5px', color: '#166534', lineHeight: 1.5 }}>
+                      Your profile and submitted documents have been officially vetted and approved by the Boulot Man team. You have full privileges to bid on tasks, accept direct hire offers, and receive secure payouts.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.notice}>
+                  <strong style={{ display: 'block', fontSize: '14.5px', color: '#92400e', marginBottom: '4px' }}>
+                    Profile & Identity Under Review
+                  </strong>
+                  <p style={{ margin: 0, fontSize: '13.5px', color: '#78350f', lineHeight: 1.5, marginBottom: '12px' }}>
+                    Complete your profile details and upload your National ID Card / Passport and trade certificates so our team can approve your account to start accepting jobs.
+                  </p>
+                  <Link href="/dashboard/technician/profile" className={styles.uploadCtaBtn}>
+                    <iconify-icon icon="lucide:upload" /> Upload ID & Certificates
+                  </Link>
+                </div>
+              )}
+
               <div className={styles.toggleRow}>
-                <span>Availability</span>
-                <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                <span>Availability for New Jobs</span>
+                <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#ff4500' }} />
               </div>
             </div>
 

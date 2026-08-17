@@ -226,9 +226,16 @@ export default function DashboardHeader({
               {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
             </div>
             <div className={styles.userDetails}>
-              <span className={styles.userName}>
-                {userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span className={styles.userName}>
+                  {userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}
+                </span>
+                {Boolean(user?.is_verified || user?.technician_profile?.is_verified) && (
+                  <span title="Verified Account" style={{ display: 'inline-flex', alignItems: 'center', color: '#16a34a', fontSize: '15px' }}>
+                    <iconify-icon icon="lucide:badge-check" />
+                  </span>
+                )}
+              </div>
               <span className={styles.userRole}>{userRole}</span>
             </div>
           </div>
@@ -238,7 +245,14 @@ export default function DashboardHeader({
               <div className={styles.profileSummary}>
                 <div className={styles.profileSummaryAvatar}>{userInitials}</div>
                 <div>
-                  <div className={styles.userName}>{userName}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div className={styles.userName}>{userName}</div>
+                    {Boolean(user?.is_verified || user?.technician_profile?.is_verified) && (
+                      <span title="Verified Account" style={{ display: 'inline-flex', alignItems: 'center', color: '#16a34a', fontSize: '16px' }}>
+                        <iconify-icon icon="lucide:badge-check" />
+                      </span>
+                    )}
+                  </div>
                   <span className={styles.userRole}>{userRole}</span>
                 </div>
               </div>
