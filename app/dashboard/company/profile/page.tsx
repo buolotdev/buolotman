@@ -9,7 +9,6 @@ import { api, getImageUrl } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
-import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 
 export default function CompanyProfilePage() {
   const toast = useToast();
@@ -20,6 +19,8 @@ export default function CompanyProfilePage() {
   const { data: profile, loading: profileLoading, refetch: refetchProfile } = useFetch(() => api.getCompanyProfile(), []);
   const { data: servicesData, refetch: refetchServices } = useFetch(() => api.getCompanyServices(), []);
   const { data: projectsData, refetch: refetchProjects } = useFetch(() => api.getCompanyProjects(), []);
+  const { data: rawDocuments, refetch: mutateDocuments } = useFetch(() => api.getTechnicianDocuments(), []);
+  const documents = useMemo(() => (Array.isArray(rawDocuments) ? rawDocuments : []), [rawDocuments]);
 
   // Form State
   const [form, setForm] = useState({
@@ -48,6 +49,7 @@ export default function CompanyProfilePage() {
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -194,6 +196,48 @@ export default function CompanyProfilePage() {
     }
   };
 
+  // Document Uploads (Linked to Database & Admin Panel)
+  const handleDocumentUpload = async (file: File, title: string, docType: string) => {
+    setUploadingSlot(title);
+    try {
+      // 1. Upload binary file
+      const res = await api.uploadTechnicianDocument(file);
+      const fileUrl = res.file_url || res.url;
+      if (!fileUrl) throw new Error("Upload did not return a valid file URL.");
+
+      // 2. Link document record to user profile so it shows in Admin Panel
+      await api.createTechnicianDocument({
+        title: title || file.name,
+        document_type: docType || "certificate",
+        file_url: fileUrl,
+      });
+
+      await mutateDocuments();
+      await refetchProfile();
+      toast.success("Document Uploaded", `${title} has been submitted for admin verification.`);
+    } catch (err: any) {
+      toast.error("Upload Failed", err?.message || "Failed to upload document.");
+    } finally {
+      setUploadingSlot(null);
+    }
+  };
+
+  const handleDeleteDoc = async (id: number, title: string) => {
+    const ok = await dialog.confirm({
+      title: "Delete Document?",
+      message: `Are you sure you want to remove "${title}"?`,
+      confirmText: "Delete",
+    });
+    if (!ok) return;
+    try {
+      await api.deleteTechnicianDocument(id);
+      await mutateDocuments();
+      toast.success("Document Removed", "Document deleted successfully.");
+    } catch (err: any) {
+      toast.error("Error", err?.message || "Could not delete document.");
+    }
+  };
+
   // Expertise Tags
   const addExpertise = () => {
     if (!expertiseInput.trim()) return;
@@ -279,7 +323,7 @@ export default function CompanyProfilePage() {
       await api.createCompanyProject({
         title: newProjectTitle.trim(),
         client_name: newProjectClient.trim() || "Corporate Client",
-        location: newProjectUrl.trim(), // store external link in location/meta
+        location: newProjectUrl.trim(),
         budget: newProjectBudget ? Number(newProjectBudget.replace(/[^0-9.]/g, "")) : null,
         timeline: newProjectTimeline.trim() || "Completed",
         status: "completed",
@@ -313,7 +357,7 @@ export default function CompanyProfilePage() {
         />
       )}
 
-      {/* ==================== 1. TOP HERO BANNER (MATCHES TECHNICIAN) ==================== */}
+      {/* ==================== 1. TOP HERO BANNER ==================== */}
       <section className={styles.heroCard}>
         <div
           className={styles.cover}
@@ -906,39 +950,36 @@ export default function CompanyProfilePage() {
         </div>
 
         <p style={{ margin: "0 0 16px", fontSize: 14, color: "#64748b", lineHeight: 1.5 }}>
-          Upload your Certificate of Incorporation, Tax Clearance, and official trade licenses to get the <strong>Verified Enterprise</strong> badge on Boulot Man.
+          Upload your Certificate of Incorporation, Tax Clearance, and official trade licenses. Once submitted, documents appear immediately in the <strong>Admin Verification Panel</strong> for rapid vetting and issuance of your <strong>Verified Enterprise</strong> badge.
         </p>
 
+        {/* Upload Slots */}
         <div className={styles.docGrid}>
           <div className={styles.docItem}>
             <div className={styles.docLeft}>
               <div className={styles.docIcon}><iconify-icon icon="lucide:file-text" /></div>
               <div>
                 <h5 className={styles.docTitle}>Business Registration / Certificate</h5>
-                <p className={styles.docSub}>{isVerified ? "Approved & Verified" : "Required for verified status"}</p>
+                <p className={styles.docSub}>{isVerified ? "Verified by Admin" : "Required for verified badge"}</p>
               </div>
             </div>
             <button
               type="button"
               className={styles.uploadDocBtn}
-              onClick={async () => {
+              disabled={uploadingSlot === "Business Registration / Certificate"}
+              onClick={() => {
                 const input = document.createElement("input");
                 input.type = "file";
                 input.accept = "image/*,application/pdf";
-                input.onchange = async (e: any) => {
+                input.onchange = (e: any) => {
                   const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    await api.uploadTechnicianDocument(file);
-                    toast.success("Uploaded", "Document submitted for admin review.");
-                  } catch (err: any) {
-                    toast.error("Upload failed", err?.message || "Please try again.");
-                  }
+                  if (file) handleDocumentUpload(file, "Business Registration / Certificate", "certificate");
                 };
                 input.click();
               }}
             >
-              <iconify-icon icon="lucide:upload" /> {isVerified ? "Re-upload" : "Upload File"}
+              <iconify-icon icon={uploadingSlot === "Business Registration / Certificate" ? "lucide:loader" : "lucide:upload"} className={uploadingSlot === "Business Registration / Certificate" ? styles.spinIcon : ""} />
+              {uploadingSlot === "Business Registration / Certificate" ? "Uploading..." : "Upload File"}
             </button>
           </div>
 
@@ -947,32 +988,111 @@ export default function CompanyProfilePage() {
               <div className={styles.docIcon}><iconify-icon icon="lucide:award" /></div>
               <div>
                 <h5 className={styles.docTitle}>Trade License & Insurance</h5>
-                <p className={styles.docSub}>{isVerified ? "Approved & Verified" : "Optional but recommended"}</p>
+                <p className={styles.docSub}>{isVerified ? "Verified by Admin" : "Trade Qualification / Insurance"}</p>
               </div>
             </div>
             <button
               type="button"
               className={styles.uploadDocBtn}
-              onClick={async () => {
+              disabled={uploadingSlot === "Trade License & Insurance"}
+              onClick={() => {
                 const input = document.createElement("input");
                 input.type = "file";
                 input.accept = "image/*,application/pdf";
-                input.onchange = async (e: any) => {
+                input.onchange = (e: any) => {
                   const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    await api.uploadTechnicianDocument(file);
-                    toast.success("Uploaded", "Trade license submitted for admin review.");
-                  } catch (err: any) {
-                    toast.error("Upload failed", err?.message || "Please try again.");
-                  }
+                  if (file) handleDocumentUpload(file, "Trade License & Insurance", "insurance");
                 };
                 input.click();
               }}
             >
-              <iconify-icon icon="lucide:upload" /> {isVerified ? "Re-upload" : "Upload File"}
+              <iconify-icon icon={uploadingSlot === "Trade License & Insurance" ? "lucide:loader" : "lucide:upload"} className={uploadingSlot === "Trade License & Insurance" ? styles.spinIcon : ""} />
+              {uploadingSlot === "Trade License & Insurance" ? "Uploading..." : "Upload File"}
             </button>
           </div>
+
+          <div className={styles.docItem}>
+            <div className={styles.docLeft}>
+              <div className={styles.docIcon}><iconify-icon icon="lucide:receipt" /></div>
+              <div>
+                <h5 className={styles.docTitle}>Tax Clearance Certificate</h5>
+                <p className={styles.docSub}>{isVerified ? "Verified by Admin" : "Official Tax Compliance Document"}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className={styles.uploadDocBtn}
+              disabled={uploadingSlot === "Tax Clearance Certificate"}
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*,application/pdf";
+                input.onchange = (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleDocumentUpload(file, "Tax Clearance Certificate", "certificate");
+                };
+                input.click();
+              }}
+            >
+              <iconify-icon icon={uploadingSlot === "Tax Clearance Certificate" ? "lucide:loader" : "lucide:upload"} className={uploadingSlot === "Tax Clearance Certificate" ? styles.spinIcon : ""} />
+              {uploadingSlot === "Tax Clearance Certificate" ? "Uploading..." : "Upload File"}
+            </button>
+          </div>
+        </div>
+
+        {/* Uploaded Documents List */}
+        <div className={styles.submittedDocsList}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <strong style={{ fontSize: 14, color: "#001f3f", display: "flex", alignItems: "center", gap: 6 }}>
+              <iconify-icon icon="lucide:paperclip" style={{ color: "#ff4500" }} /> Submitted Verification Documents ({documents.length})
+            </strong>
+          </div>
+
+          {documents.length === 0 ? (
+            <div style={{ padding: 18, background: "#f8fafc", borderRadius: 12, textAlign: "center", color: "#64748b", fontSize: 13, border: "1px dashed #cbd5e1" }}>
+              No documents uploaded yet. Use the slots above to upload your registration certificate and trade licenses.
+            </div>
+          ) : (
+            documents.map((doc: any) => (
+              <div key={doc.id} className={styles.submittedDocItem}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
+                  <div>
+                    <strong style={{ display: "block", fontSize: 14, color: "#001f3f" }}>{doc.title || "Legal Document"}</strong>
+                    <small style={{ color: "#64748b", fontSize: 12 }}>
+                      {doc.document_type === "certificate" ? "Business Certificate" : doc.document_type === "insurance" ? "Insurance / License" : "Identity Document"} • Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : ""}
+                    </small>
+                  </div>
+                </div>
+
+                <div className={styles.docActions}>
+                  <span className={`${styles.docStatusPill} ${doc.is_verified ? styles.statusApproved : styles.statusPending}`}>
+                    <iconify-icon icon={doc.is_verified ? "lucide:check-circle-2" : "lucide:clock"} />
+                    {doc.is_verified ? "Verified" : "Under Review"}
+                  </span>
+                  {doc.file_url && (
+                    <a
+                      href={getImageUrl(doc.file_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.docViewLink}
+                      title="View / Download Document"
+                    >
+                      <iconify-icon icon="lucide:eye" /> View
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.docDeleteBtn}
+                    title="Delete Document"
+                    onClick={() => handleDeleteDoc(doc.id, doc.title)}
+                  >
+                    <iconify-icon icon="lucide:trash-2" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
