@@ -42,6 +42,7 @@ export default function CompanyDashboard() {
   const totalReviews = ratingDist.total || 1; // avoid division by zero
 
   const companyName = companyProfile?.company_name || user?.company_name || "Company";
+  const isVerified = Boolean(user?.is_verified || companyProfile?.is_verified || user?.company_profile?.is_verified);
 
   return (
     <>
@@ -51,7 +52,15 @@ export default function CompanyDashboard() {
         <section className={styles.welcomeSection}>
           <div className={styles.welcomeContent}>
             <p className={styles.eyebrow}>Dashboard Overview</p>
-            <h2 className={styles.welcomeTitle}>Welcome, {companyName}! Ready to grow?</h2>
+            <h2 className={styles.welcomeTitle}>
+              Welcome, {companyName}! Ready to grow?
+              {isVerified && (
+                <span className={styles.heroVerifiedBadge} title="Verified Enterprise">
+                  <iconify-icon icon="lucide:badge-check" style={{ fontSize: '18px', color: '#16a34a' }} />
+                  <span>Verified</span>
+                </span>
+              )}
+            </h2>
             <p className={styles.welcomeSubtitle}>Track your active projects, review new quote requests, manage your services, and communicate with clients seamlessly.</p>
           </div>
           <div className={styles.welcomeActions}>
@@ -62,6 +71,52 @@ export default function CompanyDashboard() {
               Manage Services
             </Link>
           </div>
+        </section>
+
+        {/* ACCOUNT STATUS & VERIFICATION ALERT */}
+        <section className={styles.accountStatusSection}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#001f3f' }}>Company Account Status</h3>
+            {isVerified ? (
+              <span className={styles.verifiedPill}>
+                <iconify-icon icon="lucide:shield-check" style={{ fontSize: '16px' }} />
+                Verified Enterprise
+              </span>
+            ) : (
+              <span className={styles.statusPending}>
+                <iconify-icon icon="lucide:clock" style={{ fontSize: '14px', marginRight: '5px' }} />
+                Pending Verification
+              </span>
+            )}
+          </div>
+
+          {isVerified ? (
+            <div className={styles.verifiedNotice}>
+              <div className={styles.verifiedNoticeIcon}>
+                <iconify-icon icon="lucide:check-circle-2" />
+              </div>
+              <div>
+                <strong style={{ display: 'block', fontSize: '15px', color: '#14532d', marginBottom: '4px' }}>
+                  Business Credentials & Trade License Verified! 🎉
+                </strong>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#166534', lineHeight: 1.5 }}>
+                  Your company profile, registration documents, and business details have been approved by the Boulot Man admin team. Your company now has full priority listing and can accept corporate quotes and direct task contracts.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.notice}>
+              <strong style={{ display: 'block', fontSize: '14.5px', color: '#92400e', marginBottom: '4px' }}>
+                Company Account Under Review
+              </strong>
+              <p style={{ margin: 0, fontSize: '13.5px', color: '#78350f', lineHeight: 1.5, marginBottom: '12px' }}>
+                Complete your company profile and upload your official Business Registration / Trade License documents for admin vetting so clients can hire your company with confidence.
+              </p>
+              <Link href="/dashboard/company/profile" className={styles.uploadCtaBtn}>
+                <iconify-icon icon="lucide:file-check" /> Complete Profile & Upload License
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* STATS GRID (Matches Client Portal) */}

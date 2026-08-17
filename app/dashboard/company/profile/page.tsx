@@ -136,7 +136,15 @@ export default function CompanyProfileDashboard() {
       <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
         <div className={layoutStyles.welcomeContent}>
           <p className={layoutStyles.eyebrow}>Profile & Settings</p>
-          <h2 className={layoutStyles.welcomeTitle}>Profile Management</h2>
+          <h2 className={layoutStyles.welcomeTitle}>
+            Profile Management
+            {Boolean(profile?.is_verified || user?.is_verified) && (
+              <span className={layoutStyles.heroVerifiedBadge} title="Verified Enterprise">
+                <iconify-icon icon="lucide:badge-check" style={{ fontSize: '18px', color: '#16a34a' }} />
+                <span>Verified</span>
+              </span>
+            )}
+          </h2>
           <p className={layoutStyles.welcomeSubtitle}>
             Update your company information, location, expertise, and branding.
           </p>
@@ -310,9 +318,9 @@ export default function CompanyProfileDashboard() {
               <div className={styles.companyMeta}>
                 <div>
                   <h1 className={styles.companyName}>{form.company_name || "Company Name"}</h1>
-                  {profile?.is_verified && (
+                  {Boolean(profile?.is_verified || user?.is_verified) && (
                     <span className={styles.verifiedBadge}>
-                      <iconify-icon icon="lucide:check-circle-2"></iconify-icon> Verified Company
+                      <iconify-icon icon="lucide:check-circle-2"></iconify-icon> Verified Enterprise
                     </span>
                   )}
                 </div>
