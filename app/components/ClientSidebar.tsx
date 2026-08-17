@@ -7,6 +7,7 @@ import styles from "./ClientSidebar.module.css";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client" },
+  { key: "profile", label: "My Profile", icon: "lucide:user", href: "/dashboard/client/profile" },
   { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks" },
   { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects" },
   { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages" },

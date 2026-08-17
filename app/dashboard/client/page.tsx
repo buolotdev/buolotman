@@ -69,6 +69,7 @@ export default function ClientDashboardPage() {
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
+  const isVerified = Boolean(user?.is_verified);
 
   return (
     <main className={styles.page}>
@@ -87,7 +88,15 @@ export default function ClientDashboardPage() {
             <section className={styles.welcomeSection}>
               <div className={styles.welcomeContent}>
                 <p className={styles.eyebrow}>Dashboard overview</p>
-                <h2 className={styles.welcomeTitle}>Welcome{userName ? `, ${userName}` : ''}! Ready to get things done?</h2>
+                <h2 className={styles.welcomeTitle}>
+                  Welcome{userName ? `, ${userName}` : ''}! Ready to get things done?
+                  {isVerified && (
+                    <span className={styles.heroVerifiedBadge} title="Verified Client">
+                      <iconify-icon icon="lucide:badge-check" style={{ fontSize: '18px', color: '#16a34a' }} />
+                      <span>Verified</span>
+                    </span>
+                  )}
+                </h2>
                 <p className={styles.welcomeSubtitle}>Track active jobs, review quotes, manage saved professionals, and move faster on your next project.</p>
               </div>
               <div className={styles.welcomeActions}>
@@ -96,10 +105,51 @@ export default function ClientDashboardPage() {
               </div>
             </section>
 
-            <div className={styles.alert}>
-              <iconify-icon icon="lucide:alert-triangle" />
-              <span>Milestone 2 is awaiting your confirmation to release payment.</span>
-            </div>
+            {/* CLIENT ACCOUNT STATUS & VERIFICATION ALERT */}
+            <section className={styles.accountStatusSection}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#001f3f' }}>Client Account Status</h3>
+                {isVerified ? (
+                  <span className={styles.verifiedPill}>
+                    <iconify-icon icon="lucide:shield-check" style={{ fontSize: '16px' }} />
+                    Verified Client
+                  </span>
+                ) : (
+                  <span className={styles.statusPending}>
+                    <iconify-icon icon="lucide:clock" style={{ fontSize: '14px', marginRight: '5px' }} />
+                    Pending Verification
+                  </span>
+                )}
+              </div>
+
+              {isVerified ? (
+                <div className={styles.verifiedNotice}>
+                  <div className={styles.verifiedNoticeIcon}>
+                    <iconify-icon icon="lucide:check-circle-2" />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '15px', color: '#14532d', marginBottom: '4px' }}>
+                      Client Account & Identity Verified! 🎉
+                    </strong>
+                    <p style={{ margin: 0, fontSize: '13.5px', color: '#166534', lineHeight: 1.5 }}>
+                      Your client account and contact credentials have been verified. You have full priority access to post tasks, hire verified professionals directly, fund escrow safely, and receive 24/7 client protection.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.notice}>
+                  <strong style={{ display: 'block', fontSize: '14.5px', color: '#92400e', marginBottom: '4px' }}>
+                    Client Profile Verification Pending
+                  </strong>
+                  <p style={{ margin: 0, fontSize: '13.5px', color: '#78350f', lineHeight: 1.5, marginBottom: '12px' }}>
+                    Complete your client profile details and verify your contact information to ensure seamless task escrow approval, direct hiring of top-rated technicians, and maximum platform protection.
+                  </p>
+                  <Link href="/dashboard/client/profile" className={styles.uploadCtaBtn}>
+                    <iconify-icon icon="lucide:user-check" /> Complete Profile & Verification
+                  </Link>
+                </div>
+              )}
+            </section>
 
             <section className={styles.statsGrid}>
               <article className={styles.statCard}>

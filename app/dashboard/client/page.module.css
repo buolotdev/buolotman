@@ -282,3 +282,112 @@
 
 .sidebar::-webkit-scrollbar { display: none; }
 .sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ACCOUNT STATUS & VERIFIED BADGES */
+.accountStatusSection {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-shadow: 0 12px 30px rgba(0, 31, 63, 0.05);
+}
+
+.notice {
+  background: rgba(255, 244, 229, 0.7);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  padding: 18px 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #0f172a;
+  line-height: 1.6;
+}
+
+.verifiedNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.75), rgba(240, 253, 244, 0.95));
+  border: 1px solid rgba(22, 163, 74, 0.28);
+  padding: 18px 22px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.08);
+}
+
+.verifiedNoticeIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.verifiedPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.heroVerifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 12px;
+  padding: 4px 12px;
+  background: rgba(22, 163, 74, 0.15);
+  border: 1px solid rgba(22, 163, 74, 0.35);
+  border-radius: 999px;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.statusPending {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #fff4e5;
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.uploadCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 18px;
+  background: #ff4500;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
+}
+
+.uploadCtaBtn:hover {
+  background: #e03e00;
+  transform: translateY(-1px);
+}
