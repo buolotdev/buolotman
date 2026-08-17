@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ClientSidebar from "@/app/components/ClientSidebar";
-import ImageCropperModal from "@/app/components/ImageCropperModal";
 import { useToast } from "@/app/components/Toast";
 import styles from "./page.module.css";
 
@@ -52,12 +51,6 @@ export default function ClientSettingsPage() {
   const toast = useToast();
 
   const { data: me, loading, refetch } = useFetch<Me | null>(() => api.getMe(), []);
-
-  const [cropData, setCropData] = useState<{ src: string; type: 'avatar' | 'banner' } | null>(null);
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const [bannerUploading, setBannerUploading] = useState(false);
-  const avatarInputRef = React.useRef<HTMLInputElement>(null);
-  const bannerInputRef = React.useRef<HTMLInputElement>(null);
 
   // Settings State
   const [form, setForm] = useState<FormState>({
@@ -136,46 +129,6 @@ export default function ClientSettingsPage() {
     }
   };
 
-  const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setCropData({ src: reader.result as string, type });
-    };
-    reader.readAsDataURL(file);
-    if (type === 'avatar' && avatarInputRef.current) avatarInputRef.current.value = "";
-    if (type === 'banner' && bannerInputRef.current) bannerInputRef.current.value = "";
-  };
-
-  const handleCropComplete = async (croppedFile: File) => {
-    if (!cropData) return;
-    const type = cropData.type;
-    setCropData(null); 
-    if (type === 'avatar') {
-      setAvatarUploading(true);
-      try {
-        await api.uploadAvatar(croppedFile);
-        toast.success("Avatar updated", "Your profile photo has been updated.");
-        refetch();
-      } catch (err: any) {
-        toast.error("Upload failed", err?.message || "Please try again.");
-      } finally {
-        setAvatarUploading(false);
-      }
-    } else if (type === 'banner') {
-      setBannerUploading(true);
-      try {
-        await api.uploadBanner(croppedFile);
-        toast.success("Banner updated", "Your profile banner has been updated.");
-        refetch();
-      } catch (err: any) {
-        toast.error("Upload failed", err?.message || "Please try again.");
-      } finally {
-        setBannerUploading(false);
-      }
-    }
-  };
 
   const userName = `${me?.first_name || ""} ${me?.last_name || ""}`.trim() || me?.username || "Client";
   const initials = `${(me?.first_name || "")[0] || ""}${(me?.last_name || "")[0] || ""}`.toUpperCase() || "C";
@@ -190,14 +143,11 @@ export default function ClientSettingsPage() {
 
           <div className={styles.content}>
             <div className={styles.layout}>
-              {/* HERO SECTION */}
+              {/* HERO SECTION - Read Only (Edit photo from Profile page) */}
               <section className={styles.heroCard}>
                 <div 
                   className={styles.cover}
-                  onClick={() => bannerInputRef.current?.click()}
-                  title="Click to change banner"
                   style={{
-                    cursor: "pointer",
                     backgroundImage: me?.banner_url ? `url(${getImageUrl(me?.banner_url)})` : undefined,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -206,14 +156,7 @@ export default function ClientSettingsPage() {
                   <div style={{
                     position: "absolute", inset: 0,
                     background: me?.banner_url ? "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.35) 100%)" : "transparent",
-                    transition: "all 0.3s",
                   }} />
-                  <div className={styles.bannerOverlay}>
-                    <div className={styles.bannerUploadHint}>
-                      {bannerUploading ? <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> Uploading...</> : <><iconify-icon icon="lucide:camera" /> {me?.banner_url ? "Change Cover" : "Add Cover"}</>}
-                    </div>
-                  </div>
-                  <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={(e) => onFileSelect(e, 'banner')} />
                 </div>
 
                 <div className={styles.heroBody}>
@@ -221,16 +164,10 @@ export default function ClientSettingsPage() {
                     {loading ? (
                       <SkeletonBlock style={{ width: 128, height: 128, borderRadius: "50%" }} />
                     ) : (
-                      <div className={styles.avatarLarge} onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: "pointer" }}>
+                      <div className={styles.avatarLarge}>
                         {me?.avatar_url ? (
                           <Image src={getImageUrl(me?.avatar_url)} alt="Profile photo" fill unoptimized style={{ objectFit: "cover", borderRadius: "50%" }} />
                         ) : initials}
-                        <div style={{
-                          position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", opacity: avatarUploading ? 1 : 0, transition: "opacity 0.2s", color: "#fff",
-                        }}>
-                          {avatarUploading ? "..." : <iconify-icon icon="lucide:camera" style={{ fontSize: '24px' }} />}
-                        </div>
-                        <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={(e) => onFileSelect(e, 'avatar')} />
                       </div>
                     )}
                     <div className={styles.identityMeta}>
@@ -238,6 +175,9 @@ export default function ClientSettingsPage() {
                         {loading ? <SkeletonBlock style={{ width: 200, height: 28 }} /> : <h1>{userName}</h1>}
                       </div>
                       <p className={styles.lead}>{me?.email || me?.phone || "Client"}</p>
+                      <Link href="/dashboard/client/profile" style={{ fontSize: '13px', color: '#0284c7', fontWeight: 600, marginTop: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                        <iconify-icon icon="lucide:user" /> Edit Profile & Photo
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -368,15 +308,6 @@ export default function ClientSettingsPage() {
         </div>
       </div>
 
-      {cropData && (
-        <ImageCropperModal
-          imageSrc={cropData.src}
-          aspectRatio={cropData.type === 'avatar' ? 1 : 1200 / 300}
-          isCircular={cropData.type === 'avatar'}
-          onCropComplete={handleCropComplete}
-          onCancel={() => setCropData(null)}
-        />
-      )}
 
       {/* Payments Modal */}
       {paymentsModalOpen && (

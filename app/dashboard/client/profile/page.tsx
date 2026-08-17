@@ -56,8 +56,8 @@ export default function ClientProfilePage() {
       setCity(user.city || "Cotonou");
       setAddress(user.address || user.location || "");
       setAbout(user.about || user.bio || "");
-      if (user.avatar) setAvatarUrl(user.avatar);
-      if (user.cover_image || user.banner) setCoverUrl(user.cover_image || user.banner);
+      if (user.avatar_url || user.avatar) setAvatarUrl(user.avatar_url || user.avatar);
+      if (user.banner_url || user.cover_image || user.banner) setCoverUrl(user.banner_url || user.cover_image || user.banner);
     }
   }, [user, loading]);
 
@@ -249,7 +249,7 @@ export default function ClientProfilePage() {
                       </span>
                     ) : (
                       <span className={styles.pendingBadge}>
-                        <iconify-icon icon="lucide:clock" /> Verified Account
+                        <iconify-icon icon="lucide:clock" /> Verification Pending
                       </span>
                     )}
                   </div>
