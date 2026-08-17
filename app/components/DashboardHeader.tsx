@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { api, getImageUrl } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
@@ -32,14 +31,60 @@ export default function DashboardHeader({
 
   // Fetch User and Notifications data
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
-  const { data: notificationsData, refetch: refetchNotifs } = useFetch(() => api.getNotifications(), []);
+  const userRole = (user?.role || "").toUpperCase();
+  const isCompany = userRole === "COMPANY";
 
+  // If company, also fetch company profile to get company logo and company name
+  const { data: companyProfile } = useFetch(
+    () => (isCompany ? api.getCompanyProfile() : Promise.resolve(null)),
+    [isCompany]
+  );
+
+  const { data: notificationsData, refetch: refetchNotifs } = useFetch(() => api.getNotifications(), []);
   const notifications = Array.isArray(notificationsData) ? notificationsData : [];
   const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
-  const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
-  const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
-  const userRole = user?.role || "";
+  // Resolve Company / User Name
+  const companyName = companyProfile?.company_name || user?.company_name || "";
+  const userName = userLoading
+    ? ""
+    : isCompany
+    ? (companyName || `${user?.first_name || ""} ${user?.last_name || ""}`.trim() || user?.username || "Company")
+    : (`${user?.first_name || ""} ${user?.last_name || ""}`.trim() || user?.username || "User");
+
+  // Resolve Avatar / Company Logo URL
+  const avatarUrl = useMemo(() => {
+    return (
+      user?.avatar_url ||
+      user?.avatar ||
+      (user as any)?.company_profile?.logo_url ||
+      companyProfile?.logo_url ||
+      null
+    );
+  }, [user, companyProfile]);
+
+  // Resolve Initials Fallback
+  const userInitials = useMemo(() => {
+    if (isCompany) {
+      if (companyName) {
+        const parts = companyName.split(" ").filter(Boolean);
+        if (parts.length >= 2) {
+          return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        }
+        return companyName.substring(0, 2).toUpperCase();
+      }
+      return "CO";
+    }
+    const initials = `${(user?.first_name || "")[0] || ""}${(user?.last_name || "")[0] || ""}`.toUpperCase();
+    return initials || (userName ? userName.substring(0, 2).toUpperCase() : "U");
+  }, [isCompany, companyName, user, userName]);
+
+  const isVerified = Boolean(
+    user?.is_verified ||
+    user?.technician_profile?.is_verified ||
+    companyProfile?.is_verified ||
+    (user as any)?.company_profile?.is_verified
+  );
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -93,7 +138,7 @@ export default function DashboardHeader({
   const getProfileLink = () => {
     const role = userRole.toLowerCase();
     if (role === "admin") return "/dashboard/admin/settings";
-    if (role === "company") return user?.id ? `/profile/${user.id}` : "/dashboard/company/profile";
+    if (role === "company") return "/dashboard/company/profile";
     if (role === "technician") return user?.id ? `/profile/${user.id}` : "/dashboard/technician/profile";
     return "/dashboard/client/profile";
   };
@@ -137,21 +182,21 @@ export default function DashboardHeader({
               alignItems: "center",
               gap: 6,
               padding: "6px 14px",
-              background: user?.technician_profile?.is_verified ? "rgba(255, 69, 0, 0.12)" : "#f8fafc",
-              color: user?.technician_profile?.is_verified ? "#ff4500" : "#001f3f",
+              background: isVerified ? "rgba(255, 69, 0, 0.12)" : "#f8fafc",
+              color: isVerified ? "#ff4500" : "#001f3f",
               borderRadius: 999,
               fontSize: "0.78rem",
               fontWeight: 800,
               textDecoration: "none",
-              border: user?.technician_profile?.is_verified ? "1px solid rgba(255, 69, 0, 0.25)" : "1px solid #e2e8f0",
+              border: isVerified ? "1px solid rgba(255, 69, 0, 0.25)" : "1px solid #e2e8f0",
               transition: "all 0.2s ease",
             }}
           >
             <iconify-icon
-              icon={user?.technician_profile?.is_verified ? "lucide:sparkles" : "lucide:arrow-up-circle"}
+              icon={isVerified ? "lucide:sparkles" : "lucide:arrow-up-circle"}
               style={{ color: "#ff4500", fontSize: 15 }}
             />
-            <span>{user?.technician_profile?.is_verified ? "Pro Plan" : "Free Tier • Upgrade"}</span>
+            <span>{isVerified ? "Pro Plan" : "Free Tier • Upgrade"}</span>
           </Link>
         )}
 
@@ -225,14 +270,15 @@ export default function DashboardHeader({
           >
             <div className={styles.userAvatar}>
               {userLoading ? (
-                <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
-              ) : (user?.avatar_url || user?.avatar) ? (
-                <Image
-                  src={getImageUrl(user.avatar_url || user.avatar)}
+                <SkeletonBlock style={{ width: 38, height: 38, borderRadius: "50%" }} />
+              ) : avatarUrl ? (
+                <img
+                  src={getImageUrl(avatarUrl)}
                   alt={userName || "Profile photo"}
-                  fill
-                  unoptimized
-                  style={{ objectFit: "cover", borderRadius: "50%" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
                 />
               ) : (
                 userInitials
@@ -243,7 +289,7 @@ export default function DashboardHeader({
                 <span className={styles.userName}>
                   {userLoading ? <SkeletonBlock style={{ width: 80, height: 14 }} /> : userName}
                 </span>
-                {Boolean(user?.is_verified || user?.technician_profile?.is_verified) && (
+                {isVerified && (
                   <span title="Verified Account" style={{ display: 'inline-flex', alignItems: 'center', color: '#16a34a', fontSize: '15px' }}>
                     <iconify-icon icon="lucide:badge-check" />
                   </span>
@@ -257,13 +303,14 @@ export default function DashboardHeader({
             <div className={`${styles.dropdown} ${styles.profileDropdown}`}>
               <div className={styles.profileSummary}>
                 <div className={styles.profileSummaryAvatar}>
-                  {(user?.avatar_url || user?.avatar) ? (
-                    <Image
-                      src={getImageUrl(user.avatar_url || user.avatar)}
+                  {avatarUrl ? (
+                    <img
+                      src={getImageUrl(avatarUrl)}
                       alt={userName || "Profile photo"}
-                      fill
-                      unoptimized
-                      style={{ objectFit: "cover", borderRadius: "50%" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
                   ) : (
                     userInitials
@@ -272,7 +319,7 @@ export default function DashboardHeader({
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <div className={styles.userName}>{userName}</div>
-                    {Boolean(user?.is_verified || user?.technician_profile?.is_verified) && (
+                    {isVerified && (
                       <span title="Verified Account" style={{ display: 'inline-flex', alignItems: 'center', color: '#16a34a', fontSize: '16px' }}>
                         <iconify-icon icon="lucide:badge-check" />
                       </span>

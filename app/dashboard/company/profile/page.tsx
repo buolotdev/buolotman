@@ -169,7 +169,13 @@ export default function CompanyProfilePage() {
         if (newUrl) {
           setLogoUrl(newUrl);
           await api.updateCompanyProfile({ logo_url: newUrl });
+          try {
+            await api.updateMe({ avatar_url: newUrl });
+          } catch (e) {
+            console.warn("User avatar sync ignored:", e);
+          }
           await refetchProfile();
+          await refetchUser();
           toast.success("Logo Updated", "Company logo has been updated.");
         }
       } catch (err: any) {
