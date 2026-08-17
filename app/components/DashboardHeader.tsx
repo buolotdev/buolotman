@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { api } from "../lib/api";
+import { api, getImageUrl } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
 import { SkeletonBlock } from "./skeleton/Skeleton";
 import styles from "./DashboardHeader.module.css";
@@ -223,7 +224,19 @@ export default function DashboardHeader({
             }}
           >
             <div className={styles.userAvatar}>
-              {userLoading ? <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} /> : userInitials}
+              {userLoading ? (
+                <SkeletonBlock style={{ width: 36, height: 36, borderRadius: "50%" }} />
+              ) : (user?.avatar_url || user?.avatar) ? (
+                <Image
+                  src={getImageUrl(user.avatar_url || user.avatar)}
+                  alt={userName || "Profile photo"}
+                  fill
+                  unoptimized
+                  style={{ objectFit: "cover", borderRadius: "50%" }}
+                />
+              ) : (
+                userInitials
+              )}
             </div>
             <div className={styles.userDetails}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -243,7 +256,19 @@ export default function DashboardHeader({
           {profileOpen && (
             <div className={`${styles.dropdown} ${styles.profileDropdown}`}>
               <div className={styles.profileSummary}>
-                <div className={styles.profileSummaryAvatar}>{userInitials}</div>
+                <div className={styles.profileSummaryAvatar}>
+                  {(user?.avatar_url || user?.avatar) ? (
+                    <Image
+                      src={getImageUrl(user.avatar_url || user.avatar)}
+                      alt={userName || "Profile photo"}
+                      fill
+                      unoptimized
+                      style={{ objectFit: "cover", borderRadius: "50%" }}
+                    />
+                  ) : (
+                    userInitials
+                  )}
+                </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <div className={styles.userName}>{userName}</div>
