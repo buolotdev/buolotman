@@ -161,18 +161,26 @@ function Header() {
           if (user.first_name) initials = user.first_name.charAt(0).toUpperCase() + (user.last_name ? user.last_name.charAt(0).toUpperCase() : '');
           else if (user.company_name) initials = user.company_name.substring(0, 2).toUpperCase();
 
-          const avatarUrl = getImageUrl(user.avatar_url || user.logo_url);
-          const proxiedAvatarUrl = avatarUrl ? `/_next/image?url=${encodeURIComponent(avatarUrl)}&w=64&q=75` : "";
-          const avatarHtml = proxiedAvatarUrl 
-            ? `<img src="${proxiedAvatarUrl}" alt="User" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />` 
-            : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px;">${initials}</div>`;
+          const rawAvatar = user.avatar_url || user.avatar || user.logo_url;
+          const avatarUrl = rawAvatar ? getImageUrl(rawAvatar) : "";
+          const isVerified = Boolean(user.is_verified || user.technician_profile?.is_verified);
+
+          const avatarHtml = (avatarUrl && avatarUrl.trim() !== '')
+            ? `<div style="position:relative; width:36px; height:36px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#001F3F; display:flex; align-items:center; justify-content:center;">
+                 <img src="${avatarUrl}" alt="User" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                 <div style="display:none; width:100%; height:100%; color:#fff; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px; background:#001F3F;">${initials}</div>
+               </div>`
+            : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px; flex-shrink:0;">${initials}</div>`;
 
           const profileBtnHtml = `
-            <a href="${dashboardUrl}" style="display:flex; align-items:center; gap:10px; text-decoration:none; padding: 6px 12px; border-radius: 30px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;">
+            <a href="${dashboardUrl}" style="display:flex; align-items:center; gap:10px; text-decoration:none; padding: 5px 14px 5px 6px; border-radius: 30px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
               ${avatarHtml}
-              <div style="display:flex; flex-direction:column; line-height:1.2; padding-right:8px;">
-                <span style="color:#0f172a; font-weight:700; font-size:14px; white-space:nowrap;">${name}</span>
-                <span style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:600;">${role || 'User'}</span>
+              <div style="display:flex; flex-direction:column; line-height:1.2; padding-right:4px;">
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="color:#0f172a; font-weight:700; font-size:13.5px; white-space:nowrap;">${name}</span>
+                  ${isVerified ? `<iconify-icon icon="lucide:badge-check" style="font-size:15px; color:#16a34a;"></iconify-icon>` : ''}
+                </div>
+                <span style="color:#64748b; font-size:10.5px; text-transform:uppercase; font-weight:700; letter-spacing:0.04em;">${role || 'User'}</span>
               </div>
             </a>
           `;
