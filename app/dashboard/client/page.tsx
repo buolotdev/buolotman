@@ -52,6 +52,7 @@ export default function ClientDashboardPage() {
   const { data: tasksData, loading: tasksLoading, refetch: refetchTasks } = useFetch(() => api.getMyTasks(), []);
   const { data: savedPros, loading: savedLoading } = useFetch(() => api.getSavedPros(), []);
   const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
+  const { data: walletData } = useFetch(() => api.getWallet(), []);
 
   const tasks = toArray(tasksData);
   const savedList = toArray(savedPros);
@@ -63,9 +64,12 @@ export default function ClientDashboardPage() {
     [normalizedQuery, tasks]
   );
 
-  const activeTasks = tasks.filter((t: any) => t.status === "in_progress" || t.status === "open").length;
+  const activeTaskList = tasks.filter((t: any) => t.status === "in_progress" || t.status === "assigned" || t.status === "open");
+  const activeTasks = activeTaskList.length;
   const completedTasks = tasks.filter((t: any) => t.status === "completed").length;
   const unreadMessagesCount = convList.reduce((acc: number, conv: any) => acc + (conv.unread_count || 0), 0);
+  const escrowBalance = walletData?.escrow_balance ?? walletData?.balance ?? 0;
+  const fundsOnHold = walletData?.funds_on_hold ?? (activeTaskList.reduce((acc: number, t: any) => acc + (t.budget ? Number(t.budget) : 0), 0));
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
@@ -162,14 +166,14 @@ export default function ClientDashboardPage() {
               <article className={styles.statCard}>
                 <div className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:shield-check" /></div>
                 <div>
-                  <div className={styles.statValue}>32,000</div>
+                  <div className={styles.statValue}>{Number(escrowBalance).toLocaleString()}</div>
                   <p>Escrow Balance (XOF)</p>
                 </div>
               </article>
               <article className={styles.statCard}>
                 <div className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:clock" /></div>
                 <div>
-                  <div className={styles.statValue}>8,000</div>
+                  <div className={styles.statValue}>{Number(fundsOnHold).toLocaleString()}</div>
                   <p>Funds On Hold (XOF)</p>
                 </div>
               </article>
@@ -197,25 +201,38 @@ export default function ClientDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Residential Renovation</td>
-                        <td>Kigali Prime Constructors</td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div className={styles.clientProgress}>
-                              <span className={styles.clientProgressFill} style={{ width: '45%' }}></span>
-                            </div>
-                            <span style={{ fontSize: '12px', fontWeight: 600 }}>45%</span>
-                          </div>
-                        </td>
-                        <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusActive}`}>In Progress</span></td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className={styles.clientOutlineBtn} onClick={() => router.push('/dashboard/client/projects')}>View Workspace</button>
-                            <button className={styles.clientPrimaryBtn} onClick={() => { setShowConfirmModal(true); setMilestoneConfirmed(false); }}>Confirm Milestone</button>
-                          </div>
-                        </td>
-                      </tr>
+                      {activeTaskList.length > 0 ? (
+                        activeTaskList.map((t: any) => {
+                          const statusMeta = getStatusMeta(t.status);
+                          const progressPct = t.status === "completed" ? 100 : (t.status === "in_progress" ? 50 : 15);
+                          return (
+                            <tr key={t.id}>
+                              <td><strong>{t.title}</strong></td>
+                              <td>{t.assigned_to_name || t.assigned_to?.username || "Awaiting Assignment"}</td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <div className={styles.clientProgress}>
+                                    <span className={styles.clientProgressFill} style={{ width: `${progressPct}%` }}></span>
+                                  </div>
+                                  <span style={{ fontSize: '12px', fontWeight: 600 }}>{progressPct}%</span>
+                                </div>
+                              </td>
+                              <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusActive}`}>{statusMeta.label}</span></td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                  <Link href={`/dashboard/client/tasks/${t.id}`} className={styles.clientOutlineBtn}>View Details</Link>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: "center", padding: "32px 16px", color: "#64748b", fontSize: "14px" }}>
+                            No active projects yet. <Link href="/post-task" style={{ color: "#ff4500", fontWeight: 700, textDecoration: "none" }}>Post a Task</Link> to get started!
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -231,19 +248,27 @@ export default function ClientDashboardPage() {
                       <tr>
                         <th>Project</th>
                         <th>Next Milestone</th>
-                        <th>Percentage</th>
-                        <th>Amount</th>
+                        <th>Budget</th>
                         <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Residential Renovation</td>
-                        <td>Milestone 2</td>
-                        <td>20%</td>
-                        <td>$8,000</td>
-                        <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusPending}`}>Awaiting Confirmation</span></td>
-                      </tr>
+                      {activeTaskList.filter((t: any) => t.budget).length > 0 ? (
+                        activeTaskList.filter((t: any) => t.budget).map((t: any) => (
+                          <tr key={t.id}>
+                            <td><strong>{t.title}</strong></td>
+                            <td>Milestone 1</td>
+                            <td>{Number(t.budget).toLocaleString()} XOF</td>
+                            <td><span className={`${styles.clientStatusBadge} ${styles.clientStatusPending}`}>Secured in Escrow</span></td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: "center", padding: "32px 16px", color: "#64748b", fontSize: "14px" }}>
+                            No escrow milestones currently active.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -263,16 +288,23 @@ export default function ClientDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Admin</td>
-                        <td>Please confirm milestone progress.</td>
-                        <td>Today</td>
-                      </tr>
-                      <tr>
-                        <td>Kigali Prime Constructors</td>
-                        <td>Milestone 2 work completed.</td>
-                        <td>Yesterday</td>
-                      </tr>
+                      {convList.length > 0 ? (
+                        convList.slice(0, 5).map((conv: any) => (
+                          <tr key={conv.id} style={{ cursor: "pointer" }} onClick={() => router.push(`/dashboard/client/messages`)}>
+                            <td><strong>{conv.other_participant?.username || conv.other_participant?.first_name || "Support"}</strong></td>
+                            <td style={{ maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {conv.last_message?.text || "Conversation opened"}
+                            </td>
+                            <td>{conv.last_message?.created_at ? new Date(conv.last_message.created_at).toLocaleDateString() : "Recent"}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={3} style={{ textAlign: "center", padding: "32px 16px", color: "#64748b", fontSize: "14px" }}>
+                            No recent messages.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -21,63 +21,8 @@ const navItems = [
   { key: "explore", label: "Service Providers", icon: "lucide:users", href: "/service-providers/technicians", match: (p: string) => p.startsWith("/service-providers") },
 ];
 
-// INITIAL MOCK DATA - Same as Admin to prevent conflicts
-const INITIAL_TICKETS = [
-  {
-    id: "BM-2026-000451",
-    subject: "Payment not released",
-    client: "Me", // Changed to "Me" so client sees it
-    role: "Client",
-    status: "Pending",
-    statusClass: styles.statusPending,
-    messages: [
-      {
-        id: 1,
-        sender: "Me",
-        role: "Client",
-        avatar: "https://i.pravatar.cc/150?img=11",
-        time: "Today, 10:30 AM",
-        body: "My milestone payment is still on hold even though the technician finished the job."
-      }
-    ]
-  },
-  {
-    id: "BM-2026-000452",
-    subject: "Account verification issue",
-    client: "Mary Uwase",
-    role: "Technician",
-    status: "Awaiting response",
-    statusClass: styles.statusAwaiting,
-    messages: [
-      {
-        id: 1,
-        sender: "Mary Uwase",
-        role: "Technician",
-        avatar: "https://i.pravatar.cc/150?img=5",
-        time: "Yesterday, 2:15 PM",
-        body: "I uploaded my ID card but my account is still not verified. What else do I need to provide?"
-      }
-    ]
-  },
-  {
-    id: "BM-2026-000453",
-    subject: "Project dispute",
-    client: "Paul Nshimiyimana",
-    role: "Company",
-    status: "Escalated",
-    statusClass: styles.statusEscalated,
-    messages: [
-      {
-        id: 1,
-        sender: "Paul Nshimiyimana",
-        role: "Company",
-        avatar: "https://i.pravatar.cc/150?img=33",
-        time: "2 days ago",
-        body: "The client cancelled the project halfway but we already bought materials."
-      }
-    ]
-  }
-];
+// INITIAL TICKETS - Starts empty for real production users
+const INITIAL_TICKETS: any[] = [];
 
 export default function ClientSupportPage() {
   const router = useRouter();

@@ -28,6 +28,7 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
   const [notifications, setNotifications] = useState<{id: string; title: string; text: string}[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{name: string, type: string}[]>([]);
   
+  const { data: user } = useFetch(() => api.getMe(), []);
   const { data: task, loading: taskLoading } = useFetch(
     () => api.getTask(parseInt(id)), 
     [id]
@@ -38,21 +39,19 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
   const [confirmSuccess, setConfirmSuccess] = useState(false);
   
   const [chatDraft, setChatDraft] = useState("");
-  const [messages, setMessages] = useState<{id: number, sender: string, text: string}[]>([
-    { id: 1, sender: "Kigali Prime Constructors", text: "We have finished the planning phase." }
-  ]);
+  const [messages, setMessages] = useState<{id: number, sender: string, text: string}[]>([]);
 
-  const totalCost = task?.budget ? parseInt(task.budget) : 40000;
-  const released = confirmSuccess ? 20000 : 12000;
-  const milestone2Status = confirmSuccess ? "Released" : "Pending";
-  const milestone3Status: string = "On Hold";
-
+  const totalCost = task?.budget ? parseInt(task.budget) : 0;
+  const released = confirmSuccess ? totalCost : 0;
+  const milestone1Status = confirmSuccess ? "Released" : "Pending";
+  const clientName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "Client" : "Client";
+  const executorName = task?.assigned_to_name || task?.assigned_to?.username || "Awaiting Assignment";
+  const projectTitle = task?.title || `Task #${id}`;
 
   const handleConfirmRelease = () => {
     setConfirmSuccess(true);
     setTimeout(() => {
       setConfirmModalOpen(false);
-      setConfirmSuccess(false);
     }, 2000);
   };
 
@@ -100,19 +99,19 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
                   </div>
                 )}
               </div>
-              <span style={{ color: "#64748b", fontSize: 14, fontWeight: 600 }}>Residential Renovation</span>
+              <span style={{ color: "#64748b", fontSize: 14, fontWeight: 600 }}>{projectTitle}</span>
             </div>
           </header>
 
           <div className={styles.content}>
             <div className={styles.projectHeader}>
-              <h2>Residential Renovation – Kigali</h2>
+              <h2>{projectTitle} {task?.city ? `– ${task.city}` : ""}</h2>
               <div className={styles.meta}>
-                <div><strong>Client:</strong> John Mukasa</div>
-                <div><strong>Executor:</strong> Kigali Prime Constructors</div>
-                <div><strong>Total Cost:</strong> ${totalCost.toLocaleString()}</div>
-                <div><strong>Released:</strong> ${released.toLocaleString()}</div>
-                <div><strong>Balance:</strong> ${(totalCost - released).toLocaleString()}</div>
+                <div><strong>Client:</strong> {clientName}</div>
+                <div><strong>Executor:</strong> {executorName}</div>
+                <div><strong>Total Budget:</strong> {totalCost ? `${totalCost.toLocaleString()} XOF` : "Unspecified"}</div>
+                <div><strong>Released:</strong> {released ? `${released.toLocaleString()} XOF` : "0 XOF"}</div>
+                <div><strong>Balance:</strong> {(totalCost - released) ? `${(totalCost - released).toLocaleString()} XOF` : "0 XOF"}</div>
               </div>
             </div>
 
@@ -129,39 +128,29 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Planning</td>
-                    <td>30%</td>
-                    <td>$12,000</td>
-                    <td><span className={`${styles.status} ${styles.completed}`}>Released</span></td>
-                    <td>-</td>
-                  </tr>
-                  <tr>
-                    <td>Execution</td>
-                    <td>20%</td>
-                    <td>$8,000</td>
-                    <td>
-                      <span className={`${styles.status} ${milestone2Status === 'Released' ? styles.completed : styles.pending}`}>
-                        {milestone2Status}
-                      </span>
-                    </td>
-                    <td>
-                      {milestone2Status !== 'Released' ? (
-                        <button className={styles.primaryButton} onClick={() => setConfirmModalOpen(true)}>Confirm</button>
-                      ) : "-"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Completion</td>
-                    <td>50%</td>
-                    <td>$20,000</td>
-                    <td>
-                      <span className={`${styles.status} ${milestone3Status === 'Pending' ? styles.hold : styles.pending}`}>
-                        {milestone3Status}
-                      </span>
-                    </td>
-                    <td>-</td>
-                  </tr>
+                  {totalCost > 0 ? (
+                    <tr>
+                      <td>Project Delivery & Sign-off</td>
+                      <td>100%</td>
+                      <td>{totalCost.toLocaleString()} XOF</td>
+                      <td>
+                        <span className={`${styles.status} ${milestone1Status === 'Released' ? styles.completed : styles.pending}`}>
+                          {milestone1Status}
+                        </span>
+                      </td>
+                      <td>
+                        {milestone1Status !== 'Released' ? (
+                          <button className={styles.primaryButton} onClick={() => setConfirmModalOpen(true)}>Confirm & Release</button>
+                        ) : "-"}
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", color: "#64748b", padding: "24px" }}>
+                        No escrow milestones defined for this task.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -170,25 +159,22 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
               <h3>Activity Log</h3>
               <div className={styles.log}>
                 <iconify-icon icon="lucide:check-circle-2" className={styles.logIcon} style={{color: '#16a34a'}} />
-                Project created successfully
+                Task workspace initialized
               </div>
             </div>
 
             <div className={styles.card}>
               <h3>Project Files</h3>
               <div className={styles.files}>
-                <a href="#" className={styles.fileItem}>
-                  <iconify-icon icon="lucide:file-text" /> Floor_plan_v2.pdf
-                </a>
-                <a href="#" className={styles.fileItem}>
-                  <iconify-icon icon="lucide:image" /> Progress_Photo_01.jpg
-                </a>
                 {uploadedFiles.map((file, i) => (
                   <a key={i} href="#" className={styles.fileItem}>
                     <iconify-icon icon={file.type.startsWith('image') ? "lucide:image" : "lucide:file-text"} /> {file.name}
                   </a>
                 ))}
               </div>
+              {uploadedFiles.length === 0 && (
+                <p style={{ color: "#64748b", fontSize: "13.5px", margin: "8px 0 14px" }}>No project files uploaded yet. Upload task specifications, blueprints, or site photos below.</p>
+              )}
               <input 
                 type="file" 
                 className={styles.fileInput}
@@ -206,12 +192,16 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
             <div className={styles.card}>
               <h3>Project Messages</h3>
               <div className={styles.chat}>
-                {messages.map((m, i) => (
-                  <div key={m.id || i} className={styles.msg} style={{ alignSelf: m.sender === 'You' ? 'flex-end' : 'flex-start', background: m.sender === 'You' ? '#001f3f' : '#f1f5f9', color: m.sender === 'You' ? '#fff' : '#0f172a' }}>
-                    <strong style={{ color: m.sender === 'You' ? '#94a3b8' : '#ff4500' }}>{m.sender}:</strong>
-                    {m.text}
-                  </div>
-                ))}
+                {messages.length > 0 ? (
+                  messages.map((m, i) => (
+                    <div key={m.id || i} className={styles.msg} style={{ alignSelf: m.sender === 'You' ? 'flex-end' : 'flex-start', background: m.sender === 'You' ? '#001f3f' : '#f1f5f9', color: m.sender === 'You' ? '#fff' : '#0f172a' }}>
+                      <strong style={{ color: m.sender === 'You' ? '#94a3b8' : '#ff4500' }}>{m.sender}:</strong>
+                      {m.text}
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: "#64748b", fontSize: "13.5px", margin: "8px 0" }}>No workspace messages yet. Send a message to coordinate with the assigned professional.</p>
+                )}
               </div>
               <form className={styles.chatInputWrap} onSubmit={handleSendMessage}>
                 <input 
