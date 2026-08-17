@@ -154,16 +154,48 @@ function Header() {
           const { api, getImageUrl } = await import('@/app/lib/api');
           const user = await api.getMe();
           
-          let name = user.first_name ? `${user.first_name} ${user.last_name || ''}` : user.company_name || 'Dashboard';
-          if (!user.first_name && !user.company_name) name = user.email ? user.email.split('@')[0] : 'User';
+          let companyProfile: any = null;
+          if (role === "COMPANY" || user.role === "COMPANY") {
+            try {
+              companyProfile = await api.getCompanyProfile();
+            } catch (err) {
+              console.warn("Company profile fetch ignored in header:", err);
+            }
+          }
+
+          const isCompany = role === "COMPANY" || user.role === "COMPANY";
+          const companyName = companyProfile?.company_name || user.company_name || "";
+          
+          let name = isCompany
+            ? (companyName || `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || 'Company')
+            : (user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user.username || (user.email ? user.email.split('@')[0] : 'User')));
           
           let initials = 'U';
-          if (user.first_name) initials = user.first_name.charAt(0).toUpperCase() + (user.last_name ? user.last_name.charAt(0).toUpperCase() : '');
-          else if (user.company_name) initials = user.company_name.substring(0, 2).toUpperCase();
+          if (isCompany) {
+            if (companyName) {
+              const parts = companyName.split(" ").filter(Boolean);
+              initials = parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}`.toUpperCase() : companyName.substring(0, 2).toUpperCase();
+            } else {
+              initials = "CO";
+            }
+          } else if (user.first_name) {
+            initials = user.first_name.charAt(0).toUpperCase() + (user.last_name ? user.last_name.charAt(0).toUpperCase() : '');
+          }
 
-          const rawAvatar = user.avatar_url || user.avatar || user.logo_url;
+          const rawAvatar =
+            user.avatar_url ||
+            user.avatar ||
+            user.logo_url ||
+            user.company_profile?.logo_url ||
+            companyProfile?.logo_url ||
+            "";
           const avatarUrl = rawAvatar ? getImageUrl(rawAvatar) : "";
-          const isVerified = Boolean(user.is_verified || user.technician_profile?.is_verified);
+          const isVerified = Boolean(
+            user.is_verified ||
+            user.technician_profile?.is_verified ||
+            companyProfile?.is_verified ||
+            user.company_profile?.is_verified
+          );
 
           const avatarHtml = (avatarUrl && avatarUrl.trim() !== '')
             ? `<div style="position:relative; width:36px; height:36px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#001F3F; display:flex; align-items:center; justify-content:center;">
