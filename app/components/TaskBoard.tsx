@@ -158,12 +158,43 @@ export default function TaskBoard() {
 
   return (
     <div className={styles.taskBoardContainer}>
+      {/* ── STUNNING HERO BANNER ── */}
+      <section className={styles.heroBanner}>
+        <div className={styles.heroBadge}>
+          <span className={styles.pulseDot}></span>
+          <span>LIVE TASK MARKETPLACE</span>
+        </div>
+        <h1 className={styles.heroHeading}>
+          Find High-Paying Tasks &amp; Verified Projects
+        </h1>
+        <p className={styles.heroSubheading}>
+          Connect directly with verified clients across Africa. Submit competitive proposals, work with 100% escrow protection, and get paid instantly upon milestone completion.
+        </p>
+
+        <div className={styles.heroStatsRow}>
+          <div className={styles.heroStatItem}>
+            <iconify-icon icon="lucide:shield-check" className={styles.heroStatIcon} style={{ color: "#10b981" }} />
+            <span>100% Escrow Protected</span>
+          </div>
+          <div className={styles.heroStatDivider}></div>
+          <div className={styles.heroStatItem}>
+            <iconify-icon icon="lucide:zap" className={styles.heroStatIcon} style={{ color: "#f59e0b" }} />
+            <span>Instant Client Hiring</span>
+          </div>
+          <div className={styles.heroStatDivider}></div>
+          <div className={styles.heroStatItem}>
+            <iconify-icon icon="lucide:check-circle" className={styles.heroStatIcon} style={{ color: "#3b82f6" }} />
+            <span>Zero Commission On Escrow</span>
+          </div>
+        </div>
+      </section>
+
       {/* MODERN FILTER & SEARCH CARD */}
       <section className={styles.filterCard}>
         <div className={styles.searchRow}>
           {/* Keyword Search */}
           <div className={styles.inputGroup}>
-            <iconify-icon icon="lucide:search" className={styles.inputIcon} />
+            <iconify-icon icon="lucide:search" className={styles.inputIcon} style={{ color: "#ff4500" }} />
             <input
               type="text"
               className={styles.searchInput}
@@ -171,34 +202,41 @@ export default function TaskBoard() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button className={styles.clearSearchBtn} onClick={() => setSearchQuery("")}>
+                <iconify-icon icon="lucide:x" />
+              </button>
+            )}
           </div>
 
           {/* Location Dropdown */}
           <div className={styles.inputGroup}>
-            <iconify-icon icon="lucide:map-pin" className={styles.inputIcon} />
+            <iconify-icon icon="lucide:map-pin" className={styles.inputIcon} style={{ color: "#0284c7" }} />
             <select
               className={styles.filterSelect}
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
-              <option value="all">All Locations</option>
+              <option value="all">📍 All Locations</option>
               <option value="kigali">Kigali, Rwanda</option>
+              <option value="abidjan">Abidjan, Ivory Coast</option>
+              <option value="cotonou">Cotonou, Benin</option>
               <option value="rubavu">Rubavu</option>
               <option value="huye">Huye</option>
               <option value="musanze">Musanze</option>
-              <option value="remote">Remote Work</option>
+              <option value="remote">🌐 Remote Work</option>
             </select>
           </div>
 
           {/* Category Dropdown */}
           <div className={styles.inputGroup}>
-            <iconify-icon icon="lucide:layout-grid" className={styles.inputIcon} />
+            <iconify-icon icon="lucide:layout-grid" className={styles.inputIcon} style={{ color: "#8b5cf6" }} />
             <select
               className={styles.filterSelect}
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              <option value="all">All Categories</option>
+              <option value="all">🗂️ All Categories</option>
               {categories.map((c: any) => (
                 <option key={c.id || c.slug} value={c.slug || c.name}>
                   {c.name}
@@ -209,22 +247,23 @@ export default function TaskBoard() {
 
           {/* Urgency Selector */}
           <div className={styles.inputGroup}>
-            <iconify-icon icon="lucide:zap" className={styles.inputIcon} />
+            <iconify-icon icon="lucide:clock-4" className={styles.inputIcon} style={{ color: "#10b981" }} />
             <select
               className={styles.filterSelect}
               value={selectedUrgency}
               onChange={(e) => setSelectedUrgency(e.target.value)}
             >
-              <option value="all">Any Timeline</option>
-              <option value="urgent">⚡ Urgent</option>
-              <option value="flexible">Flexible</option>
-              <option value="scheduled">Scheduled</option>
+              <option value="all">⏱️ Any Timeline</option>
+              <option value="urgent">⚡ Urgent Priority</option>
+              <option value="flexible">🌱 Flexible Timeline</option>
+              <option value="scheduled">📅 Scheduled Project</option>
             </select>
           </div>
 
           {/* Action Button */}
           <button className={styles.searchSubmitBtn} onClick={() => refetch()}>
-            <iconify-icon icon="lucide:search" /> Find Tasks
+            <iconify-icon icon="lucide:search" />
+            <span>Find Tasks</span>
           </button>
         </div>
 
@@ -235,31 +274,31 @@ export default function TaskBoard() {
               className={`${styles.filterPill} ${activePill === "all" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("all")}
             >
-              All Tasks
+              <iconify-icon icon="lucide:layers" /> All Tasks
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "urgent" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("urgent")}
             >
-              ⚡ Urgent Only
+              <iconify-icon icon="lucide:zap" style={{ color: "#ef4444" }} /> Urgent Priority
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "kigali" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("kigali")}
             >
-              📍 Kigali
+              <iconify-icon icon="lucide:map-pin" style={{ color: "#0284c7" }} /> Kigali Only
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "remote" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("remote")}
             >
-              🌐 Remote
+              <iconify-icon icon="lucide:globe" style={{ color: "#10b981" }} /> Remote
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "high_budget" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("high_budget")}
             >
-              💰 High Budget (&gt;50k)
+              <iconify-icon icon="lucide:badge-dollar-sign" style={{ color: "#f59e0b" }} /> High Budget (&gt;50k)
             </button>
           </div>
 
@@ -273,27 +312,32 @@ export default function TaskBoard() {
 
       {/* TOOLBAR META */}
       <div className={styles.toolbarMeta}>
-        <p className={styles.resultCount}>
-          Showing <strong>{filteredTasks.length}</strong> available {filteredTasks.length === 1 ? "task" : "tasks"}
-        </p>
+        <div className={styles.resultCountWrap}>
+          <span className={styles.liveIndicator}></span>
+          <p className={styles.resultCount}>
+            Showing <strong>{filteredTasks.length}</strong> active {filteredTasks.length === 1 ? "task" : "tasks"}
+          </p>
+        </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: "12.5px", color: "#64748b", fontWeight: 600 }}>Sort by:</span>
-          <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="newest">Newest First</option>
-            <option value="budget_high">Budget: High to Low</option>
-            <option value="budget_low">Budget: Low to High</option>
-          </select>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: "12.5px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Sort by:</span>
+          <div className={styles.sortSelectWrapper}>
+            <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="newest">Newest First</option>
+              <option value="budget_high">Budget: High to Low</option>
+              <option value="budget_low">Budget: Low to High</option>
+            </select>
+            <iconify-icon icon="lucide:chevron-down" className={styles.sortCaret} />
+          </div>
         </div>
       </div>
 
       {/* TASK GRID / LIST */}
       {loading ? (
         <div className={styles.taskGrid}>
-          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
-          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
-          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
-          <SkeletonBlock style={{ height: "230px", borderRadius: "18px" }} />
+          <SkeletonBlock style={{ height: "240px", borderRadius: "16px" }} />
+          <SkeletonBlock style={{ height: "240px", borderRadius: "16px" }} />
+          <SkeletonBlock style={{ height: "240px", borderRadius: "16px" }} />
         </div>
       ) : error ? (
         <div className={styles.emptyCard}>
@@ -323,7 +367,7 @@ export default function TaskBoard() {
         <div className={styles.taskGrid}>
           {filteredTasks.map((task: any) => {
             const clientInitial = task.client_initials || (task.client_name ? task.client_name[0].toUpperCase() : "C");
-            const catName = task.category_name || task.category?.name || "General";
+            const catName = task.category_name || task.category?.name || "General Services";
             const budgetDisplay = task.budget_max
               ? `${Number(task.budget_min || 0).toLocaleString()} - ${Number(task.budget_max).toLocaleString()} XOF`
               : task.budget_min
@@ -336,25 +380,41 @@ export default function TaskBoard() {
                   {/* CARD HEADER */}
                   <div className={styles.cardHeader}>
                     <div className={styles.clientMeta}>
-                      <div className={styles.clientAvatar}>{clientInitial}</div>
+                      <div className={styles.clientAvatar}>
+                        {clientInitial}
+                        <span className={styles.avatarVerifiedBadge} title="Verified Client">
+                          <iconify-icon icon="lucide:check" />
+                        </span>
+                      </div>
                       <div className={styles.clientDetails}>
-                        <strong className={styles.clientName}>{task.client_name || "Verified Client"}</strong>
+                        <div className={styles.clientNameRow}>
+                          <strong className={styles.clientName}>{task.client_name || "Verified Client"}</strong>
+                          <iconify-icon icon="lucide:badge-check" style={{ color: "#10b981", fontSize: "14px" }} title="Identity Verified" />
+                        </div>
                         <span className={styles.clientLabel}>Posted by Client</span>
                       </div>
                     </div>
 
                     <div className={styles.badgesGroup}>
-                      <span className={styles.categoryBadge}>{catName}</span>
                       {task.urgency === "urgent" ? (
-                        <span className={`${styles.urgencyBadge} ${styles.urgencyUrgent}`}>⚡ Urgent</span>
+                        <span className={`${styles.urgencyBadge} ${styles.urgencyUrgent}`}>
+                          <iconify-icon icon="lucide:zap" /> Urgent
+                        </span>
                       ) : (
-                        <span className={`${styles.urgencyBadge} ${styles.urgencyFlexible}`}>Flexible</span>
+                        <span className={`${styles.urgencyBadge} ${styles.urgencyFlexible}`}>
+                          <iconify-icon icon="lucide:sparkles" /> Flexible
+                        </span>
                       )}
                     </div>
                   </div>
 
                   {/* CARD BODY */}
-                  <div className={styles.taskBody} style={{ marginTop: 14 }}>
+                  <div className={styles.taskBody}>
+                    <div className={styles.categoryChip}>
+                      <iconify-icon icon="lucide:tag" />
+                      <span>{catName}</span>
+                    </div>
+
                     <Link
                       href={`/dashboard/technician/tasks/${task.id}`}
                       style={{ textDecoration: "none" }}
@@ -362,18 +422,22 @@ export default function TaskBoard() {
                       <h3 className={styles.taskTitle}>{task.title}</h3>
                     </Link>
 
+                    {task.description && (
+                      <p className={styles.taskExcerpt}>{task.description}</p>
+                    )}
+
                     <div className={styles.metaRow}>
-                      <span className={styles.metaItem}>
-                        <iconify-icon icon="lucide:map-pin" />
-                        {task.city ? `${task.city}, ${task.location || ""}`.trim() : task.location || "Remote"}
+                      <span className={styles.metaItem} title="Location">
+                        <iconify-icon icon="lucide:map-pin" style={{ color: "#0284c7" }} />
+                        <span>{task.city ? `${task.city}, ${task.location || ""}`.trim() : task.location || "Remote Work"}</span>
                       </span>
-                      <span className={styles.metaItem}>
-                        <iconify-icon icon="lucide:clock" />
-                        {new Date(task.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      <span className={styles.metaItem} title="Posted date">
+                        <iconify-icon icon="lucide:calendar" style={{ color: "#64748b" }} />
+                        <span>{new Date(task.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                       </span>
-                      <span className={styles.metaItem}>
-                        <iconify-icon icon="lucide:users" />
-                        {task.bids_count || 0} proposals
+                      <span className={styles.metaItem} title="Active Proposals">
+                        <iconify-icon icon="lucide:users-round" style={{ color: "#8b5cf6" }} />
+                        <span>{task.bids_count || 0} proposals</span>
                       </span>
                     </div>
                   </div>
@@ -382,16 +446,23 @@ export default function TaskBoard() {
                 {/* CARD FOOTER */}
                 <div className={styles.cardFooter}>
                   <div className={styles.budgetBox}>
-                    <span className={styles.budgetAmount}>{budgetDisplay}</span>
-                    <span className={styles.budgetLabel}>{task.budget_mode === "hourly" ? "Hourly Budget" : "Estimated Budget"}</span>
+                    <span className={styles.budgetLabel}>
+                      {task.budget_mode === "hourly" ? "Hourly Rate" : "Estimated Budget"}
+                    </span>
+                    <span className={styles.budgetAmount}>
+                      <iconify-icon icon="lucide:coins" style={{ color: "#f59e0b", fontSize: "16px" }} />
+                      {budgetDisplay}
+                    </span>
                   </div>
 
                   <div className={styles.cardActions}>
                     <Link href={`/dashboard/technician/tasks/${task.id}`} className={styles.detailsBtn}>
-                      Details
+                      <span>Details</span>
+                      <iconify-icon icon="lucide:arrow-up-right" />
                     </Link>
                     <button className={styles.applyBtn} onClick={() => handleApply(task)}>
-                      Apply Now
+                      <iconify-icon icon="lucide:send" />
+                      <span>Apply Now</span>
                     </button>
                   </div>
                 </div>
