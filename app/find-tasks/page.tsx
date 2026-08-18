@@ -4,9 +4,9 @@ import TaskBoard from "@/app/components/TaskBoard";
 
 export default function FindTasksPage() {
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
+    <div style={{ background: "#f4f6fa", minHeight: "100vh" }}>
       <Header />
-      <div style={{ padding: "60px", maxWidth: "1400px", margin: "0 auto" }}>
+      <div style={{ padding: "28px 40px 56px", maxWidth: "1360px", margin: "0 auto" }}>
         <TaskBoard />
       </div>
       <Footer />
