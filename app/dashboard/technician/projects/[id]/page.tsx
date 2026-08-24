@@ -39,6 +39,9 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
   const statusDisplay = isCompleted ? "Completed" : (task?.status === "in_progress" ? "In Progress" : (task?.status ? task.status.replace("_", " ") : "In Progress"));
   const progressPercent = isCompleted ? 100 : (task?.status === "in_progress" ? 50 : 25);
 
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [submittingDeliverable, setSubmittingDeliverable] = useState(false);
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case "On Hold":
@@ -51,14 +54,51 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
     }
   };
 
-  const handleMilestoneSubmit = (e: React.FormEvent) => {
+  const handleMilestoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      setIsModalOpen(false);
-      setSubmissionNotes("");
-    }, 2500);
+    setSubmittingDeliverable(true);
+    try {
+      let fileUrl = "";
+      let fileName = "";
+      let fileSize = 0;
+
+      if (evidenceFile) {
+        try {
+          const uploadRes = await api.uploadServiceMedia(evidenceFile);
+          fileUrl = uploadRes.file_url || "";
+          fileName = evidenceFile.name;
+          fileSize = evidenceFile.size;
+        } catch (err) {
+          console.error("File upload error", err);
+        }
+      }
+
+      await api.submitDeliverable(taskId, {
+        notes: submissionNotes,
+        completion_percentage: parseInt(completionPercentage) || 100,
+        file_url: fileUrl,
+        file_name: fileName,
+        file_size: fileSize,
+      });
+
+      setShowSuccess(true);
+      refetchTask();
+      setTimeout(() => {
+        setShowSuccess(false);
+        setIsModalOpen(false);
+        setSubmissionNotes("");
+        setEvidenceFile(null);
+      }, 2500);
+    } catch (err) {
+      console.error("Submit deliverable failed", err);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setIsModalOpen(false);
+      }, 2000);
+    } finally {
+      setSubmittingDeliverable(false);
+    }
   };
 
   return (
@@ -268,10 +308,17 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
               
               <div className={styles.formGroup}>
                 <label>Upload Evidence / Photos</label>
-                <input type="file" className={styles.formInput} style={{ padding: "8px" }} />
+                <input
+                  type="file"
+                  className={styles.formInput}
+                  style={{ padding: "8px" }}
+                  onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                />
               </div>
               
-              <button type="submit" className={styles.primaryButton}>Submit</button>
+              <button type="submit" className={styles.primaryButton} disabled={submittingDeliverable}>
+                {submittingDeliverable ? "Submitting..." : "Submit"}
+              </button>
               
               {showSuccess && (
                 <div className={styles.successMessage}>

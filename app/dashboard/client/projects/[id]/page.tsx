@@ -215,6 +215,29 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               </div>
             )}
 
+            {/* ESCROW & INSPECTION CALL TO ACTION */}
+            {!isCompleted && hasEscrow && (
+              <div className={styles.inspectionActionCard}>
+                <div className={styles.inspectionIconWrap}>
+                  <iconify-icon icon="lucide:shield-alert" />
+                </div>
+                <div className={styles.inspectionTextWrap}>
+                  <strong>Deliverable Inspection & Escrow Release</strong>
+                  <p>
+                    Your specialist is working on this task. Review deliverables and discussion below. Once you are satisfied with the completed work, click <strong>Confirm & Release Escrow</strong> to pay {totalCost.toLocaleString()} XOF to {executorName}.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.inspectionReleaseBtn}
+                  onClick={() => setConfirmModalOpen(true)}
+                >
+                  <iconify-icon icon="lucide:shield-check" />
+                  <span>Confirm & Release Escrow</span>
+                </button>
+              </div>
+            )}
+
             {/* 4-GRID STATISTICS ROW */}
             <section className={styles.statsGrid}>
               <div className={styles.statCard}>

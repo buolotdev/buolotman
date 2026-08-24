@@ -445,6 +445,55 @@ def task_publish(request, task_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def task_submit_deliverable(request, task_id):
+    try:
+        task = Task.objects.select_related('client', 'assigned_to').get(id=task_id)
+    except Task.DoesNotExist:
+        return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    notes = request.data.get('notes', '')
+    completion_percentage = request.data.get('completion_percentage', 100)
+    file_url = request.data.get('file_url')
+    file_name = request.data.get('file_name', 'deliverable_proof.jpg')
+
+    if file_url:
+        TaskAttachment.objects.create(
+            task=task,
+            file_url=file_url,
+            file_name=file_name,
+            file_type='image' if any(file_name.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.webp']) else 'file',
+            file_size=request.data.get('file_size', 0),
+            uploaded_by=request.user,
+        )
+
+    # Notify client immediately
+    create_notification(
+        user=task.client,
+        category="task",
+        title=f"Work Submitted for Inspection: {task.title}",
+        body=f"The specialist has submitted completed deliverables for review ({completion_percentage}%). Please inspect the work and confirm milestone escrow release.",
+        link=f"/dashboard/client/projects/{task.id}",
+        metadata={"task_id": task.id, "action": "inspection_required", "notes": notes},
+    )
+
+    create_audit_log(
+        actor=request.user,
+        action="deliverable_submitted",
+        entity_type="task",
+        entity_id=task.id,
+        summary=f"Deliverable submitted for {task.title}",
+        metadata={"task_id": task.id, "percentage": completion_percentage, "notes": notes},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+
+    return Response({
+        "message": "Deliverable submitted successfully. Client notified for inspection.",
+        "task_id": task.id,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def task_complete(request, task_id):
     try:
         task = Task.objects.get(id=task_id)

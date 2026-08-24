@@ -251,6 +251,8 @@ export const api = {
     request<any>(`/tasks/${taskId}/complete/`, { method: "POST" }),
   cancelTask: (taskId: number) =>
     request<any>(`/tasks/${taskId}/cancel/`, { method: "POST" }),
+  submitDeliverable: (taskId: number, data: Record<string, any>) =>
+    request<any>(`/tasks/${taskId}/submit-deliverable/`, { method: "POST", body: JSON.stringify(data) }),
 
   // Questions
   getTaskQuestions: (taskId: number) => request<any>(`/tasks/${taskId}/questions/`),

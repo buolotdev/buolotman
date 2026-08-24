@@ -30,6 +30,16 @@ export default function TaskBoard() {
     }
   }, []);
 
+  const { data: myBidsData, refetch: refetchMyBids } = useFetch(
+    () => (isAuth ? api.getMyBids() : Promise.resolve([])),
+    [isAuth]
+  );
+  const appliedTaskIds = useMemo(() => {
+    if (!myBidsData) return new Set<number>();
+    const list = Array.isArray(myBidsData) ? myBidsData : ((myBidsData as any)?.results || []);
+    return new Set<number>(list.map((b: any) => Number(b.task_id || b.task?.id || b.task)));
+  }, [myBidsData]);
+
   // Modal State
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -64,6 +74,7 @@ export default function TaskBoard() {
         message: message,
       });
       setShowSuccess(true);
+      refetchMyBids();
       setTimeout(() => {
         closeModal();
       }, 2000);
@@ -460,10 +471,22 @@ export default function TaskBoard() {
                       <span>Details</span>
                       <iconify-icon icon="lucide:arrow-up-right" />
                     </Link>
-                    <button className={styles.applyBtn} onClick={() => handleApply(task)}>
-                      <iconify-icon icon="lucide:send" />
-                      <span>Apply Now</span>
-                    </button>
+                    {appliedTaskIds.has(Number(task.id)) ? (
+                      <Link href={`/dashboard/technician/bids`} className={styles.appliedBtn}>
+                        <iconify-icon icon="lucide:check-circle-2" />
+                        <span>Bid Placed</span>
+                      </Link>
+                    ) : task.status && task.status !== "open" ? (
+                      <span className={styles.inProgressPill}>
+                        <iconify-icon icon="lucide:lock" />
+                        <span style={{ textTransform: "capitalize" }}>{task.status.replace("_", " ")}</span>
+                      </span>
+                    ) : (
+                      <button className={styles.applyBtn} onClick={() => handleApply(task)}>
+                        <iconify-icon icon="lucide:send" />
+                        <span>Apply Now</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
