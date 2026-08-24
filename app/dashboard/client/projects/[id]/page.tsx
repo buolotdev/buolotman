@@ -150,60 +150,60 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
           />
 
           <div className={styles.content}>
-            {/* STANDARD CLIENT DASHBOARD HERO */}
-            <section className={styles.hero}>
-              <div className={styles.heroLeft}>
-                <p className={styles.eyebrow}>
+            {/* SIGNATURE ROYAL NAVY BLUE BANNER */}
+            <section className={styles.heroCard}>
+              <div className={styles.heroCopy}>
+                <div className={styles.heroEyebrow}>
                   <iconify-icon icon="lucide:briefcase" />
-                  PROJECT WORKSPACE & ESCROW
-                </p>
-                <h2>{projectTitle}</h2>
+                  <span>Project Workspace & Escrow</span>
+                </div>
+                <h1>{projectTitle}</h1>
                 <p className={styles.heroDescription}>
                   {task?.description || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
                 </p>
 
                 {/* META PILLS ROW */}
-                <div className={styles.metaRow}>
-                  <div className={styles.metaItem}>
-                    <iconify-icon icon="lucide:user" style={{ color: "#ff4500" }} />
+                <div className={styles.heroMetaRow}>
+                  <div className={styles.heroMetaPill}>
+                    <iconify-icon icon="lucide:user" style={{ color: "#ff8c42" }} />
                     <span><strong>Client:</strong> {clientName}</span>
                   </div>
-                  <div className={styles.metaItem}>
-                    <iconify-icon icon="lucide:wrench" style={{ color: "#0ea5e9" }} />
+                  <div className={styles.heroMetaPill}>
+                    <iconify-icon icon="lucide:wrench" style={{ color: "#38bdf8" }} />
                     <span><strong>Specialist:</strong> {executorName}</span>
                   </div>
-                  <div className={styles.metaItem}>
-                    <iconify-icon icon="lucide:map-pin" style={{ color: "#16a34a" }} />
+                  <div className={styles.heroMetaPill}>
+                    <iconify-icon icon="lucide:map-pin" style={{ color: "#4ade80" }} />
                     <span>{taskCity}</span>
                   </div>
-                  <div className={styles.metaItem}>
-                    <iconify-icon icon="lucide:shield-check" style={{ color: "#8b5cf6" }} />
+                  <div className={styles.heroMetaPill}>
+                    <iconify-icon icon="lucide:shield-check" style={{ color: "#c084fc" }} />
                     <span>BoulotMan Escrow Vault</span>
                   </div>
                 </div>
               </div>
 
               <div className={styles.heroActions}>
-                <Link href="/dashboard/client/projects" className={styles.secondaryButton}>
-                  <iconify-icon icon="lucide:arrow-left" />
-                  Back to My Projects
-                </Link>
                 {!isCompleted ? (
                   <button
                     type="button"
-                    className={styles.primaryButton}
+                    className={styles.heroOrangeBtn}
                     onClick={() => setConfirmModalOpen(true)}
                     disabled={!hasEscrow && totalCost === 0}
                   >
-                    <iconify-icon icon="lucide:shield-check" />
-                    Release Escrow
+                    <iconify-icon icon="lucide:shield-check" style={{ fontSize: 18 }} />
+                    <span>Release Escrow</span>
                   </button>
                 ) : (
-                  <span className={styles.completedHeaderBadge}>
+                  <div className={styles.heroCompletedBadge}>
                     <iconify-icon icon="lucide:check-circle-2" />
-                    Completed & Paid
-                  </span>
+                    <span>Completed & Paid</span>
+                  </div>
                 )}
+                <Link href="/dashboard/client/projects" className={styles.heroSecondaryBtn}>
+                  <iconify-icon icon="lucide:arrow-left" />
+                  <span>Back to Projects</span>
+                </Link>
               </div>
             </section>
 
