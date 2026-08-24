@@ -103,9 +103,7 @@ def verify_phone_otp(request):
     challenge.verified_at = timezone.now()
     challenge.save(update_fields=['attempts', 'verified_at'])
 
-    if challenge.user and not challenge.user.is_verified:
-        challenge.user.is_verified = True
-        challenge.user.save(update_fields=['is_verified'])
+    if challenge.user:
         create_audit_log(
             actor=challenge.user,
             action="phone_verified",

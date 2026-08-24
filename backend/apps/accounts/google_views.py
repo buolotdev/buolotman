@@ -43,14 +43,14 @@ def google_login(request):
         else:
             requested_role = 'CLIENT'
 
-        # Get or create the user
+        # Get or create the user (All accounts start as unverified until Admin Approval)
         user, created = User.objects.get_or_create(email=email, defaults={
             'first_name': first_name,
             'last_name': last_name,
             'username': email.split('@')[0],
             'role': requested_role,
             'avatar_url': picture,
-            'is_verified': True, # Google emails are already verified
+            'is_verified': False, # Must be vetted and approved by Admin
         })
 
         from apps.accounts.models import TechnicianProfile
