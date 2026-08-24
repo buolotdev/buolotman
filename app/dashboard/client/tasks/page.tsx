@@ -101,12 +101,15 @@ export default function ClientTasksPage() {
                 </>
               ) : filteredTasks.length ? (
                 filteredTasks.map((task: any) => {
+                  const isTaskCompleted = task.status === "completed";
                   const hasAcceptedProposal = Number(task.accepted_bids_count || 0) > 0 || Boolean(task.assigned_to);
-                  const displayStatus = hasAcceptedProposal && task.status === "open" ? "in_progress" : task.status;
+                  const displayStatus = isTaskCompleted ? "completed" : (hasAcceptedProposal && task.status === "open" ? "in_progress" : task.status);
                   const statusMeta = getStatusMeta(displayStatus);
-                  const taskHref = hasAcceptedProposal || task.status !== "open"
-                    ? `/dashboard/client/tasks/${task.id}`
-                    : `/dashboard/client/tasks/${task.id}/proposals`;
+                  const taskHref = isTaskCompleted || task.status === "in_progress"
+                    ? `/dashboard/client/projects/${task.id}`
+                    : (hasAcceptedProposal || task.status !== "open"
+                      ? `/dashboard/client/tasks/${task.id}`
+                      : `/dashboard/client/tasks/${task.id}/proposals`);
                   return (
                     <article key={task.id} className={styles.taskCard}>
                       <div className={styles.taskMain}>
@@ -126,7 +129,7 @@ export default function ClientTasksPage() {
                             <strong>{task.views_count || 0} views</strong>
                           </div>
                           <div className={styles.progressTrack}>
-                            <span className={`${styles.progressFill} ${styles[statusMeta.progressClass]}`} style={{ width: `${task.progress || 0}%` }} />
+                            <span className={`${styles.progressFill} ${styles[statusMeta.progressClass]}`} style={{ width: `${isTaskCompleted ? 100 : (task.progress || 0)}%` }} />
                           </div>
                         </div>
                       </div>
@@ -136,7 +139,7 @@ export default function ClientTasksPage() {
                           href={taskHref}
                           className={styles.openButton}
                         >
-                          {hasAcceptedProposal ? "Open Active Task" : task.status === "open" ? "Review Proposals" : "Open Task"}
+                          {isTaskCompleted ? "View Completed Task" : hasAcceptedProposal || task.status === "in_progress" ? "Open Active Task" : task.status === "open" ? "Review Proposals" : "Open Task"}
                         </Link>
                       </div>
                     </article>

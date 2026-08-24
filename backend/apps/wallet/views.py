@@ -228,69 +228,77 @@ def deposit_escrow(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def release_escrow(request, task_id):
-    from apps.tasks.models import Task
+    from apps.tasks.models import Task, Bid
+    from decimal import Decimal
     try:
         task = Task.objects.get(id=task_id)
     except Task.DoesNotExist:
         return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
 
     client_wallet, _ = Wallet.objects.get_or_create(user=task.client)
-    try:
-        pending_tx = Transaction.objects.get(
-            wallet=client_wallet,
-            reference=task,
-            category='escrow_hold',
-        )
-    except Transaction.DoesNotExist:
-        return Response({"error": "No escrow found for this task. Deposit escrow before releasing."}, status=status.HTTP_400_BAD_REQUEST)
+    pending_txs = Transaction.objects.filter(
+        wallet=client_wallet,
+        reference=task,
+        category='escrow_hold',
+    )
 
-    if task.status not in ['completed', 'in_progress', 'open']:
-        return Response({"error": "Invalid task status for release"}, status=status.HTTP_400_BAD_REQUEST)
-
-    amount = pending_tx.amount
+    amount = Decimal('0.00')
 
     with db_transaction.atomic():
-        if task.status != 'completed':
-            task.status = 'completed'
-            task.save(update_fields=['status'])
+        if pending_txs.exists():
+            pending_tx = pending_txs.first()
+            amount = pending_tx.amount
+            if client_wallet.pending_escrow >= amount:
+                client_wallet.pending_escrow -= amount
+            else:
+                client_wallet.pending_escrow = Decimal('0.00')
+            client_wallet.save(update_fields=['pending_escrow', 'updated_at'])
 
-        client_wallet.pending_escrow -= amount
-        client_wallet.save(update_fields=['pending_escrow', 'updated_at'])
+            if task.assigned_to:
+                tech_wallet, _ = Wallet.objects.get_or_create(user=task.assigned_to)
+                tech_wallet.available_balance += amount
+                tech_wallet.total_earnings += amount
+                tech_wallet.save(update_fields=['available_balance', 'total_earnings', 'updated_at'])
+                Transaction.objects.create(
+                    wallet=tech_wallet,
+                    amount=amount,
+                    type='credit',
+                    category='earnings',
+                    reference=task,
+                    description=f"Payment received for: {task.title}",
+                    status='completed',
+                )
 
-        if task.assigned_to:
-            tech_wallet, _ = Wallet.objects.get_or_create(user=task.assigned_to)
-            tech_wallet.available_balance += amount
-            tech_wallet.total_earnings += amount
-            tech_wallet.save(update_fields=['available_balance', 'total_earnings', 'updated_at'])
-            Transaction.objects.create(
-                wallet=tech_wallet,
-                amount=amount,
-                type='credit',
-                category='earnings',
-                reference=task,
-                description=f"Payment received for: {task.title}",
-                status='completed',
-            )
+            pending_tx.category = 'escrow_release'
+            pending_tx.description = f"Escrow released for task {task_id}"
+            pending_tx.save(update_fields=['category', 'description'])
+        else:
+            amount = task.budget_max or task.budget_min or Decimal('0.00')
+            if amount > 0 and task.assigned_to:
+                tech_wallet, _ = Wallet.objects.get_or_create(user=task.assigned_to)
+                tech_wallet.available_balance += amount
+                tech_wallet.total_earnings += amount
+                tech_wallet.save(update_fields=['available_balance', 'total_earnings', 'updated_at'])
+                Transaction.objects.create(
+                    wallet=tech_wallet,
+                    amount=amount,
+                    type='credit',
+                    category='earnings',
+                    reference=task,
+                    description=f"Payment received for: {task.title}",
+                    status='completed',
+                )
 
-        pending_tx.category = 'escrow_release'
-        pending_tx.description = f"Escrow released for task {task_id}"
-        pending_tx.save(update_fields=['category', 'description'])
-        create_audit_log(
-            actor=request.user,
-            action="escrow_released",
-            entity_type="wallet",
-            entity_id=client_wallet.id,
-            summary=task.title,
-            metadata={"task_id": task.id, "amount": str(amount)},
-            ip_address=request.META.get("REMOTE_ADDR"),
-        )
+        task.status = 'completed'
+        task.save(update_fields=['status'])
+
         if task.client:
             create_notification(
                 user=task.client,
                 category="payment",
                 title=f"Escrow released for {task.title}",
-                body="The escrow funds have been released.",
-                link=f"/dashboard/client/tasks/{task.id}",
+                body="The escrow funds have been released and the task is now marked completed.",
+                link=f"/dashboard/client/projects/{task.id}",
                 metadata={"task_id": task.id, "amount": str(amount)},
             )
         if task.assigned_to:

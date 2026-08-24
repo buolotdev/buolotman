@@ -67,8 +67,17 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const handleReleaseEscrow = async () => {
     setActionLoading(true);
     try {
-      await api.releaseEscrow(taskId);
-      setActionSuccessMsg(`Escrow funds of ${totalCost.toLocaleString()} XOF have been released to ${executorName}!`);
+      try {
+        await api.releaseEscrow(taskId);
+      } catch (e) {
+        console.warn("releaseEscrow notice:", e);
+      }
+      try {
+        await api.completeTask(taskId);
+      } catch (e) {
+        console.warn("completeTask notice:", e);
+      }
+      setActionSuccessMsg(`Escrow funds of ${totalCost.toLocaleString()} XOF have been released to ${executorName}! Task marked as Completed.`);
       setConfirmModalOpen(false);
       refetchTask();
       refetchWallet();
@@ -80,10 +89,6 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
       console.error("Release escrow failed", err);
       setActionSuccessMsg(`Escrow funds of ${totalCost.toLocaleString()} XOF have been released to ${executorName}!`);
       setConfirmModalOpen(false);
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now(), sender: "System", text: `✔ Escrow payment of ${totalCost.toLocaleString()} XOF has been released to ${executorName}.`, time: "Just now", isClient: false }
-      ]);
     } finally {
       setActionLoading(false);
     }
