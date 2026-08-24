@@ -144,60 +144,63 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
           />
 
           <div className={styles.content}>
-            {/* HERO HEADER - BRAND STANDARD */}
-            <section className={styles.heroSection}>
-              <div className={styles.heroHeaderTop}>
-                <div>
-                  <p className={styles.eyebrow}>
-                    <iconify-icon icon="lucide:briefcase" />
-                    PROJECT WORKSPACE & ESCROW
-                  </p>
-                  <h2 className={styles.heroTitle}>{projectTitle}</h2>
+            {/* ROYAL BLUE HERO BANNER */}
+            <section className={styles.heroBanner}>
+              <div className={styles.heroTopRow}>
+                <div className={styles.heroTag}>
+                  <span className={styles.pulseDot} />
+                  <span>PROJECT WORKSPACE & ESCROW</span>
+                </div>
+                <Link href="/dashboard/client/projects" className={styles.backBtnGlass}>
+                  <iconify-icon icon="lucide:arrow-left" />
+                  <span>Back to My Projects</span>
+                </Link>
+              </div>
+
+              <div className={styles.heroBody}>
+                <div className={styles.heroContent}>
+                  <h1 className={styles.heroTitle}>{projectTitle}</h1>
                   <p className={styles.heroSubtitle}>
                     {task?.description || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
                   </p>
+
+                  {/* META CHIPS ROW */}
+                  <div className={styles.metaRow}>
+                    <div className={styles.metaChip}>
+                      <iconify-icon icon="lucide:user" style={{ color: "#ff8c5a" }} />
+                      <span><strong>Client:</strong> {clientName}</span>
+                    </div>
+                    <div className={styles.metaChip}>
+                      <iconify-icon icon="lucide:wrench" style={{ color: "#38bdf8" }} />
+                      <span><strong>Assigned Specialist:</strong> {executorName}</span>
+                    </div>
+                    <div className={styles.metaChip}>
+                      <iconify-icon icon="lucide:map-pin" style={{ color: "#4ade80" }} />
+                      <span>{taskCity}</span>
+                    </div>
+                    <div className={styles.metaChip}>
+                      <iconify-icon icon="lucide:shield-check" style={{ color: "#c084fc" }} />
+                      <span>BoulotMan Escrow Vault</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className={styles.heroActions}>
-                  <Link href="/dashboard/client/projects" className={styles.secondaryButton}>
-                    <iconify-icon icon="lucide:arrow-left" />
-                    Back to My Projects
-                  </Link>
                   {!isCompleted ? (
                     <button
                       type="button"
-                      className={styles.primaryButton}
+                      className={styles.releaseEscrowBtn}
                       onClick={() => setConfirmModalOpen(true)}
                     >
-                      <iconify-icon icon="lucide:shield-check" />
-                      Release Escrow
+                      <iconify-icon icon="lucide:shield-check" style={{ fontSize: 20 }} />
+                      <span>Release Escrow</span>
                     </button>
                   ) : (
-                    <span className={styles.completedHeaderBadge}>
-                      <iconify-icon icon="lucide:check-circle-2" />
-                      Completed & Paid
-                    </span>
+                    <div className={styles.completedBadgeGlass}>
+                      <iconify-icon icon="lucide:check-circle-2" style={{ color: "#4ade80", fontSize: 20 }} />
+                      <span>Completed & Paid</span>
+                    </div>
                   )}
-                </div>
-              </div>
-
-              {/* META TAGS BAR */}
-              <div className={styles.metaRow}>
-                <div className={styles.metaItem}>
-                  <iconify-icon icon="lucide:user" style={{ color: "#ff4500" }} />
-                  <span><strong>Client:</strong> {clientName}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <iconify-icon icon="lucide:wrench" style={{ color: "#0ea5e9" }} />
-                  <span><strong>Assigned Specialist:</strong> {executorName}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <iconify-icon icon="lucide:map-pin" style={{ color: "#16a34a" }} />
-                  <span>{taskCity}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <iconify-icon icon="lucide:shield-check" style={{ color: "#8b5cf6" }} />
-                  <span>BoulotMan Escrow Vault</span>
                 </div>
               </div>
             </section>
