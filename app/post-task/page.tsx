@@ -487,7 +487,7 @@ export default function PostTaskPage() {
                           <input
                             id="skill-input"
                             className={styles.input}
-                            placeholder="e.g. Panel Installation"
+                            placeholder="e.g. Panel Installation, Python, React..."
                             value={skillInput}
                             onChange={(event) => setSkillInput(event.target.value)}
                             onKeyDown={(event) => {
@@ -497,15 +497,24 @@ export default function PostTaskPage() {
                               }
                             }}
                           />
-                          <button type="button" className={styles.secondaryButton} onClick={addSkill}>Add</button>
+                          <button
+                            type="button"
+                            className={styles.addSkillBtn}
+                            onClick={addSkill}
+                            id="add-skill-btn"
+                          >
+                            <iconify-icon icon="lucide:plus" style={{ fontSize: 18 }} />
+                            <span>Add</span>
+                          </button>
                         </div>
 
                         <div className={styles.tagRow}>
                           {skills.map((skill) => (
                             <span key={skill} className={styles.tag}>
+                              <iconify-icon icon="lucide:check" style={{ color: "#16a34a", fontSize: 13 }} />
                               {skill}
                               <button type="button" className={styles.tagRemove} onClick={() => removeSkill(skill)} aria-label={`Remove ${skill}`}>
-                                <iconify-icon icon="lucide:x" />
+                                <iconify-icon icon="lucide:x" style={{ fontSize: 13 }} />
                               </button>
                             </span>
                           ))}
