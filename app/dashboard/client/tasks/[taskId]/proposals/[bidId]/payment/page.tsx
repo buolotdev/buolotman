@@ -11,13 +11,15 @@ import styles from "./page.module.css";
 
 type PaymentMethod = "card" | "bank" | "mobile";
 
-function parseAmount(value: string) {
-  const digits = value.replace(/[^\d]/g, "");
-  return Number(digits || 0);
+function parseAmount(value: any) {
+  if (typeof value === "number") return value;
+  if (!value) return 0;
+  const num = parseFloat(String(value).replace(/,/g, ""));
+  return isNaN(num) ? 0 : num;
 }
 
 function formatXof(value: number) {
-  return `${value.toLocaleString()} XOF`;
+  return `${Math.round(value).toLocaleString()} XOF`;
 }
 
 export default function ProposalPaymentPage({ params }: { params: Promise<{ taskId: string; bidId: string }> }) {
@@ -355,18 +357,20 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                   </div>
 
                   <div className={styles.proCard}>
-                    <div className={styles.proAvatar}>{(bid as any).initials || ""}</div>
+                    <div className={styles.proAvatar}>
+                      {(bid as any)?.technician_initials || (bid as any)?.initials || ((bid as any)?.technician_name || (bid as any)?.bidder || "P").slice(0, 2).toUpperCase()}
+                    </div>
                     <div>
-                      <strong>{(bid as any).bidder || ""}</strong>
+                      <strong>{(bid as any)?.technician_name || (bid as any)?.bidder || "Assigned Specialist"}</strong>
                       <p>
-                        {(bid as any).profile?.title || ""}{(bid as any).rating != null && (bid as any).rating !== "" ? ` • ${(bid as any).rating}${(bid as any).reviews != null ? ` (${(bid as any).reviews} reviews)` : ""}` : ""}
+                        Verified Specialist{((bid as any)?.technician_rating || (bid as any)?.rating) ? ` • ★ ${((bid as any)?.technician_rating || (bid as any)?.rating)}` : ""}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.breakdown}>
-                  <div><span>Agreed price</span><strong>{(bid as any).amount}</strong></div>
+                  <div><span>Agreed price</span><strong>{formatXof(agreedPrice)}</strong></div>
                   <div><span>Platform fee (5%)</span><strong>{formatXof(platformFee)}</strong></div>
                   <div className={styles.totalRow}><span>Total to pay</span><strong>{formatXof(total)}</strong></div>
                 </div>

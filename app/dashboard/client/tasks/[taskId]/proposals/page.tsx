@@ -28,9 +28,11 @@ const sortOptions = [
 
 type SortId = (typeof sortOptions)[number]["id"];
 
-function parseAmount(value: string) {
-  const digits = value.replace(/[^\d]/g, "");
-  return Number(digits || 0);
+function parseAmount(value: any) {
+  if (typeof value === "number") return value;
+  if (!value) return 0;
+  const num = parseFloat(String(value).replace(/,/g, ""));
+  return isNaN(num) ? 0 : num;
 }
 
 export default function TaskProposalsPage({ params }: { params: Promise<{ taskId: string }> }) {
