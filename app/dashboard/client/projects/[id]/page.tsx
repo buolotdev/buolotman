@@ -35,7 +35,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   // Real local uploads state
   const [localUploadedFiles, setLocalUploadedFiles] = useState<{ name: string; type: string; size: string; url?: string }[]>([]);
 
-  // Real messages state (starts empty, user sends real messages)
+  // Real messages state
   const [chatDraft, setChatDraft] = useState("");
   const [messages, setMessages] = useState<{ id: number; sender: string; text: string; time: string; isClient: boolean }[]>([]);
 
@@ -150,65 +150,60 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
           />
 
           <div className={styles.content}>
-            {/* ROYAL BLUE HERO BANNER */}
-            <section className={styles.heroBanner}>
-              <div className={styles.heroTopRow}>
-                <div className={styles.heroTag}>
-                  <span className={styles.pulseDot} />
-                  <span>PROJECT WORKSPACE & ESCROW</span>
-                </div>
-                <Link href="/dashboard/client/projects" className={styles.backBtnGlass}>
-                  <iconify-icon icon="lucide:arrow-left" />
-                  <span>Back to My Projects</span>
-                </Link>
-              </div>
+            {/* STANDARD CLIENT DASHBOARD HERO */}
+            <section className={styles.hero}>
+              <div className={styles.heroLeft}>
+                <p className={styles.eyebrow}>
+                  <iconify-icon icon="lucide:briefcase" />
+                  PROJECT WORKSPACE & ESCROW
+                </p>
+                <h2>{projectTitle}</h2>
+                <p className={styles.heroDescription}>
+                  {task?.description || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
+                </p>
 
-              <div className={styles.heroBody}>
-                <div className={styles.heroContent}>
-                  <h1 className={styles.heroTitle}>{projectTitle}</h1>
-                  <p className={styles.heroSubtitle}>
-                    {task?.description || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
-                  </p>
-
-                  {/* META CHIPS ROW */}
-                  <div className={styles.metaRow}>
-                    <div className={styles.metaChip}>
-                      <iconify-icon icon="lucide:user" style={{ color: "#ff8c5a" }} />
-                      <span><strong>Client:</strong> {clientName}</span>
-                    </div>
-                    <div className={styles.metaChip}>
-                      <iconify-icon icon="lucide:wrench" style={{ color: "#38bdf8" }} />
-                      <span><strong>Specialist:</strong> {executorName}</span>
-                    </div>
-                    <div className={styles.metaChip}>
-                      <iconify-icon icon="lucide:map-pin" style={{ color: "#4ade80" }} />
-                      <span>{taskCity}</span>
-                    </div>
-                    <div className={styles.metaChip}>
-                      <iconify-icon icon="lucide:shield-check" style={{ color: "#c084fc" }} />
-                      <span>BoulotMan Escrow Vault</span>
-                    </div>
+                {/* META PILLS ROW */}
+                <div className={styles.metaRow}>
+                  <div className={styles.metaItem}>
+                    <iconify-icon icon="lucide:user" style={{ color: "#ff4500" }} />
+                    <span><strong>Client:</strong> {clientName}</span>
+                  </div>
+                  <div className={styles.metaItem}>
+                    <iconify-icon icon="lucide:wrench" style={{ color: "#0ea5e9" }} />
+                    <span><strong>Specialist:</strong> {executorName}</span>
+                  </div>
+                  <div className={styles.metaItem}>
+                    <iconify-icon icon="lucide:map-pin" style={{ color: "#16a34a" }} />
+                    <span>{taskCity}</span>
+                  </div>
+                  <div className={styles.metaItem}>
+                    <iconify-icon icon="lucide:shield-check" style={{ color: "#8b5cf6" }} />
+                    <span>BoulotMan Escrow Vault</span>
                   </div>
                 </div>
+              </div>
 
-                <div className={styles.heroActions}>
-                  {!isCompleted ? (
-                    <button
-                      type="button"
-                      className={styles.releaseEscrowBtn}
-                      onClick={() => setConfirmModalOpen(true)}
-                      disabled={!hasEscrow && totalCost === 0}
-                    >
-                      <iconify-icon icon="lucide:shield-check" style={{ fontSize: 20 }} />
-                      <span>Release Escrow</span>
-                    </button>
-                  ) : (
-                    <div className={styles.completedBadgeGlass}>
-                      <iconify-icon icon="lucide:check-circle-2" style={{ color: "#4ade80", fontSize: 20 }} />
-                      <span>Completed & Paid</span>
-                    </div>
-                  )}
-                </div>
+              <div className={styles.heroActions}>
+                <Link href="/dashboard/client/projects" className={styles.secondaryButton}>
+                  <iconify-icon icon="lucide:arrow-left" />
+                  Back to My Projects
+                </Link>
+                {!isCompleted ? (
+                  <button
+                    type="button"
+                    className={styles.primaryButton}
+                    onClick={() => setConfirmModalOpen(true)}
+                    disabled={!hasEscrow && totalCost === 0}
+                  >
+                    <iconify-icon icon="lucide:shield-check" />
+                    Release Escrow
+                  </button>
+                ) : (
+                  <span className={styles.completedHeaderBadge}>
+                    <iconify-icon icon="lucide:check-circle-2" />
+                    Completed & Paid
+                  </span>
+                )}
               </div>
             </section>
 
@@ -357,7 +352,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     </div>
                   ) : (
                     <div className={styles.emptyCardBox}>
-                      <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 36, color: "#94a3b8" }} />
+                      <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 32, color: "#94a3b8" }} />
                       <p>No escrow milestones defined yet for this task.</p>
                       <span>Funds will be held in escrow once you accept a proposal and fund the contract.</span>
                     </div>
@@ -425,7 +420,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     </div>
                   ) : (
                     <div className={styles.emptyCardBox}>
-                      <iconify-icon icon="lucide:folder-plus" style={{ fontSize: 36, color: "#94a3b8" }} />
+                      <iconify-icon icon="lucide:folder-plus" style={{ fontSize: 32, color: "#94a3b8" }} />
                       <p>No files uploaded for this project yet.</p>
                       <span>Click &quot;Upload File&quot; above to attach task specifications, blueprints, or site photos.</span>
                     </div>
@@ -469,7 +464,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                       </div>
                     ) : (
                       <div className={styles.emptyChatBox}>
-                        <iconify-icon icon="lucide:message-square" style={{ fontSize: 32, color: "#cbd5e1" }} />
+                        <iconify-icon icon="lucide:message-square" style={{ fontSize: 28, color: "#cbd5e1" }} />
                         <p>No workspace messages yet.</p>
                         <span>Send a message below to coordinate directly with the assigned specialist.</span>
                       </div>
@@ -608,7 +603,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
                 {/* HELP & DISPUTE RESOLUTION */}
                 <div className={styles.supportBox}>
-                  <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 28, color: "#ff4500" }} />
+                  <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 26, color: "#ff4500" }} />
                   <div>
                     <strong>Need Help or Mediation?</strong>
                     <p>Our 24/7 client protection team is on standby to assist with milestone disputes or questions.</p>
