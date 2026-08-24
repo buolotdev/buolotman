@@ -52,6 +52,12 @@ class TaskListSerializer(serializers.ModelSerializer):
         return (first + last).upper() or obj.client.email[:2].upper()
 
 
+class MilestoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Milestone
+        fields = ['id', 'title', 'amount', 'status', 'due_date', 'created_at', 'updated_at']
+
+
 class TaskDetailSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True, default='')
     client_name = serializers.SerializerMethodField()
@@ -61,6 +67,12 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     bids = serializers.SerializerMethodField()
     questions = serializers.SerializerMethodField()
     has_escrow = serializers.SerializerMethodField()
+    assigned_to_name = serializers.SerializerMethodField()
+    assigned_to_rating = serializers.SerializerMethodField()
+    assigned_to_jobs = serializers.SerializerMethodField()
+    assigned_to_verified = serializers.SerializerMethodField()
+    milestones = serializers.SerializerMethodField()
+    escrow_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -69,8 +81,9 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'schedule', 'deadline', 'materials_provided', 'contact_methods',
                   'category', 'category_name', 'skills', 'skills_list',
                   'views_count', 'bids_count', 'assigned_to',
+                  'assigned_to_name', 'assigned_to_rating', 'assigned_to_jobs', 'assigned_to_verified',
                   'client', 'client_name', 'client_initials',
-                  'attachments', 'bids', 'questions', 'has_escrow',
+                  'attachments', 'bids', 'questions', 'has_escrow', 'milestones', 'escrow_amount',
                   'created_at', 'updated_at', 'published_at']
 
     def get_client_name(self, obj):
@@ -80,6 +93,48 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         first = obj.client.first_name[:1] if obj.client.first_name else ''
         last = obj.client.last_name[:1] if obj.client.last_name else ''
         return (first + last).upper() or obj.client.email[:2].upper()
+
+    def get_assigned_to_name(self, obj):
+        if not obj.assigned_to:
+            return None
+        return f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}".strip() or obj.assigned_to.username or obj.assigned_to.email
+
+    def get_assigned_to_rating(self, obj):
+        if not obj.assigned_to:
+            return None
+        if hasattr(obj.assigned_to, 'technician_profile'):
+            return float(obj.assigned_to.technician_profile.average_rating or 0)
+        return None
+
+    def get_assigned_to_jobs(self, obj):
+        if not obj.assigned_to:
+            return None
+        if hasattr(obj.assigned_to, 'technician_profile'):
+            return obj.assigned_to.technician_profile.completed_jobs
+        return Task.objects.filter(assigned_to=obj.assigned_to, status='completed').count()
+
+    def get_assigned_to_verified(self, obj):
+        if not obj.assigned_to:
+            return False
+        return bool(obj.assigned_to.is_verified or (hasattr(obj.assigned_to, 'technician_profile') and obj.assigned_to.technician_profile.is_verified))
+
+    def get_milestones(self, obj):
+        return MilestoneSerializer(obj.milestones.all(), many=True).data
+
+    def get_escrow_amount(self, obj):
+        from apps.wallet.models import Transaction
+        tx = Transaction.objects.filter(
+            wallet__user=obj.client,
+            reference=obj,
+            category__in=['escrow_hold', 'escrow_release'],
+        ).first()
+        if tx:
+            return float(tx.amount)
+        if obj.budget_min:
+            return float(obj.budget_min)
+        if obj.budget_max:
+            return float(obj.budget_max)
+        return 0
 
     def get_skills_list(self, obj):
         return list(obj.skills.values_list('name', flat=True))
