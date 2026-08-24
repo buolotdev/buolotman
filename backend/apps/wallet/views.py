@@ -244,12 +244,16 @@ def release_escrow(request, task_id):
     except Transaction.DoesNotExist:
         return Response({"error": "No escrow found for this task. Deposit escrow before releasing."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if task.status != 'completed':
-        return Response({"error": "Task must be completed first"}, status=status.HTTP_400_BAD_REQUEST)
+    if task.status not in ['completed', 'in_progress', 'open']:
+        return Response({"error": "Invalid task status for release"}, status=status.HTTP_400_BAD_REQUEST)
 
     amount = pending_tx.amount
 
     with db_transaction.atomic():
+        if task.status != 'completed':
+            task.status = 'completed'
+            task.save(update_fields=['status'])
+
         client_wallet.pending_escrow -= amount
         client_wallet.save(update_fields=['pending_escrow', 'updated_at'])
 
