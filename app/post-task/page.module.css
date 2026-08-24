@@ -138,12 +138,269 @@
 .uploadZone span { font-size: 13px; }
 .uploadIcon { width: 48px; height: 48px; border-radius: 999px; background: #fff; color: #64748b; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; border: 1px solid #e2e8f0; }
 .uploadIcon iconify-icon { font-size: 22px; }
-.fileList { gap: 12px; margin-top: 22px; }
-.fileItem { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; }
-.fileIcon { width: 38px; height: 38px; border-radius: 12px; background: #fff; color: #001f3f; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
+.fileList { gap: 12px; margin-top: 20px; display: flex; flex-direction: column; }
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 31, 63, 0.03);
+}
+.fileItem:hover {
+  border-color: #ff4500;
+  background: #fffafa;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 69, 0, 0.1);
+}
+.fileIconWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fileThumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.fileIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #ff4500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #e2e8f0;
+  font-size: 20px;
+}
 .fileInfo { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.fileInfo strong { font-size: 14px; }
+.fileNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fileInfo strong {
+  font-size: 14px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+.previewHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ff4500;
+  background: #fff5f0;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 69, 0, 0.2);
+}
 .fileInfo span { color: #64748b; font-size: 12px; font-weight: 600; }
+.fileActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.filePreviewBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #001f3f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filePreviewBtn:hover {
+  background: #ff4500;
+  color: #ffffff;
+  border-color: #ff4500;
+  transform: scale(1.08);
+}
+.fileRemove {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fileRemove:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+  transform: scale(1.08);
+}
+
+/* LIGHTBOX MODAL */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 15, 30, 0.78);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.lightboxContent {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 31, 63, 0.35);
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes scaleUp {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.lightboxHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+.lightboxTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lightboxTitleWrap h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #001f3f;
+}
+.lightboxTitleWrap span {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+.lightboxHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lightboxDownloadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #001f3f;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.lightboxDownloadBtn:hover {
+  background: #001f3f;
+  color: #ffffff;
+  border-color: #001f3f;
+}
+.lightboxCloseBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.lightboxCloseBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.lightboxBody {
+  padding: 24px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 75vh;
+  overflow: auto;
+}
+.expandedImg {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+.pdfPreviewBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.pdfDownloadCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  background: #ff4500;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.3);
+  transition: all 0.15s ease;
+}
+.pdfDownloadCta:hover {
+  background: #e03d00;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 69, 0, 0.4);
+}
 .stack { gap: 20px; }
 .stackCompact { gap: 8px; }
 .segmentedControl { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #f1f5f9; }

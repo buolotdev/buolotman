@@ -55,6 +55,7 @@ export default function PostTaskPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { files, setFiles } = useTaskDraft();
+  const [previewMedia, setPreviewMedia] = useState<any | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -583,17 +584,57 @@ export default function PostTaskPage() {
 
                     <div className={styles.fileList}>
                       {files.map((file: any) => (
-                        <div key={file.name} className={styles.fileItem}>
-                          <div className={styles.fileIcon}>
-                            <iconify-icon icon={file.kind === "pdf" ? "lucide:file-text" : "lucide:image"} />
+                        <div
+                          key={file.name}
+                          className={styles.fileItem}
+                          onClick={() => setPreviewMedia(file)}
+                          title="Click to view & expand"
+                        >
+                          <div className={styles.fileIconWrap}>
+                            {file.kind === "image" && file.base64 ? (
+                              <img src={file.base64} alt={file.name} className={styles.fileThumbnail} />
+                            ) : (
+                              <div className={styles.fileIcon}>
+                                <iconify-icon icon={file.kind === "pdf" ? "lucide:file-text" : "lucide:image"} />
+                              </div>
+                            )}
                           </div>
+
                           <div className={styles.fileInfo}>
-                            <strong>{file.name}</strong>
+                            <div className={styles.fileNameRow}>
+                              <strong>{file.name}</strong>
+                              <span className={styles.previewHint}>
+                                <iconify-icon icon="lucide:maximize-2" /> Click to expand
+                              </span>
+                            </div>
                             <span>{file.sizeFormatted || (file.size / 1024 / 1024).toFixed(2) + " MB"}</span>
                           </div>
-                          <button type="button" className={styles.fileRemove} onClick={() => setFiles(files.filter(f => f.name !== file.name))} aria-label={`Remove ${file.name}`}>
-                            <iconify-icon icon="lucide:trash-2" />
-                          </button>
+
+                          <div className={styles.fileActions}>
+                            <button
+                              type="button"
+                              className={styles.filePreviewBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewMedia(file);
+                              }}
+                              title="Preview"
+                            >
+                              <iconify-icon icon="lucide:eye" />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.fileRemove}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFiles(files.filter((f: any) => f.name !== file.name));
+                              }}
+                              aria-label={`Remove ${file.name}`}
+                              title="Remove file"
+                            >
+                              <iconify-icon icon="lucide:trash-2" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -768,6 +809,69 @@ export default function PostTaskPage() {
           </div>
         </div>
       </div>
+
+      {/* LIGHTBOX MEDIA EXPAND MODAL */}
+      {previewMedia && (
+        <div className={styles.lightboxOverlay} onClick={() => setPreviewMedia(null)}>
+          <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.lightboxHeader}>
+              <div className={styles.lightboxTitleWrap}>
+                <iconify-icon
+                  icon={previewMedia.kind === "pdf" ? "lucide:file-text" : "lucide:image"}
+                  style={{ color: "#ff4500", fontSize: 24 }}
+                />
+                <div>
+                  <h4>{previewMedia.name}</h4>
+                  <span>{previewMedia.sizeFormatted || (previewMedia.size / 1024 / 1024).toFixed(2) + " MB"}</span>
+                </div>
+              </div>
+              <div className={styles.lightboxHeaderActions}>
+                {previewMedia.base64 && (
+                  <a
+                    href={previewMedia.base64}
+                    download={previewMedia.name}
+                    className={styles.lightboxDownloadBtn}
+                    title="Download file"
+                  >
+                    <iconify-icon icon="lucide:download" />
+                    <span>Download</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  className={styles.lightboxCloseBtn}
+                  onClick={() => setPreviewMedia(null)}
+                  title="Close Preview (Esc)"
+                >
+                  <iconify-icon icon="lucide:x" />
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.lightboxBody}>
+              {previewMedia.kind === "pdf" ? (
+                <div className={styles.pdfPreviewBox}>
+                  <iconify-icon icon="lucide:file-text" style={{ fontSize: 72, color: "#ff4500" }} />
+                  <p>PDF Document: <strong>{previewMedia.name}</strong></p>
+                  <a
+                    href={previewMedia.base64}
+                    download={previewMedia.name}
+                    className={styles.pdfDownloadCta}
+                  >
+                    <iconify-icon icon="lucide:download" /> Open / Download PDF Document
+                  </a>
+                </div>
+              ) : (
+                <img
+                  src={previewMedia.base64}
+                  alt={previewMedia.name}
+                  className={styles.expandedImg}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
