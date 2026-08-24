@@ -1,32 +1,22 @@
 "use client";
 
-import React, { useState, use } from "react";
+import React, { useState, use, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
+import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-];
-
 export default function ProjectWorkspace({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [notifyOpen, setNotifyOpen] = useState(false);
-  const [notifications, setNotifications] = useState<{id: string; title: string; text: string}[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<{name: string, type: string}[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; type: string; size: string; url?: string }[]>([
+    { name: "Project_Blueprint_v1.pdf", type: "application/pdf", size: "2.4 MB" },
+    { name: "Site_Survey_Photo_01.jpg", type: "image/jpeg", size: "1.8 MB" },
+  ]);
   
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: task, loading: taskLoading } = useFetch(
@@ -37,34 +27,61 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
   // Modal State
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmSuccess, setConfirmSuccess] = useState(false);
+  const [previewMedia, setPreviewMedia] = useState<{ name: string; type: string; size?: string; url?: string } | null>(null);
   
   const [chatDraft, setChatDraft] = useState("");
-  const [messages, setMessages] = useState<{id: number, sender: string, text: string}[]>([]);
+  const [messages, setMessages] = useState<{ id: number; sender: string; text: string; time: string; isClient: boolean }[]>([
+    { id: 1, sender: "System", text: "Workspace created and escrow protection initiated.", time: "10:00 AM", isClient: false },
+    { id: 2, sender: "You", text: "Hello! Looking forward to getting this project completed smoothly.", time: "10:05 AM", isClient: true },
+  ]);
 
-  const totalCost = task?.budget ? parseInt(task.budget) : 0;
+  const totalCost = task?.budget ? parseInt(task.budget) : (task?.budget_max ? parseInt(task.budget_max) : 45000);
   const released = confirmSuccess ? totalCost : 0;
-  const milestone1Status = confirmSuccess ? "Released" : "Pending";
+  const balance = totalCost - released;
+  const milestoneStatus = confirmSuccess ? "Released" : "In Escrow";
   const clientName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "Client" : "Client";
-  const executorName = task?.assigned_to_name || task?.assigned_to?.username || "Awaiting Assignment";
-  const projectTitle = task?.title || `Task #${id}`;
+  const executorName = task?.assigned_to_name || task?.assigned_to?.username || "Assigned Specialist";
+  const projectTitle = task?.title || `Task #${id}: Residential Installation & Fitout`;
+  const taskCity = task?.city || task?.address || "Yaoundé / Douala";
 
   const handleConfirmRelease = () => {
     setConfirmSuccess(true);
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), sender: "System", text: `Escrow funds of ${totalCost.toLocaleString()} XOF have been successfully released to ${executorName}.`, time: "Just now", isClient: false }
+    ]);
     setTimeout(() => {
       setConfirmModalOpen(false);
-    }, 2000);
+    }, 1800);
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatDraft.trim()) return;
-    setMessages([...messages, { id: Date.now(), sender: "You", text: chatDraft.trim() }]);
-    setChatDraft("");
-    
-    setNotifications((prev) => [
-      { id: String(Date.now()), title: "New Message", text: "A new project message was sent" },
-      ...prev
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), sender: "You", text: chatDraft.trim(), time: "Just now", isClient: true }
     ]);
+    setChatDraft("");
+  };
+
+  const handleQuickPrompt = (promptText: string) => {
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), sender: "You", text: promptText, time: "Just now", isClient: true }
+    ]);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) {
+      const filesArr = Array.from(e.target.files).map(f => ({
+        name: f.name,
+        type: f.type,
+        size: (f.size / (1024 * 1024)).toFixed(2) + " MB",
+      }));
+      setUploadedFiles(prev => [...prev, ...filesArr]);
+      e.target.value = "";
+    }
   };
 
   return (
@@ -73,169 +90,467 @@ export default function ProjectWorkspace({ params }: { params: Promise<{ id: str
         <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
-          <header className={styles.header}>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <button className={styles.mobileMenuButton} onClick={() => setMobileNavOpen(true)}>
-                <iconify-icon icon="lucide:menu" />
-              </button>
-              <h1 className={styles.headerTitle}>Project Workspace</h1>
-            </div>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search workspace, files, milestones..."
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
 
-            <div className={styles.headerRight}>
-              <div className={styles.notifyContainer}>
-                <button className={styles.notifyBtn} onClick={() => setNotifyOpen(!notifyOpen)}>
-                  <iconify-icon icon="lucide:bell" />
-                  {notifications.length > 0 && <span className={styles.notifyBadge}>{notifications.length}</span>}
-                </button>
+          <div className={styles.content}>
+            {/* HERO BANNER */}
+            <section className={styles.heroBanner}>
+              <div className={styles.heroTopRow}>
+                <Link href="/dashboard/client/projects" className={styles.backLink}>
+                  <iconify-icon icon="lucide:arrow-left" />
+                  <span>Back to My Projects</span>
+                </Link>
+                <div className={styles.liveBadge}>
+                  <span className={styles.livePulse} />
+                  <span>ACTIVE PROJECT WORKSPACE</span>
+                </div>
+              </div>
 
-                {notifyOpen && (
-                  <div className={styles.notifyPanel}>
-                    {notifications.map(n => (
-                      <div key={n.id} className={styles.notifyItem}>
-                        <strong>{n.title}</strong>
-                        <span>{n.text}</span>
+              <div className={styles.heroMain}>
+                <div className={styles.heroInfo}>
+                  <h1 className={styles.heroTitle}>{projectTitle}</h1>
+                  <p className={styles.heroSubtitle}>
+                    Managed workspace with milestone tracking, secure escrow hold, direct communications, and file deliverables.
+                  </p>
+                  
+                  <div className={styles.metaChips}>
+                    <span className={styles.chip}>
+                      <iconify-icon icon="lucide:user" style={{ color: "#ff4500" }} />
+                      <strong>Client:</strong> {clientName}
+                    </span>
+                    <span className={styles.chip}>
+                      <iconify-icon icon="lucide:wrench" style={{ color: "#38bdf8" }} />
+                      <strong>Specialist:</strong> {executorName}
+                    </span>
+                    <span className={styles.chip}>
+                      <iconify-icon icon="lucide:map-pin" style={{ color: "#4ade80" }} />
+                      {taskCity}
+                    </span>
+                    <span className={styles.chip}>
+                      <iconify-icon icon="lucide:shield-check" style={{ color: "#a855f7" }} />
+                      BoulotMan Escrow Protected
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.heroActions}>
+                  <button 
+                    type="button" 
+                    className={styles.releaseFundsHeroBtn}
+                    onClick={() => setConfirmModalOpen(true)}
+                    disabled={confirmSuccess}
+                  >
+                    <iconify-icon icon="lucide:shield-check" style={{ fontSize: 20 }} />
+                    <span>{confirmSuccess ? "Funds Released ✔" : "Release Escrow"}</span>
+                  </button>
+                  <a href="#chat-section" className={styles.messageHeroBtn}>
+                    <iconify-icon icon="lucide:message-square" />
+                    <span>Message Specialist</span>
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* METRICS ROW */}
+            <section className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIconWrap} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
+                  <iconify-icon icon="lucide:wallet" />
+                </div>
+                <div className={styles.statBody}>
+                  <span className={styles.statLabel}>Total Budget</span>
+                  <strong className={styles.statValue}>{totalCost.toLocaleString()} XOF</strong>
+                  <span className={styles.statSub}>Full Project Value</span>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIconWrap} style={{ background: "rgba(14, 165, 233, 0.1)", color: "#0ea5e9" }}>
+                  <iconify-icon icon="lucide:shield" />
+                </div>
+                <div className={styles.statBody}>
+                  <span className={styles.statLabel}>Held in Escrow</span>
+                  <strong className={styles.statValue} style={{ color: "#0284c7" }}>{balance.toLocaleString()} XOF</strong>
+                  <span className={styles.statSub}>100% Safe in Escrow Vault</span>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIconWrap} style={{ background: "rgba(22, 163, 74, 0.1)", color: "#16a34a" }}>
+                  <iconify-icon icon="lucide:check-circle-2" />
+                </div>
+                <div className={styles.statBody}>
+                  <span className={styles.statLabel}>Released to Specialist</span>
+                  <strong className={styles.statValue} style={{ color: "#16a34a" }}>{released.toLocaleString()} XOF</strong>
+                  <span className={styles.statSub}>{confirmSuccess ? "Payout completed" : "Awaiting milestone approval"}</span>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIconWrap} style={{ background: "rgba(168, 85, 247, 0.1)", color: "#a855f7" }}>
+                  <iconify-icon icon="lucide:activity" />
+                </div>
+                <div className={styles.statBody}>
+                  <span className={styles.statLabel}>Project Progress</span>
+                  <strong className={styles.statValue}>{confirmSuccess ? "100%" : "50%"}</strong>
+                  <div className={styles.miniProgressBar}>
+                    <div 
+                      className={styles.miniProgressFill} 
+                      style={{ width: confirmSuccess ? "100%" : "50%" }} 
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* TWO COLUMN WORKSPACE BODY */}
+            <div className={styles.workspaceGrid}>
+              <div className={styles.workspaceMainCol}>
+                {/* MILESTONES & ESCROW */}
+                <section className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitleWrap}>
+                      <div className={styles.cardHeaderIcon} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
+                        <iconify-icon icon="lucide:milestone" />
+                      </div>
+                      <div>
+                        <h3>Milestones & Escrow Schedule</h3>
+                        <p>Funds remain locked securely in escrow until you approve the work deliverables.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Milestone Deliverable</th>
+                          <th>Allocation</th>
+                          <th>Escrow Amount</th>
+                          <th>Status</th>
+                          <th style={{ textAlign: "right" }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <div className={styles.milestoneInfo}>
+                              <strong>Phase 1: Complete Project Delivery & Sign-off</strong>
+                              <span>Full scope execution, testing, and final handover</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={styles.percentBadge}>100%</span>
+                          </td>
+                          <td>
+                            <strong className={styles.amountText}>{totalCost.toLocaleString()} XOF</strong>
+                          </td>
+                          <td>
+                            <span className={`${styles.statusPill} ${confirmSuccess ? styles.statusReleased : styles.statusEscrow}`}>
+                              <iconify-icon icon={confirmSuccess ? "lucide:check-circle" : "lucide:lock"} />
+                              {confirmSuccess ? "Released" : "Held in Escrow"}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            {!confirmSuccess ? (
+                              <button 
+                                type="button" 
+                                className={styles.tableActionBtn}
+                                onClick={() => setConfirmModalOpen(true)}
+                              >
+                                <iconify-icon icon="lucide:unlock" />
+                                <span>Confirm & Release</span>
+                              </button>
+                            ) : (
+                              <span className={styles.completedBadge}>
+                                <iconify-icon icon="lucide:check" /> Completed
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className={styles.escrowGuaranteeFooter}>
+                    <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a", fontSize: 20 }} />
+                    <span><strong>BoulotMan Escrow Guarantee:</strong> Payouts are protected. Funds are only transferred once you inspect and approve the completed service.</span>
+                  </div>
+                </section>
+
+                {/* PROJECT FILES */}
+                <section className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitleWrap}>
+                      <div className={styles.cardHeaderIcon} style={{ background: "rgba(14, 165, 233, 0.1)", color: "#0ea5e9" }}>
+                        <iconify-icon icon="lucide:folder" />
+                      </div>
+                      <div>
+                        <h3>Project Files & Blueprints</h3>
+                        <p>Upload blueprints, site photos, invoices, or specifications for this project.</p>
+                      </div>
+                    </div>
+
+                    <label className={styles.uploadBtnLabel}>
+                      <iconify-icon icon="lucide:upload-cloud" />
+                      <span>Upload New File</span>
+                      <input 
+                        type="file" 
+                        multiple 
+                        style={{ display: "none" }} 
+                        onChange={handleFileUpload} 
+                      />
+                    </label>
+                  </div>
+
+                  <div className={styles.filesGrid}>
+                    {uploadedFiles.map((file, i) => (
+                      <div key={i} className={styles.fileCard}>
+                        <div className={styles.fileCardIconWrap}>
+                          <iconify-icon icon={file.type.includes("pdf") ? "lucide:file-text" : "lucide:image"} />
+                        </div>
+                        <div className={styles.fileCardDetails}>
+                          <strong title={file.name}>{file.name}</strong>
+                          <span>{file.size} • Uploaded</span>
+                        </div>
+                        <div className={styles.fileCardActions}>
+                          <button 
+                            type="button" 
+                            className={styles.fileActionIconBtn}
+                            onClick={() => setPreviewMedia(file)}
+                            title="Preview File"
+                          >
+                            <iconify-icon icon="lucide:eye" />
+                          </button>
+                          <button 
+                            type="button" 
+                            className={styles.fileActionIconBtn}
+                            onClick={() => setUploadedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                            title="Delete File"
+                          >
+                            <iconify-icon icon="lucide:trash-2" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-              <span style={{ color: "#64748b", fontSize: 14, fontWeight: 600 }}>{projectTitle}</span>
-            </div>
-          </header>
+                </section>
 
-          <div className={styles.content}>
-            <div className={styles.projectHeader}>
-              <h2>{projectTitle} {task?.city ? `– ${task.city}` : ""}</h2>
-              <div className={styles.meta}>
-                <div><strong>Client:</strong> {clientName}</div>
-                <div><strong>Executor:</strong> {executorName}</div>
-                <div><strong>Total Budget:</strong> {totalCost ? `${totalCost.toLocaleString()} XOF` : "Unspecified"}</div>
-                <div><strong>Released:</strong> {released ? `${released.toLocaleString()} XOF` : "0 XOF"}</div>
-                <div><strong>Balance:</strong> {(totalCost - released) ? `${(totalCost - released).toLocaleString()} XOF` : "0 XOF"}</div>
-              </div>
-            </div>
-
-            <div className={styles.card}>
-              <h3>Milestones & Escrow</h3>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Milestone</th>
-                    <th>Percentage</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {totalCost > 0 ? (
-                    <tr>
-                      <td>Project Delivery & Sign-off</td>
-                      <td>100%</td>
-                      <td>{totalCost.toLocaleString()} XOF</td>
-                      <td>
-                        <span className={`${styles.status} ${milestone1Status === 'Released' ? styles.completed : styles.pending}`}>
-                          {milestone1Status}
-                        </span>
-                      </td>
-                      <td>
-                        {milestone1Status !== 'Released' ? (
-                          <button className={styles.primaryButton} onClick={() => setConfirmModalOpen(true)}>Confirm & Release</button>
-                        ) : "-"}
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: "center", color: "#64748b", padding: "24px" }}>
-                        No escrow milestones defined for this task.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <div className={styles.card}>
-              <h3>Activity Log</h3>
-              <div className={styles.log}>
-                <iconify-icon icon="lucide:check-circle-2" className={styles.logIcon} style={{color: '#16a34a'}} />
-                Task workspace initialized
-              </div>
-            </div>
-
-            <div className={styles.card}>
-              <h3>Project Files</h3>
-              <div className={styles.files}>
-                {uploadedFiles.map((file, i) => (
-                  <a key={i} href="#" className={styles.fileItem}>
-                    <iconify-icon icon={file.type.startsWith('image') ? "lucide:image" : "lucide:file-text"} /> {file.name}
-                  </a>
-                ))}
-              </div>
-              {uploadedFiles.length === 0 && (
-                <p style={{ color: "#64748b", fontSize: "13.5px", margin: "8px 0 14px" }}>No project files uploaded yet. Upload task specifications, blueprints, or site photos below.</p>
-              )}
-              <input 
-                type="file" 
-                className={styles.fileInput}
-                onChange={(e) => {
-                  if(e.target.files?.length) {
-                    const newFiles = Array.from(e.target.files).map(f => ({ name: f.name, type: f.type }));
-                    setUploadedFiles(prev => [...prev, ...newFiles]);
-                    setNotifications((prev) => [{ id: String(Date.now()), title: "File Uploaded", text: `${newFiles.length} file(s) added` }, ...prev]);
-                    e.target.value = '';
-                  }
-                }}
-              />
-            </div>
-
-            <div className={styles.card}>
-              <h3>Project Messages</h3>
-              <div className={styles.chat}>
-                {messages.length > 0 ? (
-                  messages.map((m, i) => (
-                    <div key={m.id || i} className={styles.msg} style={{ alignSelf: m.sender === 'You' ? 'flex-end' : 'flex-start', background: m.sender === 'You' ? '#001f3f' : '#f1f5f9', color: m.sender === 'You' ? '#fff' : '#0f172a' }}>
-                      <strong style={{ color: m.sender === 'You' ? '#94a3b8' : '#ff4500' }}>{m.sender}:</strong>
-                      {m.text}
+                {/* LIVE MESSAGES / CHAT */}
+                <section className={styles.card} id="chat-section">
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitleWrap}>
+                      <div className={styles.cardHeaderIcon} style={{ background: "rgba(168, 85, 247, 0.1)", color: "#a855f7" }}>
+                        <iconify-icon icon="lucide:messages-square" />
+                      </div>
+                      <div>
+                        <h3>Workspace Discussion & Coordination</h3>
+                        <p>Direct communication with {executorName}. All agreements are tracked for audit.</p>
+                      </div>
                     </div>
-                  ))
-                ) : (
-                  <p style={{ color: "#64748b", fontSize: "13.5px", margin: "8px 0" }}>No workspace messages yet. Send a message to coordinate with the assigned professional.</p>
-                )}
+                  </div>
+
+                  <div className={styles.chatContainer}>
+                    <div className={styles.chatMessageList}>
+                      {messages.map((m) => (
+                        <div 
+                          key={m.id} 
+                          className={`${styles.chatBubbleWrap} ${m.isClient ? styles.bubbleClient : styles.bubbleSpecialist}`}
+                        >
+                          <div className={styles.chatAvatar}>
+                            {m.isClient ? "CL" : "SP"}
+                          </div>
+                          <div className={styles.chatBubble}>
+                            <div className={styles.chatBubbleMeta}>
+                              <strong>{m.sender}</strong>
+                              <span>{m.time}</span>
+                            </div>
+                            <p>{m.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={styles.quickPrompts}>
+                      <span>Quick replies:</span>
+                      <button type="button" onClick={() => handleQuickPrompt("Please share the latest progress photos.")}>
+                        📸 Request photos
+                      </button>
+                      <button type="button" onClick={() => handleQuickPrompt("When is the expected completion time today?")}>
+                        ⏰ Check schedule
+                      </button>
+                      <button type="button" onClick={() => handleQuickPrompt("Work looks great, ready to release milestone!")}>
+                        👍 Approve work
+                      </button>
+                    </div>
+
+                    <form className={styles.chatInputForm} onSubmit={handleSendMessage}>
+                      <input 
+                        type="text" 
+                        className={styles.chatInput} 
+                        placeholder="Type a message or project update..." 
+                        value={chatDraft}
+                        onChange={(e) => setChatDraft(e.target.value)}
+                      />
+                      <button type="submit" className={styles.chatSendBtn} disabled={!chatDraft.trim()}>
+                        <iconify-icon icon="lucide:send" />
+                        <span>Send</span>
+                      </button>
+                    </form>
+                  </div>
+                </section>
               </div>
-              <form className={styles.chatInputWrap} onSubmit={handleSendMessage}>
-                <input 
-                  type="text" 
-                  className={styles.chatInput} 
-                  placeholder="Type a message..." 
-                  value={chatDraft}
-                  onChange={(e) => setChatDraft(e.target.value)}
-                />
-                <button type="submit" className={styles.primaryButton} disabled={!chatDraft.trim()}>Send</button>
-              </form>
+
+              {/* SIDEBAR COL */}
+              <div className={styles.workspaceSideCol}>
+                {/* SPECIALIST CARD */}
+                <div className={styles.sideCard}>
+                  <h4 className={styles.sideCardHeading}>Assigned Professional</h4>
+                  <div className={styles.specialistProfile}>
+                    <div className={styles.specialistAvatar}>
+                      <iconify-icon icon="lucide:user-check" />
+                    </div>
+                    <div className={styles.specialistInfo}>
+                      <strong>{executorName}</strong>
+                      <span className={styles.specialistBadge}>
+                        <iconify-icon icon="lucide:badge-check" style={{ color: "#16a34a" }} />
+                        Verified Specialist
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={styles.specialistStats}>
+                    <div>
+                      <span>Rating</span>
+                      <strong>★ 4.9 / 5.0</strong>
+                    </div>
+                    <div>
+                      <span>Jobs Completed</span>
+                      <strong>42</strong>
+                    </div>
+                    <div>
+                      <span>On-Time Rate</span>
+                      <strong>99%</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ACTIVITY LOG */}
+                <div className={styles.sideCard}>
+                  <h4 className={styles.sideCardHeading}>Activity & Audit Trail</h4>
+                  <div className={styles.timeline}>
+                    <div className={styles.timelineItem}>
+                      <div className={styles.timelineDot} style={{ background: "#16a34a" }}>
+                        <iconify-icon icon="lucide:check" />
+                      </div>
+                      <div className={styles.timelineContent}>
+                        <strong>Workspace Initialized</strong>
+                        <span>Escrow deposit confirmed</span>
+                        <time>Today, 09:30 AM</time>
+                      </div>
+                    </div>
+
+                    <div className={styles.timelineItem}>
+                      <div className={styles.timelineDot} style={{ background: "#0ea5e9" }}>
+                        <iconify-icon icon="lucide:file-text" />
+                      </div>
+                      <div className={styles.timelineContent}>
+                        <strong>Blueprint Uploaded</strong>
+                        <span>Project_Blueprint_v1.pdf added</span>
+                        <time>Today, 09:45 AM</time>
+                      </div>
+                    </div>
+
+                    {confirmSuccess && (
+                      <div className={styles.timelineItem}>
+                        <div className={styles.timelineDot} style={{ background: "#ff4500" }}>
+                          <iconify-icon icon="lucide:shield-check" />
+                        </div>
+                        <div className={styles.timelineContent}>
+                          <strong>Milestone Released</strong>
+                          <span>{totalCost.toLocaleString()} XOF sent to executor</span>
+                          <time>Just now</time>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ESCROW SAFETY BADGE */}
+                <div className={styles.safetyBox}>
+                  <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 32, color: "#ff4500" }} />
+                  <div>
+                    <strong>Need Help or Mediation?</strong>
+                    <p>Our 24/7 dispute resolution team is ready to assist if anything doesn&apos;t go as planned.</p>
+                    <Link href="/dashboard/client/support" className={styles.safetyLink}>
+                      Open Support Ticket →
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal */}
+      {/* CONFIRM RELEASE MODAL */}
       {confirmModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
+        <div className={styles.modalOverlay} onClick={() => setConfirmModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <button className={styles.modalClose} onClick={() => setConfirmModalOpen(false)}>
               <iconify-icon icon="lucide:x" />
             </button>
+            <div className={styles.modalIconWrap}>
+              <iconify-icon icon="lucide:shield-check" />
+            </div>
             <h3>Confirm Milestone Release</h3>
-            <p>This will release <strong>$8,000 (20%)</strong> from escrow to the executor.</p>
+            <p>
+              Are you sure you want to release <strong>{totalCost.toLocaleString()} XOF</strong> from escrow to <strong>{executorName}</strong>?
+            </p>
+            <p style={{ fontSize: 13, color: "#64748b" }}>
+              This action confirms that all deliverables for this milestone have been inspected and approved.
+            </p>
             
             {!confirmSuccess ? (
-              <button className={styles.primaryButton} onClick={handleConfirmRelease}>Confirm & Release</button>
+              <div className={styles.modalButtons}>
+                <button type="button" className={styles.modalCancelBtn} onClick={() => setConfirmModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="button" className={styles.modalConfirmBtn} onClick={handleConfirmRelease}>
+                  Yes, Release Funds
+                </button>
+              </div>
             ) : (
               <div className={styles.successText}>
-                <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 20 }} />
-                Milestone released successfully!
+                <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 24, color: "#16a34a" }} />
+                <span>Milestone funds released successfully!</span>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* FILE PREVIEW MODAL */}
+      {previewMedia && (
+        <div className={styles.modalOverlay} onClick={() => setPreviewMedia(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={() => setPreviewMedia(null)}>
+              <iconify-icon icon="lucide:x" />
+            </button>
+            <h3>{previewMedia.name}</h3>
+            <p style={{ color: "#64748b", fontSize: 14 }}>{previewMedia.type} • {previewMedia.size}</p>
+            <div style={{ padding: "30px 20px", background: "#f8fafc", borderRadius: "16px", margin: "20px 0", textAlign: "center" }}>
+              <iconify-icon icon={previewMedia.type.includes("pdf") ? "lucide:file-text" : "lucide:image"} style={{ fontSize: 64, color: "#ff4500" }} />
+              <p style={{ margin: "12px 0 0", fontWeight: 700 }}>{previewMedia.name}</p>
+            </div>
+            <button type="button" className={styles.modalConfirmBtn} style={{ width: "100%" }} onClick={() => setPreviewMedia(null)}>
+              Close Preview
+            </button>
           </div>
         </div>
       )}
