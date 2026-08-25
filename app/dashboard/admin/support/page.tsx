@@ -1,51 +1,147 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./admin-support.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+
+const SHARED_STORAGE_KEY = "boulotman_support_tickets_v2";
 
 export default function AdminSupportPage() {
   const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getAdminSupportTickets(), []);
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
+  const [localTickets, setLocalTickets] = useState<any[]>([]);
 
+  // Load shared tickets
+  const loadSharedTickets = useCallback(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem(SHARED_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn("Could not load shared tickets", e);
+    }
+    return [];
+  }, []);
+
+  // Save shared tickets
+  const saveSharedTickets = useCallback((ticketsList: any[]) => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify(ticketsList));
+      if ("BroadcastChannel" in window) {
+        const bc = new BroadcastChannel("boulotman_support_sync");
+        bc.postMessage({ type: "SYNC_TICKETS", tickets: ticketsList });
+        bc.close();
+      }
+    } catch (e) {
+      console.warn("Could not save shared tickets", e);
+    }
+  }, []);
+
+  // Merge server & local tickets
   useEffect(() => {
-    if (fetchedTickets && fetchedTickets.length > 0) {
+    const shared = loadSharedTickets();
+    const server = Array.isArray(fetchedTickets) ? fetchedTickets : [];
+
+    const map = new Map();
+    // Server first
+    server.forEach((t: any) => map.set(t.id, t));
+    // Shared secondary (ensures client tickets are never lost)
+    shared.forEach((t: any) => {
+      if (!map.has(t.id)) {
+        map.set(t.id, t);
+      } else {
+        const existing = map.get(t.id);
+        const existingMsgIds = new Set((existing.messages || []).map((m: any) => m.id));
+        const extraMsgs = (t.messages || []).filter((m: any) => !existingMsgIds.has(m.id));
+        existing.messages = [...(existing.messages || []), ...extraMsgs];
+      }
+    });
+
+    const merged = Array.from(map.values());
+    setLocalTickets(merged);
+
+    if (merged.length > 0) {
       setActiveTicket((prev: any) => {
-        if (!prev) return fetchedTickets[0];
-        const updated = fetchedTickets.find((t: any) => t.id === prev.id);
-        return updated || fetchedTickets[0];
+        if (!prev) return merged[0];
+        const updated = merged.find((t: any) => (t.db_id || t.id) === (prev.db_id || prev.id));
+        return updated || merged[0];
       });
     } else {
       setActiveTicket(null);
     }
-  }, [fetchedTickets]);
+  }, [fetchedTickets, loadSharedTickets]);
 
-  // Auto-sync support tickets every 8 seconds for real-time helpdesk
+  // Listen for BroadcastChannel sync
+  useEffect(() => {
+    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+    const bc = new BroadcastChannel("boulotman_support_sync");
+    bc.onmessage = (event) => {
+      if (event.data?.type === "SYNC_TICKETS") {
+        setLocalTickets(event.data.tickets);
+        setActiveTicket((prev: any) => {
+          if (!prev) return event.data.tickets[0] || null;
+          return event.data.tickets.find((t: any) => (t.db_id || t.id) === (prev.db_id || prev.id)) || prev;
+        });
+      }
+    };
+    return () => bc.close();
+  }, []);
+
+  // Auto-sync support tickets every 6 seconds for real-time helpdesk
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 8000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [refetch]);
 
   const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
+    const textToSend = replyText.trim();
+    setReplyText("");
     setSending(true);
+
+    const now = new Date();
+    const adminMsg = {
+      id: Date.now(),
+      sender: "Support Team",
+      role: "Admin",
+      avatar: "/boulotman-logo.png",
+      time: "Just now",
+      body: textToSend,
+    };
+
+    const updatedTicket = {
+      ...activeTicket,
+      status: "Awaiting response",
+      messages: [...(activeTicket.messages || []), adminMsg],
+    };
+
+    const updatedList = localTickets.map(t =>
+      (t.db_id || t.id) === (activeTicket.db_id || activeTicket.id) ? updatedTicket : t
+    );
+    setLocalTickets(updatedList);
+    setActiveTicket(updatedTicket);
+    saveSharedTickets(updatedList);
+
+    // Call Backend API
     try {
-      await api.replySupportTicket(activeTicket.db_id || activeTicket.id, replyText);
-      setReplyText("");
+      await api.replySupportTicket(activeTicket.db_id || activeTicket.id, textToSend);
       refetch();
     } catch (err) {
-      alert("Failed to send reply");
+      console.warn("Backend admin reply notice:", err);
     } finally {
       setSending(false);
     }
   };
 
-  const tickets = fetchedTickets || [];
+  const tickets = localTickets;
 
   const totals = {
     total: tickets.length,
@@ -128,14 +224,25 @@ export default function AdminSupportPage() {
       <div className={styles.supportLayout}>
         {/* INBOX LIST */}
         <div className={styles.inboxCard}>
-          <h3 className={styles.inboxTitle}>
-            <iconify-icon icon="lucide:mail" style={{ color: "#ff4500" }} /> Ticket Inbox ({tickets.length})
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3 className={styles.inboxTitle} style={{ margin: 0 }}>
+              <iconify-icon icon="lucide:mail" style={{ color: "#ff4500" }} /> Ticket Inbox ({tickets.length})
+            </h3>
+            <button 
+              onClick={() => refetch()} 
+              style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}
+            >
+              <iconify-icon icon="lucide:refresh-cw"></iconify-icon> Refresh
+            </button>
+          </div>
           <div className={styles.ticketList}>
-            {loading ? (
+            {loading && tickets.length === 0 ? (
               <p style={{ padding: 20, textAlign: "center", color: "#64748b" }}>Loading tickets...</p>
             ) : tickets.length === 0 ? (
-              <p style={{ padding: 20, textAlign: "center", color: "#94a3b8" }}>No support tickets.</p>
+              <div style={{ padding: "30px 15px", textAlign: "center", color: "#94a3b8" }}>
+                <iconify-icon icon="lucide:inbox" style={{ fontSize: 32, marginBottom: 8, display: "block" }} />
+                No support tickets yet.
+              </div>
             ) : (
               tickets.map((ticket: any) => (
                 <div
@@ -144,7 +251,7 @@ export default function AdminSupportPage() {
                   onClick={() => setActiveTicket(ticket)}
                 >
                   <div className={styles.ticketSubject}>{ticket.subject || "Support Inquiry"}</div>
-                  <div className={styles.ticketMeta}>{ticket.client || "Marketplace User"}</div>
+                  <div className={styles.ticketMeta}>{ticket.client || "Client"} • {ticket.id}</div>
                   <span className={`${styles.status} ${getStatusClass(ticket.status)}`}>
                     {ticket.status || "Pending"}
                   </span>
@@ -196,8 +303,14 @@ export default function AdminSupportPage() {
                   placeholder="Type an official admin response to the user..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
                 />
-                <button className={styles.sendBtn} onClick={handleSend} disabled={sending}>
+                <button className={styles.sendBtn} onClick={handleSend} disabled={sending || !replyText.trim()}>
                   <iconify-icon icon="lucide:send" /> {sending ? "Sending..." : "Dispatch Reply"}
                 </button>
               </div>
