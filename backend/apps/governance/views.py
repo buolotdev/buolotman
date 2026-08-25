@@ -610,33 +610,48 @@ def admin_review_delete(request, review_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_support_tickets(request):
-    if getattr(request.user, 'role', '').lower() != 'admin' and not request.user.is_superuser:
+    user_role = str(getattr(request.user, 'role', '')).lower()
+    if user_role != 'admin' and not request.user.is_superuser and not request.user.is_staff:
         return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
         
     from apps.governance.models import SupportTicket
     
-    tickets = SupportTicket.objects.prefetch_related('messages__sender').all().order_by('-created_at')
+    tickets = SupportTicket.objects.prefetch_related('messages__sender', 'client').all().order_by('-created_at')
     data = []
     
     for t in tickets:
         messages = []
         for m in t.messages.all().order_by('created_at'):
+            sender_name = "User"
+            sender_role = "User"
+            avatar_url = "https://i.pravatar.cc/150?img=1"
+            if m.sender:
+                sender_name = f"{m.sender.first_name or ''} {m.sender.last_name or ''}".strip() or m.sender.username
+                sender_role = m.sender.get_role_display() if hasattr(m.sender, 'get_role_display') else str(m.sender.role)
+                if hasattr(m.sender, 'avatar_url') and m.sender.avatar_url:
+                    avatar_url = m.sender.avatar_url
             messages.append({
                 'id': m.id,
-                'sender': f"{m.sender.first_name} {m.sender.last_name}" if m.sender.first_name else m.sender.username,
-                'role': m.sender.get_role_display() if hasattr(m.sender, 'get_role_display') else str(m.sender.role),
-                'avatar': m.sender.avatar_url if hasattr(m.sender, 'avatar_url') and m.sender.avatar_url else "https://i.pravatar.cc/150?img=1",
+                'sender': sender_name,
+                'role': sender_role,
+                'avatar': avatar_url,
                 'time': m.created_at.strftime("%d %b %Y, %I:%M %p"),
                 'body': m.body
             })
             
+        client_name = "Client"
+        client_role = "Client"
+        if t.client:
+            client_name = f"{t.client.first_name or ''} {t.client.last_name or ''}".strip() or t.client.username
+            client_role = t.client.get_role_display() if hasattr(t.client, 'get_role_display') else str(t.client.role)
+
         data.append({
             'id': f"BM-{t.created_at.year}-{t.id:06d}",
             'db_id': t.id,
             'subject': t.subject,
-            'client': f"{t.client.first_name} {t.client.last_name}" if t.client.first_name else t.client.username,
-            'role': t.client.get_role_display() if hasattr(t.client, 'get_role_display') else str(t.client.role),
-            'status': t.get_status_display(),
+            'client': client_name,
+            'role': client_role,
+            'status': t.get_status_display() if hasattr(t, 'get_status_display') else t.status.title(),
             'messages': messages
         })
         
