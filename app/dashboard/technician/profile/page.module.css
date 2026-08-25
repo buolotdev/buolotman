@@ -381,6 +381,9 @@
   }
   .card { padding: 20px 16px; border-radius: 18px; }
   .portfolioGrid { grid-template-columns: 1fr; }
+  .twoCol { grid-template-columns: 1fr; gap: 12px; }
+  .calendarGrid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
 }
+
 
 

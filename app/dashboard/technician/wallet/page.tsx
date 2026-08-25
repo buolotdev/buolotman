@@ -165,17 +165,17 @@ export default function TechnicianWalletPage() {
             <section className={styles.walletOverview}>
               <article className={styles.statCard}>
                 <span>Available Balance</span>
-                <h3>${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <h3>{availableBalance.toLocaleString()} XOF</h3>
                 <small style={{ color: "#16a34a", fontWeight: 600 }}>Ready for withdrawal / upgrade</small>
               </article>
               <article className={styles.statCard}>
                 <span>Held in Escrow</span>
-                <h3>${pendingEscrow.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <h3>{pendingEscrow.toLocaleString()} XOF</h3>
                 <small style={{ color: "#64748b" }}>Released upon milestone sign-off</small>
               </article>
               <article className={styles.statCard}>
                 <span>Total Lifetime Earnings</span>
-                <h3>${totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                <h3>{totalEarnings.toLocaleString()} XOF</h3>
                 <small style={{ color: "#001f3f", fontWeight: 600 }}>100% Escrow Protected</small>
               </article>
             </section>
@@ -219,35 +219,35 @@ export default function TechnicianWalletPage() {
                 <table className={styles.dataTable}>
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Description</th>
                       <th>Type</th>
+                      <th>Description</th>
+                      <th>Date</th>
                       <th>Amount</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {txLoading ? (
-                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>Loading transactions...</td></tr>
+                    {walletLoading || txLoading ? (
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>Loading records...</td></tr>
                     ) : transactionsData.length === 0 ? (
-                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No transactions found yet.</td></tr>
-                    ) : transactionsData.map((tx: any) => {
-                      const date = new Date(tx.created_at || Date.now()).toLocaleDateString();
-                      const desc = tx.description || tx.task_title || `Transaction #${tx.id}`;
-                      const type = tx.type || "credit";
+                      <tr><td colSpan={5} style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>No wallet transactions found.</td></tr>
+                    ) : transactionsData.map((tx: any, idx: number) => {
+                      const isCredit = tx.transaction_type === "credit" || tx.type === "deposit" || tx.type === "payment_received";
                       const amount = parseFloat(tx.amount) || 0;
-                      const status = (tx.status || "completed").toUpperCase();
-                      
+                      const date = tx.created_at ? new Date(tx.created_at).toLocaleDateString() : "Recent";
+                      const desc = tx.description || tx.reference || (isCredit ? "Wallet Top-up / Escrow Payout" : "Withdrawal / Fee Transfer");
+                      const status = tx.status || "Completed";
+
                       return (
-                        <tr key={tx.id}>
-                          <td>{date}</td>
-                          <td><strong>{desc}</strong></td>
-                          <td style={{ textTransform: "capitalize" }}>
-                            <span style={{ color: type === "credit" ? "#16a34a" : "#dc2626", fontWeight: 700 }}>
-                              {type === "credit" ? "+ " : "- "} {type}
-                            </span>
+                        <tr key={tx.id || idx}>
+                          <td>
+                            <strong style={{ color: isCredit ? "#16a34a" : "#001f3f" }}>
+                              {isCredit ? "Deposit / Credit" : "Withdrawal / Debit"}
+                            </strong>
                           </td>
-                          <td>${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td>{desc}</td>
+                          <td>{date}</td>
+                          <td>{amount.toLocaleString()} XOF</td>
                           <td>
                             <span className={`${styles.statusBadge} ${getStatusBadge(status)}`}>
                               {status}
@@ -278,11 +278,11 @@ export default function TechnicianWalletPage() {
             </p>
 
             <div className={styles.formGroup}>
-              <label>Amount (Available: ${availableBalance.toFixed(2)} USD)</label>
+              <label>Amount (Available: {availableBalance.toLocaleString()} XOF)</label>
               <input 
                 type="number" 
                 className={styles.formInput} 
-                placeholder="0.00" 
+                placeholder="0" 
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
               />
@@ -297,7 +297,7 @@ export default function TechnicianWalletPage() {
               >
                 <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange / MTN / Wave)</option>
                 <option value="Direct Bank Wire Transfer">Direct Bank Wire Transfer</option>
-                <option value="PayPal / Stripe">PayPal / International Transfer</option>
+                <option value="International Transfer">International Transfer</option>
               </select>
             </div>
 
@@ -342,11 +342,11 @@ export default function TechnicianWalletPage() {
             </p>
 
             <div className={styles.formGroup}>
-              <label>Deposit Amount (USD)</label>
+              <label>Deposit Amount (XOF)</label>
               <input 
                 type="number" 
                 className={styles.formInput} 
-                placeholder="50" 
+                placeholder="5000" 
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
               />
@@ -386,7 +386,7 @@ export default function TechnicianWalletPage() {
                 onClick={handleDeposit}
                 disabled={depositing || depositSuccess}
               >
-                {depositing ? "Processing..." : `Deposit $${depositAmount} Now`}
+                {depositing ? "Processing..." : `Deposit ${depositAmount || 0} XOF Now`}
               </button>
             </div>
           </div>
