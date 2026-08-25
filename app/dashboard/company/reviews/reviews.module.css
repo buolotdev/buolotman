@@ -222,3 +222,35 @@
 .brandText { display: flex; flex-direction: column; }
 .brandEyebrow { color: rgba(254,254,255,.66); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; display: block; }
 .brandTitle { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .mainWrapper {
+    padding: 16px;
+  }
+  .summaryCard {
+    padding: 24px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    border-radius: 20px;
+  }
+  .summaryLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .averageRating {
+    font-size: 48px;
+  }
+  .reviewCard {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+  .reviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+

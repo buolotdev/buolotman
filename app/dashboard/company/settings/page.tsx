@@ -170,7 +170,7 @@ function CompanySettingsForm({
       {/* PAYMENTS */}
       <section className={styles.card}>
         <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Payments & B-Wallet</h3>
-        <div className={styles.balance}>Current Balance: $245.00</div>
+        <div className={styles.balance}>Current Balance: 245,000 XOF</div>
         <p className={styles.notice}>All payments and withdrawals are processed via B-Wallet securely.</p>
         <button type="button" className={styles.saveBtn} onClick={onOpenWallet} style={{ width: 'auto', padding: '0 24px' }}>
           Manage Payments
@@ -180,17 +180,25 @@ function CompanySettingsForm({
       {/* DANGER ZONE */}
       <section className={styles.card} style={{ border: '1px solid #fee2e2' }}>
         <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24, color: '#ef4444' }}>Danger Zone</h3>
-        <button type="button" className={styles.dangerBtn} onClick={() => window.confirm("Are you sure you want to deactivate your profile?")}>Deactivate Company Profile</button>
-        <button type="button" className={styles.dangerBtn} style={{ background: "#7f1d1d" }} onClick={() => window.confirm("Are you sure you want to delete your account permanently? This action cannot be undone.")}>Delete Account Permanently</button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <button type="button" className={styles.dangerBtn} onClick={() => window.confirm("Are you sure you want to deactivate your profile?")}>Deactivate Company Profile</button>
+          <button type="button" className={styles.dangerBtn} style={{ background: "#7f1d1d" }} onClick={() => window.confirm("Are you sure you want to delete your account permanently? This action cannot be undone.")}>Delete Account Permanently</button>
+        </div>
       </section>
 
       {/* SAVE BUTTON FLOATING OR FIXED */}
-      <div style={{ marginTop: 16, padding: "24px 32px", background: "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(20px)", borderRadius: 20, border: "1px solid rgba(226, 232, 240, 0.8)", display: "flex", gap: 16, alignItems: "center", justifyContent: "space-between", boxShadow: "0 10px 40px rgba(0, 31, 63, 0.04)" }}><div><p style={{margin: 0, fontSize: 14, color: "#64748b"}}>Review your settings before saving.</p></div><div style={{display: "flex", alignItems: "center", gap: 16}}>
-        <button type="button" onClick={submit} disabled={saving} className={styles.saveBtn} style={{ padding: '0 40px', boxShadow: '0 10px 25px rgba(255, 69, 0, 0.4)' }}>
-          {saving ? "Saving..." : "Save all changes"}
-        </button>
-        {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600 }}>✔ Settings updated!</span>}
-      </div></div>    </div>  );}
+      <div className={styles.saveBar}>
+        <div><p style={{margin: 0, fontSize: 14, color: "#64748b"}}>Review your settings before saving.</p></div>
+        <div style={{display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap"}}>
+          <button type="button" onClick={submit} disabled={saving} className={styles.saveBtn} style={{ padding: '0 32px', boxShadow: '0 10px 25px rgba(255, 69, 0, 0.4)' }}>
+            {saving ? "Saving..." : "Save all changes"}
+          </button>
+          {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600 }}>✔ Settings updated!</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // WALLET MODAL COMPONENT (Dummy/Simulation as requested)
 function WalletModal({ onClose }: { onClose: () => void }) {

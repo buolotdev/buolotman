@@ -146,3 +146,35 @@
 }
 .activeStatus { background: #e6f4ea; color: #1e8e3e; }
 .inactiveStatus { background: #fdecea; color: #c0392b; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+  .overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .overview {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .card {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+  .twoCol {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .table {
+    min-width: 520px;
+  }
+  .primary, .outline {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+}
+

@@ -324,3 +324,53 @@
   border-top: 1px solid #e2e8f0;
   margin: 32px 0;
 }
+
+.saveBar {
+  margin-top: 16px;
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 10px 40px rgba(0, 31, 63, 0.04);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .mainWrapper {
+    padding: 16px;
+  }
+  .card {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+  .twoCol {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .dangerBtn,
+  .saveBtn,
+  .outlineBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .modalContent {
+    padding: 24px 16px;
+    border-radius: 18px;
+  }
+  .saveBar {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .saveBar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
