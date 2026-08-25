@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.text import slugify
-from .models import Task, TaskAttachment, Bid, Question, Category, Skill, ServiceInquiry
+from .models import Task, TaskAttachment, Bid, Question, Category, Skill, ServiceInquiry, Milestone
 
 
 class CategorySerializer(serializers.ModelSerializer):
