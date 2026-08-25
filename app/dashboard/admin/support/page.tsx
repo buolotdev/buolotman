@@ -23,6 +23,14 @@ export default function AdminSupportPage() {
     }
   }, [fetchedTickets]);
 
+  // Auto-sync support tickets every 8 seconds for real-time helpdesk
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [refetch]);
+
   const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
     setSending(true);

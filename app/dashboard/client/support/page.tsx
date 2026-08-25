@@ -33,9 +33,23 @@ export default function ClientSupportPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [newSubject, setNewSubject] = useState("");
   const [sending, setSending] = useState(false);
-
   const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getMySupportTickets(), []);
   const tickets = Array.isArray(fetchedTickets) ? fetchedTickets : [];
+
+  // Clear stale mock storage from previous local builds
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mock_support_tickets");
+    }
+  }, []);
+
+  // Auto-sync support tickets every 8 seconds for live replies
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [refetch]);
 
   React.useEffect(() => {
     if (tickets.length > 0) {
@@ -56,8 +70,9 @@ export default function ClientSupportPage() {
       await api.replyMySupportTicket(activeTicket.db_id || activeTicket.id, replyText);
       setReplyText("");
       refetch();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to send reply", err);
+      alert(err.message || "Failed to send reply.");
     } finally {
       setSending(false);
     }
@@ -78,8 +93,9 @@ export default function ClientSupportPage() {
       if (res) {
         setActiveTicket(res);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to create ticket", err);
+      alert(err.message || "Failed to create ticket. Please check connection.");
     } finally {
       setSending(false);
     }
