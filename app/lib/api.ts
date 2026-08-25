@@ -424,6 +424,9 @@ export const api = {
     request<any>(`/governance/admin-dashboard-stats/`),
   getAdminSupportTickets: () => request<any[]>('/governance/admin-support/'),
   replySupportTicket: (ticketId: number, body: string) => request<any>(`/governance/admin-support/${ticketId}/reply/`, { method: "POST", body: JSON.stringify({ body }) }),
+  getMySupportTickets: () => request<any[]>('/governance/my-support/'),
+  createSupportTicket: (data: { subject: string; body: string }) => request<any>('/governance/my-support/', { method: "POST", body: JSON.stringify(data) }),
+  replyMySupportTicket: (ticketId: number, body: string) => request<any>(`/governance/my-support/${ticketId}/reply/`, { method: "POST", body: JSON.stringify({ body }) }),
   getAdminConversations: () => request<any[]>('/messaging/admin/conversations/'),
   getAdminProjects: () =>
     request<any>(`/governance/admin-projects-monitoring/`),

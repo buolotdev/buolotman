@@ -675,6 +675,101 @@ def admin_support_ticket_reply(request, ticket_id):
         'time': msg.created_at.strftime("%d %b %Y, %I:%M %p"),
         'body': msg.body
     })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def user_support_tickets(request):
+    from apps.governance.models import SupportTicket, SupportMessage
+    if request.method == 'GET':
+        tickets = SupportTicket.objects.filter(client=request.user).prefetch_related('messages__sender').order_by('-created_at')
+        data = []
+        for t in tickets:
+            messages = []
+            for m in t.messages.all().order_by('created_at'):
+                messages.append({
+                    'id': m.id,
+                    'sender': "Me" if m.sender == request.user else "Support Team",
+                    'role': "Client" if m.sender == request.user else "Support Admin",
+                    'avatar': m.sender.avatar_url if hasattr(m.sender, 'avatar_url') and m.sender.avatar_url else "https://i.pravatar.cc/150?img=11",
+                    'time': m.created_at.strftime("%d %b %Y, %I:%M %p"),
+                    'body': m.body
+                })
+            data.append({
+                'id': f"BM-{t.created_at.year}-{t.id:06d}",
+                'db_id': t.id,
+                'subject': t.subject,
+                'client': "Me",
+                'status': t.get_status_display(),
+                'statusClass': 'statusPending' if t.status == 'pending' else ('statusResolved' if t.status == 'resolved' else 'statusAwaiting'),
+                'messages': messages,
+            })
+        return Response(data)
+
+    elif request.method == 'POST':
+        subject = request.data.get('subject')
+        body = request.data.get('body')
+        if not subject or not body:
+            return Response({'error': 'Subject and body are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        ticket = SupportTicket.objects.create(
+            subject=subject,
+            client=request.user,
+            status='pending',
+        )
+        SupportMessage.objects.create(
+            ticket=ticket,
+            sender=request.user,
+            body=body,
+        )
+        return Response({
+            'id': f"BM-{ticket.created_at.year}-{ticket.id:06d}",
+            'db_id': ticket.id,
+            'subject': ticket.subject,
+            'client': "Me",
+            'status': 'Pending',
+            'statusClass': 'statusPending',
+            'messages': [{
+                'id': 1,
+                'sender': "Me",
+                'role': "Client",
+                'avatar': "https://i.pravatar.cc/150?img=11",
+                'time': "Just now",
+                'body': body,
+            }],
+        }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_support_ticket_reply(request, ticket_id):
+    from apps.governance.models import SupportTicket, SupportMessage
+    ticket = SupportTicket.objects.filter(id=ticket_id, client=request.user).first()
+    if not ticket:
+        return Response({'detail': 'Ticket not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    body = request.data.get('body')
+    if not body:
+        return Response({'detail': 'Message body is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    msg = SupportMessage.objects.create(
+        ticket=ticket,
+        sender=request.user,
+        body=body,
+    )
+    ticket.status = 'pending'
+    ticket.save(update_fields=['status', 'updated_at'])
+
+    return Response({
+        'id': msg.id,
+        'sender': "Me",
+        'role': "Client",
+        'avatar': "https://i.pravatar.cc/150?img=11",
+        'time': msg.created_at.strftime("%d %b %Y, %I:%M %p"),
+        'body': msg.body,
+    })
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def platform_settings_list(request):

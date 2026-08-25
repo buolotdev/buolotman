@@ -21,8 +21,8 @@ const navItems = [
   { key: "explore", label: "Service Providers", icon: "lucide:users", href: "/service-providers/technicians", match: (p: string) => p.startsWith("/service-providers") },
 ];
 
-// INITIAL TICKETS - Starts empty for real production users
-const INITIAL_TICKETS: any[] = [];
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 
 export default function ClientSupportPage() {
   const router = useRouter();
@@ -32,90 +32,57 @@ export default function ClientSupportPage() {
   const [replyText, setReplyText] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [newSubject, setNewSubject] = useState("");
+  const [sending, setSending] = useState(false);
 
-  const [allTickets, setAllTickets] = useState<any[]>([]);
-
-  // The client only sees tickets where client === "Me"
-  const tickets = allTickets.filter(t => t.client === "Me");
+  const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getMySupportTickets(), []);
+  const tickets = Array.isArray(fetchedTickets) ? fetchedTickets : [];
 
   React.useEffect(() => {
-    const loadTickets = () => {
-      const saved = localStorage.getItem("mock_support_tickets");
-      let currentTickets = INITIAL_TICKETS;
-      if (saved) {
-        currentTickets = JSON.parse(saved);
-      } else {
-        localStorage.setItem("mock_support_tickets", JSON.stringify(INITIAL_TICKETS));
-      }
-      
-      setAllTickets(currentTickets);
-      
-      // Update active ticket to match the newly loaded data
+    if (tickets.length > 0) {
       setActiveTicket((prev: any) => {
-        if (!prev) return null;
-        const updated = currentTickets.find((t: any) => t.id === prev.id);
-        return updated || null;
+        if (!prev) return tickets[0];
+        const updated = tickets.find((t: any) => (t.db_id || t.id) === (prev.db_id || prev.id));
+        return updated || tickets[0];
       });
-    };
-    
-    loadTickets();
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "mock_support_tickets") {
-        loadTickets();
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    } else {
+      setActiveTicket(null);
+    }
+  }, [fetchedTickets]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
-    const newMsg = {
-      id: Date.now(),
-      sender: "Me",
-      role: "Client",
-      avatar: "https://i.pravatar.cc/150?img=11",
-      time: "Just now",
-      body: replyText
-    };
-    
-    const updatedTicket = { ...activeTicket, messages: [...activeTicket.messages, newMsg] };
-    const updatedTickets = allTickets.map(t => t.id === activeTicket.id ? updatedTicket : t);
-    
-    setAllTickets(updatedTickets);
-    setActiveTicket(updatedTicket);
-    setReplyText("");
-    localStorage.setItem("mock_support_tickets", JSON.stringify(updatedTickets));
+    setSending(true);
+    try {
+      await api.replyMySupportTicket(activeTicket.db_id || activeTicket.id, replyText);
+      setReplyText("");
+      refetch();
+    } catch (err) {
+      console.error("Failed to send reply", err);
+    } finally {
+      setSending(false);
+    }
   };
 
-  const handleCreateTicket = () => {
+  const handleCreateTicket = async () => {
     if (!newSubject.trim() || !replyText.trim()) return;
-    const newTicket = {
-      id: `BM-2026-000${Math.floor(Math.random() * 900) + 100}`,
-      subject: newSubject,
-      client: "Me",
-      status: "Pending",
-      statusClass: styles.statusPending,
-      messages: [
-        {
-          id: 1,
-          sender: "Me",
-          role: "Client",
-          avatar: "https://i.pravatar.cc/150?img=11",
-          time: "Just now",
-          body: replyText
-        }
-      ]
-    };
-    
-    const updatedTickets = [newTicket, ...allTickets];
-    setAllTickets(updatedTickets);
-    setActiveTicket(newTicket);
-    setIsCreating(false);
-    setReplyText("");
-    setNewSubject("");
-    localStorage.setItem("mock_support_tickets", JSON.stringify(updatedTickets));
+    setSending(true);
+    try {
+      const res = await api.createSupportTicket({
+        subject: newSubject,
+        body: replyText,
+      });
+      setIsCreating(false);
+      setReplyText("");
+      setNewSubject("");
+      refetch();
+      if (res) {
+        setActiveTicket(res);
+      }
+    } catch (err) {
+      console.error("Failed to create ticket", err);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
