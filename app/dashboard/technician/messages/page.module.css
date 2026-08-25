@@ -707,38 +707,45 @@
   color: #cbd5e1;
 }
 
-@media (max-width: 980px) {
-  .sidebar {
-    width: 330px;
-    min-width: 330px;
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .topbar {
-    padding: 0 20px;
+    padding: 0 16px;
   }
 
-  .dashboardLink span {
-    display: none;
-  }
-
-  .main {
-    position: relative;
-  }
-
-  .sidebar,
-  .chatPanel {
+  .mainArea {
     width: 100%;
-    min-width: 0;
+  }
+
+  .chatAppContainer {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .chatPanel {
+    width: 100% !important;
+    min-width: 100% !important;
   }
 
   .sidebarHiddenMobile {
-    display: none;
+    display: none !important;
   }
 
   .chatPanelHiddenMobile {
-    display: none;
+    display: none !important;
   }
 
   .mobileBackButton {
@@ -748,20 +755,20 @@
   }
 
   .chatHeader {
-    padding: 16px 20px;
+    padding: 14px 16px;
   }
 
   .messagesWrap {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .inputBar {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .bubbleGroup {
-    max-width: 84%;
+    max-width: 88%;
   }
-}
+}

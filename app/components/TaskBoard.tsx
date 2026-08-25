@@ -330,8 +330,8 @@ export default function TaskBoard() {
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: "12.5px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Sort by:</span>
+        <div className={styles.sortWrap}>
+          <span className={styles.sortLabel}>Sort by:</span>
           <div className={styles.sortSelectWrapper}>
             <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="newest">Newest First</option>

@@ -42,18 +42,22 @@
 .tableWrapper {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: block;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  min-width: 600px;
 }
 
 .table th, .table td {
   padding: 16px;
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
+  white-space: nowrap;
 }
 
 .table th {

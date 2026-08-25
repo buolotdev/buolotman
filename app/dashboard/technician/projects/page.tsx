@@ -58,7 +58,7 @@ export default function TechnicianProjectsPage() {
                     {loading ? (
                       <tr><td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>Loading projects...</td></tr>
                     ) : activeBids.length === 0 ? (
-                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>You have no active projects yet.</td></tr>
+                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px 16px", color: "#64748b", whiteSpace: "normal" }}>You have no active projects yet.</td></tr>
                     ) : activeBids.map((bid: any) => {
                       const taskName = bid.task_title || bid.task?.title || `Task #${bid.task_id || bid.task?.id || "Unknown"}`;
                       const clientId = bid.task?.client || "Unknown";
