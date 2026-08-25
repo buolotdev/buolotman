@@ -12,132 +12,195 @@ export default function HowItWorksPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .hiw-container {
           max-width: 1450px;
-          margin: 40px auto 180px;
+          margin: 40px auto 150px;
           padding: 0 24px;
         }
         
         .hiw-hero {
-          background: #001F3F;
+          background: linear-gradient(135deg, #001F3F, #0b3c6f);
           color: #fff;
-          padding: 95px 70px;
-          border-radius: 42px;
+          padding: 85px 65px;
+          border-radius: 36px;
+          box-shadow: 0 20px 50px rgba(0, 31, 63, 0.15);
         }
         
         .hiw-hero h1 {
           margin: 0;
-          font-size: 52px;
+          font-size: 48px;
+          font-weight: 800;
+          line-height: 1.15;
         }
         
         .hiw-hero p {
           margin-top: 18px;
-          font-size: 19px;
+          font-size: 18px;
           max-width: 1150px;
-          opacity: 0.96;
+          opacity: 0.95;
+          line-height: 1.6;
         }
         
         .hiw-anchor-menu {
           background: #fff;
           border-radius: 28px;
-          margin-top: -40px;
-          padding: 26px 34px;
+          margin-top: -36px;
+          padding: 20px 30px;
           box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
           display: flex;
           flex-wrap: wrap;
-          gap: 18px;
+          gap: 12px;
           justify-content: center;
           position: relative;
           z-index: 10;
+          border: 1px solid #e2e8f0;
         }
         
         .hiw-anchor-menu a {
-          background: #f2f6fb;
-          padding: 12px 22px;
+          background: #f1f5f9;
+          padding: 10px 20px;
           border-radius: 999px;
           color: #001F3F;
-          font-weight: 800;
+          font-weight: 700;
+          font-size: 14px;
           text-decoration: none;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
+          white-space: nowrap;
         }
         
         .hiw-anchor-menu a:hover {
           background: #FF4500;
           color: #fff;
+          transform: translateY(-2px);
         }
         
         .hiw-section {
-          margin-top: 120px;
+          margin-top: 90px;
         }
         
         .hiw-section h2 {
-          font-size: 42px;
+          font-size: 34px;
           color: #001F3F;
-          margin-bottom: 22px;
+          margin-bottom: 20px;
+          font-weight: 800;
         }
         
         .hiw-card {
           background: #0F2C4A;
           color: #fff;
-          border-radius: 34px;
-          padding: 44px;
-          margin-top: 34px;
-          box-shadow: 0 26px 60px rgba(0, 0, 0, 0.06);
+          border-radius: 28px;
+          padding: 38px 32px;
+          margin-top: 28px;
+          box-shadow: 0 20px 50px rgba(0, 31, 63, 0.08);
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
         
         .hiw-card h3 {
-          font-size: 28px;
+          font-size: 24px;
           color: #FF4500;
           margin-top: 0;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
+          font-weight: 800;
         }
         
         .hiw-card p {
-          color: rgba(255, 255, 255, 0.85);
-          line-height: 1.9;
-          font-size: 16px;
+          color: rgba(255, 255, 255, 0.88);
+          line-height: 1.8;
+          font-size: 15.5px;
         }
         
         .hiw-card ul {
-          padding-left: 22px;
-          margin-top: 20px;
+          padding-left: 20px;
+          margin-top: 16px;
           color: rgba(255, 255, 255, 0.9);
         }
         
         .hiw-card li {
-          margin-bottom: 12px;
-          font-size: 16px;
+          margin-bottom: 10px;
+          font-size: 15px;
+          line-height: 1.5;
         }
         
         .hiw-card a {
-          color: #FF4500;
+          color: #ff7b47;
           font-weight: 700;
           text-decoration: none;
           display: inline-block;
           margin-top: 10px;
+          transition: color 0.2s;
         }
         
         .hiw-card a:hover {
+          color: #ff9d75;
           text-decoration: underline;
         }
         
         .hiw-divider {
-          margin-top: 120px;
+          margin-top: 80px;
           border-top: 2px dashed #cbd6e2;
-          padding-top: 120px;
+          padding-top: 80px;
         }
         
         @media (max-width: 768px) {
+          .hiw-container {
+            margin: 20px auto 70px;
+            padding: 0 16px;
+          }
           .hiw-hero {
-            padding: 50px 30px;
+            padding: 36px 20px;
+            border-radius: 22px;
           }
           .hiw-hero h1 {
-            font-size: 36px;
+            font-size: 26px;
+            line-height: 1.25;
+          }
+          .hiw-hero p {
+            font-size: 14.5px;
+            margin-top: 12px;
+            line-height: 1.5;
           }
           .hiw-anchor-menu {
-            padding: 20px;
+            margin-top: -24px;
+            padding: 12px;
+            border-radius: 18px;
+            gap: 8px;
+            justify-content: flex-start;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .hiw-anchor-menu::-webkit-scrollbar {
+            display: none;
+          }
+          .hiw-anchor-menu a {
+            padding: 8px 14px;
+            font-size: 13px;
+            flex-shrink: 0;
+          }
+          .hiw-section {
+            margin-top: 48px;
+          }
+          .hiw-section h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
           }
           .hiw-card {
-            padding: 30px;
+            padding: 24px 18px;
+            border-radius: 20px;
+            margin-top: 18px;
+          }
+          .hiw-card h3 {
+            font-size: 19px;
+            margin-bottom: 12px;
+          }
+          .hiw-card p {
+            font-size: 14px;
+          }
+          .hiw-card li {
+            font-size: 13.5px;
+          }
+          .hiw-divider {
+            margin-top: 48px;
+            padding-top: 48px;
           }
         }
       `}} />

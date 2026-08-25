@@ -7,7 +7,7 @@
 /* ================= HERO SECTION ================= */
 .hero {
   background: radial-gradient(circle at 50% 0%, #0b3c6f 0%, #001F3F 70%);
-  padding: 100px 24px;
+  padding: 90px 24px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -21,16 +21,16 @@
 }
 
 .heroTitle {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   font-weight: 800;
   color: #ffffff;
-  margin-bottom: 20px;
-  line-height: 1.2;
+  margin-bottom: 18px;
+  line-height: 1.15;
 }
 
 .heroSubtitle {
-  font-size: 1.2rem;
-  color: #94a3b8;
+  font-size: 1.15rem;
+  color: #cbd5e1;
   margin-bottom: 0;
   line-height: 1.6;
 }
@@ -45,18 +45,18 @@
 
 .sectionHeader {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 48px;
 }
 
 .sectionTitle {
   font-size: 2.2rem;
   font-weight: 800;
   color: #001F3F;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 
 .sectionDesc {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: #64748b;
   line-height: 1.6;
   max-width: 750px;
@@ -71,16 +71,24 @@
   align-items: stretch;
 }
 
-@media (max-width: 968px) {
+@media (max-width: 1024px) {
+  .grid3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 640px) {
   .grid3 {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
 .card {
   background: #ffffff;
   border-radius: 28px;
-  padding: 40px 30px;
+  padding: 36px 28px;
   box-shadow: 0 15px 40px rgba(0, 31, 63, 0.05);
   border: 1px solid #e2e8f0;
   position: relative;
@@ -90,16 +98,16 @@
 }
 
 .card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   box-shadow: 0 25px 50px rgba(0, 31, 63, 0.1);
   border-color: #cbd5e1;
 }
 
 .cardTitle {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #001F3F;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .badge {
@@ -107,11 +115,11 @@
   align-self: flex-start;
   background: #eef2ff;
   color: #001F3F;
-  padding: 8px 18px;
+  padding: 7px 16px;
   border-radius: 999px;
   font-weight: 800;
-  font-size: 13px;
-  margin-bottom: 24px;
+  font-size: 12.5px;
+  margin-bottom: 20px;
 }
 
 .featureList {
@@ -120,7 +128,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .checkItem {
@@ -131,14 +139,15 @@
 
 .checkIcon {
   color: #FF4500;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .checkItem span {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #475569;
   line-height: 1.5;
   font-weight: 500;
@@ -160,7 +169,7 @@
 .flowStep {
   background: #ffffff;
   border-radius: 24px;
-  padding: 30px;
+  padding: 28px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 10px 30px rgba(0, 31, 63, 0.03);
 }
@@ -169,17 +178,17 @@
   font-weight: 800;
   color: #FF4500;
   font-size: 12px;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .flowStep p {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: #001F3F;
   font-weight: 700;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 /* ================= COMPARE TABLE ================= */
@@ -188,20 +197,22 @@
   border-radius: 28px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 15px 40px rgba(0, 31, 63, 0.05);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .compareTable {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 600px;
 }
 
 .compareTable th,
 .compareTable td {
-  padding: 22px 28px;
+  padding: 18px 24px;
   border-bottom: 1px solid #e2e8f0;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .compareTable tr:last-child td {
@@ -226,18 +237,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 36px;
   margin-top: 80px;
   margin-bottom: 120px;
   box-shadow: 0 20px 50px rgba(0, 31, 63, 0.15);
-}
-
-@media (max-width: 968px) {
-  .cta {
-    flex-direction: column;
-    text-align: center;
-    padding: 50px 30px;
-  }
 }
 
 .ctaTitle {
@@ -245,11 +248,11 @@
   font-weight: 800;
   color: #ffffff;
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .ctaDesc {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #cbd5e1;
   margin-bottom: 0;
   max-width: 600px;
@@ -262,7 +265,7 @@
   border: none;
   border-radius: 16px;
   padding: 18px 36px;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
@@ -270,6 +273,7 @@
   gap: 10px;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .ctaBtn:hover {
@@ -337,7 +341,7 @@
   font-weight: 800;
   color: #001F3F;
   margin-top: 0;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .successMsg {
@@ -355,7 +359,7 @@
 .modalForm {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .formGroup {
@@ -396,7 +400,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .submitBtn:hover {
@@ -407,3 +411,85 @@
   background: #94a3b8;
   cursor: not-allowed;
 }
+
+/* ================= MOBILE MEDIA QUERIES ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  .hero {
+    padding: 40px 16px;
+  }
+  .heroTitle {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .heroSubtitle {
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .section {
+    margin-top: 48px;
+    margin-bottom: 48px;
+  }
+  .sectionHeader {
+    margin-bottom: 32px;
+  }
+  .sectionTitle {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .sectionDesc {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+  .cardTitle {
+    font-size: 18px;
+  }
+  .checkItem span {
+    font-size: 14px;
+  }
+  .flowStep {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+  .compareTable th,
+  .compareTable td {
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .cta {
+    flex-direction: column;
+    text-align: center;
+    padding: 36px 20px;
+    border-radius: 24px;
+    margin-top: 50px;
+    margin-bottom: 60px;
+    gap: 24px;
+  }
+  .ctaTitle {
+    font-size: 22px;
+  }
+  .ctaDesc {
+    font-size: 14px;
+  }
+  .ctaBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+  .modalContent {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+  .modalTitle {
+    font-size: 22px;
+  }
+}
+

@@ -9,18 +9,22 @@
   color: #fff;
   padding: 85px 65px;
   border-radius: 36px;
+  box-shadow: 0 20px 50px rgba(0, 31, 63, 0.15);
 }
 
 .hero h1 {
   margin: 0;
   font-size: 46px;
+  font-weight: 800;
+  line-height: 1.15;
 }
 
 .hero p {
   margin-top: 16px;
   font-size: 18px;
-  opacity: 0.96;
+  opacity: 0.95;
   max-width: 950px;
+  line-height: 1.6;
 }
 
 .section {
@@ -28,58 +32,80 @@
 }
 
 .section h2 {
-  font-size: 36px;
+  font-size: 34px;
   color: #001F3F;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
+  font-weight: 800;
 }
 
 .section p {
   color: #6b7280;
-  line-height: 1.9;
+  line-height: 1.8;
   max-width: 1100px;
+  font-size: 17px;
 }
 
 .grid3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  gap: 30px;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
+  .grid3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 640px) {
   .grid3 {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
 .card {
   background: #ffffff;
-  border-radius: 30px;
-  padding: 40px;
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.06);
+  border-radius: 28px;
+  padding: 36px 30px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .card h3 {
   margin-top: 0;
   color: #001F3F;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 18px;
 }
 
 .card ul {
-  padding-left: 22px;
-  color: #1a1a1a;
+  padding-left: 20px;
+  color: #475569;
 }
 
 .card li {
   margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .flow {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
+  gap: 18px;
   margin-top: 36px;
 }
 
 @media (max-width: 1100px) {
+  .flow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
   .flow {
     grid-template-columns: 1fr;
   }
@@ -87,29 +113,32 @@
 
 .flowStep {
   background: #fff;
-  border-radius: 24px;
-  padding: 26px;
+  border-radius: 22px;
+  padding: 24px;
   border: 1.5px solid #e4e7ec;
+  box-shadow: 0 8px 24px rgba(0, 31, 63, 0.03);
 }
 
 .flowStep span {
   font-weight: 900;
   color: #FF4500;
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .flowStep p {
   margin: 0;
-  font-size: 0.9rem;
-  color: #1a1a1a;
+  font-size: 14.5px;
+  color: #333;
   line-height: 1.5;
+  font-weight: 500;
 }
 
 .accordionItem {
   border-top: 1px solid #e4e7ec;
-  padding: 24px 0;
+  padding: 22px 0;
   cursor: pointer;
 }
 
@@ -119,43 +148,49 @@
 }
 
 .accordionTitle {
-  font-weight: 900;
+  font-weight: 800;
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #001F3F;
+  font-size: 17px;
 }
 
 .accordionContent {
-  margin-top: 16px;
+  margin-top: 14px;
   color: #6b7280;
-  line-height: 1.85;
+  line-height: 1.75;
+  font-size: 15px;
 }
 
 .compare {
   overflow-x: auto;
   margin-top: 40px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .compareTable {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 26px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  min-width: 600px;
 }
 
 .compareTable th, .compareTable td {
-  padding: 18px 20px;
-  border-bottom: 1px solid #e4e7ec;
+  padding: 16px 22px;
   text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
 }
 
 .compareTable th {
-  background: #f2f6fb;
-  font-weight: 900;
+  background: #f8fafc;
   color: #001F3F;
+  font-weight: 800;
 }
 
 .compareTable tr:last-child td {
@@ -165,46 +200,124 @@
 .cta {
   background: linear-gradient(135deg, #001F3F, #0b3c6f);
   color: #fff;
-  padding: 70px;
-  border-radius: 38px;
-  margin-top: 100px;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  padding: 60px 50px;
+  border-radius: 36px;
+  margin-top: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 36px;
-}
-
-@media (max-width: 1000px) {
-  .cta {
-    grid-template-columns: 1fr;
-  }
+  box-shadow: 0 20px 50px rgba(0, 31, 63, 0.15);
 }
 
 .cta h2 {
+  font-size: 30px;
+  font-weight: 800;
   margin-top: 0;
-  font-size: 36px;
+  margin-bottom: 12px;
 }
 
-.cta button {
-  background: #FF4500;
-  border: none;
-  border-radius: 26px;
-  padding: 22px 34px;
+.cta p {
   font-size: 16px;
-  font-weight: 900;
+  opacity: 0.92;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 650px;
+}
+
+.ctaBtn {
+  background: #FF4500;
   color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 18px 36px;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-  max-width: 250px;
+  transition: transform 0.2s, background 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.cta button:hover {
+.ctaBtn:hover {
+  background: #e63e00;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 69, 0, 0.3);
 }
 
-.ctaRight {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ================= MOBILE MEDIA QUERIES ================= */
+@media (max-width: 768px) {
+  .container {
+    margin: 20px auto 70px;
+    padding: 0 16px;
+  }
+  .hero {
+    padding: 36px 20px;
+    border-radius: 22px;
+  }
+  .hero h1 {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .hero p {
+    font-size: 14.5px;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  .section {
+    margin-top: 48px;
+  }
+  .section h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  .section p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+  .card h3 {
+    font-size: 18px;
+  }
+  .card li {
+    font-size: 14px;
+  }
+  .flowStep {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  .accordionTitle {
+    font-size: 15px;
+  }
+  .accordionContent {
+    font-size: 14px;
+  }
+  .compareTable th, .compareTable td {
+    padding: 12px 14px;
+    font-size: 13.5px;
+  }
+  .cta {
+    flex-direction: column;
+    text-align: center;
+    padding: 36px 20px;
+    border-radius: 24px;
+    margin-top: 50px;
+    gap: 24px;
+  }
+  .cta h2 {
+    font-size: 22px;
+  }
+  .cta p {
+    font-size: 14px;
+  }
+  .ctaBtn {
+    width: 100%;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
 }
+
