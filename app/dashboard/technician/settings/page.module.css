@@ -375,11 +375,47 @@
   }
   
   .content {
-    padding: 24px 16px;
+    padding: 16px;
+  }
+
+  .heroBody {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    margin-top: -40px;
+    gap: 16px;
+  }
+
+  .identityBlock {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .avatarLarge {
+    width: 80px;
+    height: 80px;
+    font-size: 26px;
+  }
+
+  .nameRow h1 {
+    font-size: 22px;
+  }
+
+  .settingsCard {
+    padding: 20px 16px;
+    border-radius: 18px;
   }
 
   .twoCol {
     grid-template-columns: 1fr;
     gap: 0;
   }
+
+  .btnPrimary,
+  .btnOutline,
+  .btnDanger {
+    width: 100%;
+  }
 }
+

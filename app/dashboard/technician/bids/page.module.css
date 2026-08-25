@@ -98,5 +98,25 @@
 .pageButtonActive { background: #001f3f; color: #fff; border-color: #001f3f; }
 .pageButton:disabled { opacity: .5; }
 .emptyState { padding: 32px 24px; border: 1px solid #e2e8f0; border-radius: 20px; background: #fff; color: #64748b; text-align: center; font-size: 14px; font-weight: 600; }
-@media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } .sidebar { position: fixed; top: 0; left: 0; width: min(320px, calc(100vw - 32px)); transform: translateX(-100%); transition: transform .2s ease; z-index: 50; } .sidebarOpen { transform: translateX(0); } .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; } }
-@media (max-width: 760px) { .topbar, .content { padding-left: 20px; padding-right: 20px; } .topbar { flex-direction: column; align-items: stretch; } .topbarLeft, .topbarActions { width: 100%; } .topbarActions { justify-content: space-between; } .searchBox { min-width: 0; width: 100%; } .pageHeader, .toolbar, .bidHeader, .offerBox, .bidFooter, .actionRow { flex-direction: column; align-items: stretch; } .primaryButton, .outlineButton, .primarySmallButton { width: 100%; } .offerPrice { text-align: left; } }
+@media (max-width: 1080px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, calc(100vw - 32px));
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+  }
+  .sidebarOpen { transform: translateX(0); }
+  .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; }
+}
+@media (max-width: 768px) {
+  .content { padding: 16px; gap: 20px; }
+  .pageHeader, .toolbar, .bidHeader, .offerBox, .bidFooter, .actionRow { flex-direction: column; align-items: stretch; gap: 12px; }
+  .primaryButton, .outlineButton, .primarySmallButton { width: 100%; justify-content: center; }
+  .offerPrice { text-align: left; }
+  .bidCard { padding: 18px 14px; border-radius: 18px; }
+}
+

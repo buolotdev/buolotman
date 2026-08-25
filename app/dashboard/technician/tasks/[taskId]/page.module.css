@@ -484,22 +484,22 @@
   }
 }
 
-@media (max-width: 760px) {
-  .topbar,
-  .container {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
+@media (max-width: 768px) {
   .topbar {
+    padding: 12px 16px;
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+
+  .container {
+    padding: 16px;
   }
 
   .topbarLeft,
   .topbarRight {
-    flex-direction: column;
-    align-items: stretch;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .topbarLink,
@@ -510,11 +510,13 @@
 
   .detailCard,
   .sideCard {
-    padding: 22px;
+    padding: 18px 14px;
+    border-radius: 18px;
   }
 
   .title {
-    font-size: 30px;
+    font-size: 22px;
+    line-height: 1.25;
   }
 
   .metaGrid {
@@ -525,3 +527,4 @@
     flex-direction: column;
   }
 }
+
