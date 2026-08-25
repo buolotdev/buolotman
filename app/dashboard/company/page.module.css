@@ -197,6 +197,44 @@
   transform: translateY(-1px);
 }
 
-@media (max-width: 1280px) { .statsGrid, .twoColumnGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .content { padding: 20px; } .statsGrid, .twoColumnGrid { grid-template-columns: 1fr; } .welcomeActions { width: 100%; flex-direction: column; } .primaryButton, .secondaryButton { width: 100%; } }
+@media (max-width: 1280px) {
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .twoColumnGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .content { padding: 16px; gap: 20px; }
+  .welcomeSection {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 18px;
+    border-radius: 20px;
+    gap: 18px;
+  }
+  .welcomeTitle { font-size: 24px; }
+  .welcomeSubtitle { font-size: 14px; }
+  .welcomeActions { width: 100%; flex-direction: column; gap: 10px; }
+  .primaryButton, .secondaryButton { width: 100%; justify-content: center; }
+
+  .accountStatusSection { padding: 18px 14px; border-radius: 18px; }
+  .verifiedNotice { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 14px; }
+  .uploadCtaBtn { width: 100%; justify-content: center; }
+
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .statCard { padding: 16px 12px; gap: 12px; border-radius: 18px; }
+  .statIcon { width: 44px; height: 44px; }
+  .statIcon iconify-icon { font-size: 20px; }
+  .statCard .statValue { font-size: 22px; }
+  .statCard p { font-size: 12px; }
+
+  .card { padding: 18px 14px; border-radius: 18px; }
+  .table { min-width: 520px; }
+  .actionGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr; }
+  .welcomeTitle { font-size: 20px; }
+}
+
 
