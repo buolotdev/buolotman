@@ -117,8 +117,32 @@
 .taskAside { display: flex; flex-direction: column; gap: 14px; align-items: flex-end; }
 .proChip { padding: 10px 14px; border-radius: 999px; background: #f1f5f9; color: #001f3f; font-size: 13px; font-weight: 700; }
 .openButton { min-height: 44px; width: 100%; border-radius: 14px; background: #001f3f; color: #fff; }
-@media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } .sidebar { position: fixed; top: 0; left: 0; width: min(320px, calc(100vw - 32px)); transform: translateX(-100%); transition: transform .2s ease; z-index: 50; } .sidebarOpen { transform: translateX(0); } .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; } .taskCard { grid-template-columns: 1fr; } .taskAside { align-items: stretch; } }
-@media (max-width: 760px) { .topbar, .content { padding-left: 20px; padding-right: 20px; } .topbar { flex-direction: column; align-items: stretch; } .topbarLeft, .topbarActions { width: 100%; } .topbarActions { justify-content: space-between; } .searchBar { min-width: 0; width: 100%; } .hero { align-items: flex-start; } .primaryButton { width: 100%; } }
+@media (max-width: 1080px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, calc(100vw - 32px));
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 100;
+  }
+  .sidebarOpen { transform: translateX(0); }
+  .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; }
+  .taskCard { grid-template-columns: 1fr; gap: 18px; }
+  .taskAside { align-items: stretch; }
+}
+@media (max-width: 768px) {
+  .content { padding: 16px; gap: 20px; }
+  .hero { align-items: flex-start; gap: 16px; }
+  .hero h2 { font-size: 24px; }
+  .hero p { font-size: 14px; }
+  .primaryButton { width: 100%; justify-content: center; }
+  .taskCard { padding: 18px 16px; border-radius: 18px; }
+  .taskMain h3 { font-size: 18px; margin: 10px 0; }
+  .taskMeta { font-size: 13px; gap: 6px 12px; }
+}
 
 
 

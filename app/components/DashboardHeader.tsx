@@ -177,6 +177,7 @@ export default function DashboardHeader({
         {(userRole === "TECHNICIAN" || userRole === "COMPANY" || userRole === "CLIENT") && (
           <Link
             href="/upgrade"
+            className={styles.upgradeBadge}
             style={{
               display: "inline-flex",
               alignItems: "center",

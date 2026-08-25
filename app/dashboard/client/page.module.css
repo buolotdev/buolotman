@@ -265,10 +265,137 @@
 .tagList { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 4px 0 10px; }
 .tag { padding: 5px 8px; border-radius: 8px; background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; }
 .outlineBlockButton { min-height: 42px; }
-@media (max-width: 1280px) { .statsGrid, .recommendedGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tasksGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 1080px) { .layout { grid-template-columns: minmax(0, 1fr); } .sidebar { position: fixed; top: 0; left: 0; width: min(320px, calc(100vw - 32px)); transform: translateX(-100%); transition: transform .2s ease; z-index: 50; } .sidebarOpen { transform: translateX(0); } .sidebarClose, .mobileMenuButton { display: inline-flex; align-items: center; justify-content: center; } .twoColumnGrid, .tasksGrid { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .topbar, .content { padding-left: 20px; padding-right: 20px; } .topbar { flex-direction: column; align-items: stretch; } .topbarLeft, .topbarActions { width: 100%; } .topbarActions { justify-content: space-between; } .searchBar { min-width: 0; width: 100%; } .statsGrid, .recommendedGrid { grid-template-columns: 1fr; } .taskFooter, .savedItem, .welcomeActions, .taskActionGroup { flex-direction: column; align-items: stretch; } .savedActions { width: 100%; } .outlineSmallButton, .primarySmallButton, .successSmallButton, .primaryButton, .secondaryButton { width: 100%; } }
-@media (max-width: 560px) { .content { gap: 28px; padding-top: 24px; padding-bottom: 28px; } .welcomeTitle { font-size: 28px; } .card, .statCard, .timelineCard { padding: 20px; } .userMenu { min-width: 0; } }
+@media (max-width: 1280px) {
+  .statsGrid, .recommendedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .tasksGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, calc(100vw - 32px));
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+  }
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+  .sidebarClose,
+  .mobileMenuButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .twoColumnGrid,
+  .tasksGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+    gap: 20px;
+  }
+  .welcomeSection {
+    padding: 24px 18px;
+    border-radius: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .welcomeTitle {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .welcomeSubtitle {
+    font-size: 14px;
+  }
+  .welcomeActions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .welcomeActions a {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .accountStatusSection {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+  .verifiedNotice {
+    padding: 14px 16px;
+  }
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .statCard {
+    padding: 16px 12px;
+    gap: 12px;
+    border-radius: 16px;
+  }
+  .statIcon {
+    width: 44px;
+    height: 44px;
+  }
+  .statIcon iconify-icon {
+    font-size: 20px;
+  }
+  .statCard .statValue {
+    font-size: 22px;
+  }
+  .statCard p {
+    font-size: 12px;
+  }
+  .clientCard {
+    padding: 18px 14px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+  }
+  .clientTable {
+    min-width: 520px;
+  }
+  .taskFooter,
+  .savedItem,
+  .taskActionGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .savedActions {
+    width: 100%;
+  }
+  .outlineSmallButton,
+  .primarySmallButton,
+  .successSmallButton,
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  .welcomeTitle {
+    font-size: 20px;
+  }
+}
+
 
 
 

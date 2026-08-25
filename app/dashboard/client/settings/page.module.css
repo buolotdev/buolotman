@@ -796,3 +796,79 @@
   color: #ef4444;
   font-weight: 700;
 }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, calc(100vw - 32px));
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+  }
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+  .sidebarClose {
+    display: inline-flex;
+  }
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+    gap: 20px;
+  }
+  .cover {
+    height: 120px;
+  }
+  .heroBody {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 16px 20px;
+    margin-top: -40px;
+    gap: 16px;
+  }
+  .avatarLarge {
+    width: 80px;
+    height: 80px;
+    font-size: 26px;
+    border-radius: 18px;
+  }
+  .identityMeta {
+    padding-top: 0;
+  }
+  .heroActions {
+    width: 100%;
+  }
+  .heroActions button,
+  .saveButton {
+    width: 100%;
+    justify-content: center;
+  }
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .formCard,
+  .sideCard {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+  .tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table {
+    min-width: 500px;
+  }
+}
+

@@ -298,10 +298,10 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: min(320px, calc(100vw - 32px));
+    width: min(300px, calc(100vw - 32px));
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    z-index: 50;
+    transition: transform 0.25s ease;
+    z-index: 100;
   }
 
   .sidebarOpen {
@@ -317,9 +317,22 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 20px;
+    padding: 16px;
+    gap: 20px;
   }
+  .headerTitle {
+    font-size: 24px;
+  }
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .table {
+    min-width: 520px;
+  }
+}
 
+@media (max-width: 480px) {
   .statsGrid {
     grid-template-columns: 1fr;
   }
