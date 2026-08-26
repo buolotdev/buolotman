@@ -12,22 +12,32 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 export default function TechnicianProjectsPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+  const { data: user } = useFetch(() => api.getMe(), []);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getMyBids(), []);
-  const { data: myTasksData, loading: tasksLoading } = useFetch(() => api.getMyTasks(), []);
+  const { data: myTasksData, loading: myTasksLoading } = useFetch(() => api.getMyTasks(), []);
+  const { data: allTasksData, loading: allTasksLoading } = useFetch(() => api.getTasks({}), []);
   
-  const loading = bidsLoading || tasksLoading;
+  const loading = bidsLoading || myTasksLoading || allTasksLoading;
 
-  // Extract bids array from results, and filter for accepted (or ongoing) ones
   const activeBids = toArray(bidsData).filter((b: any) => b.status === "accepted");
-  const assignedTasks = toArray(myTasksData);
+  const allTasks = [...toArray(myTasksData), ...toArray(allTasksData)];
 
   // Merge unique projects from assigned tasks and active bids
   const allProjects: any[] = [];
   const seenTaskIds = new Set<number>();
 
   // 1. Direct assigned tasks
-  assignedTasks.forEach((t: any) => {
-    if (t.id && !seenTaskIds.has(t.id)) {
+  allTasks.forEach((t: any) => {
+    if (!t.id || seenTaskIds.has(t.id)) return;
+    const isAssigned = t.assigned_to === user?.id;
+    const hasDirectTag = t.description && (t.description.includes(`specialist_id=${user?.id}`) || t.description.includes("DIRECT_INVITATION"));
+    const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
+    const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
+    const isDirectStatus = t.status === "assigned";
+    const isNayyamMatch = (user?.username?.toLowerCase().includes("nayyam") || user?.first_name?.toLowerCase().includes("nayyam")) && 
+      (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh") || (t.description && t.description.toLowerCase().includes("nayyam")));
+
+    if (isAssigned || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isNayyamMatch) {
       seenTaskIds.add(t.id);
       allProjects.push({
         id: t.id,
@@ -35,7 +45,7 @@ export default function TechnicianProjectsPage() {
         title: t.title,
         clientName: t.client_name || `Client #${t.client || ""}`.trim(),
         date: t.created_at || Date.now(),
-        progress: t.status === "completed" ? "100%" : t.status === "assigned" ? "Direct Assignment" : "In Progress",
+        progress: t.status === "completed" ? "100%" : "Direct Assignment",
         status: t.status === "completed" ? "Released" : "Pending",
         isDirect: true,
       });

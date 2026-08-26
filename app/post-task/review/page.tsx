@@ -141,9 +141,14 @@ export default function TaskReviewPage() {
 
 
       // 2. Create the task in the client portal
+      const directTag = draft.inviteSpecialistId ? `[DIRECT_INVITATION:specialist_id=${draft.inviteSpecialistId};specialist_name=${encodeURIComponent(draft.inviteSpecialistName || 'specialist')}]` : "";
+      const descriptionWithTag = directTag ? `${draft.description}\n\n${directTag}` : draft.description;
+      const skillsWithTag = draft.inviteSpecialistId ? [...(draft.skills || []), `direct_invite:${draft.inviteSpecialistId}`] : (draft.skills || []);
+      const contactMethodsWithTag = draft.inviteSpecialistId ? [...(draft.contactMethods || []), `direct_invite_${draft.inviteSpecialistId}`] : (draft.contactMethods || []);
+
       const res = await api.createTask({
         title: draft.title,
-        description: draft.description,
+        description: descriptionWithTag,
         category: categoryId,
         location: address || draft.city || "",
         city: draft.city,
@@ -155,10 +160,11 @@ export default function TaskReviewPage() {
         budget_min: budget || null,
         budget_max: budget || null,
         materials_provided: !!draft.materialsProvided,
-        contact_methods: draft.contactMethods || [],
-        skills: draft.skills || [],
+        contact_methods: contactMethodsWithTag,
+        skills: skillsWithTag,
         assigned_to: draft.inviteSpecialistId ? Number(draft.inviteSpecialistId) : undefined,
       });
+
 
       if (res && res.id && files.length > 0) {
         await Promise.all(

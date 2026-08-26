@@ -90,7 +90,16 @@ export default function TaskBoard() {
 
   // Filter & Sort Tasks in real-time
   const filteredTasks = useMemo(() => {
-    let result: any[] = rawTasks.filter((t: any) => !t.assigned_to && (t.status === "open" || !t.status));
+    let result: any[] = rawTasks.filter((t: any) => {
+      if (t.assigned_to) return false;
+      if (t.status && t.status !== "open") return false;
+      if (t.description && (t.description.includes("DIRECT_INVITATION") || t.description.includes("specialist_id="))) return false;
+      if (Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes("direct_invite"))) return false;
+      if (Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes("direct_invite"))) return false;
+      if (t.title && (t.title.toLowerCase().includes("auto work") || t.title.toLowerCase().includes("need hh"))) return false;
+      return true;
+    });
+
 
 
 

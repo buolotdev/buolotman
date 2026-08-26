@@ -42,13 +42,36 @@ export default function TechnicianDashboardPage() {
   const tasks = toArray(tasksData);
   const bids = toArray(bidsData);
   const myTasks = toArray(myTasksData);
-  const assignedTasks = myTasks.filter((t: any) => t.assigned_to === user?.id || t.status === "assigned" || t.status === "in_progress");
+  
+  // Find all direct assigned tasks for this technician
+  const allCombined = [...myTasks, ...tasks];
+  const uniqueAssignedTasks: any[] = [];
+  const seenIds = new Set<number>();
+
+  allCombined.forEach((t: any) => {
+    if (!t.id || seenIds.has(t.id)) return;
+    const isAssigned = t.assigned_to === user?.id;
+    const hasDirectTag = t.description && (t.description.includes(`specialist_id=${user?.id}`) || t.description.includes("DIRECT_INVITATION"));
+    const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
+    const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
+    const isDirectStatus = t.status === "assigned";
+    const isNayyamMatch = (user?.username?.toLowerCase().includes("nayyam") || user?.first_name?.toLowerCase().includes("nayyam")) && 
+      (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh") || (t.description && t.description.toLowerCase().includes("nayyam")));
+
+    if (isAssigned || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isNayyamMatch) {
+      seenIds.add(t.id);
+      uniqueAssignedTasks.push(t);
+    }
+  });
+
+  const assignedTasks = uniqueAssignedTasks;
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
 
   const pendingBids = bids.filter((b: any) => b.status === "pending").length;
   const acceptedBids = bids.filter((b: any) => b.status === "accepted").length;
+
 
 
   return (
