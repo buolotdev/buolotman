@@ -2063,6 +2063,12 @@ body {
 }
 
 /* ================= RESPONSIVE ================= */
+@media(max-width: 1024px) {
+  #bmMegaRoot .bmHdr {
+    display: none !important;
+  }
+}
+
 @media(max-width:768px) {
   .bm-ts-header h2 {
     font-size: 1.7rem
@@ -2073,9 +2079,9 @@ body {
   }
 }
 
-
 /* Hide mega menu when scrolling */
 #bmMegaRoot.hide-mega .bmMega,
 #bmMegaRoot.hide-mega .bmDropMenu {
   display: none !important;
 }
+

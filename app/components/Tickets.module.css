@@ -235,3 +235,56 @@
   color: #cbd5e1;
   margin-bottom: 16px;
 }
+
+.backToTicketsBtn {
+  display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 120px);
+    border-radius: 16px;
+  }
+  .inbox {
+    width: 100%;
+    border-right: none;
+  }
+  .inboxHiddenMobile {
+    display: none !important;
+  }
+  .chatAreaHiddenMobile {
+    display: none !important;
+  }
+  .chatArea {
+    width: 100%;
+  }
+  .chatHeader {
+    padding: 16px;
+  }
+  .thread {
+    padding: 16px;
+  }
+  .message {
+    padding: 14px;
+  }
+  .composer {
+    padding: 14px 16px;
+  }
+  .backToTicketsBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: #ff4500;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+}
+
