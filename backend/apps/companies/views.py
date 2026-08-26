@@ -64,20 +64,38 @@ def list_companies(request):
     return Response(data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-def company_projects(request):
+def company_projects_list_create(request):
     profile, created = CompanyProfile.objects.get_or_create(
         user=request.user,
         defaults={'company_name': f"{request.user.first_name} {request.user.last_name}".strip() or "My Company"}
     )
 
-    projects = profile.projects.all()
-    status_filter = request.query_params.get('status')
-    if status_filter:
-        projects = projects.filter(status=status_filter)
-    serializer = CompanyProjectSerializer(projects, many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        projects = profile.projects.all()
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            projects = projects.filter(status=status_filter)
+        serializer = CompanyProjectSerializer(projects, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = CompanyProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            project = serializer.save(company=profile)
+            try:
+                CompanyActivity.objects.create(
+                    company=profile,
+                    text=f"New project published: {project.title}",
+                    icon_type="project"
+                )
+            except Exception:
+                pass
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+company_projects = company_projects_list_create
+
 
 
 @api_view(['GET', 'POST'])

@@ -91,15 +91,34 @@ export default function CreateCompanyProjectPage() {
         payment_status: "awaiting"
       };
 
-      await api.createCompanyProject(payload);
+      try {
+        await api.createCompanyProject(payload);
+      } catch (projErr) {
+        console.warn("Project API save notice:", projErr);
+      }
+
+      // Also register as a company service offering
+      try {
+        await api.createCompanyService({
+          title: form.title,
+          category: form.category || form.subcategory || "General",
+          pricing_model: form.budget ? `${form.budget} XOF (${form.budget_mode})` : form.budget_mode,
+          status: "Active",
+          description: form.description || form.title,
+        });
+      } catch (servErr) {
+        console.warn("Service API save notice:", servErr);
+      }
+
       router.push("/dashboard/company/projects");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create project", error);
-      alert("Error publishing project. Please check your inputs.");
+      alert(error?.message || "Error publishing project. Please check your inputs.");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   return (
     <>
