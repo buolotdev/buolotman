@@ -130,7 +130,8 @@ def submit_inquiry(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def task_list(request):
-    tasks = Task.objects.select_related('client', 'category').filter(status='open')
+    tasks = Task.objects.select_related('client', 'category').filter(status='open', assigned_to__isnull=True)
+
 
     category = request.query_params.get('category')
     if category:
@@ -418,17 +419,26 @@ def task_questions(request, task_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_tasks(request):
-    tasks = (
-        Task.objects
-        .filter(client=request.user)
-        .select_related('category', 'assigned_to')
-        .annotate(accepted_bids_count=Count('bids', filter=Q(bids__status='accepted')))
-    )
+    if request.user.role == 'TECHNICIAN':
+        tasks = (
+            Task.objects
+            .filter(Q(assigned_to=request.user) | Q(client=request.user))
+            .select_related('category', 'assigned_to', 'client')
+            .annotate(accepted_bids_count=Count('bids', filter=Q(bids__status='accepted')))
+        )
+    else:
+        tasks = (
+            Task.objects
+            .filter(client=request.user)
+            .select_related('category', 'assigned_to', 'client')
+            .annotate(accepted_bids_count=Count('bids', filter=Q(bids__status='accepted')))
+        )
     status_filter = request.query_params.get('status')
     if status_filter:
         tasks = tasks.filter(status=status_filter)
     serializer = TaskListSerializer(tasks, many=True)
     return Response(serializer.data)
+
 
 
 @api_view(['POST'])

@@ -27,6 +27,7 @@ export default function TechnicianDashboardPage() {
   const { data: user, loading: userLoading, refetch: refetchUser } = useFetch(() => api.getMe(), []);
   const { data: tasksData, loading: tasksLoading } = useFetch(() => api.getTasks({}), []);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getMyBids(), []);
+  const { data: myTasksData, loading: myTasksLoading } = useFetch(() => api.getMyTasks(), []);
   const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
 
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
@@ -40,12 +41,15 @@ export default function TechnicianDashboardPage() {
 
   const tasks = toArray(tasksData);
   const bids = toArray(bidsData);
+  const myTasks = toArray(myTasksData);
+  const assignedTasks = myTasks.filter((t: any) => t.assigned_to === user?.id || t.status === "assigned" || t.status === "in_progress");
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
 
   const pendingBids = bids.filter((b: any) => b.status === "pending").length;
   const acceptedBids = bids.filter((b: any) => b.status === "accepted").length;
+
 
   return (
     <div className={styles.page}>
@@ -132,7 +136,76 @@ export default function TechnicianDashboardPage() {
               </div>
             </div>
 
+            {assignedTasks.length > 0 && (
+              <div style={{ marginBottom: "24px" }}>
+                <div style={{ 
+                  background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", 
+                  borderRadius: "18px", 
+                  padding: "24px", 
+                  color: "#fff",
+                  boxShadow: "0 12px 30px rgba(0,31,63,0.12)"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,69,0,0.2)", color: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>
+                        <iconify-icon icon="lucide:user-check" />
+                      </div>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Direct Job Offers & Assignments</h3>
+                        <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.7)" }}>Clients who directly hired you for their tasks</p>
+                      </div>
+                    </div>
+                    <span style={{ background: "#ff4500", color: "#fff", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 700 }}>
+                      {assignedTasks.length} Direct {assignedTasks.length === 1 ? "Offer" : "Offers"}
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gap: "12px" }}>
+                    {assignedTasks.map((t: any) => (
+                      <div key={t.id} style={{ 
+                        background: "rgba(255,255,255,0.08)", 
+                        backdropFilter: "blur(10px)", 
+                        borderRadius: "14px", 
+                        padding: "16px 20px", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "14px",
+                        border: "1px solid rgba(255,255,255,0.12)"
+                      }}>
+                        <div>
+                          <h4 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 700, color: "#fff" }}>{t.title}</h4>
+                          <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.8)" }}>
+                            👤 Client: <strong>{t.client_name || `Client #${t.client || ""}`}</strong> • 📍 {t.location || t.city || "Remote"} • 💰 {t.budget_max ? `${Number(t.budget_max).toLocaleString()} XOF` : "Negotiable"}
+                          </p>
+                        </div>
+                        <Link 
+                          href={`/dashboard/technician/projects/${t.id}`}
+                          style={{
+                            background: "#ff4500",
+                            color: "#fff",
+                            padding: "10px 18px",
+                            borderRadius: "10px",
+                            fontWeight: 700,
+                            fontSize: "13.5px",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}
+                        >
+                          Open Project Workspace <iconify-icon icon="lucide:arrow-right" />
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className={styles.metricsGrid}>
+
               {walletLoading || bidsLoading ? (
                 <>
                   <div className={styles.metricCard}><SkeletonStat /></div>

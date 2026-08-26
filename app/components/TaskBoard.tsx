@@ -90,7 +90,9 @@ export default function TaskBoard() {
 
   // Filter & Sort Tasks in real-time
   const filteredTasks = useMemo(() => {
-    let result = [...rawTasks];
+    let result: any[] = rawTasks.filter((t: any) => !t.assigned_to && (t.status === "open" || !t.status));
+
+
 
     // Search Query (Title or Description)
     if (searchQuery.trim()) {
