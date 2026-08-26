@@ -197,9 +197,13 @@ def submit_company_quote(request, company_id):
     try:
         company = CompanyProfile.objects.get(id=company_id)
     except CompanyProfile.DoesNotExist:
-        return Response({"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            company = CompanyProfile.objects.get(user__id=company_id)
+        except CompanyProfile.DoesNotExist:
+            return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
 
     client_name = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip() or request.user.username or "Client"
+
     data = request.data.copy()
     data['company'] = company.id
     data['client_name'] = data.get('client_name') or client_name

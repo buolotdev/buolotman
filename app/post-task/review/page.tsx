@@ -119,6 +119,16 @@ export default function TaskReviewPage() {
         } catch (quoteErr) {
           console.warn("Company quote creation notice:", quoteErr);
         }
+
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("boulotman_last_quote", JSON.stringify({
+            isCompanyQuote: true,
+            companyName: draft.inviteCompanyName || "the enterprise company",
+            service: draft.title,
+          }));
+        }
+      } else if (typeof window !== "undefined") {
+        window.localStorage.removeItem("boulotman_last_quote");
       }
 
       // 2. Create the task in the client portal
@@ -160,6 +170,7 @@ export default function TaskReviewPage() {
       setSubmitting(false);
     }
   };
+
 
 
   return (
