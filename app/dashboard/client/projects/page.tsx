@@ -353,12 +353,13 @@ export default function ClientProjectsPage() {
                       {/* ACTIONS */}
                       <div className={styles.projectActions}>
                         <Link 
-                          href={`/dashboard/client/messages?name=${encodeURIComponent(project.specialistName)}&task=${project.id}`}
+                          href={`/dashboard/client/messages?name=${encodeURIComponent(project.specialistName)}&task=${project.id}&specialist=${project.specialistId || ""}`}
                           className={styles.btnOutline}
                         >
                           <iconify-icon icon="lucide:message-square" />
                           Chat with {project.specialistName}
                         </Link>
+
 
                         <Link 
                           href={`/dashboard/client/projects/${project.id}`}

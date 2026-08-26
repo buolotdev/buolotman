@@ -83,9 +83,7 @@ export default function ClientMessagesPage() {
 
   const targetName = searchParams.get("name");
   const targetTask = searchParams.get("task");
-  const chatKey = targetTask 
-    ? `boulotman_chat_task_${targetTask}` 
-    : `boulotman_chat_direct_${(targetName || "pro").toLowerCase().replace(/\s+/g, "_")}`;
+  const targetSpecialistId = searchParams.get("specialist") || searchParams.get("user") || searchParams.get("participant");
 
   useEffect(() => {
     let list = Array.isArray(apiConversations) ? [...apiConversations] : [...((apiConversations as any)?.results || [])];
@@ -97,10 +95,11 @@ export default function ClientMessagesPage() {
 
     if (existing) {
       setActiveConversationId(String(existing.id));
-    } else if (targetName || targetTask) {
+    } else if (targetName || targetTask || targetSpecialistId) {
       api.createConversation({
         task_id: targetTask ? Number(targetTask) : undefined,
         participant_name: targetName || undefined,
+        participant_id: targetSpecialistId ? Number(targetSpecialistId) : undefined,
       }).then((created: any) => {
         if (created && created.id) {
           setActiveConversationId(String(created.id));
@@ -112,6 +111,7 @@ export default function ClientMessagesPage() {
     } else if (!activeConversationId && list[0]) {
       setActiveConversationId(String(list[0].id));
     }
+
 
     if (targetName && !list.some((c: any) => c.other_participant?.name?.toLowerCase() === targetName.toLowerCase())) {
       list.unshift({
