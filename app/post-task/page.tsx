@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import styles from "./page.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
@@ -30,9 +30,12 @@ import { toArray } from "@/app/lib/dataShape";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EMPTY_SKILLS: any[] = [];
 
-
-export default function PostTaskPage() {
+function PostTaskForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteCompanyId = searchParams.get("invite_company");
+  const inviteSpecialistId = searchParams.get("invite");
+
   const [authState, setAuthState] = useState<"checking" | "authed" | "guest">("checking");
   const { data: meData } = useFetch(
     () => (authState === "authed" ? api.getMe() : Promise.resolve(null)),
@@ -42,6 +45,17 @@ export default function PostTaskPage() {
     () => api.getCategories(),
     []
   );
+
+  const { data: invitedCompany } = useFetch<any>(
+    () => (inviteCompanyId ? api.getCompanyPublicProfile(Number(inviteCompanyId)) : Promise.resolve(null)),
+    [inviteCompanyId]
+  );
+  const { data: invitedSpecialist } = useFetch<any>(
+    () => (inviteSpecialistId ? api.getUserProfile(Number(inviteSpecialistId)) : Promise.resolve(null)),
+    [inviteSpecialistId]
+  );
+
+
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [serviceType, setServiceType] = useState<ServiceType>("onsite");
@@ -257,6 +271,10 @@ export default function PostTaskPage() {
         contactMethods,
         materialsProvided,
         skills,
+        inviteCompanyId: inviteCompanyId || null,
+        inviteSpecialistId: inviteSpecialistId || null,
+        inviteCompanyName: invitedCompany?.company_name || null,
+        inviteSpecialistName: invitedSpecialist ? `${invitedSpecialist.first_name || ""} ${invitedSpecialist.last_name || ""}`.trim() || invitedSpecialist.username : null,
       };
       if (typeof window !== "undefined") {
         window.localStorage.setItem("boulotman_post_task_draft", JSON.stringify(draftPayload));
@@ -355,8 +373,14 @@ export default function PostTaskPage() {
             <div className={styles.contentInner}>
               <section className={styles.pageHeader}>
                 <div>
-                  <h2>Post a Task</h2>
-                  <p>Provide detailed information to find the best professional for your job.</p>
+                  <h2>{inviteCompanyId ? "Request Enterprise Quotation" : inviteSpecialistId ? "Direct Task Assignment" : "Post a Task"}</h2>
+                  <p>
+                    {inviteCompanyId
+                      ? `Fill out your project specifications to request a formal quotation from ${invitedCompany?.company_name || "the enterprise"}.`
+                      : inviteSpecialistId
+                      ? `Assign this task directly to ${invitedSpecialist?.first_name || "the selected specialist"}.`
+                      : "Provide detailed information to find the best professional for your job."}
+                  </p>
                 </div>
 
                 <div className={styles.stepper} aria-label="Task publishing progress">
@@ -376,6 +400,30 @@ export default function PostTaskPage() {
                   </div>
                 </div>
               </section>
+
+              {inviteCompanyId && (
+                <div style={{ padding: "18px 22px", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", borderRadius: 18, color: "#fff", display: "flex", alignItems: "center", gap: 14, marginBottom: 24, boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", flexShrink: 0 }}>
+                    <iconify-icon icon="lucide:building-2"></iconify-icon>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Enterprise Quote Request</div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Requesting quotation from {invitedCompany?.company_name || "Selected Company"}</h3>
+                  </div>
+                </div>
+              )}
+
+              {inviteSpecialistId && (
+                <div style={{ padding: "18px 22px", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", borderRadius: 18, color: "#fff", display: "flex", alignItems: "center", gap: 14, marginBottom: 24, boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", flexShrink: 0 }}>
+                    <iconify-icon icon="lucide:user-check"></iconify-icon>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Direct Specialist Assignment</div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Directly inviting {invitedSpecialist ? `${invitedSpecialist.first_name || ""} ${invitedSpecialist.last_name || ""}`.trim() || invitedSpecialist.username : "Technician"}</h3>
+                  </div>
+                </div>
+              )}
 
               {saved ? (
                 <section className={`${styles.banner} ${styles.bannerDraft}`}>
@@ -400,6 +448,7 @@ export default function PostTaskPage() {
 
               <form className={styles.twoColumnLayout} onSubmit={handleSubmit}>
                 <div className={styles.mainColumn}>
+
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
                       <h3>Task Overview</h3>
@@ -875,3 +924,12 @@ export default function PostTaskPage() {
     </main>
   );
 }
+
+export default function PostTaskPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, textAlign: "center", color: "#001f3f", fontWeight: 700 }}>Loading task form...</div>}>
+      <PostTaskForm />
+    </Suspense>
+  );
+}
+

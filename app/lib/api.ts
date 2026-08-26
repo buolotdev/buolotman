@@ -378,8 +378,13 @@ export const api = {
   getCompanyCertifications: () => request<any[]>("/company/certifications/"),
   createCompanyCertification: (data: Record<string, string>) =>
     request<any>("/company/certifications/", { method: "POST", body: JSON.stringify(data) }),
+  getCompanyPublicProfile: (companyId: number) => request<any>(`/company/${companyId}/`),
   getCompanyQuotes: () => request<any[]>("/company/quotes/"),
+  createCompanyQuote: (companyId: number, data: Record<string, any>) =>
+    request<any>(`/company/${companyId}/quotes/`, { method: "POST", body: JSON.stringify(data) }),
   getCompanyActivities: () => request<any[]>("/company/activities/"),
+
+
   addCompanyReview: (companyId: number, data: { rating: number; text?: string; service?: string }) =>
     request<any>(`/company/${companyId}/reviews/`, { method: "POST", body: JSON.stringify(data) }),
 

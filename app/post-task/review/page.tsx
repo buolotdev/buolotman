@@ -40,6 +40,10 @@ type DraftPayload = {
   contactMethods: string[];
   materialsProvided: boolean;
   skills: string[];
+  inviteCompanyId?: string | null;
+  inviteSpecialistId?: string | null;
+  inviteCompanyName?: string | null;
+  inviteSpecialistName?: string | null;
 };
 
 function readDraft(): DraftPayload | null {
@@ -105,6 +109,27 @@ export default function TaskReviewPage() {
     try {
       const categoryId = draft.category && /^\d+$/.test(draft.category) ? Number(draft.category) : null;
       const address = [draft.address, draft.apartment, draft.city].filter(Boolean).join(", ");
+      
+      // 1. If invited company, create company quote request
+      if (draft.inviteCompanyId) {
+        try {
+          await api.createCompanyQuote(Number(draft.inviteCompanyId), {
+            client_name: userName || "Client",
+            client_email: meData?.email || "",
+            service: draft.title,
+            budget: draft.budget ? `${Number(draft.budget).toLocaleString()} XOF` : "Quote required",
+            deadline: draft.expectedDate || "Flexible",
+            location: address || draft.city || "Remote",
+            priority: draft.urgency || "standard",
+            project_summary: draft.description,
+            status: "pending",
+          });
+        } catch (quoteErr) {
+          console.warn("Company quote creation notice:", quoteErr);
+        }
+      }
+
+      // 2. Create the task in the client portal
       const res = await api.createTask({
         title: draft.title,
         description: draft.description,
@@ -121,6 +146,7 @@ export default function TaskReviewPage() {
         materials_provided: !!draft.materialsProvided,
         contact_methods: draft.contactMethods || [],
         skills: draft.skills || [],
+        assigned_to: draft.inviteSpecialistId ? Number(draft.inviteSpecialistId) : undefined,
       });
 
       if (res && res.id && files.length > 0) {
@@ -142,6 +168,7 @@ export default function TaskReviewPage() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <main className={styles.page}>
@@ -238,6 +265,30 @@ export default function TaskReviewPage() {
                 </div>
               </section>
 
+              {draft?.inviteCompanyId && (
+                <div style={{ padding: "18px 22px", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", borderRadius: 18, color: "#fff", display: "flex", alignItems: "center", gap: 14, marginBottom: 24, boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", flexShrink: 0 }}>
+                    <iconify-icon icon="lucide:building-2"></iconify-icon>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Direct Enterprise Quotation</div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>This request will be sent directly to {draft.inviteCompanyName || "the enterprise"}</h3>
+                  </div>
+                </div>
+              )}
+
+              {draft?.inviteSpecialistId && (
+                <div style={{ padding: "18px 22px", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", borderRadius: 18, color: "#fff", display: "flex", alignItems: "center", gap: 14, marginBottom: 24, boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", flexShrink: 0 }}>
+                    <iconify-icon icon="lucide:user-check"></iconify-icon>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Direct Specialist Assignment</div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Directly assigning to {draft.inviteSpecialistName || "Technician"}</h3>
+                  </div>
+                </div>
+              )}
+
               {submitError ? (
                 <section className={styles.banner} style={{ borderColor: "#ef4444" }}>
                   <div>
@@ -250,6 +301,7 @@ export default function TaskReviewPage() {
               <div className={styles.twoColumnLayout}>
                 <div className={styles.mainColumn}>
                   <section className={styles.card}>
+
                     <div className={styles.previewMeta}>
                       <span className={styles.metaBadge}>{category}</span>
                       {subcategory ? <span className={styles.metaBadge}>{subcategory}</span> : null}

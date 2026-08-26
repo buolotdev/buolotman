@@ -685,7 +685,7 @@ export default function Home() {
                   </div>
                   <div className="bm-ftx-actions">
                     <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">{t.ftxBtnView}</Link>
-                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">{t.ftxBtnHire}</Link>
+                    <Link href={isLoggedIn ? `/post-task?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">{t.ftxBtnHire}</Link>
                   </div>
                 </div>
               ))
@@ -729,7 +729,7 @@ export default function Home() {
                   </div>
                   <div className="bm-enterprise-actions">
                     <Link href={`/search?type=company&q=${company.company_name}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
-                    <Link href={isLoggedIn ? `/dashboard/client/tasks/create?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">{t.entBtnHire}</Link>
+                    <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">{t.entBtnHire}</Link>
                   </div>
                 </div>
               ))

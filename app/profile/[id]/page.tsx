@@ -139,7 +139,7 @@ export default function PublicProfilePage() {
                   </div>
                   
                   <div className={styles.actionButtons}>
-                    <Link href={`/dashboard/client/tasks/create?invite=${profile.id}`} className={styles.btnPrimary}>
+                    <Link href={isCompany ? `/post-task?invite_company=${profile.id}` : `/post-task?invite=${profile.id}`} className={styles.btnPrimary}>
                       Hire {isCompany ? "Company" : "Pro"}
                     </Link>
                   </div>
@@ -251,12 +251,13 @@ export default function PublicProfilePage() {
                 <div className={styles.contactBox}>
                   <h3 className={styles.contactTitle}>Ready to get started?</h3>
                   <p className={styles.contactText}>Hire this professional directly for your next project and get it done right.</p>
-                  <Link href={`/dashboard/client/tasks/create?invite=${profile.id}`} className={styles.contactBtn}>
+                  <Link href={isCompany ? `/post-task?invite_company=${profile.id}` : `/post-task?invite=${profile.id}`} className={styles.contactBtn}>
                     Request Quote
                   </Link>
                 </div>
               </div>
             </div>
+
           </>
         ) : (
           <div className={styles.skeletonCard} style={{ animation: 'none' }}>

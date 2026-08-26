@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from utils.cache import cached
 
-from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyReview
+from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyReview, QuoteRequest, CompanyActivity
 from .serializers import (
     CompanyProfileSerializer, CompanyProjectSerializer,
     CompanyServiceSerializer, CompanyCertificationSerializer, CompanyReviewSerializer,
@@ -189,6 +189,33 @@ def company_quotes(request):
     quotes = profile.quote_requests.all()
     serializer = QuoteRequestSerializer(quotes, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_company_quote(request, company_id):
+    try:
+        company = CompanyProfile.objects.get(id=company_id)
+    except CompanyProfile.DoesNotExist:
+        return Response({"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    client_name = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip() or request.user.username or "Client"
+    data = request.data.copy()
+    data['company'] = company.id
+    data['client_name'] = data.get('client_name') or client_name
+    data['client_email'] = data.get('client_email') or request.user.email
+    data['client_phone'] = data.get('client_phone') or getattr(request.user, 'phone', '')
+    
+    serializer = QuoteRequestSerializer(data=data)
+    if serializer.is_valid():
+        quote = serializer.save(company=company)
+        CompanyActivity.objects.create(
+            company=company,
+            text=f"New quote request from {client_name} for {quote.service}",
+            icon_type="quote"
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
