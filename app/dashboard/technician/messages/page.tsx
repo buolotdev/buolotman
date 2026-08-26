@@ -413,7 +413,13 @@ export default function TechnicianMessagesPage() {
                 )}
               </div>
 
-              <div className={styles.composerArea}>
+              <form
+                className={styles.inputBar}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  sendMessage();
+                }}
+              >
                 {attachmentDraft ? (
                   <div className={styles.attachmentChip}>
                     <iconify-icon icon="lucide:paperclip" />
@@ -424,32 +430,9 @@ export default function TechnicianMessagesPage() {
                   </div>
                 ) : null}
 
-                <form
-                  className={styles.composer}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    sendMessage();
-                  }}
-                >
-                  <input
-                    type="file"
-                    ref={attachmentInputRef}
-                    style={{ display: "none" }}
-                    onChange={(e) => handleAttachmentPick(e.target.files?.[0])}
-                  />
-                  <button
-                    type="button"
-                    className={styles.iconBtn}
-                    onClick={() => attachmentInputRef.current?.click()}
-                    disabled={attachmentUploading}
-                    aria-label="Attach file"
-                  >
-                    <iconify-icon icon="lucide:paperclip" />
-                  </button>
-
+                <div className={styles.composeBox}>
                   <textarea
-                    rows={1}
-                    className={styles.textarea}
+                    className={styles.composerTextarea}
                     placeholder="Type your message..."
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
@@ -461,17 +444,33 @@ export default function TechnicianMessagesPage() {
                     }}
                   />
 
-                  <button
-                    type="submit"
-                    className={styles.sendButton}
-                    disabled={sending || (!draft.trim() && !attachmentDraft)}
-                    aria-label="Send message"
-                  >
-                    <iconify-icon icon="lucide:send" />
-                    <span>Send</span>
-                  </button>
-                </form>
-              </div>
+                  <div className={styles.composerTools}>
+                    <input
+                      type="file"
+                      ref={attachmentInputRef}
+                      style={{ display: "none" }}
+                      onChange={(e) => handleAttachmentPick(e.target.files?.[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => attachmentInputRef.current?.click()}
+                      disabled={attachmentUploading}
+                      style={{ background: "none", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", color: "#64748b", fontSize: "13.5px" }}
+                    >
+                      <iconify-icon icon="lucide:paperclip" style={{ fontSize: "16px" }} />
+                      <span>{attachmentUploading ? "Uploading..." : "Attach file"}</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      className={styles.sendButton}
+                      disabled={sending || (!draft.trim() && !attachmentDraft)}
+                    >
+                      {sending ? "Sending..." : "Send"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </>
           ) : (
             <div className={styles.emptyState}>
