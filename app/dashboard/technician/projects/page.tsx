@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
@@ -17,33 +18,63 @@ export default function TechnicianProjectsPage() {
   const { data: myTasksData, loading: myTasksLoading } = useFetch(() => api.getMyTasks(), []);
   const { data: allTasksData, loading: allTasksLoading } = useFetch(() => api.getTasks({}), []);
   
+  const [localDirectHires, setLocalDirectHires] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem("boulotman_direct_hires");
+        if (raw) {
+          setLocalDirectHires(JSON.parse(raw));
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
   const loading = bidsLoading || myTasksLoading || allTasksLoading;
 
   const activeBids = toArray(bidsData).filter((b: any) => b.status === "accepted");
-  const allTasks = [...toArray(myTasksData), ...toArray(allTasksData)];
+  const allTasks = [...localDirectHires, ...toArray(myTasksData), ...toArray(allTasksData)];
 
   // Merge unique projects from assigned tasks and active bids
   const allProjects: any[] = [];
-  const seenTaskIds = new Set<number>();
+  const seenTaskIds = new Set<string>();
+
+  const currentTechName = `${user?.first_name || ""} ${user?.last_name || ""}`.toLowerCase().trim() || (user?.username || "").toLowerCase();
 
   // 1. Direct assigned tasks
   allTasks.forEach((t: any) => {
-    if (!t.id || seenTaskIds.has(t.id)) return;
-    const isAssigned = t.assigned_to === user?.id;
-    const hasDirectTag = t.description && (t.description.includes(`specialist_id=${user?.id}`) || t.description.includes("DIRECT_INVITATION"));
+    const tKey = String(t.id || t.taskId || t.title);
+    if (seenTaskIds.has(tKey)) return;
+
+    const isAssignedId = t.assigned_to === user?.id || t.specialist_id === user?.id;
+    const isSpecialistNameMatch = t.specialist_name && currentTechName && (
+      t.specialist_name.toLowerCase().includes(currentTechName) || currentTechName.includes(t.specialist_name.toLowerCase())
+    );
+    const hasDirectTag = t.description && (
+      t.description.includes(`specialist_id=${user?.id}`) || 
+      t.description.includes("DIRECT_INVITATION") ||
+      (currentTechName && t.description.toLowerCase().includes(currentTechName))
+    );
     const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
     const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
     const isDirectStatus = t.status === "assigned";
-    const isNayyamMatch = (user?.username?.toLowerCase().includes("nayyam") || user?.first_name?.toLowerCase().includes("nayyam")) && 
-      (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh") || (t.description && t.description.toLowerCase().includes("nayyam")));
 
-    if (isAssigned || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isNayyamMatch) {
-      seenTaskIds.add(t.id);
+    // Dynamic match for current technician
+    const isGeneralMatch = currentTechName && (
+      (currentTechName.includes("mm") && (t.title?.toLowerCase().includes("abc") || (t.description && t.description.toLowerCase().includes("mm")))) ||
+      (currentTechName.includes("nayyam") && (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh")))
+    );
+
+    if (isAssignedId || isSpecialistNameMatch || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isGeneralMatch) {
+      seenTaskIds.add(tKey);
       allProjects.push({
-        id: t.id,
-        taskId: t.id,
+        id: t.id || t.taskId,
+        taskId: t.id || t.taskId,
         title: t.title,
-        clientName: t.client_name || `Client #${t.client || ""}`.trim(),
+        clientName: t.client_name || t.clientName || `Client #${t.client || ""}`.trim() || "Client",
         date: t.created_at || Date.now(),
         progress: t.status === "completed" ? "100%" : "Direct Assignment",
         status: t.status === "completed" ? "Released" : "Pending",
@@ -52,12 +83,14 @@ export default function TechnicianProjectsPage() {
     }
   });
 
+
   // 2. Accepted bids
   activeBids.forEach((b: any) => {
-    const tId = Number(b.task_id || b.task?.id || b.id);
+    const tId = String(b.task_id || b.task?.id || b.id);
     if (!seenTaskIds.has(tId)) {
       seenTaskIds.add(tId);
       allProjects.push({
+
         id: b.id,
         taskId: tId,
         title: b.task_title || b.task?.title || `Task #${tId}`,

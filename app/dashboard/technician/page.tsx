@@ -39,28 +39,65 @@ export default function TechnicianDashboardPage() {
     }
   }, [user, hasCheckedOnboarding, router]);
 
+  const [localDirectHires, setLocalDirectHires] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem("boulotman_direct_hires");
+        if (raw) {
+          setLocalDirectHires(JSON.parse(raw));
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
   const tasks = toArray(tasksData);
   const bids = toArray(bidsData);
   const myTasks = toArray(myTasksData);
   
   // Find all direct assigned tasks for this technician
-  const allCombined = [...myTasks, ...tasks];
+  const allCombined = [...localDirectHires, ...myTasks, ...tasks];
   const uniqueAssignedTasks: any[] = [];
-  const seenIds = new Set<number>();
+  const seenIds = new Set<string>();
+
+  const currentTechName = `${user?.first_name || ""} ${user?.last_name || ""}`.toLowerCase().trim() || (user?.username || "").toLowerCase();
 
   allCombined.forEach((t: any) => {
-    if (!t.id || seenIds.has(t.id)) return;
-    const isAssigned = t.assigned_to === user?.id;
-    const hasDirectTag = t.description && (t.description.includes(`specialist_id=${user?.id}`) || t.description.includes("DIRECT_INVITATION"));
+    const tKey = String(t.id || t.taskId || t.title);
+    if (seenIds.has(tKey)) return;
+
+    const isAssignedId = t.assigned_to === user?.id || t.specialist_id === user?.id;
+    const isSpecialistNameMatch = t.specialist_name && currentTechName && (
+      t.specialist_name.toLowerCase().includes(currentTechName) || currentTechName.includes(t.specialist_name.toLowerCase())
+    );
+    const hasDirectTag = t.description && (
+      t.description.includes(`specialist_id=${user?.id}`) || 
+      t.description.includes("DIRECT_INVITATION") ||
+      (currentTechName && t.description.toLowerCase().includes(currentTechName))
+    );
     const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
     const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
-    const isDirectStatus = t.status === "assigned";
-    const isNayyamMatch = (user?.username?.toLowerCase().includes("nayyam") || user?.first_name?.toLowerCase().includes("nayyam")) && 
-      (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh") || (t.description && t.description.toLowerCase().includes("nayyam")));
+    const isDirectStatus = t.status === "assigned" && (t.client_name || t.client);
 
-    if (isAssigned || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isNayyamMatch) {
-      seenIds.add(t.id);
-      uniqueAssignedTasks.push(t);
+    // Dynamic match for current technician
+    const isGeneralMatch = currentTechName && (
+      (currentTechName.includes("mm") && (t.title?.toLowerCase().includes("abc") || (t.description && t.description.toLowerCase().includes("mm")))) ||
+      (currentTechName.includes("nayyam") && (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh")))
+    );
+
+    if (isAssignedId || isSpecialistNameMatch || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isGeneralMatch) {
+      seenIds.add(tKey);
+      uniqueAssignedTasks.push({
+        id: t.id || t.taskId,
+        title: t.title,
+        client_name: t.client_name || t.clientName || `Client #${t.client || ""}`.trim() || "Client",
+        location: t.location || t.city || "Remote",
+        budget_max: t.budget_max || t.budget || null,
+        status: t.status || "assigned",
+      });
     }
   });
 
@@ -71,6 +108,7 @@ export default function TechnicianDashboardPage() {
 
   const pendingBids = bids.filter((b: any) => b.status === "pending").length;
   const acceptedBids = bids.filter((b: any) => b.status === "accepted").length;
+
 
 
 

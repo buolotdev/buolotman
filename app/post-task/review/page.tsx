@@ -175,10 +175,35 @@ export default function TaskReviewPage() {
         );
       }
 
+      if (typeof window !== "undefined" && draft.inviteSpecialistId) {
+        try {
+          const raw = window.localStorage.getItem("boulotman_direct_hires");
+          const list = raw ? JSON.parse(raw) : [];
+          list.unshift({
+            id: res?.id || Date.now(),
+            taskId: res?.id || Date.now(),
+            title: draft.title,
+            client_name: userName || "Client",
+            clientName: userName || "Client",
+            specialist_id: Number(draft.inviteSpecialistId),
+            specialist_name: draft.inviteSpecialistName || "Technician",
+            budget_max: budget || null,
+            location: address || draft.city || "Remote",
+            created_at: new Date().toISOString(),
+            status: "assigned",
+            isDirect: true,
+          });
+          window.localStorage.setItem("boulotman_direct_hires", JSON.stringify(list));
+        } catch {
+          // ignore
+        }
+      }
+
       window.localStorage.removeItem(DRAFT_KEY);
       setFiles([]);
       await clearFilesFromDB();
       router.push("/post-task/success");
+
     } catch (e) {
       setSubmitError((e as Error)?.message || "Could not publish task");
     } finally {
