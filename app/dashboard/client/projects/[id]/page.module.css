@@ -1275,22 +1275,68 @@
     grid-template-columns: 1fr;
   }
   .content {
-    padding: 20px;
+    padding: 16px;
+    gap: 20px;
+  }
+  .heroCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 18px;
+    border-radius: 20px;
+    gap: 20px;
+  }
+  .heroCopy {
+    max-width: 100%;
+    width: 100%;
+  }
+  .heroCopy h1 {
+    font-size: 24px;
+  }
+  .heroDescription {
+    font-size: 14px;
+    max-width: 100%;
+  }
+  .heroMetaRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  .heroMetaPill {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .heroActions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .heroOrangeBtn,
+  .heroSecondaryBtn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 600px) {
   .statsGrid {
     grid-template-columns: 1fr;
-  }
-  .heroActions {
-    width: 100%;
-    flex-direction: column;
-  }
-  .heroOrangeBtn, .heroSecondaryBtn {
-    width: 100%;
+    gap: 12px;
   }
   .card {
     padding: 18px 14px;
+    border-radius: 18px;
+  }
+  .milestoneItem {
+    padding: 16px 14px;
+  }
+  .milestoneHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .fileGrid {
+    grid-template-columns: 1fr;
   }
 }
+
