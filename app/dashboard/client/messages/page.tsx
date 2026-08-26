@@ -83,6 +83,9 @@ export default function ClientMessagesPage() {
 
   const targetName = searchParams.get("name");
   const targetTask = searchParams.get("task");
+  const chatKey = targetTask 
+    ? `boulotman_chat_task_${targetTask}` 
+    : `boulotman_chat_direct_${(targetName || "pro").toLowerCase().replace(/\s+/g, "_")}`;
 
   useEffect(() => {
     let list = Array.isArray(apiConversations) ? [...apiConversations] : [...((apiConversations as any)?.results || [])];
@@ -114,15 +117,20 @@ export default function ClientMessagesPage() {
 
   useEffect(() => {
     if (!activeConversationId) return;
-    if (activeConversationId === "direct_specialist") {
-      try {
-        const stored = localStorage.getItem(`boulotman_chat_${targetName || "pro"}`);
-        if (stored) setActiveMessages(JSON.parse(stored));
-        else setActiveMessages([]);
-      } catch {
-        setActiveMessages([]);
-      }
-      return;
+    if (activeConversationId === "direct_specialist" || isNaN(Number(activeConversationId))) {
+      const syncMessages = () => {
+        try {
+          const raw = localStorage.getItem(chatKey) || (targetName ? localStorage.getItem(`boulotman_chat_${targetName}`) : null);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            setActiveMessages(parsed);
+          }
+        } catch {}
+      };
+
+      syncMessages();
+      const interval = setInterval(syncMessages, 1200);
+      return () => clearInterval(interval);
     }
 
     let cancelled = false;
@@ -143,7 +151,8 @@ export default function ClientMessagesPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId, targetName]);
+  }, [activeConversationId, targetName, chatKey]);
+
 
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -195,7 +204,9 @@ export default function ClientMessagesPage() {
     const optimistic = {
       id: tempId,
       sender: userData?.id,
-      sender_name: userName,
+      sender_id: userData?.id,
+      sender_name: userName || "Client",
+      isClient: true,
       text: message,
       attachment_url: attachmentDraft?.url || "",
       attachment_name: attachmentDraft?.name || "",
@@ -214,16 +225,19 @@ export default function ClientMessagesPage() {
       if (el) el.scrollTop = el.scrollHeight;
     });
 
-    if (activeConversation.id === "direct_specialist") {
+    if (activeConversation.id === "direct_specialist" || isNaN(Number(activeConversation.id))) {
       try {
-        const key = `boulotman_chat_${targetName || "pro"}`;
-        const stored = JSON.parse(localStorage.getItem(key) || "[]");
-        stored.push(optimistic);
-        localStorage.setItem(key, JSON.stringify(stored));
+        const raw = localStorage.getItem(chatKey);
+        const list = raw ? JSON.parse(raw) : [];
+        list.push(optimistic);
+        localStorage.setItem(chatKey, JSON.stringify(list));
+        if (targetName) localStorage.setItem(`boulotman_chat_${targetName}`, JSON.stringify(list));
+        setActiveMessages(list);
       } catch {}
       setSending(false);
       return;
     }
+
 
     try {
       const real = await api.sendMessage(Number(activeConversation.id), {
@@ -379,9 +393,10 @@ export default function ClientMessagesPage() {
                       </div>
                     ) : (
                       activeMessages.map((message: any) => {
-                        const isMine = message.sender === userData?.id;
+                        const isMine = message.sender === userData?.id || message.sender_id === userData?.id || message.isClient === true;
                         return (
                           <article key={message.id} className={`${styles.messageGroup} ${isMine ? styles.messageGroupSent : styles.messageGroupReceived}`}>
+
                             <div className={styles.messageBubble}>{message.text}</div>
                             {message.attachment_url ? (
                               <a href={message.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
