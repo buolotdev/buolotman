@@ -164,15 +164,19 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         model = Task
         fields = ['title', 'description', 'category', 'budget_min', 'budget_max', 'budget_mode',
                   'urgency', 'service_type', 'location', 'city', 'schedule', 'deadline',
-                  'materials_provided', 'contact_methods', 'skills']
+                  'materials_provided', 'contact_methods', 'skills', 'assigned_to', 'status']
 
     def create(self, validated_data):
         skills = validated_data.pop('skills', [])
         validated_data['client'] = self.context['request'].user
-        validated_data['status'] = 'open'
+        if validated_data.get('assigned_to'):
+            validated_data['status'] = validated_data.get('status') or 'assigned'
+        else:
+            validated_data['status'] = validated_data.get('status') or 'open'
         task = super().create(validated_data)
         self._set_skills(task, skills)
         return task
+
 
     def update(self, instance, validated_data):
         skills = validated_data.pop('skills', None)

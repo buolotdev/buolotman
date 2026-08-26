@@ -127,9 +127,18 @@ export default function TaskReviewPage() {
             service: draft.title,
           }));
         }
+      } else if (draft.inviteSpecialistId) {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("boulotman_last_quote", JSON.stringify({
+            isSpecialistInvite: true,
+            specialistName: draft.inviteSpecialistName || "the specialist",
+            service: draft.title,
+          }));
+        }
       } else if (typeof window !== "undefined") {
         window.localStorage.removeItem("boulotman_last_quote");
       }
+
 
       // 2. Create the task in the client portal
       const res = await api.createTask({

@@ -197,16 +197,40 @@ def task_create(request):
             metadata={"status": task.status, "category_id": task.category_id},
             ip_address=request.META.get("REMOTE_ADDR"),
         )
-        create_notification(
-            user=request.user,
-            category="task",
-            title=f"Task drafted: {task.title}",
-            body="Your task draft has been saved and is ready for review.",
-            link=f"/dashboard/client/tasks/{task.id}",
-            metadata={"task_id": task.id},
-        )
+        
+        client_name = f"{request.user.first_name or ''} {request.user.last_name or ''}".strip() or request.user.username or "Client"
+        
+        # If directly assigned to a technician, notify the technician
+        if task.assigned_to:
+            create_notification(
+                user=task.assigned_to,
+                category="task",
+                title=f"New Direct Job Offer: {task.title}",
+                body=f"{client_name} has directly hired and invited you for a new task!",
+                link=f"/dashboard/technician/projects/{task.id}",
+                metadata={"task_id": task.id},
+            )
+            create_notification(
+                user=request.user,
+                category="task",
+                title=f"Direct Task Invitation Sent",
+                body=f"Your direct task invitation for '{task.title}' was sent to the specialist.",
+                link=f"/dashboard/client/tasks/{task.id}",
+                metadata={"task_id": task.id},
+            )
+        else:
+            create_notification(
+                user=request.user,
+                category="task",
+                title=f"Task published: {task.title}",
+                body="Your task has been published and is now visible to qualified professionals.",
+                link=f"/dashboard/client/tasks/{task.id}",
+                metadata={"task_id": task.id},
+            )
+
         return Response(TaskDetailSerializer(task).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])
