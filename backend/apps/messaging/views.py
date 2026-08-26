@@ -120,16 +120,43 @@ def upload_message_attachment(request, conversation_id):
 def create_conversation(request):
     participant_id = request.data.get('participant_id')
     task_id = request.data.get('task_id')
-
-    if not participant_id:
-        return Response({"error": "participant_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+    participant_name = request.data.get('participant_name')
 
     from django.contrib.auth import get_user_model
+    from django.db.models import Q
     User = get_user_model()
-    try:
-        participant = User.objects.get(id=participant_id)
-    except User.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    participant = None
+
+    if participant_id:
+        try:
+            participant = User.objects.get(id=participant_id)
+        except (User.DoesNotExist, ValueError):
+            pass
+
+    if not participant and task_id:
+        try:
+            from apps.tasks.models import Task
+            task = Task.objects.get(id=task_id)
+            if request.user == task.client:
+                participant = task.assigned_to
+            elif request.user == task.assigned_to:
+                participant = task.client
+        except Exception:
+            pass
+
+    if not participant and participant_name:
+        participant = User.objects.filter(
+            Q(username__icontains=participant_name) |
+            Q(first_name__icontains=participant_name) |
+            Q(last_name__icontains=participant_name)
+        ).exclude(id=request.user.id).first()
+
+    if not participant:
+        if task_id:
+            existing = Conversation.objects.filter(participants=request.user, task_id=task_id).first()
+            if existing:
+                return Response(ConversationDetailSerializer(existing).data)
+        return Response({"error": "Participant or valid task could not be resolved"}, status=status.HTTP_400_BAD_REQUEST)
 
     existing = Conversation.objects.filter(participants=request.user).filter(participants=participant)
     if task_id:
@@ -151,6 +178,7 @@ def create_conversation(request):
         ip_address=request.META.get("REMOTE_ADDR"),
     )
     return Response(ConversationDetailSerializer(conversation).data, status=status.HTTP_201_CREATED)
+
 
 
 @api_view(['PATCH'])

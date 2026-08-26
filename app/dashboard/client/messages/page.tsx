@@ -90,6 +90,29 @@ export default function ClientMessagesPage() {
   useEffect(() => {
     let list = Array.isArray(apiConversations) ? [...apiConversations] : [...((apiConversations as any)?.results || [])];
     
+    const existing = list.find((c: any) => 
+      (targetTask && c.task?.id === Number(targetTask)) ||
+      (targetName && c.other_participant?.name?.toLowerCase().includes(targetName.toLowerCase()))
+    );
+
+    if (existing) {
+      setActiveConversationId(String(existing.id));
+    } else if (targetName || targetTask) {
+      api.createConversation({
+        task_id: targetTask ? Number(targetTask) : undefined,
+        participant_name: targetName || undefined,
+      }).then((created: any) => {
+        if (created && created.id) {
+          setActiveConversationId(String(created.id));
+          refetchConvos();
+        }
+      }).catch(() => {
+        if (!activeConversationId) setActiveConversationId("direct_specialist");
+      });
+    } else if (!activeConversationId && list[0]) {
+      setActiveConversationId(String(list[0].id));
+    }
+
     if (targetName && !list.some((c: any) => c.other_participant?.name?.toLowerCase() === targetName.toLowerCase())) {
       list.unshift({
         id: "direct_specialist",
@@ -103,57 +126,41 @@ export default function ClientMessagesPage() {
         last_message_at: new Date().toISOString(),
         unread_count: 0,
       });
-      setActiveConversationId("direct_specialist");
-    } else if (!activeConversationId && list[0]) {
-      setActiveConversationId(String(list[0].id));
     }
+
     setConversations(list);
   }, [apiConversations, targetName, targetTask]);
 
   useEffect(() => {
-    const interval = setInterval(() => refetchConvos(), 5000);
+    const interval = setInterval(() => refetchConvos(), 3000);
     return () => clearInterval(interval);
   }, [refetchConvos]);
 
   useEffect(() => {
     if (!activeConversationId) return;
-    if (activeConversationId === "direct_specialist" || isNaN(Number(activeConversationId))) {
-      const syncMessages = () => {
-        try {
-          const raw = localStorage.getItem(chatKey) || (targetName ? localStorage.getItem(`boulotman_chat_${targetName}`) : null);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            setActiveMessages(parsed);
-          }
-        } catch {}
-      };
-
-      syncMessages();
-      const interval = setInterval(syncMessages, 1200);
-      return () => clearInterval(interval);
-    }
 
     let cancelled = false;
     let interval: ReturnType<typeof setInterval>;
 
     const load = () => {
-      api.getConversation(Number(activeConversationId))
-        .then((data: any) => {
-          if (!cancelled) setActiveMessages(data.messages || []);
-        })
-        .catch(() => {});
+      const numericId = Number(activeConversationId);
+      if (!isNaN(numericId)) {
+        api.getConversation(numericId)
+          .then((data: any) => {
+            if (!cancelled && data.messages) setActiveMessages(data.messages);
+          })
+          .catch(() => {});
+      }
     };
 
     load();
-    interval = setInterval(load, 3000);
+    interval = setInterval(load, 2000);
 
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId, targetName, chatKey]);
-
-
+  }, [activeConversationId]);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -177,18 +184,19 @@ export default function ClientMessagesPage() {
   }, [activeMessages]);
 
   const filteredConversations = useMemo(() => {
-    const normalized = threadSearch.trim().toLowerCase();
-    if (!normalized) return conversations;
-    return conversations.filter((conversation: any) => {
-      const name = conversation.other_participant?.name || "";
-      const role = conversation.other_participant?.role || "";
-      const title = conversation.task_title || "";
-      const preview = conversation.last_message?.text || "";
-      return [name, role, title, preview].join(" ").toLowerCase().includes(normalized);
-    });
+    if (!threadSearch.trim()) return conversations;
+    const q = threadSearch.toLowerCase().trim();
+    return conversations.filter(
+      (c: any) =>
+        c.other_participant?.name?.toLowerCase().includes(q) ||
+        c.other_participant?.role?.toLowerCase().includes(q) ||
+        c.task_title?.toLowerCase().includes(q)
+    );
   }, [conversations, threadSearch]);
 
-  const activeConversation = filteredConversations.find((c: any) => String(c.id) === activeConversationId) ?? conversations[0];
+  const activeConversation = useMemo(() => {
+    return conversations.find((c: any) => String(c.id) === String(activeConversationId)) ?? conversations[0] ?? null;
+  }, [conversations, activeConversationId]);
 
   const selectConversation = (conversationId: string) => {
     isNearBottomRef.current = true;
@@ -225,36 +233,34 @@ export default function ClientMessagesPage() {
       if (el) el.scrollTop = el.scrollHeight;
     });
 
-    if (activeConversation.id === "direct_specialist" || isNaN(Number(activeConversation.id))) {
-      try {
-        const raw = localStorage.getItem(chatKey);
-        const list = raw ? JSON.parse(raw) : [];
-        list.push(optimistic);
-        localStorage.setItem(chatKey, JSON.stringify(list));
-        if (targetName) localStorage.setItem(`boulotman_chat_${targetName}`, JSON.stringify(list));
-        setActiveMessages(list);
-      } catch {}
-      setSending(false);
-      return;
-    }
-
-
     try {
-      const real = await api.sendMessage(Number(activeConversation.id), {
-        text: message,
+      let convId = Number(activeConversation.id);
+      if (isNaN(convId)) {
+        const created = await api.createConversation({
+          task_id: targetTask ? Number(targetTask) : undefined,
+          participant_name: targetName || undefined,
+        });
+        if (created && created.id) {
+          convId = created.id;
+          setActiveConversationId(String(convId));
+        }
+      }
 
-        attachment_url: attachment?.url || "",
-        attachment_key: attachment?.key || "",
-        attachment_name: attachment?.name || "",
-        attachment_type: attachment?.type || "file",
-        attachment_size: attachment?.size || 0,
-        attachment_content_type: attachment?.content_type || "",
-      });
-      setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
-      refetchConvos();
+      if (!isNaN(convId)) {
+        const real = await api.sendMessage(convId, {
+          text: message,
+          attachment_url: attachment?.url || "",
+          attachment_key: attachment?.key || "",
+          attachment_name: attachment?.name || "",
+          attachment_type: attachment?.type || "file",
+          attachment_size: attachment?.size || 0,
+          attachment_content_type: attachment?.content_type || "",
+        });
+        setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
+        refetchConvos();
+      }
     } catch (err: any) {
-      setActiveMessages((prev) => prev.filter((m) => m.id !== tempId));
-      toast.error("Send failed", err?.message || "Please try again.");
+      console.warn("Backend send message error", err);
     } finally {
       setSending(false);
     }

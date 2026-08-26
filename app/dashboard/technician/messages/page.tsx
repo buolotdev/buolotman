@@ -102,15 +102,33 @@ export default function TechnicianMessagesPage() {
   }, [conversationsData, targetClientName, targetTaskId]);
 
   useEffect(() => {
-    if (targetClientName) {
-      setActiveConversationId("direct_client");
+    const raw = Array.isArray(conversationsData) ? conversationsData : (conversationsData as any)?.results || [];
+    const existing = raw.find((c: any) => 
+      (targetTaskId && c.task?.id === Number(targetTaskId)) ||
+      (targetClientName && c.other_participant?.name?.toLowerCase().includes(targetClientName.toLowerCase()))
+    );
+
+    if (existing) {
+      setActiveConversationId(String(existing.id));
+    } else if (targetTaskId || targetClientName) {
+      api.createConversation({
+        task_id: targetTaskId ? Number(targetTaskId) : undefined,
+        participant_name: targetClientName || undefined,
+      }).then((created: any) => {
+        if (created && created.id) {
+          setActiveConversationId(String(created.id));
+          refetchConvos();
+        }
+      }).catch(() => {
+        if (!activeConversationId) setActiveConversationId("direct_client");
+      });
     } else if (!activeConversationId && conversations.length) {
       setActiveConversationId(conversations[0].id);
     }
-  }, [conversations, activeConversationId, targetClientName]);
+  }, [conversationsData, targetTaskId, targetClientName, conversations]);
 
   useEffect(() => {
-    const interval = setInterval(() => refetchConvos(), 5000);
+    const interval = setInterval(() => refetchConvos(), 3000);
     return () => clearInterval(interval);
   }, [refetchConvos]);
 
@@ -118,42 +136,28 @@ export default function TechnicianMessagesPage() {
   useEffect(() => {
     if (!activeConversationId) return;
 
-    if (activeConversationId === "direct_client" || isNaN(Number(activeConversationId))) {
-      const syncMessages = () => {
-        try {
-          // Check task key, fallback to name key
-          const raw = localStorage.getItem(chatKey) || (targetClientName ? localStorage.getItem(`boulotman_chat_${targetClientName}`) : null);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            setActiveMessages(parsed);
-          }
-        } catch {}
-      };
-
-      syncMessages();
-      const interval = setInterval(syncMessages, 1200);
-      return () => clearInterval(interval);
-    }
-
     let cancelled = false;
     let interval: ReturnType<typeof setInterval>;
 
     const load = () => {
-      api.getConversation(Number(activeConversationId))
-        .then((data: any) => {
-          if (!cancelled) setActiveMessages(data.messages || []);
-        })
-        .catch(() => {});
+      const numericId = Number(activeConversationId);
+      if (!isNaN(numericId)) {
+        api.getConversation(numericId)
+          .then((data: any) => {
+            if (!cancelled && data.messages) setActiveMessages(data.messages);
+          })
+          .catch(() => {});
+      }
     };
 
     load();
-    interval = setInterval(load, 3000);
+    interval = setInterval(load, 2000);
 
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId, chatKey, targetClientName]);
+  }, [activeConversationId]);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -189,7 +193,7 @@ export default function TechnicianMessagesPage() {
   }, [conversations, threadSearch]);
 
   const activeConversation = useMemo(() => {
-    return conversations.find((c) => c.id === activeConversationId) ?? conversations[0] ?? null;
+    return conversations.find((c) => String(c.id) === String(activeConversationId)) ?? conversations[0] ?? null;
   }, [conversations, activeConversationId]);
 
   const userInitials = useMemo(() => {
@@ -237,37 +241,39 @@ export default function TechnicianMessagesPage() {
       if (el) el.scrollTop = el.scrollHeight;
     });
 
-    if (activeConversation.id === "direct_client" || isNaN(Number(activeConversation.id))) {
-      try {
-        const raw = localStorage.getItem(chatKey);
-        const list = raw ? JSON.parse(raw) : [];
-        list.push(optimistic);
-        localStorage.setItem(chatKey, JSON.stringify(list));
-        setActiveMessages(list);
-      } catch {}
-      setSending(false);
-      return;
-    }
-
     try {
-      const real = await api.sendMessage(Number(activeConversation.id), {
-        text,
-        attachment_url: attachment?.url || "",
-        attachment_key: attachment?.key || "",
-        attachment_name: attachment?.name || "",
-        attachment_type: attachment?.type || "file",
-        attachment_size: attachment?.size || 0,
-        attachment_content_type: attachment?.content_type || "",
-      });
-      setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
-      refetchConvos();
+      let convId = Number(activeConversation.id);
+      if (isNaN(convId)) {
+        const created = await api.createConversation({
+          task_id: targetTaskId ? Number(targetTaskId) : undefined,
+          participant_name: targetClientName || undefined,
+        });
+        if (created && created.id) {
+          convId = created.id;
+          setActiveConversationId(String(convId));
+        }
+      }
+
+      if (!isNaN(convId)) {
+        const real = await api.sendMessage(convId, {
+          text,
+          attachment_url: attachment?.url || "",
+          attachment_key: attachment?.key || "",
+          attachment_name: attachment?.name || "",
+          attachment_type: attachment?.type || "file",
+          attachment_size: attachment?.size || 0,
+          attachment_content_type: attachment?.content_type || "",
+        });
+        setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
+        refetchConvos();
+      }
     } catch (err: any) {
-      // Keep optimistic message locally so chat flow is not blocked
-      console.warn("API message failed, keeping local copy", err);
+      console.warn("API message failed", err);
     } finally {
       setSending(false);
     }
   };
+
 
   const handleAttachmentPick = async (file?: File | null) => {
     if (!file || !activeConversation || attachmentUploading) return;

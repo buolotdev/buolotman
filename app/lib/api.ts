@@ -326,11 +326,14 @@ export const api = {
       return res.json();
     });
   },
-  createConversation: (participantId: number, taskId?: number) =>
-    request<any>("/conversations/create/", {
+  createConversation: (data: { participant_id?: number; task_id?: number; participant_name?: string } | number, taskId?: number) => {
+    const payload = typeof data === "number" ? { participant_id: data, task_id: taskId } : data;
+    return request<any>("/conversations/create/", {
       method: "POST",
-      body: JSON.stringify({ participant_id: participantId, task_id: taskId }),
-    }),
+      body: JSON.stringify(payload),
+    });
+  },
+
 
   // Saved Professionals
   getSavedPros: () => request<any[]>("/auth/saved-pros/"),
