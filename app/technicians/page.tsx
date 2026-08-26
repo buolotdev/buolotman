@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import styles from "./page.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+
+
 
 export default function TechniciansPage() {
   const [selectedTech, setSelectedTech] = useState<any>(null);
@@ -67,8 +70,14 @@ export default function TechniciansPage() {
                 </div>
                 <div className={styles.cardActions}>
                   <button className={styles.btnOutline} onClick={() => setSelectedTech(tech)}>View Profile</button>
-                  <button className={styles.btnPrimary}>Request Service</button>
+                  <Link 
+                    href={`/post-task?specialist_id=${tech.id}&specialist_name=${encodeURIComponent(tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : tech.username || "Technician")}`} 
+                    className={styles.btnPrimary}
+                  >
+                    Hire Technician
+                  </Link>
                 </div>
+
               </div>
             ))}
           </div>
@@ -131,7 +140,13 @@ export default function TechniciansPage() {
                   <a href="#" className={styles.footerLink}>Block</a>
                   <a href="#" className={styles.footerLink}>Report</a>
                 </div>
-                <button className={styles.btnHire}>Hire Boulot Man</button>
+                <Link 
+                  href={`/post-task?specialist_id=${selectedTech.id}&specialist_name=${encodeURIComponent(selectedTech.first_name ? `${selectedTech.first_name} ${selectedTech.last_name || ""}`.trim() : selectedTech.username || "Technician")}`}
+                  className={styles.btnHire}
+                >
+                  Hire Technician
+                </Link>
+
               </div>
             </div>
           </div>

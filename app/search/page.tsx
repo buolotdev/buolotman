@@ -496,18 +496,35 @@ export default function SearchPage() {
 
                   <div className={styles.resultActions}>
                     <Link
-                      href={result.link || `/profile/${result.id}`}
+                      href={result.link || (result.type === "company" ? `/companies/${result.id}` : `/profile/${result.id}`)}
                       className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
                       View Profile
                     </Link>
-                    <button
-                      type="button"
-                      className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
-                    >
-                      Request Service
-                    </button>
+                    {result.type === "company" ? (
+                      <Link
+                        href={`/post-task?company_id=${result.id}&company_name=${encodeURIComponent(result.name)}`}
+                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
+                      >
+                        Request Quote
+                      </Link>
+                    ) : result.type === "technician" ? (
+                      <Link
+                        href={`/post-task?specialist_id=${result.id}&specialist_name=${encodeURIComponent(result.name)}`}
+                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
+                      >
+                        Hire Specialist
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/post-task?service=${encodeURIComponent(result.name)}`}
+                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
+                      >
+                        Request Service
+                      </Link>
+                    )}
                   </div>
+
                 </article>
               ))
             )}
