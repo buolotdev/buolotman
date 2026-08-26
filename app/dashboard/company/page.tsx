@@ -154,7 +154,7 @@ export default function CompanyDashboard() {
         {/* TWO COLUMN GRID (Matches Client Portal) */}
         <div className={styles.twoColumnGrid}>
           {/* LEFT */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0, width: '100%' }}>
             
             {/* PROJECT OVERVIEW */}
             <div className={styles.card}>
@@ -162,20 +162,20 @@ export default function CompanyDashboard() {
                 <h3>Project Overview</h3>
                 <Link href="/dashboard/company/projects" className={styles.linkButton}>View All</Link>
               </div>
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Status</th>
-                      <th>Budget</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {projectsLoading ? (
-                      <tr><td colSpan={3}>Loading projects...</td></tr>
-                    ) : projects.length > 0 ? (
-                      projects.slice(0, 4).map((project: any) => (
+              {projectsLoading ? (
+                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>Loading projects...</div>
+              ) : projects.length > 0 ? (
+                <div className={styles.tableWrapper}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Project</th>
+                        <th>Status</th>
+                        <th>Budget</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projects.slice(0, 4).map((project: any) => (
                         <tr key={project.id}>
                           <td><strong>{project.title || "Project"}</strong></td>
                           <td>
@@ -185,36 +185,37 @@ export default function CompanyDashboard() {
                           </td>
                           <td>{project.budget ? `${Number(project.budget).toLocaleString()} XOF` : "N/A"}</td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr><td colSpan={3} className={styles.emptyState}>No projects yet.</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className={styles.emptyState}>No active projects yet.</div>
+              )}
             </div>
 
             {/* QUOTES */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
                 <h3>Recent Quote Requests</h3>
+                <Link href="/dashboard/company/quotes" className={styles.linkButton}>View All</Link>
               </div>
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Client</th>
-                      <th>Service</th>
-                      <th>Budget</th>
-                      <th>Deadline</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {quotesLoading ? (
-                      <tr><td colSpan={5}>Loading quotes...</td></tr>
-                    ) : quotes.length > 0 ? (
-                      quotes.map((quote: any) => (
+              {quotesLoading ? (
+                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>Loading quotes...</div>
+              ) : quotes.length > 0 ? (
+                <div className={styles.tableWrapper}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Client</th>
+                        <th>Service</th>
+                        <th>Budget</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quotes.map((quote: any) => (
                         <tr key={quote.id}>
                           <td><strong>{quote.client_name}</strong></td>
                           <td>{quote.service}</td>
@@ -226,13 +227,13 @@ export default function CompanyDashboard() {
                             </span>
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr><td colSpan={5} className={styles.emptyState}>No quote requests yet.</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className={styles.emptyState}>No quote requests yet.</div>
+              )}
             </div>
             
             {/* SERVICES OFFERED */}
@@ -265,7 +266,7 @@ export default function CompanyDashboard() {
           </div>
 
           {/* RIGHT */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0, width: '100%' }}>
             
             {/* WALLET / BALANCES */}
             <div className={styles.card}>

@@ -61,27 +61,25 @@ export default function CompanyQuotesPage() {
         {/* INBOX TABLE */}
         <div className={styles.card}>
           <h3>Incoming Quote Requests</h3>
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Budget</th>
-                  <th>Deadline</th>
-                  <th>Location</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quotesLoading ? (
+          {quotesLoading ? (
+            <div style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>Loading quotes...</div>
+          ) : quotes.length > 0 ? (
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
                   <tr>
-                    <td colSpan={8} style={{ textAlign: "center", padding: "20px" }}>Loading quotes...</td>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Budget</th>
+                    <th>Deadline</th>
+                    <th>Location</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
-                ) : quotes.length > 0 ? (
-                  quotes.map((quote: any) => (
+                </thead>
+                <tbody>
+                  {quotes.map((quote: any) => (
                     <tr key={quote.id}>
                       <td><strong>{quote.client_name}</strong></td>
                       <td>{quote.service}</td>
@@ -103,17 +101,17 @@ export default function CompanyQuotesPage() {
                         </button>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-                      No quote requests found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "40px 16px", color: "#64748b" }}>
+              <iconify-icon icon="lucide:file-text" style={{ fontSize: "36px", color: "#cbd5e1", display: "inline-block", marginBottom: "8px" }} />
+              <p style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>No quote requests found.</p>
+              <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#94a3b8" }}>When clients request quotes for your services, they will appear here.</p>
+            </div>
+          )}
         </div>
       </div>
 

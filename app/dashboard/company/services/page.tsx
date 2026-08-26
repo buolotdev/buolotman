@@ -170,24 +170,22 @@ export default function ServicesManagement() {
       {/* SERVICES LIST */}
       <div className={styles.card}>
         <h3>Existing Services</h3>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Service</th>
-                <th>Category</th>
-                <th>Pricing</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {servicesLoading ? (
+        {servicesLoading ? (
+          <div style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>Loading services...</div>
+        ) : services.length > 0 ? (
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>Loading services...</td>
+                  <th>Service</th>
+                  <th>Category</th>
+                  <th>Pricing</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ) : services.length > 0 ? (
-                services.map(svc => (
+              </thead>
+              <tbody>
+                {services.map(svc => (
                   <tr key={svc.id}>
                     <td><strong>{svc.title}</strong></td>
                     <td>{svc.category || "Construction"}</td>
@@ -204,17 +202,17 @@ export default function ServicesManagement() {
                       </button>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-                    No services found. Add your first service above!
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "40px 16px", color: "#64748b" }}>
+            <iconify-icon icon="lucide:layers" style={{ fontSize: "36px", color: "#cbd5e1", display: "inline-block", marginBottom: "8px" }} />
+            <p style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>No services found.</p>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#94a3b8" }}>Add your first corporate service using the form above!</p>
+          </div>
+        )}
       </div>
       
     </div>
