@@ -81,15 +81,31 @@ export default function ClientMessagesPage() {
   }, [userData]);
   const userRole = userData?.role ?? "";
 
+  const targetName = searchParams.get("name");
+  const targetTask = searchParams.get("task");
+
   useEffect(() => {
-    if (apiConversations) {
-      const list = Array.isArray(apiConversations) ? apiConversations : (apiConversations as any)?.results || [];
-      setConversations(list);
-      if (!activeConversationId && list[0]) {
-        setActiveConversationId(String(list[0].id));
-      }
+    let list = Array.isArray(apiConversations) ? [...apiConversations] : [...((apiConversations as any)?.results || [])];
+    
+    if (targetName && !list.some((c: any) => c.other_participant?.name?.toLowerCase() === targetName.toLowerCase())) {
+      list.unshift({
+        id: "direct_specialist",
+        other_participant: {
+          name: targetName,
+          initials: targetName.slice(0, 2).toUpperCase(),
+          role: "Technician",
+        },
+        task_title: targetTask ? `Task #${targetTask}` : "Direct Project Chat",
+        last_message: { text: "Start messaging with technician..." },
+        last_message_at: new Date().toISOString(),
+        unread_count: 0,
+      });
+      setActiveConversationId("direct_specialist");
+    } else if (!activeConversationId && list[0]) {
+      setActiveConversationId(String(list[0].id));
     }
-  }, [apiConversations]);
+    setConversations(list);
+  }, [apiConversations, targetName, targetTask]);
 
   useEffect(() => {
     const interval = setInterval(() => refetchConvos(), 5000);
@@ -98,6 +114,17 @@ export default function ClientMessagesPage() {
 
   useEffect(() => {
     if (!activeConversationId) return;
+    if (activeConversationId === "direct_specialist") {
+      try {
+        const stored = localStorage.getItem(`boulotman_chat_${targetName || "pro"}`);
+        if (stored) setActiveMessages(JSON.parse(stored));
+        else setActiveMessages([]);
+      } catch {
+        setActiveMessages([]);
+      }
+      return;
+    }
+
     let cancelled = false;
     let interval: ReturnType<typeof setInterval>;
 
@@ -116,7 +143,8 @@ export default function ClientMessagesPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId]);
+  }, [activeConversationId, targetName]);
+
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -186,9 +214,21 @@ export default function ClientMessagesPage() {
       if (el) el.scrollTop = el.scrollHeight;
     });
 
+    if (activeConversation.id === "direct_specialist") {
+      try {
+        const key = `boulotman_chat_${targetName || "pro"}`;
+        const stored = JSON.parse(localStorage.getItem(key) || "[]");
+        stored.push(optimistic);
+        localStorage.setItem(key, JSON.stringify(stored));
+      } catch {}
+      setSending(false);
+      return;
+    }
+
     try {
       const real = await api.sendMessage(Number(activeConversation.id), {
         text: message,
+
         attachment_url: attachment?.url || "",
         attachment_key: attachment?.key || "",
         attachment_name: attachment?.name || "",

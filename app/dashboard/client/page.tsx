@@ -145,8 +145,36 @@ export default function ClientDashboardPage() {
               <div className={styles.welcomeActions}>
                 <Link href="/post-task" className={styles.primaryButton}><iconify-icon icon="lucide:plus" /> Post a Task</Link>
                 <Link href="/search?q=electrician" className={styles.secondaryButton}>Browse electricians</Link>
+                <Link 
+                  href="/dashboard/client/projects" 
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#ffffff',
+                    minHeight: '44px',
+                    padding: '0 18px',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <iconify-icon icon="lucide:user-check" style={{ color: '#38bdf8', fontSize: '18px' }} />
+                  Direct Hires & Projects
+                  {activeTasks > 0 && (
+                    <span style={{ background: '#ff4500', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '999px', fontWeight: 800 }}>
+                      {activeTasks}
+                    </span>
+                  )}
+                </Link>
               </div>
             </section>
+
 
             {/* CLIENT ACCOUNT STATUS & VERIFICATION ALERT */}
             <section className={styles.accountStatusSection}>
