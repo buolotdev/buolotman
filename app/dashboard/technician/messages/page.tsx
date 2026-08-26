@@ -64,9 +64,13 @@ export default function TechnicianMessagesPage() {
     unreadCount: number;
   };
 
+  const targetClientName = searchParams.get("name");
+  const targetTaskId = searchParams.get("task");
+
+
   const conversations: ConversationItem[] = useMemo(() => {
     const raw = Array.isArray(conversationsData) ? conversationsData : (conversationsData as any)?.results || [];
-    return raw.map((c: any) => ({
+    const list: ConversationItem[] = raw.map((c: any) => ({
       id: String(c.id),
       participant: {
         name: c.other_participant?.name || "",
@@ -78,13 +82,31 @@ export default function TechnicianMessagesPage() {
       lastMessageAt: c.last_message_at || c.last_message?.time || null,
       unreadCount: c.unread_count || 0,
     }));
-  }, [conversationsData]);
+
+    if (targetClientName && !list.some(c => c.participant.name.toLowerCase() === targetClientName.toLowerCase())) {
+      list.unshift({
+        id: "direct_client",
+        participant: {
+          name: targetClientName,
+          initials: targetClientName.slice(0, 2).toUpperCase(),
+          role: "Client",
+        },
+        taskTitle: targetTaskId ? `Task #${targetTaskId}` : "Direct Project Chat",
+        lastMessagePreview: "Start conversation with client...",
+        lastMessageAt: new Date().toISOString(),
+        unreadCount: 0,
+      });
+    }
+
+    return list;
+  }, [conversationsData, targetClientName, targetTaskId]);
 
   useEffect(() => {
     if (!activeConversationId && conversations.length) {
       setActiveConversationId(conversations[0].id);
     }
   }, [conversations, activeConversationId]);
+
 
   useEffect(() => {
     const interval = setInterval(() => refetchConvos(), 5000);
