@@ -113,11 +113,15 @@ function ProjectTrackingContent() {
                 {project.created_at && ` • Created on ${new Date(project.created_at).toLocaleDateString()}`}
               </p>
             </div>
-            <Link href="/dashboard/company/messages" className={styles.btnOutline}>
+            <Link 
+              href={`/dashboard/company/messages?name=${encodeURIComponent(project.client_name || 'Client')}&task=${project.id || ''}&client=${project.client_id || project.client || ''}`} 
+              className={styles.btnOutline}
+            >
               <iconify-icon icon="lucide:message-square" style={{ fontSize: '16px' }}></iconify-icon>
               Message Client
             </Link>
           </div>
+
 
           <div className={styles.phStats}>
             <div className={styles.statItem}>

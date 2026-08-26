@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
@@ -10,9 +12,10 @@ import layoutStyles from "../page.module.css";
 import styles from "./quotes.module.css";
 
 export default function CompanyQuotesPage() {
+  const router = useRouter();
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: companyProfile } = useFetch(() => api.getCompanyProfile(), []);
-  const { data: quotesData, loading: quotesLoading } = useFetch(() => api.getCompanyQuotes(), []);
+  const { data: quotesData, loading: quotesLoading, refetch: refetchQuotes } = useFetch(() => api.getCompanyQuotes(), []);
   
   const quotes = toArray(quotesData);
   
@@ -22,6 +25,42 @@ export default function CompanyQuotesPage() {
   const rejectedQuotes = quotes.filter((q: any) => q.status === 'rejected').length;
 
   const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [updating, setUpdating] = useState(false);
+
+  const handleAcceptQuote = async (quote: any) => {
+    if (updating) return;
+    setUpdating(true);
+    try {
+      await api.updateCompanyQuote(quote.id, { status: "approved" });
+      refetchQuotes();
+      setSelectedQuote(null);
+      router.push("/dashboard/company/projects");
+    } catch {
+      setSelectedQuote(null);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleRejectQuote = async (quote: any) => {
+    if (updating) return;
+    setUpdating(true);
+    try {
+      await api.updateCompanyQuote(quote.id, { status: "rejected" });
+      refetchQuotes();
+      setSelectedQuote(null);
+    } catch {
+      setSelectedQuote(null);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleMessageClient = (quote: any) => {
+    setSelectedQuote(null);
+    router.push(`/dashboard/company/messages?name=${encodeURIComponent(quote.client_name)}&task=${quote.id || ''}`);
+  };
+
 
   const companyName = companyProfile?.company_name || user?.company_name || "Company";
 
@@ -164,9 +203,27 @@ export default function CompanyQuotesPage() {
             </div>
 
             <div className={styles.modalActions}>
-              <button className={styles.primary}>Accept Quote</button>
-              <button className={styles.outline}>Reject Quote</button>
-              <button className={styles.outline}>Message Client</button>
+              <button 
+                className={styles.primary} 
+                onClick={() => handleAcceptQuote(selectedQuote)} 
+                disabled={updating}
+              >
+                {updating ? "Accepting..." : "Accept Quote & Start Project"}
+              </button>
+              <button 
+                className={styles.outline} 
+                onClick={() => handleRejectQuote(selectedQuote)} 
+                disabled={updating}
+              >
+                Reject Quote
+              </button>
+              <button 
+                className={styles.outline} 
+                onClick={() => handleMessageClient(selectedQuote)}
+              >
+                <iconify-icon icon="lucide:message-square" style={{ marginRight: '6px' }} />
+                Message Client
+              </button>
             </div>
           </div>
         </div>
@@ -174,3 +231,4 @@ export default function CompanyQuotesPage() {
     </>
   );
 }
+

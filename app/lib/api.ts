@@ -385,7 +385,10 @@ export const api = {
   getCompanyQuotes: () => request<any[]>("/company/quotes/"),
   createCompanyQuote: (companyId: number, data: Record<string, any>) =>
     request<any>(`/company/${companyId}/quotes/`, { method: "POST", body: JSON.stringify(data) }),
+  updateCompanyQuote: (quoteId: number, data: Record<string, any>) =>
+    request<any>(`/company/quotes/${quoteId}/`, { method: "PATCH", body: JSON.stringify(data) }),
   getCompanyActivities: () => request<any[]>("/company/activities/"),
+
 
 
   addCompanyReview: (companyId: number, data: { rating: number; text?: string; service?: string }) =>

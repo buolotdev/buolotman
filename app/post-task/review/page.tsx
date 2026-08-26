@@ -175,7 +175,7 @@ export default function TaskReviewPage() {
         );
       }
 
-      if (typeof window !== "undefined" && draft.inviteSpecialistId) {
+      if (typeof window !== "undefined" && (draft.inviteSpecialistId || draft.inviteCompanyId)) {
         try {
           const raw = window.localStorage.getItem("boulotman_direct_hires");
           const list = raw ? JSON.parse(raw) : [];
@@ -185,8 +185,11 @@ export default function TaskReviewPage() {
             title: draft.title,
             client_name: userName || "Client",
             clientName: userName || "Client",
-            specialist_id: Number(draft.inviteSpecialistId),
-            specialist_name: draft.inviteSpecialistName || "Technician",
+            specialist_id: draft.inviteSpecialistId ? Number(draft.inviteSpecialistId) : undefined,
+            specialist_name: draft.inviteSpecialistName || undefined,
+            company_id: draft.inviteCompanyId ? Number(draft.inviteCompanyId) : undefined,
+            company_name: draft.inviteCompanyName || undefined,
+            isCompany: Boolean(draft.inviteCompanyId),
             budget_max: budget || null,
             location: address || draft.city || "Remote",
             created_at: new Date().toISOString(),
@@ -198,6 +201,7 @@ export default function TaskReviewPage() {
           // ignore
         }
       }
+
 
       window.localStorage.removeItem(DRAFT_KEY);
       setFiles([]);

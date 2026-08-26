@@ -12,6 +12,8 @@ urlpatterns = [
     path('<int:company_id>/reviews/', views.add_company_review, name='add_company_review'),
     path('<int:company_id>/quotes/', views.submit_company_quote, name='submit_company_quote'),
     path('quotes/', views.company_quotes, name='company_quotes'),
+    path('quotes/<int:quote_id>/', views.update_company_quote, name='update_company_quote'),
     path('activities/', views.company_activities, name='company_activities'),
 ]
+
 

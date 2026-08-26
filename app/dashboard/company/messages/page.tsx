@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./page.module.css";
 import LogoutButton from "@/app/components/LogoutButton";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
-import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
-
+import { SkeletonCard, SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 
 type Message = {
   id: string;
@@ -36,6 +36,10 @@ type Conversation = {
 
 export default function CompanyMessages() {
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const targetClientName = searchParams.get("name") || (searchParams.get("client") ? `Client #${searchParams.get("client")}` : null);
+  const targetClientId = searchParams.get("client");
+  const targetTaskId = searchParams.get("task");
   
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
@@ -52,8 +56,8 @@ export default function CompanyMessages() {
   const { data: rawConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
 
   const conversations: Conversation[] = useMemo(() => {
-    if (!rawConversations || !Array.isArray(rawConversations)) return [];
-    return rawConversations.map((c: any) => ({
+    const raw = Array.isArray(rawConversations) ? rawConversations : (rawConversations as any)?.results || [];
+    const list: Conversation[] = raw.map((c: any) => ({
       id: String(c.id),
       participant: {
         name: c.other_participant?.name || "",
@@ -65,13 +69,51 @@ export default function CompanyMessages() {
       unreadCount: c.unread_count || 0,
       taskTitle: c.task_title || undefined,
     }));
-  }, [rawConversations]);
+
+    if (targetClientName && !list.some(c => c.participant.name.toLowerCase() === targetClientName.toLowerCase())) {
+      list.unshift({
+        id: "direct_company_client",
+        participant: {
+          name: targetClientName,
+          role: "Client",
+          initials: targetClientName.slice(0, 2).toUpperCase(),
+        },
+        lastMessage: "Start conversation with client...",
+        time: new Date().toISOString(),
+        unreadCount: 0,
+        taskTitle: targetTaskId ? `Task #${targetTaskId}` : undefined,
+      });
+    }
+
+    return list;
+  }, [rawConversations, targetClientName, targetTaskId]);
 
   useEffect(() => {
-    if (conversations.length > 0 && !activeId) {
+    const raw = Array.isArray(rawConversations) ? rawConversations : (rawConversations as any)?.results || [];
+    const existing = raw.find((c: any) => 
+      (targetTaskId && c.task?.id === Number(targetTaskId)) ||
+      (targetClientName && c.other_participant?.name?.toLowerCase().includes(targetClientName.toLowerCase()))
+    );
+
+    if (existing) {
+      setActiveId(String(existing.id));
+    } else if (targetTaskId || targetClientName || targetClientId) {
+      api.createConversation({
+        task_id: targetTaskId ? Number(targetTaskId) : undefined,
+        participant_name: targetClientName || undefined,
+        participant_id: targetClientId ? Number(targetClientId) : undefined,
+      }).then((created: any) => {
+        if (created && created.id) {
+          setActiveId(String(created.id));
+          refetchConvos();
+        }
+      }).catch(() => {
+        if (!activeId) setActiveId("direct_company_client");
+      });
+    } else if (!activeId && conversations.length > 0) {
       setActiveId(conversations[0].id);
     }
-  }, [conversations, activeId]);
+  }, [rawConversations, targetTaskId, targetClientName, targetClientId, conversations]);
 
   useEffect(() => {
     if (!activeId) {
@@ -82,15 +124,18 @@ export default function CompanyMessages() {
     let interval: ReturnType<typeof setInterval>;
 
     const load = () => {
-      api.getConversation(Number(activeId))
-        .then((data: any) => {
-          if (!cancelled) setActiveMessages(data.messages || []);
-        })
-        .catch(() => {});
+      const numericId = Number(activeId);
+      if (!isNaN(numericId)) {
+        api.getConversation(numericId)
+          .then((data: any) => {
+            if (!cancelled && data.messages) setActiveMessages(data.messages);
+          })
+          .catch(() => {});
+      }
     };
 
     load();
-    interval = setInterval(load, 3000);
+    interval = setInterval(load, 2000);
 
     return () => {
       cancelled = true;
@@ -99,7 +144,7 @@ export default function CompanyMessages() {
   }, [activeId]);
 
   useEffect(() => {
-    const interval = setInterval(() => refetchConvos(), 5000);
+    const interval = setInterval(() => refetchConvos(), 3000);
     return () => clearInterval(interval);
   }, [refetchConvos]);
 
@@ -124,9 +169,7 @@ export default function CompanyMessages() {
     }
   }, [activeMessages]);
 
-  
-
-  const activeConv = conversations.find((c) => c.id === activeId) || conversations[0];
+  const activeConv = conversations.find((c) => String(c.id) === String(activeId)) || conversations[0];
 
   const filteredConversations = useMemo(() => {
     return conversations.filter((c) =>
@@ -140,7 +183,13 @@ export default function CompanyMessages() {
     const text = draft.trim();
     if ((!text && !attachmentDraft) || !activeId || sending) return;
     const tempId = `tmp-${Date.now()}`;
-    setActiveMessages((prev) => [...prev, { id: tempId, sender: user?.id || 0, text, time: new Date().toISOString() }]);
+    const optimistic = { 
+      id: tempId, 
+      sender: user?.id || 0, 
+      text, 
+      time: new Date().toISOString() 
+    };
+    setActiveMessages((prev) => [...prev, optimistic]);
     setDraft("");
     const attachment = attachmentDraft;
     setAttachmentDraft(null);
@@ -150,20 +199,35 @@ export default function CompanyMessages() {
       const el = messagesContainerRef.current;
       if (el) el.scrollTop = el.scrollHeight;
     });
+
     try {
-      await api.sendMessage(Number(activeId), {
-        text,
-        attachment_url: attachment?.url || "",
-        attachment_key: attachment?.key || "",
-        attachment_name: attachment?.name || "",
-        attachment_type: attachment?.type || "file",
-        attachment_size: attachment?.size || 0,
-        attachment_content_type: attachment?.content_type || "",
-      });
-      refetchConvos();
+      let convId = Number(activeId);
+      if (isNaN(convId)) {
+        const created = await api.createConversation({
+          task_id: targetTaskId ? Number(targetTaskId) : undefined,
+          participant_name: targetClientName || undefined,
+          participant_id: targetClientId ? Number(targetClientId) : undefined,
+        });
+        if (created && created.id) {
+          convId = created.id;
+          setActiveId(String(convId));
+        }
+      }
+
+      if (!isNaN(convId)) {
+        await api.sendMessage(convId, {
+          text,
+          attachment_url: attachment?.url || "",
+          attachment_key: attachment?.key || "",
+          attachment_name: attachment?.name || "",
+          attachment_type: attachment?.type || "file",
+          attachment_size: attachment?.size || 0,
+          attachment_content_type: attachment?.content_type || "",
+        });
+        refetchConvos();
+      }
     } catch (err: any) {
-      setActiveMessages((prev) => prev.filter((m) => m.id !== tempId));
-      toast.error("Send failed", err?.message || "Please try again.");
+      console.warn("Company send message error", err);
     } finally {
       setSending(false);
     }
@@ -207,194 +271,194 @@ export default function CompanyMessages() {
 
   return (
     <>
-
-        <div className={styles.chatShell}>
-          <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
-            <div className={styles.panelHeader}>
-              <div className={styles.panelTitleRow}>
-                <h1 className={styles.panelTitle}>Messages</h1>
-                <button className={styles.newMessageBtn}>
-                  <iconify-icon icon="lucide:square-pen" />
-                </button>
-              </div>
-              <div className={styles.threadSearch}>
-                <iconify-icon icon="lucide:search" />
-                <input
-                  type="text"
-                  placeholder="Search messages..."
-                  value={threadSearch}
-                  onChange={(e) => setThreadSearch(e.target.value)}
-                />
-              </div>
+      <div className={styles.chatShell}>
+        <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
+          <div className={styles.panelHeader}>
+            <div className={styles.panelTitleRow}>
+              <h1 className={styles.panelTitle}>Messages</h1>
+              <button className={styles.newMessageBtn}>
+                <iconify-icon icon="lucide:square-pen" />
+              </button>
             </div>
+            <div className={styles.threadSearch}>
+              <iconify-icon icon="lucide:search" />
+              <input
+                type="text"
+                placeholder="Search messages..."
+                value={threadSearch}
+                onChange={(e) => setThreadSearch(e.target.value)}
+              />
+            </div>
+          </div>
 
-            <div className={styles.conversationList}>
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} style={{ padding: "16px" }}>
-                    <SkeletonCard />
-                  </div>
-                ))
-              ) : filteredConversations.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 24px", color: "#64748b", animation: "fadeIn 0.5s ease" }}>
-                  <div style={{ width: "64px", height: "64px", background: "#f8fafc", borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "#ff4500", boxShadow: "0 8px 16px rgba(255,69,0,0.1)" }}>
-                    <iconify-icon icon="lucide:message-circle" style={{ fontSize: "32px" }}></iconify-icon>
-                  </div>
-                  <h3 style={{ margin: "0 0 8px", color: "#001f3f", fontSize: "16px", fontWeight: "700" }}>No conversations</h3>
-                  <p style={{ margin: 0, fontSize: "14px" }}>When clients contact you, they will appear here.</p>
+          <div className={styles.conversationList}>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{ padding: "16px" }}>
+                  <SkeletonCard />
                 </div>
-              ) : (
-                filteredConversations.map((conv) => (
+              ))
+            ) : filteredConversations.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 24px", color: "#64748b", animation: "fadeIn 0.5s ease" }}>
+                <div style={{ width: "64px", height: "64px", background: "#f8fafc", borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "#ff4500", boxShadow: "0 8px 16px rgba(255,69,0,0.1)" }}>
+                  <iconify-icon icon="lucide:message-circle" style={{ fontSize: "32px" }}></iconify-icon>
+                </div>
+                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#001f3f", margin: "0 0 8px" }}>No Messages Yet</h3>
+                <p style={{ fontSize: "14px", margin: 0, lineHeight: "1.5" }}>When clients contact your company regarding quotes and projects, messages will appear here.</p>
+              </div>
+            ) : (
+              filteredConversations.map((c) => {
+                const isActive = activeConv && String(activeConv.id) === String(c.id);
+                return (
                   <button
-                    key={conv.id}
-                    className={`${styles.conversationItem} ${activeId === conv.id ? styles.conversationItemActive : ""}`}
-                    onClick={() => selectConversation(conv.id)}
+                    key={c.id}
+                    onClick={() => selectConversation(c.id)}
+                    className={`${styles.conversationItem} ${isActive ? styles.conversationItemActive : ""}`}
                   >
-                    <div className={styles.avatarWrap}>
-                      <div className={styles.avatar}>{conv.participant.initials}</div>
+                    <div className={styles.conversationAvatarWrap}>
+                      <span className={styles.conversationAvatar}>{c.participant.initials}</span>
+                      <span className={`${styles.onlineDot} ${styles.onlineDotActive}`} />
                     </div>
                     <div className={styles.conversationContent}>
                       <div className={styles.conversationMeta}>
-                        <strong>{conv.participant.name}</strong>
-                        <span>{formatTime(conv.time)}</span>
+                        <strong>{c.participant.name}</strong>
+                        <span>{formatTime(c.time)}</span>
                       </div>
+                      {c.taskTitle && (
+                        <span className={styles.conversationTask} style={{ color: "#ff4500", fontSize: "11.5px", fontWeight: 700 }}>
+                          📋 {c.taskTitle}
+                        </span>
+                      )}
                       <div className={styles.conversationPreviewRow}>
-                        <p className={`${styles.conversationPreview} ${conv.unreadCount > 0 ? styles.conversationPreviewStrong : ""}`}>
-                          {conv.lastMessage}
+                        <p className={`${styles.conversationPreview} ${c.unreadCount > 0 ? styles.conversationPreviewStrong : ""}`}>
+                          {c.lastMessage || "No messages yet"}
                         </p>
-                        {conv.unreadCount > 0 && <span className={styles.unreadPill}>{conv.unreadCount}</span>}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        {conv.taskTitle && <span className={styles.conversationTask}>{conv.taskTitle}</span>}
-                        {conv.participant.role && (
-                          <span className={`${styles.roleBadge} ${
-                            conv.participant.role.toLowerCase() === 'admin' ? styles.roleAdmin :
-                            conv.participant.role.toLowerCase() === 'technician' ? styles.roleTechnician :
-                            conv.participant.role.toLowerCase() === 'company' ? styles.roleCompany :
-                            styles.roleProject
-                          }`}>
-                            {conv.participant.role}
-                          </span>
-                        )}
+                        {c.unreadCount > 0 && <span className={styles.unreadPill}>{c.unreadCount}</span>}
                       </div>
                     </div>
                   </button>
-                ))
-              )}
-            </div>
-          </aside>
-
-          <section className={`${styles.chatPanel} ${mobileConversationOpen ? styles.chatPanelOpenMobile : ""}`}>
-            {activeConv ? (
-              <>
-                <header className={styles.chatHeader}>
-                  <div className={styles.chatUser}>
-                    <button
-                      className={styles.mobileBackBtn}
-                      onClick={() => setMobileConversationOpen(false)}
-                    >
-                      <iconify-icon icon="lucide:arrow-left" />
-                    </button>
-                    <div className={styles.avatarWrap} style={{ width: 44, height: 44 }}>
-                      <div className={styles.avatar} style={{ width: 44, height: 44 }}>
-                        {activeConv.participant.initials}
-                      </div>
-                    </div>
-                    <div className={styles.chatUserDetails}>
-                      <strong>{activeConv.participant.name}</strong>
-                      <span>{activeConv.participant.role ? activeConv.participant.role.toLowerCase() : "contact"} • {activeConv.taskTitle || "General"}</span>
-                    </div>
-                  </div>
-                  <div className={styles.chatHeaderActions}>
-                    <button className={styles.circleIcon}><iconify-icon icon="lucide:phone" /></button>
-                    <button className={styles.circleIcon}><iconify-icon icon="lucide:video" /></button>
-                    <button className={styles.circleIcon}><iconify-icon icon="lucide:more-vertical" /></button>
-                  </div>
-                </header>
-
-                <div className={styles.messagesArea} ref={messagesContainerRef}>
-                  {loadingMessages ? (
-                    <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>Loading...</div>
-                  ) : activeMessages.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
-                      <p>No messages yet. Start the conversation!</p>
-                    </div>
-                  ) : (
-                    activeMessages.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`${styles.messageGroup} ${m.sender === user?.id ? styles.messageGroupSent : styles.messageGroupReceived}`}
-                      >
-                        <div className={styles.messageBubble}>{m.text}</div>
-                        {m.attachment_url ? (
-                          <a href={m.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
-                            <iconify-icon icon="lucide:paperclip" />
-                            <span>{m.attachment_name || "Attachment"}</span>
-                          </a>
-                        ) : null}
-                        <div className={styles.messageMeta}>
-                          {formatTime(m.time)}
-                          {m.sender === user?.id && <iconify-icon icon="lucide:check-check" style={{ fontSize: 14 }} />}
-                        </div>
-                      </div>
-                    ))
-                    )}
-                  </div>
-
-                <form className={styles.composer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
-                  <div className={styles.composerField}>
-                    <textarea
-                      className={styles.composerTextarea}
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      placeholder="Type your message..."
-                      aria-label="Type a message"
-                      rows={3}
-                    />
-                    <div className={styles.composerTools}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <input
-                          ref={attachmentInputRef}
-                          type="file"
-                          className={styles.fileInput}
-                          accept="image/*,video/*,.pdf,.doc,.docx"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            handleAttachmentPick(file);
-                          }}
-                        />
-                        {attachmentUploading && <span style={{ fontSize: 12, color: '#64748b' }}>Uploading...</span>}
-                        {attachmentDraft && !attachmentUploading && (
-                          <button type="button" className={styles.attachmentChip} onClick={() => { setAttachmentDraft(null); if (attachmentInputRef.current) attachmentInputRef.current.value = ""; }}>
-                            <span>{attachmentDraft.name}</span>
-                            <iconify-icon icon="lucide:x" style={{ fontSize: 14, marginLeft: 4 }} />
-                          </button>
-                        )}
-                      </div>
-                      <button type="submit" className={styles.sendBtn} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending || attachmentUploading}>
-                        Send
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div className={styles.emptyChat}>
-                <div className={styles.emptyIcon}>
-                  <iconify-icon icon="lucide:message-square" />
-                </div>
-                <h2>Your Messages</h2>
-                <p>Select a conversation from the list to start messaging.</p>
-              </div>
+                );
+              })
             )}
-          </section>
+          </div>
+        </aside>
+
+        <section className={`${styles.chatPanel} ${!mobileConversationOpen ? styles.chatPanelHiddenMobile : ""}`}>
+          {activeConv ? (
+            <>
+              <header className={styles.chatHeader}>
+                <div className={styles.chatUser}>
+                  <button
+                    onClick={() => setMobileConversationOpen(false)}
+                    className={styles.mobileBackBtn}
+                  >
+                    <iconify-icon icon="lucide:arrow-left" />
+                  </button>
+                  <div className={styles.chatAvatarWrap}>
+                    <span className={styles.chatAvatar}>{activeConv.participant.initials}</span>
+                    <span className={`${styles.onlineDot} ${styles.onlineDotActive}`} />
+                  </div>
+                  <div className={styles.chatUserDetails}>
+                    <strong>{activeConv.participant.name}</strong>
+                    <span>
+                      {activeConv.participant.role || "Client"}
+                      {activeConv.taskTitle ? ` • ${activeConv.taskTitle}` : ""}
+                    </span>
+                  </div>
+                </div>
+              </header>
+
+              <div className={styles.messagesArea} ref={messagesContainerRef}>
+                {loadingMessages ? (
+                  <div style={{ padding: "20px" }}>
+                    <SkeletonBlock style={{ width: "60%", height: 40, margin: "8px 0" }} />
+                    <SkeletonBlock style={{ width: "50%", height: 40, margin: "8px 0" }} />
+                  </div>
+                ) : activeMessages.length === 0 ? (
+                  <div className={styles.emptyChat}>
+                    <iconify-icon icon="lucide:message-circle" style={{ fontSize: 40, opacity: 0.3 }} />
+                    <p>No messages yet. Send a message to start communicating with the client!</p>
+                  </div>
+                ) : (
+                  activeMessages.map((msg: any) => {
+                    const isMine = msg.sender === user?.id || (msg.sender_name && user?.company_name && msg.sender_name.includes(user.company_name));
+                    return (
+                      <article key={msg.id} className={`${styles.messageGroup} ${isMine ? styles.messageGroupSent : styles.messageGroupReceived}`}>
+                        <div className={styles.messageBubble}>{msg.text}</div>
+                        {msg.attachment_url && (
+                          <a href={msg.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
+                            <iconify-icon icon="lucide:paperclip" />
+                            <span>{msg.attachment_name || "Attachment"}</span>
+                          </a>
+                        )}
+                        <div className={styles.messageMeta}>
+                          <span>{formatTime(msg.created_at || msg.time)}</span>
+                          {isMine && <iconify-icon icon="lucide:check-check" />}
+                        </div>
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+
+              <form className={styles.composer} onSubmit={handleSendMessage}>
+                {attachmentDraft && (
+                  <div className={styles.attachmentChip}>
+                    <iconify-icon icon="lucide:paperclip" />
+                    <span>{attachmentDraft.name}</span>
+                    <button type="button" onClick={() => setAttachmentDraft(null)} aria-label="Remove attachment">
+                      <iconify-icon icon="lucide:x" />
+                    </button>
+                  </div>
+                )}
+                <div className={styles.composerField}>
+                  <textarea
+                    className={styles.composerTextarea}
+                    placeholder="Type your message to client..."
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <div className={styles.composerTools}>
+                    <input
+                      type="file"
+                      ref={attachmentInputRef}
+                      style={{ display: "none" }}
+                      onChange={(e) => handleAttachmentPick(e.target.files?.[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => attachmentInputRef.current?.click()}
+                      disabled={attachmentUploading}
+                      style={{ background: "none", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", color: "#64748b", fontSize: "13px" }}
+                    >
+                      <iconify-icon icon="lucide:paperclip" style={{ fontSize: "16px" }} />
+                      <span>{attachmentUploading ? "Uploading..." : "Attach file"}</span>
+                    </button>
+                    <button
+                      type="submit"
+                      className={styles.sendButton}
+                      disabled={sending || (!draft.trim() && !attachmentDraft)}
+                    >
+                      {sending ? "Sending..." : "Send Message"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </>
+          ) : (
+            <div className={styles.emptyChat}>
+              <iconify-icon icon="lucide:messages-square" style={{ fontSize: 48, opacity: 0.3 }} />
+              <p>Select a conversation to start messaging.</p>
             </div>
+          )}
+        </section>
+      </div>
     </>
   );
 }

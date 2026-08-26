@@ -233,3 +233,39 @@ def company_activities(request):
     activities = profile.activities.all()
     serializer = CompanyActivitySerializer(activities, many=True)
     return Response(serializer.data)
+
+
+@api_view(['PATCH', 'PUT'])
+@permission_classes([IsAuthenticated])
+def update_company_quote(request, quote_id):
+    try:
+        quote = QuoteRequest.objects.get(id=quote_id)
+    except QuoteRequest.DoesNotExist:
+        return Response({"error": "Quote not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    new_status = request.data.get('status')
+    if new_status:
+        quote.status = new_status
+        quote.save(update_fields=['status'])
+
+    if new_status in ['approved', 'accepted']:
+        from .models import CompanyProject
+        if not CompanyProject.objects.filter(company=quote.company, name__icontains=quote.service).exists():
+            numeric_budget = None
+            if quote.budget:
+                import re
+                nums = re.findall(r'\d+', str(quote.budget).replace(',', ''))
+                if nums:
+                    numeric_budget = float(''.join(nums))
+            CompanyProject.objects.create(
+                company=quote.company,
+                name=quote.service or f"Contract with {quote.client_name}",
+                client_name=quote.client_name,
+                budget=numeric_budget or 50000,
+                status='in_progress',
+                progress=20,
+            )
+
+    serializer = QuoteRequestSerializer(quote)
+    return Response(serializer.data)
+
