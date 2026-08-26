@@ -255,11 +255,17 @@ def user_public_profile(request, user_id):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        from apps.companies.models import CompanyProfile
+        try:
+            comp = CompanyProfile.objects.get(id=user_id)
+            user = comp.user
+        except CompanyProfile.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
     from .serializers import UserPublicSerializer
     serializer = UserPublicSerializer(user)
     data = serializer.data
+
 
     if user.role == 'TECHNICIAN':
         profile = getattr(user, 'technician_profile', None)

@@ -3,6 +3,7 @@ from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCerti
 
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     logo_url = serializers.CharField(max_length=500, required=False, allow_blank=True)
     cover_url = serializers.CharField(max_length=500, required=False, allow_blank=True)
     website = serializers.CharField(max_length=500, required=False, allow_blank=True)
@@ -10,7 +11,7 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CompanyProfile
-        fields = ['id', 'company_name', 'registration_number', 'services_offered', 'company_size',
+        fields = ['id', 'user_id', 'company_name', 'registration_number', 'services_offered', 'company_size',
                   'year_founded', 'industry', 'subject_title', 'country', 'city', 'latitude', 'longitude', 'areas_of_expertise',
                   'logo_url', 'cover_url', 'about', 'website', 'headquarters', 'business_hours',
                   'is_verified', 'average_rating', 'review_count', 'team_size', 'completed_tasks',
@@ -18,7 +19,8 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
                   'traffic_recommendations', 'traffic_external', 'rating_distribution', 'created_at',
                   'currency', 'auto_accept_visits', 'notif_email', 'notif_sms', 'notif_inapp',
                   'privacy_public', 'privacy_show_phone', 'privacy_show_email', 'privacy_search', 'sec_2fa']
-        read_only_fields = ['id', 'is_verified', 'average_rating', 'review_count', 'profile_views', 'created_at']
+        read_only_fields = ['id', 'user_id', 'is_verified', 'average_rating', 'review_count', 'profile_views', 'created_at']
+
 
     def get_rating_distribution(self, obj):
         reviews = obj.reviews.all()

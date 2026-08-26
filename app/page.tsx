@@ -728,9 +728,10 @@ export default function Home() {
                     {company.description || t.entDescFallback}
                   </div>
                   <div className="bm-enterprise-actions">
-                    <Link href={`/search?type=company&q=${company.company_name}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
+                    <Link href={`/profile/${company.user_id || company.id}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
                     <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">{t.entBtnHire}</Link>
                   </div>
+
                 </div>
               ))
             ) : (
