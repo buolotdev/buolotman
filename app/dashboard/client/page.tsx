@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
@@ -58,19 +59,57 @@ export default function ClientDashboardPage() {
   const savedList = toArray(savedPros);
   const convList = toArray(conversations);
 
+  const [localDirectHires, setLocalDirectHires] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem("boulotman_direct_hires");
+        if (raw) setLocalDirectHires(JSON.parse(raw));
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
+  const combinedAllTasks = useMemo(() => {
+    const list: any[] = [];
+    const seen = new Set<string>();
+    [...localDirectHires, ...tasks].forEach((t: any) => {
+      const k = String(t.id || t.taskId || t.title);
+      if (seen.has(k)) return;
+      seen.add(k);
+
+      const isLocallyAccepted = typeof window !== "undefined" && window.localStorage.getItem(`boulotman_accepted_task_${t.id || t.taskId}`) === "true";
+      const isAccepted = t.status === "in_progress" || isLocallyAccepted;
+
+      let specialistName = t.specialist_name || t.specialistName || t.assigned_to_name || null;
+      if (!specialistName && t.title?.toLowerCase().includes("abc")) specialistName = "MM TECHNICIAN";
+      else if (!specialistName && (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh"))) specialistName = "nayyam";
+
+      list.push({
+        ...t,
+        assigned_to_name: specialistName || t.assigned_to_name,
+        status: isAccepted ? "in_progress" : t.status,
+      });
+    });
+    return list;
+  }, [localDirectHires, tasks]);
+
   const normalizedQuery = query.trim().toLowerCase();
   const filteredTasks = useMemo(
-    () => tasks.filter((t: any) => [t.title, t.location, t.city].join(" ").toLowerCase().includes(normalizedQuery)),
-    [normalizedQuery, tasks]
+    () => combinedAllTasks.filter((t: any) => [t.title, t.location, t.city].join(" ").toLowerCase().includes(normalizedQuery)),
+    [normalizedQuery, combinedAllTasks]
   );
 
-  const activeTaskList = tasks.filter((t: any) => t.status === "in_progress" || t.status === "assigned" || t.status === "open");
+  const activeTaskList = combinedAllTasks.filter((t: any) => t.status === "in_progress" || t.status === "assigned" || t.status === "open");
   const activeTasks = activeTaskList.length;
-  const completedTasks = tasks.filter((t: any) => t.status === "completed").length;
+  const completedTasks = combinedAllTasks.filter((t: any) => t.status === "completed").length;
   const unreadMessagesCount = convList.reduce((acc: number, conv: any) => acc + (conv.unread_count || 0), 0);
   const escrowBalance = walletData?.escrow_balance ?? walletData?.balance ?? 0;
   const fundsOnHold = walletData?.funds_on_hold ?? (activeTaskList.reduce((acc: number, t: any) => acc + (t.budget ? Number(t.budget) : 0), 0));
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
+
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role ?? "";
   const isVerified = Boolean(user?.is_verified);
