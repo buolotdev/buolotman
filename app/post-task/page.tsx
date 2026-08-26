@@ -8,24 +8,17 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { formatXOF } from "@/app/lib/format";
 import { useTaskDraft } from "./TaskDraftContext";
+import ClientSidebar from "@/app/components/ClientSidebar";
+import DashboardHeader from "@/app/components/DashboardHeader";
 
-type NavKey = "dashboard" | "tasks" | "messages" | "payments" | "saved" | "profile";
 type ServiceType = "onsite" | "remote" | "hybrid";
 type Urgency = "urgent" | "standard";
 type BudgetMode = "fixed" | "hourly";
 type PaymentOption = "" | "Cash on completion" | "Milestone payment" | "Escrow";
 type ContactMethod = "in-app" | "phone" | "whatsapp";
 
-const navItems: Array<{ key: NavKey; label: string; icon: string; href: string }> = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks" },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages" },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments" },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved" },
-  { key: "profile", label: "Profile", icon: "lucide:user", href: "/dashboard/client/profile" },
-];
-
 import { toArray } from "@/app/lib/dataShape";
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EMPTY_SKILLS: any[] = [];
@@ -309,67 +302,16 @@ function PostTaskForm() {
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
-        <aside className={`${styles.sidebar} ${mobileNavOpen ? styles.sidebarOpen : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <div>
-              <p className={styles.sidebarEyebrow}>Boulot Man</p>
-              <h1 className={styles.sidebarTitle}>Client Space</h1>
-            </div>
-            <button
-              type="button"
-              className={styles.sidebarClose}
-              aria-label="Close navigation"
-              onClick={() => setMobileNavOpen(false)}
-            >
-              <iconify-icon icon="lucide:x" />
-            </button>
-          </div>
-
-          <nav className={styles.sidebarNav} aria-label="Dashboard navigation">
-            {navItems.map((item) => (
-              <Link key={item.key} href={item.href} className={styles.navItem}>
-                <iconify-icon icon={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
+        <ClientSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <div className={styles.main}>
-          <header className={styles.topbar}>
-            <div className={styles.topbarLeft}>
-              <button
-                type="button"
-                className={styles.mobileMenuButton}
-                aria-label="Open navigation"
-                onClick={() => setMobileNavOpen(true)}
-              >
-                <iconify-icon icon="lucide:menu" />
-              </button>
-
-              <label className={styles.searchBar}>
-                <iconify-icon icon="lucide:search" />
-                <input type="search" placeholder="Search tasks, professionals..." aria-label="Search tasks and professionals" />
-              </label>
-            </div>
-
-            <div className={styles.topbarActions}>
-              <button type="button" className={styles.iconButton} aria-label="Notifications">
-                <iconify-icon icon="lucide:bell" />
-                <span className={styles.notificationDot} />
-              </button>
-
-              <div className={styles.userMenu}>
-                <div className={styles.userAvatar}>{userInitials}</div>
-                <div>
-                  <p className={styles.userName}>{userName}</p>
-                  <p className={styles.userRole}>{userRole}</p>
-                </div>
-              </div>
-            </div>
-          </header>
+          <DashboardHeader
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search tasks, professionals..."
+          />
 
           <div className={styles.content}>
+
             <div className={styles.contentInner}>
               <section className={styles.pageHeader}>
                 <div>
