@@ -144,6 +144,33 @@ export default function TechnicianDashboardPage() {
               <div className={styles.heroActions}>
                 <Link href="/dashboard/technician/tasks" className={styles.primaryButton}><iconify-icon icon="lucide:search" /> Browse Tasks</Link>
                 <Link href="/dashboard/technician/wallet" className={styles.secondaryButton}>View Wallet</Link>
+                <Link 
+                  href="/dashboard/technician/projects" 
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#ffffff',
+                    minHeight: '44px',
+                    padding: '0 18px',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <iconify-icon icon="lucide:briefcase" style={{ color: '#38bdf8', fontSize: '18px' }} />
+                  Direct Projects & Offers
+                  {assignedTasks.length > 0 && (
+                    <span style={{ background: '#ff4500', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '999px', fontWeight: 800 }}>
+                      {assignedTasks.length} New
+                    </span>
+                  )}
+                </Link>
               </div>
             </div>
 

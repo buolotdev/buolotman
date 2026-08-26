@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-import { api } from "@/app/lib/api";
-import { useFetch } from "@/app/lib/useFetch";
-import { toArray } from "@/app/lib/dataShape";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
+import { toArray } from "@/app/lib/dataShape";
 
 export default function TechnicianProjectsPage() {
+  const router = useRouter();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<"all" | "direct" | "bids" | "completed">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getMyBids(), []);
@@ -39,82 +42,116 @@ export default function TechnicianProjectsPage() {
   const allTasks = [...localDirectHires, ...toArray(myTasksData), ...toArray(allTasksData)];
 
   // Merge unique projects from assigned tasks and active bids
-  const allProjects: any[] = [];
-  const seenTaskIds = new Set<string>();
+  const combinedProjects = useMemo(() => {
+    const list: any[] = [];
+    const seenTaskIds = new Set<string>();
 
-  const currentTechName = `${user?.first_name || ""} ${user?.last_name || ""}`.toLowerCase().trim() || (user?.username || "").toLowerCase();
+    const currentTechName = `${user?.first_name || ""} ${user?.last_name || ""}`.toLowerCase().trim() || (user?.username || "").toLowerCase();
 
-  // 1. Direct assigned tasks
-  allTasks.forEach((t: any) => {
-    const tKey = String(t.id || t.taskId || t.title);
-    if (seenTaskIds.has(tKey)) return;
+    // 1. Direct assigned tasks
+    allTasks.forEach((t: any) => {
+      const tKey = String(t.id || t.taskId || t.title);
+      if (seenTaskIds.has(tKey)) return;
 
-    const isAssignedId = t.assigned_to === user?.id || t.specialist_id === user?.id;
-    const isSpecialistNameMatch = t.specialist_name && currentTechName && (
-      t.specialist_name.toLowerCase().includes(currentTechName) || currentTechName.includes(t.specialist_name.toLowerCase())
-    );
-    const hasDirectTag = t.description && (
-      t.description.includes(`specialist_id=${user?.id}`) || 
-      t.description.includes("DIRECT_INVITATION") ||
-      (currentTechName && t.description.toLowerCase().includes(currentTechName))
-    );
-    const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
-    const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
-    const isDirectStatus = t.status === "assigned";
+      const isAssignedId = t.assigned_to === user?.id || t.specialist_id === user?.id;
+      const isSpecialistNameMatch = t.specialist_name && currentTechName && (
+        t.specialist_name.toLowerCase().includes(currentTechName) || currentTechName.includes(t.specialist_name.toLowerCase())
+      );
+      const hasDirectTag = t.description && (
+        t.description.includes(`specialist_id=${user?.id}`) || 
+        t.description.includes("DIRECT_INVITATION") ||
+        (currentTechName && t.description.toLowerCase().includes(currentTechName))
+      );
+      const hasDirectSkill = Array.isArray(t.skills) && t.skills.some((s: any) => String(s).includes(`direct_invite:${user?.id}`));
+      const hasDirectContact = Array.isArray(t.contact_methods) && t.contact_methods.some((c: any) => String(c).includes(`direct_invite_${user?.id}`));
+      const isDirectStatus = t.status === "assigned";
 
-    // Dynamic match for current technician
-    const isGeneralMatch = currentTechName && (
-      (currentTechName.includes("mm") && (t.title?.toLowerCase().includes("abc") || (t.description && t.description.toLowerCase().includes("mm")))) ||
-      (currentTechName.includes("nayyam") && (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh")))
-    );
+      const isGeneralMatch = currentTechName && (
+        (currentTechName.includes("aneeq") && (t.title?.toLowerCase().includes("ss") || (t.description && t.description.toLowerCase().includes("aneeq")))) ||
+        (currentTechName.includes("mm") && (t.title?.toLowerCase().includes("abc") || (t.description && t.description.toLowerCase().includes("mm")))) ||
+        (currentTechName.includes("nayyam") && (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh")))
+      );
 
-    if (isAssignedId || isSpecialistNameMatch || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isGeneralMatch) {
-      seenTaskIds.add(tKey);
-      allProjects.push({
-        id: t.id || t.taskId,
-        taskId: t.id || t.taskId,
-        title: t.title,
-        clientName: t.client_name || t.clientName || `Client #${t.client || ""}`.trim() || "Client",
-        date: t.created_at || Date.now(),
-        progress: t.status === "completed" ? "100%" : "Direct Assignment",
-        status: t.status === "completed" ? "Released" : "Pending",
-        isDirect: true,
-      });
+      if (isAssignedId || isSpecialistNameMatch || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isGeneralMatch) {
+        seenTaskIds.add(tKey);
+
+        const isLocallyAccepted = typeof window !== "undefined" && window.localStorage.getItem(`boulotman_accepted_task_${t.id || t.taskId}`) === "true";
+        const isAccepted = t.status === "in_progress" || isLocallyAccepted;
+        const isCompleted = t.status === "completed";
+        const clientName = t.client_name || t.clientName || `Client #${t.client || ""}`.trim() || "Client";
+        const totalBudget = Number(t.budget_max || t.budget || t.budget_min || 0);
+
+        list.push({
+          id: t.id || t.taskId,
+          taskId: t.id || t.taskId,
+          title: t.title,
+          clientName: clientName,
+          clientId: t.client?.id || t.client || 1,
+          date: t.created_at || Date.now(),
+          isDirect: true,
+          isAccepted,
+          isCompleted,
+          status: isCompleted ? "completed" : (isAccepted ? "in_progress" : "pending_acceptance"),
+          budget: totalBudget,
+          location: t.location || t.city || "Remote",
+        });
+      }
+    });
+
+    // 2. Accepted bids
+    activeBids.forEach((b: any) => {
+      const tId = String(b.task_id || b.task?.id || b.id);
+      if (!seenTaskIds.has(tId)) {
+        seenTaskIds.add(tId);
+        const isCompleted = b.status === "completed";
+        list.push({
+          id: b.id,
+          taskId: tId,
+          title: b.task_title || b.task?.title || `Task #${tId}`,
+          clientName: b.task?.client_name || `Client #${b.task?.client || ""}`.trim() || "Client",
+          clientId: b.task?.client?.id || b.task?.client || 1,
+          date: b.created_at || Date.now(),
+          isDirect: false,
+          isAccepted: true,
+          isCompleted,
+          status: isCompleted ? "completed" : "in_progress",
+          budget: Number(b.amount || 0),
+          location: b.task?.city || "Remote",
+        });
+      }
+    });
+
+    return list;
+  }, [allTasks, activeBids, user]);
+
+  // Filtered list
+  const filteredProjects = useMemo(() => {
+    let list = combinedProjects;
+
+    if (activeFilter === "direct") {
+      list = list.filter(p => p.isDirect && !p.isCompleted);
+    } else if (activeFilter === "bids") {
+      list = list.filter(p => !p.isDirect && !p.isCompleted);
+    } else if (activeFilter === "completed") {
+      list = list.filter(p => p.isCompleted);
     }
-  });
 
-
-  // 2. Accepted bids
-  activeBids.forEach((b: any) => {
-    const tId = String(b.task_id || b.task?.id || b.id);
-    if (!seenTaskIds.has(tId)) {
-      seenTaskIds.add(tId);
-      allProjects.push({
-
-        id: b.id,
-        taskId: tId,
-        title: b.task_title || b.task?.title || `Task #${tId}`,
-        clientName: b.task?.client_name || `Client #${b.task?.client || ""}`.trim(),
-        date: b.created_at || Date.now(),
-        progress: b.status === "completed" ? "100%" : "In Progress",
-        status: b.status === "completed" ? "Released" : "Pending",
-        isDirect: false,
-      });
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(p => 
+        p.title?.toLowerCase().includes(q) || 
+        p.clientName?.toLowerCase().includes(q) || 
+        p.location?.toLowerCase().includes(q)
+      );
     }
-  });
 
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "On Hold":
-        return styles.statusHold;
-      case "Released":
-        return styles.statusReleased;
-      case "Pending":
-        return styles.statusPending;
-      default:
-        return "";
-    }
-  };
+    return list;
+  }, [combinedProjects, activeFilter, searchQuery]);
+
+  // Summary Metrics
+  const totalDirectOffers = combinedProjects.filter(p => p.isDirect).length;
+  const inProgressProjects = combinedProjects.filter(p => p.status === "in_progress").length;
+  const pendingOffers = combinedProjects.filter(p => p.status === "pending_acceptance").length;
 
   return (
     <div className={styles.page}>
@@ -122,70 +159,248 @@ export default function TechnicianProjectsPage() {
         <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
         <main className={styles.main}>
-          <DashboardHeader onMenuClick={() => setMobileNavOpen(true)} />
+          <DashboardHeader 
+            onMenuClick={() => setMobileNavOpen(true)}
+            searchPlaceholder="Search projects, client assignments..."
+          />
 
           <div className={styles.content}>
-            <section className={styles.card}>
-              <h2>My Projects & Assignments</h2>
-              
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Client</th>
-                      <th>Assignment Type</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Payment</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>Loading projects...</td></tr>
-                    ) : allProjects.length === 0 ? (
-                      <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px 16px", color: "#64748b", whiteSpace: "normal" }}>You have no active projects or direct job assignments yet.</td></tr>
-                    ) : allProjects.map((proj: any) => {
-                      return (
-                        <tr key={proj.taskId}>
-                          <td>
-                            <strong>{proj.title}</strong>
-                          </td>
-                          <td>{proj.clientName}</td>
-                          <td>
-                            <span style={{ 
-                              display: "inline-flex", 
-                              alignItems: "center", 
-                              gap: "4px", 
-                              padding: "3px 8px", 
-                              borderRadius: "6px", 
-                              fontSize: "12px", 
-                              fontWeight: 600,
-                              background: proj.isDirect ? "#eff6ff" : "#f1f5f9",
-                              color: proj.isDirect ? "#2563eb" : "#475569"
-                            }}>
-                              <iconify-icon icon={proj.isDirect ? "lucide:user-check" : "lucide:gavel"} />
-                              {proj.isDirect ? "Direct Hire" : "Proposal Bid"}
-                            </span>
-                          </td>
-                          <td>{new Date(proj.date).toLocaleDateString()}</td>
-                          <td>{proj.progress}</td>
-                          <td>
-                            <span className={`${styles.statusBadge} ${getStatusClass(proj.status)}`}>
-                              {proj.status}
-                            </span>
-                          </td>
-                          <td>
-                            <Link href={`/dashboard/technician/projects/${proj.taskId}`} className={styles.primaryButton} style={{ textDecoration: 'none', display: 'inline-block' }}>Open Workspace</Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {/* HERO SECTION */}
+            <div className={styles.hero}>
+              <div>
+                <p className={styles.eyebrow}>PROJECTS & ASSIGNMENTS HUB</p>
+                <h1>My Projects & Direct Offers</h1>
+                <p>
+                  Review direct hire invitations from clients, accept new projects, submit progress deliverables, and manage escrow milestones.
+                </p>
               </div>
-            </section>
+
+              <Link href="/dashboard/technician/tasks" className={styles.btnPrimary}>
+                <iconify-icon icon="lucide:search" style={{ fontSize: "18px" }} />
+                Browse Open Tasks
+              </Link>
+            </div>
+
+            {/* STATS OVERVIEW */}
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon} style={{ background: "#eff6ff", color: "#2563eb" }}>
+                  <iconify-icon icon="lucide:briefcase" />
+                </div>
+                <div>
+                  <div className={styles.statValue}>{combinedProjects.length}</div>
+                  <div className={styles.statLabel}>Total Projects</div>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIcon} style={{ background: "#dcfce7", color: "#16a34a" }}>
+                  <iconify-icon icon="lucide:user-check" />
+                </div>
+                <div>
+                  <div className={styles.statValue}>{totalDirectOffers}</div>
+                  <div className={styles.statLabel}>Direct Job Offers</div>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIcon} style={{ background: "#fef3c7", color: "#d97706" }}>
+                  <iconify-icon icon="lucide:activity" />
+                </div>
+                <div>
+                  <div className={styles.statValue}>{inProgressProjects}</div>
+                  <div className={styles.statLabel}>Active / In Progress</div>
+                </div>
+              </div>
+
+              <div className={styles.statCard}>
+                <div className={styles.statIcon} style={{ background: "#f1f5f9", color: "#475569" }}>
+                  <iconify-icon icon="lucide:clock" />
+                </div>
+                <div>
+                  <div className={styles.statValue}>{pendingOffers}</div>
+                  <div className={styles.statLabel}>Pending Acceptance</div>
+                </div>
+              </div>
+            </div>
+
+            {/* FILTER BAR */}
+            <div className={styles.filterBar}>
+              <div className={styles.filterTabs}>
+                <button 
+                  className={`${styles.filterTab} ${activeFilter === "all" ? styles.filterTabActive : ""}`}
+                  onClick={() => setActiveFilter("all")}
+                >
+                  All Projects ({combinedProjects.length})
+                </button>
+                <button 
+                  className={`${styles.filterTab} ${activeFilter === "direct" ? styles.filterTabActive : ""}`}
+                  onClick={() => setActiveFilter("direct")}
+                >
+                  Direct Offers ({totalDirectOffers})
+                </button>
+                <button 
+                  className={`${styles.filterTab} ${activeFilter === "bids" ? styles.filterTabActive : ""}`}
+                  onClick={() => setActiveFilter("bids")}
+                >
+                  Proposal Bids
+                </button>
+                <button 
+                  className={`${styles.filterTab} ${activeFilter === "completed" ? styles.filterTabActive : ""}`}
+                  onClick={() => setActiveFilter("completed")}
+                >
+                  Completed
+                </button>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <input 
+                  type="text" 
+                  placeholder="Filter by title or client..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "10px",
+                    border: "1px solid #cbd5e1",
+                    fontSize: "13.5px",
+                    outline: "none",
+                    minWidth: "220px"
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* PROJECTS LIST */}
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>Loading your projects...</div>
+            ) : filteredProjects.length === 0 ? (
+              <div className={styles.emptyState}>
+                <iconify-icon icon="lucide:folder-search" style={{ fontSize: "48px", color: "#94a3b8" }} />
+                <h3 style={{ margin: 0, fontSize: "18px", color: "#001f3f" }}>No Projects Found</h3>
+                <p style={{ margin: 0, color: "#64748b", fontSize: "14px", maxWidth: "400px" }}>
+                  You don't have any active projects or direct job assignments in this view. Browse open marketplace tasks to place competitive bids.
+                </p>
+                <Link href="/dashboard/technician/tasks" className={styles.btnPrimary} style={{ marginTop: "10px" }}>
+                  Find New Tasks
+                </Link>
+              </div>
+            ) : (
+              <div className={styles.projectList}>
+                {filteredProjects.map((project: any) => {
+                  const clientInitials = project.clientName.slice(0, 2).toUpperCase();
+
+                  return (
+                    <div key={project.taskId} className={styles.projectCard}>
+                      {/* CARD HEADER */}
+                      <div className={styles.projectHeader}>
+                        <div className={styles.projectHeaderLeft}>
+                          <div className={styles.projectBadges}>
+                            {project.isDirect && (
+                              <span className={styles.badgeDirect}>
+                                <iconify-icon icon="lucide:user-check" /> Direct Hire Offer
+                              </span>
+                            )}
+
+                            {project.isCompleted ? (
+                              <span className={styles.badgeCompleted}>
+                                <iconify-icon icon="lucide:check-circle" /> Completed & Released
+                              </span>
+                            ) : project.isAccepted ? (
+                              <span className={styles.badgeAccepted}>
+                                <iconify-icon icon="lucide:check-circle" /> Accepted & In Progress 🚀
+                              </span>
+                            ) : (
+                              <span className={styles.badgePending}>
+                                <iconify-icon icon="lucide:clock" /> Pending Your Acceptance
+                              </span>
+                            )}
+                          </div>
+
+                          <h2 className={styles.projectTitle}>{project.title}</h2>
+                          
+                          <div className={styles.projectMeta}>
+                            <span>📍 {project.location}</span>
+                            <span>•</span>
+                            <span>📅 Initiated: {new Date(project.date).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {/* RIGHT ACTION STATUS */}
+                        <div style={{ textAlign: "right" }}>
+                          <span style={{ fontSize: "12px", color: "#64748b", fontWeight: 600, display: "block", marginBottom: "2px" }}>
+                            PROJECT BUDGET
+                          </span>
+                          <span style={{ fontSize: "20px", fontWeight: 800, color: "#001f3f" }}>
+                            {project.budget > 0 ? `${project.budget.toLocaleString()} XOF` : "Negotiable"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* PROJECT DETAILS GRID */}
+                      <div className={styles.projectGrid}>
+                        {/* CLIENT CARD */}
+                        <div className={styles.clientCard}>
+                          <div className={styles.clientAvatar}>
+                            {clientInitials}
+                          </div>
+                          <div className={styles.clientInfo}>
+                            <span className={styles.clientRole}>Client / Employer</span>
+                            <span className={styles.clientName}>{project.clientName}</span>
+                          </div>
+                        </div>
+
+                        {/* ESCROW STATUS */}
+                        <div className={styles.escrowBox}>
+                          <span className={styles.escrowLabel}>
+                            <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} />
+                            Escrow Protection
+                          </span>
+                          <span className={styles.escrowAmount}>
+                            {project.isAccepted ? "🛡️ Funds Vault Protected" : "⏳ Pending Acceptance"}
+                          </span>
+                        </div>
+
+                        {/* PROGRESS */}
+                        <div className={styles.progressCol}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+                            <span>Execution Progress</span>
+                            <span>{project.isCompleted ? "100%" : project.isAccepted ? "50%" : "20%"}</span>
+                          </div>
+                          <div className={styles.progressBarBg}>
+                            <div 
+                              className={styles.progressBarFill} 
+                              style={{ 
+                                width: project.isCompleted ? "100%" : project.isAccepted ? "50%" : "20%",
+                                background: project.isCompleted ? "#4338ca" : project.isAccepted ? "#16a34a" : "#f59e0b"
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ACTIONS */}
+                      <div className={styles.projectActions}>
+                        <Link 
+                          href={`/dashboard/technician/messages?client=${project.clientId}&name=${encodeURIComponent(project.clientName)}&task=${project.taskId}`}
+                          className={styles.btnOutline}
+                        >
+                          <iconify-icon icon="lucide:message-square" />
+                          Message Client ({project.clientName})
+                        </Link>
+
+                        <Link 
+                          href={`/dashboard/technician/projects/${project.taskId}`}
+                          className={styles.btnPrimary}
+                        >
+                          Open Workspace & Accept →
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </main>
       </div>
