@@ -23,8 +23,9 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 
 export default function PaymentsAndEarningsPage() {
   return (
-    <div style={{ background: "#f5f7fb", minHeight: "100vh" }}>
+    <div className={styles.page}>
       <Header />
+
 
       {/* HERO */}
       <section className={styles.hero}>

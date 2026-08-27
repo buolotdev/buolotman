@@ -165,11 +165,13 @@ export default function UpgradePage() {
             {/* FREE TIER */}
             <div className={styles.card}>
               {currentTier === "FREE" && (
-                <div style={{ position: "absolute", top: -14, left: 24, background: "#001f3f", color: "#fff", padding: "4px 12px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 700 }}>
+                <div className={styles.activeTag}>
+                  <iconify-icon icon="lucide:check-circle" style={{ fontSize: "13px", color: "#22c55e" }}></iconify-icon>
                   Active Plan
                 </div>
               )}
               <h3 className={styles.tierName}>Free Tier</h3>
+
               <p className={styles.price}>$0 <span>/ month</span></p>
               <p style={{ color: "#64748b", fontSize: "0.9rem", margin: "-10px 0 20px" }}>Standard entry access for starting professionals.</p>
 
