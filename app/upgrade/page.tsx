@@ -95,48 +95,57 @@ export default function UpgradePage() {
       {/* HERO */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255, 69, 0, 0.2)", color: "#ff4500", padding: "6px 16px", borderRadius: 999, fontSize: "0.85rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 20 }}>
+          <div className={styles.heroBadge}>
             <iconify-icon icon="lucide:sparkles" /> Maximize Your Growth
           </div>
-          <h1 className={styles.heroTitle}>Tier Pricing & Subscriptions</h1>
+          <h1 className={styles.heroTitle}>Tier Pricing &amp; Subscriptions</h1>
           <p className={styles.heroSubtitle}>
             Choose the tier that matches your ambitions. Increase daily post limits, reply to unlimited tasks, 
             unlock instant payouts, and get priority exposure across Africa.
           </p>
 
           {/* Billing Toggle */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 14, marginTop: 36, background: "rgba(255, 255, 255, 0.1)", padding: "6px 14px", borderRadius: 999, border: "1px solid rgba(255, 255, 255, 0.2)" }}>
-            <span style={{ color: !isAnnual ? "#ffffff" : "#94a3b8", fontWeight: !isAnnual ? 700 : 500, fontSize: "0.95rem" }}>
+          <div className={styles.billingToggle}>
+            <span 
+              className={`${styles.billingLabel} ${!isAnnual ? styles.billingLabelActive : ""}`}
+              onClick={() => setIsAnnual(false)}
+            >
               Monthly Billing
             </span>
             <button
+              type="button"
+              aria-label="Toggle annual billing"
               onClick={() => setIsAnnual(!isAnnual)}
               style={{
-                width: 52,
-                height: 28,
+                width: 48,
+                height: 26,
                 borderRadius: 999,
                 background: isAnnual ? "#ff4500" : "rgba(255,255,255,0.3)",
                 border: "none",
                 cursor: "pointer",
                 position: "relative",
                 transition: "all 0.2s ease",
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
-                  width: 22,
-                  height: 22,
+                  width: 20,
+                  height: 20,
                   borderRadius: "50%",
                   background: "#ffffff",
                   position: "absolute",
                   top: 3,
-                  left: isAnnual ? 27 : 3,
+                  left: isAnnual ? 25 : 3,
                   transition: "all 0.2s ease",
                 }}
               />
             </button>
-            <span style={{ color: isAnnual ? "#ffffff" : "#94a3b8", fontWeight: isAnnual ? 700 : 500, fontSize: "0.95rem", display: "flex", alignItems: "center", gap: 6 }}>
-              Annual Billing <span style={{ background: "#22c55e", color: "#fff", padding: "2px 8px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 800 }}>Save 20%</span>
+            <span 
+              className={`${styles.billingLabel} ${isAnnual ? styles.billingLabelActive : ""}`}
+              onClick={() => setIsAnnual(true)}
+            >
+              Annual Billing <span className={styles.saveBadge}>Save 20%</span>
             </span>
           </div>
         </div>

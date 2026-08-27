@@ -207,17 +207,18 @@ export default function DisputeResolutionPage() {
               For general inquiries, feel free to contact us.
             </p>
           </div>
-          <div style={{ display: "flex", gap: "16px", alignItems: "center", justifyContent: "center" }}>
-            <Link href="/login" style={{ width: '100%' }}>
-              <button className={styles.ctaBtn} style={{ background: '#fff', color: '#001F3F' }}>
+          <div className={styles.ctaButtonGroup}>
+            <Link href="/login" style={{ width: '100%', textDecoration: 'none' }}>
+              <button type="button" className={`${styles.ctaBtn} ${styles.ctaBtnSecondary}`}>
                 Go to Dashboard
               </button>
             </Link>
-            <button className={styles.ctaBtn} onClick={() => setShowModal(true)}>
+            <button type="button" className={styles.ctaBtn} onClick={() => setShowModal(true)}>
               Contact Support
             </button>
           </div>
         </div>
+
       </main>
 
       <Footer />
