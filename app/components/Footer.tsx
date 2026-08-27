@@ -202,14 +202,15 @@ export default function Footer() {
           {/* COMPANY */}
           <div className="footer-col">
             <h4>{t.company}</h4>
-            <Link href="/">About Us</Link>
-            <Link href="/">Careers</Link>
-            <Link href="/">Investors</Link>
-            <Link href="/">Legal</Link>
+            <Link href="/about">About Us</Link>
+            <Link href="/careers">Careers</Link>
+            <Link href="/investors">Investors</Link>
+            <Link href="/terms">Legal</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
-            <Link href="/">Contact</Link>
+            <Link href="/help-center">Contact</Link>
           </div>
+
 
         </div>
 
