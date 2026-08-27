@@ -58,7 +58,7 @@ def search(request):
     else:
         tasks = tasks.order_by('-created_at')
 
-    users = User.objects.filter(is_active=True, role='TECHNICIAN').select_related('technician_profile').prefetch_related('technician_profile__skills')
+    users = User.objects.filter(is_active=True, role='TECHNICIAN', is_verified=True).select_related('technician_profile').prefetch_related('technician_profile__skills')
     if query:
         users = users.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query) | Q(email__icontains=query))
     if location:
@@ -68,7 +68,7 @@ def search(request):
     if category:
         users = users.filter(Q(technician_services__category__slug__iexact=category) | Q(technician_services__category__name__icontains=category)).distinct()
 
-    companies = CompanyProfile.objects.select_related('user').prefetch_related('services', 'reviews').order_by('-created_at')
+    companies = CompanyProfile.objects.filter(is_verified=True).select_related('user').prefetch_related('services', 'reviews').order_by('-created_at')
     if query:
         companies = companies.filter(Q(company_name__icontains=query) | Q(about__icontains=query) | Q(headquarters__icontains=query))
     if location:
@@ -78,7 +78,8 @@ def search(request):
     if category:
         companies = companies.filter(Q(services__title__icontains=category) | Q(services__description__icontains=category)).distinct()
 
-    services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True)
+    services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True, technician__is_verified=True)
+
     if query:
         services = services.filter(
             Q(title__icontains=query)

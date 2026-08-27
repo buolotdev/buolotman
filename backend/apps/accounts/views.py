@@ -219,16 +219,19 @@ def switch_role(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-@cached("list_users", ttl=120)
 def list_users(request):
     from django.contrib.auth import get_user_model
     User = get_user_model()
     role = request.query_params.get('role', '').upper()
     limit = int(request.query_params.get('limit', '12'))
+    show_all = request.query_params.get('all_status') == 'true'
     qs = User.objects.filter(is_active=True)
+    if not show_all:
+        qs = qs.filter(is_verified=True)
     if role in ('TECHNICIAN', 'CLIENT', 'COMPANY', 'ADMIN'):
         qs = qs.filter(role=role)
     qs = qs.order_by('-created_at')[:max(1, min(limit, 50))]
+
 
     from .serializers import UserPublicSerializer
     data = []
@@ -377,20 +380,25 @@ def technician_services(request):
         serializer = TechnicianServiceSerializer(items, many=True)
         return Response(serializer.data)
 
-    serializer = TechnicianServiceSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    service = serializer.save(technician=request.user)
-    create_audit_log(
-        actor=request.user,
-        action="technician_service_created",
-        entity_type="technician_service",
-        entity_id=service.id,
-        summary=service.title,
-        metadata={"service_type": service.service_type, "pricing_model": service.pricing_model},
-        ip_address=request.META.get("REMOTE_ADDR"),
-    )
-    return Response(TechnicianServiceSerializer(service).data, status=status.HTTP_201_CREATED)
+    elif request.method == 'POST':
+        if not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({"error": "Your technician account is pending Admin verification. You can post services once approved by Admin."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = TechnicianServiceSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        service = serializer.save(technician=request.user)
+        create_audit_log(
+            actor=request.user,
+            action="technician_service_created",
+            entity_type="technician_service",
+            entity_id=service.id,
+            summary=service.title,
+            metadata={"service_type": service.service_type, "pricing_model": service.pricing_model},
+            ip_address=request.META.get("REMOTE_ADDR"),
+        )
+        return Response(TechnicianServiceSerializer(service).data, status=status.HTTP_201_CREATED)
+
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])

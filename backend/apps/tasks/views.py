@@ -186,9 +186,13 @@ def task_list(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def task_create(request):
+    if not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({"error": "Your account is pending Admin verification. You can post tasks once approved by Admin."}, status=status.HTTP_403_FORBIDDEN)
+
     serializer = TaskCreateSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         task = serializer.save()
+
         create_audit_log(
             actor=request.user,
             action="task_created",

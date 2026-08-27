@@ -50,10 +50,13 @@ def company_public_profile(request, company_id):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-@cached("list_companies", ttl=120)
 def list_companies(request):
     limit = int(request.query_params.get('limit', '12'))
-    qs = CompanyProfile.objects.select_related('user').order_by('-created_at')[:max(1, min(limit, 50))]
+    show_all = request.query_params.get('all_status') == 'true'
+    qs = CompanyProfile.objects.select_related('user')
+    if not show_all:
+        qs = qs.filter(is_verified=True)
+    qs = qs.order_by('-created_at')[:max(1, min(limit, 50))]
     data = []
     for profile in qs:
         item = CompanyProfileSerializer(profile).data
@@ -80,6 +83,9 @@ def company_projects_list_create(request):
         serializer = CompanyProjectSerializer(projects, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
+        if not profile.is_verified and not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({"error": "Your company account is pending Admin verification. You can post services and projects once approved by Admin."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = CompanyProjectSerializer(data=request.data)
         if serializer.is_valid():
             project = serializer.save(company=profile)
@@ -97,7 +103,6 @@ def company_projects_list_create(request):
 company_projects = company_projects_list_create
 
 
-
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def company_services(request):
@@ -111,11 +116,15 @@ def company_services(request):
         serializer = CompanyServiceSerializer(services, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
+        if not profile.is_verified and not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({"error": "Your company account is pending Admin verification. You can post services once approved by Admin."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = CompanyServiceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(company=profile)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['DELETE'])

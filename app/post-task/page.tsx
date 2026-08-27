@@ -343,7 +343,20 @@ function PostTaskForm() {
                 </div>
               </section>
 
+              {meData && !meData.is_verified && (
+                <div style={{ padding: "16px 20px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 16, display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "#d97706", flexShrink: 0 }}>
+                    <iconify-icon icon="lucide:shield-alert"></iconify-icon>
+                  </div>
+                  <div>
+                    <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>Account Verification Notice</strong>
+                    <span style={{ color: "#b45309", fontSize: 13 }}>Your account is currently under review by Admin. You can draft your project specifications, and it will be published once verified by Admin.</span>
+                  </div>
+                </div>
+              )}
+
               {inviteCompanyId && (
+
                 <div style={{ padding: "18px 22px", background: "linear-gradient(135deg, #001f3f 0%, #003366 100%)", borderRadius: 18, color: "#fff", display: "flex", alignItems: "center", gap: 14, marginBottom: 24, boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
                   <div style={{ width: 44, height: 44, borderRadius: 12, background: "#ff4500", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#fff", flexShrink: 0 }}>
                     <iconify-icon icon="lucide:building-2"></iconify-icon>

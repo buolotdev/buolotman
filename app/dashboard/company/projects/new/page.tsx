@@ -39,6 +39,10 @@ export default function CreateCompanyProjectPage() {
     description: "",
   });
 
+  const { data: user } = useFetch(() => api.getMe(), []);
+  const { data: companyProfile } = useFetch(() => api.getCompanyProfile(), []);
+  const isVerified = Boolean(user?.is_verified || companyProfile?.is_verified || user?.company_profile?.is_verified);
+
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
     []
@@ -51,6 +55,7 @@ export default function CreateCompanyProjectPage() {
   
   const categories = categoriesData || [];
   const subcategories = subcategoriesData || [];
+
 
   // Auto-detect location
   useEffect(() => {
@@ -128,7 +133,20 @@ export default function CreateCompanyProjectPage() {
           <p>Advertise your company services to clients on Boulot Man</p>
         </div>
 
+        {!isVerified && user && (
+          <div style={{ padding: "16px 20px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 16, display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "#d97706", flexShrink: 0 }}>
+              <iconify-icon icon="lucide:shield-alert"></iconify-icon>
+            </div>
+            <div>
+              <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>Company Verification Notice</strong>
+              <span style={{ color: "#b45309", fontSize: 13 }}>Your enterprise company profile is currently pending Admin verification. Once verified, your published services and projects will be visible in public search and client directories.</span>
+            </div>
+          </div>
+        )}
+
         <form className={styles.formCard} onSubmit={handlePreview}>
+
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Company Name</label>
