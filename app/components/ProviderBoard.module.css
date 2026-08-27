@@ -233,14 +233,19 @@
 
 .btn {
   flex: 1;
-  padding: 12px;
+  padding: 12px 14px;
   font-size: 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
+  font-weight: 700;
+  transition: all 0.2s ease;
   border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .btnView {
@@ -252,6 +257,7 @@
 .btnView:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
+  color: #001F3F;
 }
 
 .btnHire {
@@ -261,9 +267,11 @@
 
 .btnHire:hover {
   background: #e63e00;
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,69,0,0.2);
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
 }
+
 
 /* ================= PAGINATION ================= */
 .pagination {
