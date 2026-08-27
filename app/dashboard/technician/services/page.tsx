@@ -176,68 +176,151 @@ export default function TechnicianServicesPage() {
           onMenuClick={() => setMobileNavOpen(true)}
         />
 
-        <div style={{ padding: "0 0 24px" }}>
-          <header className={styles.topbar}>
-            <div>
-              <p className={styles.kicker}>Manage your listings</p>
-              <h1>My Services</h1>
-              <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
+        {/* BLUE GRADIENT HERO BANNER */}
+        <section style={{
+          background: "linear-gradient(135deg, #001f3f 0%, #0b3c6f 100%)",
+          borderRadius: "24px",
+          padding: "32px 36px",
+          color: "#fff",
+          marginBottom: "28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "24px",
+          boxShadow: "0 14px 36px rgba(0, 31, 63, 0.15)"
+        }}>
+          <div>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "rgba(255, 69, 0, 0.2)",
+              color: "#ff7b47",
+              border: "1px solid rgba(255, 69, 0, 0.35)",
+              padding: "4px 12px",
+              borderRadius: "999px",
+              fontSize: "12px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.8px",
+              marginBottom: "12px"
+            }}>
+              <iconify-icon icon="lucide:layers" /> Manage Your Listings
             </div>
-            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-              <button
-                type="button"
-                onClick={handleNewServiceClick}
-                className={styles.primaryButton}
-                style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", display: "inline-flex", whiteSpace: "nowrap", fontWeight: 700 }}
-              >
-                + New service
-              </button>
-              <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+            <h1 style={{ color: "#ffffff", fontSize: "2rem", fontWeight: 800, margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+              My Services
+            </h1>
+            <p style={{ color: "#cbd5e1", fontSize: "14.5px", margin: 0, maxWidth: "560px", lineHeight: 1.5 }}>
+              Create the services you want to offer, manage pricing models, and publish them to get hired by verified clients.
+            </p>
+          </div>
 
-            </div>
-          </header>
-        </div>
+          <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={handleNewServiceClick}
+              style={{
+                background: "#FF4500",
+                color: "#ffffff",
+                padding: "14px 28px",
+                borderRadius: "14px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 800,
+                fontSize: "14.5px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 8px 20px rgba(255, 69, 0, 0.3)",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap"
+              }}
+            >
+              <iconify-icon icon="lucide:plus-circle" style={{ fontSize: "18px" }} />
+              + New service
+            </button>
+            <Link
+              href="/dashboard/technician"
+              style={{
+                background: "rgba(255, 255, 255, 0.12)",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.25)",
+                padding: "14px 22px",
+                borderRadius: "14px",
+                fontWeight: 700,
+                fontSize: "14px",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                backdropFilter: "blur(10px)",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap"
+              }}
+            >
+              Back to dashboard
+            </Link>
+          </div>
+        </section>
 
         {!isVerified && (
           <div style={{
             background: "#fffbeb",
             border: "1.5px solid #fcd34d",
-            borderRadius: "16px",
-            padding: "16px 20px",
-            marginBottom: "24px",
+            borderRadius: "20px",
+            padding: "20px 24px",
+            marginBottom: "28px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "16px"
+            gap: "18px",
+            boxShadow: "0 8px 24px rgba(245, 158, 11, 0.08)"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#fef3c7", color: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>
-                <iconify-icon icon="lucide:alert-triangle" />
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <div style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "14px",
+                background: "#fef3c7",
+                color: "#d97706",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "24px",
+                flexShrink: 0
+              }}>
+                <iconify-icon icon="lucide:clock" />
               </div>
               <div>
-                <strong style={{ color: "#92400e", fontSize: "14.5px", display: "block", marginBottom: "2px" }}>
-                  Admin Verification Required to Post Services
+                <strong style={{ color: "#92400e", fontSize: "15px", display: "block", marginBottom: "3px" }}>
+                  Account Verification Pending
                 </strong>
-                <p style={{ margin: 0, color: "#b45309", fontSize: "13px" }}>
-                  Your profile is currently under review by the Boulot Man admin team. You cannot publish services until your identity documents and trade credentials are fully approved.
+                <p style={{ margin: 0, color: "#b45309", fontSize: "13.5px", lineHeight: 1.5 }}>
+                  Your profile is currently under review by the admin team. Once verified, you will be able to publish public services and start receiving job requests.
                 </p>
               </div>
             </div>
             <Link href="/dashboard/technician/profile" style={{
-              background: "#d97706",
-              color: "#fff",
-              padding: "8px 16px",
-              borderRadius: "10px",
-              fontWeight: "700",
-              fontSize: "13px",
+              background: "#FF4500",
+              color: "#ffffff",
+              padding: "10px 20px",
+              borderRadius: "12px",
+              fontWeight: 800,
+              fontSize: "13.5px",
               textDecoration: "none",
-              whiteSpace: "nowrap"
+              whiteSpace: "nowrap",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              boxShadow: "0 4px 12px rgba(255, 69, 0, 0.25)"
             }}>
-              Upload Documents
+              <iconify-icon icon="lucide:upload" /> Upload Documents
             </Link>
           </div>
         )}
+
 
 
         <section className={styles.summaryGrid}>
