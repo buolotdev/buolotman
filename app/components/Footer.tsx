@@ -136,12 +136,13 @@ export default function Footer() {
             <h4>{t.clients}</h4>
             <Link href="/post-task">Post a Task</Link>
             <Link href="/search">Browse Services</Link>
-            <Link href="/search?type=technician">Find Technicians</Link>
+            <Link href="/service-providers/technicians">Find Technicians</Link>
             <Link href="/search?type=company">Hire Companies</Link>
-            <Link href="/dashboard/company/projects">Build a Team</Link>
+            <Link href="/build-a-team">Build a Team</Link>
             <Link href="/concierge">Concierge</Link>
-            <Link href="/search?category=it">IT on Demand</Link>
+            <Link href="/it-on-demand">IT on Demand</Link>
           </div>
+
 
           {/* TECHNICIANS */}
           <div className="footer-col">
@@ -181,8 +182,9 @@ export default function Footer() {
           {/* RESOURCES */}
           <div className="footer-col">
             <h4>{t.resources}</h4>
-            <Link href="/#how-it-works">How It Works</Link>
+            <Link href="/how-it-works">How It Works</Link>
             <Link href="/help-center">Help Center</Link>
+
             <Link href="/payments-and-earnings">Payments &amp; Earnings</Link>
             <Link href="/upgrade">Pricing &amp; Upgrades</Link>
             <Link href="/search">Reviews</Link>
