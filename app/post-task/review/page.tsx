@@ -96,9 +96,14 @@ export default function TaskReviewPage() {
 
   const publish = async () => {
     if (!draft) return;
+    if (meData && !meData.is_verified && meData.role !== "ADMIN") {
+      setSubmitError("Your account is currently pending Admin verification. You will be able to publish tasks once approved by Admin.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
     try {
+
       const categoryId = draft.category && /^\d+$/.test(draft.category) ? Number(draft.category) : null;
       const address = [draft.address, draft.apartment, draft.city].filter(Boolean).join(", ");
       
@@ -471,12 +476,23 @@ export default function TaskReviewPage() {
                       <p>Once published, available professionals in your area will be notified and can start sending offers.</p>
                     </div>
 
+                    {!meData?.is_verified && meData?.role !== "ADMIN" && (
+                      <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", marginBottom: "14px", textAlign: "left" }}>
+                        <strong style={{ color: "#92400e", fontSize: "13px", display: "block", marginBottom: "4px" }}>
+                          ⚠️ Verification Required
+                        </strong>
+                        <span style={{ color: "#b45309", fontSize: "12px", lineHeight: "1.4", display: "block" }}>
+                          Your account is currently under review by Admin. You will be able to publish tasks once approved.
+                        </span>
+                      </div>
+                    )}
+
                     <div className={styles.actionStack}>
                       <button
                         type="button"
                         className={styles.primaryButton}
                         onClick={publish}
-                        disabled={submitting || !draft}
+                        disabled={submitting || !draft || (!meData?.is_verified && meData?.role !== "ADMIN")}
                       >
                         {submitting ? "Publishing…" : "Publish Task Now"}
                       </button>
@@ -485,6 +501,7 @@ export default function TaskReviewPage() {
                         Edit Details
                       </Link>
                     </div>
+
                   </section>
                 </aside>
               </div>

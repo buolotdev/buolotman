@@ -130,7 +130,11 @@ def submit_inquiry(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def task_list(request):
+    show_all = request.query_params.get('all_status') == 'true'
     tasks = Task.objects.select_related('client', 'category').filter(status='open', assigned_to__isnull=True)
+    if not show_all:
+        tasks = tasks.filter(client__is_verified=True)
+
 
 
     category = request.query_params.get('category')
