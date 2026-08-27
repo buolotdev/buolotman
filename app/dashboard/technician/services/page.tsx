@@ -152,6 +152,8 @@ export default function TechnicianServicesPage() {
     }
   };
 
+  const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
+
   return (
     <div className={styles.page}>
       <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
@@ -169,11 +171,63 @@ export default function TechnicianServicesPage() {
               <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
             </div>
             <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-              <Link href="/dashboard/technician/services/new" className={styles.primaryButton} style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", textDecoration: "none", display: "inline-flex", whiteSpace: "nowrap", border: "none" }}>+ New service</Link>
+              {isVerified ? (
+                <Link href="/dashboard/technician/services/new" className={styles.primaryButton} style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", textDecoration: "none", display: "inline-flex", whiteSpace: "nowrap", border: "none" }}>+ New service</Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast.error("Verification Required", "Your account is pending admin verification. You cannot post services until approved by Admin.")}
+                  style={{ background: "#94a3b8", color: "#fff", padding: "12px 20px", borderRadius: "12px", border: "none", cursor: "not-allowed", display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap", fontWeight: 700 }}
+                >
+                  <iconify-icon icon="lucide:lock" /> + New service (Locked)
+                </button>
+              )}
               <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
             </div>
           </header>
         </div>
+
+        {!isVerified && (
+          <div style={{
+            background: "#fffbeb",
+            border: "1.5px solid #fcd34d",
+            borderRadius: "16px",
+            padding: "16px 20px",
+            marginBottom: "24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "16px"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#fef3c7", color: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>
+                <iconify-icon icon="lucide:alert-triangle" />
+              </div>
+              <div>
+                <strong style={{ color: "#92400e", fontSize: "14.5px", display: "block", marginBottom: "2px" }}>
+                  Admin Verification Required to Post Services
+                </strong>
+                <p style={{ margin: 0, color: "#b45309", fontSize: "13px" }}>
+                  Your profile is currently under review by the Boulot Man admin team. You cannot publish services until your identity documents and trade credentials are fully approved.
+                </p>
+              </div>
+            </div>
+            <Link href="/dashboard/technician/profile" style={{
+              background: "#d97706",
+              color: "#fff",
+              padding: "8px 16px",
+              borderRadius: "10px",
+              fontWeight: "700",
+              fontSize: "13px",
+              textDecoration: "none",
+              whiteSpace: "nowrap"
+            }}>
+              Upload Documents
+            </Link>
+          </div>
+        )}
+
 
         <section className={styles.summaryGrid}>
           <article className={styles.statCard}>

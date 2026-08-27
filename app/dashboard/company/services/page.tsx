@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import layoutStyles from "../page.module.css";
 import styles from "./services.module.css";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
+
 
 export default function ServicesManagement() {
   const toast = useToast();
@@ -31,8 +33,14 @@ export default function ServicesManagement() {
   });
 
   const [saving, setSaving] = useState(false);
+  const isVerified = Boolean(user?.is_verified || (profile as any)?.is_verified);
+
 
   const handleSave = async () => {
+    if (!isVerified) {
+      toast.error("Verification Required", "Your company account is pending admin verification. You cannot post services until approved.");
+      return;
+    }
     if (!form.title.trim()) {
       toast.warning("Missing title", "Please enter a service name.");
       return;
@@ -43,6 +51,7 @@ export default function ServicesManagement() {
       toast.success("Service saved", `"${form.title}" has been added successfully.`);
       setForm({
         title: "",
+
         category: "Construction",
         pricing_model: "Quote-based",
         description: "",
@@ -98,6 +107,48 @@ export default function ServicesManagement() {
           <p className={layoutStyles.welcomeSubtitle}>Publish the services your company offers. Clients will see these on your public profile.</p>
         </div>
       </section>
+
+      {!isVerified && (
+        <div style={{
+          background: "#fffbeb",
+          border: "1.5px solid #fcd34d",
+          borderRadius: "16px",
+          padding: "16px 20px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#fef3c7", color: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 }}>
+              <iconify-icon icon="lucide:alert-triangle" />
+            </div>
+            <div>
+              <strong style={{ color: "#92400e", fontSize: "14.5px", display: "block", marginBottom: "2px" }}>
+                Company Account Pending Admin Verification
+              </strong>
+              <p style={{ margin: 0, color: "#b45309", fontSize: "13px" }}>
+                Your company registration documents are under administrative review. Publishing and managing services will unlock upon admin verification.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/company/profile" style={{
+            background: "#d97706",
+            color: "#fff",
+            padding: "8px 16px",
+            borderRadius: "10px",
+            fontWeight: "700",
+            fontSize: "13px",
+            textDecoration: "none",
+            whiteSpace: "nowrap"
+          }}>
+            Company Profile
+          </Link>
+        </div>
+      )}
+
 
       {/* OVERVIEW STATS */}
       <div className={styles.overview}>

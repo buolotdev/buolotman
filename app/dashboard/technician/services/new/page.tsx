@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/app/lib/api";
+import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import LogoutButton from "@/app/components/LogoutButton";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import styles from "./page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 const CATEGORY_DATA = [
   {
@@ -244,6 +247,8 @@ const CATEGORY_DATA = [
 export default function TechnicianPostServicePage() {
   const router = useRouter();
   const toast = useToast();
+  const { data: user } = useFetch(() => api.getMe(), []);
+  const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
   
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -283,6 +288,10 @@ export default function TechnicianPostServicePage() {
 
   const handlePreviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isVerified) {
+      toast.error("Verification Required", "Your account is pending admin verification. You cannot post services until approved by Admin.");
+      return;
+    }
     if (selectedTags.size === 0) {
       toast.error("Error", "Please select at least one service category.");
       return;
@@ -296,6 +305,10 @@ export default function TechnicianPostServicePage() {
   };
 
   const publishService = () => {
+    if (!isVerified) {
+      toast.error("Verification Required", "Your account is pending admin verification. You cannot post services until approved by Admin.");
+      return;
+    }
     toast.success("Published!", "Your service is now live.");
     router.push("/dashboard/technician/services");
   };
@@ -315,6 +328,48 @@ export default function TechnicianPostServicePage() {
                 <h1>Post a service</h1>
                 <p>Advertise your skills and get hired by clients.</p>
               </div>
+
+              {!isVerified && (
+                <div style={{
+                  background: "#fffbeb",
+                  border: "1.5px solid #fcd34d",
+                  borderRadius: "16px",
+                  padding: "18px 22px",
+                  marginBottom: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "16px"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "#fef3c7", color: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", flexShrink: 0 }}>
+                      <iconify-icon icon="lucide:alert-triangle" />
+                    </div>
+                    <div>
+                      <strong style={{ color: "#92400e", fontSize: "15px", display: "block", marginBottom: "2px" }}>
+                        Account Pending Admin Verification
+                      </strong>
+                      <p style={{ margin: 0, color: "#b45309", fontSize: "13.5px" }}>
+                        You cannot publish new services until an administrator verifies your account credentials. You can prepare your service draft, but publishing requires verified status.
+                      </p>
+                    </div>
+                  </div>
+                  <Link href="/dashboard/technician/profile" style={{
+                    background: "#d97706",
+                    color: "#fff",
+                    padding: "10px 18px",
+                    borderRadius: "10px",
+                    fontWeight: "700",
+                    fontSize: "13.5px",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap"
+                  }}>
+                    Upload ID &amp; Certificates
+                  </Link>
+                </div>
+              )}
+
 
               <div className={styles.card}>
                 <form onSubmit={handlePreviewSubmit}>

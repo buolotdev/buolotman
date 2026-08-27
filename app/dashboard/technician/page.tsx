@@ -142,8 +142,12 @@ export default function TechnicianDashboardPage() {
                 <p>Find new tasks, manage your bids, track earnings, and grow your reputation.</p>
               </div>
               <div className={styles.heroActions}>
-                <Link href="/dashboard/technician/tasks" className={styles.primaryButton}><iconify-icon icon="lucide:search" /> Browse Tasks</Link>
+                <Link href="/dashboard/technician/tasks" className={styles.primaryButton}>
+                  <iconify-icon icon={Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? "lucide:search" : "lucide:lock"} /> 
+                  Browse Tasks {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? "" : "(Verification Required)"}
+                </Link>
                 <Link href="/dashboard/technician/wallet" className={styles.secondaryButton}>View Wallet</Link>
+
                 <Link 
                   href="/dashboard/technician/projects" 
                   style={{
