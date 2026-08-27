@@ -296,8 +296,11 @@ def task_bids(request, task_id):
         user_role = str(getattr(request.user, 'role', '')).upper()
         if user_role not in ['TECHNICIAN', 'COMPANY']:
             return Response({"error": "Only technicians and service providers can submit bids"}, status=status.HTTP_403_FORBIDDEN)
+        if not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({"error": "Your account is pending Admin verification. You can place bids on tasks once approved by Admin."}, status=status.HTTP_403_FORBIDDEN)
         if request.user == task.client:
             return Response({"error": "You cannot submit a bid on your own task"}, status=status.HTTP_400_BAD_REQUEST)
+
         if task.status != 'open' or task.bids.filter(status='accepted').exists():
             return Response({"error": "This task is no longer accepting bids"}, status=status.HTTP_400_BAD_REQUEST)
         if Bid.objects.filter(task=task, technician=request.user).exclude(status='withdrawn').exists():

@@ -16,6 +16,9 @@ export default function TechnicianSubmitBidPage({ params }: { params: Promise<{ 
 
   const { data: task, loading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: myBids } = useFetch(() => api.getMyBids(), []);
+  const { data: meData } = useFetch(() => api.getMe(), []);
+  const isVerified = Boolean(meData?.is_verified || meData?.role === "ADMIN");
+
 
   const [paymentType, setPaymentType] = useState<"project" | "milestone">("project");
   const [offerPrice, setOfferPrice] = useState("");
@@ -204,20 +207,31 @@ export default function TechnicianSubmitBidPage({ params }: { params: Promise<{ 
                 <textarea className={styles.formTextarea} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Introduce yourself and explain your approach..." rows={6} />
               </label>
 
+              {!isVerified && meData && (
+                <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                  <iconify-icon icon="lucide:shield-alert" style={{ fontSize: "22px", color: "#d97706", flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ color: "#92400e", fontSize: "13px", display: "block" }}>Verification Required to Bid</strong>
+                    <span style={{ color: "#b45309", fontSize: "12px" }}>Your technician profile is pending Admin verification. Once approved, you can place bids on marketplace tasks.</span>
+                  </div>
+                </div>
+              )}
+
               <div className={styles.formActions}>
                 <Link href={`/dashboard/technician/tasks/${task.id}`} className={styles.ghostButton}>Cancel</Link>
                 <button
                   type="button"
                   className={`${styles.primaryButton} ${submitted ? styles.successButton : ""}`}
-                  disabled={submitting || !numericOffer || Boolean(activeBid)}
+                  disabled={submitting || !numericOffer || Boolean(activeBid) || !isVerified}
                   onClick={handleSubmit}
                 >
                   <span>
-                    {submitting ? "Submitting..." : submitted ? "Bid Submitted" : activeBid ? "Bid Already Submitted" : "Submit Bid"}
+                    {submitting ? "Submitting..." : submitted ? "Bid Submitted" : activeBid ? "Bid Already Submitted" : !isVerified ? "Verification Required" : "Submit Bid"}
                   </span>
                   <iconify-icon icon={submitted ? "lucide:check-circle-2" : "lucide:send"} />
                 </button>
               </div>
+
 
               {submitted && (
                 <div className={styles.successPanel}>
