@@ -38,9 +38,10 @@ export default function ServicesManagement() {
 
   const handleSave = async () => {
     if (!isVerified) {
-      toast.error("Verification Required", "Your company account is pending admin verification. You cannot post services until approved.");
+      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can save and post services.");
       return;
     }
+
     if (!form.title.trim()) {
       toast.warning("Missing title", "Please enter a service name.");
       return;

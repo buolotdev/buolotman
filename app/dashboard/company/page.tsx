@@ -6,11 +6,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
+import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 
 export default function CompanyDashboard() {
   const router = useRouter();
+  const toast = useToast();
+
 
   // Shared Data
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
@@ -64,14 +67,43 @@ export default function CompanyDashboard() {
             <p className={styles.welcomeSubtitle}>Track your active projects, review new quote requests, manage your services, and communicate with clients seamlessly.</p>
           </div>
           <div className={styles.welcomeActions}>
-            <Link href="/dashboard/company/projects/new" className={styles.primaryButton}>
+            <button
+              type="button"
+              onClick={() => {
+                if (!isVerified) {
+                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can post services.");
+                  return;
+                }
+                router.push("/dashboard/company/projects/new");
+              }}
+              className={styles.primaryButton}
+              style={{ border: "none", cursor: "pointer" }}
+            >
               <iconify-icon icon="lucide:plus" /> Post a Service
-            </Link>
-            <Link href="/dashboard/company/services" className={styles.secondaryButton}>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!isVerified) {
+                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can manage services.");
+                  return;
+                }
+                router.push("/dashboard/company/services");
+              }}
+              className={styles.secondaryButton}
+              style={{ border: "none", cursor: "pointer" }}
+            >
               Manage Services
-            </Link>
-            <Link 
-              href="/dashboard/company/quotes" 
+            </button>
+            <button 
+              type="button"
+              onClick={() => {
+                if (!isVerified) {
+                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can access quote requests.");
+                  return;
+                }
+                router.push("/dashboard/company/quotes");
+              }}
               style={{
                 background: 'rgba(255, 255, 255, 0.15)',
                 backdropFilter: 'blur(10px)',
@@ -82,7 +114,7 @@ export default function CompanyDashboard() {
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: 700,
-                textDecoration: 'none',
+                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -96,8 +128,9 @@ export default function CompanyDashboard() {
                   {quoteRequestsCount} New
                 </span>
               )}
-            </Link>
+            </button>
           </div>
+
         </section>
 
 

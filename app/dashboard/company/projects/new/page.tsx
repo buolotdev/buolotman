@@ -7,6 +7,8 @@ import styles from "./new.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
+
 
 const COUNTRIES = [
   "Rwanda", 
@@ -21,9 +23,11 @@ const COUNTRIES = [
 
 export default function CreateCompanyProjectPage() {
   const router = useRouter();
+  const toast = useToast();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
 
   const [form, setForm] = useState({
     companyName: "",
@@ -75,11 +79,20 @@ export default function CreateCompanyProjectPage() {
 
   const handlePreview = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isVerified) {
+      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services.");
+      return;
+    }
     setShowPreview(true);
   };
 
   const handlePublish = async () => {
+    if (!isVerified) {
+      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services.");
+      return;
+    }
     setSubmitting(true);
+
     try {
       const finalTitle = form.companyName ? `${form.companyName} - ${form.title}` : form.title;
 
