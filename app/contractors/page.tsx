@@ -254,7 +254,7 @@ export default function ContractorsPage() {
   };
 
   return (
-    <div style={{ background: "#f5f7fb", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className={styles.page}>
       <Header />
 
       {/* HERO */}
@@ -264,6 +264,7 @@ export default function ContractorsPage() {
           <p className={styles.heroSubtitle}>{t.heroSubtitle}</p>
         </div>
       </section>
+
 
       <main className={styles.container}>
         {/* OVERVIEW */}
