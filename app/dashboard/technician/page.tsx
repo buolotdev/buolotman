@@ -7,10 +7,12 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
+import { useToast } from "@/app/components/Toast";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ProfileCompletionModal from "@/app/components/ProfileCompletionModal";
+
 
 
 
@@ -21,8 +23,10 @@ function getBidDisplayStatus(bid: any) {
 export default function TechnicianDashboardPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const toast = useToast();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
+
 
   const { data: user, loading: userLoading, refetch: refetchUser } = useFetch(() => api.getMe(), []);
   const { data: tasksData, loading: tasksLoading } = useFetch(() => api.getTasks({}), []);
@@ -142,11 +146,23 @@ export default function TechnicianDashboardPage() {
                 <p>Find new tasks, manage your bids, track earnings, and grow your reputation.</p>
               </div>
               <div className={styles.heroActions}>
-                <Link href="/dashboard/technician/tasks" className={styles.primaryButton}>
-                  <iconify-icon icon={Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? "lucide:search" : "lucide:lock"} /> 
-                  Browse Tasks {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? "" : "(Verification Required)"}
-                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
+                    if (!isVerified) {
+                      toast.warning("Wait for Verification", "Please wait for verification. Your account is currently under review by admin. Once approved, you can browse and bid on tasks.");
+                      return;
+                    }
+                    router.push("/dashboard/technician/tasks");
+                  }}
+                  className={styles.primaryButton}
+                  style={{ border: "none", cursor: "pointer" }}
+                >
+                  <iconify-icon icon="lucide:search" /> Browse Tasks
+                </button>
                 <Link href="/dashboard/technician/wallet" className={styles.secondaryButton}>View Wallet</Link>
+
 
                 <Link 
                   href="/dashboard/technician/projects" 

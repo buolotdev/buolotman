@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import styles from "./page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
+
 
 type MediaItem = {
   file_url: string;
@@ -45,6 +47,7 @@ const initialForm: ServiceForm = {
 
 
 export default function TechnicianServicesPage() {
+  const router = useRouter();
   const toast = useToast();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { data: user } = useFetch(() => api.getMe(), []);
@@ -62,10 +65,21 @@ export default function TechnicianServicesPage() {
     [categoriesData]
   );
 
+  const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
+
+  const handleNewServiceClick = () => {
+    if (!isVerified) {
+      toast.warning("Wait for Verification", "Please wait for verification. Your account is currently under review by admin. Once approved, you can post services.");
+      return;
+    }
+    router.push("/dashboard/technician/services/new");
+  };
+
   const resetForm = () => {
     setEditingId(null);
     setForm(initialForm);
   };
+
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -152,10 +166,9 @@ export default function TechnicianServicesPage() {
     }
   };
 
-  const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
-
   return (
     <div className={styles.page}>
+
       <TechnicianSidebar isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
       <main className={styles.main}>
@@ -171,18 +184,16 @@ export default function TechnicianServicesPage() {
               <p className={styles.lead}>Create the services you want to offer, then keep them visible on search and profile pages.</p>
             </div>
             <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-              {isVerified ? (
-                <Link href="/dashboard/technician/services/new" className={styles.primaryButton} style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", textDecoration: "none", display: "inline-flex", whiteSpace: "nowrap", border: "none" }}>+ New service</Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => toast.error("Verification Required", "Your account is pending admin verification. You cannot post services until approved by Admin.")}
-                  style={{ background: "#94a3b8", color: "#fff", padding: "12px 20px", borderRadius: "12px", border: "none", cursor: "not-allowed", display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap", fontWeight: 700 }}
-                >
-                  <iconify-icon icon="lucide:lock" /> + New service (Locked)
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleNewServiceClick}
+                className={styles.primaryButton}
+                style={{ background: "#ff4500", color: "#fff", padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", display: "inline-flex", whiteSpace: "nowrap", fontWeight: 700 }}
+              >
+                + New service
+              </button>
               <Link href="/dashboard/technician" className={styles.backLink}>Back to dashboard</Link>
+
             </div>
           </header>
         </div>
