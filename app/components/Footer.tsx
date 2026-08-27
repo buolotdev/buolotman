@@ -208,8 +208,9 @@ export default function Footer() {
             <Link href="/terms">Legal</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
-            <Link href="/help-center">Contact</Link>
+            <Link href="/contact">Contact</Link>
           </div>
+
 
 
         </div>
