@@ -1,49 +1,132 @@
+"use client";
+
+import Link from "next/link";
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+import styles from "./privacy.module.css";
+
 const policies = [
   {
-    title: "Data we collect",
+    id: "data-collection",
+    number: "Policy 01",
+    icon: "lucide:database",
+    title: "Data We Collect",
     body:
-      "We collect account information, task and service data, message content, payment records, device and usage metadata, and verification documents where applicable.",
+      "We collect verified account information, professional background credentials, task & project specifications, direct message transcripts, escrow transaction records, and device metadata required to deliver reliable marketplace operations.",
   },
   {
-    title: "How we use data",
+    id: "data-usage",
+    number: "Policy 02",
+    icon: "lucide:cpu",
+    title: "How We Use Information",
     body:
-      "We use data to operate the marketplace, process payments, verify users, prevent abuse, resolve disputes, and improve product reliability and performance.",
+      "Your data powers our smart matchmaking engine, processes secure escrow payouts, conducts professional vetting, prevents unauthorized platform abuse, and continually refines the quality and speed of service delivery.",
   },
   {
-    title: "Sharing and disclosure",
+    id: "data-sharing",
+    number: "Policy 03",
+    icon: "lucide:share-2",
+    title: "Sharing & Disclosure",
     body:
-      "We share only the information required to complete tasks, process payments, comply with the law, or support trusted infrastructure providers such as hosting, storage, messaging, or analytics services.",
+      "We strictly never sell personal data. Information is shared only with counter-parties on active task contracts, payment processing partners, authorized compliance authorities, or trusted cloud infrastructure providers.",
   },
   {
-    title: "Retention and security",
+    id: "security-retention",
+    number: "Policy 04",
+    icon: "lucide:shield-check",
+    title: "Security & Retention",
     body:
-      "We retain records for as long as needed for business, legal, and compliance purposes and protect data with access controls, transport security, and operational safeguards.",
+      "All sensitive information is secured with bank-grade encryption at rest and in transit. We maintain access controls, regular security audits, and retain records in compliance with applicable regional data protection regulations.",
   },
   {
-    title: "Your choices",
+    id: "user-rights",
+    number: "Policy 05",
+    icon: "lucide:user-check",
+    title: "Your Rights & Privacy Choices",
     body:
-      "You can review and update certain profile information, request account deletion where permitted, and manage communication preferences through the platform.",
+      "You hold full sovereignty over your account data. You can access, rectify, or export your profile records, configure communication settings, or request formal account closure at any time through your dashboard.",
   },
 ];
 
 export default function PrivacyPage() {
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
-    <main style={{ minHeight: "100vh", padding: 24, background: "#f8fafc" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", background: "#fff", borderRadius: 24, padding: 32, boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
-        <p style={{ margin: 0, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em" }}>Legal</p>
-        <h1 style={{ margin: "8px 0 16px" }}>Privacy Policy</h1>
-        <p style={{ color: "#475569", lineHeight: 1.7 }}>
-          This is a practical privacy policy summary for the working product. It should be replaced with jurisdiction-specific legal text before production launch.
-        </p>
-        <div style={{ display: "grid", gap: 18, marginTop: 24 }}>
+    <div className={styles.page}>
+      <Header />
+
+      {/* HERO */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroMeta}>
+            <div className={styles.heroBadge}>
+              <iconify-icon icon="lucide:lock" /> Privacy &amp; Data Protection
+            </div>
+            <div className={styles.heroDate}>
+              <iconify-icon icon="lucide:calendar" /> Last Updated: August 2026
+            </div>
+          </div>
+          <h1 className={styles.heroTitle}>Privacy Policy</h1>
+          <p className={styles.heroSubtitle}>
+            We are committed to protecting your personal data, project confidentiality, and transaction privacy with international security standards and transparent compliance.
+          </p>
+        </div>
+      </section>
+
+      <main className={styles.container}>
+        {/* QUICK NAVIGATION PILLS */}
+        <div className={styles.quickNav}>
+          {policies.map((p) => (
+            <button
+              type="button"
+              key={p.id}
+              onClick={() => scrollToSection(p.id)}
+              className={styles.quickPill}
+            >
+              <iconify-icon icon={p.icon} style={{ color: "#22c55e" }} />
+              {p.title}
+            </button>
+          ))}
+        </div>
+
+        {/* SECTIONS LIST */}
+        <div className={styles.sectionsList}>
           {policies.map((policy) => (
-            <section key={policy.title} style={{ border: "1px solid #e2e8f0", borderRadius: 18, padding: 20, background: "#f8fafc" }}>
-              <h2 style={{ margin: "0 0 8px", fontSize: 18 }}>{policy.title}</h2>
-              <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>{policy.body}</p>
+            <section key={policy.id} id={policy.id} className={styles.termCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardIconWrap}>
+                  <iconify-icon icon={policy.icon}></iconify-icon>
+                </div>
+                <div>
+                  <span className={styles.cardNumber}>{policy.number}</span>
+                  <h2 className={styles.cardTitle}>{policy.title}</h2>
+                </div>
+              </div>
+              <p className={styles.cardBody}>{policy.body}</p>
             </section>
           ))}
         </div>
-      </div>
-    </main>
+
+        {/* CTA BANNER */}
+        <section className={styles.cta}>
+          <div>
+            <h2 className={styles.ctaTitle}>Questions regarding your data privacy?</h2>
+            <p className={styles.ctaDesc}>
+              Contact our Data Protection and Security team to exercise your data rights or report any security concerns.
+            </p>
+          </div>
+          <Link href="/help-center" className={styles.ctaBtn}>
+            Contact Privacy Officer <iconify-icon icon="lucide:arrow-right" style={{ fontSize: "18px" }}></iconify-icon>
+          </Link>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

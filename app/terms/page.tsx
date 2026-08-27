@@ -1,49 +1,132 @@
+"use client";
+
+import Link from "next/link";
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+import styles from "./terms.module.css";
+
 const sections = [
   {
-    title: "Use of the platform",
+    id: "use-of-platform",
+    number: "Section 01",
+    icon: "lucide:layout-grid",
+    title: "Use of the Platform",
     body:
-      "Boulot Man connects clients, technicians, freelancers, and companies for lawful service contracts. You must provide accurate information and only use the platform for legitimate work requests and bids.",
+      "Boulot Man connects clients, certified technicians, engineering specialists, and registered companies for lawful, enterprise-grade service contracts. Users must provide verified and accurate information, honor communication protocols, and only use the platform for legitimate project requests, tenders, and authorized bids.",
   },
   {
-    title: "Accounts and security",
+    id: "accounts-security",
+    number: "Section 02",
+    icon: "lucide:shield-check",
+    title: "Accounts & Identity Verification",
     body:
-      "You are responsible for maintaining the confidentiality of your credentials and for all activity on your account. We may suspend access for fraud, abuse, or policy violations.",
+      "Users are solely responsible for maintaining the confidentiality of their credentials and session security. Professional technicians and companies undergo rigorous administrative verification and document vetting. We maintain the right to suspend or terminate accounts for fraudulent credentials, misrepresentation, abuse, or policy violations.",
   },
   {
-    title: "Payments and escrow",
+    id: "payments-escrow",
+    number: "Section 03",
+    icon: "lucide:lock",
+    title: "Payments & Escrow Protection",
     body:
-      "Payments may be held in escrow until work is completed and approved. Refunds, chargebacks, and payout timing are governed by the applicable task or project terms.",
+      "All client project funds are held securely in the Boulot Man Escrow vault until work milestones are verified and formally approved by the client. Instant payouts, withdrawal processing timelines, and fee structures are governed by standard transparent terms with zero hidden fees.",
   },
   {
-    title: "Disputes",
+    id: "disputes-mediation",
+    number: "Section 04",
+    icon: "lucide:scale",
+    title: "Disputes & Neutral Mediation",
     body:
-      "If a dispute arises, we may request evidence, review task history, and make a platform decision based on the available records and policies.",
+      "If a project disagreement or delivery conflict arises, either party may initiate formal dispute resolution from their dashboard. Boulot Man's specialized mediation panel will examine time-stamped task logs, messages, milestone deliverables, and media evidence to issue a binding, fair determination.",
   },
   {
-    title: "Liability",
+    id: "liability-compliance",
+    number: "Section 05",
+    icon: "lucide:alert-circle",
+    title: "Liability & Platform Governance",
     body:
-      "We provide the marketplace and supporting tools but do not guarantee every service outcome. To the fullest extent permitted by law, liability is limited to the applicable service fees or other caps stated in the final legal terms.",
+      "Boulot Man delivers a secure infrastructure, escrow protection, and specialized matchmaking tools. While professionals are independently verified for skills and credentials, statutory liability is governed by the applicable service agreement and caps established under regional commercial legal frameworks.",
   },
 ];
 
 export default function TermsPage() {
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
-    <main style={{ minHeight: "100vh", padding: 24, background: "#f8fafc" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", background: "#fff", borderRadius: 24, padding: 32, boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
-        <p style={{ margin: 0, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em" }}>Legal</p>
-        <h1 style={{ margin: "8px 0 16px" }}>Terms of Service</h1>
-        <p style={{ color: "#475569", lineHeight: 1.7 }}>
-          These terms are a working platform policy summary. Replace them with the final legal text reviewed by counsel before public launch in each operating market.
-        </p>
-        <div style={{ display: "grid", gap: 18, marginTop: 24 }}>
+    <div className={styles.page}>
+      <Header />
+
+      {/* HERO */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroMeta}>
+            <div className={styles.heroBadge}>
+              <iconify-icon icon="lucide:file-text" /> Official Legal Terms
+            </div>
+            <div className={styles.heroDate}>
+              <iconify-icon icon="lucide:calendar" /> Last Updated: August 2026
+            </div>
+          </div>
+          <h1 className={styles.heroTitle}>Terms of Service</h1>
+          <p className={styles.heroSubtitle}>
+            Please review the platform agreement and governance policies that ensure a secure, transparent, and trusted marketplace for clients, technicians, and enterprises across Africa.
+          </p>
+        </div>
+      </section>
+
+      <main className={styles.container}>
+        {/* QUICK NAVIGATION PILLS */}
+        <div className={styles.quickNav}>
+          {sections.map((s) => (
+            <button
+              type="button"
+              key={s.id}
+              onClick={() => scrollToSection(s.id)}
+              className={styles.quickPill}
+            >
+              <iconify-icon icon={s.icon} style={{ color: "#FF4500" }} />
+              {s.title}
+            </button>
+          ))}
+        </div>
+
+        {/* SECTIONS LIST */}
+        <div className={styles.sectionsList}>
           {sections.map((section) => (
-            <section key={section.title} style={{ border: "1px solid #e2e8f0", borderRadius: 18, padding: 20, background: "#f8fafc" }}>
-              <h2 style={{ margin: "0 0 8px", fontSize: 18 }}>{section.title}</h2>
-              <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>{section.body}</p>
+            <section key={section.id} id={section.id} className={styles.termCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardIconWrap}>
+                  <iconify-icon icon={section.icon}></iconify-icon>
+                </div>
+                <div>
+                  <span className={styles.cardNumber}>{section.number}</span>
+                  <h2 className={styles.cardTitle}>{section.title}</h2>
+                </div>
+              </div>
+              <p className={styles.cardBody}>{section.body}</p>
             </section>
           ))}
         </div>
-      </div>
-    </main>
+
+        {/* CTA BANNER */}
+        <section className={styles.cta}>
+          <div>
+            <h2 className={styles.ctaTitle}>Have questions about our terms?</h2>
+            <p className={styles.ctaDesc}>
+              Our compliance and legal support specialists are available to clarify contracts, privacy, and dispute policies.
+            </p>
+          </div>
+          <Link href="/help-center" className={styles.ctaBtn}>
+            Contact Legal Support <iconify-icon icon="lucide:arrow-right" style={{ fontSize: "18px" }}></iconify-icon>
+          </Link>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
