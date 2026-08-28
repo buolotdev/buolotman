@@ -70,7 +70,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const allFiles = useMemo(() => {
     const serverFiles = (task?.attachments || []).map((att: any) => ({
       name: att.file_name || "Attached File",
-      type: att.file_type || "file",
+      type: att.file_type || (att.file_name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? "image/jpeg" : (att.file_name?.endsWith(".pdf") ? "application/pdf" : "file")),
       size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : "Attached",
       url: att.file_url,
     }));
@@ -135,21 +135,38 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
     const selected = Array.from(e.target.files);
     
     for (const file of selected) {
+      const localBlobUrl = URL.createObjectURL(file);
+      const isImg = file.type.startsWith("image/") || file.name.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i);
+      const isPdf = file.type.includes("pdf") || file.name.endsWith(".pdf");
+      const derivedType = isPdf ? "application/pdf" : (isImg ? "image/jpeg" : (file.type || "file"));
+
       try {
         const res = await api.uploadServiceMedia(file);
+        const fileUrl = res.file_url || localBlobUrl;
         setLocalUploadedFiles(prev => [
           ...prev,
-          { name: file.name, type: file.type, size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`, url: res.file_url }
+          { 
+            name: file.name, 
+            type: derivedType, 
+            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`, 
+            url: fileUrl 
+          }
         ]);
       } catch (err) {
         setLocalUploadedFiles(prev => [
           ...prev,
-          { name: file.name, type: file.type, size: `${(file.size / (1024 * 1024)).toFixed(2)} MB` }
+          { 
+            name: file.name, 
+            type: derivedType, 
+            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`, 
+            url: localBlobUrl 
+          }
         ]);
       }
     }
     e.target.value = "";
   };
+
 
   const taskCreatedDate = task?.created_at
     ? new Date(task.created_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
@@ -432,10 +449,22 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     <div className={styles.filesGrid}>
                       {allFiles.map((file, i) => (
                         <div key={i} className={styles.fileItem}>
-                          <div className={styles.fileIcon}>
-                            <iconify-icon icon={file.type.includes("pdf") ? "lucide:file-text" : "lucide:image"} />
+                          <div className={styles.fileIcon} style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {file.url && (file.type?.startsWith("image/") || file.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
+                              <img
+                                src={file.url}
+                                alt={file.name}
+                                style={{ width: "38px", height: "38px", objectFit: "cover", borderRadius: "8px" }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <iconify-icon icon={file.type?.includes("pdf") || file.name?.endsWith(".pdf") ? "lucide:file-text" : "lucide:image"} />
+                            )}
                           </div>
                           <div className={styles.fileDetails}>
+
                             <strong title={file.name}>{file.name}</strong>
                             <span>{file.size} • Attached</span>
                           </div>
@@ -700,23 +729,152 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
         </div>
       )}
 
-      {/* FILE PREVIEW MODAL */}
+      {/* REAL FILE PREVIEW MODAL / LIGHTBOX */}
       {previewMedia && (
-        <div className={styles.modalOverlay} onClick={() => setPreviewMedia(null)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.modalClose} onClick={() => setPreviewMedia(null)}>
-              <iconify-icon icon="lucide:x" />
-            </button>
-            <h3>{previewMedia.name}</h3>
-            <p style={{ color: "#64748b", fontSize: 13.5 }}>{previewMedia.type} • {previewMedia.size}</p>
-            <div style={{ padding: "32px 20px", background: "#f8fafc", borderRadius: "16px", margin: "20px 0", textAlign: "center" }}>
-              <iconify-icon icon={previewMedia.type.includes("pdf") ? "lucide:file-text" : "lucide:image"} style={{ fontSize: 64, color: "#ff4500" }} />
-              <p style={{ margin: "12px 0 0", fontWeight: 700 }}>{previewMedia.name}</p>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setPreviewMedia(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 31, 63, 0.78)",
+            backdropFilter: "blur(8px)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div
+            className={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "680px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "#ffffff",
+              borderRadius: "24px",
+              padding: "28px",
+              boxShadow: "0 25px 60px rgba(0, 31, 63, 0.3)",
+              position: "relative"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ maxWidth: "80%" }}>
+                <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 800, color: "#001F3F", wordBreak: "break-all" }}>
+                  {previewMedia.name}
+                </h3>
+                <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>
+                  {previewMedia.type} • {previewMedia.size}
+                </p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {previewMedia.url && (
+                  <a
+                    href={previewMedia.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    download={previewMedia.name}
+                    style={{
+                      background: "#f1f5f9",
+                      color: "#001F3F",
+                      padding: "8px 14px",
+                      borderRadius: "10px",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px"
+                    }}
+                  >
+                    <iconify-icon icon="lucide:download" /> Open / Download
+                  </a>
+                )}
+                <button
+                  type="button"
+                  className={styles.modalClose}
+                  onClick={() => setPreviewMedia(null)}
+                  style={{ position: "static", background: "#f1f5f9", width: "36px", height: "36px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer" }}
+                >
+                  <iconify-icon icon="lucide:x" style={{ fontSize: "18px" }} />
+                </button>
+              </div>
             </div>
+
+            {/* PREVIEW CONTAINER */}
+            <div style={{
+              background: "#0f172a",
+              borderRadius: "18px",
+              padding: "16px",
+              margin: "16px 0",
+              minHeight: "260px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden"
+            }}>
+              {(previewMedia.type?.startsWith("image/") || previewMedia.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
+                previewMedia.url ? (
+                  <img
+                    src={previewMedia.url}
+                    alt={previewMedia.name}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "60vh",
+                      objectFit: "contain",
+                      borderRadius: "10px",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.style.display = "none";
+                      const parent = target.parentElement;
+                      if (parent) {
+                        const fallback = document.createElement("div");
+                        fallback.style.textAlign = "center";
+                        fallback.style.color = "#fff";
+                        fallback.innerHTML = `<iconify-icon icon="lucide:image" style="font-size: 54px; color: #ff4500;"></iconify-icon><p style="margin-top: 10px;">${previewMedia.name}</p>`;
+                        parent.appendChild(fallback);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div style={{ textAlign: "center", color: "#fff" }}>
+                    <iconify-icon icon="lucide:image" style={{ fontSize: "54px", color: "#ff4500" }} />
+                    <p style={{ margin: "10px 0 0 0" }}>{previewMedia.name}</p>
+                  </div>
+                )
+              ) : (previewMedia.type?.includes("pdf") || previewMedia.name?.endsWith(".pdf")) ? (
+                previewMedia.url ? (
+                  <div style={{ width: "100%", textAlign: "center" }}>
+                    <iframe
+                      src={previewMedia.url}
+                      style={{ width: "100%", height: "450px", border: "none", borderRadius: "10px", background: "#fff" }}
+                      title={previewMedia.name}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ textAlign: "center", color: "#fff", padding: "30px" }}>
+                    <iconify-icon icon="lucide:file-text" style={{ fontSize: "54px", color: "#ff4500" }} />
+                    <p style={{ margin: "12px 0 6px 0", fontWeight: 700 }}>{previewMedia.name}</p>
+                  </div>
+                )
+              ) : (
+                <div style={{ textAlign: "center", color: "#fff", padding: "30px" }}>
+                  <iconify-icon icon="lucide:file" style={{ fontSize: "54px", color: "#ff4500" }} />
+                  <p style={{ margin: "12px 0 6px 0", fontWeight: 700 }}>{previewMedia.name}</p>
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               className={styles.modalConfirmBtn}
-              style={{ width: "100%" }}
+              style={{ width: "100%", background: "#FF4500", color: "#fff", padding: "14px", borderRadius: "12px", border: "none", fontWeight: 800, fontSize: "14.5px", cursor: "pointer" }}
               onClick={() => setPreviewMedia(null)}
             >
               Close Preview
@@ -724,6 +882,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
           </div>
         </div>
       )}
+
     </main>
   );
 }
