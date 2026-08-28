@@ -106,6 +106,19 @@ export const SUPPORTED_COUNTRIES: Record<string, CountryInfo> = {
   },
 };
 
+export function getFlagEmoji(countryCode: string): string {
+  if (!countryCode || countryCode.length !== 2) return "🌍";
+  try {
+    const codePoints = countryCode
+      .toUpperCase()
+      .split("")
+      .map((char) => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  } catch {
+    return "🌍";
+  }
+}
+
 export const DEFAULT_COUNTRY = SUPPORTED_COUNTRIES["RW"];
 
 interface UserLocation {
@@ -205,7 +218,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
           const countryName = countryMatch ? countryMatch.name : (data.country_name || DEFAULT_COUNTRY.name);
           const detectedCity = data.city || (countryMatch ? countryMatch.defaultCity : DEFAULT_COUNTRY.defaultCity);
-          const flag = countryMatch ? countryMatch.flag : "🌍";
+          const flag = countryMatch ? countryMatch.flag : getFlagEmoji(code);
           const currency = countryMatch ? countryMatch.currency : (data.currency || DEFAULT_COUNTRY.currency);
           const currencySymbol = countryMatch ? countryMatch.currencySymbol : (data.currency || DEFAULT_COUNTRY.currencySymbol);
 
@@ -239,14 +252,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           if (fallbackRes.ok) {
             const fallbackData = await fallbackRes.json();
             const code = (fallbackData.country || "RW").toUpperCase();
-            const countryMatch = SUPPORTED_COUNTRIES[code] || DEFAULT_COUNTRY;
+            const countryMatch = SUPPORTED_COUNTRIES[code];
             const newLocation: UserLocation = {
-              country: countryMatch.name,
-              countryCode: countryMatch.code,
-              city: countryMatch.defaultCity,
-              flag: countryMatch.flag,
-              currency: countryMatch.currency,
-              currencySymbol: countryMatch.currencySymbol,
+              country: countryMatch ? countryMatch.name : (code === "PK" ? "Pakistan" : DEFAULT_COUNTRY.name),
+              countryCode: code,
+              city: countryMatch ? countryMatch.defaultCity : DEFAULT_COUNTRY.defaultCity,
+              flag: countryMatch ? countryMatch.flag : getFlagEmoji(code),
+              currency: countryMatch ? countryMatch.currency : DEFAULT_COUNTRY.currency,
+              currencySymbol: countryMatch ? countryMatch.currencySymbol : DEFAULT_COUNTRY.currencySymbol,
               isAutoDetected: true,
             };
             if (isMounted) {
