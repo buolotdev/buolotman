@@ -18,6 +18,7 @@ type PaymentOption = "" | "Cash on completion" | "Milestone payment" | "Escrow";
 type ContactMethod = "in-app" | "phone" | "whatsapp";
 
 import { toArray } from "@/app/lib/dataShape";
+import { useLocation } from "@/app/context/LocationContext";
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,9 +61,9 @@ function PostTaskForm() {
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
   const { files, setFiles } = useTaskDraft();
   const [previewMedia, setPreviewMedia] = useState<any | null>(null);
+  const { location } = useLocation();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -78,6 +79,18 @@ function PostTaskForm() {
     budgetMax: "",
     paymentOption: "" as PaymentOption,
   });
+
+  // Auto-fill city and location if not yet typed by client
+  useEffect(() => {
+    if (location && location.city) {
+      setFormData((prev) => {
+        if (!prev.city || prev.city.trim() === "") {
+          return { ...prev, city: location.city };
+        }
+        return prev;
+      });
+    }
+  }, [location]);
   const [skills, setSkills] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -697,7 +710,7 @@ function PostTaskForm() {
                       <div className={styles.divider} />
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Budget Range (XOF)</label>
+                        <label className={styles.label}>Budget Range ({location.currency})</label>
                         <div className={styles.inlineInputRow}>
                           <input
                             type="number"

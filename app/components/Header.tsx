@@ -3,6 +3,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import "./header.css";
 import { detectAndSetGeoLanguage } from "@/app/lib/geoDetector";
+import CountrySelector from "./CountrySelector";
 
 function Header() {
   const [lang, setLang] = useState("en");
@@ -348,7 +349,52 @@ function Header() {
   };
 
   return (
-    <div onClick={handleMegaClick}>
+    <div onClick={handleMegaClick} style={{ position: "relative" }}>
+      {/* Top Regional / Geo Localization Utility Bar */}
+      <div
+        style={{
+          background: "#00172e",
+          color: "#cbd5e1",
+          fontSize: "12.5px",
+          padding: "6px 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          zIndex: 1001,
+          position: "relative",
+          flexWrap: "wrap",
+          gap: "8px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#f8fafc", fontWeight: 600 }}>
+            <span>🌍</span>
+            <span>Pan-African Network</span>
+          </span>
+          <span style={{ color: "#475569" }} className="hidden sm:inline">•</span>
+          <span style={{ color: "#94a3b8", fontSize: "12px" }}>Active in 10+ African Countries</span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginLeft: "auto" }}>
+          <CountrySelector variant="compact" />
+          <Link
+            href="/help-center"
+            style={{
+              color: "#cbd5e1",
+              textDecoration: "none",
+              fontWeight: 500,
+              fontSize: "12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            Help
+          </Link>
+        </div>
+      </div>
+
       <div
         dangerouslySetInnerHTML={{
           __html: `

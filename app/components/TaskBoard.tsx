@@ -8,8 +8,11 @@ import { api } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
 import { SkeletonBlock } from "./skeleton/Skeleton";
 
+import { useLocation } from "@/app/context/LocationContext";
+
 export default function TaskBoard() {
   const router = useRouter();
+  const { location, formatPrice } = useLocation();
   
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,10 +149,13 @@ export default function TaskBoard() {
     // Quick Pill Filter
     if (activePill === "urgent") {
       result = result.filter((t) => (t.urgency || "").toLowerCase() === "urgent");
-    } else if (activePill === "kigali") {
-      result = result.filter(
-        (t) => (t.city && t.city.toLowerCase().includes("kigali")) || (t.location && t.location.toLowerCase().includes("kigali"))
-      );
+    } else if (activePill === "local") {
+      const userCity = (location.city || "").toLowerCase();
+      const userCountry = (location.country || "").toLowerCase();
+      result = result.filter((t) => {
+        const tLoc = `${t.city || ""} ${t.location || ""} ${t.country || ""}`.toLowerCase();
+        return (userCity && tLoc.includes(userCity)) || (userCountry && tLoc.includes(userCountry));
+      });
     } else if (activePill === "remote") {
       result = result.filter((t) => t.is_remote || (t.location && t.location.toLowerCase().includes("remote")));
     } else if (activePill === "high_budget") {
@@ -162,12 +168,34 @@ export default function TaskBoard() {
     } else if (sortBy === "budget_low") {
       result.sort((a, b) => Number(a.budget_min || a.budget_max || 0) - Number(b.budget_min || b.budget_max || 0));
     } else {
-      // Newest
-      result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+      // Intelligent Location-Aware Newest:
+      // Boost tasks from user's detected country/city to top
+      const userCity = (location.city || "").toLowerCase();
+      const userCountry = (location.country || "").toLowerCase();
+
+      result.sort((a, b) => {
+        const aLoc = `${a.city || ""} ${a.location || ""} ${a.country || ""}`.toLowerCase();
+        const bLoc = `${b.city || ""} ${b.location || ""} ${b.country || ""}`.toLowerCase();
+
+        let aLocScore = 0;
+        let bLocScore = 0;
+
+        if (userCity && aLoc.includes(userCity)) aLocScore += 2;
+        else if (userCountry && aLoc.includes(userCountry)) aLocScore += 1;
+
+        if (userCity && bLoc.includes(userCity)) bLocScore += 2;
+        else if (userCountry && bLoc.includes(userCountry)) bLocScore += 1;
+
+        if (aLocScore !== bLocScore) {
+          return bLocScore - aLocScore;
+        }
+
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
     }
 
     return result;
-  }, [rawTasks, searchQuery, selectedCategory, selectedLocation, selectedUrgency, activePill, sortBy]);
+  }, [rawTasks, searchQuery, selectedCategory, selectedLocation, selectedUrgency, activePill, sortBy, location.city, location.country]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -305,27 +333,27 @@ export default function TaskBoard() {
               <iconify-icon icon="lucide:zap" style={{ color: "#ef4444" }} /> Urgent Priority
             </button>
             <button
-              className={`${styles.filterPill} ${activePill === "kigali" ? styles.filterPillActive : ""}`}
-              onClick={() => setActivePill("kigali")}
+              className={`${styles.filterPill} ${activePill === "local" ? styles.filterPillActive : ""}`}
+              onClick={() => setActivePill("local")}
             >
-              <iconify-icon icon="lucide:map-pin" style={{ color: "#0284c7" }} /> Kigali Only
+              <span>{location.flag}</span> In {location.country} ({location.city})
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "remote" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("remote")}
             >
-              <iconify-icon icon="lucide:globe" style={{ color: "#10b981" }} /> Remote
+              <iconify-icon icon="lucide:globe" style={{ color: "#10b981" }} /> Remote Work
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "high_budget" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("high_budget")}
             >
-              <iconify-icon icon="lucide:badge-dollar-sign" style={{ color: "#f59e0b" }} /> High Budget (&gt;50k)
+              <iconify-icon icon="lucide:badge-dollar-sign" style={{ color: "#f59e0b" }} /> High Budget
             </button>
           </div>
 
           {(searchQuery || selectedCategory !== "all" || selectedLocation !== "all" || selectedUrgency !== "all" || activePill !== "all") && (
-            <button className={styles.resetBtn} onClick={handleResetFilters}>
+            <button className={styles.resetFiltersBtn} onClick={handleResetFilters}>
               <iconify-icon icon="lucide:rotate-ccw" /> Reset Filters
             </button>
           )}
@@ -391,9 +419,9 @@ export default function TaskBoard() {
             const clientInitial = task.client_initials || (task.client_name ? task.client_name[0].toUpperCase() : "C");
             const catName = task.category_name || task.category?.name || "General Services";
             const budgetDisplay = task.budget_max
-              ? `${Number(task.budget_min || 0).toLocaleString()} - ${Number(task.budget_max).toLocaleString()} XOF`
+              ? `${Number(task.budget_min || 0).toLocaleString()} - ${Number(task.budget_max).toLocaleString()} ${location.currency}`
               : task.budget_min
-              ? `${Number(task.budget_min).toLocaleString()} XOF`
+              ? `${Number(task.budget_min).toLocaleString()} ${location.currency}`
               : "Negotiable";
 
             return (

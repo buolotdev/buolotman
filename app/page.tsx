@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import { api } from "./lib/api";
 import { useFetch } from "./lib/useFetch";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
+import { useLocation } from "./context/LocationContext";
 
 const ICON_BY_KEY: Record<string, string> = {
   "software-and-digital-engineering": "lucide:cpu",
@@ -271,13 +272,21 @@ export default function Home() {
   }, []);
 
   const router = useRouter();
-    const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const { location, filterByLocation } = useLocation();
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [liveTaskIndex, setLiveTaskIndex] = useState(0);
+
+  // Auto pre-populate search location with detected user city/country
+  useEffect(() => {
+    if (location && location.city && !searchLocation) {
+      setSearchLocation(`${location.city}, ${location.country}`);
+    }
+  }, [location]);
 
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
@@ -500,13 +509,16 @@ export default function Home() {
     : []
   ).slice(0, 15);
 
-  const pros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
-  const companies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
-  const liveTasks = Array.isArray((liveTasksData as any)?.results)
+  const rawPros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
+  const pros = filterByLocation(rawPros);
+  const rawCompanies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
+  const companies = filterByLocation(rawCompanies);
+  const rawLiveTasks = Array.isArray((liveTasksData as any)?.results)
     ? (liveTasksData as any).results
     : Array.isArray(liveTasksData)
       ? liveTasksData
       : [];
+  const liveTasks = filterByLocation(rawLiveTasks);
 
   const firstName = meData?.first_name || meData?.firstName || "";
   const greeting = firstName ? `Welcome back, ${firstName}` : "";
