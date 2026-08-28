@@ -657,3 +657,19 @@ def bid_withdraw(request, bid_id):
         ip_address=request.META.get("REMOTE_ADDR"),
     )
     return Response(BidDetailSerializer(bid).data)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def task_delete_attachment(request, task_id, attachment_id):
+    try:
+        att = TaskAttachment.objects.get(id=attachment_id, task_id=task_id)
+    except TaskAttachment.DoesNotExist:
+        return Response({"error": "Attachment not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.user != att.task.client and request.user != att.uploaded_by and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({"error": "Not authorized to delete this attachment"}, status=status.HTTP_403_FORBIDDEN)
+    
+    att.delete()
+    return Response({"message": "Attachment deleted successfully"}, status=status.HTTP_200_OK)
+

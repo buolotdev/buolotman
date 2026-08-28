@@ -225,6 +225,9 @@ export const api = {
     request<any>(`/tasks/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteTask: (id: number) =>
     request<void>(`/tasks/${id}/`, { method: "DELETE" }),
+  deleteTaskAttachment: (taskId: number, attachmentId: number) =>
+    request<any>(`/tasks/${taskId}/attachments/${attachmentId}/`, { method: "DELETE" }),
+
 
   // Bids
   getTaskBids: (taskId: number) => request<any>(`/tasks/${taskId}/bids/`),

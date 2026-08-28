@@ -16,7 +16,10 @@ urlpatterns = [
     path('<int:task_id>/submit-deliverable/', views.task_submit_deliverable, name='task_submit_deliverable'),
     path('<int:task_id>/bids/', views.task_bids, name='task_bids'),
     path('<int:task_id>/questions/', views.task_questions, name='task_questions'),
+    path('<int:task_id>/attachments/<int:attachment_id>/', views.task_delete_attachment, name='task_delete_attachment'),
     path('bids/<int:bid_id>/', views.bid_detail, name='bid_detail'),
+
     path('bids/<int:bid_id>/withdraw/', views.bid_withdraw, name='bid_withdraw'),
     path('bids/my/', views.my_bids, name='my_bids'),
 ]
+

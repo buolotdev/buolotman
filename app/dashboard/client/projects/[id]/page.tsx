@@ -9,11 +9,13 @@ import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { useToast } from "@/app/components/Toast";
 
 export default function ProjectWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const taskId = parseInt(id) || 1;
   const router = useRouter();
+  const toast = useToast();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,8 +34,10 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   );
   const { data: walletData, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
 
-  // Real local uploads state
+  // Real local uploads & deleted state
   const [localUploadedFiles, setLocalUploadedFiles] = useState<{ name: string; type: string; size: string; url?: string }[]>([]);
+  const [deletedFileKeys, setDeletedFileKeys] = useState<string[]>([]);
+
 
   // Real messages state
   const [chatDraft, setChatDraft] = useState("");
@@ -68,14 +72,42 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
   // Combine server attachments and local uploads
   const allFiles = useMemo(() => {
-    const serverFiles = (task?.attachments || []).map((att: any) => ({
+    const serverFiles = (task?.attachments || []).map((att: any, idx: number) => ({
+      id: att.id,
       name: att.file_name || "Attached File",
       type: att.file_type || (att.file_name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? "image/jpeg" : (att.file_name?.endsWith(".pdf") ? "application/pdf" : "file")),
       size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : "Attached",
       url: att.file_url,
+      isServer: true,
+      key: `server-${att.id || idx}-${att.file_name}`,
     }));
-    return [...serverFiles, ...localUploadedFiles];
-  }, [task?.attachments, localUploadedFiles]);
+    const local = localUploadedFiles.map((file, idx) => ({
+      ...file,
+      id: undefined,
+      isServer: false,
+      key: `local-${idx}-${file.name}`,
+    }));
+    return [...serverFiles, ...local].filter(f => !deletedFileKeys.includes(f.key) && !deletedFileKeys.includes(f.name));
+  }, [task?.attachments, localUploadedFiles, deletedFileKeys]);
+
+  const handleDeleteFile = async (file: any) => {
+    setDeletedFileKeys(prev => [...prev, file.key, file.name]);
+    
+    if (!file.isServer) {
+      setLocalUploadedFiles(prev => prev.filter(f => f.name !== file.name && f.url !== file.url));
+    }
+    
+    if (file.isServer && file.id) {
+      try {
+        await api.deleteTaskAttachment(taskId, file.id);
+        refetchTask();
+      } catch (err) {
+        console.warn("Delete attachment API notice:", err);
+      }
+    }
+    toast.success("File Removed", `"${file.name}" has been removed from this project workspace.`);
+  };
+
 
   // Handle Escrow Release
   const handleReleaseEscrow = async () => {
@@ -480,11 +512,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                             <button
                               type="button"
                               className={styles.fileIconBtn}
-                              onClick={() => setLocalUploadedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                              onClick={() => handleDeleteFile(file)}
                               title="Remove File"
                             >
                               <iconify-icon icon="lucide:trash-2" />
                             </button>
+
                           </div>
                         </div>
                       ))}
