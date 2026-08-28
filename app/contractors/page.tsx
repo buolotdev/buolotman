@@ -219,8 +219,6 @@ export default function ContractorsPage() {
 
   // Language state
   const [lang, setLang] = useState("en");
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [loadingCompanies, setLoadingCompanies] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -233,14 +231,6 @@ export default function ContractorsPage() {
         setLang("en"); // Default fallback
       }
     }
-
-    api.listCompanies({ limit: "12" })
-      .then((res: any) => {
-        const list = Array.isArray(res) ? res : res?.results || [];
-        setCompanies(list);
-      })
-      .catch(() => setCompanies([]))
-      .finally(() => setLoadingCompanies(false));
   }, []);
 
   const t = translations[lang] || translations["en"];
@@ -313,111 +303,6 @@ export default function ContractorsPage() {
             </div>
           </div>
         </section>
-
-        {/* REGISTERED COMPANIES SHOWCASE */}
-        {companies.length > 0 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>{lang === "fr" ? "Entreprises & Prestataires Enregistrés" : "Registered Enterprise Companies"}</h2>
-              <p className={styles.sectionDesc}>
-                {lang === "fr" 
-                  ? "Découvrez les entreprises techniques vérifiées prêtes à exécuter vos projets et chantiers."
-                  : "Discover verified enterprise engineering and contracting companies ready for your projects."}
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-              {companies.map((comp: any) => {
-                const compLogo = comp.logo || comp.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(comp.company_name || 'C')}&background=001f3f&color=fff`;
-                return (
-                  <div
-                    key={comp.id}
-                    style={{
-                      background: "#ffffff",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "16px",
-                      padding: "24px",
-                      boxShadow: "0 4px 20px rgba(0, 31, 63, 0.05)",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      gap: "16px",
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px" }}>
-                        <img
-                          src={compLogo}
-                          alt={comp.company_name}
-                          style={{ width: "52px", height: "52px", borderRadius: "12px", objectFit: "cover", border: "1px solid #e2e8f0" }}
-                        />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h4 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#001f3f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {comp.company_name}
-                          </h4>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
-                            <span style={{ background: "#f0fdf4", color: "#16a34a", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "6px", border: "1px solid #bbf7d0" }}>
-                              Verified Company
-                            </span>
-                            <span style={{ fontSize: "12px", color: "#64748b" }}>
-                              ★ {comp.average_rating || "4.9"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p style={{ margin: 0, fontSize: "13.5px", color: "#64748b", lineHeight: 1.55, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                        {comp.description || comp.bio || "Turnkey technical services and industrial engineering solutions."}
-                      </p>
-
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "14px", fontSize: "12.5px", color: "#64748b" }}>
-                        <span>📍 {comp.city || comp.country || "Rwanda"}</span>
-                        <span>•</span>
-                        <span>{comp.projects_count || 0} Projects</span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "10px", paddingTop: "14px", borderTop: "1px solid #f1f5f9" }}>
-                      <Link
-                        href={`/profile/${comp.user_id || comp.id}`}
-                        style={{
-                          flex: 1,
-                          textAlign: "center",
-                          textDecoration: "none",
-                          padding: "10px 14px",
-                          borderRadius: "10px",
-                          border: "1.5px solid #001f3f",
-                          color: "#001f3f",
-                          fontWeight: 700,
-                          fontSize: "13px",
-                          background: "#fff",
-                        }}
-                      >
-                        View Profile
-                      </Link>
-                      <Link
-                        href={`/post-task?invite_company=${comp.id}`}
-                        style={{
-                          flex: 1.2,
-                          textAlign: "center",
-                          textDecoration: "none",
-                          padding: "10px 14px",
-                          borderRadius: "10px",
-                          background: "#ff4500",
-                          color: "#fff",
-                          fontWeight: 800,
-                          fontSize: "13px",
-                        }}
-                      >
-                        Request Quote
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         {/* SERVICES */}
         <section className={styles.section}>

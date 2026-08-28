@@ -54,12 +54,10 @@ export default function ClientDashboardPage() {
   const { data: savedPros, loading: savedLoading } = useFetch(() => api.getSavedPros(), []);
   const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
   const { data: walletData } = useFetch(() => api.getWallet(), []);
-  const { data: companiesData, loading: companiesLoading } = useFetch(() => api.listCompanies({ limit: "6" }), []);
 
   const tasks = toArray(tasksData);
   const savedList = toArray(savedPros);
   const convList = toArray(conversations);
-  const companiesList = toArray(companiesData);
 
   const [localDirectHires, setLocalDirectHires] = useState<any[]>([]);
 
@@ -146,8 +144,7 @@ export default function ClientDashboardPage() {
               </div>
               <div className={styles.welcomeActions}>
                 <Link href="/post-task" className={styles.primaryButton}><iconify-icon icon="lucide:plus" /> Post a Task</Link>
-                <Link href="/service-providers/technicians" className={styles.secondaryButton}><iconify-icon icon="lucide:wrench" /> Browse Technicians</Link>
-                <Link href="/contractors" className={styles.secondaryButton}><iconify-icon icon="lucide:building-2" /> Browse Companies</Link>
+                <Link href="/search?q=electrician" className={styles.secondaryButton}>Browse electricians</Link>
                 <Link 
                   href="/dashboard/client/projects" 
                   style={{
@@ -379,108 +376,6 @@ export default function ClientDashboardPage() {
                   </table>
                 </div>
               </div>
-            </section>
-
-            {/* VERIFIED COMPANIES & SERVICES */}
-            <section className={styles.section} style={{ marginTop: '28px' }}>
-              <div className={styles.sectionHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#001f3f', margin: '0 0 4px' }}>
-                    Verified Companies & Enterprise Services
-                  </h3>
-                  <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
-                    Browse registered companies offering turnkey engineering, maintenance, and technical services.
-                  </p>
-                </div>
-                <Link href="/contractors" className={styles.outlineSmallButton} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  View All Companies →
-                </Link>
-              </div>
-
-              {companiesLoading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                  {[1, 2, 3].map((i) => <div key={i} className={styles.card}><SkeletonCard /></div>)}
-                </div>
-              ) : companiesList.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                  {companiesList.slice(0, 4).map((comp: any) => {
-                    const compLogo = comp.logo || comp.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(comp.company_name || 'C')}&background=001f3f&color=fff`;
-                    return (
-                      <div
-                        key={comp.id}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '16px',
-                          padding: '20px',
-                          boxShadow: '0 4px 16px rgba(0, 31, 63, 0.04)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '14px',
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                            <img
-                              src={compLogo}
-                              alt={comp.company_name}
-                              style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid #e2e8f0' }}
-                            />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#001f3f', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {comp.company_name}
-                              </h4>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                                <span style={{ background: '#f0fdf4', color: '#16a34a', fontSize: '11px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
-                                  Verified Company
-                                </span>
-                                <span style={{ fontSize: '12px', color: '#64748b' }}>
-                                  ★ {comp.average_rating || '4.9'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            {comp.description || comp.bio || 'Turnkey technical services and industrial engineering solutions.'}
-                          </p>
-
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px', fontSize: '12px', color: '#64748b' }}>
-                            <span>📍 {comp.city || comp.country || 'Rwanda'}</span>
-                            <span>•</span>
-                            <span>{comp.projects_count || 0} Projects</span>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '8px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-                          <Link
-                            href={`/profile/${comp.user_id || comp.id}`}
-                            className={styles.outlineSmallButton}
-                            style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}
-                          >
-                            View Profile
-                          </Link>
-                          <Link
-                            href={`/post-task?invite_company=${comp.id}`}
-                            className={styles.primarySmallButton}
-                            style={{ flex: 1.2, textAlign: 'center', textDecoration: 'none' }}
-                          >
-                            Hire Company
-                          </Link>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{ padding: '24px', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                  <p style={{ color: '#64748b', margin: '0 0 12px', fontSize: '14px' }}>Explore registered enterprise companies ready to take on your contracts.</p>
-                  <Link href="/contractors" className={styles.primarySmallButton} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                    Browse All Companies
-                  </Link>
-                </div>
-              )}
             </section>
 
             <section className={styles.section}>
