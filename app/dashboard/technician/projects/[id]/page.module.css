@@ -195,22 +195,25 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 15, 30, 0.75);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 99999;
+  padding: 20px;
 }
 
 .modalContent {
-  background: #ffffff;
+  background: #ffffff !important;
   width: 500px;
-  max-width: 90%;
-  border-radius: 16px;
-  padding: 32px;
+  max-width: 95%;
+  border-radius: 20px;
+  padding: 32px 28px;
   position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 60px rgba(0, 20, 45, 0.45);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-sizing: border-box;
 }
 
 .closeButton {

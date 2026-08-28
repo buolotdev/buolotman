@@ -979,7 +979,11 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
       {/* FUND ESCROW MODAL */}
       {fundModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setFundModalOpen(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modalClose} onClick={() => setFundModalOpen(false)} aria-label="Close modal">
+              <iconify-icon icon="lucide:x" />
+            </button>
+
             <div className={styles.modalHeader}>
               <div className={styles.modalIconWrap} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
                 <iconify-icon icon="lucide:shield-check" style={{ fontSize: 28 }} />
@@ -990,9 +994,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               </div>
             </div>
 
-            <form onSubmit={handleFundEscrow} className={styles.modalBody} style={{ padding: "0 24px 20px" }}>
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#001f3f", marginBottom: "6px" }}>
+            <form onSubmit={handleFundEscrow} className={styles.modalBody}>
+              <div style={{ marginBottom: "18px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#001f3f", marginBottom: "8px" }}>
                   Contract Budget Amount (XOF)
                 </label>
                 <div style={{ position: "relative" }}>
@@ -1005,30 +1009,32 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     required
                     style={{
                       width: "100%",
-                      padding: "12px 14px",
-                      borderRadius: "10px",
+                      padding: "14px 44px 14px 16px",
+                      borderRadius: "12px",
                       border: "1.5px solid #cbd5e1",
+                      background: "#ffffff",
                       fontSize: "16px",
                       fontWeight: 700,
                       color: "#001f3f",
                       boxSizing: "border-box",
                       outline: "none",
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#ff4500"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#cbd5e1"}
                   />
-                  <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: "13px", fontWeight: 700, color: "#64748b" }}>
+                  <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: "13px", fontWeight: 800, color: "#64748b" }}>
                     XOF
                   </span>
                 </div>
               </div>
 
-              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px 14px", marginBottom: "20px", fontSize: "12.5px", color: "#475569" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#16a34a", fontWeight: 700, marginBottom: "4px" }}>
-                  <iconify-icon icon="lucide:shield-check" style={{ fontSize: 16 }} />
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "14px 16px", marginBottom: "22px", fontSize: "12.5px", color: "#475569" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#16a34a", fontWeight: 800, marginBottom: "4px" }}>
+                  <iconify-icon icon="lucide:shield-check" style={{ fontSize: 17 }} />
                   <span>Escrow Protection Active</span>
                 </div>
-                <span>Your funds are locked in the secure vault and will only be released to {executorName} after you inspect and approve the completed work.</span>
+                <span>Your funds are locked securely in vault and will only be released to {executorName} after you inspect and approve the completed deliverables.</span>
               </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
