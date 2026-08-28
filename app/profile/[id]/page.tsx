@@ -42,7 +42,105 @@ export default function PublicProfilePage() {
   const id = Number(params?.id);
   const validId = Number.isFinite(id) ? id : null;
   const { data: profile, loading, error } = useFetch<PublicProfile | null>(
-    () => (validId ? api.getUserProfile(validId) : Promise.resolve(null)),
+    async () => {
+      if (!validId) return null;
+
+      // 1. Try direct user profile
+      try {
+        const userRes = await api.getUserProfile(validId);
+        if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
+          return userRes;
+        }
+      } catch {
+        // Fallback to company checks
+      }
+
+      // 2. Try direct company endpoint
+      try {
+        const compRes = await api.getCompanyById(validId);
+        if (compRes && compRes.id) {
+          return {
+            id: compRes.id,
+            role: "COMPANY",
+            company_name: compRes.company_name,
+            logo_url: compRes.logo || compRes.logo_url,
+            banner_url: compRes.banner_url || compRes.cover_image,
+            bio: compRes.description || compRes.bio,
+            about: compRes.about || compRes.description,
+            city: compRes.city,
+            country: compRes.country,
+            headquarters: compRes.headquarters,
+            is_verified: compRes.is_verified ?? true,
+            average_rating: compRes.average_rating || 4.9,
+            services_offered: compRes.services_offered || compRes.services || [],
+            skills: compRes.skills || [],
+            portfolio: compRes.portfolio || compRes.projects || [],
+          };
+        }
+      } catch {
+        // Fallback to company list search
+      }
+
+      // 3. Try finding in company list
+      try {
+        const compList = await api.listCompanies();
+        const compArray = Array.isArray(compList) ? compList : (compList as any)?.results || [];
+        const match = compArray.find(
+          (c: any) => c.id === validId || c.user_id === validId || c.user === validId
+        );
+        if (match) {
+          return {
+            id: match.id,
+            role: "COMPANY",
+            company_name: match.company_name,
+            logo_url: match.logo || match.logo_url,
+            banner_url: match.banner_url || match.cover_image,
+            bio: match.description || match.bio,
+            about: match.about || match.description,
+            city: match.city,
+            country: match.country,
+            headquarters: match.headquarters,
+            is_verified: match.is_verified ?? true,
+            average_rating: match.average_rating || 4.8,
+            services_offered: match.services_offered || match.services || [],
+            skills: match.skills || [],
+            portfolio: match.portfolio || match.projects || [],
+          };
+        }
+      } catch {
+        // Fallback to technician list
+      }
+
+      // 4. Try finding in technician users list
+      try {
+        const techList = await api.listUsers({ limit: "100" });
+        const techArray = Array.isArray(techList) ? techList : (techList as any)?.results || [];
+        const matchTech = techArray.find(
+          (u: any) => u.id === validId || u.user_id === validId
+        );
+        if (matchTech) {
+          return matchTech;
+        }
+      } catch {
+        // Fallback to local storage
+      }
+
+      // 5. Check local storage
+      if (typeof window !== "undefined") {
+        try {
+          const rawSaved = localStorage.getItem("boulotman_saved_pros");
+          if (rawSaved) {
+            const savedList = JSON.parse(rawSaved);
+            const matchSaved = savedList.find((p: any) => p.id === validId || p.professional?.id === validId);
+            if (matchSaved) {
+              return matchSaved.professional || matchSaved;
+            }
+          }
+        } catch {}
+      }
+
+      throw new Error("Profile not found");
+    },
     [validId]
   );
 
@@ -100,13 +198,25 @@ export default function PublicProfilePage() {
             <div style={{ height: 30, width: 200, background: '#e2e8f0', margin: '0 auto 10px', borderRadius: 8 }}></div>
             <div style={{ height: 16, width: 150, background: '#e2e8f0', margin: '0 auto', borderRadius: 4 }}></div>
           </div>
-        ) : error ? (
-          <div className={styles.skeletonCard} style={{ animation: 'none', color: '#dc2626' }}>
-            <iconify-icon icon="lucide:alert-circle" style={{ fontSize: 48, marginBottom: 16 }} />
-            <h2>Error loading profile</h2>
-            <p>{error}</p>
+        ) : error || !profile ? (
+          <div className={styles.skeletonCard} style={{ animation: 'none', padding: '48px 24px', textAlign: 'center', background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255, 69, 0, 0.1)', color: '#FF4500', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 36 }}>
+              <iconify-icon icon="lucide:user-x" />
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#001F3F', marginBottom: '8px' }}>Profile Not Available</h2>
+            <p style={{ color: '#64748b', fontSize: '15px', maxWidth: '500px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+              This specialist or company profile (ID #{validId}) is no longer active, or may have been updated.
+            </p>
+            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/search" style={{ background: '#FF4500', color: '#fff', padding: '12px 24px', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <iconify-icon icon="lucide:search" /> Browse Verified Specialists
+              </Link>
+              <Link href="/contractors" style={{ background: '#001F3F', color: '#fff', padding: '12px 24px', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <iconify-icon icon="lucide:building-2" /> Explore Companies
+              </Link>
+            </div>
           </div>
-        ) : profile ? (
+        ) : (
           <>
             <div className={styles.hero}>
               <div className={styles.coverPhoto} style={coverSrc ? { backgroundImage: `url(${coverSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
@@ -259,11 +369,6 @@ export default function PublicProfilePage() {
             </div>
 
           </>
-        ) : (
-          <div className={styles.skeletonCard} style={{ animation: 'none' }}>
-            <h2>Profile not found</h2>
-            <p style={{ color: '#64748b' }}>The professional you are looking for does not exist or has been removed.</p>
-          </div>
         )}
       </main>
       

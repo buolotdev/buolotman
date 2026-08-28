@@ -350,6 +350,7 @@ export const api = {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any[]>(`/company/${qs}`);
   },
+  getCompanyById: (id: number) => request<any>(`/company/${id}/`),
   getCompanyProfile: () => request<any>("/company/profile/"),
   updateCompanyProfile: (data: Record<string, any>) =>
     request<any>("/company/profile/", { method: "PATCH", body: JSON.stringify(data) }),
