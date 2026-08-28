@@ -10,6 +10,7 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
+import { cleanDescription, extractDirectInvitation } from "@/app/lib/format";
 
 export default function ProjectWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -21,6 +22,11 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // Escrow Funding Modal for Direct Hire
+  const [fundModalOpen, setFundModalOpen] = useState(false);
+  const [fundAmount, setFundAmount] = useState("");
+  const [fundingLoading, setFundingLoading] = useState(false);
 
   // Modal State
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -54,9 +60,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const isAccepted = task?.status === "in_progress" || isLocallyAccepted || task?.status === "completed";
 
   let detectedExecutor = task?.assigned_to_name || (task?.assigned_to ? `${task.assigned_to.first_name || ""} ${task.assigned_to.last_name || ""}`.trim() || task.assigned_to.username : null);
-  if (!detectedExecutor && task?.description && task.description.includes("specialist_name=")) {
-    const match = task.description.match(/specialist_name=([^;\]]+)/);
-    if (match) detectedExecutor = decodeURIComponent(match[1]);
+  const directInvite = extractDirectInvitation(task?.description);
+  if (!detectedExecutor && directInvite?.specialistName) {
+    detectedExecutor = directInvite.specialistName;
   }
   if (!detectedExecutor) {
     if (task?.title?.toLowerCase().includes("abc")) detectedExecutor = "MM TECHNICIAN";
@@ -67,6 +73,35 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const hasSpecialist = Boolean(detectedExecutor || task?.assigned_to);
   const projectTitle = task?.title || `Task #${taskId}`;
   const taskCity = task?.city || task?.location || "Location not specified";
+
+  const handleFundEscrow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amt = Number(fundAmount);
+    if (!amt || amt <= 0) {
+      toast.error("Please enter a valid budget amount");
+      return;
+    }
+    setFundingLoading(true);
+    try {
+      await api.updateTask(taskId, {
+        budget: amt,
+        budget_min: amt,
+        budget_max: amt,
+        escrow_amount: amt,
+        has_escrow: true,
+        status: "in_progress"
+      });
+      toast.success(`Escrow of ${amt.toLocaleString()} XOF funded successfully!`);
+      setFundModalOpen(false);
+      refetchTask();
+      refetchWallet();
+    } catch (err) {
+      console.error("Fund escrow error", err);
+      toast.error("Failed to fund escrow. Please try again.");
+    } finally {
+      setFundingLoading(false);
+    }
+  };
 
 
 
@@ -227,8 +262,15 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 </div>
                 <h1>{projectTitle}</h1>
                 <p className={styles.heroDescription}>
-                  {task?.description || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
+                  {cleanDescription(task?.description) || "Manage milestone progress, verify escrow vault status, collaborate with your specialist, and safely release payments."}
                 </p>
+
+                {directInvite && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255, 69, 0, 0.15)", color: "#ff8c42", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 700, border: "1px solid rgba(255, 69, 0, 0.35)", marginBottom: "14px" }}>
+                    <span>🎯 Direct Specialist Invitation:</span>
+                    <strong style={{ color: "#ffffff" }}>{directInvite.specialistName || executorName}</strong>
+                  </div>
+                )}
 
                 {/* META PILLS ROW */}
                 <div className={styles.heroMetaRow}>
@@ -252,7 +294,16 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               </div>
 
               <div className={styles.heroActions}>
-                {!isCompleted ? (
+                {!isCompleted && totalCost === 0 ? (
+                  <button
+                    type="button"
+                    className={styles.heroOrangeBtn}
+                    onClick={() => setFundModalOpen(true)}
+                  >
+                    <iconify-icon icon="lucide:lock" style={{ fontSize: 18 }} />
+                    <span>Fund Escrow</span>
+                  </button>
+                ) : !isCompleted ? (
                   <button
                     type="button"
                     className={styles.heroOrangeBtn}
@@ -443,9 +494,18 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     </div>
                   ) : (
                     <div className={styles.emptyCardBox}>
-                      <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 32, color: "#94a3b8" }} />
-                      <p>No escrow milestones defined yet for this task.</p>
-                      <span>Funds will be held in escrow once you accept a proposal and fund the contract.</span>
+                      <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 32, color: "#ff4500" }} />
+                      <p>No escrow budget deposited yet for this task.</p>
+                      <span>Lock funds securely in the BoulotMan Escrow Vault to activate this contract with {executorName}.</span>
+                      <button
+                        type="button"
+                        className={styles.heroOrangeBtn}
+                        style={{ marginTop: "16px", padding: "10px 22px", fontSize: "13.5px" }}
+                        onClick={() => setFundModalOpen(true)}
+                      >
+                        <iconify-icon icon="lucide:lock" />
+                        <span>Set Budget & Deposit Escrow</span>
+                      </button>
                     </div>
                   )}
 
@@ -912,6 +972,95 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
             >
               Close Preview
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* FUND ESCROW MODAL */}
+      {fundModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setFundModalOpen(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIconWrap} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
+                <iconify-icon icon="lucide:shield-check" style={{ fontSize: 28 }} />
+              </div>
+              <div className={styles.modalTitleWrap}>
+                <h3>Set Budget & Fund Escrow</h3>
+                <p>Deposit funds into the BoulotMan Escrow Vault to activate this contract.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleFundEscrow} className={styles.modalBody} style={{ padding: "0 24px 20px" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#001f3f", marginBottom: "6px" }}>
+                  Contract Budget Amount (XOF)
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="number"
+                    min="1000"
+                    placeholder="e.g. 50000"
+                    value={fundAmount}
+                    onChange={(e) => setFundAmount(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      borderRadius: "10px",
+                      border: "1.5px solid #cbd5e1",
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      color: "#001f3f",
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#ff4500"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#cbd5e1"}
+                  />
+                  <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: "13px", fontWeight: 700, color: "#64748b" }}>
+                    XOF
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px 14px", marginBottom: "20px", fontSize: "12.5px", color: "#475569" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#16a34a", fontWeight: 700, marginBottom: "4px" }}>
+                  <iconify-icon icon="lucide:shield-check" style={{ fontSize: 16 }} />
+                  <span>Escrow Protection Active</span>
+                </div>
+                <span>Your funds are locked in the secure vault and will only be released to {executorName} after you inspect and approve the completed work.</span>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  className={styles.modalCancelBtn}
+                  onClick={() => setFundModalOpen(false)}
+                  disabled={fundingLoading}
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={styles.modalConfirmBtn}
+                  disabled={fundingLoading || !fundAmount}
+                  style={{ flex: 1 }}
+                >
+                  {fundingLoading ? (
+                    <>
+                      <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} />
+                      <span>Locking Vault...</span>
+                    </>
+                  ) : (
+                    <>
+                      <iconify-icon icon="lucide:lock" />
+                      <span>Deposit & Lock</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

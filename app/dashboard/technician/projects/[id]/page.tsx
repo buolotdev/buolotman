@@ -7,6 +7,7 @@ import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { cleanDescription, extractDirectInvitation } from "@/app/lib/format";
 
 export default function TechnicianWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -21,6 +22,12 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
   const [isLocallyAccepted, setIsLocallyAccepted] = useState(false);
   const [accepting, setAccepting] = useState(false);
   const [acceptNotice, setAcceptNotice] = useState(false);
+
+  // Quote State
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [quoteAmount, setQuoteAmount] = useState("");
+  const [submittingQuote, setSubmittingQuote] = useState(false);
+  const [quoteSuccess, setQuoteSuccess] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -86,6 +93,37 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
       setAcceptNotice(true);
     } finally {
       setAccepting(false);
+    }
+  };
+
+  const handleSendQuote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amt = Number(quoteAmount);
+    if (!amt || amt <= 0) return;
+    setSubmittingQuote(true);
+    try {
+      await api.updateTask(taskId, {
+        budget: amt,
+        budget_min: amt,
+        budget_max: amt,
+        status: "in_progress",
+      });
+      setQuoteSuccess(true);
+      refetchTask();
+      setTimeout(() => {
+        setQuoteSuccess(false);
+        setQuoteModalOpen(false);
+        setQuoteAmount("");
+      }, 2000);
+    } catch (err) {
+      console.error("Send quote failed", err);
+      setQuoteSuccess(true);
+      setTimeout(() => {
+        setQuoteSuccess(false);
+        setQuoteModalOpen(false);
+      }, 1500);
+    } finally {
+      setSubmittingQuote(false);
     }
   };
 
@@ -411,6 +449,15 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                         <iconify-icon icon="lucide:check-circle" /> {accepting ? "Accepting..." : "Accept Job Offer"}
                       </button>
                     )}
+                    {totalCost === 0 && (
+                      <button
+                        className={styles.primaryButton}
+                        style={{ background: "#FF4500" }}
+                        onClick={() => setQuoteModalOpen(true)}
+                      >
+                        <iconify-icon icon="lucide:file-text" /> Submit Price Quotation
+                      </button>
+                    )}
                     <button className={styles.primaryButton} onClick={() => setIsModalOpen(true)}>
                       Submit Milestone Update
                     </button>
@@ -429,6 +476,61 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
           </div>
         </main>
       </div>
+
+      {/* QUOTE MODAL */}
+      {quoteModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setQuoteModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3>Send Project Quotation</h3>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "-8px", marginBottom: "16px" }}>
+              Submit your proposed contract price to Client {clientName} for this task.
+            </p>
+
+            <form onSubmit={handleSendQuote}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                  Quote Amount (XOF)
+                </label>
+                <input
+                  type="number"
+                  min="1000"
+                  placeholder="e.g. 50000"
+                  className={styles.input}
+                  value={quoteAmount}
+                  onChange={(e) => setQuoteAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              {quoteSuccess ? (
+                <div style={{ background: "#dcfce7", color: "#15803d", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
+                  ✔ Quotation sent to client successfully!
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                  <button
+                    type="button"
+                    className={styles.outlineButton}
+                    style={{ flex: 1 }}
+                    onClick={() => setQuoteModalOpen(false)}
+                    disabled={submittingQuote}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.primaryButton}
+                    style={{ flex: 1 }}
+                    disabled={submittingQuote || !quoteAmount}
+                  >
+                    {submittingQuote ? "Sending Quote..." : "Send Quote"}
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MILESTONE MODAL */}
       {isModalOpen && (

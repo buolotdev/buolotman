@@ -8,6 +8,7 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import { cleanDescription } from "@/app/lib/format";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 
@@ -221,7 +222,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
 
                     <div className={styles.descriptionBlock}>
                       <h3>Task Description</h3>
-                      <p>{(Array.isArray(task.description) ? task.description[0] : task.description) || "No description provided."}</p>
+                      <p>{cleanDescription(Array.isArray(task.description) ? task.description[0] : task.description) || "No description provided."}</p>
                       <div className={styles.skillRow}>
                         {(task.skills || []).map((skill: string) => (
                           <span key={skill} className={styles.skillTag}>

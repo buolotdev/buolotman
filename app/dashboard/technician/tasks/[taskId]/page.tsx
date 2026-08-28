@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useDialog } from "@/app/components/Dialog";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import { cleanDescription } from "@/app/lib/format";
 import styles from "./page.module.css";
 
 export default function TechnicianTaskDetailsPage({ params }: { params: Promise<{ taskId: string }> }) {
@@ -141,7 +142,7 @@ export default function TechnicianTaskDetailsPage({ params }: { params: Promise<
               <div className={styles.section}>
                 <h2>Task Description</h2>
                 <div className={styles.description}>
-                  <p>{task.description || "No description provided."}</p>
+                  <p>{cleanDescription(task.description) || "No description provided."}</p>
                 </div>
               </div>
 
