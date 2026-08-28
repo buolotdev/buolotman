@@ -172,12 +172,38 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
         payload.company_name = signupName;
       }
 
-      if (selectedRole === "Client") {
-        await api.registerClient(payload);
-      } else if (selectedRole === "Technician") {
-        await api.registerTechnician(payload);
-      } else if (selectedRole === "Company") {
-        await api.registerCompany(payload);
+      try {
+        if (selectedRole === "Client") {
+          await api.registerClient(payload);
+        } else if (selectedRole === "Technician") {
+          await api.registerTechnician(payload);
+        } else if (selectedRole === "Company") {
+          await api.registerCompany(payload);
+        }
+      } catch (regErr: any) {
+        const errMsg = String(regErr?.message || regErr?.detail || "");
+        if (
+          errMsg.toLowerCase().includes("already exists") ||
+          errMsg.toLowerCase().includes("already registered") ||
+          errMsg.toLowerCase().includes("user with this") ||
+          errMsg.toLowerCase().includes("duplicate")
+        ) {
+          try {
+            const loginData = await api.login(signupEmail, signupPassword);
+            const role: string = (loginData.role || selectedRole || "client").toLowerCase();
+            localStorage.setItem("access_token", loginData.access);
+            localStorage.setItem("refresh_token", loginData.refresh);
+            localStorage.setItem("user_role", role);
+            if (role === "admin") router.push("/dashboard/admin");
+            else if (role === "company") router.push("/dashboard/company");
+            else if (role === "technician") router.push("/dashboard/technician");
+            else router.push("/dashboard/client");
+            return;
+          } catch {
+            throw new Error("This email is already registered. Please log in or use another email address.");
+          }
+        }
+        throw regErr;
       }
 
       // Auto-login after signup

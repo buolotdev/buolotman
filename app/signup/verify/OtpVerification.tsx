@@ -191,12 +191,39 @@ export default function OtpVerification({
       }
 
       let registerResult: { message: string };
-      if (data.role === "technician") {
-        registerResult = await api.registerTechnician(payload);
-      } else if (data.role === "company") {
-        registerResult = await api.registerCompany(payload);
-      } else {
-        registerResult = await api.registerClient(payload);
+      try {
+        if (data.role === "technician") {
+          registerResult = await api.registerTechnician(payload);
+        } else if (data.role === "company") {
+          registerResult = await api.registerCompany(payload);
+        } else {
+          registerResult = await api.registerClient(payload);
+        }
+      } catch (regErr: any) {
+        const errMsg = String(regErr?.message || regErr?.detail || "");
+        if (
+          errMsg.toLowerCase().includes("already exists") ||
+          errMsg.toLowerCase().includes("already registered") ||
+          errMsg.toLowerCase().includes("user with this") ||
+          errMsg.toLowerCase().includes("duplicate")
+        ) {
+          try {
+            const tokens = await api.login(data.email, data.password);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("access_token", tokens.access);
+              localStorage.setItem("refresh_token", tokens.refresh);
+              localStorage.setItem("user_role", data.role);
+            }
+            try {
+              sessionStorage.removeItem("signup_data");
+            } catch {}
+            router.push(roleDestinations[data.role as RoleKey] ?? "/dashboard/client");
+            return;
+          } catch {
+            throw new Error("This email is already registered. Please log in or use another email.");
+          }
+        }
+        throw regErr;
       }
 
       const tokens = await api.login(data.email, data.password);
