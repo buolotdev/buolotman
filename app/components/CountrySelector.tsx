@@ -50,25 +50,25 @@ export default function CountrySelector({ variant = "header" }: CountrySelectorP
           display: "flex",
           alignItems: "center",
           gap: "7px",
-          background: variant === "footer" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)",
+          background: variant === "footer" ? "#0b2a4d" : "rgba(255,255,255,0.12)",
           backdropFilter: "blur(8px)",
-          border: variant === "footer" ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.22)",
-          borderRadius: "24px",
-          padding: variant === "compact" ? "4px 10px" : "6px 14px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          borderRadius: variant === "footer" ? "8px" : "24px",
+          padding: variant === "footer" ? "8px 14px" : variant === "compact" ? "4px 10px" : "6px 14px",
           color: "#ffffff",
           cursor: "pointer",
-          fontSize: "13.5px",
+          fontSize: variant === "footer" ? "0.78rem" : "13.5px",
           fontWeight: 600,
           transition: "all 0.2s ease",
           boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(255,255,255,0.22)";
+          e.currentTarget.style.background = variant === "footer" ? "#113c6e" : "rgba(255,255,255,0.22)";
           e.currentTarget.style.borderColor = "#FF4500";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = variant === "footer" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)";
-          e.currentTarget.style.borderColor = variant === "footer" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.22)";
+          e.currentTarget.style.background = variant === "footer" ? "#0b2a4d" : "rgba(255,255,255,0.12)";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
         }}
       >
         <span style={{ fontSize: "16px", lineHeight: 1 }}>{location.flag}</span>
@@ -99,7 +99,8 @@ export default function CountrySelector({ variant = "header" }: CountrySelectorP
         <div
           style={{
             position: "absolute",
-            top: "calc(100% + 8px)",
+            bottom: variant === "footer" ? "calc(100% + 8px)" : undefined,
+            top: variant === "footer" ? undefined : "calc(100% + 8px)",
             right: 0,
             width: "300px",
             background: "#ffffff",

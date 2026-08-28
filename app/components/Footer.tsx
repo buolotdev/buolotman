@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
+import CountrySelector from "./CountrySelector";
 import "./footer.css";
 
 
@@ -238,23 +239,7 @@ export default function Footer() {
             </div>
 
             {/* COUNTRY */}
-            <div className="switch">
-              <div className="switch-btn" onClick={() => { setCountryOpen(!countryOpen); setLangOpen(false); }}>
-                📍 <span>{country}</span>
-              </div>
-              {countryOpen && (
-                <div className="switch-list" style={{ display: "block" }}>
-                  <button onClick={() => changeCountry("Rwanda")}>Rwanda</button>
-                  <button onClick={() => changeCountry("Kenya")}>Kenya</button>
-                  <button onClick={() => changeCountry("Nigeria")}>Nigeria</button>
-                  <button onClick={() => changeCountry("Ghana")}>Ghana</button>
-                  <button onClick={() => changeCountry("South Africa")}>South Africa</button>
-                  <button onClick={() => changeCountry("Ivory Coast")}>Ivory Coast</button>
-                  <button onClick={() => changeCountry("Cameroon")}>Cameroon</button>
-                  <button onClick={() => changeCountry("Global")}>Global</button>
-                </div>
-              )}
-            </div>
+            <CountrySelector variant="footer" />
           </div>
 
           <div className="footer-socials">
