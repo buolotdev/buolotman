@@ -158,19 +158,28 @@ export default function BuildATeamPage() {
         <div className={styles.section}>
           <h2>Build a Team FAQ</h2>
 
-          <div className={styles.card} style={{ padding: "10px 40px" }}>
+          <div className={styles.faqCard}>
             <div className={styles.accordionItem} onClick={() => toggleFaq(1)}>
-              <div className={styles.accordionTitle}>How fast can a team be deployed? <span>{activeFaq === 1 ? "-" : "+"}</span></div>
+              <div className={styles.accordionTitle}>
+                <span>How fast can a team be deployed?</span>
+                <span className={styles.accordionIcon}>{activeFaq === 1 ? "−" : "+"}</span>
+              </div>
               {activeFaq === 1 && <div className={styles.accordionContent}>Usually within 1–24 hours depending on size and location.</div>}
             </div>
 
             <div className={styles.accordionItem} onClick={() => toggleFaq(2)}>
-              <div className={styles.accordionTitle}>Are technicians verified? <span>{activeFaq === 2 ? "-" : "+"}</span></div>
+              <div className={styles.accordionTitle}>
+                <span>Are technicians verified?</span>
+                <span className={styles.accordionIcon}>{activeFaq === 2 ? "−" : "+"}</span>
+              </div>
               {activeFaq === 2 && <div className={styles.accordionContent}>Yes. All team members are ID-verified, skill-assessed, and rated.</div>}
             </div>
 
             <div className={styles.accordionItem} onClick={() => toggleFaq(3)}>
-              <div className={styles.accordionTitle}>Can diaspora clients manage remotely? <span>{activeFaq === 3 ? "-" : "+"}</span></div>
+              <div className={styles.accordionTitle}>
+                <span>Can diaspora clients manage remotely?</span>
+                <span className={styles.accordionIcon}>{activeFaq === 3 ? "−" : "+"}</span>
+              </div>
               {activeFaq === 3 && <div className={styles.accordionContent}>Yes. Reports, photos, and updates are provided remotely.</div>}
             </div>
           </div>
@@ -186,7 +195,7 @@ export default function BuildATeamPage() {
             </p>
           </div>
           <div className={styles.ctaRight}>
-            <button onClick={() => router.push("/login")}>
+            <button className={styles.ctaBtn} onClick={() => router.push("/login")}>
               Request a Team
             </button>
           </div>
