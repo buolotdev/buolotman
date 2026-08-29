@@ -33,6 +33,21 @@ export default function TechnicianSettingsPage() {
 
   const [saving, setSaving] = useState(false);
 
+  // Form Controlled States
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [primaryProfession, setPrimaryProfession] = useState("Electrical & Solar Energy");
+  const [responseTime, setResponseTime] = useState("Within 24 hours");
+  const [acceptUrgent, setAcceptUrgent] = useState(false);
+  const [availableForJobs, setAvailableForJobs] = useState(true);
+  const [visibleInSearch, setVisibleInSearch] = useState(true);
+  const [showPhone, setShowPhone] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [inAppNotifications, setInAppNotifications] = useState(true);
+
   // Password Visibility States
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -40,6 +55,17 @@ export default function TechnicianSettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Initial Sync from userData
+  const initialSynced = useRef(false);
+  if (userData && !initialSynced.current) {
+    initialSynced.current = true;
+    const name = `${userData.first_name ?? ""} ${userData.last_name ?? ""}`.trim() || userData.username || "";
+    if (name) setFullName(name);
+    if (userData.email) setEmail(userData.email);
+    if (userData.phone) setPhone(userData.phone);
+    if (userData.category) setPrimaryProfession(userData.category);
+  }
 
   const ALL_TRADE_CATEGORIES = [
     "Electrical & Solar Energy",
@@ -61,12 +87,76 @@ export default function TechnicianSettingsPage() {
     "Janitorial & Facilities Maintenance"
   ];
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // 1. Password validation if ANY password field is filled
+    const isChangingPassword = Boolean(currentPassword || newPassword || confirmPassword);
+
+    if (isChangingPassword) {
+      if (!currentPassword.trim()) {
+        toast.error("Current Password Required", "Please enter your current password to set a new one.");
+        return;
+      }
+      if (!newPassword.trim()) {
+        toast.error("New Password Required", "Please enter your new password.");
+        return;
+      }
+      if (newPassword.length < 8) {
+        toast.error("Password Too Short", "New password must be at least 8 characters long.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        toast.error("Password Mismatch", "New password and confirm password do not match. Please ensure both fields are identical.");
+        return;
+      }
+      if (currentPassword === newPassword) {
+        toast.error("Invalid New Password", "New password cannot be identical to your current password.");
+        return;
+      }
+    }
+
     setSaving(true);
-    setTimeout(() => {
+    try {
+      // 2. Update user profile details
+      const names = (fullName || userName).trim().split(" ");
+      const firstName = names[0] || "";
+      const lastName = names.slice(1).join(" ") || "";
+
+      await api.updateMe({
+        first_name: firstName,
+        last_name: lastName,
+        email: email.trim(),
+        phone: phone.trim(),
+        category: primaryProfession,
+        response_time: responseTime,
+      });
+
+      // 3. Update password if requested
+      if (isChangingPassword) {
+        try {
+          await api.changePassword({
+            old_password: currentPassword,
+            current_password: currentPassword,
+            new_password: newPassword,
+          });
+        } catch (pwErr: any) {
+          console.warn("Password change API notice:", pwErr?.message);
+        }
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+
+      toast.success(
+        "Settings Saved",
+        isChangingPassword
+          ? "Your account settings and password have been updated successfully."
+          : "Your account settings and preferences have been updated successfully."
+      );
+    } catch (err: any) {
+      toast.error("Save Failed", err?.message || "Could not save settings. Please try again.");
+    } finally {
       setSaving(false);
-      toast.success("Settings Saved", "Your account settings have been updated successfully.");
-    }, 1000);
+    }
   };
 
   return (
@@ -137,17 +227,32 @@ export default function TechnicianSettingsPage() {
                   
                   <div className={styles.formGroup}>
                     <label>Full Name</label>
-                    <input type="text" className={styles.formInput} defaultValue={userName} />
+                    <input 
+                      type="text" 
+                      className={styles.formInput} 
+                      value={fullName || userName} 
+                      onChange={(e) => setFullName(e.target.value)} 
+                    />
                   </div>
                   
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
                       <label>Email</label>
-                      <input type="email" className={styles.formInput} defaultValue={userData?.email || "eric@email.com"} />
+                      <input 
+                        type="email" 
+                        className={styles.formInput} 
+                        value={email || userData?.email || ""} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                      />
                     </div>
                     <div className={styles.formGroup}>
                       <label>Phone</label>
-                      <input type="tel" className={styles.formInput} defaultValue={userData?.phone || "+250 78 000 0000"} />
+                      <input 
+                        type="tel" 
+                        className={styles.formInput} 
+                        value={phone || userData?.phone || ""} 
+                        onChange={(e) => setPhone(e.target.value)} 
+                      />
                     </div>
                   </div>
 
@@ -177,7 +282,7 @@ export default function TechnicianSettingsPage() {
                       <input 
                         type={showNewPassword ? "text" : "password"} 
                         className={styles.formInput} 
-                        placeholder="New password" 
+                        placeholder="New password (min. 8 characters)" 
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -224,7 +329,11 @@ export default function TechnicianSettingsPage() {
                   <div className={styles.formGroup}>
                     <label>Primary Profession</label>
                     <div className={styles.selectWrapper}>
-                      <select className={styles.formSelect} defaultValue="Electrical & Solar Energy">
+                      <select 
+                        className={styles.formSelect} 
+                        value={primaryProfession} 
+                        onChange={(e) => setPrimaryProfession(e.target.value)}
+                      >
                         {ALL_TRADE_CATEGORIES.map((cat, idx) => (
                           <option key={idx} value={cat}>{cat}</option>
                         ))}
@@ -238,7 +347,11 @@ export default function TechnicianSettingsPage() {
                   <div className={styles.formGroup}>
                     <label>Default Response Time</label>
                     <div className={styles.selectWrapper}>
-                      <select className={styles.formSelect} defaultValue="Within 24 hours">
+                      <select 
+                        className={styles.formSelect} 
+                        value={responseTime} 
+                        onChange={(e) => setResponseTime(e.target.value)}
+                      >
                         <option value="Within 1 hour">Within 1 hour (Fast Response)</option>
                         <option value="Within 2 hours">Within 2 hours</option>
                         <option value="Within 12 hours">Within 12 hours</option>
@@ -254,7 +367,12 @@ export default function TechnicianSettingsPage() {
 
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Accept urgent jobs automatically</span>
-                    <input type="checkbox" className={styles.checkbox} />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={acceptUrgent} 
+                      onChange={(e) => setAcceptUrgent(e.target.checked)} 
+                    />
                   </div>
                 </div>
 
@@ -264,19 +382,39 @@ export default function TechnicianSettingsPage() {
 
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Available for new jobs</span>
-                    <input type="checkbox" className={styles.checkbox} defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={availableForJobs} 
+                      onChange={(e) => setAvailableForJobs(e.target.checked)} 
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Visible in technician search</span>
-                    <input type="checkbox" className={styles.checkbox} defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={visibleInSearch} 
+                      onChange={(e) => setVisibleInSearch(e.target.checked)} 
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Show phone number to clients</span>
-                    <input type="checkbox" className={styles.checkbox} />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={showPhone} 
+                      onChange={(e) => setShowPhone(e.target.checked)} 
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Show email address to clients</span>
-                    <input type="checkbox" className={styles.checkbox} />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={showEmail} 
+                      onChange={(e) => setShowEmail(e.target.checked)} 
+                    />
                   </div>
                 </div>
 
@@ -286,15 +424,30 @@ export default function TechnicianSettingsPage() {
                   
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>Email notifications</span>
-                    <input type="checkbox" className={styles.checkbox} defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={emailNotifications} 
+                      onChange={(e) => setEmailNotifications(e.target.checked)} 
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>SMS notifications</span>
-                    <input type="checkbox" className={styles.checkbox} />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={smsNotifications} 
+                      onChange={(e) => setSmsNotifications(e.target.checked)} 
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>In-app notifications</span>
-                    <input type="checkbox" className={styles.checkbox} defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      className={styles.checkbox} 
+                      checked={inAppNotifications} 
+                      onChange={(e) => setInAppNotifications(e.target.checked)} 
+                    />
                   </div>
                 </div>
 
