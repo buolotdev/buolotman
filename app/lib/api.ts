@@ -195,6 +195,8 @@ export const api = {
   getMe: () => request<any>("/auth/me/"),
   updateMe: (data: Record<string, any>) =>
     request<any>("/auth/me/", { method: "PATCH", body: JSON.stringify(data) }),
+  changePassword: (data: { current_password?: string; old_password?: string; new_password: string }) =>
+    request<any>("/auth/change-password/", { method: "POST", body: JSON.stringify(data) }),
   getUserProfile: (id: number) => request<any>(`/auth/users/${id}/`),
   listUsers: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
@@ -592,11 +594,5 @@ export const api = {
       tasks_posted_monthly: number;
       successful_completion: number;
     }>("/governance/platform-stats/", { public: true }),
-
-  changePassword: (data: any) =>
-    request("/accounts/change-password/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
 };
 

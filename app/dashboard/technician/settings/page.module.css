@@ -252,9 +252,9 @@
 
 .formInput:focus {
   outline: none;
-  border-color: #ff4500;
+  border-color: #001f3f;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.08);
 }
 
 .passwordWrapper {
@@ -314,13 +314,15 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .formSelect:focus {
   outline: none;
-  border-color: #ff4500;
+  border-color: #001f3f;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.08);
 }
 
 .selectArrow {
