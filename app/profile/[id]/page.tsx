@@ -240,10 +240,10 @@ export default function PublicProfilePage() {
   const skillsList = (profile?.skills && profile.skills.length > 0)
     ? profile.skills
     : isCompany
-    ? ["Civil Construction", "Structural Engineering", "Solar & High-Voltage Power", "HVAC Cooling", "Renovation & Finishing"]
+    ? (profile?.services_offered && profile.services_offered.length > 0 ? profile.services_offered : ["Civil Construction", "Structural Engineering", "High-Voltage Power", "HVAC Cooling", "Finishing Works"])
     : userCategory
-    ? [userCategory, "Fault Diagnostics", "Preventive Maintenance", "System Installation", "Safety Compliance"]
-    : ["Technical Diagnostics", "Preventive Maintenance", "System Installation", "Safety Compliance", "Field Execution"];
+    ? [userCategory]
+    : [];
 
   const portfolioList = (profile?.portfolio && profile.portfolio.length > 0)
     ? profile.portfolio
@@ -439,12 +439,18 @@ export default function PublicProfilePage() {
                     {isCompany ? "Verified Services & Trade Domains" : "Trade Skills & Verified Specializations"}
                   </h2>
                   <div className={styles.skillsContainer}>
-                    {skillsList.map((s: string, i: number) => (
-                      <span key={i} className={styles.skillChip}>
-                        <iconify-icon icon="lucide:check" style={{ color: "#16a34a" }} />
-                        {s}
-                      </span>
-                    ))}
+                    {skillsList.length === 0 ? (
+                      <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
+                        No specific skills listed yet.
+                      </p>
+                    ) : (
+                      skillsList.map((s: string, i: number) => (
+                        <span key={i} className={styles.skillChip}>
+                          <iconify-icon icon="lucide:check" style={{ color: "#16a34a" }} />
+                          {s}
+                        </span>
+                      ))
+                    )}
                   </div>
                 </section>
 

@@ -125,7 +125,7 @@ export default function TechnicianProfilePage() {
   const [city, setCity] = useState("Cotonou");
   const [address, setAddress] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [skills, setSkills] = useState<string[]>(["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring"]);
+  const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
 
@@ -195,7 +195,13 @@ export default function TechnicianProfilePage() {
           if (p.primaryOccupation !== undefined && p.primaryOccupation !== "") setPrimaryOccupation(p.primaryOccupation);
           if (p.educationLevel !== undefined && p.educationLevel !== "") setEducationLevel(p.educationLevel);
           if (p.expertiseLevel !== undefined && p.expertiseLevel !== "") setExpertiseLevel(p.expertiseLevel);
+          if (Array.isArray(p.skills)) setSkills(p.skills);
         } catch {}
+      }
+
+      const rawSkills = localStorage.getItem("boulotman_technician_skills");
+      if (rawSkills) {
+        try { setSkills(JSON.parse(rawSkills)); } catch {}
       }
 
       const rawPort = localStorage.getItem("boulotman_technician_portfolio");
@@ -344,8 +350,10 @@ export default function TechnicianProfilePage() {
         primaryOccupation,
         educationLevel: educationLevel.trim(),
         expertiseLevel,
+        skills,
       };
       localStorage.setItem("boulotman_technician_profile_custom", JSON.stringify(customProfileData));
+      localStorage.setItem("boulotman_technician_skills", JSON.stringify(skills));
       localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
       localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
       localStorage.setItem("boulotman_technician_available_now", String(availableNow));
@@ -396,8 +404,18 @@ export default function TechnicianProfilePage() {
   const handleAddSkill = () => {
     if (!newSkill.trim()) return;
     const val = newSkill.trim();
-    if (!skills.includes(val)) setSkills([...skills, val]);
+    if (!skills.includes(val)) {
+      const updated = [...skills, val];
+      setSkills(updated);
+      localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
+    }
     setNewSkill("");
+  };
+
+  const handleRemoveSkill = (index: number) => {
+    const updated = skills.filter((_, i) => i !== index);
+    setSkills(updated);
+    localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
   };
 
   // Add Tool
@@ -804,16 +822,22 @@ export default function TechnicianProfilePage() {
                 {/* Skills Manager */}
                 <div style={{ marginTop: 20 }}>
                   <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Trade Skills & Specializations</label>
-                  <div className={styles.skillsListEditable}>
-                    {skills.map((skill, index) => (
-                      <span key={index} className={styles.skillTag}>
-                        {skill}
-                        <button type="button" className={styles.skillAction} onClick={() => setSkills(skills.filter((_, i) => i !== index))}>
-                          <iconify-icon icon="lucide:x" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+                  {skills.length === 0 ? (
+                    <p style={{ fontSize: 13, color: "#94a3b8", margin: "4px 0 10px", fontStyle: "italic" }}>
+                      No skills added yet. Type a skill below and click &quot;Add&quot; to list your trade specializations.
+                    </p>
+                  ) : (
+                    <div className={styles.skillsListEditable}>
+                      {skills.map((skill, index) => (
+                        <span key={index} className={styles.skillTag}>
+                          {skill}
+                          <button type="button" className={styles.skillAction} onClick={() => handleRemoveSkill(index)}>
+                            <iconify-icon icon="lucide:x" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: 10, maxWidth: 500, marginTop: 10 }}>
                     <input
                       className={styles.formInput}
