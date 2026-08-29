@@ -591,14 +591,134 @@
   margin-top: 14px;
 }
 
-.pricingCard {
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 16px;
+/* ================= VISUAL PORTFOLIO CARDS ================= */
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.portfolioCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  height: 100%;
+  border-radius: 18px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.04);
+  transition: all 0.25s ease;
+}
+
+.portfolioCard:hover {
+  transform: translateY(-3px);
+  border-color: #ff4500;
+  box-shadow: 0 10px 28px rgba(0, 31, 63, 0.09);
+}
+
+.portfolioVisual {
+  height: 160px;
+  width: 100%;
+  position: relative;
+  background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.portfolioVisual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portfolioBudgetPill {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 31, 63, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  color: #4ade80;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  z-index: 2;
+}
+
+.portfolioBody {
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+}
+
+.portfolioCategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portfolioCategoryTag {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ff4500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 69, 0, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.portfolioDeleteBtn {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.portfolioDeleteBtn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.portfolioTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #001f3f;
+  line-height: 1.35;
+}
+
+.portfolioDesc {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.portfolioFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  margin-top: auto;
 }
 
 /* ================= RESPONSIVE ================= */

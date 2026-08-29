@@ -58,6 +58,26 @@ const DEFAULT_PORTFOLIO: PortfolioItem[] = [
   }
 ];
 
+const PLATFORM_TRADE_CATEGORIES = [
+  "Electrical & Solar Energy",
+  "Plumbing & Sanitation Works",
+  "HVAC, Air Conditioning & Cold Rooms",
+  "Carpentry, Furniture & Woodwork",
+  "Masonry, Tiling & Civil Construction",
+  "Painting, Finishes & Waterproofing",
+  "Welding, Metalwork & Steel Structures",
+  "Roofing, Ceilings & Structural Waterproofing",
+  "CCTV, Security Systems & Smart Home",
+  "IT Infrastructure & Networking",
+  "Software & Web Engineering",
+  "Cybersecurity Services",
+  "Cloud & Systems Engineering",
+  "Automotive & Heavy Fleet Mechanics",
+  "Appliance & Electronics Repair",
+  "Landscaping & Environmental Works",
+  "Architecture, CAD & Quantity Surveying"
+];
+
 const DEFAULT_TOOLS = [
   "Digital Multimeter (Fluke)",
   "Heavy Duty Rotary Hammer Drill",
@@ -98,7 +118,7 @@ export default function TechnicianProfilePage() {
   const [headline, setHeadline] = useState("Certified Electrician & Solar Specialist");
   const [bio, setBio] = useState("");
   const [experienceYears, setExperienceYears] = useState("8");
-  const [primaryOccupation, setPrimaryOccupation] = useState("Electrician");
+  const [primaryOccupation, setPrimaryOccupation] = useState("Electrical & Solar Energy");
   const [expertiseLevel, setExpertiseLevel] = useState("Senior");
   const [educationLevel, setEducationLevel] = useState("B.Sc. Electrical Engineering");
   const [country, setCountry] = useState("Benin");
@@ -117,10 +137,11 @@ export default function TechnicianProfilePage() {
   const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [newProjTitle, setNewProjTitle] = useState("");
-  const [newProjCategory, setNewProjCategory] = useState("Electrical & Solar");
+  const [newProjCategory, setNewProjCategory] = useState("Electrical & Solar Energy");
   const [newProjDesc, setNewProjDesc] = useState("");
   const [newProjLocation, setNewProjLocation] = useState("");
   const [newProjBudget, setNewProjBudget] = useState("");
+  const [newProjPhotoUrl, setNewProjPhotoUrl] = useState("");
 
   // Tab 4: Work Preferences & "Available Now" State
   const [availableNow, setAvailableNow] = useState(true);
@@ -409,6 +430,7 @@ export default function TechnicianProfilePage() {
       location: newProjLocation.trim() || `${city}, ${country}`,
       completionDate: "Recent",
       budget: newProjBudget.trim() || undefined,
+      photoUrl: newProjPhotoUrl || undefined,
     };
     const updated = [newPort, ...portfolioList];
     setPortfolioList(updated);
@@ -417,6 +439,7 @@ export default function TechnicianProfilePage() {
     setNewProjDesc("");
     setNewProjLocation("");
     setNewProjBudget("");
+    setNewProjPhotoUrl("");
     setShowAddProjectModal(false);
     toast.success("Portfolio Added", "Your completed work has been added to your profile gallery.");
   };
@@ -731,14 +754,9 @@ export default function TechnicianProfilePage() {
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Primary Trade / Occupation</label>
                     <select className={styles.formInput} value={primaryOccupation} onChange={(e) => setPrimaryOccupation(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="Electrician">Electrician & Solar Specialist</option>
-                      <option value="Plumber">Plumber & Pipefitter</option>
-                      <option value="HVAC">HVAC & Refrigeration Tech</option>
-                      <option value="Carpenter">Carpenter & Woodworker</option>
-                      <option value="Mason">Mason & Bricklayer</option>
-                      <option value="Painter">Painter & Finisher</option>
-                      <option value="Welder">Welder & Metal Fabricator</option>
-                      <option value="IT Technician">IT Network & Telecom Tech</option>
+                      {PLATFORM_TRADE_CATEGORIES.map((trade) => (
+                        <option key={trade} value={trade}>{trade}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -1134,25 +1152,37 @@ export default function TechnicianProfilePage() {
                   {portfolioList.map((item) => (
                     <div key={item.id} className={styles.portfolioCard}>
                       <div className={styles.portfolioVisual}>
-                        <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36, color: "rgba(255,255,255,0.7)" }} />
-                        {item.budget && (
-                          <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.65)", color: "#4ade80", padding: "3px 8px", borderRadius: 999, fontSize: 11.5, fontWeight: 800 }}>
-                            {item.budget}
+                        {item.photoUrl ? (
+                          <img src={getImageUrl(item.photoUrl)} alt={item.title} />
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
+                            <iconify-icon icon="lucide:briefcase" style={{ fontSize: 38 }} />
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>Proof of Work</span>
                           </div>
+                        )}
+                        {item.budget && (
+                          <span className={styles.portfolioBudgetPill}>
+                            {item.budget}
+                          </span>
                         )}
                       </div>
                       <div className={styles.portfolioBody}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 800, color: "#ff4500", textTransform: "uppercase" }}>{item.category}</span>
-                          <button type="button" onClick={() => handleDeletePortfolio(item.id)} style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer" }}>
+                        <div className={styles.portfolioCategoryHeader}>
+                          <span className={styles.portfolioCategoryTag}>{item.category}</span>
+                          <button
+                            type="button"
+                            className={styles.portfolioDeleteBtn}
+                            onClick={() => handleDeletePortfolio(item.id)}
+                            title="Delete Project"
+                          >
                             <iconify-icon icon="lucide:trash-2" />
                           </button>
                         </div>
-                        <h4 style={{ margin: "6px 0 4px", fontSize: 14.5, fontWeight: 800, color: "#001f3f" }}>{item.title}</h4>
-                        <p style={{ margin: 0, fontSize: 12.5, color: "#64748b", lineHeight: 1.45 }}>{item.description}</p>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, color: "#94a3b8", marginTop: 10 }}>
-                          <span>📍 {item.location}</span>
-                          <span>⏳ {item.completionDate}</span>
+                        <h4 className={styles.portfolioTitle}>{item.title}</h4>
+                        <p className={styles.portfolioDesc}>{item.description}</p>
+                        <div className={styles.portfolioFooter}>
+                          <span><iconify-icon icon="lucide:map-pin" style={{ marginRight: 4, color: "#001f3f" }} /> {item.location}</span>
+                          <span><iconify-icon icon="lucide:calendar" style={{ marginRight: 4, color: "#001f3f" }} /> {item.completionDate}</span>
                         </div>
                       </div>
                     </div>
@@ -1162,10 +1192,10 @@ export default function TechnicianProfilePage() {
                 {/* Add Portfolio Modal */}
                 {showAddProjectModal && (
                   <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.75)", backdropFilter: "blur(8px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-                    <div style={{ background: "#ffffff", borderRadius: 20, width: "100%", maxWidth: 480, padding: 24 }}>
+                    <div style={{ background: "#ffffff", borderRadius: 20, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", padding: 24 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #f1f5f9", paddingBottom: 12 }}>
                         <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#001f3f" }}>Add Completed Work / Project</h3>
-                        <button type="button" onClick={() => setShowAddProjectModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 32, height: 32, cursor: "pointer" }}>
+                        <button type="button" onClick={() => setShowAddProjectModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <iconify-icon icon="lucide:x" />
                         </button>
                       </div>
@@ -1177,13 +1207,11 @@ export default function TechnicianProfilePage() {
                             <input className={styles.formInput} value={newProjTitle} onChange={(e) => setNewProjTitle(e.target.value)} placeholder="e.g. 10kVA Solar System & Distribution Panel" required />
                           </div>
                           <div>
-                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Trade Category</label>
-                            <select className={styles.formInput} value={newProjCategory} onChange={(e) => setNewProjCategory(e.target.value)} style={{ width: "100%", height: 42, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 8 }}>
-                              <option value="Electrical & Solar">Electrical & Solar</option>
-                              <option value="Plumbing & Sanitation">Plumbing & Sanitation</option>
-                              <option value="HVAC & Cooling">HVAC & Cooling</option>
-                              <option value="Carpentry & Furniture">Carpentry & Furniture</option>
-                              <option value="Masonry & Renovation">Masonry & Renovation</option>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Trade Category ({PLATFORM_TRADE_CATEGORIES.length} Categories)</label>
+                            <select className={styles.formInput} value={newProjCategory} onChange={(e) => setNewProjCategory(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 8 }}>
+                              {PLATFORM_TRADE_CATEGORIES.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
                             </select>
                           </div>
                           <div>
@@ -1199,6 +1227,28 @@ export default function TechnicianProfilePage() {
                               <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Value (Optional)</label>
                               <input className={styles.formInput} value={newProjBudget} onChange={(e) => setNewProjBudget(e.target.value)} placeholder="e.g. 750,000 XOF" />
                             </div>
+                          </div>
+
+                          <div>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Project Cover Photo (Optional)</label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className={styles.formInput}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = () => setNewProjPhotoUrl(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            {newProjPhotoUrl && (
+                              <div style={{ marginTop: 8, width: "100%", height: 100, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0" }}>
+                                <img src={newProjPhotoUrl} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              </div>
+                            )}
                           </div>
                         </div>
 
