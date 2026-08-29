@@ -547,15 +547,22 @@ export default function TechnicianPostServicePage() {
     setSubmitting(true);
     try {
       // 1. Create service record
+      const matchedCategory = CATEGORY_DATA.find(c => c.id === activeCategory);
+      const categoryTitle = matchedCategory?.title || Array.from(selectedTags)[0];
+
       const serviceData = {
         title: title.trim(),
-        mode,
-        tags: Array.from(selectedTags),
-        category: CATEGORY_DATA.find(c => c.id === activeCategory)?.title || Array.from(selectedTags)[0],
+        service_type: mode.toLowerCase() === "remote" ? "remote" : "onsite",
+        coverage_area: location.trim() || "National",
+        pricing_model: hourlyRate ? "hourly" : (dailyRate ? "fixed" : "fixed"),
+        pricing_min: hourlyRate ? Number(hourlyRate) : (dailyRate ? Number(dailyRate) : 0),
+        pricing_max: dailyRate ? Number(dailyRate) : (hourlyRate ? Number(hourlyRate) : null),
         description: description.trim(),
-        location: location.trim(),
-        hourly_rate: hourlyRate ? Number(hourlyRate) : undefined,
-        daily_rate: dailyRate ? Number(dailyRate) : undefined,
+        is_active: true,
+        media: [],
+        tags: Array.from(selectedTags),
+        category_name: categoryTitle,
+        category_title: categoryTitle,
       };
 
       try {
@@ -626,7 +633,7 @@ export default function TechnicianPostServicePage() {
                     </div>
                   </div>
                   <Link href="/dashboard/technician/profile" style={{
-                    background: "#d97706",
+                    background: "#001f3f",
                     color: "#fff",
                     padding: "10px 18px",
                     borderRadius: "10px",
@@ -702,8 +709,8 @@ export default function TechnicianPostServicePage() {
                       >
                         <div className={styles.categoryTitle}>
                           <span>{category.title}</span>
-                          <span style={{ fontSize: "12px", color: "#ff4500", fontWeight: 600 }}>
-                            {activeCategory === category.id ? "▲ Collapse" : "▼ Expand Subcategories"}
+                          <span style={{ fontSize: "12.5px", color: activeCategory === category.id ? "#0284c7" : "#64748b", fontWeight: 700 }}>
+                            {activeCategory === category.id ? "▲ Close" : "▼ Choose Services"}
                           </span>
                         </div>
                         <div className={styles.subcategories} onClick={e => e.stopPropagation()}>

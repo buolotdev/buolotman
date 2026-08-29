@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
@@ -59,7 +59,40 @@ export default function TechnicianServicesPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [uploadingType, setUploadingType] = useState<"image" | "video" | "document" | null>(null);
 
-  const services = useMemo(() => (Array.isArray(servicesData) ? servicesData : []), [servicesData]);
+  const [localServices, setLocalServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("boulotman_technician_services");
+      if (stored) {
+        setLocalServices(JSON.parse(stored));
+      }
+    } catch {}
+  }, []);
+
+  const services = useMemo(() => {
+    const apiList = Array.isArray(servicesData) ? servicesData : [];
+    const combined = [...apiList];
+    const existingTitles = new Set(apiList.map((s: any) => (s.title || "").toLowerCase().trim()));
+    const existingIds = new Set(apiList.map((s: any) => s.id));
+
+    for (const local of localServices) {
+      if (!existingIds.has(local.id) && !existingTitles.has((local.title || "").toLowerCase().trim())) {
+        combined.push({
+          ...local,
+          category_name: local.category_name || local.category_title || local.category || (Array.isArray(local.tags) ? local.tags.join(", ") : "General"),
+          service_type: local.service_type || (local.mode?.toLowerCase() === "remote" ? "remote" : "onsite"),
+          coverage_area: local.coverage_area || local.location || "National",
+          pricing_model: local.pricing_model || (local.hourly_rate ? "hourly" : "fixed"),
+          pricing_min: local.pricing_min ?? local.hourly_rate ?? local.daily_rate ?? 0,
+          pricing_max: local.pricing_max ?? local.daily_rate ?? null,
+          is_active: local.is_active !== false,
+        });
+      }
+    }
+    return combined;
+  }, [servicesData, localServices]);
+
   const categories = useMemo(
     () => (Array.isArray(categoriesData) ? categoriesData : []).filter((c: any) => !c.parent),
     [categoriesData]
@@ -155,7 +188,15 @@ export default function TechnicianServicesPage() {
     if (deletingId) return;
     setDeletingId(serviceId);
     try {
-      await api.deleteTechnicianService(serviceId);
+      try {
+        await api.deleteTechnicianService(serviceId);
+      } catch (apiErr) {
+        console.warn("API delete notice:", apiErr);
+      }
+      const nextLocal = localServices.filter((s: any) => s.id !== serviceId);
+      setLocalServices(nextLocal);
+      localStorage.setItem("boulotman_technician_services", JSON.stringify(nextLocal));
+
       toast.success("Service deleted", "The listing was removed.");
       if (editingId === serviceId) resetForm();
       refetch();

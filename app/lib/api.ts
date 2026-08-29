@@ -338,6 +338,16 @@ export const api = {
   },
 
 
+  // Technician Services
+  getTechnicianServices: () => request<any[]>("/auth/technician-services/"),
+  getTechnicianServiceById: (id: number) => request<any>(`/auth/technician-services/${id}/`),
+  createTechnicianService: (data: Record<string, any>) =>
+    request<any>("/auth/technician-services/", { method: "POST", body: JSON.stringify(data) }),
+  updateTechnicianService: (id: number, data: Record<string, any>) =>
+    request<any>(`/auth/technician-services/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteTechnicianService: (id: number) =>
+    request<void>(`/auth/technician-services/${id}/`, { method: "DELETE" }),
+
   // Saved Professionals
   getSavedPros: () => request<any[]>("/auth/saved-pros/"),
   savePro: (id: number) =>
@@ -397,16 +407,6 @@ export const api = {
 
   addCompanyReview: (companyId: number, data: { rating: number; text?: string; service?: string }) =>
     request<any>(`/company/${companyId}/reviews/`, { method: "POST", body: JSON.stringify(data) }),
-
-  // Technician services
-  getTechnicianServices: () => request<any[]>("/auth/technician-services/"),
-  getTechnicianService: (serviceId: number) => request<any>(`/auth/technician-services/${serviceId}/`),
-  createTechnicianService: (data: Record<string, any>) =>
-    request<any>("/auth/technician-services/", { method: "POST", body: JSON.stringify(data) }),
-  updateTechnicianService: (serviceId: number, data: Record<string, any>) =>
-    request<any>(`/auth/technician-services/${serviceId}/`, { method: "PATCH", body: JSON.stringify(data) }),
-  deleteTechnicianService: (serviceId: number) =>
-    request<void>(`/auth/technician-services/${serviceId}/`, { method: "DELETE" }),
 
   // Technician Documents
   getTechnicianDocuments: () => request<any[]>("/auth/technician-documents/"),
