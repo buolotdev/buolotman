@@ -1,16 +1,16 @@
 .page {
   min-height: 100vh;
-  background-color: #f4f7fb;
+  background-color: #f8fafc;
   display: flex;
   flex-direction: column;
 }
 
 .mainContent {
   flex: 1;
-  max-width: 1100px;
+  max-width: 1180px;
   width: 100%;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 32px 20px 60px;
 }
 
 .backLink {
@@ -19,48 +19,59 @@
   gap: 8px;
   color: #64748b;
   text-decoration: none;
-  font-weight: 500;
-  margin-bottom: 24px;
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-bottom: 20px;
   transition: color 0.2s ease;
 }
 
 .backLink:hover {
-  color: #ff5722;
+  color: #ff4500;
 }
 
+/* ================= HERO & COVER ================= */
 .hero {
-  background: white;
+  background: #ffffff;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 31, 63, 0.05);
+  border: 1px solid #e2e8f0;
   position: relative;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .coverPhoto {
   height: 200px;
-  background: linear-gradient(135deg, #0b203b 0%, #1e3a5f 100%);
+  background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
   position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+.coverOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 31, 63, 0.2) 0%, rgba(0, 31, 63, 0.75) 100%);
 }
 
 .profileInfo {
-  padding: 0 40px 40px;
+  padding: 0 32px 32px;
   position: relative;
 }
 
 .avatarWrapper {
-  width: 140px;
-  height: 140px;
+  width: 136px;
+  height: 136px;
   border-radius: 50%;
-  background: white;
-  padding: 6px;
-  margin-top: -70px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 5px;
+  margin-top: -68px;
+  box-shadow: 0 10px 25px rgba(0, 31, 63, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  margin-bottom: 20px;
+  position: relative;
+  margin-bottom: 16px;
 }
 
 .avatarInner {
@@ -74,10 +85,28 @@
   overflow: hidden;
 }
 
+.avatarInner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onlineBadge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  background: #22c55e;
+  border: 3.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
 .initials {
-  font-size: 42px;
-  font-weight: 700;
-  color: #0b203b;
+  font-size: 40px;
+  font-weight: 800;
+  color: #001f3f;
 }
 
 .headerRow {
@@ -90,157 +119,193 @@
 
 .nameRole {
   flex: 1;
+  min-width: 280px;
 }
 
 .roleBadge {
-  display: inline-block;
-  padding: 6px 12px;
-  background: rgba(255, 87, 34, 0.1);
-  color: #ff5722;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 69, 0, 0.1);
+  color: #ff4500;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
 }
 
 .name {
-  font-size: 32px;
-  font-weight: 800;
-  color: #0b203b;
-  margin: 0 0 8px;
+  font-size: 30px;
+  font-weight: 900;
+  color: #001f3f;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.headlineText {
+  font-size: 16px;
+  font-weight: 700;
+  color: #334155;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .location {
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 12px;
   color: #64748b;
-  font-size: 15px;
+  font-size: 14px;
+}
+
+.trustPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
 }
 
 .actionButtons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btnPrimary {
-  background: #ff5722;
-  color: white;
+  background: #ff4500;
+  color: #ffffff;
   border: none;
   padding: 12px 24px;
   border-radius: 12px;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 14.5px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   text-decoration: none;
+  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.25);
 }
 
 .btnPrimary:hover {
-  background: #e64a19;
+  background: #e03e00;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(255, 87, 34, 0.3);
+  box-shadow: 0 8px 20px rgba(255, 69, 0, 0.35);
 }
 
 .btnOutline {
-  background: transparent;
-  color: #0b203b;
-  border: 2px solid #e2e8f0;
-  padding: 10px 24px;
+  background: #ffffff;
+  color: #001f3f;
+  border: 1.5px solid #cbd5e1;
+  padding: 11px 20px;
   border-radius: 12px;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btnOutline:hover {
-  border-color: #0b203b;
+  border-color: #001f3f;
   background: #f8fafc;
 }
 
+/* ================= STATS STRIP ================= */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .statCard {
-  background: white;
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  background: #ffffff;
+  padding: 20px 22px;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 31, 63, 0.03);
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
 }
 
 .statIcon {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: rgba(11, 32, 59, 0.04);
-  color: #0b203b;
+  background: rgba(0, 31, 63, 0.05);
+  color: #001f3f;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  flex-shrink: 0;
 }
 
 .statInfo h3 {
   margin: 0 0 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #64748b;
   text-transform: uppercase;
+  font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .statInfo p {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 17px;
+  font-weight: 800;
+  color: #001f3f;
 }
 
+/* ================= CONTENT GRID ================= */
 .contentGrid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 32px;
-}
-
-@media (max-width: 900px) {
-  .contentGrid {
-    grid-template-columns: 1fr;
-  }
+  gap: 24px;
+  align-items: start;
 }
 
 .section {
-  background: white;
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  margin-bottom: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 31, 63, 0.03);
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0b203b;
-  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -249,96 +314,182 @@
 .sectionText {
   color: #475569;
   line-height: 1.7;
-  font-size: 16px;
-  white-space: pre-wrap;
+  font-size: 14.5px;
+  margin: 0;
+  white-space: pre-line;
 }
 
+/* Skills */
 .skillsContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .skillChip {
   background: #f1f5f9;
-  color: #334155;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
+  color: #001f3f;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
 }
 
 .skillChip:hover {
   background: #e2e8f0;
-  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
-.contactBox {
-  background: linear-gradient(135deg, #0b203b 0%, #1a365d 100%);
-  border-radius: 24px;
-  padding: 32px;
-  color: white;
-  text-align: center;
+/* Portfolio Grid */
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
 }
 
-.contactTitle {
-  margin: 0 0 12px;
-  font-size: 22px;
-  font-weight: 700;
+.portfolioCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.03);
+  transition: all 0.2s ease;
 }
 
-.contactText {
-  color: #cbd5e1;
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 24px;
+.portfolioCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 31, 63, 0.08);
+  border-color: #ff4500;
 }
 
-.contactBtn {
-  background: #ff5722;
-  color: white;
-  text-decoration: none;
-  display: inline-block;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 600;
+.portfolioVisual {
+  height: 150px;
   width: 100%;
-  transition: background 0.2s;
+  position: relative;
+  background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.contactBtn:hover {
-  background: #e64a19;
+.portfolioVisual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.skeletonCard {
-  background: white;
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  text-align: center;
-  animation: pulse 1.5s infinite;
+.portfolioBudgetBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 31, 63, 0.85);
+  backdrop-filter: blur(6px);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+.portfolioBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
 }
 
+.portfolioCategory {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ff4500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portfolioTitle {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #001f3f;
+  line-height: 1.35;
+}
+
+.portfolioDesc {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.portfolioFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+/* Pricing Grid */
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pricingBox {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pricingLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.pricingValue {
+  font-size: 17px;
+  font-weight: 800;
+  color: #001f3f;
+}
+
+/* ================= RIGHT SIDEBAR ================= */
 .detailsCard {
-  background: white;
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  margin-bottom: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 31, 63, 0.03);
+  margin-bottom: 20px;
 }
 
 .detailsTitle {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0b203b;
-  margin: 0 0 20px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -349,7 +500,7 @@
 .detailsList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -358,20 +509,120 @@
 .detailsItem {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .detailsLabel {
   font-size: 11px;
   text-transform: uppercase;
   color: #64748b;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.05em;
 }
 
 .detailsValue {
-  font-size: 15px;
-  color: #1e293b;
-  font-weight: 500;
+  font-size: 14px;
+  color: #001f3f;
+  font-weight: 700;
 }
 
+.trustList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trustItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.trustItem iconify-icon {
+  font-size: 18px;
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.contactBox {
+  background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
+  border-radius: 20px;
+  padding: 28px 24px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.contactTitle {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.contactText {
+  color: #cbd5e1;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.contactBtn {
+  background: #ff4500;
+  color: #ffffff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.3);
+}
+
+.contactBtn:hover {
+  background: #e03e00;
+  transform: translateY(-2px);
+}
+
+/* Skeleton */
+.skeletonCard {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 31, 63, 0.04);
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 900px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actionButtons {
+    width: 100%;
+  }
+  .btnPrimary, .btnOutline {
+    flex: 1;
+    justify-content: center;
+  }
+}
