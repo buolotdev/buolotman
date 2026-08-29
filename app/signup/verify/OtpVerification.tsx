@@ -185,6 +185,8 @@ export default function OtpVerification({
         email: data.email,
         password: data.password,
         phone: data.phone,
+        ...( (data as any).country ? { country: (data as any).country } : {} ),
+        ...( (data as any).city ? { city: (data as any).city } : {} ),
       };
       if (data.role === "company") {
         payload.company_name = data.fullName.trim() || data.email;
@@ -231,6 +233,20 @@ export default function OtpVerification({
         localStorage.setItem("access_token", tokens.access);
         localStorage.setItem("refresh_token", tokens.refresh);
         localStorage.setItem("user_role", data.role);
+
+        // Save local preferences
+        if ((data as any).clientType) {
+          localStorage.setItem("boulotman_client_type", (data as any).clientType);
+        }
+      }
+
+      try {
+        await api.updateMe({
+          country: (data as any).country || "Benin",
+          city: (data as any).city || "Cotonou",
+        });
+      } catch {
+        // ignore
       }
 
       try {

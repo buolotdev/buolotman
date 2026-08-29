@@ -24,6 +24,10 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
     fullName: "",
     email: "",
     phone: "",
+    clientType: "household",
+    country: "Benin",
+    city: "Cotonou",
+    preferredLanguage: "fr",
     password: "",
     confirmPassword: "",
     acceptedTerms: true,
@@ -75,6 +79,10 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
+          clientType: formData.clientType,
+          country: formData.country,
+          city: formData.city,
+          preferredLanguage: formData.preferredLanguage,
           password: formData.password,
           challenge_id: res.challenge_id,
         })
@@ -145,6 +153,71 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
               onChange={(event) => handleChange("fullName", event.target.value)}
               autoComplete="name"
             />
+          </div>
+
+          {role === "client" && (
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                How will you use Boulot Man?
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {[
+                  { id: "household", label: "Individual / Household", icon: "lucide:home" },
+                  { id: "business", label: "Business Client", icon: "lucide:building-2" },
+                  { id: "ngo", label: "Organization / NGO", icon: "lucide:landmark" },
+                  { id: "property_manager", label: "Property Manager", icon: "lucide:key" },
+                ].map((ct) => (
+                  <button
+                    key={ct.id}
+                    type="button"
+                    onClick={() => handleChange("clientType", ct.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px 12px",
+                      borderRadius: "10px",
+                      border: formData.clientType === ct.id ? "2px solid #ff4500" : "1.5px solid #e2e8f0",
+                      background: formData.clientType === ct.id ? "rgba(255, 69, 0, 0.04)" : "#ffffff",
+                      color: formData.clientType === ct.id ? "#ff4500" : "#001f3f",
+                      fontWeight: formData.clientType === ct.id ? 700 : 500,
+                      fontSize: "12.5px",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <iconify-icon icon={ct.icon} style={{ fontSize: "16px", flexShrink: 0 }} />
+                    <span>{ct.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.formRow}>
+            <div className={styles.fieldGroup}>
+              <label htmlFor="country" className={styles.label}>Country</label>
+              <input
+                id="country"
+                type="text"
+                className={styles.input}
+                value={formData.country}
+                onChange={(e) => handleChange("country", e.target.value)}
+                placeholder="e.g. Benin"
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <label htmlFor="city" className={styles.label}>City</label>
+              <input
+                id="city"
+                type="text"
+                className={styles.input}
+                value={formData.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                placeholder="e.g. Cotonou"
+              />
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>

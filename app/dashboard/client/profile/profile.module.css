@@ -511,6 +511,292 @@
   color: #991b1b;
 }
 
+/* ==================== TAB NAVIGATION ==================== */
+.tabNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.04);
+  overflow-x: auto;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  background: #f8fafc;
+  color: #001f3f;
+}
+
+.tabBtnActive {
+  background: #001f3f !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.18);
+}
+
+/* ==================== CLIENT TYPE GRID ==================== */
+.clientTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.clientTypeCard {
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 16px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.clientTypeCard:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 31, 63, 0.06);
+}
+
+.clientTypeCardActive {
+  border-color: #ff4500 !important;
+  background: rgba(255, 69, 0, 0.03) !important;
+  box-shadow: 0 6px 20px rgba(255, 69, 0, 0.12) !important;
+}
+
+.clientTypeIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.clientTypeCardActive .clientTypeIconWrap {
+  background: rgba(255, 69, 0, 0.12);
+  color: #ff4500;
+}
+
+.clientTypeTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0;
+}
+
+.clientTypeDesc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ==================== ADDRESSES MANAGER ==================== */
+.addressGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.addressCard {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.addressCard:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 31, 63, 0.06);
+}
+
+.addressCardDefault {
+  border-color: #ff4500;
+  background: #fffdfc;
+}
+
+.addressCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.addressLabelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #001f3f;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.addressActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addressIconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.addressIconBtn:hover {
+  background: #001f3f;
+  color: #ffffff;
+  border-color: #001f3f;
+}
+
+.addressIconBtnDanger:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+}
+
+/* ==================== PRIVACY & TRUST GUARDS ==================== */
+.privacyGuardBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.privacyGuardBox iconify-icon {
+  font-size: 24px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+/* ==================== REPUTATION CARD ==================== */
+.reputationStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.reputationStatBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+
+.reputationStatNumber {
+  font-size: 20px;
+  font-weight: 800;
+  color: #001f3f;
+  margin-bottom: 4px;
+}
+
+.reputationStatLabel {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* ==================== VERIFICATION UPLOAD BOX ==================== */
+.uploadDropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadDropzone:hover {
+  border-color: #ff4500;
+  background: rgba(255, 69, 0, 0.02);
+}
+
+.uploadDropzone iconify-icon {
+  font-size: 40px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+/* ==================== SWITCH ROW ==================== */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.switchRow:last-child {
+  border-bottom: none;
+}
+
+.switchInfo h4 {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #001f3f;
+}
+
+.switchInfo p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .verificationGrid {
@@ -524,6 +810,15 @@
     gap: 20px;
   }
 
+  .tabNav {
+    padding: 6px;
+  }
+
+  .tabBtn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+
   .formGrid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -533,10 +828,6 @@
     grid-column: span 1;
   }
 
-  .heroCover {
-    height: 120px;
-  }
-
   .heroBody {
     flex-direction: column;
     align-items: flex-start;
@@ -544,50 +835,13 @@
     gap: 16px;
   }
 
-  .avatarWrapper {
-    margin-top: -46px;
-  }
-
-  .companyAvatar {
-    width: 80px;
-    height: 80px;
-    font-size: 24px;
-    border-width: 4px;
-  }
-
-  .companyName {
-    font-size: 22px;
-  }
-
-  .heroActions {
-    width: 100%;
-    margin-left: 0;
-    padding-top: 0;
-  }
-
-  .heroActions button {
-    width: 100%;
-    justify-content: center;
-  }
-
   .card {
     padding: 20px 16px;
     border-radius: 18px;
   }
 
-  .cardHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .headerActions {
-    width: 100%;
-  }
-
-  .headerActions button {
-    width: 100%;
-    justify-content: center;
+  .clientTypeGrid {
+    grid-template-columns: 1fr;
   }
 }
 
