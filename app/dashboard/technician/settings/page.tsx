@@ -33,6 +33,34 @@ export default function TechnicianSettingsPage() {
 
   const [saving, setSaving] = useState(false);
 
+  // Password Visibility States
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const ALL_TRADE_CATEGORIES = [
+    "Electrical & Solar Energy",
+    "Plumbing, Water & Wastewater Systems",
+    "HVAC & Cooling Systems",
+    "Mechanical, Plant & Industrial Maintenance",
+    "Welding, Metal & Structural Fabrication",
+    "Civil Works, Masonry & Concrete",
+    "Carpentry, Joinery & Furniture",
+    "Painting, Coating & Waterproofing",
+    "Tiling, Flooring & Marble",
+    "Roofing, Ceilings & Structural Insulation",
+    "Glass, Aluminum & Glazing",
+    "Fire Protection & Emergency Systems",
+    "IT Infrastructure & Networking",
+    "Software & Digital Engineering",
+    "Security & Access Control",
+    "Specialized Heavy Equipment Operations",
+    "Janitorial & Facilities Maintenance"
+  ];
+
   const handleSave = () => {
     setSaving(true);
     setTimeout(() => {
@@ -125,12 +153,66 @@ export default function TechnicianSettingsPage() {
 
                   <div className={styles.formGroup} style={{ marginTop: '24px' }}>
                     <label>Change Password</label>
-                    <input type="password" className={styles.formInput} placeholder="Current password" style={{ marginBottom: '16px' }} />
-                    <input type="password" className={styles.formInput} placeholder="New password" style={{ marginBottom: '16px' }} />
-                    <input type="password" className={styles.formInput} placeholder="Confirm new password" />
+                    
+                    <div className={styles.passwordWrapper} style={{ marginBottom: '16px' }}>
+                      <input 
+                        type={showCurrentPassword ? "text" : "password"} 
+                        className={styles.formInput} 
+                        placeholder="Current password" 
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.eyeBtn}
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        tabIndex={-1}
+                        title={showCurrentPassword ? "Hide password" : "Show password"}
+                      >
+                        <iconify-icon icon={showCurrentPassword ? "lucide:eye-off" : "lucide:eye"} />
+                      </button>
+                    </div>
+
+                    <div className={styles.passwordWrapper} style={{ marginBottom: '16px' }}>
+                      <input 
+                        type={showNewPassword ? "text" : "password"} 
+                        className={styles.formInput} 
+                        placeholder="New password" 
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.eyeBtn}
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        tabIndex={-1}
+                        title={showNewPassword ? "Hide password" : "Show password"}
+                      >
+                        <iconify-icon icon={showNewPassword ? "lucide:eye-off" : "lucide:eye"} />
+                      </button>
+                    </div>
+
+                    <div className={styles.passwordWrapper}>
+                      <input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        className={styles.formInput} 
+                        placeholder="Confirm new password" 
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.eyeBtn}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        tabIndex={-1}
+                        title={showConfirmPassword ? "Hide password" : "Show password"}
+                      >
+                        <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
+                      </button>
+                    </div>
                   </div>
 
-                  <button className={styles.btnPrimary} onClick={handleSave} disabled={saving} style={{ marginTop: '16px' }}>
+                  <button className={styles.btnPrimary} onClick={handleSave} disabled={saving} style={{ marginTop: '20px' }}>
                     {saving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
@@ -141,21 +223,33 @@ export default function TechnicianSettingsPage() {
 
                   <div className={styles.formGroup}>
                     <label>Primary Profession</label>
-                    <select className={styles.formSelect} defaultValue="Electrical Technician">
-                      <option>Electrical Technician</option>
-                      <option>Plumber</option>
-                      <option>Mechanical Technician</option>
-                      <option>IT Technician</option>
-                    </select>
+                    <div className={styles.selectWrapper}>
+                      <select className={styles.formSelect} defaultValue="Electrical & Solar Energy">
+                        {ALL_TRADE_CATEGORIES.map((cat, idx) => (
+                          <option key={idx} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                      <span className={styles.selectArrow}>
+                        <iconify-icon icon="lucide:chevron-down" />
+                      </span>
+                    </div>
                   </div>
 
                   <div className={styles.formGroup}>
                     <label>Default Response Time</label>
-                    <select className={styles.formSelect} defaultValue="Within 24 hours">
-                      <option>Within 24 hours</option>
-                      <option>Within 48 hours</option>
-                      <option>Within 72 hours</option>
-                    </select>
+                    <div className={styles.selectWrapper}>
+                      <select className={styles.formSelect} defaultValue="Within 24 hours">
+                        <option value="Within 1 hour">Within 1 hour (Fast Response)</option>
+                        <option value="Within 2 hours">Within 2 hours</option>
+                        <option value="Within 12 hours">Within 12 hours</option>
+                        <option value="Within 24 hours">Within 24 hours</option>
+                        <option value="Within 48 hours">Within 48 hours</option>
+                        <option value="Within 72 hours">Within 72 hours</option>
+                      </select>
+                      <span className={styles.selectArrow}>
+                        <iconify-icon icon="lucide:chevron-down" />
+                      </span>
+                    </div>
                   </div>
 
                   <div className={styles.toggleRow}>
