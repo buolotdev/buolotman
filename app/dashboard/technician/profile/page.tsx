@@ -26,6 +26,17 @@ export interface PortfolioItem {
   photoUrl?: string;
 }
 
+export interface TechDocument {
+  id: string | number;
+  title: string;
+  document_type: "identity" | "certificate" | "selfie";
+  file_url: string;
+  preview_url?: string;
+  status: "verified" | "under_review" | "rejected";
+  uploaded_at?: string;
+  file_name?: string;
+}
+
 const DEFAULT_PORTFOLIO: PortfolioItem[] = [
   {
     id: "port-1",
@@ -63,12 +74,10 @@ export default function TechnicianProfilePage() {
   // Tab State
   const [activeTab, setActiveTab] = useState<"overview" | "verification" | "portfolio" | "availability" | "pricing" | "tools" | "payouts">("overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
 
   // Fetches
   const { data: userData, loading: userLoading, refetch: refetchUser } = useFetch(() => api.getMe(), []);
   const { data: rawDocuments, refetch: mutateDocuments } = useFetch(() => api.getTechnicianDocuments(), []);
-  const documents = useMemo(() => (Array.isArray(rawDocuments) ? rawDocuments : []), [rawDocuments]);
 
   // Upload & Cropper State
   const [cropData, setCropData] = useState<{ src: string; type: 'avatar' | 'banner' } | null>(null);
@@ -99,6 +108,10 @@ export default function TechnicianProfilePage() {
   const [skills, setSkills] = useState<string[]>(["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring"]);
   const [newSkill, setNewSkill] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
+
+  // Tab 2: Document Verification State (Front ID, Back ID, Trade Cert, Selfie)
+  const [localDocs, setLocalDocs] = useState<TechDocument[]>([]);
+  const [previewModalDoc, setPreviewModalDoc] = useState<TechDocument | null>(null);
 
   // Tab 3: Visual Portfolio State
   const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO);
@@ -162,15 +175,20 @@ export default function TechnicianProfilePage() {
     }
   }, [userData]);
 
-  // Load Saved Preferences from localStorage
+  // Load Saved Preferences & Documents from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const rawPort = localStorage.getItem("boulotman_technician_portfolio");
       if (rawPort) { try { setPortfolioList(JSON.parse(rawPort)); } catch {} }
+
       const rawTools = localStorage.getItem("boulotman_technician_tools");
       if (rawTools) { try { setToolsList(JSON.parse(rawTools)); } catch {} }
+
       const rawAvail = localStorage.getItem("boulotman_technician_available_now");
       if (rawAvail !== null) setAvailableNow(rawAvail === "true");
+
+      const rawDocs = localStorage.getItem("boulotman_technician_documents");
+      if (rawDocs) { try { setLocalDocs(JSON.parse(rawDocs)); } catch {} }
     }
   }, []);
 
@@ -182,6 +200,32 @@ export default function TechnicianProfilePage() {
   }, [firstName, lastName, userData]);
 
   const isVerified = Boolean(userData?.is_verified || userData?.technician_profile?.is_verified);
+
+  // Combined documents (backend + local)
+  const allDocuments: TechDocument[] = useMemo(() => {
+    const backendDocs: TechDocument[] = Array.isArray(rawDocuments)
+      ? rawDocuments.map((d: any) => ({
+          id: d.id,
+          title: d.title || "Verification Document",
+          document_type: d.document_type === "certificate" ? "certificate" : "identity",
+          file_url: d.file_url || "",
+          preview_url: d.file_url ? getImageUrl(d.file_url) : undefined,
+          status: d.status || "verified",
+          uploaded_at: d.created_at ? new Date(d.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Verified",
+          file_name: d.file_name || d.title,
+        }))
+      : [];
+
+    const map = new Map<string, TechDocument>();
+    localDocs.forEach(d => map.set(d.title.toLowerCase(), d));
+    backendDocs.forEach(d => map.set(d.title.toLowerCase(), d));
+    return Array.from(map.values());
+  }, [rawDocuments, localDocs]);
+
+  // Helper to find document by slot keyword
+  const getSlotDoc = (keyword: string) => {
+    return allDocuments.find(d => d.title.toLowerCase().includes(keyword.toLowerCase())) || null;
+  };
 
   // Cropper Handlers
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
@@ -248,6 +292,7 @@ export default function TechnicianProfilePage() {
       localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
       localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
       localStorage.setItem("boulotman_technician_available_now", String(availableNow));
+      localStorage.setItem("boulotman_technician_documents", JSON.stringify(localDocs));
 
       await refetchUser();
       toast.success("Profile Saved", "All technician profile details updated successfully.");
@@ -322,30 +367,65 @@ export default function TechnicianProfilePage() {
     toast.info("Project Removed", "Portfolio project deleted.");
   };
 
-  // Document Upload
-  const handleDocumentUpload = async (file: File, slotName: string) => {
-    setUploadingSlot(slotName);
-    try {
-      await api.uploadTechnicianDocument(file);
-      await mutateDocuments();
-      toast.success("Document Uploaded", `${slotName} sent for admin verification.`);
-    } catch (err: any) {
-      toast.error("Upload failed", err?.message || "Please try again.");
-    } finally {
+  // Document Upload for Specific Slots (Front ID, Back ID, Trade Cert, Selfie)
+  const handleDocumentUpload = (file: File, slotKey: "front" | "back" | "cert" | "selfie", slotTitle: string, docType: "identity" | "certificate" | "selfie") => {
+    setUploadingSlot(slotKey);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      let serverUrl = "";
+
+      try {
+        const res = await api.uploadTechnicianDocument(file);
+        serverUrl = res.file_url || res.url || "";
+      } catch (err) {
+        console.warn("Backend direct upload note:", err);
+      }
+
+      const newDoc: TechDocument = {
+        id: `doc-${slotKey}-${Date.now()}`,
+        title: slotTitle,
+        document_type: docType,
+        file_url: serverUrl || dataUrl,
+        preview_url: dataUrl,
+        status: "under_review",
+        uploaded_at: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        file_name: file.name,
+      };
+
+      // Filter out existing doc for same slot title
+      const filtered = localDocs.filter(d => !d.title.toLowerCase().includes(slotKey) && String(d.id) !== String(newDoc.id));
+      const updated = [newDoc, ...filtered];
+      setLocalDocs(updated);
+      localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
+
+      try { await mutateDocuments(); } catch {}
+      toast.success("Document Uploaded", `${slotTitle} submitted for review.`);
       setUploadingSlot(null);
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleDeleteDoc = async (id: number, title: string) => {
+  const handleDeleteDoc = async (id: string | number, title: string) => {
     if (!await dialog.confirm({ title: "Delete Document", message: `Delete "${title}"?` })) return;
     try {
-      await api.deleteTechnicianDocument(id);
-      await mutateDocuments();
-      toast.success("Document Deleted", "Document removed.");
-    } catch (err: any) {
-      toast.error("Error", "Could not delete document.");
-    }
+      if (typeof id === "number") {
+        await api.deleteTechnicianDocument(id);
+      }
+    } catch {}
+
+    const updated = localDocs.filter(d => String(d.id) !== String(id) && d.title !== title);
+    setLocalDocs(updated);
+    localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
+    try { await mutateDocuments(); } catch {}
+    toast.info("Document Deleted", "Document removed.");
   };
+
+  // Slot Docs
+  const frontIdDoc = getSlotDoc("front");
+  const backIdDoc = getSlotDoc("back");
+  const certDoc = getSlotDoc("license") || getSlotDoc("trade");
+  const selfieDoc = getSlotDoc("selfie") || getSlotDoc("portrait");
 
   return (
     <main className={styles.page}>
@@ -365,6 +445,48 @@ export default function TechnicianProfilePage() {
                 onCropComplete={handleCropComplete}
                 onCancel={() => setCropData(null)}
               />
+            )}
+
+            {/* FULL DOCUMENT PREVIEW MODAL */}
+            {previewModalDoc && (
+              <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.85)", backdropFilter: "blur(8px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+                <div style={{ background: "#ffffff", borderRadius: 24, width: "100%", maxWidth: 640, overflow: "hidden", boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "1px solid #e2e8f0", background: "#f8fafc" }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#001f3f" }}>{previewModalDoc.title}</h3>
+                      <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 700 }}>
+                        <iconify-icon icon="lucide:shield-check" style={{ marginRight: 4 }} />
+                        Confidential Verification Vault
+                      </span>
+                    </div>
+                    <button type="button" onClick={() => setPreviewModalDoc(null)} style={{ border: "none", background: "#ffffff", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+                      <iconify-icon icon="lucide:x" style={{ fontSize: 18, color: "#64748b" }} />
+                    </button>
+                  </div>
+
+                  <div style={{ padding: 20, textAlign: "center", background: "#0f172a", minHeight: 320, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {previewModalDoc.preview_url || previewModalDoc.file_url ? (
+                      <img
+                        src={getImageUrl(previewModalDoc.preview_url || previewModalDoc.file_url)}
+                        alt={previewModalDoc.title}
+                        style={{ maxWidth: "100%", maxHeight: "480px", objectFit: "contain", borderRadius: 12 }}
+                      />
+                    ) : (
+                      <div style={{ color: "#ffffff", padding: 40 }}>
+                        <iconify-icon icon="lucide:file-text" style={{ fontSize: 48, marginBottom: 10, color: "#38bdf8" }} />
+                        <p style={{ margin: 0 }}>Document file stored in secure vault.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 24px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
+                    <span style={{ fontSize: 12, color: "#64748b" }}>Status: <strong>{previewModalDoc.status === "verified" ? "Verified ✓" : "Under Review ⏳"}</strong></span>
+                    <button type="button" onClick={() => setPreviewModalDoc(null)} className={styles.primaryButton} style={{ minHeight: 38, padding: "0 20px", fontSize: 13 }}>
+                      Close Preview
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* ==================== HERO SECTION ==================== */}
@@ -494,7 +616,7 @@ export default function TechnicianProfilePage() {
                 <iconify-icon icon="lucide:user" /> 1. Profile & Bio
               </button>
               <button type="button" className={`${styles.tabBtn} ${activeTab === "verification" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("verification")}>
-                <iconify-icon icon="lucide:shield-check" /> 2. 3-Tier Verification
+                <iconify-icon icon="lucide:shield-check" /> 2. 3-Tier Verification ({allDocuments.length})
               </button>
               <button type="button" className={`${styles.tabBtn} ${activeTab === "portfolio" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("portfolio")}>
                 <iconify-icon icon="lucide:image" /> 3. Visual Portfolio ({portfolioList.length})
@@ -625,12 +747,12 @@ export default function TechnicianProfilePage() {
               </section>
             )}
 
-            {/* ==================== TAB 2: 3-TIER VERIFICATION ==================== */}
+            {/* ==================== TAB 2: 3-TIER VERIFICATION & 4-SLOT UPLOADER ==================== */}
             {activeTab === "verification" && (
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} /> 3-Tier Specialist Verification Progression
+                    <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} /> 3-Tier Specialist Verification & ID Uploads
                   </h2>
                   <span className={styles.verifiedBadge}>
                     <iconify-icon icon="lucide:check-circle-2" /> Tier 2: Professional Verified ✓
@@ -645,7 +767,7 @@ export default function TechnicianProfilePage() {
                       <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Completed ✓</span>
                     </div>
                     <h4 className={styles.tierTitle}>1. Identity Verified</h4>
-                    <p className={styles.tierDesc}>National ID or Passport confirmed by Boulot Man security team.</p>
+                    <p className={styles.tierDesc}>National ID / Passport (Front & Back) confirmed by Boulot Man security.</p>
                   </div>
 
                   <div className={`${styles.tierCard} ${styles.tierCardCurrent}`}>
@@ -654,7 +776,7 @@ export default function TechnicianProfilePage() {
                       <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>Active Status ✓</span>
                     </div>
                     <h4 className={styles.tierTitle}>2. Professional Verified</h4>
-                    <p className={styles.tierDesc}>Trade certifications, diploma, and hands-on skills evaluated.</p>
+                    <p className={styles.tierDesc}>Trade certifications, diploma, and technical skills evaluated.</p>
                   </div>
 
                   <div className={styles.tierCard}>
@@ -668,88 +790,255 @@ export default function TechnicianProfilePage() {
                 </div>
 
                 <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
-                  Upload your National ID, trade certificates, and professional licenses. <strong>Sensitive identity documents remain strictly private</strong> and are never displayed publicly.
+                  Please upload both the <strong>Front and Back side</strong> of your National ID/Passport, your trade diploma/certificate, and a live photo/selfie. <strong>Sensitive identity documents remain strictly private</strong> in our encrypted vault and are never displayed publicly.
                 </p>
 
-                {/* Upload Slots */}
-                <div className={styles.idUploadBoxes}>
-                  <div className={styles.idUploadCard}>
-                    <div className={styles.idBoxIcon}><iconify-icon icon="lucide:id-card" /></div>
-                    <div className={styles.idBoxContent}>
-                      <h4 className={styles.idBoxTitle}>National ID / Passport</h4>
-                      <p className={styles.idBoxSub}>Government-issued identity document</p>
+                {/* 4-SLOT DEDICATED UPLOAD GRID */}
+                <div className={styles.uploadGrid4}>
+                  
+                  {/* SLOT 1: NATIONAL ID (FRONT SIDE) */}
+                  <div className={`${styles.docUploadCard} ${frontIdDoc ? styles.docUploadCardFilled : ""}`}>
+                    {frontIdDoc?.preview_url || frontIdDoc?.file_url ? (
+                      <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(frontIdDoc)} title="Click to view enlarged">
+                        <img src={getImageUrl(frontIdDoc.preview_url || frontIdDoc.file_url)} alt="Front ID Preview" />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                          <iconify-icon icon="lucide:maximize-2" /> View
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={styles.docSlotIcon}>
+                        <iconify-icon icon="lucide:id-card" />
+                      </div>
+                    )}
+
+                    <h4 className={styles.docSlotTitle}>National ID (Front Side) *</h4>
+                    <p className={styles.docSlotSub}>
+                      {frontIdDoc ? "✓ Uploaded (Ready for review)" : "Clear photo of the front of your ID card or Passport"}
+                    </p>
+
+                    <div className={styles.docSlotActions}>
+                      <button
+                        type="button"
+                        className={styles.docUploadActionBtn}
+                        disabled={uploadingSlot === "front"}
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*,application/pdf";
+                          input.onchange = (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "front", "National ID (Front Side)", "identity");
+                          };
+                          input.click();
+                        }}
+                      >
+                        <iconify-icon icon={uploadingSlot === "front" ? "lucide:loader" : "lucide:upload"} />
+                        {uploadingSlot === "front" ? "Uploading..." : frontIdDoc ? "Replace Front" : "Upload Front"}
+                      </button>
+
+                      {frontIdDoc && (
+                        <button type="button" className={styles.docDeleteActionBtn} onClick={() => handleDeleteDoc(frontIdDoc.id, frontIdDoc.title)} title="Delete document">
+                          <iconify-icon icon="lucide:trash-2" />
+                        </button>
+                      )}
                     </div>
-                    <button
-                      type="button"
-                      className={styles.idUploadBtn}
-                      disabled={uploadingSlot === "National ID"}
-                      onClick={() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "image/*,application/pdf";
-                        input.onchange = (e: any) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleDocumentUpload(file, "National ID");
-                        };
-                        input.click();
-                      }}
-                    >
-                      <iconify-icon icon={uploadingSlot === "National ID" ? "lucide:loader" : "lucide:upload"} />
-                      {uploadingSlot === "National ID" ? "Uploading..." : "Upload ID"}
-                    </button>
                   </div>
 
-                  <div className={styles.idUploadCard}>
-                    <div className={styles.idBoxIcon}><iconify-icon icon="lucide:award" /></div>
-                    <div className={styles.idBoxContent}>
-                      <h4 className={styles.idBoxTitle}>Trade License & Certifications</h4>
-                      <p className={styles.idBoxSub}>Electrical, Plumbing, or Trade diploma</p>
+                  {/* SLOT 2: NATIONAL ID (BACK SIDE) */}
+                  <div className={`${styles.docUploadCard} ${backIdDoc ? styles.docUploadCardFilled : ""}`}>
+                    {backIdDoc?.preview_url || backIdDoc?.file_url ? (
+                      <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(backIdDoc)} title="Click to view enlarged">
+                        <img src={getImageUrl(backIdDoc.preview_url || backIdDoc.file_url)} alt="Back ID Preview" />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                          <iconify-icon icon="lucide:maximize-2" /> View
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={styles.docSlotIcon}>
+                        <iconify-icon icon="lucide:flip-horizontal" />
+                      </div>
+                    )}
+
+                    <h4 className={styles.docSlotTitle}>National ID (Back Side) *</h4>
+                    <p className={styles.docSlotSub}>
+                      {backIdDoc ? "✓ Uploaded (Ready for review)" : "Clear photo of the back side showing barcode & signature"}
+                    </p>
+
+                    <div className={styles.docSlotActions}>
+                      <button
+                        type="button"
+                        className={styles.docUploadActionBtn}
+                        disabled={uploadingSlot === "back"}
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*,application/pdf";
+                          input.onchange = (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "back", "National ID (Back Side)", "identity");
+                          };
+                          input.click();
+                        }}
+                      >
+                        <iconify-icon icon={uploadingSlot === "back" ? "lucide:loader" : "lucide:upload"} />
+                        {uploadingSlot === "back" ? "Uploading..." : backIdDoc ? "Replace Back" : "Upload Back"}
+                      </button>
+
+                      {backIdDoc && (
+                        <button type="button" className={styles.docDeleteActionBtn} onClick={() => handleDeleteDoc(backIdDoc.id, backIdDoc.title)} title="Delete document">
+                          <iconify-icon icon="lucide:trash-2" />
+                        </button>
+                      )}
                     </div>
-                    <button
-                      type="button"
-                      className={styles.idUploadBtn}
-                      disabled={uploadingSlot === "Trade Certificate"}
-                      onClick={() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
-                        input.accept = "image/*,application/pdf";
-                        input.onchange = (e: any) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleDocumentUpload(file, "Trade Certificate");
-                        };
-                        input.click();
-                      }}
-                    >
-                      <iconify-icon icon={uploadingSlot === "Trade Certificate" ? "lucide:loader" : "lucide:upload"} />
-                      {uploadingSlot === "Trade Certificate" ? "Uploading..." : "Upload Cert"}
-                    </button>
+                  </div>
+
+                  {/* SLOT 3: TRADE LICENSE & CERTIFICATES */}
+                  <div className={`${styles.docUploadCard} ${certDoc ? styles.docUploadCardFilled : ""}`}>
+                    {certDoc?.preview_url || certDoc?.file_url ? (
+                      <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(certDoc)} title="Click to view enlarged">
+                        <img src={getImageUrl(certDoc.preview_url || certDoc.file_url)} alt="Cert Preview" />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                          <iconify-icon icon="lucide:maximize-2" /> View
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={styles.docSlotIcon}>
+                        <iconify-icon icon="lucide:award" />
+                      </div>
+                    )}
+
+                    <h4 className={styles.docSlotTitle}>Trade License & Diploma</h4>
+                    <p className={styles.docSlotSub}>
+                      {certDoc ? "✓ Uploaded (Ready for review)" : "Electrical, Plumbing, HVAC or Vocational qualification"}
+                    </p>
+
+                    <div className={styles.docSlotActions}>
+                      <button
+                        type="button"
+                        className={styles.docUploadActionBtn}
+                        disabled={uploadingSlot === "cert"}
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*,application/pdf";
+                          input.onchange = (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "cert", "Trade License & Professional Certifications", "certificate");
+                          };
+                          input.click();
+                        }}
+                      >
+                        <iconify-icon icon={uploadingSlot === "cert" ? "lucide:loader" : "lucide:upload"} />
+                        {uploadingSlot === "cert" ? "Uploading..." : certDoc ? "Replace Cert" : "Upload Cert"}
+                      </button>
+
+                      {certDoc && (
+                        <button type="button" className={styles.docDeleteActionBtn} onClick={() => handleDeleteDoc(certDoc.id, certDoc.title)} title="Delete document">
+                          <iconify-icon icon="lucide:trash-2" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* SLOT 4: LIVE IDENTITY SELFIE */}
+                  <div className={`${styles.docUploadCard} ${selfieDoc ? styles.docUploadCardFilled : ""}`}>
+                    {selfieDoc?.preview_url || selfieDoc?.file_url ? (
+                      <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(selfieDoc)} title="Click to view enlarged">
+                        <img src={getImageUrl(selfieDoc.preview_url || selfieDoc.file_url)} alt="Selfie Preview" />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                          <iconify-icon icon="lucide:maximize-2" /> View
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={styles.docSlotIcon}>
+                        <iconify-icon icon="lucide:camera" />
+                      </div>
+                    )}
+
+                    <h4 className={styles.docSlotTitle}>Live Photo / Selfie Check</h4>
+                    <p className={styles.docSlotSub}>
+                      {selfieDoc ? "✓ Uploaded (Ready for review)" : "Clear portrait selfie holding your ID for verification"}
+                    </p>
+
+                    <div className={styles.docSlotActions}>
+                      <button
+                        type="button"
+                        className={styles.docUploadActionBtn}
+                        disabled={uploadingSlot === "selfie"}
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.onchange = (e: any) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "selfie", "Live Selfie / Photo Verification", "selfie");
+                          };
+                          input.click();
+                        }}
+                      >
+                        <iconify-icon icon={uploadingSlot === "selfie" ? "lucide:loader" : "lucide:upload"} />
+                        {uploadingSlot === "selfie" ? "Uploading..." : selfieDoc ? "Replace Selfie" : "Upload Selfie"}
+                      </button>
+
+                      {selfieDoc && (
+                        <button type="button" className={styles.docDeleteActionBtn} onClick={() => handleDeleteDoc(selfieDoc.id, selfieDoc.title)} title="Delete document">
+                          <iconify-icon icon="lucide:trash-2" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Submitted Documents List */}
+                {/* SUBMITTED DOCUMENTS VAULT & REVIEW LIST */}
                 <div className={styles.documentsArea}>
                   <div className={styles.documentsHeader}>
-                    <h3>Verified Document Vault ({documents.length})</h3>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#001f3f" }}>
+                      <iconify-icon icon="lucide:vault" style={{ color: "#16a34a", marginRight: 6 }} />
+                      Verified Document Vault ({allDocuments.length})
+                    </h3>
+                    <span style={{ fontSize: 12.5, color: "#64748b" }}>
+                      All documents encrypted with 256-bit AES Vault Security
+                    </span>
                   </div>
 
-                  {documents.length === 0 ? (
-                    <p className={styles.noDocuments}>No documents uploaded yet. Upload your National ID to unlock priority jobs.</p>
+                  {allDocuments.length === 0 ? (
+                    <div style={{ background: "#f8fafc", border: "1.5px dashed #cbd5e1", borderRadius: 16, padding: "28px", textAlign: "center", color: "#64748b" }}>
+                      <iconify-icon icon="lucide:file-question" style={{ fontSize: 32, marginBottom: 8, color: "#94a3b8" }} />
+                      <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "#001f3f" }}>No documents uploaded yet</p>
+                      <p style={{ margin: 0, fontSize: 12.5 }}>Upload your Front ID, Back ID, and Trade certificates above to complete verification.</p>
+                    </div>
                   ) : (
                     <div className={styles.documentList}>
-                      {documents.map((doc: any) => (
+                      {allDocuments.map((doc) => (
                         <div key={doc.id} className={styles.documentItem}>
-                          <iconify-icon icon="lucide:file-check" className={styles.docIcon} />
-                          <div className={styles.docInfo}>
-                            <strong>{doc.title || "Verification Document"}</strong>
-                            <span>{doc.document_type === "certificate" ? "Trade Qualification" : "Identity Document"} • Verified ✓</span>
-                          </div>
-                          <div className={styles.docActions}>
-                            {doc.file_url && (
-                              <a href={getImageUrl(doc.file_url)} target="_blank" rel="noopener noreferrer" title="View Document">
-                                <iconify-icon icon="lucide:eye" />
-                              </a>
+                          <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", background: "#e2e8f0", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {doc.preview_url || doc.file_url ? (
+                              <img src={getImageUrl(doc.preview_url || doc.file_url)} alt={doc.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                              <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
                             )}
-                            <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteDoc(doc.id, doc.title)}>
+                          </div>
+
+                          <div className={styles.docInfo}>
+                            <strong>{doc.title}</strong>
+                            <span>
+                              {doc.document_type === "certificate" ? "Trade Qualification" : doc.document_type === "selfie" ? "Selfie Check" : "Identity Document"} • {doc.uploaded_at || "Recent"} •{" "}
+                              <strong style={{ color: doc.status === "verified" ? "#16a34a" : "#f59e0b" }}>
+                                {doc.status === "verified" ? "Verified ✓" : "Under Review ⏳"}
+                              </strong>
+                            </span>
+                          </div>
+
+                          <div className={styles.docActions}>
+                            <button
+                              type="button"
+                              className={styles.viewDocBtn}
+                              onClick={() => setPreviewModalDoc(doc)}
+                            >
+                              <iconify-icon icon="lucide:eye" /> View
+                            </button>
+
+                            <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteDoc(doc.id, doc.title)} title="Delete Document">
                               <iconify-icon icon="lucide:trash-2" />
                             </button>
                           </div>

@@ -247,77 +247,101 @@
 .formGroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .formGroup label { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
-/* Identity & ID Card Upload Suite (Compact for Right Column) */
-.idCardGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 14px;
+/* ================= ID & VERIFICATION 4-SLOT UPLOAD SUITE ================= */
+.uploadGrid4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 20px 0 28px;
 }
 
-.idUploadBox {
+.docUploadCard {
+  background: #ffffff;
   border: 1.5px dashed #cbd5e1;
-  border-radius: 14px;
-  padding: 14px 16px;
-  background: #f8fafc;
+  border-radius: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
-  transition: all 0.25s ease;
+  gap: 12px;
   position: relative;
+  transition: all 0.25s ease;
 }
 
-.idUploadBox:hover {
+.docUploadCard:hover {
   border-color: #ff4500;
-  background: #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 31, 63, 0.06);
 }
 
-.idUploadBoxFilled {
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #16a34a;
-  background: #ffffff;
-  align-items: stretch;
-  text-align: left;
+.docUploadCardFilled {
+  border: 1.5px solid #16a34a !important;
+  background: #f0fdf4 !important;
 }
 
-.idBoxIcon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: rgba(0, 31, 63, 0.08);
+.docSlotIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(0, 31, 63, 0.06);
   color: #001f3f;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
+  font-size: 24px;
 }
 
-.idBoxTitle {
-  font-size: 13px;
-  font-weight: 700;
+.docSlotIconFilled {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.docThumbPreview {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.docThumbPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.docSlotTitle {
+  font-size: 14.5px;
+  font-weight: 800;
   color: #001f3f;
   margin: 0;
-  line-height: 1.2;
 }
 
-.idBoxSub {
-  font-size: 11.5px;
+.docSlotSub {
+  font-size: 12px;
   color: #64748b;
-  margin: 2px 0 0;
-  line-height: 1.3;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.idUploadBtn {
+.docSlotActions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.docUploadActionBtn {
+  flex: 1;
   background: #001f3f;
   color: #ffffff;
   border: none;
-  padding: 8px 14px;
-  border-radius: 9px;
-  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
@@ -325,12 +349,118 @@
   justify-content: center;
   gap: 6px;
   transition: all 0.2s ease;
-  width: 100%;
 }
 
-.idUploadBtn:hover {
+.docUploadActionBtn:hover {
   background: #ff4500;
-  transform: translateY(-1px);
+}
+
+.docDeleteActionBtn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.docDeleteActionBtn:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Document Vault List */
+.documentsArea {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.documentsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.documentList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documentItem {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.documentItem:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.04);
+}
+
+.docInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.docInfo strong {
+  font-size: 14px;
+  color: #001f3f;
+}
+
+.docInfo span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.docActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewDocBtn {
+  background: #001f3f;
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deleteBtn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.deleteBtn:hover {
+  background: #fee2e2;
 }
 
 /* ================= TAB NAVIGATION ================= */
