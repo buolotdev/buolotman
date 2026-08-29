@@ -646,24 +646,27 @@ export default function TechnicianProfilePage() {
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Full Legal Name *</label>
-                    <input className={styles.formInput} placeholder="e.g. Nelson Tagor" value={`${firstName} ${lastName}`.trim()} onChange={(e) => {
-                      const parts = e.target.value.split(" ");
-                      setFirstName(parts[0] || "");
-                      setLastName(parts.slice(1).join(" ") || "");
-                    }} />
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>First Name *</label>
+                    <input className={styles.formInput} placeholder="e.g. Aneeq" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Display / Privacy Name (Shown to clients)</label>
-                    <input className={styles.formInput} placeholder="e.g. Nelson T." value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Last Name *</label>
+                    <input className={styles.formInput} placeholder="e.g. Nisar" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Professional Headline *</label>
-                    <input className={styles.formInput} placeholder="e.g. Certified Electrician & Solar PV Specialist" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Display / Privacy Name (Shown to clients)</label>
+                    <input className={styles.formInput} placeholder="e.g. Aneeq N." value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                   </div>
+                  <div>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Professional Headline *</label>
+                    <input className={styles.formInput} placeholder="e.g. Certified Electrician & Solar Specialist" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+                  </div>
+                </div>
+
+                <div className={styles.twoCol}>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Primary Trade / Occupation</label>
                     <select className={styles.formInput} value={primaryOccupation} onChange={(e) => setPrimaryOccupation(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
@@ -677,13 +680,13 @@ export default function TechnicianProfilePage() {
                       <option value="IT Technician">IT Network & Telecom Tech</option>
                     </select>
                   </div>
-                </div>
-
-                <div className={styles.twoCol}>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Years of Hands-on Experience</label>
                     <input className={styles.formInput} placeholder="e.g. 8" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} />
                   </div>
+                </div>
+
+                <div className={styles.twoCol}>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Skill / Seniority Level</label>
                     <select className={styles.formInput} value={expertiseLevel} onChange={(e) => setExpertiseLevel(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
@@ -693,20 +696,20 @@ export default function TechnicianProfilePage() {
                       <option value="Expert">Lead Expert / Site Supervisor (12+ Years)</option>
                     </select>
                   </div>
-                </div>
-
-                <div className={styles.twoCol}>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Education & Training Institution</label>
                     <input className={styles.formInput} placeholder="e.g. Lycée Technique Coulibaly / B.Sc. Electrical Eng" value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)} />
                   </div>
+                </div>
+
+                <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating City & Country</label>
-                    <input className={styles.formInput} placeholder="e.g. Cotonou, Benin" value={`${city}, ${country}`} onChange={(e) => {
-                      const parts = e.target.value.split(",");
-                      setCity(parts[0]?.trim() || "");
-                      setCountry(parts[1]?.trim() || "Benin");
-                    }} />
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating City / Town *</label>
+                    <input className={styles.formInput} placeholder="e.g. Cotonou" value={city} onChange={(e) => setCity(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating Country *</label>
+                    <input className={styles.formInput} placeholder="e.g. Benin" value={country} onChange={(e) => setCountry(e.target.value)} />
                   </div>
                 </div>
 
