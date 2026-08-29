@@ -49,36 +49,6 @@ type PublicProfile = {
   technician_profile?: any;
 };
 
-const DEFAULT_PORTFOLIO_ITEMS = [
-  {
-    id: "port-1",
-    title: "15kVA Solar PV & Hybrid Inverter Installation",
-    category: "Electrical & Solar",
-    description: "Complete off-grid solar system with 12x 540W Mono panels, charge controllers, and lithium battery bank.",
-    location: "Cotonou, Benin",
-    completionDate: "January 2026",
-    budget: "4,500,000 XOF",
-  },
-  {
-    id: "port-2",
-    title: "Commercial Building Electrical Distribution Board",
-    category: "Electrical & Power",
-    description: "Installation of 3-phase main distribution board, surge arresters, and structured cable tray systems.",
-    location: "Porto-Novo, Benin",
-    completionDate: "December 2025",
-    budget: "1,850,000 XOF",
-  }
-];
-
-const DEFAULT_TOOLS_LIST = [
-  "Digital Multimeter (Fluke)",
-  "Heavy Duty Rotary Hammer Drill",
-  "Solar PV Crimping & Testing Kit",
-  "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
-  "Insulated VDE Screwdriver Set (1000V)",
-  "Cable Puller & Conduit Bender"
-];
-
 export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
@@ -96,9 +66,7 @@ export default function PublicProfilePage() {
         if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
           baseUser = userRes;
         }
-      } catch {
-        // Fallback
-      }
+      } catch {}
 
       // 2. Try direct company endpoint if not found
       if (!baseUser) {
@@ -117,15 +85,13 @@ export default function PublicProfilePage() {
               country: compRes.country,
               headquarters: compRes.headquarters,
               is_verified: compRes.is_verified ?? true,
-              average_rating: compRes.average_rating || 4.9,
+              average_rating: compRes.average_rating || "0.00",
               services_offered: compRes.services_offered || compRes.services || [],
               skills: compRes.skills || [],
               portfolio: compRes.portfolio || compRes.projects || [],
             };
           }
-        } catch {
-          // Fallback
-        }
+        } catch {}
       }
 
       // 3. Try finding in technician users list if still not found
@@ -167,6 +133,7 @@ export default function PublicProfilePage() {
               const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
               const rawPort = localStorage.getItem("boulotman_technician_portfolio");
               const rawTools = localStorage.getItem("boulotman_technician_tools");
+              const rawSkills = localStorage.getItem("boulotman_technician_skills");
 
               if (rawCustom) {
                 const c = JSON.parse(rawCustom);
@@ -176,22 +143,17 @@ export default function PublicProfilePage() {
                   role: baseUser?.role || "TECHNICIAN",
                   first_name: c.firstName !== undefined && c.firstName !== "" ? c.firstName : baseUser?.first_name,
                   last_name: c.lastName !== undefined && c.lastName !== "" ? c.lastName : baseUser?.last_name,
-                  headline: c.headline || baseUser?.headline,
-                  bio: c.bio || baseUser?.bio,
-                  about: c.bio || baseUser?.about,
-                  city: c.city || baseUser?.city,
-                  country: c.country || baseUser?.country,
-                  experience_years: c.experienceYears || baseUser?.experience_years,
-                  education_level: c.educationLevel || baseUser?.education_level,
-                  expertise_level: c.expertiseLevel || baseUser?.expertise_level,
-                  skills: (baseUser?.skills && baseUser.skills.length > 0) ? baseUser.skills : ["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring"],
-                  portfolio: rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || DEFAULT_PORTFOLIO_ITEMS),
-                  tools: rawTools ? JSON.parse(rawTools) : (baseUser?.tools || DEFAULT_TOOLS_LIST),
-                  is_verified: true,
-                  average_rating: baseUser?.average_rating || 4.9,
-                  review_count: baseUser?.review_count || 127,
-                  tasks_completed_count: baseUser?.tasks_completed_count || 94,
-                  completion_rate: baseUser?.completion_rate || 96,
+                  headline: c.headline !== undefined ? c.headline : baseUser?.headline,
+                  bio: c.bio !== undefined ? c.bio : baseUser?.bio,
+                  about: c.bio !== undefined ? c.bio : baseUser?.about,
+                  city: c.city !== undefined ? c.city : baseUser?.city,
+                  country: c.country !== undefined ? c.country : baseUser?.country,
+                  experience_years: c.experienceYears !== undefined ? c.experienceYears : baseUser?.experience_years,
+                  education_level: c.educationLevel !== undefined ? c.educationLevel : baseUser?.education_level,
+                  expertise_level: c.expertiseLevel !== undefined ? c.expertiseLevel : baseUser?.expertise_level,
+                  skills: rawSkills ? JSON.parse(rawSkills) : (baseUser?.skills || []),
+                  portfolio: rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || []),
+                  tools: rawTools ? JSON.parse(rawTools) : (baseUser?.tools || []),
                 };
               }
             }
@@ -217,45 +179,44 @@ export default function PublicProfilePage() {
 
   const headline = profile?.headline 
     || profile?.technician_profile?.headline 
-    || (userCategory ? `Certified ${userCategory} Specialist` : (isCompany ? "Certified Commercial & Infrastructure Contractor" : "Certified Engineering & Technical Specialist"));
+    || (userCategory ? `Certified ${userCategory} Specialist` : (isCompany ? "Corporate Engineering Contractor" : "Certified Specialist"));
 
   const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || (displayName?.[0]?.toUpperCase()) || "SP";
   
   const city = profile?.city || profile?.technician_profile?.city || "";
-  const country = profile?.country || profile?.technician_profile?.country || profile?.headquarters || "Benin";
-  const location = city ? `${city}, ${country}` : country;
+  const country = profile?.country || profile?.technician_profile?.country || profile?.headquarters || "";
+  const location = city && country ? `${city}, ${country}` : (city || country || "Operating Region Not Specified");
 
-  const ratingDisplay = profile?.average_rating && Number(profile.average_rating) > 0
-    ? `${Number(profile.average_rating).toFixed(1)} / 5.0`
-    : "4.9 / 5.0";
+  const hasRating = profile?.average_rating && Number(profile.average_rating) > 0;
+  const ratingDisplay = hasRating
+    ? `${Number(profile?.average_rating).toFixed(1)} / 5.0`
+    : "New Specialist";
 
-  const reviewsCount = profile?.review_count || 127;
-  const completedJobs = profile?.tasks_completed_count || (isCompany ? 74 : 94);
-  const completionRate = profile?.completion_rate ? `${profile.completion_rate}%` : "96%";
+  const reviewsCount = profile?.review_count || 0;
+  const completedJobs = profile?.tasks_completed_count || 0;
+  const completionRate = profile?.completion_rate ? `${profile.completion_rate}%` : "100%";
 
-  const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || (isCompany
-    ? "Established turnkey engineering and construction contractor delivering certified technical execution across industrial, commercial, and residential projects with full escrow protection."
-    : `Dedicated and certified technical specialist ${userCategory ? `specializing in ${userCategory}` : ""} with extensive hands-on experience, precision diagnostics, and a commitment to safety compliance and 100% client satisfaction.`);
+  const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || "";
 
   const skillsList = (profile?.skills && profile.skills.length > 0)
     ? profile.skills
     : isCompany
-    ? (profile?.services_offered && profile.services_offered.length > 0 ? profile.services_offered : ["Civil Construction", "Structural Engineering", "High-Voltage Power", "HVAC Cooling", "Finishing Works"])
-    : userCategory
-    ? [userCategory]
+    ? (profile?.services_offered && profile.services_offered.length > 0 ? profile.services_offered : [])
     : [];
 
   const portfolioList = (profile?.portfolio && profile.portfolio.length > 0)
     ? profile.portfolio
-    : DEFAULT_PORTFOLIO_ITEMS;
+    : [];
 
   const toolsList = (profile?.tools && profile.tools.length > 0)
     ? profile.tools
-    : DEFAULT_TOOLS_LIST;
+    : [];
 
-  const expertiseLevel = profile?.expertise_level || "Senior Master (6-12 Years)";
-  const educationLevel = profile?.education_level || "B.Sc. Electrical Engineering / Technical Diploma";
-  const experienceYears = profile?.experience_years || profile?.technician_profile?.experience_years || "8+ Years";
+  const expertiseLevel = profile?.expertise_level || "Certified Specialist";
+  const educationLevel = profile?.education_level || "Technical Certification";
+  const experienceYears = profile?.experience_years || profile?.technician_profile?.experience_years 
+    ? `${profile?.experience_years || profile?.technician_profile?.experience_years} Years` 
+    : "Verified Professional";
 
   if (validId === null) {
     return (
@@ -364,7 +325,7 @@ export default function PublicProfilePage() {
                     </Link>
 
                     <Link
-                      href={`/dashboard/messages?recipient=${profile.id}`}
+                      href={`/dashboard/messages?recipient=${profile.id}&name=${encodeURIComponent(displayName)}`}
                       className={styles.btnOutline}
                     >
                       <iconify-icon icon="lucide:message-square" />
@@ -427,8 +388,8 @@ export default function PublicProfilePage() {
                     <iconify-icon icon="lucide:user-check" style={{ color: "#ff4500" }} />
                     {isCompany ? "Company Overview & Execution Capacity" : "About Me & Professional Summary"}
                   </h2>
-                  <p className={styles.sectionText}>
-                    {bioText}
+                  <p className={styles.sectionText} style={!bioText ? { fontStyle: "italic", color: "#94a3b8" } : {}}>
+                    {bioText || "No professional summary or bio provided yet."}
                   </p>
                 </section>
 
@@ -441,7 +402,7 @@ export default function PublicProfilePage() {
                   <div className={styles.skillsContainer}>
                     {skillsList.length === 0 ? (
                       <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
-                        No specific skills listed yet.
+                        No specific trade skills listed yet.
                       </p>
                     ) : (
                       skillsList.map((s: string, i: number) => (
@@ -460,36 +421,42 @@ export default function PublicProfilePage() {
                     <iconify-icon icon="lucide:image" style={{ color: "#ff4500" }} />
                     Visual Portfolio & Previous Completed Work
                   </h2>
-                  <div className={styles.portfolioGrid}>
-                    {portfolioList.map((item: any) => (
-                      <div key={item.id} className={styles.portfolioCard}>
-                        <div className={styles.portfolioVisual}>
-                          {item.photoUrl ? (
-                            <img src={getImageUrl(item.photoUrl)} alt={item.title} />
-                          ) : (
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
-                              <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36 }} />
-                              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified Job</span>
+                  {portfolioList.length === 0 ? (
+                    <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
+                      No visual portfolio projects published yet.
+                    </p>
+                  ) : (
+                    <div className={styles.portfolioGrid}>
+                      {portfolioList.map((item: any) => (
+                        <div key={item.id || item.title} className={styles.portfolioCard}>
+                          <div className={styles.portfolioVisual}>
+                            {item.photoUrl ? (
+                              <img src={getImageUrl(item.photoUrl)} alt={item.title} />
+                            ) : (
+                              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
+                                <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36 }} />
+                                <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified Job</span>
+                              </div>
+                            )}
+                            {item.budget && (
+                              <span className={styles.portfolioBudgetBadge}>
+                                {item.budget}
+                              </span>
+                            )}
+                          </div>
+                          <div className={styles.portfolioBody}>
+                            <span className={styles.portfolioCategory}>{item.category || "General Technical"}</span>
+                            <h4 className={styles.portfolioTitle}>{item.title}</h4>
+                            <p className={styles.portfolioDesc}>{item.description}</p>
+                            <div className={styles.portfolioFooter}>
+                              <span>📍 {item.location || location}</span>
+                              <span>⏳ {item.completionDate || "Completed"}</span>
                             </div>
-                          )}
-                          {item.budget && (
-                            <span className={styles.portfolioBudgetBadge}>
-                              {item.budget}
-                            </span>
-                          )}
-                        </div>
-                        <div className={styles.portfolioBody}>
-                          <span className={styles.portfolioCategory}>{item.category}</span>
-                          <h4 className={styles.portfolioTitle}>{item.title}</h4>
-                          <p className={styles.portfolioDesc}>{item.description}</p>
-                          <div className={styles.portfolioFooter}>
-                            <span>📍 {item.location}</span>
-                            <span>⏳ {item.completionDate || "Recent"}</span>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
 
                 {/* 4. Tools & Equipment */}
@@ -499,12 +466,18 @@ export default function PublicProfilePage() {
                     Verified Equipment, Mobility & Safety Gear
                   </h2>
                   <div className={styles.skillsContainer}>
-                    {toolsList.map((tool: string, i: number) => (
-                      <span key={i} className={styles.skillChip} style={{ background: "#f8fafc" }}>
-                        <iconify-icon icon="lucide:shield" style={{ color: "#001f3f" }} />
-                        {tool}
-                      </span>
-                    ))}
+                    {toolsList.length === 0 ? (
+                      <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
+                        No specific tools or equipment listed yet.
+                      </p>
+                    ) : (
+                      toolsList.map((tool: string, i: number) => (
+                        <span key={i} className={styles.skillChip} style={{ background: "#f8fafc" }}>
+                          <iconify-icon icon="lucide:shield" style={{ color: "#001f3f" }} />
+                          {tool}
+                        </span>
+                      ))
+                    )}
                   </div>
                 </section>
 
@@ -517,15 +490,21 @@ export default function PublicProfilePage() {
                   <div className={styles.pricingGrid}>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Hourly Rate</span>
-                      <span className={styles.pricingValue}>{profile.hourly_rate || "5,000 XOF"} <small style={{ fontSize: 12, color: "#64748b" }}>/ hr</small></span>
+                      <span className={styles.pricingValue}>
+                        {profile.hourly_rate ? `${profile.hourly_rate} / hr` : "Quote on Request"}
+                      </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Full Day Rate</span>
-                      <span className={styles.pricingValue}>{profile.daily_rate || "35,000 XOF"} <small style={{ fontSize: 12, color: "#64748b" }}>/ day</small></span>
+                      <span className={styles.pricingValue}>
+                        {profile.daily_rate ? `${profile.daily_rate} / day` : "Quote on Request"}
+                      </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Diagnostic Inspection</span>
-                      <span className={styles.pricingValue}>{profile.inspection_fee || "10,000 XOF"}</span>
+                      <span className={styles.pricingValue}>
+                        {profile.inspection_fee || "On Request"}
+                      </span>
                     </div>
                   </div>
                 </section>
