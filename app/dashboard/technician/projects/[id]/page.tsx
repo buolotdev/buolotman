@@ -39,10 +39,16 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
   }, [taskId]);
 
   // Fetch real task from backend
+  const { data: user } = useFetch(() => api.getMe(), []);
   const { data: task, loading: taskLoading, refetch: refetchTask } = useFetch(
     () => api.getTask(taskId),
     [taskId]
   );
+
+  // Real messages state
+  const [chatDraft, setChatDraft] = useState("");
+  const [messages, setMessages] = useState<{ id: number; sender: string; text: string; time: string; isClient: boolean }[]>([]);
+  const [conversationId, setConversationId] = useState<number | null>(null);
 
   // Derived real project values
   const totalCost = Number(task?.budget || task?.budget_min || task?.budget_max || task?.escrow_amount || 0);
@@ -54,15 +60,116 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
   const escrowHeld = isCompleted ? 0 : (hasEscrow ? totalCost : 0);
   const remainingAmount = isCompleted ? 0 : totalCost;
 
-  const clientName = task?.client_name || (task?.client ? `${task.client.first_name || ""} ${task.client.last_name || ""}`.trim() || task.client.username : "Haram");
+  const clientName = task?.client_name || (task?.client ? `${task.client.first_name || ""} ${task.client.last_name || ""}`.trim() || task.client.username : "Client");
+  const technicianName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "Specialist" : "Specialist";
   const clientId = task?.client?.id || task?.client || 1;
   const taskTitle = task?.title || `Task #${taskId}`;
-  const startDate = task?.created_at ? new Date(task.created_at).toISOString().split("T")[0] : "2026-08-26";
+  const startDate = task?.created_at ? new Date(task.created_at).toISOString().split("T")[0] : "Recently";
   const statusDisplay = isCompleted ? "Completed" : (isAccepted ? "In Progress" : "Pending Acceptance");
   const progressPercent = isCompleted ? 100 : (isAccepted ? 50 : 25);
 
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [submittingDeliverable, setSubmittingDeliverable] = useState(false);
+
+  // Sync real-time workspace discussion
+  useEffect(() => {
+    if (!taskId) return;
+    let isCancelled = false;
+
+    const syncChat = async () => {
+      try {
+        const convos = await api.getConversations();
+        const list = Array.isArray(convos) ? convos : (convos as any)?.results || [];
+        const existing = list.find((c: any) => 
+          (c.task?.id === taskId) || 
+          (c.task_id === taskId) ||
+          (c.other_participant?.name?.toLowerCase().includes(clientName.toLowerCase()))
+        );
+
+        if (existing && !isCancelled) {
+          setConversationId(existing.id);
+          const data = await api.getConversation(existing.id);
+          if (data?.messages && !isCancelled) {
+            const mapped = data.messages.map((m: any) => {
+              const isSenderMe = m.sender?.id === user?.id || m.sender_name === technicianName || m.is_technician || m.sender_role?.toLowerCase() === 'technician';
+              return {
+                id: m.id || Date.now() + Math.random(),
+                sender: isSenderMe ? "You" : (m.sender_name || clientName),
+                text: m.text || m.content || "",
+                time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now",
+                isClient: !isSenderMe
+              };
+            });
+            setMessages(mapped);
+            localStorage.setItem(`boulotman_chat_task_${taskId}`, JSON.stringify(mapped));
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback to local storage
+      }
+
+      const stored = localStorage.getItem(`boulotman_chat_task_${taskId}`);
+      if (stored && !isCancelled) {
+        try { setMessages(JSON.parse(stored)); } catch {}
+      }
+    };
+
+    syncChat();
+    const interval = setInterval(syncChat, 3000);
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [taskId, user?.id, clientName, technicianName]);
+
+  const handleSendMessage = async (e?: React.FormEvent, customText?: string) => {
+    if (e) e.preventDefault();
+    const textToSend = (customText || chatDraft).trim();
+    if (!textToSend) return;
+    setChatDraft("");
+
+    const newMsg = {
+      id: Date.now(),
+      sender: "You",
+      text: textToSend,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isClient: false
+    };
+
+    // 1. Optimistic update
+    setMessages(prev => {
+      const updated = [...prev, newMsg];
+      localStorage.setItem(`boulotman_chat_task_${taskId}`, JSON.stringify(updated));
+      return updated;
+    });
+
+    // 2. Transmit to backend
+    try {
+      let activeConvoId = conversationId;
+      if (!activeConvoId) {
+        const created = await api.createConversation({
+          task_id: taskId,
+          participant_name: clientName,
+          participant_id: clientId
+        });
+        if (created?.id) {
+          activeConvoId = created.id;
+          setConversationId(created.id);
+        }
+      }
+
+      if (activeConvoId) {
+        await api.sendMessage(activeConvoId, { text: textToSend });
+      }
+    } catch (err) {
+      console.warn("API sendMessage notice:", err);
+    }
+  };
+
+  const handleQuickReply = (text: string) => {
+    handleSendMessage(undefined, text);
+  };
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -378,6 +485,78 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </section>
+
+                {/* WORKSPACE DISCUSSION & COORDINATION */}
+                <section className={styles.card}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "10px", background: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+                      <iconify-icon icon="lucide:messages-square" />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 800 }}>Workspace Discussion & Coordination</h3>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#64748b" }}>
+                        Direct communication with Client <strong>{clientName}</strong>. All messages are synced.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.chatWrapper}>
+                    {messages.length > 0 ? (
+                      <div className={styles.chatList}>
+                        {messages.map((m) => (
+                          <div
+                            key={m.id}
+                            className={`${styles.chatRow} ${m.isClient ? styles.chatRowClient : styles.chatRowSpecialist}`}
+                          >
+                            <div className={styles.chatAvatar}>
+                              {m.isClient ? "CL" : "SP"}
+                            </div>
+                            <div className={styles.chatBubble}>
+                              <div className={styles.chatMeta}>
+                                <strong>{m.sender}</strong>
+                                <span>{m.time}</span>
+                              </div>
+                              <p>{m.text}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={styles.emptyChatBox}>
+                        <iconify-icon icon="lucide:message-square" style={{ fontSize: 28, color: "#cbd5e1" }} />
+                        <p>No workspace messages yet.</p>
+                        <span>Send a message below to coordinate directly with the client.</span>
+                      </div>
+                    )}
+
+                    <div className={styles.quickReplyRow}>
+                      <span>Quick replies:</span>
+                      <button type="button" onClick={() => handleQuickReply("Progress photos have been uploaded for your review.")}>
+                        📸 Uploaded photos
+                      </button>
+                      <button type="button" onClick={() => handleQuickReply("On track to finish task today.")}>
+                        ⏰ On schedule
+                      </button>
+                      <button type="button" onClick={() => handleQuickReply("Milestone completed, please inspect.")}>
+                        👍 Work completed
+                      </button>
+                    </div>
+
+                    <form className={styles.chatForm} onSubmit={handleSendMessage}>
+                      <input
+                        type="text"
+                        className={styles.chatInput}
+                        placeholder="Type a message or milestone update..."
+                        value={chatDraft}
+                        onChange={(e) => setChatDraft(e.target.value)}
+                      />
+                      <button type="submit" className={styles.chatSendBtn} disabled={!chatDraft.trim()}>
+                        <iconify-icon icon="lucide:send" />
+                        Send
+                      </button>
+                    </form>
                   </div>
                 </section>
 

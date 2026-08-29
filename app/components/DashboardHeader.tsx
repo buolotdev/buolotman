@@ -114,12 +114,43 @@ export default function DashboardHeader({
   const handleNotificationClick = async (notif: any) => {
     try {
       if (!notif.is_read) {
-        await api.markNotificationRead(notif.id);
+        await api.markNotificationRead(notif.id).catch(() => {});
         refetchNotifs();
       }
+      setNotifOpen(false);
+
+      const role = (userRole || "").toLowerCase();
+      const title = (notif.title || "").toLowerCase();
+      const body = (notif.body || "").toLowerCase();
+      const category = (notif.category || "").toLowerCase();
+
       if (notif.link) {
-        setNotifOpen(false);
-        router.push(notif.link);
+        if (notif.link.startsWith("/dashboard/messages")) {
+          if (role === "technician") router.push("/dashboard/technician/messages");
+          else if (role === "company") router.push("/dashboard/company/messages");
+          else router.push("/dashboard/client/messages");
+        } else {
+          router.push(notif.link);
+        }
+        return;
+      }
+
+      // Smart routing if no explicit link
+      if (category === "message" || title.includes("message") || body.includes("message")) {
+        if (role === "technician") router.push("/dashboard/technician/messages");
+        else if (role === "company") router.push("/dashboard/company/messages");
+        else router.push("/dashboard/client/messages");
+      } else if (category === "payment" || title.includes("payment") || title.includes("escrow") || title.includes("balance") || title.includes("wallet")) {
+        if (role === "technician") router.push("/dashboard/technician/wallet");
+        else if (role === "company") router.push("/dashboard/company/wallet");
+        else router.push("/dashboard/client/payments");
+      } else if (category === "task" || category === "project" || title.includes("task") || title.includes("project") || title.includes("bid")) {
+        if (role === "technician") router.push("/dashboard/technician/projects");
+        else if (role === "company") router.push("/dashboard/company/projects");
+        else router.push("/dashboard/client/projects");
+      } else if (category === "dispute" || title.includes("dispute") || title.includes("ticket") || title.includes("support")) {
+        if (role === "technician") router.push("/dashboard/technician/support");
+        else if (role === "client") router.push("/dashboard/client/support");
       }
     } catch (err) {
       console.error("Failed to process notification click", err);

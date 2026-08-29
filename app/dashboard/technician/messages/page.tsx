@@ -266,6 +266,25 @@ export default function TechnicianMessagesPage() {
         });
         setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
         refetchConvos();
+
+        // Sync with project workspace thread if task is associated
+        const taskNum = targetTaskId || (activeConversation?.taskTitle?.match(/#?(\d+)/)?.[1]);
+        if (taskNum) {
+          const key = `boulotman_chat_task_${taskNum}`;
+          const currentStored = localStorage.getItem(key);
+          let list = [];
+          if (currentStored) {
+            try { list = JSON.parse(currentStored); } catch {}
+          }
+          list.push({
+            id: Date.now(),
+            sender: "You",
+            text,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isClient: false
+          });
+          localStorage.setItem(key, JSON.stringify(list));
+        }
       }
     } catch (err: any) {
       console.warn("API message failed", err);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, use, useMemo } from "react";
+import React, { useState, useEffect, use, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -64,15 +64,65 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   if (!detectedExecutor && directInvite?.specialistName) {
     detectedExecutor = directInvite.specialistName;
   }
-  if (!detectedExecutor) {
-    if (task?.title?.toLowerCase().includes("abc")) detectedExecutor = "MM TECHNICIAN";
-    else if (task?.title?.toLowerCase().includes("auto work") || task?.title?.toLowerCase().includes("need hh")) detectedExecutor = "nayyam";
-  }
   const executorName = detectedExecutor || "Assigned Specialist";
   const clientName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "Client" : "Client";
   const hasSpecialist = Boolean(detectedExecutor || task?.assigned_to);
   const projectTitle = task?.title || `Task #${taskId}`;
   const taskCity = task?.city || task?.location || "Location not specified";
+
+  const [conversationId, setConversationId] = useState<number | null>(null);
+
+  // Sync real-time workspace discussion
+  useEffect(() => {
+    if (!taskId) return;
+    let isCancelled = false;
+
+    const syncChat = async () => {
+      try {
+        const convos = await api.getConversations();
+        const list = Array.isArray(convos) ? convos : (convos as any)?.results || [];
+        const existing = list.find((c: any) => 
+          (c.task?.id === taskId) || 
+          (c.task_id === taskId) ||
+          (detectedExecutor && c.other_participant?.name?.toLowerCase().includes(detectedExecutor.toLowerCase()))
+        );
+
+        if (existing && !isCancelled) {
+          setConversationId(existing.id);
+          const data = await api.getConversation(existing.id);
+          if (data?.messages && !isCancelled) {
+            const mapped = data.messages.map((m: any) => {
+              const isSenderMe = m.sender?.id === user?.id || m.sender_name === clientName || m.is_client || m.sender_role?.toLowerCase() === 'client';
+              return {
+                id: m.id || Date.now() + Math.random(),
+                sender: isSenderMe ? "You" : (m.sender_name || executorName),
+                text: m.text || m.content || "",
+                time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now",
+                isClient: isSenderMe
+              };
+            });
+            setMessages(mapped);
+            localStorage.setItem(`boulotman_chat_task_${taskId}`, JSON.stringify(mapped));
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback to local storage
+      }
+
+      const stored = localStorage.getItem(`boulotman_chat_task_${taskId}`);
+      if (stored && !isCancelled) {
+        try { setMessages(JSON.parse(stored)); } catch {}
+      }
+    };
+
+    syncChat();
+    const interval = setInterval(syncChat, 3000);
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [taskId, user?.id, clientName, executorName, detectedExecutor]);
 
   const handleFundEscrow = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,8 +152,6 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
       setFundingLoading(false);
     }
   };
-
-
 
   // Combine server attachments and local uploads
   const allFiles = useMemo(() => {
@@ -143,7 +191,6 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
     toast.success("File Removed", `"${file.name}" has been removed from this project workspace.`);
   };
 
-
   // Handle Escrow Release
   const handleReleaseEscrow = async () => {
     setActionLoading(true);
@@ -162,10 +209,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
       setConfirmModalOpen(false);
       refetchTask();
       refetchWallet();
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now(), sender: "System", text: `✔ Escrow payment of ${totalCost.toLocaleString()} XOF has been released to ${executorName}. Task marked as Completed!`, time: "Just now", isClient: false }
-      ]);
+      
+      const systemNotice = `✔ Escrow payment of ${totalCost.toLocaleString()} XOF has been released to ${executorName}. Task marked as Completed!`;
+      handleSendMessage(undefined, systemNotice);
     } catch (err: any) {
       console.error("Release escrow failed", err);
       setActionSuccessMsg(`Escrow funds of ${totalCost.toLocaleString()} XOF have been released to ${executorName}!`);
@@ -176,24 +222,53 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   };
 
   // Handle Send Message
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatDraft.trim()) return;
-    const newMsgText = chatDraft.trim();
+  const handleSendMessage = async (e?: React.FormEvent, customText?: string) => {
+    if (e) e.preventDefault();
+    const textToSend = (customText || chatDraft).trim();
+    if (!textToSend) return;
     setChatDraft("");
 
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now(), sender: "You", text: newMsgText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), isClient: true }
-    ]);
+    const newMsg = {
+      id: Date.now(),
+      sender: "You",
+      text: textToSend,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isClient: true
+    };
+
+    // 1. Optimistic update
+    setMessages(prev => {
+      const updated = [...prev, newMsg];
+      localStorage.setItem(`boulotman_chat_task_${taskId}`, JSON.stringify(updated));
+      return updated;
+    });
+
+    // 2. Transmit to backend
+    try {
+      let activeConvoId = conversationId;
+      if (!activeConvoId) {
+        const created = await api.createConversation({
+          task_id: taskId,
+          participant_name: executorName,
+          participant_id: task?.assigned_to?.id || task?.assigned_to_id || directInvite?.specialistId
+        });
+        if (created?.id) {
+          activeConvoId = created.id;
+          setConversationId(created.id);
+        }
+      }
+
+      if (activeConvoId) {
+        await api.sendMessage(activeConvoId, { text: textToSend });
+      }
+    } catch (err) {
+      console.warn("API sendMessage notice:", err);
+    }
   };
 
   // Quick reply
   const handleQuickReply = (text: string) => {
-    setMessages(prev => [
-      ...prev,
-      { id: Date.now(), sender: "You", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), isClient: true }
-    ]);
+    handleSendMessage(undefined, text);
   };
 
   // Handle file upload

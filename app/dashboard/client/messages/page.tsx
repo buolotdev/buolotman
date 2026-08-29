@@ -258,6 +258,25 @@ export default function ClientMessagesPage() {
         });
         setActiveMessages((prev) => prev.map((m) => (m.id === tempId ? real : m)));
         refetchConvos();
+
+        // Sync with project workspace thread if task is associated
+        const taskNum = targetTask || (activeConversation?.task_title?.match(/#?(\d+)/)?.[1]);
+        if (taskNum) {
+          const key = `boulotman_chat_task_${taskNum}`;
+          const currentStored = localStorage.getItem(key);
+          let list = [];
+          if (currentStored) {
+            try { list = JSON.parse(currentStored); } catch {}
+          }
+          list.push({
+            id: Date.now(),
+            sender: "You",
+            text: message,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isClient: true
+          });
+          localStorage.setItem(key, JSON.stringify(list));
+        }
       }
     } catch (err: any) {
       console.warn("Backend send message error", err);
