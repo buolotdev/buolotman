@@ -43,6 +43,9 @@ type PublicProfile = {
   hourly_rate?: string;
   daily_rate?: string;
   inspection_fee?: string;
+  category?: string;
+  primary_occupation?: string;
+  trade_category?: string;
   technician_profile?: any;
 };
 
@@ -144,35 +147,53 @@ export default function PublicProfilePage() {
         try {
           const currentToken = localStorage.getItem("access_token");
           if (currentToken) {
-            const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
-            const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-            const rawTools = localStorage.getItem("boulotman_technician_tools");
+            let myUserId: number | null = null;
+            const rawUser = localStorage.getItem("user") || localStorage.getItem("boulotman_user");
+            if (rawUser) {
+              try {
+                const u = JSON.parse(rawUser);
+                myUserId = Number(u.id || u.user_id);
+              } catch {}
+            }
+            if (!myUserId) {
+              try {
+                const me = await api.getMe();
+                myUserId = Number(me?.id);
+              } catch {}
+            }
 
-            if (rawCustom) {
-              const c = JSON.parse(rawCustom);
-              baseUser = {
-                ...(baseUser || {}),
-                id: validId,
-                role: baseUser?.role || "TECHNICIAN",
-                first_name: c.firstName || baseUser?.first_name,
-                last_name: c.lastName || baseUser?.last_name,
-                headline: c.headline || baseUser?.headline,
-                bio: c.bio || baseUser?.bio,
-                about: c.bio || baseUser?.about,
-                city: c.city || baseUser?.city,
-                country: c.country || baseUser?.country,
-                experience_years: c.experienceYears || baseUser?.experience_years,
-                education_level: c.educationLevel || baseUser?.education_level,
-                expertise_level: c.expertiseLevel || baseUser?.expertise_level,
-                skills: (baseUser?.skills && baseUser.skills.length > 0) ? baseUser.skills : ["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring"],
-                portfolio: rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || DEFAULT_PORTFOLIO_ITEMS),
-                tools: rawTools ? JSON.parse(rawTools) : (baseUser?.tools || DEFAULT_TOOLS_LIST),
-                is_verified: true,
-                average_rating: baseUser?.average_rating || 4.9,
-                review_count: baseUser?.review_count || 127,
-                tasks_completed_count: baseUser?.tasks_completed_count || 94,
-                completion_rate: baseUser?.completion_rate || 96,
-              };
+            // ONLY apply local custom overrides if viewing own profile!
+            if (myUserId && myUserId === validId) {
+              const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
+              const rawPort = localStorage.getItem("boulotman_technician_portfolio");
+              const rawTools = localStorage.getItem("boulotman_technician_tools");
+
+              if (rawCustom) {
+                const c = JSON.parse(rawCustom);
+                baseUser = {
+                  ...(baseUser || {}),
+                  id: validId,
+                  role: baseUser?.role || "TECHNICIAN",
+                  first_name: c.firstName !== undefined && c.firstName !== "" ? c.firstName : baseUser?.first_name,
+                  last_name: c.lastName !== undefined && c.lastName !== "" ? c.lastName : baseUser?.last_name,
+                  headline: c.headline || baseUser?.headline,
+                  bio: c.bio || baseUser?.bio,
+                  about: c.bio || baseUser?.about,
+                  city: c.city || baseUser?.city,
+                  country: c.country || baseUser?.country,
+                  experience_years: c.experienceYears || baseUser?.experience_years,
+                  education_level: c.educationLevel || baseUser?.education_level,
+                  expertise_level: c.expertiseLevel || baseUser?.expertise_level,
+                  skills: (baseUser?.skills && baseUser.skills.length > 0) ? baseUser.skills : ["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring"],
+                  portfolio: rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || DEFAULT_PORTFOLIO_ITEMS),
+                  tools: rawTools ? JSON.parse(rawTools) : (baseUser?.tools || DEFAULT_TOOLS_LIST),
+                  is_verified: true,
+                  average_rating: baseUser?.average_rating || 4.9,
+                  review_count: baseUser?.review_count || 127,
+                  tasks_completed_count: baseUser?.tasks_completed_count || 94,
+                  completion_rate: baseUser?.completion_rate || 96,
+                };
+              }
             }
           }
         } catch {}
@@ -192,12 +213,17 @@ export default function PublicProfilePage() {
     ? profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Corporate Partner"
     : `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Specialist";
 
-  const headline = profile?.headline || profile?.technician_profile?.headline || (isCompany ? "Certified Commercial & Infrastructure Contractor" : "Certified Electrician & Solar Specialist");
+  const userCategory = profile?.category || profile?.primary_occupation || (profile as any)?.trade_category;
+
+  const headline = profile?.headline 
+    || profile?.technician_profile?.headline 
+    || (userCategory ? `Certified ${userCategory} Specialist` : (isCompany ? "Certified Commercial & Infrastructure Contractor" : "Certified Engineering & Technical Specialist"));
+
   const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || (displayName?.[0]?.toUpperCase()) || "SP";
   
-  const city = profile?.city || profile?.technician_profile?.city || "Cotonou";
+  const city = profile?.city || profile?.technician_profile?.city || "";
   const country = profile?.country || profile?.technician_profile?.country || profile?.headquarters || "Benin";
-  const location = `${city}, ${country}`;
+  const location = city ? `${city}, ${country}` : country;
 
   const ratingDisplay = profile?.average_rating && Number(profile.average_rating) > 0
     ? `${Number(profile.average_rating).toFixed(1)} / 5.0`
@@ -209,13 +235,15 @@ export default function PublicProfilePage() {
 
   const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || (isCompany
     ? "Established turnkey engineering and construction contractor delivering certified technical execution across industrial, commercial, and residential projects with full escrow protection."
-    : "Dedicated and certified technical specialist with extensive hands-on experience in electrical systems, solar PV installations, inverter setups, and precision diagnostics. Committed to safety compliance and 100% client satisfaction.");
+    : `Dedicated and certified technical specialist ${userCategory ? `specializing in ${userCategory}` : ""} with extensive hands-on experience, precision diagnostics, and a commitment to safety compliance and 100% client satisfaction.`);
 
   const skillsList = (profile?.skills && profile.skills.length > 0)
     ? profile.skills
     : isCompany
     ? ["Civil Construction", "Structural Engineering", "Solar & High-Voltage Power", "HVAC Cooling", "Renovation & Finishing"]
-    : ["Solar PV Installation", "Electrical Rewiring", "Inverter Setup", "Fault Diagnostics", "HVAC Wiring", "Distribution Panels"];
+    : userCategory
+    ? [userCategory, "Fault Diagnostics", "Preventive Maintenance", "System Installation", "Safety Compliance"]
+    : ["Technical Diagnostics", "Preventive Maintenance", "System Installation", "Safety Compliance", "Field Execution"];
 
   const portfolioList = (profile?.portfolio && profile.portfolio.length > 0)
     ? profile.portfolio

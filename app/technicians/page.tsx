@@ -69,7 +69,7 @@ export default function TechniciansPage() {
                   <span className={styles.rating}>⭐ 4.8</span> • {tech.location || tech.country || "Kigali, Rwanda"}
                 </div>
                 <div className={styles.cardActions}>
-                  <button className={styles.btnOutline} onClick={() => setSelectedTech(tech)}>View Profile</button>
+                  <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>
                   <Link 
                     href={`/post-task?specialist_id=${tech.id}&specialist_name=${encodeURIComponent(tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : tech.username || "Technician")}`} 
                     className={styles.btnPrimary}
@@ -118,8 +118,14 @@ export default function TechniciansPage() {
 
               <h3 className={styles.sectionTitle}>Past Works</h3>
               <div className={styles.worksGrid}>
-                <img src="https://images.unsplash.com/photo-1504307651254-35680f356f12?w=300&q=80" alt="Past work" className={styles.workImg} />
-                <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&q=80" alt="Past work" className={styles.workImg} />
+                <div style={{ background: "#001f3f", borderRadius: 10, padding: 16, color: "#fff", display: "flex", flexDirection: "column", gap: 4 }}>
+                  <strong style={{ fontSize: 13 }}>System Installation</strong>
+                  <span style={{ fontSize: 11, color: "#4ade80" }}>Verified Project ✓</span>
+                </div>
+                <div style={{ background: "#1e3a8a", borderRadius: 10, padding: 16, color: "#fff", display: "flex", flexDirection: "column", gap: 4 }}>
+                  <strong style={{ fontSize: 13 }}>Diagnostic Inspection</strong>
+                  <span style={{ fontSize: 11, color: "#4ade80" }}>Completed on Schedule ✓</span>
+                </div>
               </div>
 
               <h3 className={styles.sectionTitle}>Reviews</h3>
@@ -128,25 +134,21 @@ export default function TechniciansPage() {
                   <img src="https://i.pravatar.cc/100?img=1" alt="Avatar" className={styles.reviewAvatar} />
                   <div className={styles.reviewContent}>
                     <div className={styles.reviewStars}>⭐⭐⭐⭐⭐</div>
-                    <p className={styles.reviewText}>Excellent work, very professional.</p>
+                    <p className={styles.reviewText}>Excellent work, very professional and punctual.</p>
                   </div>
                 </div>
               </div>
 
-              <div className={styles.modalFooter}>
-                <div className={styles.footerLinks}>
-                  <a href="#" className={styles.footerLink}>Message</a>
-                  <a href="#" className={styles.footerLink}>Follow</a>
-                  <a href="#" className={styles.footerLink}>Block</a>
-                  <a href="#" className={styles.footerLink}>Report</a>
-                </div>
+              <div className={styles.modalFooter} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+                <Link href={`/profile/${selectedTech.id}`} className={styles.btnOutline} style={{ padding: "8px 16px", textDecoration: "none", fontSize: 13 }}>
+                  View Full Profile
+                </Link>
                 <Link 
                   href={`/post-task?specialist_id=${selectedTech.id}&specialist_name=${encodeURIComponent(selectedTech.first_name ? `${selectedTech.first_name} ${selectedTech.last_name || ""}`.trim() : selectedTech.username || "Technician")}`}
                   className={styles.btnHire}
                 >
                   Hire Technician
                 </Link>
-
               </div>
             </div>
           </div>
