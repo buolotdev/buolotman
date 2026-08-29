@@ -44,7 +44,12 @@ export default function TechnicianSidebar({ isOpen, onClose }: { isOpen: boolean
             : cleanPath.startsWith(cleanHref);
 
           return (
-            <Link key={item.key} href={item.href} className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}>
+            <Link 
+              key={item.key} 
+              href={item.href} 
+              className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              onClick={onClose}
+            >
               <span className={styles.navIcon}>
                 <iconify-icon icon={item.icon} />
               </span>
@@ -52,11 +57,10 @@ export default function TechnicianSidebar({ isOpen, onClose }: { isOpen: boolean
             </Link>
           );
         })}
-      </nav>
 
-      <div style={{ marginTop: "auto" }}>
-        <LogoutButton className={styles.logoutButton} />
-      </div>
+        {/* Logout placed directly under Settings */}
+        <LogoutButton className={styles.logoutNavItem} showLabel={true} />
+      </nav>
     </aside>
   );
 }

@@ -46,7 +46,12 @@ export default function CompanySidebar({ isOpen, onClose }: { isOpen: boolean; o
             : cleanPath.startsWith(cleanHref);
 
           return (
-            <Link key={item.key} href={item.href} className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}>
+            <Link 
+              key={item.key} 
+              href={item.href} 
+              className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              onClick={onClose}
+            >
               <span className={styles.navIcon}>
                 <iconify-icon icon={item.icon} />
               </span>
@@ -54,11 +59,10 @@ export default function CompanySidebar({ isOpen, onClose }: { isOpen: boolean; o
             </Link>
           );
         })}
-      </nav>
 
-      <div style={{ marginTop: "auto" }}>
-        <LogoutButton className={styles.logoutButton} />
-      </div>
+        {/* Logout placed directly under navigation */}
+        <LogoutButton className={styles.logoutNavItem} showLabel={true} />
+      </nav>
     </aside>
   );
 }

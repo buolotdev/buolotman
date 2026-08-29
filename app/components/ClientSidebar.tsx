@@ -58,11 +58,10 @@ export default function ClientSidebar({ isOpen, onClose }: { isOpen: boolean; on
             </Link>
           );
         })}
-      </nav>
 
-      <div style={{ marginTop: "auto" }}>
-        <LogoutButton className={styles.logoutButton} />
-      </div>
+        {/* Logout placed under navigation */}
+        <LogoutButton className={styles.logoutNavItem} showLabel={true} />
+      </nav>
     </aside>
   );
 }
