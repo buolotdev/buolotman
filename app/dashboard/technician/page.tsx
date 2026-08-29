@@ -194,53 +194,49 @@ export default function TechnicianDashboardPage() {
               </div>
             </div>
 
-            <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <h3 className={styles.sectionHeader} style={{ fontSize: '18px', margin: 0 }}>Account Status</h3>
-                {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? (
-                  <span className={styles.verifiedPill}>
-                    <iconify-icon icon="lucide:shield-check" style={{ fontSize: '16px' }} />
-                    Verified Account
-                  </span>
-                ) : (
-                  <span className={`${styles.statusBadge} ${styles.statusPending}`}>
-                    <iconify-icon icon="lucide:clock" style={{ fontSize: '14px', marginRight: '4px' }} />
-                    Pending Verification
-                  </span>
-                )}
+            {/* 3-TIER SPECIALIST VERIFICATION & PERFORMANCE METRICS */}
+            <div className={styles.fullWidthSection} style={{ padding: '24px', marginBottom: '24px', background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(0,31,63,0.04)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <h3 className={styles.sectionHeader} style={{ fontSize: '18px', margin: 0, color: '#001f3f' }}>Specialist Trust & Verification Level</h3>
+                    {Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified) ? (
+                      <span className={styles.verifiedPill} style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <iconify-icon icon="lucide:shield-check" /> Boulot Man Approved Pro ✓
+                      </span>
+                    ) : (
+                      <span style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <iconify-icon icon="lucide:award" /> Professional Verified ✓
+                      </span>
+                    )}
+                    <span style={{ background: '#dcfce7', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} /> Available Now
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
+                    Your specialist profile is active and eligible for priority task dispatch, emergency jobs, and team projects.
+                  </p>
+                </div>
+
+                <Link href="/dashboard/technician/profile" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#001f3f', color: '#ffffff', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>
+                  <iconify-icon icon="lucide:sliders" /> Manage Specialist Hub
+                </Link>
               </div>
 
-              {Boolean(user?.is_verified || user?.technician_profile?.is_verified) ? (
-                <div className={styles.verifiedNotice}>
-                  <div className={styles.verifiedNoticeIcon}>
-                    <iconify-icon icon="lucide:check-circle-2" />
-                  </div>
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '15px', color: '#14532d', marginBottom: '4px' }}>
-                      Identity & Credentials Approved! 🎉
-                    </strong>
-                    <p style={{ margin: 0, fontSize: '13.5px', color: '#166534', lineHeight: 1.5 }}>
-                      Your profile and submitted documents have been officially vetted and approved by the Boulot Man team. You have full privileges to bid on tasks, accept direct hire offers, and receive secure payouts.
-                    </p>
-                  </div>
+              {/* 3-Tier Verification Progress Tracker */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginTop: '12px', background: '#f8fafc', padding: '14px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#166534', fontWeight: 700 }}>
+                  <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 16, color: '#16a34a' }} />
+                  <span>1. Identity Verified ✓</span>
                 </div>
-              ) : (
-                <div className={styles.notice}>
-                  <strong style={{ display: 'block', fontSize: '14.5px', color: '#92400e', marginBottom: '4px' }}>
-                    Profile & Identity Under Review
-                  </strong>
-                  <p style={{ margin: 0, fontSize: '13.5px', color: '#78350f', lineHeight: 1.5, marginBottom: '12px' }}>
-                    Complete your profile details and upload your National ID Card / Passport and trade certificates so our team can approve your account to start accepting jobs.
-                  </p>
-                  <Link href="/dashboard/technician/profile" className={styles.uploadCtaBtn}>
-                    <iconify-icon icon="lucide:upload" /> Upload ID & Certificates
-                  </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#0284c7', fontWeight: 800 }}>
+                  <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: '#0284c7' }} />
+                  <span>2. Professional Verified ✓</span>
                 </div>
-              )}
-
-              <div className={styles.toggleRow}>
-                <span>Availability for New Jobs</span>
-                <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#ff4500' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: Boolean(user?.is_verified) ? '#166534' : '#64748b', fontWeight: 700 }}>
+                  <iconify-icon icon={Boolean(user?.is_verified) ? "lucide:check-circle-2" : "lucide:circle-dot"} style={{ fontSize: 16, color: Boolean(user?.is_verified) ? '#16a34a' : '#94a3b8' }} />
+                  <span>3. Boulot Man Approved Pro</span>
+                </div>
               </div>
             </div>
 
