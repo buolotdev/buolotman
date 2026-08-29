@@ -154,30 +154,29 @@ export default function TechnicianProfilePage() {
   const [matchBuildTeam, setMatchBuildTeam] = useState(true);
   const [matchSupervisor, setMatchSupervisor] = useState(true);
 
-  // Sync User Data
-  useEffect(() => {
-    if (userData) {
-      setFirstName(userData.first_name || "");
-      setLastName(userData.last_name || "");
-      setDisplayName(userData.first_name ? `${userData.first_name} ${(userData.last_name || "")[0] || ""}.` : userData.username || "");
-      setEmail(userData.email || "");
-      setPhone(userData.phone || "");
-      setBio(userData.bio || userData.about || "");
-      if (Array.isArray(userData.skills) && userData.skills.length > 0) setSkills(userData.skills);
-      setDateOfBirth(userData.date_of_birth || "");
-      setAddress(userData.address || "");
-      setEducationLevel(userData.education_level || "Technical License");
-      setExpertiseLevel(userData.expertise_level || "Senior");
-      setCountry(userData.country || "Benin");
-      setCity(userData.city || "Cotonou");
-      if (userData.avatar_url) setAvatarUrl(userData.avatar_url);
-      if (userData.banner_url) setBannerUrl(userData.banner_url);
-    }
-  }, [userData]);
+  const isInitialSyncedRef = useRef(false);
 
-  // Load Saved Preferences & Documents from localStorage
+  // Load Saved Preferences, Profile Customizations & Documents from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const rawProfile = localStorage.getItem("boulotman_technician_profile_custom");
+      if (rawProfile) {
+        try {
+          const p = JSON.parse(rawProfile);
+          if (p.firstName !== undefined && p.firstName !== "") setFirstName(p.firstName);
+          if (p.lastName !== undefined && p.lastName !== "") setLastName(p.lastName);
+          if (p.displayName !== undefined && p.displayName !== "") setDisplayName(p.displayName);
+          if (p.headline !== undefined && p.headline !== "") setHeadline(p.headline);
+          if (p.bio !== undefined && p.bio !== "") setBio(p.bio);
+          if (p.city !== undefined && p.city !== "") setCity(p.city);
+          if (p.country !== undefined && p.country !== "") setCountry(p.country);
+          if (p.experienceYears !== undefined && p.experienceYears !== "") setExperienceYears(p.experienceYears);
+          if (p.primaryOccupation !== undefined && p.primaryOccupation !== "") setPrimaryOccupation(p.primaryOccupation);
+          if (p.educationLevel !== undefined && p.educationLevel !== "") setEducationLevel(p.educationLevel);
+          if (p.expertiseLevel !== undefined && p.expertiseLevel !== "") setExpertiseLevel(p.expertiseLevel);
+        } catch {}
+      }
+
       const rawPort = localStorage.getItem("boulotman_technician_portfolio");
       if (rawPort) { try { setPortfolioList(JSON.parse(rawPort)); } catch {} }
 
@@ -191,6 +190,44 @@ export default function TechnicianProfilePage() {
       if (rawDocs) { try { setLocalDocs(JSON.parse(rawDocs)); } catch {} }
     }
   }, []);
+
+  // Sync initial User Data once without ever overwriting user's active/saved edits
+  useEffect(() => {
+    if (userData && !isInitialSyncedRef.current) {
+      isInitialSyncedRef.current = true;
+      const rawProfile = typeof window !== "undefined" ? localStorage.getItem("boulotman_technician_profile_custom") : null;
+      let savedP: any = {};
+      if (rawProfile) {
+        try { savedP = JSON.parse(rawProfile); } catch {}
+      }
+
+      if (userData.first_name && !savedP.firstName) setFirstName(userData.first_name);
+      if (userData.last_name && !savedP.lastName) setLastName(userData.last_name);
+      if (!savedP.displayName) {
+        setDisplayName(userData.first_name ? `${userData.first_name} ${(userData.last_name || "")[0] || ""}.` : userData.username || "");
+      }
+      if (userData.email) setEmail(userData.email);
+      if (userData.phone) setPhone(userData.phone);
+      
+      const userBio = userData.bio || userData.about || (userData as any).technician_profile?.bio;
+      if (userBio && !savedP.bio) setBio(userBio);
+
+      if (Array.isArray(userData.skills) && userData.skills.length > 0) setSkills(userData.skills);
+      if (userData.date_of_birth) setDateOfBirth(userData.date_of_birth);
+      if (userData.address) setAddress(userData.address);
+      if (userData.education_level && !savedP.educationLevel) setEducationLevel(userData.education_level);
+      if (userData.expertise_level && !savedP.expertiseLevel) setExpertiseLevel(userData.expertise_level);
+
+      const userCountry = userData.country || (userData as any).technician_profile?.country;
+      if (userCountry && !savedP.country) setCountry(userCountry);
+
+      const userCity = userData.city || (userData as any).technician_profile?.city;
+      if (userCity && !savedP.city) setCity(userCity);
+
+      if (userData.avatar_url) setAvatarUrl(userData.avatar_url);
+      if (userData.banner_url) setBannerUrl(userData.banner_url);
+    }
+  }, [userData]);
 
   const userName = `${firstName} ${lastName}`.trim() || userData?.username || "Specialist";
   const userInitials = useMemo(() => {
@@ -273,12 +310,34 @@ export default function TechnicianProfilePage() {
   const handleSaveProfile = async () => {
     setProfileSaving(true);
     try {
+      // 1. Immediately persist custom profile fields locally
+      const customProfileData = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        displayName: displayName.trim(),
+        headline: headline.trim(),
+        bio: bio.trim(),
+        city: city.trim(),
+        country: country.trim(),
+        experienceYears: experienceYears.trim(),
+        primaryOccupation,
+        educationLevel: educationLevel.trim(),
+        expertiseLevel,
+      };
+      localStorage.setItem("boulotman_technician_profile_custom", JSON.stringify(customProfileData));
+      localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
+      localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
+      localStorage.setItem("boulotman_technician_available_now", String(availableNow));
+      localStorage.setItem("boulotman_technician_documents", JSON.stringify(localDocs));
+
+      // 2. Send complete payload to backend
       await api.updateProfile({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim(),
         phone: phone.trim(),
         bio: bio.trim(),
+        about: bio.trim(),
         skills: skills,
         country: country.trim(),
         city: city.trim(),
@@ -286,15 +345,17 @@ export default function TechnicianProfilePage() {
         date_of_birth: dateOfBirth || null,
         education_level: educationLevel,
         expertise_level: expertiseLevel,
+        headline: headline.trim(),
+        technician_profile: {
+          bio: bio.trim(),
+          city: city.trim(),
+          country: country.trim(),
+          headline: headline.trim(),
+          experience_years: experienceYears,
+        }
       });
 
-      // Save custom fields to localStorage
-      localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
-      localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
-      localStorage.setItem("boulotman_technician_available_now", String(availableNow));
-      localStorage.setItem("boulotman_technician_documents", JSON.stringify(localDocs));
-
-      await refetchUser();
+      try { await refetchUser(); } catch {}
       toast.success("Profile Saved", "All technician profile details updated successfully.");
     } catch (err: any) {
       toast.error("Save failed", err?.message || "Please try again.");
@@ -646,11 +707,11 @@ export default function TechnicianProfilePage() {
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>First Name *</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>First Name</label>
                     <input className={styles.formInput} placeholder="e.g. Aneeq" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Last Name *</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Last Name</label>
                     <input className={styles.formInput} placeholder="e.g. Nisar" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
@@ -661,7 +722,7 @@ export default function TechnicianProfilePage() {
                     <input className={styles.formInput} placeholder="e.g. Aneeq N." value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Professional Headline *</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Professional Headline</label>
                     <input className={styles.formInput} placeholder="e.g. Certified Electrician & Solar Specialist" value={headline} onChange={(e) => setHeadline(e.target.value)} />
                   </div>
                 </div>
@@ -704,11 +765,11 @@ export default function TechnicianProfilePage() {
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating City / Town *</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating City / Town</label>
                     <input className={styles.formInput} placeholder="e.g. Cotonou" value={city} onChange={(e) => setCity(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating Country *</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating Country</label>
                     <input className={styles.formInput} placeholder="e.g. Benin" value={country} onChange={(e) => setCountry(e.target.value)} />
                   </div>
                 </div>
