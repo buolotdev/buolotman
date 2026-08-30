@@ -31,7 +31,11 @@ const translations: Record<string, Record<string, string>> = {
     share: "Share",
     copied: "Copied",
     viewPublicProfile: "View Public Profile",
-    saveChanges: "Save Changes",
+    saveChanges: "Save & Continue",
+    saveAndContinue: "Save & Continue",
+    prevStep: "Previous Step",
+    teamModalSub: "Highlight technical leadership and qualified site personnel.",
+    saveSuccessNext: "Step saved! Proceeding to next section.",
     saving: "Saving...",
     savingAll: "Saving All Changes...",
     saveEnterpriseProfile: "Save Enterprise Profile",
@@ -162,7 +166,11 @@ const translations: Record<string, Record<string, string>> = {
     share: "Partager",
     copied: "Copié",
     viewPublicProfile: "Voir le profil public",
-    saveChanges: "Enregistrer les modifications",
+    saveChanges: "Enregistrer & Continuer",
+    saveAndContinue: "Enregistrer & Continuer",
+    prevStep: "Étape précédente",
+    teamModalSub: "Mettez en avant vos ingénieurs et cadres techniques qualifiés.",
+    saveSuccessNext: "Étape enregistrée ! Passage à l'étape suivante.",
     saving: "Enregistrement...",
     savingAll: "Enregistrement de tout le profil...",
     saveEnterpriseProfile: "Enregistrer le Profil Entreprise",
@@ -285,6 +293,44 @@ const translations: Record<string, Record<string, string>> = {
   }
 };
 
+export const ALL_SERVICE_CATEGORIES = [
+  "Civil & Building Construction",
+  "Architecture, 3D Rendering & Interior Design",
+  "Electrical, Power & Solar Energy",
+  "HVAC, Industrial Cooling & Refrigeration",
+  "Plumbing, Water Sanitation & Boreholes",
+  "Software, Web & Mobile App Development",
+  "IT Networks, Structured Cabling & CCTV",
+  "Cybersecurity, Systems & Data Protection",
+  "Cloud Infrastructure, DevOps & Server Hosting",
+  "Mechanical Engineering & Industrial Machinery",
+  "Metal Fabrication, Welding & Steel Structures",
+  "Renewable Energy & Solar PV Farms",
+  "Automotive, Mobile Mechanic & Fleet Servicing",
+  "Telecom, Fiber Optics & Tower Installations",
+  "Facility Management, Commercial Cleaning & Pest Control",
+  "Heavy Logistics, Transport & Equipment Rental",
+  "Audio-Visual, Photography & Media Production",
+  "Quantity Surveying, BOQ & Cost Control",
+  "Fire Safety, Smoke Detection & Access Control",
+  "Interior Finishing, Tiling, Painting & Plastering",
+  "Elevators, Escalators & Lifting Equipment",
+  "Landscaping, Environmental & Agricultural Irrigation",
+  "Corporate Consulting & Enterprise IT Support"
+];
+
+export const TAB_ORDER = [
+  "overview",
+  "verification",
+  "capabilities",
+  "services",
+  "projects",
+  "team",
+  "insurance",
+] as const;
+
+export type TabType = typeof TAB_ORDER[number];
+
 const DEFAULT_TEAM: TeamMember[] = [
   {
     id: "tm-1",
@@ -345,15 +391,24 @@ export default function CompanyProfilePage() {
   const t = translations[lang] || translations["en"];
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"overview" | "verification" | "capabilities" | "services" | "projects" | "team" | "insurance">("overview");
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
 
   // Fetches
   const { data: user, refetch: refetchUser } = useFetch(() => api.getMe(), []);
   const { data: profile, loading: profileLoading, refetch: refetchProfile } = useFetch(() => api.getCompanyProfile(), []);
+  const { data: rawCategories } = useFetch(() => api.getCategories().catch(() => []), []);
   const { data: servicesData, refetch: refetchServices } = useFetch(() => api.getCompanyServices(), []);
   const { data: projectsData, refetch: refetchProjects } = useFetch(() => api.getCompanyProjects(), []);
   const { data: rawDocuments, refetch: mutateDocuments } = useFetch(() => api.getTechnicianDocuments(), []);
   const documents = useMemo(() => (Array.isArray(rawDocuments) ? rawDocuments : []), [rawDocuments]);
+
+  // Combined comprehensive categories
+  const availableCategories = useMemo(() => {
+    const dynamic = Array.isArray(rawCategories)
+      ? rawCategories.map((c: any) => c.name || c.title).filter(Boolean)
+      : [];
+    return Array.from(new Set([...ALL_SERVICE_CATEGORIES, ...dynamic]));
+  }, [rawCategories]);
 
   // Form State - Overview & Branding
   const [form, setForm] = useState({
@@ -361,7 +416,7 @@ export default function CompanyProfilePage() {
     trading_name: "",
     company_type: "Limited Liability Company (SARL)",
     year_founded: "",
-    industry: "Construction",
+    industry: "Civil & Building Construction",
     subject_title: "",
     about: "",
     website: "",
@@ -376,7 +431,6 @@ export default function CompanyProfilePage() {
     preferred_language: "fr",
     working_hours: "Mon - Sat: 07:30 - 18:00",
     areas_of_expertise: [] as string[],
-
     services_offered: [] as string[],
   });
 
@@ -421,7 +475,7 @@ export default function CompanyProfilePage() {
   // Add Service Form State
   const [showAddService, setShowAddService] = useState(false);
   const [newServiceTitle, setNewServiceTitle] = useState("");
-  const [newServiceCategory, setNewServiceCategory] = useState("General Contracting");
+  const [newServiceCategory, setNewServiceCategory] = useState("Civil & Building Construction");
   const [newServicePricing, setNewServicePricing] = useState("Request Quote");
   const [newServiceDesc, setNewServiceDesc] = useState("");
   const [addingService, setAddingService] = useState(false);
@@ -555,7 +609,7 @@ export default function CompanyProfilePage() {
   };
 
   // Save All Profile Details
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = async (advanceToNext: boolean = true) => {
     setSaving(true);
     try {
       await api.updateCompanyProfile({
@@ -586,9 +640,29 @@ export default function CompanyProfilePage() {
 
       await refetchProfile();
       await refetchUser();
-      toast.success("Profile Saved", "Company profile and enterprise details updated successfully.");
+
+      const currentIdx = TAB_ORDER.indexOf(activeTab);
+      if (advanceToNext && currentIdx < TAB_ORDER.length - 1) {
+        const nextTab = TAB_ORDER[currentIdx + 1];
+        setActiveTab(nextTab);
+        toast.success(
+          lang === "fr" ? "Étape Enregistrée" : "Section Saved",
+          t.saveSuccessNext || (lang === "fr" ? "Passage automatique à l'étape suivante !" : "Changes saved! Moving to the next step.")
+        );
+        if (typeof window !== "undefined") {
+          window.scrollTo({ top: 380, behavior: "smooth" });
+        }
+      } else {
+        toast.success(
+          lang === "fr" ? "Profil Enregistré" : "Profile Saved",
+          lang === "fr" ? "Toutes les informations de l'entreprise ont été enregistrées avec succès." : "Company profile and enterprise details updated successfully."
+        );
+      }
     } catch (err: any) {
-      toast.error("Save Failed", err?.message || "Could not save company profile changes.");
+      toast.error(
+        lang === "fr" ? "Échec de l'enregistrement" : "Save Failed",
+        err?.message || (lang === "fr" ? "Impossible d'enregistrer les modifications." : "Could not save company profile changes.")
+      );
     } finally {
       setSaving(false);
     }
@@ -921,7 +995,7 @@ export default function CompanyProfilePage() {
             <button
               type="button"
               className={styles.primaryButton}
-              onClick={handleSaveProfile}
+              onClick={() => handleSaveProfile(true)}
               disabled={saving}
             >
               <iconify-icon icon={saving ? "lucide:loader" : "lucide:save"} className={saving ? styles.spinIcon : ""} />
@@ -1034,14 +1108,11 @@ export default function CompanyProfilePage() {
                 value={form.industry}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
               >
-                <option value="Construction">Civil & Building Construction</option>
-                <option value="Engineering">Structural & Mechanical Engineering</option>
-                <option value="Electrical">Electrical, Power & Solar Energy</option>
-                <option value="HVAC">HVAC & Industrial Cooling</option>
-                <option value="Plumbing">Industrial Plumbing & Water Sanitation</option>
-                <option value="Technology">IT Networks, Telecom & Security</option>
-                <option value="Logistics">Heavy Logistics, Transport & Fleet</option>
-                <option value="Facility Management">Facility Management & Industrial Maintenance</option>
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -1511,12 +1582,11 @@ export default function CompanyProfilePage() {
                     value={newServiceCategory}
                     onChange={(e) => setNewServiceCategory(e.target.value)}
                   >
-                    <option value="Civil & Construction">Civil & Building Construction</option>
-                    <option value="Electrical & Solar">Electrical & Solar Energy</option>
-                    <option value="HVAC & Cooling">HVAC & Industrial Cooling</option>
-                    <option value="Plumbing & Water">Plumbing & Water Sanitation</option>
-                    <option value="IT & Telecom">IT Networks, Telecom & CCTV</option>
-                    <option value="Facility Management">Facility Management & Cleaning</option>
+                    {availableCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1743,38 +1813,55 @@ export default function CompanyProfilePage() {
 
           {/* Add Team Modal */}
           {showAddTeamModal && (
-            <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.75)", backdropFilter: "blur(8px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-              <div style={{ background: "#ffffff", borderRadius: 20, width: "100%", maxWidth: 480, padding: 24 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #f1f5f9", paddingBottom: 12 }}>
-                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#001f3f" }}>{t.addKeyPersonnelTitle}</h3>
-                  <button type="button" onClick={() => setShowAddTeamModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 32, height: 32, cursor: "pointer" }}>
+            <div className={styles.modalOverlay} onClick={() => setShowAddTeamModal(false)}>
+              <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <div className={styles.modalTitleGroup}>
+                    <div className={styles.modalIcon}>
+                      <iconify-icon icon="lucide:user-plus" />
+                    </div>
+                    <div>
+                      <h3>{t.addKeyPersonnelTitle}</h3>
+                      <p>{t.teamModalSub}</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setShowAddTeamModal(false)} className={styles.modalCloseBtn}>
                     <iconify-icon icon="lucide:x" />
                   </button>
                 </div>
 
                 <form onSubmit={handleAddTeamMember}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.fullName}</label>
-                      <input className={styles.formInput} value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder="e.g. Dr. Marcelle Dossou" required />
+                  <div className={styles.modalBody}>
+                    <div className={styles.twoCol}>
+                      <div>
+                        <label className={styles.label}>{t.fullName}</label>
+                        <input className={styles.input} value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder="e.g. Dr. Marcelle Dossou" required />
+                      </div>
+                      <div>
+                        <label className={styles.label}>{t.positionRole}</label>
+                        <input className={styles.input} value={newTeamRole} onChange={(e) => setNewTeamRole(e.target.value)} placeholder="e.g. Lead Structural Engineer" required />
+                      </div>
                     </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.positionRole}</label>
-                      <input className={styles.formInput} value={newTeamRole} onChange={(e) => setNewTeamRole(e.target.value)} placeholder="e.g. Lead Structural Engineer" required />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.qualificationsDegrees}</label>
-                      <input className={styles.formInput} value={newTeamQual} onChange={(e) => setNewTeamQual(e.target.value)} placeholder="e.g. M.Sc. Civil Engineering / Chartered Member" />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.yearsExp}</label>
-                      <input className={styles.formInput} value={newTeamExp} onChange={(e) => setNewTeamExp(e.target.value)} placeholder="e.g. 10+ Years" />
+                    <div className={styles.twoCol}>
+                      <div>
+                        <label className={styles.label}>{t.qualificationsDegrees}</label>
+                        <input className={styles.input} value={newTeamQual} onChange={(e) => setNewTeamQual(e.target.value)} placeholder="e.g. M.Sc. Civil Engineering / Chartered Member" />
+                      </div>
+                      <div>
+                        <label className={styles.label}>{t.yearsExp}</label>
+                        <input className={styles.input} value={newTeamExp} onChange={(e) => setNewTeamExp(e.target.value)} placeholder="e.g. 10+ Years" />
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-                    <button type="button" onClick={() => setShowAddTeamModal(false)} className={styles.outlineButton} style={{ flex: 1, justifyContent: "center" }}>{t.cancel}</button>
-                    <button type="submit" className={styles.primaryButton} style={{ flex: 1.2, justifyContent: "center" }}>{t.saveMember}</button>
+                  <div className={styles.modalFooter}>
+                    <button type="button" onClick={() => setShowAddTeamModal(false)} className={styles.outlineButton}>
+                      {t.cancel}
+                    </button>
+                    <button type="submit" className={styles.primaryButton}>
+                      <iconify-icon icon="lucide:check" />
+                      {t.saveMember}
+                    </button>
                   </div>
                 </form>
               </div>
@@ -1863,21 +1950,50 @@ export default function CompanyProfilePage() {
         </section>
       )}
 
-      {/* ==================== BOTTOM SAVE ACTION ==================== */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 14, marginTop: 10 }}>
+      {/* ==================== BOTTOM SAVE ACTION & STEP PROGRESSION ==================== */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginTop: 10, flexWrap: "wrap" }}>
         <Link href="/dashboard/company" className={styles.outlineButton}>
-          {t.backToDashboard}
+          <iconify-icon icon="lucide:arrow-left" /> {t.backToDashboard}
         </Link>
-        <button
-          type="button"
-          className={styles.primaryButton}
-          onClick={handleSaveProfile}
-          disabled={saving}
-          style={{ minHeight: 48, padding: "0 32px", fontSize: 15 }}
-        >
-          <iconify-icon icon={saving ? "lucide:loader" : "lucide:save"} className={saving ? styles.spinIcon : ""} />
-          {saving ? t.savingAll : t.saveEnterpriseProfile}
-        </button>
+
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          {activeTab !== "overview" && (
+            <button
+              type="button"
+              className={styles.outlineButton}
+              onClick={() => {
+                const currentIdx = TAB_ORDER.indexOf(activeTab);
+                if (currentIdx > 0) {
+                  setActiveTab(TAB_ORDER[currentIdx - 1]);
+                  if (typeof window !== "undefined") {
+                    window.scrollTo({ top: 380, behavior: "smooth" });
+                  }
+                }
+              }}
+            >
+              <iconify-icon icon="lucide:chevron-left" />
+              {t.prevStep}
+            </button>
+          )}
+
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => handleSaveProfile(true)}
+            disabled={saving}
+            style={{ minHeight: 48, padding: "0 28px", fontSize: 15 }}
+          >
+            <iconify-icon
+              icon={saving ? "lucide:loader" : activeTab === "insurance" ? "lucide:check" : "lucide:arrow-right"}
+              className={saving ? styles.spinIcon : ""}
+            />
+            {saving
+              ? t.saving
+              : activeTab === "insurance"
+              ? t.saveEnterpriseProfile
+              : t.saveAndContinue}
+          </button>
+        </div>
       </div>
     </div>
   );
