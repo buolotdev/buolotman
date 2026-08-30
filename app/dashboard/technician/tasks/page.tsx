@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
@@ -9,9 +9,46 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import TaskBoard from "@/app/components/TaskBoard";
 import styles from "./page.module.css";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchPlaceholder: "Search tasks or keywords",
+    eyebrow: "Marketplace",
+    title: "Browse Tasks",
+    subtitle: "Find the best tasks and apply easily.",
+    loading: "Loading marketplace access...",
+    lockTitle: "Admin Verification Required to Browse & Bid Tasks",
+    lockDesc: "Your technician profile is currently under review by the Boulot Man verification team. To protect platform clients and ensure work quality, task browsing and bid submissions unlock once your National ID and credentials are fully approved.",
+    uploadBtn: "Upload ID & Certificates",
+    backBtn: "Back to Dashboard",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher des tâches ou mots-clés",
+    eyebrow: "Place de marché",
+    title: "Parcourir les Missions",
+    subtitle: "Trouvez les meilleures missions et postulez facilement.",
+    loading: "Chargement de l'accès à la place de marché...",
+    lockTitle: "Validation Administrateur Requise pour Postuler aux Missions",
+    lockDesc: "Votre profil de technicien est actuellement en cours d'examen par l'équipe Boulot Man. Pour garantir la sécurité des clients, l'accès aux missions et le dépôt d'offres seront débloqués dès la validation de votre pièce d'identité et de vos diplômes.",
+    uploadBtn: "Télécharger Pièce d'Identité & Diplômes",
+    backBtn: "Retour au Tableau de bord",
+  }
+};
+
 export default function TechnicianTasksPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
   const { data: user, loading } = useFetch(() => api.getMe(), []);
 
   const isVerified = Boolean(user?.is_verified || (user as any)?.technician_profile?.is_verified);
@@ -24,7 +61,7 @@ export default function TechnicianTasksPage() {
         <div className={styles.main}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search tasks or keywords"
+            searchPlaceholder={t.searchPlaceholder}
             searchQuery={query}
             setSearchQuery={setQuery}
           />
@@ -32,14 +69,14 @@ export default function TechnicianTasksPage() {
           <div className={styles.content}>
             <section className={styles.pageHeader} style={{ marginBottom: "20px" }}>
               <div>
-                <p className={styles.eyebrow}>Marketplace</p>
-                <h1>Browse Tasks</h1>
-                <p>Find the best tasks and apply easily.</p>
+                <p className={styles.eyebrow}>{t.eyebrow}</p>
+                <h1>{t.title}</h1>
+                <p>{t.subtitle}</p>
               </div>
             </section>
 
             {loading ? (
-              <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading marketplace access...</div>
+              <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>{t.loading}</div>
             ) : !isVerified ? (
               <div style={{
                 background: "#ffffff",
@@ -66,10 +103,10 @@ export default function TechnicianTasksPage() {
                   <iconify-icon icon="lucide:lock" />
                 </div>
                 <h2 style={{ color: "#001F3F", fontSize: "1.6rem", fontWeight: 800, margin: "0 0 12px 0" }}>
-                  Admin Verification Required to Browse &amp; Bid Tasks
+                  {t.lockTitle}
                 </h2>
                 <p style={{ color: "#64748b", fontSize: "15px", lineHeight: 1.65, margin: "0 0 28px 0" }}>
-                  Your technician profile is currently under review by the Boulot Man verification team. To protect platform clients and ensure work quality, task browsing and bid submissions unlock once your National ID and credentials are fully approved.
+                  {t.lockDesc}
                 </p>
                 <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
                   <Link href="/dashboard/technician/profile" style={{
@@ -85,7 +122,7 @@ export default function TechnicianTasksPage() {
                     gap: "8px",
                     boxShadow: "0 6px 16px rgba(255, 69, 0, 0.25)"
                   }}>
-                    <iconify-icon icon="lucide:upload" /> Upload ID &amp; Certificates
+                    <iconify-icon icon="lucide:upload" /> {t.uploadBtn}
                   </Link>
                   <Link href="/dashboard/technician" style={{
                     background: "#f1f5f9",
@@ -96,7 +133,7 @@ export default function TechnicianTasksPage() {
                     fontSize: "14.5px",
                     textDecoration: "none"
                   }}>
-                    Back to Dashboard
+                    {t.backBtn}
                   </Link>
                 </div>
               </div>
@@ -109,3 +146,4 @@ export default function TechnicianTasksPage() {
     </main>
   );
 }
+

@@ -1,40 +1,64 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
-import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-  { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchPlaceholder: "Search tasks...",
+    eyebrow: "Task management",
+    title: "My Tasks",
+    subtitle: "Open any task to manage progress, review proposals, and keep communication in one place.",
+    postAnother: "Post another task",
+    noTasks: "No tasks yet.",
+    proposals: "proposals",
+    views: "views",
+    viewCompleted: "View Completed Task",
+    openActive: "Open Active Task",
+    reviewProposals: "Review Proposals",
+    openTask: "Open Task",
+    inProgress: "In Progress",
+    completed: "Completed",
+    open: "Open",
+    cancelled: "Cancelled",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher des tâches...",
+    eyebrow: "Gestion des missions",
+    title: "Mes Tâches",
+    subtitle: "Consultez vos tâches pour suivre l'avancement, examiner les propositions et communiquer en un seul endroit.",
+    postAnother: "Publier une autre tâche",
+    noTasks: "Aucune tâche pour le moment.",
+    proposals: "offres",
+    views: "vues",
+    viewCompleted: "Voir la tâche terminée",
+    openActive: "Voir la mission en cours",
+    reviewProposals: "Examiner les offres",
+    openTask: "Ouvrir la tâche",
+    inProgress: "En cours",
+    completed: "Terminée",
+    open: "Ouverte",
+    cancelled: "Annulée",
+  }
+};
 
-];
-
-function getStatusMeta(status: string) {
+function getStatusMeta(status: string, t: Record<string, string>) {
   switch (status) {
     case "in_progress":
-      return { label: "In Progress", badgeClass: "badgeProgress", progressClass: "progressActive" };
+      return { label: t.inProgress || "In Progress", badgeClass: "badgeProgress", progressClass: "progressActive" };
     case "completed":
-      return { label: "Completed", badgeClass: "badgeSuccess", progressClass: "progressSuccess" };
+      return { label: t.completed || "Completed", badgeClass: "badgeSuccess", progressClass: "progressSuccess" };
     case "open":
-      return { label: "Open", badgeClass: "badgeWarning", progressClass: "progressPending" };
+      return { label: t.open || "Open", badgeClass: "badgeWarning", progressClass: "progressPending" };
     case "cancelled":
-      return { label: "Cancelled", badgeClass: "badgeDanger", progressClass: "progressPending" };
+      return { label: t.cancelled || "Cancelled", badgeClass: "badgeDanger", progressClass: "progressPending" };
     default:
       return { label: status, badgeClass: "badgeDefault", progressClass: "progressPending" };
   }
@@ -43,20 +67,21 @@ function getStatusMeta(status: string) {
 export default function ClientTasksPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const router = useRouter();
-  const pathname = usePathname();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: tasksData, loading } = useFetch(() => api.getMyTasks(), []);
-  const { data: userData } = useFetch(() => api.getMe(), []);
   const tasks = toArray(tasksData);
-
-  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
-  const userInitials = useMemo(() => {
-    const first = userData?.first_name?.[0] ?? "";
-    const last = userData?.last_name?.[0] ?? "";
-    return `${first}${last}`.toUpperCase();
-  }, [userData]);
-  const userRole = userData?.role ?? "";
 
   const filteredTasks = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -74,7 +99,7 @@ export default function ClientTasksPage() {
         <div className={styles.main}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search tasks..."
+            searchPlaceholder={t.searchPlaceholder}
             searchQuery={query}
             setSearchQuery={setQuery}
           />
@@ -82,13 +107,13 @@ export default function ClientTasksPage() {
           <div className={styles.content}>
             <section className={styles.hero}>
               <div>
-                <p className={styles.eyebrow}>Task management</p>
-                <h2>My Tasks</h2>
-                <p>Open any task to manage progress, review proposals, and keep communication in one place.</p>
+                <p className={styles.eyebrow}>{t.eyebrow}</p>
+                <h2>{t.title}</h2>
+                <p>{t.subtitle}</p>
               </div>
               <Link href="/post-task" className={styles.primaryButton}>
                 <iconify-icon icon="lucide:plus" />
-                Post another task
+                {t.postAnother}
               </Link>
             </section>
 
@@ -104,7 +129,7 @@ export default function ClientTasksPage() {
                   const isTaskCompleted = task.status === "completed";
                   const hasAcceptedProposal = Number(task.accepted_bids_count || 0) > 0 || Boolean(task.assigned_to);
                   const displayStatus = isTaskCompleted ? "completed" : (hasAcceptedProposal && task.status === "open" ? "in_progress" : task.status);
-                  const statusMeta = getStatusMeta(displayStatus);
+                  const statusMeta = getStatusMeta(displayStatus, t);
                   const taskHref = isTaskCompleted || task.status === "in_progress"
                     ? `/dashboard/client/projects/${task.id}`
                     : (hasAcceptedProposal || task.status !== "open"
@@ -125,8 +150,8 @@ export default function ClientTasksPage() {
                         </div>
                         <div className={styles.progressBlock}>
                           <div className={styles.progressHeader}>
-                            <span>{task.bids_count || 0} proposals</span>
-                            <strong>{task.views_count || 0} views</strong>
+                            <span>{task.bids_count || 0} {t.proposals}</span>
+                            <strong>{task.views_count || 0} {t.views}</strong>
                           </div>
                           <div className={styles.progressTrack}>
                             <span className={`${styles.progressFill} ${styles[statusMeta.progressClass]}`} style={{ width: `${isTaskCompleted ? 100 : (task.progress || 0)}%` }} />
@@ -139,14 +164,14 @@ export default function ClientTasksPage() {
                           href={taskHref}
                           className={styles.openButton}
                         >
-                          {isTaskCompleted ? "View Completed Task" : hasAcceptedProposal || task.status === "in_progress" ? "Open Active Task" : task.status === "open" ? "Review Proposals" : "Open Task"}
+                          {isTaskCompleted ? t.viewCompleted : hasAcceptedProposal || task.status === "in_progress" ? t.openActive : task.status === "open" ? t.reviewProposals : t.openTask}
                         </Link>
                       </div>
                     </article>
                   );
                 })
               ) : (
-                <div className={styles.emptyState}>No tasks yet.</div>
+                <div className={styles.emptyState}>{t.noTasks}</div>
               )}
             </section>
           </div>
@@ -155,3 +180,4 @@ export default function ClientTasksPage() {
     </main>
   );
 }
+

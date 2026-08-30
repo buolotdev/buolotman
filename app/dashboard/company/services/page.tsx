@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import layoutStyles from "../page.module.css";
 import styles from "./services.module.css";
@@ -9,10 +9,100 @@ import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    eyebrow: "Services Management",
+    title: "Manage Services",
+    subtitle: "Publish the services your company offers. Clients will see these on your public profile.",
+    pendingTitle: "Company Account Pending Admin Verification",
+    pendingDesc: "Your company registration documents are under administrative review. Publishing and managing services will unlock upon admin verification.",
+    profileBtn: "Company Profile",
+    totalServices: "Total Services",
+    activeServices: "Active Services",
+    inactiveServices: "Inactive Services",
+    addNewService: "Add New Service",
+    serviceName: "Service Name",
+    servicePlaceholder: "e.g. Commercial Building Construction",
+    category: "Category",
+    pricingModel: "Pricing Model",
+    quoteBased: "Quote-based",
+    fixedPrice: "Fixed Price",
+    hourly: "Hourly",
+    description: "Description",
+    descPlaceholder: "Describe the service in detail",
+    status: "Status",
+    activeOption: "Active (Visible to clients)",
+    inactiveOption: "Inactive (Hidden)",
+    saving: "Saving...",
+    saveService: "Save Service",
+    existingServices: "Existing Services",
+    loadingServices: "Loading services...",
+    thService: "Service",
+    thCategory: "Category",
+    thPricing: "Pricing",
+    thStatus: "Status",
+    thActions: "Actions",
+    edit: "Edit",
+    activate: "Activate",
+    deactivate: "Deactivate",
+    noServices: "No services found.",
+    noServicesSub: "Add your first corporate service using the form above!",
+  },
+  fr: {
+    eyebrow: "Gestion des Prestations",
+    title: "Gérer les Services",
+    subtitle: "Publiez les services proposés par votre entreprise. Les clients les verront sur votre profil public.",
+    pendingTitle: "Compte Entreprise en Attente de Vérification",
+    pendingDesc: "Vos documents d'enregistrement sont en cours d'examen. La publication et la gestion des services seront actives dès la validation.",
+    profileBtn: "Profil Entreprise",
+    totalServices: "Total des Services",
+    activeServices: "Services Actifs",
+    inactiveServices: "Services Inactifs",
+    addNewService: "Ajouter un Nouveau Service",
+    serviceName: "Nom de la prestation",
+    servicePlaceholder: "ex. Construction de bâtiments commerciaux",
+    category: "Catégorie",
+    pricingModel: "Modèle de Tarification",
+    quoteBased: "Sur devis",
+    fixedPrice: "Prix Fixe",
+    hourly: "Horaire",
+    description: "Description",
+    descPlaceholder: "Décrivez la prestation en détail",
+    status: "Statut",
+    activeOption: "Actif (Visible pour les clients)",
+    inactiveOption: "Inactif (Masqué)",
+    saving: "Enregistrement...",
+    saveService: "Enregistrer le Service",
+    existingServices: "Services Existants",
+    loadingServices: "Chargement des services...",
+    thService: "Service",
+    thCategory: "Catégorie",
+    thPricing: "Tarification",
+    thStatus: "Statut",
+    thActions: "Actions",
+    edit: "Modifier",
+    activate: "Activer",
+    deactivate: "Désactiver",
+    noServices: "Aucun service trouvé.",
+    noServicesSub: "Ajoutez votre premier service entreprise avec le formulaire ci-dessus !",
+  }
+};
 
 export default function ServicesManagement() {
   const toast = useToast();
   const dialog = useDialog();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: profile } = useFetch(() => api.getCompanyProfile(), []);
@@ -35,24 +125,25 @@ export default function ServicesManagement() {
   const [saving, setSaving] = useState(false);
   const isVerified = Boolean(user?.is_verified || (profile as any)?.is_verified);
 
-
   const handleSave = async () => {
     if (!isVerified) {
-      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can save and post services.");
+      toast.warning(
+        lang === "fr" ? "En attente de vérification" : "Wait for Verification",
+        lang === "fr" ? "Votre compte entreprise est en cours d'examen. Une fois approuvé, vous pourrez publier vos services." : "Please wait for verification. Your company account is currently under review by admin. Once approved, you can save and post services."
+      );
       return;
     }
 
     if (!form.title.trim()) {
-      toast.warning("Missing title", "Please enter a service name.");
+      toast.warning(lang === "fr" ? "Titre manquant" : "Missing title", lang === "fr" ? "Veuillez saisir un nom de service." : "Please enter a service name.");
       return;
     }
     setSaving(true);
     try {
       await api.createCompanyService(form);
-      toast.success("Service saved", `"${form.title}" has been added successfully.`);
+      toast.success(lang === "fr" ? "Service enregistré" : "Service saved", `"${form.title}"`);
       setForm({
         title: "",
-
         category: "Construction",
         pricing_model: "Quote-based",
         description: "",
@@ -60,7 +151,7 @@ export default function ServicesManagement() {
       });
       await refetch();
     } catch (err: any) {
-      toast.error("Save failed", err.message || "Failed to save the service.");
+      toast.error(lang === "fr" ? "Échec de l'enregistrement" : "Save failed", err.message || "Failed to save the service.");
     } finally {
       setSaving(false);
     }
@@ -69,28 +160,21 @@ export default function ServicesManagement() {
   const toggleStatus = async (id: number, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
     try {
-      // Assuming you have an updateCompanyService endpoint or can handle partial updates
-      // Currently api.ts might only have createCompanyService and getCompanyServices.
-      // If we don't have updateCompanyService, I'll delete and re-create as a fallback for now.
-      // Let's implement delete for the "Deactivate" action if update isn't available, or just mock it.
-      // The mockup has "Deactivate" and "Activate". Let's assume we can update it or just show a warning.
-      // For this demo, let's use delete since that's what was there before.
-      
       if (newStatus === 'Inactive') {
         const ok = await dialog.confirm({
-          title: "Deactivate Service?",
-          message: "This will remove the service from your active profile.",
-          confirmText: "Deactivate",
-          cancelText: "Cancel",
+          title: lang === "fr" ? "Désactiver le service ?" : "Deactivate Service?",
+          message: lang === "fr" ? "Cela masquera le service de votre profil actif." : "This will remove the service from your active profile.",
+          confirmText: lang === "fr" ? "Désactiver" : "Deactivate",
+          cancelText: lang === "fr" ? "Annuler" : "Cancel",
           variant: "danger"
         });
         if (ok) {
           await api.deleteCompanyService(id);
-          toast.success("Service deactivated", "The service has been removed.");
+          toast.success(lang === "fr" ? "Service désactivé" : "Service deactivated", lang === "fr" ? "Le service a été retiré." : "The service has been removed.");
           await refetch();
         }
       } else {
-        toast.info("Update required", "Editing services will be available soon.");
+        toast.info(lang === "fr" ? "Mise à jour requise" : "Update required", lang === "fr" ? "La modification sera bientôt disponible." : "Editing services will be available soon.");
       }
     } catch (err: any) {
       toast.error("Action failed", err.message);
@@ -103,9 +187,9 @@ export default function ServicesManagement() {
       {/* BLUE BANNER HEADER */}
       <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
         <div className={layoutStyles.welcomeContent}>
-          <p className={layoutStyles.eyebrow}>Services Management</p>
-          <h2 className={layoutStyles.welcomeTitle}>Manage Services</h2>
-          <p className={layoutStyles.welcomeSubtitle}>Publish the services your company offers. Clients will see these on your public profile.</p>
+          <p className={layoutStyles.eyebrow}>{t.eyebrow}</p>
+          <h2 className={layoutStyles.welcomeTitle}>{t.title}</h2>
+          <p className={layoutStyles.welcomeSubtitle}>{t.subtitle}</p>
         </div>
       </section>
 
@@ -128,10 +212,10 @@ export default function ServicesManagement() {
             </div>
             <div>
               <strong style={{ color: "#92400e", fontSize: "14.5px", display: "block", marginBottom: "2px" }}>
-                Company Account Pending Admin Verification
+                {t.pendingTitle}
               </strong>
               <p style={{ margin: 0, color: "#b45309", fontSize: "13px" }}>
-                Your company registration documents are under administrative review. Publishing and managing services will unlock upon admin verification.
+                {t.pendingDesc}
               </p>
             </div>
           </div>
@@ -145,43 +229,42 @@ export default function ServicesManagement() {
             textDecoration: "none",
             whiteSpace: "nowrap"
           }}>
-            Company Profile
+            {t.profileBtn}
           </Link>
         </div>
       )}
 
-
       {/* OVERVIEW STATS */}
       <div className={styles.overview}>
         <div className={styles.stat}>
-          <span>Total Services</span>
+          <span>{t.totalServices}</span>
           <h3>{servicesLoading ? "..." : totalServices}</h3>
         </div>
         <div className={styles.stat}>
-          <span>Active Services</span>
+          <span>{t.activeServices}</span>
           <h3>{servicesLoading ? "..." : activeServices}</h3>
         </div>
         <div className={styles.stat}>
-          <span>Inactive Services</span>
+          <span>{t.inactiveServices}</span>
           <h3>{servicesLoading ? "..." : inactiveServices}</h3>
         </div>
       </div>
 
       {/* ADD SERVICE FORM */}
       <div className={styles.card}>
-        <h3>Add New Service</h3>
+        <h3>{t.addNewService}</h3>
 
-        <label className={styles.label}>Service Name</label>
+        <label className={styles.label}>{t.serviceName}</label>
         <input 
           className={styles.input} 
-          placeholder="e.g. Commercial Building Construction" 
+          placeholder={t.servicePlaceholder} 
           value={form.title}
           onChange={e => setForm({...form, title: e.target.value})}
         />
 
         <div className={styles.twoCol}>
           <div>
-            <label className={styles.label}>Category</label>
+            <label className={styles.label}>{t.category}</label>
             <select className={styles.select} value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
               <option value="Construction">Construction</option>
               <option value="Engineering">Engineering</option>
@@ -191,49 +274,49 @@ export default function ServicesManagement() {
             </select>
           </div>
           <div>
-            <label className={styles.label}>Pricing Model</label>
+            <label className={styles.label}>{t.pricingModel}</label>
             <select className={styles.select} value={form.pricing_model} onChange={e => setForm({...form, pricing_model: e.target.value})}>
-              <option value="Quote-based">Quote-based</option>
-              <option value="Fixed Price">Fixed Price</option>
-              <option value="Hourly">Hourly</option>
+              <option value="Quote-based">{t.quoteBased}</option>
+              <option value="Fixed Price">{t.fixedPrice}</option>
+              <option value="Hourly">{t.hourly}</option>
             </select>
           </div>
         </div>
 
-        <label className={styles.label}>Description</label>
+        <label className={styles.label}>{t.description}</label>
         <textarea 
           className={styles.textarea} 
-          placeholder="Describe the service in detail"
+          placeholder={t.descPlaceholder}
           value={form.description}
           onChange={e => setForm({...form, description: e.target.value})}
         />
 
-        <label className={styles.label}>Status</label>
+        <label className={styles.label}>{t.status}</label>
         <select className={styles.select} value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
-          <option value="Active">Active (Visible to clients)</option>
-          <option value="Inactive">Inactive (Hidden)</option>
+          <option value="Active">{t.activeOption}</option>
+          <option value="Inactive">{t.inactiveOption}</option>
         </select>
 
         <button className={styles.primary} onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Service"}
+          {saving ? t.saving : t.saveService}
         </button>
       </div>
 
       {/* SERVICES LIST */}
       <div className={styles.card}>
-        <h3>Existing Services</h3>
+        <h3>{t.existingServices}</h3>
         {servicesLoading ? (
-          <div style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>Loading services...</div>
+          <div style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>{t.loadingServices}</div>
         ) : services.length > 0 ? (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Service</th>
-                  <th>Category</th>
-                  <th>Pricing</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t.thService}</th>
+                  <th>{t.thCategory}</th>
+                  <th>{t.thPricing}</th>
+                  <th>{t.thStatus}</th>
+                  <th>{t.thActions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,9 +331,9 @@ export default function ServicesManagement() {
                       </span>
                     </td>
                     <td>
-                      <button className={styles.outline} onClick={() => toast.info("Edit", "Editing will open the form with data soon.")}>Edit</button>
+                      <button className={styles.outline} onClick={() => toast.info("Edit", "Editing will open the form with data soon.")}>{t.edit}</button>
                       <button className={styles.outline} onClick={() => toggleStatus(svc.id, svc.status || 'Active')}>
-                        {svc.status === 'Inactive' ? 'Activate' : 'Deactivate'}
+                        {svc.status === 'Inactive' ? t.activate : t.deactivate}
                       </button>
                     </td>
                   </tr>
@@ -261,8 +344,8 @@ export default function ServicesManagement() {
         ) : (
           <div style={{ textAlign: "center", padding: "40px 16px", color: "#64748b" }}>
             <iconify-icon icon="lucide:layers" style={{ fontSize: "36px", color: "#cbd5e1", display: "inline-block", marginBottom: "8px" }} />
-            <p style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>No services found.</p>
-            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#94a3b8" }}>Add your first corporate service using the form above!</p>
+            <p style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>{t.noServices}</p>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#94a3b8" }}>{t.noServicesSub}</p>
           </div>
         )}
       </div>
@@ -270,3 +353,4 @@ export default function ServicesManagement() {
     </div>
   );
 }
+

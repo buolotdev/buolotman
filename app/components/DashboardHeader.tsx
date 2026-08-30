@@ -67,9 +67,9 @@ const headerTranslations: Record<string, Record<string, string>> = {
 };
 
 const LANGUAGES = [
-  { code: "en", name: "English", flag: "🇬🇧" },
-  { code: "fr", name: "Français", flag: "🇫🇷" },
-  { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
+  { code: "en", name: "English", flagUrl: "https://flagcdn.com/w40/gb.png", flagAlt: "EN" },
+  { code: "fr", name: "Français", flagUrl: "https://flagcdn.com/w40/fr.png", flagAlt: "FR" },
+  { code: "rw", name: "Kinyarwanda", flagUrl: "https://flagcdn.com/w40/rw.png", flagAlt: "RW" },
 ];
 
 export default function DashboardHeader({
@@ -330,18 +330,27 @@ export default function DashboardHeader({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "6px",
-              padding: "0 10px",
+              gap: "8px",
+              padding: "0 12px",
               width: "auto",
-              minWidth: "44px",
+              minWidth: "75px",
               borderRadius: "12px",
-              fontWeight: 700,
+              fontWeight: 800,
               fontSize: "13px",
-              color: "#001f3f"
+              color: "#001f3f",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 2px 6px rgba(0,31,63,0.04)"
             }}
             aria-label="Change Language"
           >
-            <span style={{ fontSize: "17px", lineHeight: 1 }}>{currentLangObj.flag}</span>
+            <img
+              src={currentLangObj.flagUrl}
+              alt={currentLangObj.flagAlt}
+              width={20}
+              height={14}
+              style={{ borderRadius: "3px", objectFit: "cover", display: "inline-block", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
+            />
             <span style={{ textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.5px" }}>{currentLangObj.code}</span>
             <iconify-icon icon="lucide:chevron-down" style={{ fontSize: "14px", color: "#64748b" }} />
           </button>
@@ -356,8 +365,8 @@ export default function DashboardHeader({
                 background: "#ffffff",
                 borderRadius: "14px",
                 border: "1px solid #e2e8f0",
-                boxShadow: "0 10px 25px rgba(0, 31, 63, 0.1)",
-                minWidth: "160px",
+                boxShadow: "0 10px 25px rgba(0, 31, 63, 0.12)",
+                minWidth: "165px",
                 padding: "6px",
                 zIndex: 100,
                 display: "flex",
@@ -375,28 +384,35 @@ export default function DashboardHeader({
                     alignItems: "center",
                     gap: "10px",
                     width: "100%",
-                    padding: "8px 12px",
+                    padding: "9px 12px",
                     border: "none",
                     background: lang === item.code ? "rgba(255, 69, 0, 0.08)" : "transparent",
                     color: lang === item.code ? "#ff4500" : "#001f3f",
                     borderRadius: "8px",
-                    fontSize: "13px",
-                    fontWeight: lang === item.code ? 700 : 500,
+                    fontSize: "13.5px",
+                    fontWeight: lang === item.code ? 800 : 600,
                     cursor: "pointer",
                     textAlign: "left",
                     transition: "all 0.15s ease"
                   }}
                 >
-                  <span style={{ fontSize: "16px" }}>{item.flag}</span>
+                  <img
+                    src={item.flagUrl}
+                    alt={item.flagAlt}
+                    width={20}
+                    height={14}
+                    style={{ borderRadius: "3px", objectFit: "cover", display: "inline-block", boxShadow: "0 1px 2px rgba(0,0,0,0.15)" }}
+                  />
                   <span>{item.name}</span>
                   {lang === item.code && (
-                    <iconify-icon icon="lucide:check" style={{ marginLeft: "auto", color: "#ff4500" }} />
+                    <iconify-icon icon="lucide:check" style={{ marginLeft: "auto", color: "#ff4500", fontWeight: "bold" }} />
                   )}
                 </button>
               ))}
             </div>
           )}
         </div>
+
 
         {/* Notifications button and dropdown */}
         <div className={styles.actionWrapper} ref={notifRef}>

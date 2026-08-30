@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
@@ -38,8 +38,88 @@ type Bid = {
 
 const PAGE_SIZE = 2;
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchPlaceholder: "Search tasks or users...",
+    eyebrow: "Bid management",
+    title: "My Bids",
+    findNewTasks: "Find New Tasks",
+    totalBids: "Total Bids",
+    activePending: "Active Pending",
+    winRate: "Win Rate",
+    earnedViaBids: "Earned via Bids",
+    allBids: "All Bids",
+    pending: "Pending",
+    accepted: "Accepted",
+    rejected: "Rejected",
+    completed: "Completed",
+    sortBy: "Sort by",
+    newestFirst: "Newest First",
+    highestAmount: "Highest Amount",
+    lowestAmount: "Lowest Amount",
+    competingBids: "Competing Bids",
+    yourProposal: "Your Proposal",
+    estDuration: "Est. Duration:",
+    includes: "Includes:",
+    fixedAmount: "Fixed Amount",
+    withdrawBid: "Withdraw Bid",
+    withdrawing: "Withdrawing...",
+    message: "Message",
+    messageSent: "Message Sent",
+    viewCompleted: "View Completed Task",
+    manageTask: "Manage Task",
+    viewDetails: "View Details",
+    noBidsYet: "No bids yet",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher des tâches ou utilisateurs...",
+    eyebrow: "Gestion des offres",
+    title: "Mes Offres",
+    findNewTasks: "Trouver de nouvelles missions",
+    totalBids: "Total des Offres",
+    activePending: "En attente",
+    winRate: "Taux de réussite",
+    earnedViaBids: "Gagné via les offres",
+    allBids: "Toutes les offres",
+    pending: "En attente",
+    accepted: "Acceptées",
+    rejected: "Refusées",
+    completed: "Terminée",
+    sortBy: "Trier par",
+    newestFirst: "Plus récentes",
+    highestAmount: "Montant le plus élevé",
+    lowestAmount: "Montant le plus bas",
+    competingBids: "Offres concurrentes",
+    yourProposal: "Votre proposition",
+    estDuration: "Durée estimée :",
+    includes: "Comprend :",
+    fixedAmount: "Montant Fixe",
+    withdrawBid: "Retirer l'offre",
+    withdrawing: "Retrait en cours...",
+    message: "Message",
+    messageSent: "Message envoyé",
+    viewCompleted: "Voir la tâche terminée",
+    manageTask: "Gérer la tâche",
+    viewDetails: "Voir les détails",
+    noBidsYet: "Aucune offre pour le moment",
+  }
+};
+
 export default function TechnicianBidsPage() {
   const toast = useToast();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const { data: bidsData, loading, refetch } = useFetch(() => api.getMyBids(), []);
   const { data: userData } = useFetch(() => api.getMe(), []);
   const { data: conversationsData } = useFetch(() => api.getConversations(), []);
@@ -52,14 +132,6 @@ export default function TechnicianBidsPage() {
   const [page, setPage] = useState(1);
   const [messagedIds, setMessagedIds] = useState<string[]>([]);
   const [withdrawingBidId, setWithdrawingBidId] = useState<string | null>(null);
-
-  const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
-  const userInitials = useMemo(() => {
-    const first = userData?.first_name?.[0] ?? "";
-    const last = userData?.last_name?.[0] ?? "";
-    return `${first}${last}`.toUpperCase();
-  }, [userData]);
-  const userRole = userData?.role ?? "";
 
   const bids: Bid[] = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,37 +174,45 @@ export default function TechnicianBidsPage() {
 
     if (normalizedQuery) {
       next = next.filter((bid) =>
-        [bid.taskTitle, bid.location, bid.client, bid.description, ...bid.skills]
+        [bid.taskTitle, bid.location, bid.client, bid.description, bid.proposal, ...bid.skills]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery)
       );
     }
 
-    if (sortBy === "highest") next = [...next].sort((a, b) => b.amount - a.amount);
-    else if (sortBy === "lowest") next = [...next].sort((a, b) => a.amount - b.amount);
-
-    return next;
+    return [...next].sort((a, b) => {
+      if (sortBy === "highest") return b.amount - a.amount;
+      if (sortBy === "lowest") return a.amount - b.amount;
+      return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+    });
   }, [visibleBids, activeTab, normalizedQuery, sortBy]);
+
+  const pendingCount = useMemo(() => visibleBids.filter((bid) => bid.status === "pending").length, [visibleBids]);
+  const acceptedCount = useMemo(() => visibleBids.filter((bid) => bid.status === "accepted").length, [visibleBids]);
+  const rejectedCount = useMemo(() => visibleBids.filter((bid) => bid.status === "rejected").length, [visibleBids]);
 
   const totalPages = Math.max(1, Math.ceil(filteredBids.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pagedBids = filteredBids.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pagedBids = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredBids.slice(start, start + PAGE_SIZE);
+  }, [filteredBids, currentPage]);
 
-  const pendingCount = visibleBids.filter((bid) => bid.status === "pending").length;
-  const acceptedCount = visibleBids.filter((bid) => bid.status === "accepted").length;
-  const rejectedCount = visibleBids.filter((bid) => bid.status === "rejected").length;
-  const earnedTotal = visibleBids.filter((bid) => bid.status === "accepted").reduce((sum, bid) => sum + bid.amount, 0);
+  const earnedTotal = useMemo(
+    () => visibleBids.filter((bid) => bid.status === "accepted").reduce((sum, bid) => sum + bid.amount, 0),
+    [visibleBids]
+  );
   const winRate = visibleBids.length ? `${Math.round((acceptedCount / visibleBids.length) * 100)}%` : "0%";
 
   const withdrawBid = async (bidId: string) => {
     setWithdrawingBidId(bidId);
     try {
       await api.withdrawBid(Number(bidId));
-      toast.success("Bid withdrawn", "You can submit a fresh bid for this task now.");
+      toast.success(lang === "fr" ? "Offre retirée" : "Bid withdrawn", lang === "fr" ? "Vous pouvez soumettre une nouvelle offre pour cette tâche." : "You can submit a fresh bid for this task now.");
       await refetch();
     } catch (err: any) {
-      toast.error("Could not withdraw bid", err?.message || "Please try again.");
+      toast.error(lang === "fr" ? "Impossible de retirer l'offre" : "Could not withdraw bid", err?.message || "Please try again.");
     } finally {
       setWithdrawingBidId((current) => (current === bidId ? null : current));
     }
@@ -156,6 +236,13 @@ export default function TechnicianBidsPage() {
     setPage(1);
   };
 
+  const getDisplayStatusLabel = (displayStatus: string) => {
+    if (displayStatus === "completed") return t.completed;
+    if (displayStatus === "accepted") return t.accepted;
+    if (displayStatus === "rejected") return t.rejected;
+    return t.pending;
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
@@ -164,7 +251,7 @@ export default function TechnicianBidsPage() {
         <div className={styles.main}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search tasks or users..."
+            searchPlaceholder={t.searchPlaceholder}
             searchQuery={query}
             setSearchQuery={setQuery}
           />
@@ -172,12 +259,12 @@ export default function TechnicianBidsPage() {
           <div className={styles.content}>
             <section className={styles.pageHeader}>
               <div>
-                <p className={styles.eyebrow}>Bid management</p>
-                <h1>My Bids</h1>
+                <p className={styles.eyebrow}>{t.eyebrow}</p>
+                <h1>{t.title}</h1>
               </div>
               <Link href="/dashboard/technician/tasks" className={styles.primaryButton}>
                 <iconify-icon icon="lucide:search" />
-                Find New Tasks
+                {t.findNewTasks}
               </Link>
             </section>
 
@@ -192,37 +279,37 @@ export default function TechnicianBidsPage() {
               <section className={styles.statsGrid}>
                 <article className={styles.statCard}>
                   <span className={styles.statIcon}><iconify-icon icon="lucide:file-stack" /></span>
-                  <div><small>Total Bids</small><strong>{visibleBids.length}</strong></div>
+                  <div><small>{t.totalBids}</small><strong>{visibleBids.length}</strong></div>
                 </article>
                 <article className={styles.statCard}>
                   <span className={styles.statIcon}><iconify-icon icon="lucide:clock" /></span>
-                  <div><small>Active Pending</small><strong>{pendingCount}</strong></div>
+                  <div><small>{t.activePending}</small><strong>{pendingCount}</strong></div>
                 </article>
                 <article className={styles.statCard}>
                   <span className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:check-circle" /></span>
-                  <div><small>Win Rate</small><strong>{winRate}</strong></div>
+                  <div><small>{t.winRate}</small><strong>{winRate}</strong></div>
                 </article>
                 <article className={styles.statCard}>
                   <span className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:coins" /></span>
-                  <div><small>Earned via Bids</small><strong>{formatXOF(earnedTotal)}</strong></div>
+                  <div><small>{t.earnedViaBids}</small><strong>{formatXOF(earnedTotal)}</strong></div>
                 </article>
               </section>
             )}
 
             <section className={styles.toolbar}>
               <div className={styles.tabs}>
-                <button type="button" className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => changeTab("all")}>All Bids ({visibleBids.length})</button>
-                <button type="button" className={`${styles.tab} ${activeTab === "pending" ? styles.tabActive : ""}`} onClick={() => changeTab("pending")}>Pending ({pendingCount})</button>
-                <button type="button" className={`${styles.tab} ${activeTab === "accepted" ? styles.tabActive : ""}`} onClick={() => changeTab("accepted")}>Accepted ({acceptedCount})</button>
-                <button type="button" className={`${styles.tab} ${activeTab === "rejected" ? styles.tabActive : ""}`} onClick={() => changeTab("rejected")}>Rejected ({rejectedCount})</button>
+                <button type="button" className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`} onClick={() => changeTab("all")}>{t.allBids} ({visibleBids.length})</button>
+                <button type="button" className={`${styles.tab} ${activeTab === "pending" ? styles.tabActive : ""}`} onClick={() => changeTab("pending")}>{t.pending} ({pendingCount})</button>
+                <button type="button" className={`${styles.tab} ${activeTab === "accepted" ? styles.tabActive : ""}`} onClick={() => changeTab("accepted")}>{t.accepted} ({acceptedCount})</button>
+                <button type="button" className={`${styles.tab} ${activeTab === "rejected" ? styles.tabActive : ""}`} onClick={() => changeTab("rejected")}>{t.rejected} ({rejectedCount})</button>
               </div>
 
               <label className={styles.sortWrap}>
-                <span>Sort by</span>
+                <span>{t.sortBy}</span>
                 <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)} className={styles.sortSelect}>
-                  <option value="newest">Newest First</option>
-                  <option value="highest">Highest Amount</option>
-                  <option value="lowest">Lowest Amount</option>
+                  <option value="newest">{t.newestFirst}</option>
+                  <option value="highest">{t.highestAmount}</option>
+                  <option value="lowest">{t.lowestAmount}</option>
                 </select>
               </label>
             </section>
@@ -260,12 +347,12 @@ export default function TechnicianBidsPage() {
                           <div className={styles.metaRow}>
                             <span><iconify-icon icon="lucide:map-pin" />{bid.location}</span>
                             <span><iconify-icon icon="lucide:clock" />{bid.submittedAt}</span>
-                            <span><iconify-icon icon="lucide:users" />{bid.competingBids} Competing Bids</span>
+                            <span><iconify-icon icon="lucide:users" />{bid.competingBids} {t.competingBids}</span>
                           </div>
                         </div>
                         <span className={`${styles.statusPill} ${statusClass}`}>
                           <iconify-icon icon={statusIcon} />
-                          {displayStatus}
+                          {getDisplayStatusLabel(displayStatus)}
                         </span>
                       </div>
 
@@ -279,16 +366,16 @@ export default function TechnicianBidsPage() {
 
                       <div className={styles.offerBox}>
                         <div className={styles.offerDetails}>
-                          <span className={styles.offerLabel}>Your Proposal</span>
+                          <span className={styles.offerLabel}>{t.yourProposal}</span>
                           <p>{bid.proposal}</p>
                           <div className={styles.offerMeta}>
-                            <span><iconify-icon icon="lucide:calendar-clock" />Est. Duration: <strong>{bid.duration}</strong></span>
-                            <span><iconify-icon icon="lucide:shield-check" />Includes: <strong>{bid.extra}</strong></span>
+                            <span><iconify-icon icon="lucide:calendar-clock" />{t.estDuration} <strong>{bid.duration}</strong></span>
+                            <span><iconify-icon icon="lucide:shield-check" />{t.includes} <strong>{bid.extra}</strong></span>
                           </div>
                         </div>
                         <div className={styles.offerPrice}>
                           <strong>{bid.amountLabel}</strong>
-                          <small>Fixed Amount</small>
+                          <small>{t.fixedAmount}</small>
                         </div>
                       </div>
 
@@ -309,17 +396,17 @@ export default function TechnicianBidsPage() {
                               disabled={withdrawingBidId === bid.id}
                               onClick={() => withdrawBid(bid.id)}
                             >
-                              {withdrawingBidId === bid.id ? "Withdrawing..." : "Withdraw Bid"}
+                              {withdrawingBidId === bid.id ? t.withdrawing : t.withdrawBid}
                             </button>
                           ) : null}
                           {bid.status === "accepted" && !isCompletedTask ? (
                             <Link href={getConvoLink(bid.client, bid.taskId)} className={styles.outlineButton} onClick={() => messageClient(bid.id)}>
                               <iconify-icon icon="lucide:message-circle" />
-                              {isMessaged ? "Message Sent" : "Message"}
+                              {isMessaged ? t.messageSent : t.message}
                             </Link>
                           ) : null}
                           <Link href={`/dashboard/technician/tasks/${bid.taskId}`} className={styles.primarySmallButton}>
-                            {isCompletedTask ? "View Completed Task" : bid.status === "accepted" ? "Manage Task" : "View Details"}
+                            {isCompletedTask ? t.viewCompleted : bid.status === "accepted" ? t.manageTask : t.viewDetails}
                           </Link>
                         </div>
                       </div>
@@ -327,7 +414,7 @@ export default function TechnicianBidsPage() {
                   );
                 })
               ) : (
-                <div className={styles.emptyState}>No bids yet</div>
+                <div className={styles.emptyState}>{t.noBidsYet}</div>
               )}
             </section>
 
