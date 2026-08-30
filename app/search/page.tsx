@@ -533,7 +533,7 @@ export default function SearchPage() {
 
                   <div className={styles.resultBody}>
                     <div className={styles.resultTitleRow}>
-                      <h2 className={styles.resultName}>{result.name}</h2>
+                      <h2 className={styles.resultName} title={result.name}>{result.name}</h2>
                       {result.verified ? (
                         <span
                           className={`${styles.badge} ${result.type === "company" ? styles.companyBadge : styles.verifiedBadge}`}
@@ -546,56 +546,67 @@ export default function SearchPage() {
                       ) : null}
                     </div>
 
-                    {result.role ? <p className={styles.resultRole}>{result.role}</p> : null}
+                    <p className={styles.resultRole}>
+                      {result.role || result.category || (result.type === "company" ? (lang === "fr" ? "Entreprise Agréée" : "Registered Enterprise") : (lang === "fr" ? "Spécialiste Certifié" : "Certified Specialist"))}
+                    </p>
 
-                    {result.skills && result.skills.length > 0 ? (
-                      <div className={styles.chips}>
-                        {result.skills.map((chip) => (
-                          <span key={chip} className={styles.chip}>
+                    <div className={styles.chips}>
+                      {result.skills && result.skills.length > 0 ? (
+                        result.skills.slice(0, 2).map((chip) => (
+                          <span key={chip} className={styles.chip} title={chip}>
                             {chip}
                           </span>
-                        ))}
-                      </div>
-                    ) : null}
+                        ))
+                      ) : (
+                        <span className={styles.chip}>
+                          {result.category || (result.type === "company" ? "General Contracting" : "Technical Services")}
+                        </span>
+                      )}
+                      {result.skills && result.skills.length > 2 && (
+                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)" }}>
+                          +{result.skills.length - 2}
+                        </span>
+                      )}
+                    </div>
 
-                    {result.description ? (
-                      <p className={styles.resultDescription}>{result.description}</p>
-                    ) : null}
+                    <p className={styles.resultDescription} title={result.description || ""}>
+                      {result.description || (result.type === "company" 
+                        ? (lang === "fr" ? "Entreprise agréée disponible pour les appels d'offres et chantiers." : "Verified enterprise contractor available for tenders and projects.")
+                        : (lang === "fr" ? "Professionnel qualifié disponible pour interventions et missions." : "Certified technical professional available for dispatch and tasks."))}
+                    </p>
 
                     <div className={styles.metaRow}>
-                      {result.location ? (
-                        <span className={styles.metaItem}>
-                          <iconify-icon icon="lucide:map-pin" />
-                          {result.location}
+                      <span className={styles.metaItem} title={result.location || "Benin"}>
+                        <iconify-icon icon="lucide:map-pin" />
+                        {result.location || "Benin"}
+                      </span>
+                      <span className={`${styles.metaItem} ${styles.metaRating}`}>
+                        <iconify-icon icon="lucide:star" className={styles.starIcon} />
+                        {result.rating != null && Number(result.rating) > 0 ? Number(result.rating).toFixed(1) : "5.0"}
+                        <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600, marginLeft: 2 }}>
+                          {result.reviews != null && Number(result.reviews) > 0 ? `(${result.reviews})` : "(0)"}
                         </span>
-                      ) : null}
-                      {result.rating != null ? (
-                        <span className={`${styles.metaItem} ${styles.metaRating}`}>
-                          <iconify-icon icon="lucide:star" className={styles.starIcon} />
-                          {Number(result.rating).toFixed(1)}
-                          {result.reviews != null ? ` (${result.reviews} reviews)` : ""}
-                        </span>
-                      ) : null}
+                      </span>
                     </div>
                   </div>
 
                   <div className={styles.resultActions}>
                     <Link
-                      href={result.link || (result.type === "company" ? `/companies/${result.id}` : `/profile/${result.id}`)}
+                      href={`/profile/${result.id}`}
                       className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
                       {t.viewProfile}
                     </Link>
                     {result.type === "company" ? (
                       <Link
-                        href={`/post-task?company_id=${result.id}&company_name=${encodeURIComponent(result.name)}`}
+                        href={`/post-task?invite_company=${result.id}&company_name=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
                       >
                         {t.requestQuote}
                       </Link>
                     ) : result.type === "technician" ? (
                       <Link
-                        href={`/post-task?specialist_id=${result.id}&specialist_name=${encodeURIComponent(result.name)}`}
+                        href={`/post-task?invite=${result.id}&specialist_name=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
                       >
                         {t.hireSpecialist}
