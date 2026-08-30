@@ -637,6 +637,14 @@ export default function CompanyProfilePage() {
       // Save capabilities & team to localStorage
       localStorage.setItem("boulotman_company_capabilities", JSON.stringify(capabilities));
       localStorage.setItem("boulotman_company_team", JSON.stringify(teamMembers));
+      if (profile?.id) {
+        localStorage.setItem(`boulotman_company_team_${profile.id}`, JSON.stringify(teamMembers));
+        localStorage.setItem(`boulotman_company_capabilities_${profile.id}`, JSON.stringify(capabilities));
+      }
+      if (user?.id) {
+        localStorage.setItem(`boulotman_company_team_${user.id}`, JSON.stringify(teamMembers));
+        localStorage.setItem(`boulotman_company_capabilities_${user.id}`, JSON.stringify(capabilities));
+      }
 
       await refetchProfile();
       await refetchUser();
@@ -818,6 +826,8 @@ export default function CompanyProfilePage() {
     const updated = [...teamMembers, newMember];
     setTeamMembers(updated);
     localStorage.setItem("boulotman_company_team", JSON.stringify(updated));
+    if (profile?.id) localStorage.setItem(`boulotman_company_team_${profile.id}`, JSON.stringify(updated));
+    if (user?.id) localStorage.setItem(`boulotman_company_team_${user.id}`, JSON.stringify(updated));
     setNewTeamName("");
     setNewTeamRole("");
     setNewTeamQual("");
@@ -830,6 +840,8 @@ export default function CompanyProfilePage() {
     const updated = teamMembers.filter(t => t.id !== id);
     setTeamMembers(updated);
     localStorage.setItem("boulotman_company_team", JSON.stringify(updated));
+    if (profile?.id) localStorage.setItem(`boulotman_company_team_${profile.id}`, JSON.stringify(updated));
+    if (user?.id) localStorage.setItem(`boulotman_company_team_${user.id}`, JSON.stringify(updated));
     toast.info("Member Removed", "Key personnel removed from company profile.");
   };
 

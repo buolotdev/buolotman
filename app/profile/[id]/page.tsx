@@ -42,8 +42,6 @@ const translations: Record<string, Record<string, string>> = {
     noPortfolioListed: "No past project references published yet.",
     keyPersonnel: "Key Technical Personnel & Engineering Leadership",
     noTeamListed: "No key engineering personnel declared yet.",
-    heavyFleet: "Owned Heavy Machinery, Equipment & Facilities",
-    noEquipmentListed: "No specialized heavy machinery declared yet.",
     corporateComplianceVault: "Corporate Legal Compliance Vault",
     rccmRegVal: "RCCM Commercial Registration",
     ifuTaxVal: "IFU Taxpayer Clearance",
@@ -124,8 +122,6 @@ const translations: Record<string, Record<string, string>> = {
     noPortfolioListed: "Aucune réalisation publiée pour l'instant.",
     keyPersonnel: "Direction Technique & Personnel Clé",
     noTeamListed: "Aucun membre clé répertorié pour l'instant.",
-    heavyFleet: "Parc d'Engins Lourds, Matériel & Infrastructures",
-    noEquipmentListed: "Aucun engin lourd déclaré pour l'instant.",
     corporateComplianceVault: "Coffre-fort de Conformité Juridique",
     rccmRegVal: "Immatriculation RCCM",
     ifuTaxVal: "Identifiant Fiscal IFU",
@@ -256,65 +252,61 @@ export default function PublicProfilePage() {
         } catch {}
       }
 
-      // 4. If current viewer is previewing their own profile, blend active local edits seamlessly
+      // 4. Always read local storage for latest team, capabilities, and customized fields
       if (typeof window !== "undefined") {
         try {
-          const rawMe = localStorage.getItem("boulotman_user");
-          let isOwnProfile = false;
-          if (rawMe) {
+          const rawTeam = localStorage.getItem(`boulotman_company_team_${validId}`) 
+            || localStorage.getItem("boulotman_company_team")
+            || (baseUser?.id ? localStorage.getItem(`boulotman_company_team_${baseUser.id}`) : null)
+            || (baseUser?.user_id ? localStorage.getItem(`boulotman_company_team_${baseUser.user_id}`) : null);
+
+          if (rawTeam) {
             try {
-              const meObj = JSON.parse(rawMe);
-              if (meObj && (meObj.id === validId || meObj.user_id === validId)) {
-                isOwnProfile = true;
+              const parsedTeam = JSON.parse(rawTeam);
+              if (Array.isArray(parsedTeam) && parsedTeam.length > 0) {
+                baseUser.team = parsedTeam;
               }
             } catch {}
           }
 
-          if (isOwnProfile) {
-            const rawRole = localStorage.getItem("user_role");
-            const isComp = baseUser?.role === "COMPANY" || rawRole === "COMPANY";
-            if (isComp) {
-              const rawCap = localStorage.getItem("boulotman_company_capabilities");
-              const rawTeam = localStorage.getItem("boulotman_company_team");
-              if (rawCap) {
-                try {
-                  baseUser.capabilities = JSON.parse(rawCap);
-                } catch {}
-              }
-              if (rawTeam) {
-                try {
-                  baseUser.team = JSON.parse(rawTeam);
-                } catch {}
-              }
-            } else {
-              const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
-              const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-              const rawTools = localStorage.getItem("boulotman_technician_tools");
-              const rawSkills = localStorage.getItem("boulotman_technician_skills");
+          const rawCap = localStorage.getItem(`boulotman_company_capabilities_${validId}`)
+            || localStorage.getItem("boulotman_company_capabilities")
+            || (baseUser?.id ? localStorage.getItem(`boulotman_company_capabilities_${baseUser.id}`) : null)
+            || (baseUser?.user_id ? localStorage.getItem(`boulotman_company_capabilities_${baseUser.user_id}`) : null);
 
-              if (rawCustom) {
-                const c = JSON.parse(rawCustom);
-                if (c) {
-                  baseUser = {
-                    ...(baseUser || {}),
-                    id: validId,
-                    role: "TECHNICIAN",
-                    first_name: c.firstName || baseUser?.first_name,
-                    last_name: c.lastName || baseUser?.last_name,
-                    headline: c.headline || baseUser?.headline,
-                    bio: c.bio || baseUser?.bio,
-                    about: c.bio || baseUser?.about,
-                    city: c.city || baseUser?.city,
-                    country: c.country || baseUser?.country,
-                    experience_years: c.experienceYears || baseUser?.experience_years,
-                    education_level: c.educationLevel || baseUser?.education_level,
-                    expertise_level: c.expertiseLevel || baseUser?.expertise_level,
-                    skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
-                    portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
-                    tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
-                  };
-                }
-              }
+          if (rawCap) {
+            try {
+              const parsedCap = JSON.parse(rawCap);
+              baseUser.capabilities = parsedCap;
+            } catch {}
+          }
+
+          const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
+          const rawPort = localStorage.getItem("boulotman_technician_portfolio");
+          const rawTools = localStorage.getItem("boulotman_technician_tools");
+          const rawSkills = localStorage.getItem("boulotman_technician_skills");
+
+          if (baseUser?.role !== "COMPANY" && rawCustom) {
+            const c = JSON.parse(rawCustom);
+            if (c) {
+              baseUser = {
+                ...(baseUser || {}),
+                id: validId,
+                role: "TECHNICIAN",
+                first_name: c.firstName || baseUser?.first_name,
+                last_name: c.lastName || baseUser?.last_name,
+                headline: c.headline || baseUser?.headline,
+                bio: c.bio || baseUser?.bio,
+                about: c.bio || baseUser?.about,
+                city: c.city || baseUser?.city,
+                country: c.country || baseUser?.country,
+                experience_years: c.experienceYears || baseUser?.experience_years,
+                education_level: c.educationLevel || baseUser?.education_level,
+                expertise_level: c.expertiseLevel || baseUser?.expertise_level,
+                skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
+                portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
+                tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
+              };
             }
           }
         } catch {}
@@ -370,7 +362,7 @@ export default function PublicProfilePage() {
 
   const bioText = profile?.about || profile?.bio || profile?.technician_profile?.bio || "";
 
-  // Lists (NO hardcoded fake entries)
+  // Dynamic Lists
   const servicesList: any[] = useMemo(() => {
     if (Array.isArray(profile?.services) && profile.services.length > 0) {
       return profile.services;
@@ -400,19 +392,22 @@ export default function PublicProfilePage() {
   const teamList: any[] = useMemo(() => {
     if (Array.isArray(profile?.team) && profile.team.length > 0) return profile.team;
     if (Array.isArray(profile?.team_members) && profile.team_members.length > 0) return profile.team_members;
+    if (typeof window !== "undefined") {
+      try {
+        const rawTeam = localStorage.getItem(`boulotman_company_team_${validId}`)
+          || localStorage.getItem("boulotman_company_team")
+          || (profile?.id ? localStorage.getItem(`boulotman_company_team_${profile.id}`) : null)
+          || (profile?.user_id ? localStorage.getItem(`boulotman_company_team_${profile.user_id}`) : null);
+        if (rawTeam) {
+          const parsed = JSON.parse(rawTeam);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
     return [];
-  }, [profile]);
+  }, [profile, validId]);
 
   const capabilities = profile?.capabilities || null;
-  const equipmentList: string[] = useMemo(() => {
-    if (Array.isArray(capabilities?.equipment) && capabilities.equipment.length > 0) {
-      return capabilities.equipment;
-    }
-    if (Array.isArray(profile?.equipment) && profile.equipment.length > 0) {
-      return profile.equipment;
-    }
-    return [];
-  }, [capabilities, profile]);
 
   // Individual specialist pricing & tools
   const rawTools = profile?.tools || profile?.technician_profile?.languages || profile?.languages;
@@ -745,33 +740,10 @@ export default function PublicProfilePage() {
                             {member.qualification && <p className={styles.teamQual}>🎓 {member.qualification}</p>}
                             {member.experienceYears && (
                               <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, display: "inline-block", marginTop: 4 }}>
-                                ⏳ {member.experienceYears} {t.experience}
+                                ⏳ {member.experienceYears.includes("Exp") || member.experienceYears.includes("exp") || member.experienceYears.includes("ans") ? member.experienceYears : `${member.experienceYears} ${t.experience}`}
                               </span>
                             )}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {/* 5. Heavy Machinery Fleet & Equipment */}
-                <section className={styles.section}>
-                  <h2 className={styles.sectionTitle}>
-                    <iconify-icon icon="lucide:truck" style={{ color: "#ff4500" }} />
-                    {t.heavyFleet} ({equipmentList.length})
-                  </h2>
-                  {equipmentList.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
-                      <iconify-icon icon="lucide:truck" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
-                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>{t.noEquipmentListed}</p>
-                    </div>
-                  ) : (
-                    <div className={styles.equipmentGrid}>
-                      {equipmentList.map((eq: string, i: number) => (
-                        <div key={i} className={styles.equipmentChip}>
-                          <iconify-icon icon="lucide:check-circle" />
-                          <span>{eq}</span>
                         </div>
                       ))}
                     </div>
