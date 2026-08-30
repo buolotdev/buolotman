@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
@@ -12,11 +12,60 @@ import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchPlaceholder: "Search settings...",
+    accountSettings: "Account Settings",
+    fullName: "Full Name",
+    emailAddress: "Email Address",
+    phoneNumber: "Phone Number (Numbers only)",
+    changePassword: "Change Password (Requires Current Password)",
+    currentPasswordPlaceholder: "Enter your current password",
+    newPasswordPlaceholder: "New password (minimum 8 characters)",
+    confirmPasswordPlaceholder: "Confirm new password",
+    saveAllSettings: "Save All Settings & Preferences",
+    saveAllSub: "Click below to commit your account info, primary profession, notification preferences, and password.",
+    saveChanges: "Save Changes",
+    savingChanges: "Saving Changes...",
+    deactivateBtn: "Deactivate Profile",
+    deleteBtn: "Delete Account Permanently",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher dans les paramètres...",
+    accountSettings: "Paramètres du Compte",
+    fullName: "Nom Complet",
+    emailAddress: "Adresse E-mail",
+    phoneNumber: "Numéro de téléphone (Chiffres uniquement)",
+    changePassword: "Modifier le Mot de Passe (Nécessite l'ancien mot de passe)",
+    currentPasswordPlaceholder: "Entrez votre mot de passe actuel",
+    newPasswordPlaceholder: "Nouveau mot de passe (minimum 8 caractères)",
+    confirmPasswordPlaceholder: "Confirmez le nouveau mot de passe",
+    saveAllSettings: "Enregistrer tous les Paramètres & Préférences",
+    saveAllSub: "Cliquez ci-dessous pour valider vos coordonnées, profession, notifications et mot de passe.",
+    saveChanges: "Enregistrer les Modifications",
+    savingChanges: "Enregistrement en cours...",
+    deactivateBtn: "Désactiver le Profil",
+    deleteBtn: "Supprimer Définitivement le Compte",
+  }
+};
+
 export default function TechnicianSettingsPage() {
   const router = useRouter();
   const toast = useToast();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
   
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +81,7 @@ export default function TechnicianSettingsPage() {
   }, [userData]);
 
   const [saving, setSaving] = useState(false);
+
 
   // Form Controlled States
   const [fullName, setFullName] = useState("");
@@ -231,10 +281,10 @@ export default function TechnicianSettingsPage() {
                 
                 {/* ACCOUNT SETTINGS */}
                 <div className={styles.settingsCard}>
-                  <h3>Account Settings</h3>
+                  <h3>{t.accountSettings}</h3>
                   
                   <div className={styles.formGroup}>
-                    <label>Full Name</label>
+                    <label>{t.fullName}</label>
                     <input 
                       type="text" 
                       className={styles.formInput} 
@@ -245,7 +295,7 @@ export default function TechnicianSettingsPage() {
                   
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
-                      <label>Email Address</label>
+                      <label>{t.emailAddress}</label>
                       <input 
                         type="email" 
                         className={styles.formInput} 
@@ -254,7 +304,7 @@ export default function TechnicianSettingsPage() {
                       />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Phone Number (Numbers only)</label>
+                      <label>{t.phoneNumber}</label>
                       <input 
                         type="tel" 
                         className={styles.formInput} 
@@ -269,13 +319,13 @@ export default function TechnicianSettingsPage() {
                   </div>
 
                   <div className={styles.formGroup} style={{ marginTop: '24px' }}>
-                    <label>Change Password (Requires Current Password)</label>
+                    <label>{t.changePassword}</label>
                     
                     <div className={styles.passwordWrapper} style={{ marginBottom: '16px' }}>
                       <input 
                         type={showCurrentPassword ? "text" : "password"} 
                         className={styles.formInput} 
-                        placeholder="Enter your current password" 
+                        placeholder={t.currentPasswordPlaceholder} 
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                       />
@@ -294,7 +344,7 @@ export default function TechnicianSettingsPage() {
                       <input 
                         type={showNewPassword ? "text" : "password"} 
                         className={styles.formInput} 
-                        placeholder="New password (minimum 8 characters)" 
+                        placeholder={t.newPasswordPlaceholder} 
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -313,7 +363,7 @@ export default function TechnicianSettingsPage() {
                       <input 
                         type={showConfirmPassword ? "text" : "password"} 
                         className={styles.formInput} 
-                        placeholder="Confirm new password" 
+                        placeholder={t.confirmPasswordPlaceholder} 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />

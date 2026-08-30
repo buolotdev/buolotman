@@ -87,9 +87,96 @@ const DEFAULT_TOOLS = [
   "Cable Puller & Conduit Bender"
 ];
 
+const profileTranslations: Record<string, Record<string, string>> = {
+  en: {
+    addCover: "Add Cover Photo",
+    changeCover: "Change Cover Photo",
+    uploading: "Uploading...",
+    verifiedPro: "Verified Pro ✓",
+    identityVerified: "Identity Verified ✓",
+    availableNow: "Available Now",
+    busyOffline: "Busy / Offline",
+    availableOn: "Available Now: ON",
+    availableOff: "Available Now: OFF",
+    previewPublic: "Preview Public",
+    saveProfile: "Save Profile",
+    saving: "Saving...",
+    tab1: "1. Profile & Bio",
+    tab2: "2. 3-Tier Verification",
+    tab3: "3. Visual Portfolio",
+    tab4: "4. Availability & Radius",
+    tab5: "5. Pricing Models",
+    tab6: "6. Tools & Mobility",
+    tab7: "7. Payouts & Teams",
+    profInfoTitle: "Professional Information & Summary",
+    firstName: "First Name",
+    lastName: "Last Name",
+    displayName: "Display / Privacy Name (Shown to clients)",
+    headline: "Professional Headline",
+    primaryTrade: "Primary Trade / Occupation",
+    experienceYears: "Years of Hands-on Experience",
+    expertiseLevel: "Skill / Seniority Level",
+    education: "Education & Training Institution",
+    city: "Operating City / Town",
+    country: "Operating Country",
+    aboutMe: "About Me & Professional Summary",
+    skillsTitle: "Trade Skills & Specializations",
+    addSkillBtn: "+ Add Skill",
+    saveAndContinue: "Save & Continue to Next Step →",
+  },
+  fr: {
+    addCover: "Ajouter une photo de couverture",
+    changeCover: "Modifier la photo de couverture",
+    uploading: "Téléchargement...",
+    verifiedPro: "Professionnel Vérifié ✓",
+    identityVerified: "Identité Vérifiée ✓",
+    availableNow: "Disponible Immédiatement",
+    busyOffline: "Occupé / Hors ligne",
+    availableOn: "Disponibilité Immédiate : OUI",
+    availableOff: "Disponibilité Immédiate : NON",
+    previewPublic: "Voir Profil Public",
+    saveProfile: "Enregistrer le Profil",
+    saving: "Enregistrement...",
+    tab1: "1. Profil & Bio",
+    tab2: "2. Vérification 3 Niveaux",
+    tab3: "3. Portfolio Visuel",
+    tab4: "4. Disponibilité & Rayon",
+    tab5: "5. Modèles de Tarifs",
+    tab6: "6. Outils & Mobilité",
+    tab7: "7. Paiements & Équipes",
+    profInfoTitle: "Informations Professionnelles & Résumé",
+    firstName: "Prénom",
+    lastName: "Nom de famille",
+    displayName: "Nom d'affichage (Visible par les clients)",
+    headline: "Titre professionnel",
+    primaryTrade: "Métier / Spécialité principale",
+    experienceYears: "Années d'expérience pratique",
+    expertiseLevel: "Niveau d'expertise",
+    education: "Établissement de formation / Diplôme",
+    city: "Ville d'intervention",
+    country: "Pays d'intervention",
+    aboutMe: "À propos de moi & Présentation professionnelle",
+    skillsTitle: "Compétences & Spécialisations",
+    addSkillBtn: "+ Ajouter une compétence",
+    saveAndContinue: "Enregistrer & Étape suivante →",
+  }
+};
+
 export default function TechnicianProfilePage() {
   const toast = useToast();
   const dialog = useDialog();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = profileTranslations[lang] || profileTranslations["en"];
 
   // Tab State
   const [activeTab, setActiveTab] = useState<"overview" | "verification" | "portfolio" | "availability" | "pricing" | "tools" | "payouts">("overview");
@@ -138,6 +225,7 @@ export default function TechnicianProfilePage() {
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [newProjTitle, setNewProjTitle] = useState("");
   const [newProjCategory, setNewProjCategory] = useState("Electrical & Solar Energy");
+
   const [newProjDesc, setNewProjDesc] = useState("");
   const [newProjLocation, setNewProjLocation] = useState("");
   const [newProjBudget, setNewProjBudget] = useState("");
@@ -614,16 +702,16 @@ export default function TechnicianProfilePage() {
   type TabType = "overview" | "verification" | "portfolio" | "availability" | "pricing" | "tools" | "payouts";
 
   const TABS: Array<{ key: TabType; label: string; icon: string }> = [
-    { key: "overview", label: "1. Profile & Bio", icon: "lucide:user" },
-    { key: "verification", label: `2. 3-Tier Verification (${allDocuments.length})`, icon: "lucide:shield-check" },
-    { key: "portfolio", label: `3. Visual Portfolio (${portfolioList.length})`, icon: "lucide:image" },
-    { key: "availability", label: "4. Availability & Radius", icon: "lucide:clock" },
-    { key: "pricing", label: "5. Pricing Models", icon: "lucide:tag" },
-    { key: "tools", label: "6. Tools & Mobility", icon: "lucide:hammer" },
-    { key: "payouts", label: "7. Payouts & Teams", icon: "lucide:wallet" },
+    { key: "overview", label: t.tab1, icon: "lucide:user" },
+    { key: "verification", label: `${t.tab2} (${allDocuments.length})`, icon: "lucide:shield-check" },
+    { key: "portfolio", label: `${t.tab3} (${portfolioList.length})`, icon: "lucide:image" },
+    { key: "availability", label: t.tab4, icon: "lucide:clock" },
+    { key: "pricing", label: t.tab5, icon: "lucide:tag" },
+    { key: "tools", label: t.tab6, icon: "lucide:hammer" },
+    { key: "payouts", label: t.tab7, icon: "lucide:wallet" },
   ];
 
-  const currentTabIndex = TABS.findIndex((t) => t.key === activeTab);
+  const currentTabIndex = TABS.findIndex((tabItem) => tabItem.key === activeTab);
   const isFirstTab = currentTabIndex <= 0;
   const isLastTab = currentTabIndex >= TABS.length - 1;
 
@@ -734,9 +822,9 @@ export default function TechnicianProfilePage() {
                 <div className={styles.bannerOverlay}>
                   <div className={styles.bannerUploadHint}>
                     {bannerUploading ? (
-                      <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> Uploading...</>
+                      <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> {t.uploading}</>
                     ) : (
-                      <><iconify-icon icon="lucide:camera" /> {(bannerUrl || userData?.banner_url) ? "Change Cover Photo" : "Add Cover Photo"}</>
+                      <><iconify-icon icon="lucide:camera" /> {(bannerUrl || userData?.banner_url) ? t.changeCover : t.addCover}</>
                     )}
                   </div>
                 </div>
@@ -774,20 +862,20 @@ export default function TechnicianProfilePage() {
                       {isVerified ? (
                         <span className={styles.verifiedBadge} title="Boulot Man Verified Professional">
                           <iconify-icon icon="lucide:badge-check" style={{ fontSize: 16 }} />
-                          <span style={{ fontSize: '11.5px', fontWeight: 800 }}>Verified Pro ✓</span>
+                          <span style={{ fontSize: '11.5px', fontWeight: 800 }}>{t.verifiedPro}</span>
                         </span>
                       ) : (
                         <span style={{ background: "rgba(2,132,199,0.1)", color: "#0284c7", padding: "3px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                          <iconify-icon icon="lucide:shield" /> Identity Verified ✓
+                          <iconify-icon icon="lucide:shield" /> {t.identityVerified}
                         </span>
                       )}
                       {availableNow ? (
                         <span style={{ background: "#dcfce7", color: "#16a34a", padding: "3px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} /> Available Now
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} /> {t.availableNow}
                         </span>
                       ) : (
                         <span style={{ background: "#f1f5f9", color: "#64748b", padding: "3px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 700 }}>
-                          Busy / Offline
+                          {t.busyOffline}
                         </span>
                       )}
                     </div>
@@ -820,16 +908,16 @@ export default function TechnicianProfilePage() {
                     }}
                   >
                     <iconify-icon icon={availableNow ? "lucide:radio" : "lucide:power-off"} />
-                    {availableNow ? "Available Now: ON" : "Available Now: OFF"}
+                    {availableNow ? t.availableOn : t.availableOff}
                   </button>
 
                   <Link href={userData?.id ? `/profile/${userData.id}` : "/dashboard/technician"} className={styles.outlineButton} target="_blank">
-                    <iconify-icon icon="lucide:external-link" /> Preview Public
+                    <iconify-icon icon="lucide:external-link" /> {t.previewPublic}
                   </Link>
 
                   <button type="button" className={styles.primaryButton} onClick={handleSaveProfile} disabled={profileSaving}>
                     <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:save"} className={profileSaving ? styles.spinIcon : ""} />
-                    {profileSaving ? "Saving..." : "Save Profile"}
+                    {profileSaving ? t.saving : t.saveProfile}
                   </button>
                 </div>
               </div>
@@ -879,35 +967,35 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:user-check" style={{ color: "#ff4500" }} /> Professional Information & Summary
+                    <iconify-icon icon="lucide:user-check" style={{ color: "#ff4500" }} /> {t.profInfoTitle}
                   </h2>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>First Name</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.firstName}</label>
                     <input className={styles.formInput} placeholder="e.g. Aneeq" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Last Name</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.lastName}</label>
                     <input className={styles.formInput} placeholder="e.g. Nisar" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Display / Privacy Name (Shown to clients)</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.displayName}</label>
                     <input className={styles.formInput} placeholder="e.g. Aneeq N." value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Professional Headline</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.headline}</label>
                     <input className={styles.formInput} placeholder="e.g. Certified Electrician & Solar Specialist" value={headline} onChange={(e) => setHeadline(e.target.value)} />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Primary Trade / Occupation</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.primaryTrade}</label>
                     <select className={styles.formInput} value={primaryOccupation} onChange={(e) => setPrimaryOccupation(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
                       {PLATFORM_TRADE_CATEGORIES.map((trade) => (
                         <option key={trade} value={trade}>{trade}</option>
@@ -915,14 +1003,14 @@ export default function TechnicianProfilePage() {
                     </select>
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Years of Hands-on Experience</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.experienceYears}</label>
                     <input className={styles.formInput} placeholder="e.g. 8" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Skill / Seniority Level</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.expertiseLevel}</label>
                     <select className={styles.formInput} value={expertiseLevel} onChange={(e) => setExpertiseLevel(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
                       <option value="Junior">Junior (1-3 Years)</option>
                       <option value="Intermediate">Intermediate (3-6 Years)</option>
@@ -931,23 +1019,23 @@ export default function TechnicianProfilePage() {
                     </select>
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Education & Training Institution</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.education}</label>
                     <input className={styles.formInput} placeholder="e.g. Lycée Technique Coulibaly / B.Sc. Electrical Eng" value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)} />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating City / Town</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.city}</label>
                     <input className={styles.formInput} placeholder="e.g. Cotonou" value={city} onChange={(e) => setCity(e.target.value)} />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Operating Country</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.country}</label>
                     <input className={styles.formInput} placeholder="e.g. Benin" value={country} onChange={(e) => setCountry(e.target.value)} />
                   </div>
                 </div>
 
-                <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>About Me & Professional Summary</label>
+                <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.aboutMe}</label>
                 <textarea
                   className={styles.formTextarea}
                   rows={4}
@@ -958,7 +1046,7 @@ export default function TechnicianProfilePage() {
 
                 {/* Skills Manager */}
                 <div style={{ marginTop: 20 }}>
-                  <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Trade Skills & Specializations</label>
+                  <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.skillsTitle}</label>
                   {skills.length === 0 ? (
                     <p style={{ fontSize: 13, color: "#94a3b8", margin: "4px 0 10px", fontStyle: "italic" }}>
                       No skills added yet. Type a skill below and click &quot;Add&quot; to list your trade specializations.
@@ -978,6 +1066,7 @@ export default function TechnicianProfilePage() {
                   <div style={{ display: "flex", gap: 10, maxWidth: 500, marginTop: 10 }}>
                     <input
                       className={styles.formInput}
+
                       style={{ marginBottom: 0 }}
                       placeholder="Add trade skill (e.g. Solar Inverter Setup, 3-Phase Wiring)"
                       value={newSkill}

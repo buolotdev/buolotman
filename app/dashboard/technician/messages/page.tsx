@@ -36,9 +36,53 @@ function formatMessageTime(iso: string | null | undefined): string {
   }
 }
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchConversations: "Search conversations...",
+    title: "Messages",
+    searchMessages: "Search messages...",
+    noConversationsYet: "No conversations yet",
+    clickMessageClient: "Click \"Message Client\" on a task you bid on to start chatting.",
+    noMessagesYet: "No messages yet. Start the conversation!",
+    selectAConversation: "Select a conversation to start messaging.",
+    attachFile: "Attach file",
+    uploading: "Uploading...",
+    send: "Send",
+    sending: "Sending...",
+    placeholder: "Type a message...",
+  },
+  fr: {
+    searchConversations: "Rechercher une conversation...",
+    title: "Messagerie",
+    searchMessages: "Rechercher dans les messages...",
+    noConversationsYet: "Aucune conversation pour le moment",
+    clickMessageClient: "Cliquez sur « Contacter le client » depuis une mission pour démarrer un échange.",
+    noMessagesYet: "Aucun message pour l'instant. Démarrez la discussion !",
+    selectAConversation: "Sélectionnez une conversation pour commencer à échanger.",
+    attachFile: "Joindre un fichier",
+    uploading: "Téléchargement...",
+    send: "Envoyer",
+    sending: "Envoi en cours...",
+    placeholder: "Écrivez un message...",
+  }
+};
+
 export default function TechnicianMessagesPage() {
   const toast = useToast();
   const searchParams = useSearchParams();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const { data: conversationsData, loading: conversationsLoading, error: conversationsError, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
   const { data: userData } = useFetch(() => api.getMe(), []);
 
@@ -52,6 +96,9 @@ export default function TechnicianMessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const isNearBottomRef = useRef(true);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
 
   type ConversationItem = {
     id: string;
@@ -159,8 +206,6 @@ export default function TechnicianMessagesPage() {
     };
   }, [activeConversationId]);
 
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const isNearBottomRef = useRef(true);
 
   useEffect(() => {
     const el = messagesContainerRef.current;
@@ -317,7 +362,7 @@ export default function TechnicianMessagesPage() {
         <div className={styles.mainArea}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search conversations..."
+            searchPlaceholder={t.searchConversations}
             searchQuery={threadSearch}
             setSearchQuery={setThreadSearch}
           />
@@ -325,12 +370,12 @@ export default function TechnicianMessagesPage() {
           <div className={styles.chatAppContainer}>
         <aside className={`${styles.sidebar} ${!mobileListOpen ? styles.sidebarHiddenMobile : ""}`}>
           <div className={styles.sidebarHead}>
-            <h1>Messages</h1>
+            <h1>{t.title}</h1>
             <label className={styles.searchBox}>
               <iconify-icon icon="lucide:search" />
               <input
                 type="search"
-                placeholder="Search messages..."
+                placeholder={t.searchMessages}
                 value={threadSearch}
                 onChange={(e) => setThreadSearch(e.target.value)}
               />
@@ -361,7 +406,7 @@ export default function TechnicianMessagesPage() {
                         <span className={styles.userName}>{c.participant.name}</span>
                         <span className={styles.messageTime}>{formatTime(c.lastMessageAt)}</span>
                       </div>
-                      <p className={styles.preview}>{c.lastMessagePreview || "No messages yet"}</p>
+                      <p className={styles.preview}>{c.lastMessagePreview || (lang === "fr" ? "Aucun message pour l'instant" : "No messages yet")}</p>
                       <div className={styles.taskMetaRow}>
                         {c.taskTitle ? <span className={styles.taskSnippet}>{c.taskTitle}</span> : null}
                         {c.unreadCount > 0 ? (
@@ -375,8 +420,8 @@ export default function TechnicianMessagesPage() {
             ) : (
               <div className={styles.emptyState}>
                 <iconify-icon icon="lucide:message-square-off" style={{ fontSize: 36, opacity: 0.3 }} />
-                <p>No conversations yet</p>
-                <span style={{ fontSize: 13, color: "#94a3b8" }}>Click "Message Client" on a task you bid on to start chatting.</span>
+                <p>{t.noConversationsYet}</p>
+                <span style={{ fontSize: 13, color: "#94a3b8" }}>{t.clickMessageClient}</span>
               </div>
             )}
           </div>
@@ -410,7 +455,7 @@ export default function TechnicianMessagesPage() {
                 ) : activeMessages.length === 0 ? (
                   <div className={styles.emptyState}>
                     <iconify-icon icon="lucide:message-circle" style={{ fontSize: 40, opacity: 0.3 }} />
-                    <p>No messages yet. Start the conversation!</p>
+                    <p>{t.noMessagesYet}</p>
                   </div>
                 ) : (
                   <div className={styles.thread}>
@@ -425,7 +470,7 @@ export default function TechnicianMessagesPage() {
                             {message.attachment_url ? (
                               <a href={message.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
                                 <iconify-icon icon="lucide:paperclip" />
-                                <span>{message.attachment_name || "Attachment"}</span>
+                                <span>{message.attachment_name || (lang === "fr" ? "Fichier joint" : "Attachment")}</span>
                               </a>
                             ) : null}
                             <span className={styles.timestamp}>{formatMessageTime(message.created_at)}</span>
@@ -458,7 +503,7 @@ export default function TechnicianMessagesPage() {
                 <div className={styles.composeBox}>
                   <textarea
                     className={styles.composerTextarea}
-                    placeholder="Type your message..."
+                    placeholder={lang === "fr" ? "Écrivez votre message..." : "Type your message..."}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => {
@@ -483,7 +528,7 @@ export default function TechnicianMessagesPage() {
                       style={{ background: "none", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", color: "#64748b", fontSize: "13.5px" }}
                     >
                       <iconify-icon icon="lucide:paperclip" style={{ fontSize: "16px" }} />
-                      <span>{attachmentUploading ? "Uploading..." : "Attach file"}</span>
+                      <span>{attachmentUploading ? t.uploading : t.attachFile}</span>
                     </button>
 
                     <button
@@ -491,7 +536,7 @@ export default function TechnicianMessagesPage() {
                       className={styles.sendButton}
                       disabled={sending || (!draft.trim() && !attachmentDraft)}
                     >
-                      {sending ? "Sending..." : "Send"}
+                      {sending ? t.sending : t.send}
                     </button>
                   </div>
                 </div>
@@ -500,7 +545,7 @@ export default function TechnicianMessagesPage() {
           ) : (
             <div className={styles.emptyState}>
               <iconify-icon icon="lucide:messages-square" style={{ fontSize: 48, opacity: 0.3 }} />
-              <p>Select a conversation to start messaging.</p>
+              <p>{t.selectAConversation}</p>
             </div>
           )}
         </section>

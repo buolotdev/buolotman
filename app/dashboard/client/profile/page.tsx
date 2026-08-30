@@ -47,13 +47,81 @@ const DEFAULT_ADDRESSES: SavedAddress[] = [
   }
 ];
 
+const clientProfileTranslations: Record<string, Record<string, string>> = {
+  en: {
+    changeCover: "Change Cover",
+    uploading: "Uploading...",
+    verifiedClient: "Verified Client ✓",
+    registeredClient: "Registered Client",
+    clientRating: "⭐ 4.9 Client Rating",
+    paymentReliability: "100% Payment Reliability",
+    postTask: "Post a Task",
+    tabPersonal: "Personal Information",
+    tabBusiness: "Client Type & Business",
+    tabAddresses: "Saved Service Locations",
+    tabVerification: "Identity & Escrow Trust",
+    tabPrivacy: "Privacy & Preferences",
+    personalTitle: "Personal Details & Contact",
+    personalSubtitle: "Basic information used to identify your account and dispatch technicians to your tasks.",
+    firstName: "First Name",
+    lastName: "Last Name",
+    email: "Email Address",
+    phone: "Phone Number",
+    country: "Operating Country",
+    city: "Operating City",
+    address: "Default Address / Neighborhood",
+    aboutMe: "About You / Note for Technicians",
+    savePersonal: "Save Personal Information",
+    saving: "Saving...",
+  },
+  fr: {
+    changeCover: "Modifier la Couverture",
+    uploading: "Téléchargement...",
+    verifiedClient: "Client Vérifié ✓",
+    registeredClient: "Client Enregistré",
+    clientRating: "⭐ Note Client 4.9",
+    paymentReliability: "Fiabilité de Paiement 100%",
+    postTask: "Publier une Mission",
+    tabPersonal: "Informations Personnelles",
+    tabBusiness: "Profil & Type de Client",
+    tabAddresses: "Adresses Enregistrées",
+    tabVerification: "Identité & Séquestre",
+    tabPrivacy: "Confidentialité & Préférences",
+    personalTitle: "Coordonnées & Informations Personnelles",
+    personalSubtitle: "Informations de base pour identifier votre compte et faciliter l'intervention des artisans.",
+    firstName: "Prénom",
+    lastName: "Nom",
+    email: "Adresse E-mail",
+    phone: "Numéro de Téléphone",
+    country: "Pays de résidence",
+    city: "Ville d'intervention",
+    address: "Adresse principale / Quartier",
+    aboutMe: "À propos de vous / Remarques pour les techniciens",
+    savePersonal: "Enregistrer les Informations",
+    saving: "Enregistrement...",
+  }
+};
+
 export default function ClientProfilePage() {
   const toast = useToast();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"personal" | "business" | "addresses" | "verification" | "privacy">("personal");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = clientProfileTranslations[lang] || clientProfileTranslations["en"];
 
   // Fetch current user
   const { data: user, loading, refetch: refetchUser } = useFetch(() => api.getMe(), []);
+
 
   // Form State - Personal
   const [firstName, setFirstName] = useState("");
@@ -585,7 +653,7 @@ export default function ClientProfilePage() {
                     icon={uploadingCover ? "lucide:loader-2" : "lucide:camera"}
                     className={uploadingCover ? styles.spinIcon : ""}
                   />
-                  {uploadingCover ? "Uploading..." : "Change Cover"}
+                  {uploadingCover ? t.uploading : t.changeCover}
                 </span>
               </div>
             </div>
@@ -630,21 +698,21 @@ export default function ClientProfilePage() {
                     <h1 className={styles.companyName}>{displayName}</h1>
                     {isVerified ? (
                       <span className={styles.verifiedBadge}>
-                        <iconify-icon icon="lucide:shield-check" /> Verified Client ✓
+                        <iconify-icon icon="lucide:shield-check" /> {t.verifiedClient}
                       </span>
                     ) : (
                       <span className={styles.pendingBadge}>
-                        <iconify-icon icon="lucide:clock" /> Registered Client
+                        <iconify-icon icon="lucide:clock" /> {t.registeredClient}
                       </span>
                     )}
                     <span style={{ background: "#f1f5f9", color: "#001f3f", padding: "4px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                      ⭐ 4.9 Client Rating
+                      {t.clientRating}
                     </span>
                   </div>
                   <p className={styles.companyTagline}>
                     {clientType === "business" ? "🏢 Business Client" : clientType === "ngo" ? "🏛️ Organization / NGO" : clientType === "property_manager" ? "🏗️ Property Manager" : "🏠 Individual / Household"} • Member since{" "}
                     {user?.date_joined
-                      ? new Date(user.date_joined).toLocaleDateString("en-US", {
+                      ? new Date(user.date_joined).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
                           month: "short",
                           year: "numeric",
                         })
@@ -663,7 +731,7 @@ export default function ClientProfilePage() {
                       </span>
                     )}
                     <span className={styles.metaItem} style={{ color: "#16a34a", fontWeight: 700 }}>
-                      <iconify-icon icon="lucide:check-circle-2" /> 100% Payment Reliability
+                      <iconify-icon icon="lucide:check-circle-2" /> {t.paymentReliability}
                     </span>
                   </div>
                 </div>
@@ -687,7 +755,7 @@ export default function ClientProfilePage() {
                   }}
                 >
                   <iconify-icon icon="lucide:plus-circle" style={{ fontSize: "18px" }} />
-                  Post a Task
+                  {t.postTask}
                 </Link>
               </div>
             </div>
@@ -700,35 +768,35 @@ export default function ClientProfilePage() {
               className={`${styles.tabBtn} ${activeTab === "personal" ? styles.tabBtnActive : ""}`}
               onClick={() => setActiveTab("personal")}
             >
-              <iconify-icon icon="lucide:user" /> Personal Information
+              <iconify-icon icon="lucide:user" /> {t.tabPersonal}
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === "business" ? styles.tabBtnActive : ""}`}
               onClick={() => setActiveTab("business")}
             >
-              <iconify-icon icon="lucide:building-2" /> Client Type & Business
+              <iconify-icon icon="lucide:building-2" /> {t.tabBusiness}
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === "addresses" ? styles.tabBtnActive : ""}`}
               onClick={() => setActiveTab("addresses")}
             >
-              <iconify-icon icon="lucide:map-pin" /> Saved Service Locations ({savedAddresses.length})
+              <iconify-icon icon="lucide:map-pin" /> {t.tabAddresses} ({savedAddresses.length})
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === "verification" ? styles.tabBtnActive : ""}`}
               onClick={() => setActiveTab("verification")}
             >
-              <iconify-icon icon="lucide:shield-check" /> Identity & Escrow Trust {isVerified ? "✓" : ""}
+              <iconify-icon icon="lucide:shield-check" /> {t.tabVerification} {isVerified ? "✓" : ""}
             </button>
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === "privacy" ? styles.tabBtnActive : ""}`}
               onClick={() => setActiveTab("privacy")}
             >
-              <iconify-icon icon="lucide:lock" /> Privacy & Preferences
+              <iconify-icon icon="lucide:lock" /> {t.tabPrivacy}
             </button>
           </div>
 
@@ -739,9 +807,9 @@ export default function ClientProfilePage() {
                 <div>
                   <h3>
                     <iconify-icon icon="lucide:user" style={{ color: "#ff4500" }} />
-                    Personal Details & Contact
+                    {t.personalTitle}
                   </h3>
-                  <p>Basic information used to identify your account and dispatch technicians to your tasks.</p>
+                  <p>{t.personalSubtitle}</p>
                 </div>
               </div>
 
@@ -749,7 +817,7 @@ export default function ClientProfilePage() {
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
                     <label htmlFor="first_name">
-                      <iconify-icon icon="lucide:user" /> First Name
+                      <iconify-icon icon="lucide:user" /> {t.firstName}
                     </label>
                     <input
                       id="first_name"
@@ -764,7 +832,7 @@ export default function ClientProfilePage() {
 
                   <div className={styles.formGroup}>
                     <label htmlFor="last_name">
-                      <iconify-icon icon="lucide:user" /> Last Name
+                      <iconify-icon icon="lucide:user" /> {t.lastName}
                     </label>
                     <input
                       id="last_name"
@@ -776,6 +844,7 @@ export default function ClientProfilePage() {
                       required
                     />
                   </div>
+
 
                   <div className={styles.formGroup}>
                     <label htmlFor="email">

@@ -1,9 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { formatXOF } from "@/app/lib/format";
@@ -20,23 +17,51 @@ type Transaction = {
   status?: string;
 };
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-  { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
-
-];
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    pageTitle: "Payments & Escrows",
+    pageSubtitle: "Monitor your available balances, pending deposits, and task payouts.",
+    availableBalance: "Available Balance",
+    pendingEscrow: "Pending Escrow",
+    txHistory: "Transaction History",
+    loading: "Loading transactions...",
+    noTx: "No transaction history recorded yet.",
+    thDate: "Date",
+    thType: "Type",
+    thCategory: "Category",
+    thAmount: "Amount",
+    thStatus: "Status",
+  },
+  fr: {
+    pageTitle: "Paiements & Séquestres",
+    pageSubtitle: "Suivez vos soldes disponibles, dépôts et paiements de missions.",
+    availableBalance: "Solde Disponible",
+    pendingEscrow: "Bloqué sous Séquestre",
+    txHistory: "Historique des Transactions",
+    loading: "Chargement des transactions...",
+    noTx: "Aucune transaction enregistrée pour le moment.",
+    thDate: "Date",
+    thType: "Type",
+    thCategory: "Catégorie",
+    thAmount: "Montant",
+    thStatus: "Statut",
+  }
+};
 
 export default function ClientPaymentsPage() {
-  const router = useRouter();
-  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: wallet, loading: walletLoading } = useFetch(() => api.getWallet(), []);
   const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions({ limit: "20" }), []);
@@ -65,8 +90,8 @@ export default function ClientPaymentsPage() {
           <div className={styles.content}>
             <div className={styles.pageHeader}>
               <div>
-                <h1 className={styles.headerTitle}>Payments & Escrows</h1>
-                <p className={styles.headerSubtitle}>Monitor your available balances, pending deposits, and task payouts.</p>
+                <h1 className={styles.headerTitle}>{t.pageTitle}</h1>
+                <p className={styles.headerSubtitle}>{t.pageSubtitle}</p>
               </div>
             </div>
 
@@ -77,7 +102,7 @@ export default function ClientPaymentsPage() {
                   <iconify-icon icon="lucide:wallet" />
                 </div>
                 <div>
-                  <h3 className={styles.statLabel}>Available Balance</h3>
+                  <h3 className={styles.statLabel}>{t.availableBalance}</h3>
                   <p className={styles.statValue}>
                     {walletLoading ? "..." : formatXOF(wallet?.available_balance || 0)}
                   </p>
@@ -89,7 +114,7 @@ export default function ClientPaymentsPage() {
                   <iconify-icon icon="lucide:lock" />
                 </div>
                 <div>
-                  <h3 className={styles.statLabel}>Pending Escrow</h3>
+                  <h3 className={styles.statLabel}>{t.pendingEscrow}</h3>
                   <p className={styles.statValue}>
                     {walletLoading ? "..." : formatXOF(wallet?.pending_escrow || 0)}
                   </p>
@@ -99,27 +124,27 @@ export default function ClientPaymentsPage() {
 
             {/* Transaction History Section */}
             <section className={styles.tableCard}>
-              <h2 className={styles.tableTitle}>Transaction History</h2>
+              <h2 className={styles.tableTitle}>{t.txHistory}</h2>
               
               {txLoading ? (
                 <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
-                  <p>Loading transactions...</p>
+                  <p>{t.loading}</p>
                 </div>
               ) : transactions.length === 0 ? (
                 <div className={styles.emptyState}>
                   <iconify-icon icon="lucide:file-text" />
-                  <p>No transaction history recorded yet.</p>
+                  <p>{t.noTx}</p>
                 </div>
               ) : (
                 <div className={styles.tableWrapper}>
                   <table className={styles.adminTable}>
                     <thead>
                       <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{t.thDate}</th>
+                        <th>{t.thType}</th>
+                        <th>{t.thCategory}</th>
+                        <th>{t.thAmount}</th>
+                        <th>{t.thStatus}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -127,7 +152,7 @@ export default function ClientPaymentsPage() {
                         <tr key={tx.id}>
                           <td>
                             {tx.created_at
-                              ? new Date(tx.created_at).toLocaleDateString("en-US", {
+                              ? new Date(tx.created_at).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
@@ -157,3 +182,4 @@ export default function ClientPaymentsPage() {
     </main>
   );
 }
+

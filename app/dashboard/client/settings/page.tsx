@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -45,10 +45,83 @@ const navItems = [
   { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
 ];
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    editProfilePhoto: "Edit Profile & Photo",
+    accountSettings: "Account Settings",
+    firstName: "First Name",
+    lastName: "Last Name",
+    email: "Email",
+    phone: "Phone",
+    country: "Country",
+    changePassword: "Change Password",
+    currentPasswordPlaceholder: "Current password",
+    newPasswordPlaceholder: "New password",
+    confirmPasswordPlaceholder: "Confirm new password",
+    saveChanges: "Save Changes",
+    saving: "Saving...",
+    paymentPrefs: "Payment Preferences",
+    preferredMethod: "Preferred Payment Method",
+    savePref: "Save Preference",
+    managePayments: "Manage Payments",
+    notifPrefs: "Notification Preferences",
+    emailNotifs: "Email notifications",
+    smsNotifs: "SMS notifications",
+    inAppNotifs: "In-app notifications",
+    security: "Security",
+    twoFactor: "Enable Two-Factor Authentication",
+    logoutAllDevices: "Logout all devices",
+    dangerZone: "Danger Zone",
+    deactivateAccount: "Deactivate Account",
+    deleteAccountPermanently: "Delete Account Permanently",
+  },
+  fr: {
+    editProfilePhoto: "Modifier le Profil & la Photo",
+    accountSettings: "Paramètres du Compte",
+    firstName: "Prénom",
+    lastName: "Nom",
+    email: "E-mail",
+    phone: "Téléphone",
+    country: "Pays",
+    changePassword: "Modifier le Mot de Passe",
+    currentPasswordPlaceholder: "Mot de passe actuel",
+    newPasswordPlaceholder: "Nouveau mot de passe",
+    confirmPasswordPlaceholder: "Confirmez le mot de passe",
+    saveChanges: "Enregistrer les Modifications",
+    saving: "Enregistrement...",
+    paymentPrefs: "Préférences de Paiement",
+    preferredMethod: "Mode de paiement préféré",
+    savePref: "Enregistrer la Préférence",
+    managePayments: "Gérer les Paiements",
+    notifPrefs: "Préférences de Notification",
+    emailNotifs: "Notifications par e-mail",
+    smsNotifs: "Notifications par SMS",
+    inAppNotifs: "Notifications dans l'application",
+    security: "Sécurité",
+    twoFactor: "Activer la double authentification (2FA)",
+    logoutAllDevices: "Déconnecter tous les appareils",
+    dangerZone: "Zone de Danger",
+    deactivateAccount: "Désactiver le Compte",
+    deleteAccountPermanently: "Supprimer Définitivement le Compte",
+  }
+};
+
 export default function ClientSettingsPage() {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [lang, setLang] = useState("en");
   const toast = useToast();
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: me, loading, refetch } = useFetch<Me | null>(() => api.getMe(), []);
 
@@ -69,38 +142,37 @@ export default function ClientSettingsPage() {
   }, [me]);
 
   const [savingSettings, setSavingSettings] = useState(false);
-
-  // Payment Modal State
-  const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
-  const { data: walletData, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
-  const { data: transData, refetch: refetchTrans } = useFetch(() => api.getTransactions(), []);
-  const balance = walletData?.balance || 0;
-  const transactions = Array.isArray(transData) ? transData : ((transData as any)?.results || []);
-  const [addAmount, setAddAmount] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingSettings(true);
     try {
-      await api.updateMe(form);
-      toast.success("Settings saved", "Your account settings have been updated.");
-      refetch();
-    } catch (err: any) {
-      toast.error("Save failed", err?.message || "Please try again.");
+      await api.updateProfile(form);
+      await refetch();
+      toast.success(lang === "fr" ? "Paramètres Enregistrés" : "Settings Saved", lang === "fr" ? "Vos coordonnées ont été mises à jour." : "Your profile settings have been updated.");
+    } catch(e: any) {
+      toast.error(lang === "fr" ? "Erreur" : "Error", e?.message || "Failed to update profile");
     } finally {
       setSavingSettings(false);
     }
   };
 
+  // Payments & Balance
+  const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const { data: wallet, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
+  const { data: txData, refetch: refetchTrans } = useFetch(() => api.getTransactions(), []);
+
+  const balance = Number((wallet as any)?.available_balance || 0);
+  const transactions = Array.isArray(txData) ? txData : [];
+
   const handleAddMoney = async () => {
     const amt = parseFloat(addAmount);
     if (isNaN(amt) || amt < 10) {
-      toast.error("Error", "Minimum top-up amount is 10 XOF");
+      toast.error(lang === "fr" ? "Montant Invalide" : "Invalid Amount", lang === "fr" ? "Le montant minimum est de 10$" : "Minimum amount is $10");
       return;
     }
     try {
-      // API call to add money would go here
       toast.success("Success", "Add Money requires a payment gateway integration");
       setAddAmount("");
     } catch(e) {
@@ -176,7 +248,7 @@ export default function ClientSettingsPage() {
                       </div>
                       <p className={styles.lead}>{me?.email || me?.phone || "Client"}</p>
                       <Link href="/dashboard/client/profile" style={{ fontSize: '13px', color: '#0284c7', fontWeight: 600, marginTop: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
-                        <iconify-icon icon="lucide:user" /> Edit Profile & Photo
+                        <iconify-icon icon="lucide:user" /> {t.editProfilePhoto}
                       </Link>
                     </div>
                   </div>
@@ -188,57 +260,57 @@ export default function ClientSettingsPage() {
                 
                 {/* Account Settings */}
                 <form className={styles.settingsCard} onSubmit={handleSaveSettings}>
-                  <h3>Account Settings</h3>
+                  <h3>{t.accountSettings}</h3>
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
-                      <label>First Name</label>
+                      <label>{t.firstName}</label>
                       <input className={styles.formInput} value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Last Name</label>
+                      <label>{t.lastName}</label>
                       <input className={styles.formInput} value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} />
                     </div>
                   </div>
 
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
-                      <label>Email</label>
+                      <label>{t.email}</label>
                       <input type="email" className={styles.formInput} value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} />
                     </div>
                     <div className={styles.formGroup}>
-                      <label>Phone</label>
+                      <label>{t.phone}</label>
                       <input type="tel" className={styles.formInput} value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
                     </div>
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label>Country</label>
+                    <label>{t.country}</label>
                     <input className={styles.formInput} value={form.country} onChange={(e) => setForm({...form, country: e.target.value})} />
                   </div>
 
-                  <h4 style={{ marginTop: '32px', marginBottom: '16px', fontSize: '15px', fontWeight: 600, color: '#334155' }}>Change Password</h4>
+                  <h4 style={{ marginTop: '32px', marginBottom: '16px', fontSize: '15px', fontWeight: 600, color: '#334155' }}>{t.changePassword}</h4>
                   <div className={styles.formGroup}>
-                    <input type="password" placeholder="Current password" className={styles.formInput} />
+                    <input type="password" placeholder={t.currentPasswordPlaceholder} className={styles.formInput} />
                   </div>
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
-                      <input type="password" placeholder="New password" className={styles.formInput} />
+                      <input type="password" placeholder={t.newPasswordPlaceholder} className={styles.formInput} />
                     </div>
                     <div className={styles.formGroup}>
-                      <input type="password" placeholder="Confirm new password" className={styles.formInput} />
+                      <input type="password" placeholder={t.confirmPasswordPlaceholder} className={styles.formInput} />
                     </div>
                   </div>
 
                   <button type="submit" className={styles.btnPrimary} disabled={savingSettings}>
-                    {savingSettings ? "Saving..." : "Save Changes"}
+                    {savingSettings ? t.saving : t.saveChanges}
                   </button>
                 </form>
 
                 {/* Payment Preferences */}
                 <div className={styles.settingsCard}>
-                  <h3>Payment Preferences</h3>
+                  <h3>{t.paymentPrefs}</h3>
                   <div className={styles.formGroup}>
-                    <label>Preferred Payment Method</label>
+                    <label>{t.preferredMethod}</label>
                     <select className={styles.formSelect}>
                       <option>B-Pay Wallet</option>
                       <option>Mobile Money</option>
@@ -247,33 +319,33 @@ export default function ClientSettingsPage() {
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className={styles.btnPrimary}>Save Preference</button>
-                    <button className={styles.btnOutline} onClick={() => setPaymentsModalOpen(true)}>Manage Payments</button>
+                    <button className={styles.btnPrimary}>{t.savePref}</button>
+                    <button className={styles.btnOutline} onClick={() => setPaymentsModalOpen(true)}>{t.managePayments}</button>
                   </div>
                 </div>
 
                 {/* Notifications */}
                 <div className={styles.settingsCard}>
-                  <h3>Notification Preferences</h3>
+                  <h3>{t.notifPrefs}</h3>
                   <div className={styles.toggleRow}>
-                    <span className={styles.toggleLabel}>Email notifications</span>
+                    <span className={styles.toggleLabel}>{t.emailNotifs}</span>
                     <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
                   </div>
                   <div className={styles.toggleRow}>
-                    <span className={styles.toggleLabel}>SMS notifications</span>
+                    <span className={styles.toggleLabel}>{t.smsNotifs}</span>
                     <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
                   </div>
                   <div className={styles.toggleRow}>
-                    <span className={styles.toggleLabel}>In-app notifications</span>
+                    <span className={styles.toggleLabel}>{t.inAppNotifs}</span>
                     <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
                   </div>
                 </div>
 
                 {/* Security */}
                 <div className={styles.settingsCard}>
-                  <h3>Security</h3>
+                  <h3>{t.security}</h3>
                   <div className={styles.toggleRow}>
-                    <span className={styles.toggleLabel}>Enable Two-Factor Authentication</span>
+                    <span className={styles.toggleLabel}>{t.twoFactor}</span>
                     <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
                   </div>
                   <div style={{ marginTop: '20px' }}>
@@ -281,24 +353,24 @@ export default function ClientSettingsPage() {
                       if (window.confirm("Are you sure you want to log out of all other devices?")) {
                         toast.success("Security Updated", "You have been logged out of all other active sessions.");
                       }
-                    }}>Logout all devices</button>
+                    }}>{t.logoutAllDevices}</button>
                   </div>
                 </div>
 
                 {/* Danger Zone */}
                 <div className={styles.settingsCard} style={{ border: '1px solid #fee2e2', background: '#fff5f5' }}>
-                  <h3 style={{ color: '#ef4444' }}>Danger Zone</h3>
+                  <h3 style={{ color: '#ef4444' }}>{t.dangerZone}</h3>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                     <button className={styles.btnDanger} style={{ background: '#f87171' }} onClick={() => {
                       if (window.confirm("Are you sure you want to deactivate your account? Your profile will be hidden from the public.")) {
                         toast.info("Request Received", "Your account deactivation request has been sent to support.");
                       }
-                    }}>Deactivate Account</button>
+                    }}>{t.deactivateAccount}</button>
                     <button className={styles.btnDanger} onClick={() => {
                       if (window.confirm("WARNING: This action is irreversible. Are you sure you want to permanently delete your account and all associated data?")) {
                         toast.info("Request Received", "Your account deletion request is being processed. Support will contact you shortly.");
                       }
-                    }}>Delete Account Permanently</button>
+                    }}>{t.deleteAccountPermanently}</button>
                   </div>
                 </div>
               </section>
