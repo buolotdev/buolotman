@@ -208,11 +208,16 @@ def me(request):
             new_role = str(role_to_set).upper()
             request.user.role = new_role
             request.user.save(update_fields=['role'])
-            if new_role == 'TECHNICIAN':
-                from apps.accounts.models import TechnicianProfile
-                TechnicianProfile.objects.get_or_create(user=request.user)
+        user_update_data = {}
+        for k in ['first_name', 'last_name', 'phone', 'avatar_url', 'banner_url', 'language_preference', 'country', 'address', 'education_level', 'expertise_level']:
+            if k in request.data:
+                user_update_data[k] = request.data[k]
         
-        serializer = UserMeSerializer(request.user, data=request.data, partial=True)
+        if 'date_of_birth' in request.data:
+            dob = request.data.get('date_of_birth')
+            user_update_data['date_of_birth'] = dob if dob else None
+
+        serializer = UserMeSerializer(request.user, data=user_update_data, partial=True)
         if serializer.is_valid():
             serializer.save()
 
