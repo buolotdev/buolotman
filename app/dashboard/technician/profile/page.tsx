@@ -37,26 +37,7 @@ export interface TechDocument {
   file_name?: string;
 }
 
-const DEFAULT_PORTFOLIO: PortfolioItem[] = [
-  {
-    id: "port-1",
-    title: "15kVA Solar PV & Hybrid Inverter Installation",
-    category: "Electrical & Solar",
-    description: "Complete off-grid solar system with 12x 540W Mono panels and lithium battery bank.",
-    location: "Cotonou, Benin",
-    completionDate: "January 2026",
-    budget: "4,500,000 XOF",
-  },
-  {
-    id: "port-2",
-    title: "Commercial Building Electrical Distribution Board",
-    category: "Electrical & Power",
-    description: "Installation of 3-phase main distribution board, surge arresters, and cable tray systems.",
-    location: "Porto-Novo, Benin",
-    completionDate: "December 2025",
-    budget: "1,850,000 XOF",
-  }
-];
+const DEFAULT_PORTFOLIO: PortfolioItem[] = [];
 
 const PLATFORM_TRADE_CATEGORIES = [
   "Electrical & Solar Energy",
@@ -78,14 +59,7 @@ const PLATFORM_TRADE_CATEGORIES = [
   "Architecture, CAD & Quantity Surveying"
 ];
 
-const DEFAULT_TOOLS = [
-  "Digital Multimeter (Fluke)",
-  "Heavy Duty Rotary Hammer Drill",
-  "Solar PV Crimping & Testing Kit",
-  "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
-  "Insulated VDE Screwdriver Set (1000V)",
-  "Cable Puller & Conduit Bender"
-];
+const DEFAULT_TOOLS: string[] = [];
 
 const profileTranslations: Record<string, Record<string, string>> = {
   en: {
@@ -202,12 +176,12 @@ export default function TechnicianProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [headline, setHeadline] = useState("Certified Electrician & Solar Specialist");
+  const [headline, setHeadline] = useState("");
   const [bio, setBio] = useState("");
-  const [experienceYears, setExperienceYears] = useState("8");
-  const [primaryOccupation, setPrimaryOccupation] = useState("Electrical & Solar Energy");
-  const [expertiseLevel, setExpertiseLevel] = useState("Senior");
-  const [educationLevel, setEducationLevel] = useState("B.Sc. Electrical Engineering");
+  const [experienceYears, setExperienceYears] = useState("");
+  const [primaryOccupation, setPrimaryOccupation] = useState("");
+  const [expertiseLevel, setExpertiseLevel] = useState("Intermediate");
+  const [educationLevel, setEducationLevel] = useState("");
   const [country, setCountry] = useState("Benin");
   const [city, setCity] = useState("Cotonou");
   const [address, setAddress] = useState("");
@@ -224,7 +198,7 @@ export default function TechnicianProfilePage() {
   const [portfolioList, setPortfolioList] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [newProjTitle, setNewProjTitle] = useState("");
-  const [newProjCategory, setNewProjCategory] = useState("Electrical & Solar Energy");
+  const [newProjCategory, setNewProjCategory] = useState("General Contracting");
 
   const [newProjDesc, setNewProjDesc] = useState("");
   const [newProjLocation, setNewProjLocation] = useState("");
@@ -240,10 +214,10 @@ export default function TechnicianProfilePage() {
   const [acceptTeamProjects, setAcceptTeamProjects] = useState(true);
 
   // Tab 5: Flexible Pricing Model State
-  const [startingPrice, setStartingPrice] = useState("15,000 XOF");
-  const [hourlyRate, setHourlyRate] = useState("5,000 XOF / hr");
-  const [dailyRate, setDailyRate] = useState("35,000 XOF / day");
-  const [inspectionFee, setInspectionFee] = useState("10,000 XOF");
+  const [startingPrice, setStartingPrice] = useState("");
+  const [hourlyRate, setHourlyRate] = useState("");
+  const [dailyRate, setDailyRate] = useState("");
+  const [inspectionFee, setInspectionFee] = useState("");
   const [isNegotiable, setIsNegotiable] = useState(true);
 
   // Tab 6: Tools & Equipment State
@@ -257,8 +231,8 @@ export default function TechnicianProfilePage() {
 
   // Tab 7: Payouts & Matchmaking State
   const [payoutMethod, setPayoutMethod] = useState("MTN Mobile Money / Moov Money");
-  const [payoutAccountNo, setPayoutAccountNo] = useState("+229 97 12 34 56");
-  const [payoutHolder, setPayoutHolder] = useState("Nelson Tagor");
+  const [payoutAccountNo, setPayoutAccountNo] = useState("");
+  const [payoutHolder, setPayoutHolder] = useState("");
   const [matchConcierge, setMatchConcierge] = useState(true);
   const [matchBuildTeam, setMatchBuildTeam] = useState(true);
   const [matchSupervisor, setMatchSupervisor] = useState(true);
@@ -301,10 +275,26 @@ export default function TechnicianProfilePage() {
       }
 
       const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-      if (rawPort) { try { setPortfolioList(JSON.parse(rawPort)); } catch {} }
+      if (rawPort) {
+        try {
+          const parsed = JSON.parse(rawPort);
+          if (Array.isArray(parsed)) {
+            const realOnly = parsed.filter((p: any) => p.id !== "port-1" && p.id !== "port-2");
+            setPortfolioList(realOnly);
+          }
+        } catch {}
+      }
 
       const rawTools = localStorage.getItem("boulotman_technician_tools");
-      if (rawTools) { try { setToolsList(JSON.parse(rawTools)); } catch {} }
+      if (rawTools) {
+        try {
+          const parsed = JSON.parse(rawTools);
+          if (Array.isArray(parsed)) {
+            const realOnly = parsed.filter((t: string) => !t.includes("Fluke") && !t.includes("Rotary Hammer") && !t.includes("Insulated VDE"));
+            setToolsList(realOnly);
+          }
+        } catch {}
+      }
 
       const rawAvail = localStorage.getItem("boulotman_technician_available_now");
       if (rawAvail !== null) setAvailableNow(rawAvail === "true");
@@ -880,11 +870,11 @@ export default function TechnicianProfilePage() {
                       )}
                     </div>
                     <div className={styles.metaList}>
-                      <span><iconify-icon icon="lucide:wrench" /> {headline}</span>
-                      <span><iconify-icon icon="lucide:map-pin" /> {city}, {country}</span>
-                      <span><iconify-icon icon="lucide:star" /> 4.9 (127 Reviews)</span>
-                      <span><iconify-icon icon="lucide:check-circle-2" /> 94 Completed Jobs</span>
-                      <span><iconify-icon icon="lucide:trending-up" /> 96% Completion Rate</span>
+                      <span><iconify-icon icon="lucide:wrench" /> {headline || primaryOccupation || (lang === "fr" ? "Spécialiste Certifié" : "Certified Specialist")}</span>
+                      <span><iconify-icon icon="lucide:map-pin" /> {city ? (country ? `${city}, ${country}` : city) : (country || "Benin")}</span>
+                      <span><iconify-icon icon="lucide:star" /> {userData?.average_rating && Number(userData.average_rating) > 0 ? Number(userData.average_rating).toFixed(1) : "5.0"} ({userData?.review_count ?? 0} {lang === "fr" ? "Avis" : "Reviews"})</span>
+                      <span><iconify-icon icon="lucide:check-circle-2" /> {userData?.tasks_completed_count ?? userData?.completed_jobs ?? 0} {lang === "fr" ? "Missions Terminées" : "Completed Jobs"}</span>
+                      <span><iconify-icon icon="lucide:trending-up" /> {userData?.completion_rate ? `${userData.completion_rate}%` : "100%"} {lang === "fr" ? "Taux de Réussite" : "Completion Rate"}</span>
                     </div>
                   </div>
                 </div>

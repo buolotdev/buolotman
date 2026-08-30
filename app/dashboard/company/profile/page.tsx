@@ -983,11 +983,11 @@ export default function CompanyProfilePage() {
                 </span>
               </div>
               <div className={styles.metaList}>
-                <span><iconify-icon icon="lucide:building-2" /> {form.industry}</span>
+                <span><iconify-icon icon="lucide:building-2" /> {form.industry || "Commercial & Industrial"}</span>
                 <span><iconify-icon icon="lucide:map-pin" /> {form.city ? `${form.city}, ` : ""}{form.country || "Benin"}</span>
                 {form.year_founded && <span><iconify-icon icon="lucide:calendar" /> Est. {form.year_founded}</span>}
-                <span><iconify-icon icon="lucide:users" /> {capabilities.permanentWorkforce}</span>
-                <span><iconify-icon icon="lucide:star" /> 4.8 (86 {t.reviews})</span>
+                {capabilities.permanentWorkforce && <span><iconify-icon icon="lucide:users" /> {capabilities.permanentWorkforce}</span>}
+                <span><iconify-icon icon="lucide:star" /> {profile?.average_rating && Number(profile.average_rating) > 0 ? Number(profile.average_rating).toFixed(1) : "5.0"} ({profile?.review_count ?? 0} {t.reviews})</span>
               </div>
             </div>
           </div>
