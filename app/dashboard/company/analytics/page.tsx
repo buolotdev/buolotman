@@ -1,11 +1,86 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import layoutStyles from "../page.module.css";
 import styles from "./analytics.module.css";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    eyebrow: "Analytics & Insights",
+    welcomeTitle: "Analytics Dashboard",
+    welcomeSubtitle: "Track your profile views, quote requests, and overall performance metrics.",
+    profileViews: "Profile Views",
+    quoteRequests: "Quote Requests",
+    conversionRate: "Conversion Rate",
+    completedHires: "Completed Hires",
+    avgRating: "Avg. Rating",
+    funnelTitle: "Lead Conversion Funnel",
+    acceptedQuotes: "Accepted Quotes",
+    servicePerformance: "Service Performance",
+    thService: "Service",
+    thViews: "Views",
+    thQuotes: "Quotes",
+    thAcceptance: "Acceptance",
+    noServicesActive: "No services active.",
+    trafficSources: "Traffic Sources",
+    search: "Search",
+    direct: "Direct",
+    recommendations: "Recommendations",
+    externalLinks: "External Links",
+    reputationOverview: "Reputation Overview",
+    stars5: "5 Stars",
+    stars4: "4 Stars",
+    stars3: "3 Stars",
+    stars2: "2 Stars",
+    stars1: "1 Star",
+  },
+  fr: {
+    eyebrow: "Analytique & Statistiques",
+    welcomeTitle: "Tableau de Bord Analytique",
+    welcomeSubtitle: "Suivez vos vues de profil, demandes de devis et indicateurs de performance.",
+    profileViews: "Vues du Profil",
+    quoteRequests: "Demandes de Devis",
+    conversionRate: "Taux de Conversion",
+    completedHires: "Contrats Réalisés",
+    avgRating: "Note Moyenne",
+    funnelTitle: "Entonnoir de Conversion",
+    acceptedQuotes: "Devis Acceptés",
+    servicePerformance: "Performance des Services",
+    thService: "Service",
+    thViews: "Vues",
+    thQuotes: "Devis",
+    thAcceptance: "Acceptation",
+    noServicesActive: "Aucun service actif pour le moment.",
+    trafficSources: "Sources de Trafic",
+    search: "Recherche",
+    direct: "Direct",
+    recommendations: "Recommandations",
+    externalLinks: "Liens Externes",
+    reputationOverview: "Aperçu de la Réputation",
+    stars5: "5 Étoiles",
+    stars4: "4 Étoiles",
+    stars3: "3 Étoiles",
+    stars2: "2 Étoiles",
+    stars1: "1 Étoile",
+  }
+};
+
 export default function CompanyAnalyticsPage() {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: profile } = useFetch(() => api.getCompanyProfile(), []);
   const { data: quotesData } = useFetch(() => api.getCompanyQuotes(), []);
@@ -42,32 +117,32 @@ export default function CompanyAnalyticsPage() {
       {/* BLUE BANNER HEADER */}
       <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
         <div className={layoutStyles.welcomeContent}>
-          <p className={layoutStyles.eyebrow}>Analytics & Insights</p>
-          <h2 className={layoutStyles.welcomeTitle}>Analytics Dashboard</h2>
-          <p className={layoutStyles.welcomeSubtitle}>Track your profile views, quote requests, and overall performance metrics.</p>
+          <p className={layoutStyles.eyebrow}>{t.eyebrow}</p>
+          <h2 className={layoutStyles.welcomeTitle}>{t.welcomeTitle}</h2>
+          <p className={layoutStyles.welcomeSubtitle}>{t.welcomeSubtitle}</p>
         </div>
       </section>
 
       {/* KPIs */}
       <div className={styles.kpis}>
         <div className={styles.kpi}>
-          <span>Profile Views</span>
+          <span>{t.profileViews}</span>
           <h3>{profileViews.toLocaleString()}</h3>
         </div>
         <div className={styles.kpi}>
-          <span>Quote Requests</span>
+          <span>{t.quoteRequests}</span>
           <h3>{quoteRequests}</h3>
         </div>
         <div className={styles.kpi}>
-          <span>Conversion Rate</span>
+          <span>{t.conversionRate}</span>
           <h3>{conversionRate}%</h3>
         </div>
         <div className={styles.kpi}>
-          <span>Completed Hires</span>
+          <span>{t.completedHires}</span>
           <h3>{completedHires}</h3>
         </div>
         <div className={styles.kpi}>
-          <span>Avg. Rating</span>
+          <span>{t.avgRating}</span>
           <h3>{avgRating} <span style={{ color: '#f4b400' }}>★</span></h3>
         </div>
       </div>
@@ -79,32 +154,32 @@ export default function CompanyAnalyticsPage() {
         <div>
           {/* FUNNEL */}
           <div className={styles.card}>
-            <h3>Lead Conversion Funnel</h3>
+            <h3>{t.funnelTitle}</h3>
 
-            <div className={styles.label}><span>Profile Views</span> <span>100%</span></div>
+            <div className={styles.label}><span>{t.profileViews}</span> <span>100%</span></div>
             <div className={styles.bar}><span style={{ width: '100%' }}></span></div>
 
-            <div className={styles.label}><span>Quote Requests</span> <span>{quoteRequests > 0 ? '100' : '0'}%</span></div>
+            <div className={styles.label}><span>{t.quoteRequests}</span> <span>{quoteRequests > 0 ? '100' : '0'}%</span></div>
             <div className={styles.bar}><span style={{ width: quoteRequests > 0 ? '100%' : '0%' }}></span></div>
 
-            <div className={styles.label}><span>Accepted Quotes</span> <span>{conversionRate}%</span></div>
+            <div className={styles.label}><span>{t.acceptedQuotes}</span> <span>{conversionRate}%</span></div>
             <div className={styles.bar}><span style={{ width: `${conversionRate}%` }}></span></div>
 
-            <div className={styles.label}><span>Hires Completed</span> <span>{completedHiresPct}%</span></div>
+            <div className={styles.label}><span>{t.completedHires}</span> <span>{completedHiresPct}%</span></div>
             <div className={styles.bar}><span style={{ width: `${completedHiresPct}%` }}></span></div>
           </div>
 
           {/* SERVICES */}
           <div className={styles.card} style={{ marginTop: 24 }}>
-            <h3>Service Performance</h3>
+            <h3>{t.servicePerformance}</h3>
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Service</th>
-                    <th>Views</th>
-                    <th>Quotes</th>
-                    <th>Acceptance</th>
+                    <th>{t.thService}</th>
+                    <th>{t.thViews}</th>
+                    <th>{t.thQuotes}</th>
+                    <th>{t.thAcceptance}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,7 +192,7 @@ export default function CompanyAnalyticsPage() {
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={4} style={{ textAlign: 'center', color: '#666', padding: 20 }}>No services active.</td>
+                      <td colSpan={4} style={{ textAlign: 'center', color: '#666', padding: 20 }}>{t.noServicesActive}</td>
                     </tr>
                   )}
                 </tbody>
@@ -130,38 +205,38 @@ export default function CompanyAnalyticsPage() {
         <div>
           {/* TRAFFIC */}
           <div className={styles.card}>
-            <h3>Traffic Sources</h3>
-            <div className={styles.label}><span>Search</span></div>
+            <h3>{t.trafficSources}</h3>
+            <div className={styles.label}><span>{t.search}</span></div>
             <div className={styles.bar}><span style={{ width: `${tSearch}%` }}></span></div>
             
-            <div className={styles.label}><span>Direct</span></div>
+            <div className={styles.label}><span>{t.direct}</span></div>
             <div className={styles.bar}><span style={{ width: `${tDirect}%` }}></span></div>
             
-            <div className={styles.label}><span>Recommendations</span></div>
+            <div className={styles.label}><span>{t.recommendations}</span></div>
             <div className={styles.bar}><span style={{ width: `${tRec}%` }}></span></div>
             
-            <div className={styles.label}><span>External Links</span></div>
+            <div className={styles.label}><span>{t.externalLinks}</span></div>
             <div className={styles.bar}><span style={{ width: `${tExt}%` }}></span></div>
           </div>
 
           {/* REVIEWS */}
           <div className={styles.card} style={{ marginTop: 24 }}>
-            <h3>Reputation Overview</h3>
+            <h3>{t.reputationOverview}</h3>
             <div className={styles.stars}>★★★★★ {avgRating} / 5</div>
 
-            <div className={styles.label}><span>5 Stars</span> <span>{dist['5']}</span></div>
+            <div className={styles.label}><span>{t.stars5}</span> <span>{dist['5']}</span></div>
             <div className={styles.bar}><span style={{ width: getPct('5') }}></span></div>
 
-            <div className={styles.label}><span>4 Stars</span> <span>{dist['4']}</span></div>
+            <div className={styles.label}><span>{t.stars4}</span> <span>{dist['4']}</span></div>
             <div className={styles.bar}><span style={{ width: getPct('4') }}></span></div>
 
-            <div className={styles.label}><span>3 Stars</span> <span>{dist['3']}</span></div>
+            <div className={styles.label}><span>{t.stars3}</span> <span>{dist['3']}</span></div>
             <div className={styles.bar}><span style={{ width: getPct('3') }}></span></div>
             
-            <div className={styles.label}><span>2 Stars</span> <span>{dist['2']}</span></div>
+            <div className={styles.label}><span>{t.stars2}</span> <span>{dist['2']}</span></div>
             <div className={styles.bar}><span style={{ width: getPct('2') }}></span></div>
 
-            <div className={styles.label}><span>1 Star</span> <span>{dist['1']}</span></div>
+            <div className={styles.label}><span>{t.stars1}</span> <span>{dist['1']}</span></div>
             <div className={styles.bar}><span style={{ width: getPct('1') }}></span></div>
           </div>
         </div>
@@ -171,3 +246,4 @@ export default function CompanyAnalyticsPage() {
     </div>
   );
 }
+

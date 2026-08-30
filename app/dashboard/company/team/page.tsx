@@ -1,12 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import layoutStyles from "../page.module.css";
 import styles from "./team.module.css";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    subtitle: "Enterprise Workforce Management",
+    title: "Company Team & Staff",
+    backToDashboard: "Back to dashboard",
+    inviteMember: "Invite Member",
+    noTeamMembers: "No team members added yet",
+    noTeamDesc: "Add certified engineers, project supervisors, and technicians to your enterprise roster.",
+    addFirstMember: "Add First Team Member",
+    active: "● Active",
+    invited: "⏱ Invited",
+    remove: "Remove",
+    confirmRemove: "Are you sure you want to remove this team member?",
+    inviteModalTitle: "Invite Team Member",
+    inviteModalDesc: "Send an invitation to add a professional to your company roster.",
+    fullName: "Full Name *",
+    workEmail: "Work Email Address *",
+    phone: "Phone Number (Optional)",
+    role: "Role / Position",
+    cancel: "Cancel",
+    sendInvitation: "Send Invitation",
+    invitationSent: "Invitation sent to",
+    leadTechnician: "Lead Technician",
+    seniorEngineer: "Senior Electrical Engineer",
+    projectManager: "Project Manager",
+    siteSupervisor: "Site Supervisor",
+    hvacSpecialist: "HVAC Specialist",
+    plumbingLead: "Plumbing Lead",
+  },
+  fr: {
+    subtitle: "Gestion des Effectifs d'Entreprise",
+    title: "Équipe & Personnel de l'Entreprise",
+    backToDashboard: "Retour au tableau de bord",
+    inviteMember: "Inviter un Membre",
+    noTeamMembers: "Aucun membre d'équipe ajouté pour l'instant",
+    noTeamDesc: "Ajoutez des ingénieurs certifiés, des chefs de projet et des techniciens à votre effectif d'entreprise.",
+    addFirstMember: "Ajouter un Premier Membre",
+    active: "● Actif",
+    invited: "⏱ Invité",
+    remove: "Supprimer",
+    confirmRemove: "Êtes-vous sûr de vouloir retirer ce membre de l'équipe ?",
+    inviteModalTitle: "Inviter un Membre de l'Équipe",
+    inviteModalDesc: "Envoyez une invitation pour ajouter un professionnel à l'effectif de votre entreprise.",
+    fullName: "Nom Complet *",
+    workEmail: "Adresse E-mail Professionnelle *",
+    phone: "Numéro de Téléphone (Facultatif)",
+    role: "Rôle / Poste",
+    cancel: "Annuler",
+    sendInvitation: "Envoyer l'Invitation",
+    invitationSent: "Invitation envoyée à",
+    leadTechnician: "Technicien en Chef",
+    seniorEngineer: "Ingénieur Électricien Principal",
+    projectManager: "Chef de Projet",
+    siteSupervisor: "Superviseur de Chantier",
+    hvacSpecialist: "Spécialiste CVC / Climatisation",
+    plumbingLead: "Responsable Plomberie",
+  }
+};
 
 export default function CompanyTeamPage() {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const [team, setTeam] = useState<any[]>([
     {
       id: 1,
@@ -59,7 +130,7 @@ export default function CompanyTeamPage() {
     };
 
     setTeam((prev) => [newMember, ...prev]);
-    setSuccessMsg(`Invitation sent to ${formData.email}!`);
+    setSuccessMsg(`${t.invitationSent} ${formData.email}!`);
     setFormData({ name: "", email: "", phone: "", role: "Lead Technician" });
     setTimeout(() => {
       setIsModalOpen(false);
@@ -68,7 +139,7 @@ export default function CompanyTeamPage() {
   };
 
   const handleRemove = (id: number) => {
-    if (confirm("Are you sure you want to remove this team member?")) {
+    if (confirm(t.confirmRemove)) {
       setTeam((prev) => prev.filter((m) => m.id !== id));
     }
   };
@@ -79,15 +150,15 @@ export default function CompanyTeamPage() {
         <div className={styles.container} style={{ marginTop: 24 }}>
           <header className={styles.header}>
             <div className={styles.headerLeft}>
-              <p className={styles.subtitle}>Enterprise Workforce Management</p>
-              <h1 className={styles.title}>Company Team &amp; Staff</h1>
+              <p className={styles.subtitle}>{t.subtitle}</p>
+              <h1 className={styles.title}>{t.title}</h1>
               <Link href="/dashboard/company" className={styles.backLink}>
-                <iconify-icon icon="lucide:arrow-left" /> Back to dashboard
+                <iconify-icon icon="lucide:arrow-left" /> {t.backToDashboard}
               </Link>
             </div>
             <div className={styles.headerActions}>
               <button className={styles.inviteBtn} onClick={() => setIsModalOpen(true)}>
-                <iconify-icon icon="lucide:user-plus" /> Invite Member
+                <iconify-icon icon="lucide:user-plus" /> {t.inviteMember}
               </button>
             </div>
           </header>
@@ -97,10 +168,10 @@ export default function CompanyTeamPage() {
               <div className={styles.emptyIcon}>
                 <iconify-icon icon="lucide:users" />
               </div>
-              <h3>No team members added yet</h3>
-              <p>Add certified engineers, project supervisors, and technicians to your enterprise roster.</p>
+              <h3>{t.noTeamMembers}</h3>
+              <p>{t.noTeamDesc}</p>
               <button className={styles.inviteBtn} onClick={() => setIsModalOpen(true)} style={{ marginTop: 12 }}>
-                <iconify-icon icon="lucide:user-plus" /> Add First Team Member
+                <iconify-icon icon="lucide:user-plus" /> {t.addFirstMember}
               </button>
             </div>
           ) : (
@@ -116,7 +187,7 @@ export default function CompanyTeamPage() {
                       </div>
                     </div>
                     <span className={`${styles.status} ${member.status === "active" ? styles.statusActive : styles.statusPending}`}>
-                      {member.status === "active" ? "● Active" : "⏱ Invited"}
+                      {member.status === "active" ? t.active : t.invited}
                     </span>
                   </div>
                   <div className={styles.memberContact}>
@@ -134,7 +205,7 @@ export default function CompanyTeamPage() {
                       className={`${styles.actionBtn} ${styles.actionBtnRemove}`}
                       onClick={() => handleRemove(member.id)}
                     >
-                      <iconify-icon icon="lucide:trash-2" /> Remove
+                      <iconify-icon icon="lucide:trash-2" /> {t.remove}
                     </button>
                   </div>
                 </div>
@@ -156,8 +227,8 @@ export default function CompanyTeamPage() {
                 <iconify-icon icon="lucide:user-plus" />
               </div>
               <div>
-                <h2>Invite Team Member</h2>
-                <p>Send an invitation to add a professional to your company roster.</p>
+                <h2>{t.inviteModalTitle}</h2>
+                <p>{t.inviteModalDesc}</p>
               </div>
             </div>
 
@@ -169,58 +240,58 @@ export default function CompanyTeamPage() {
             ) : (
               <form onSubmit={handleInvite} className={styles.form}>
                 <div className={styles.formGroup}>
-                  <label>Full Name *</label>
+                  <label>{t.fullName}</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. John Bosco"
+                    placeholder="e.g. Jean Dupont"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Work Email Address *</label>
+                  <label>{t.workEmail}</label>
                   <input
                     type="email"
                     required
-                    placeholder="john@company.rw"
+                    placeholder="jean@entreprise.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Phone Number (Optional)</label>
+                  <label>{t.phone}</label>
                   <input
                     type="tel"
-                    placeholder="+250 788 000 000"
+                    placeholder="+225 07 00 00 00"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Role / Position</label>
+                  <label>{t.role}</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   >
-                    <option value="Lead Technician">Lead Technician</option>
-                    <option value="Senior Electrical Engineer">Senior Electrical Engineer</option>
-                    <option value="Project Manager">Project Manager</option>
-                    <option value="Site Supervisor">Site Supervisor</option>
-                    <option value="HVAC Specialist">HVAC Specialist</option>
-                    <option value="Plumbing Lead">Plumbing Lead</option>
+                    <option value="Lead Technician">{t.leadTechnician}</option>
+                    <option value="Senior Electrical Engineer">{t.seniorEngineer}</option>
+                    <option value="Project Manager">{t.projectManager}</option>
+                    <option value="Site Supervisor">{t.siteSupervisor}</option>
+                    <option value="HVAC Specialist">{t.hvacSpecialist}</option>
+                    <option value="Plumbing Lead">{t.plumbingLead}</option>
                   </select>
                 </div>
 
                 <div className={styles.modalActions}>
                   <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button type="submit" className={styles.submitBtn}>
-                    <iconify-icon icon="lucide:send" /> Send Invitation
+                    <iconify-icon icon="lucide:send" /> {t.sendInvitation}
                   </button>
                 </div>
               </form>
@@ -231,3 +302,4 @@ export default function CompanyTeamPage() {
     </>
   );
 }
+

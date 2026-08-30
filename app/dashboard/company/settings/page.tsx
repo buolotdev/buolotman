@@ -1,14 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import layoutStyles from "../page.module.css";
 import styles from "./settings.module.css";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    eyebrow: "Company dashboard",
+    welcomeTitle: "Settings",
+    welcomeSubtitle: "Manage your account preferences, notifications, and security.",
+    accountSettings: "Account Settings",
+    companyName: "Company Name",
+    registrationNumber: "Registration Number",
+    headquarters: "Headquarters",
+    businessPreferences: "Business Preferences",
+    defaultResponseTime: "Default Response Time",
+    selectTime: "Select time",
+    within24h: "Within 24 hours",
+    within48h: "Within 48 hours",
+    within72h: "Within 72 hours",
+    preferredCurrency: "Preferred Currency",
+    autoAcceptVisits: "Auto-accept site visits",
+    notificationPreferences: "Notification Preferences",
+    emailNotif: "Email notifications",
+    smsNotif: "SMS notifications",
+    inappNotif: "In-app notifications",
+    privacyVisibility: "Privacy & Visibility",
+    publicProfileVisible: "Public profile visible",
+    showPhone: "Show phone number",
+    showEmail: "Show email address",
+    appearInSearch: "Appear in search results",
+    security: "Security",
+    enable2fa: "Enable Two-Factor Authentication (2FA)",
+    logoutAll: "Logout all devices",
+    paymentsWallet: "Payments & B-Wallet",
+    currentBalance: "Current Balance: 245,000 XOF",
+    paymentsNotice: "All payments and withdrawals are processed via B-Wallet securely.",
+    managePayments: "Manage Payments",
+    dangerZone: "Danger Zone",
+    deactivateProfile: "Deactivate Company Profile",
+    deleteAccount: "Delete Account Permanently",
+    reviewBeforeSave: "Review your settings before saving.",
+    saveAllChanges: "Save all changes",
+    saving: "Saving...",
+    settingsUpdated: "✔ Settings updated!",
+  },
+  fr: {
+    eyebrow: "Espace Entreprise",
+    welcomeTitle: "Paramètres",
+    welcomeSubtitle: "Gérez les préférences de votre compte, vos notifications et la sécurité.",
+    accountSettings: "Paramètres du Compte",
+    companyName: "Nom de l'entreprise",
+    registrationNumber: "Numéro d'immatriculation",
+    headquarters: "Siège social",
+    businessPreferences: "Préférences Commerciales",
+    defaultResponseTime: "Délai de réponse par défaut",
+    selectTime: "Sélectionner un délai",
+    within24h: "Moins de 24 heures",
+    within48h: "Moins de 48 heures",
+    within72h: "Moins de 72 heures",
+    preferredCurrency: "Devise préférée",
+    autoAcceptVisits: "Accepter automatiquement les visites de chantier",
+    notificationPreferences: "Préférences de Notification",
+    emailNotif: "Notifications par e-mail",
+    smsNotif: "Notifications par SMS",
+    inappNotif: "Notifications dans l'application",
+    privacyVisibility: "Confidentialité & Visibilité",
+    publicProfileVisible: "Profil public visible",
+    showPhone: "Afficher le numéro de téléphone",
+    showEmail: "Afficher l'adresse e-mail",
+    appearInSearch: "Apparaître dans les résultats de recherche",
+    security: "Sécurité",
+    enable2fa: "Activer l'authentification à deux facteurs (2FA)",
+    logoutAll: "Déconnecter tous les appareils",
+    paymentsWallet: "Paiements & B-Wallet",
+    currentBalance: "Solde Actuel : 245 000 XOF",
+    paymentsNotice: "Tous les paiements et retraits sont traités de manière sécurisée via B-Wallet.",
+    managePayments: "Gérer les Paiements",
+    dangerZone: "Zone Critique",
+    deactivateProfile: "Désactiver le Profil Entreprise",
+    deleteAccount: "Supprimer Définitivement le Compte",
+    reviewBeforeSave: "Vérifiez vos paramètres avant d'enregistrer.",
+    saveAllChanges: "Enregistrer les modifications",
+    saving: "Enregistrement...",
+    settingsUpdated: "✔ Paramètres mis à jour !",
+  }
+};
+
 export default function CompanySettingsPage() {
   const { data: profile, refetch } = useFetch(() => api.getCompanyProfile(), []);
   const [walletModal, setWalletModal] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   if (!profile) return null;
 
@@ -19,15 +114,16 @@ export default function CompanySettingsPage() {
         {/* BLUE BANNER HEADER */}
         <section className={layoutStyles.welcomeSection} style={{ marginBottom: 30 }}>
           <div className={layoutStyles.welcomeContent}>
-            <p className={layoutStyles.eyebrow}>Company dashboard</p>
-            <h2 className={layoutStyles.welcomeTitle}>Settings</h2>
-            <p className={layoutStyles.welcomeSubtitle}>Manage your account preferences, notifications, and security.</p>
+            <p className={layoutStyles.eyebrow}>{t.eyebrow}</p>
+            <h2 className={layoutStyles.welcomeTitle}>{t.welcomeTitle}</h2>
+            <p className={layoutStyles.welcomeSubtitle}>{t.welcomeSubtitle}</p>
           </div>
         </section>
 
         <CompanySettingsForm
           key={profile.id ?? "company-settings"}
           profile={profile}
+          t={t}
           onSave={async (form) => {
             await api.updateCompanyProfile(form);
             refetch();
@@ -43,10 +139,12 @@ export default function CompanySettingsPage() {
 
 function CompanySettingsForm({
   profile,
+  t,
   onSave,
   onOpenWallet
 }: {
   profile: any;
+  t: Record<string, string>;
   onSave: (form: any) => Promise<void>;
   onOpenWallet: () => void;
 }) {
@@ -73,18 +171,18 @@ function CompanySettingsForm({
       
       {/* ACCOUNT SETTINGS */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Account Settings</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.accountSettings}</h3>
         <div className={styles.fieldGroup}>
-          <label className={styles.label}>Company Name</label>
+          <label className={styles.label}>{t.companyName}</label>
           <input className={styles.input} value={form.company_name} onChange={(e) => update('company_name', e.target.value)} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Registration Number</label>
+            <label className={styles.label}>{t.registrationNumber}</label>
             <input className={styles.input} value={form.registration_number || ''} onChange={(e) => update('registration_number', e.target.value)} />
           </div>
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Headquarters</label>
+            <label className={styles.label}>{t.headquarters}</label>
             <input className={styles.input} value={form.headquarters || ''} onChange={(e) => update('headquarters', e.target.value)} />
           </div>
         </div>
@@ -92,113 +190,115 @@ function CompanySettingsForm({
 
       {/* BUSINESS PREFERENCES */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Business Preferences</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.businessPreferences}</h3>
         
         <div className={styles.fieldGroup}>
-          <label className={styles.label}>Default Response Time</label>
+          <label className={styles.label}>{t.defaultResponseTime}</label>
           <select className={styles.select} value={form.response_time || ''} onChange={(e) => update('response_time', e.target.value)}>
-            <option value="">Select time</option>
-            <option value="Within 24 hours">Within 24 hours</option>
-            <option value="Within 48 hours">Within 48 hours</option>
-            <option value="Within 72 hours">Within 72 hours</option>
+            <option value="">{t.selectTime}</option>
+            <option value="Within 24 hours">{t.within24h}</option>
+            <option value="Within 48 hours">{t.within48h}</option>
+            <option value="Within 72 hours">{t.within72h}</option>
           </select>
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.label}>Preferred Currency</label>
+          <label className={styles.label}>{t.preferredCurrency}</label>
           <select className={styles.select} value={form.currency || 'USD'} onChange={(e) => update('currency', e.target.value)}>
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
             <option value="RWF">RWF (FRw)</option>
+            <option value="XOF">XOF (FCFA)</option>
           </select>
         </div>
 
         <label className={styles.toggle}>
-          Auto-accept site visits
+          {t.autoAcceptVisits}
           <input type="checkbox" checked={!!form.auto_accept_visits} onChange={(e) => update('auto_accept_visits', e.target.checked)} />
         </label>
       </section>
 
       {/* NOTIFICATION PREFERENCES */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Notification Preferences</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.notificationPreferences}</h3>
         <label className={styles.toggle}>
-          Email notifications
+          {t.emailNotif}
           <input type="checkbox" checked={!!form.notif_email} onChange={(e) => update('notif_email', e.target.checked)} />
         </label>
         <label className={styles.toggle}>
-          SMS notifications
+          {t.smsNotif}
           <input type="checkbox" checked={!!form.notif_sms} onChange={(e) => update('notif_sms', e.target.checked)} />
         </label>
         <label className={styles.toggle}>
-          In-app notifications
+          {t.inappNotif}
           <input type="checkbox" checked={!!form.notif_inapp} onChange={(e) => update('notif_inapp', e.target.checked)} />
         </label>
       </section>
 
       {/* PRIVACY & VISIBILITY */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Privacy & Visibility</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.privacyVisibility}</h3>
         <label className={styles.toggle}>
-          Public profile visible
+          {t.publicProfileVisible}
           <input type="checkbox" checked={!!form.privacy_public} onChange={(e) => update('privacy_public', e.target.checked)} />
         </label>
         <label className={styles.toggle}>
-          Show phone number
+          {t.showPhone}
           <input type="checkbox" checked={!!form.privacy_show_phone} onChange={(e) => update('privacy_show_phone', e.target.checked)} />
         </label>
         <label className={styles.toggle}>
-          Show email address
+          {t.showEmail}
           <input type="checkbox" checked={!!form.privacy_show_email} onChange={(e) => update('privacy_show_email', e.target.checked)} />
         </label>
         <label className={styles.toggle}>
-          Appear in search results
+          {t.appearInSearch}
           <input type="checkbox" checked={!!form.privacy_search} onChange={(e) => update('privacy_search', e.target.checked)} />
         </label>
       </section>
 
       {/* SECURITY */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Security</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.security}</h3>
         <label className={styles.toggle}>
-          Enable Two-Factor Authentication (2FA)
+          {t.enable2fa}
           <input type="checkbox" checked={!!form.sec_2fa} onChange={(e) => update('sec_2fa', e.target.checked)} />
         </label>
-        <button type="button" className={styles.outlineBtn} style={{ marginTop: 12 }}>Logout all devices</button>
+        <button type="button" className={styles.outlineBtn} style={{ marginTop: 12 }}>{t.logoutAll}</button>
       </section>
 
       {/* PAYMENTS */}
       <section className={styles.card}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>Payments & B-Wallet</h3>
-        <div className={styles.balance}>Current Balance: 245,000 XOF</div>
-        <p className={styles.notice}>All payments and withdrawals are processed via B-Wallet securely.</p>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.paymentsWallet}</h3>
+        <div className={styles.balance}>{t.currentBalance}</div>
+        <p className={styles.notice}>{t.paymentsNotice}</p>
         <button type="button" className={styles.saveBtn} onClick={onOpenWallet} style={{ width: 'auto', padding: '0 24px' }}>
-          Manage Payments
+          {t.managePayments}
         </button>
       </section>
 
       {/* DANGER ZONE */}
       <section className={styles.card} style={{ border: '1px solid #fee2e2' }}>
-        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24, color: '#ef4444' }}>Danger Zone</h3>
+        <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24, color: '#ef4444' }}>{t.dangerZone}</h3>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <button type="button" className={styles.dangerBtn} onClick={() => window.confirm("Are you sure you want to deactivate your profile?")}>Deactivate Company Profile</button>
-          <button type="button" className={styles.dangerBtn} style={{ background: "#7f1d1d" }} onClick={() => window.confirm("Are you sure you want to delete your account permanently? This action cannot be undone.")}>Delete Account Permanently</button>
+          <button type="button" className={styles.dangerBtn} onClick={() => window.confirm(t.deactivateProfile + "?")}>{t.deactivateProfile}</button>
+          <button type="button" className={styles.dangerBtn} style={{ background: "#7f1d1d" }} onClick={() => window.confirm(t.deleteAccount + "?")}>{t.deleteAccount}</button>
         </div>
       </section>
 
       {/* SAVE BUTTON FLOATING OR FIXED */}
       <div className={styles.saveBar}>
-        <div><p style={{margin: 0, fontSize: 14, color: "#64748b"}}>Review your settings before saving.</p></div>
+        <div><p style={{margin: 0, fontSize: 14, color: "#64748b"}}>{t.reviewBeforeSave}</p></div>
         <div style={{display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap"}}>
           <button type="button" onClick={submit} disabled={saving} className={styles.saveBtn} style={{ padding: '0 32px', boxShadow: '0 10px 25px rgba(255, 69, 0, 0.4)' }}>
-            {saving ? "Saving..." : "Save all changes"}
+            {saving ? t.saving : t.saveAllChanges}
           </button>
-          {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600 }}>✔ Settings updated!</span>}
+          {saveSuccess && <span style={{ color: '#10b981', fontWeight: 600 }}>{t.settingsUpdated}</span>}
         </div>
       </div>
     </div>
   );
 }
+
 
 // WALLET MODAL COMPONENT (Dummy/Simulation as requested)
 function WalletModal({ onClose }: { onClose: () => void }) {

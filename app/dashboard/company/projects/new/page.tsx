@@ -18,8 +18,94 @@ const COUNTRIES = [
   "South Africa", 
   "Ivory Coast", 
   "Cameroon", 
+  "Benin",
+  "Togo",
+  "Senegal",
   "Global"
 ];
+
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    heroTitle: "Post a Company Service",
+    heroSubtitle: "Advertise your company services to clients on Boulot Man",
+    verificationNoticeTitle: "Company Verification Notice",
+    verificationNoticeDesc: "Your enterprise company profile is currently pending Admin verification. Once verified, your published services and projects will be visible in public search and client directories.",
+    companyName: "Company Name",
+    serviceTitle: "Service Title",
+    serviceDeliveryMode: "Service Delivery Mode",
+    onsite: "On-site",
+    remote: "Remote",
+    hybrid: "Hybrid",
+    category: "Category",
+    selectCategory: "👉 Click here to select Category",
+    subcategory: "Subcategory",
+    selectSubcategory: "Select Subcategory",
+    selectCategoryFirst: "👈 Click 'Category' on the left first",
+    country: "Country (auto-detected)",
+    city: "City (auto-detected)",
+    pricingStructure: "Pricing Structure",
+    contractBased: "Contract-based",
+    projectBased: "Project-based",
+    hourlyDaily: "Hourly / Daily",
+    negotiable: "Negotiable",
+    estimatedBudget: "Estimated Budget (XOF)",
+    deadline: "Deadline",
+    projectDescription: "Project Description",
+    descPlaceholder: "Provide detailed requirements for this project...",
+    previewProject: "Preview Project",
+    projectPreview: "Project Preview",
+    company: "Company",
+    serviceMode: "Service Mode",
+    pricing: "Pricing",
+    categories: "Categories",
+    editDetails: "Edit Details",
+    saveDraft: "Save Draft",
+    publishProject: "Publish Project",
+    publishing: "Publishing...",
+    toastWaitTitle: "Wait for Verification",
+    toastWaitDesc: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services."
+  },
+  fr: {
+    heroTitle: "Publier un Service Entreprise",
+    heroSubtitle: "Faites la promotion des prestations de votre entreprise auprès des clients sur Boulot Man",
+    verificationNoticeTitle: "Avis de Vérification Entreprise",
+    verificationNoticeDesc: "Votre profil d'entreprise est actuellement en cours de vérification par l'administration. Dès validation, vos services seront visibles sur l'annuaire public.",
+    companyName: "Nom de l'entreprise",
+    serviceTitle: "Titre de la prestation",
+    serviceDeliveryMode: "Mode de prestation",
+    onsite: "Sur site",
+    remote: "À distance",
+    hybrid: "Hybride",
+    category: "Catégorie",
+    selectCategory: "👉 Cliquez ici pour choisir la catégorie",
+    subcategory: "Sous-catégorie",
+    selectSubcategory: "Sélectionner la sous-catégorie",
+    selectCategoryFirst: "👈 Choisissez d'abord la catégorie à gauche",
+    country: "Pays (détecté automatiquement)",
+    city: "Ville (détectée automatiquement)",
+    pricingStructure: "Structure tarifaire",
+    contractBased: "Sur contrat",
+    projectBased: "Par projet",
+    hourlyDaily: "Horaire / Journalier",
+    negotiable: "Négociable",
+    estimatedBudget: "Budget estimatif (XOF)",
+    deadline: "Date limite / Échéance",
+    projectDescription: "Description détaillée",
+    descPlaceholder: "Fournissez les spécifications et détails pour cette prestation...",
+    previewProject: "Aperçu de la prestation",
+    projectPreview: "Aperçu de la prestation",
+    company: "Entreprise",
+    serviceMode: "Mode d'intervention",
+    pricing: "Tarification",
+    categories: "Catégories",
+    editDetails: "Modifier",
+    saveDraft: "Enregistrer brouillon",
+    publishProject: "Publier l'Offre",
+    publishing: "Publication en cours...",
+    toastWaitTitle: "Vérification en attente",
+    toastWaitDesc: "Veuillez patienter pendant l'examen de votre compte entreprise par l'administration. Dès validation, vous pourrez publier vos prestations."
+  }
+};
 
 export default function CreateCompanyProjectPage() {
   const router = useRouter();
@@ -27,6 +113,18 @@ export default function CreateCompanyProjectPage() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
 
   const [form, setForm] = useState({
@@ -80,7 +178,7 @@ export default function CreateCompanyProjectPage() {
   const handlePreview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isVerified) {
-      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services.");
+      toast.warning(t.toastWaitTitle, t.toastWaitDesc);
       return;
     }
     setShowPreview(true);
@@ -88,7 +186,7 @@ export default function CreateCompanyProjectPage() {
 
   const handlePublish = async () => {
     if (!isVerified) {
-      toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services.");
+      toast.warning(t.toastWaitTitle, t.toastWaitDesc);
       return;
     }
     setSubmitting(true);
@@ -142,8 +240,8 @@ export default function CreateCompanyProjectPage() {
     <>
       <div className={styles.container} style={{ marginTop: 32 }}>
         <div className={styles.hero}>
-          <h1>Post a Company Service</h1>
-          <p>Advertise your company services to clients on Boulot Man</p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroSubtitle}</p>
         </div>
 
         {!isVerified && user && (
@@ -152,8 +250,8 @@ export default function CreateCompanyProjectPage() {
               <iconify-icon icon="lucide:shield-alert"></iconify-icon>
             </div>
             <div>
-              <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>Company Verification Notice</strong>
-              <span style={{ color: "#b45309", fontSize: 13 }}>Your enterprise company profile is currently pending Admin verification. Once verified, your published services and projects will be visible in public search and client directories.</span>
+              <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>{t.verificationNoticeTitle}</strong>
+              <span style={{ color: "#b45309", fontSize: 13 }}>{t.verificationNoticeDesc}</span>
             </div>
           </div>
         )}
@@ -162,7 +260,7 @@ export default function CreateCompanyProjectPage() {
 
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Company Name</label>
+              <label className={styles.label}>{t.companyName}</label>
               <input 
                 type="text" 
                 className={styles.input} 
@@ -172,7 +270,7 @@ export default function CreateCompanyProjectPage() {
               />
             </div>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Service Title</label>
+              <label className={styles.label}>{t.serviceTitle}</label>
               <input 
                 type="text" 
                 className={styles.input} 
@@ -184,7 +282,7 @@ export default function CreateCompanyProjectPage() {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Service Delivery Mode</label>
+            <label className={styles.label}>{t.serviceDeliveryMode}</label>
             <div className={styles.pills}>
               <label>
                 <input 
@@ -194,7 +292,7 @@ export default function CreateCompanyProjectPage() {
                   checked={form.service_type === "onsite"}
                   onChange={e => setForm({...form, service_type: e.target.value})}
                 />
-                <span>On-site</span>
+                <span>{t.onsite}</span>
               </label>
               <label>
                 <input 
@@ -204,7 +302,7 @@ export default function CreateCompanyProjectPage() {
                   checked={form.service_type === "remote"}
                   onChange={e => setForm({...form, service_type: e.target.value})}
                 />
-                <span>Remote</span>
+                <span>{t.remote}</span>
               </label>
               <label>
                 <input 
@@ -214,21 +312,21 @@ export default function CreateCompanyProjectPage() {
                   checked={form.service_type === "hybrid"}
                   onChange={e => setForm({...form, service_type: e.target.value})}
                 />
-                <span>Hybrid</span>
+                <span>{t.hybrid}</span>
               </label>
             </div>
           </div>
 
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Category</label>
+              <label className={styles.label}>{t.category}</label>
               <select 
                 className={styles.select}
                 value={form.category}
                 onChange={e => setForm({...form, category: e.target.value, subcategory: ""})}
                 required
               >
-                <option value="">👉 Click here to select Category</option>
+                <option value="">{t.selectCategory}</option>
                 {categoriesLoading ? (
                   <option>Loading...</option>
                 ) : (
@@ -240,7 +338,7 @@ export default function CreateCompanyProjectPage() {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Subcategory</label>
+              <label className={styles.label}>{t.subcategory}</label>
               <select 
                 className={styles.select}
                 value={form.subcategory}
@@ -248,7 +346,7 @@ export default function CreateCompanyProjectPage() {
                 required
                 disabled={!form.category || subcategories.length === 0}
               >
-                <option value="">{!form.category ? "👈 Click 'Category' on the left first" : "Select Subcategory"}</option>
+                <option value="">{!form.category ? t.selectCategoryFirst : t.selectSubcategory}</option>
                 {subcategories.map((sub: any) => (
                   <option key={sub.id} value={String(sub.id)}>{sub.name}</option>
                 ))}
@@ -258,27 +356,27 @@ export default function CreateCompanyProjectPage() {
 
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Country (auto-detected)</label>
+              <label className={styles.label}>{t.country}</label>
               <select 
                 className={styles.select} 
                 value={form.country}
                 onChange={e => setForm({...form, country: e.target.value})}
                 required
               >
-                <option value="">Select Country</option>
+                <option value="">{lang === "fr" ? "Sélectionner le Pays" : "Select Country"}</option>
                 {COUNTRIES.map(country => (
                   <option key={country} value={country}>{country}</option>
                 ))}
               </select>
             </div>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>City (auto-detected)</label>
+              <label className={styles.label}>{t.city}</label>
               <input 
                 type="text" 
                 className={styles.input} 
                 value={form.city}
                 onChange={e => setForm({...form, city: e.target.value})}
-                placeholder="City"
+                placeholder={lang === "fr" ? "Ville" : "City"}
                 required
               />
             </div>
@@ -286,21 +384,21 @@ export default function CreateCompanyProjectPage() {
 
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Pricing Structure</label>
+              <label className={styles.label}>{t.pricingStructure}</label>
               <select 
                 className={styles.select}
                 value={form.budget_mode}
                 onChange={e => setForm({...form, budget_mode: e.target.value})}
                 required
               >
-                <option value="Contract-based">Contract-based</option>
-                <option value="Project-based">Project-based</option>
-                <option value="Hourly / Daily">Hourly / Daily</option>
-                <option value="Negotiable">Negotiable</option>
+                <option value="Contract-based">{t.contractBased}</option>
+                <option value="Project-based">{t.projectBased}</option>
+                <option value="Hourly / Daily">{t.hourlyDaily}</option>
+                <option value="Negotiable">{t.negotiable}</option>
               </select>
             </div>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Estimated Budget (XOF)</label>
+              <label className={styles.label}>{t.estimatedBudget}</label>
               <input 
                 type="number" 
                 className={styles.input} 
@@ -313,7 +411,7 @@ export default function CreateCompanyProjectPage() {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Deadline</label>
+            <label className={styles.label}>{t.deadline}</label>
             <input 
               type="date" 
               className={styles.input} 
@@ -324,10 +422,10 @@ export default function CreateCompanyProjectPage() {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Project Description</label>
+            <label className={styles.label}>{t.projectDescription}</label>
             <textarea 
               className={styles.textarea} 
-              placeholder="Provide detailed requirements for this project..."
+              placeholder={t.descPlaceholder}
               value={form.description}
               onChange={e => setForm({...form, description: e.target.value})}
               required
@@ -335,7 +433,7 @@ export default function CreateCompanyProjectPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn}>
-            <iconify-icon icon="lucide:eye" /> Preview Project
+            <iconify-icon icon="lucide:eye" /> {t.previewProject}
           </button>
         </form>
       </div>
@@ -343,40 +441,40 @@ export default function CreateCompanyProjectPage() {
       {showPreview && (
         <div className={styles.previewOverlay}>
           <div className={styles.previewBox}>
-            <h2>Project Preview</h2>
+            <h2>{t.projectPreview}</h2>
             <div className={styles.previewGrid}>
-              <div><strong>Company</strong><p>{form.companyName}</p></div>
-              <div><strong>Service Title</strong><p>{form.title}</p></div>
-              <div><strong>Service Mode</strong><p style={{ textTransform: 'capitalize' }}>{form.service_type}</p></div>
-              <div><strong>Country</strong><p>{form.country || "Not specified"}</p></div>
-              <div><strong>City</strong><p>{form.city || "Not specified"}</p></div>
-              <div><strong>Pricing</strong><p>{form.budget_mode} {form.budget ? `- ${form.budget} XOF` : ""}</p></div>
-              <div><strong>Deadline</strong><p>{form.deadline || "No deadline"}</p></div>
+              <div><strong>{t.company}</strong><p>{form.companyName}</p></div>
+              <div><strong>{t.serviceTitle}</strong><p>{form.title}</p></div>
+              <div><strong>{t.serviceMode}</strong><p style={{ textTransform: 'capitalize' }}>{form.service_type}</p></div>
+              <div><strong>{t.country}</strong><p>{form.country || "Not specified"}</p></div>
+              <div><strong>{t.city}</strong><p>{form.city || "Not specified"}</p></div>
+              <div><strong>{t.pricing}</strong><p>{form.budget_mode} {form.budget ? `- ${form.budget} XOF` : ""}</p></div>
+              <div><strong>{t.deadline}</strong><p>{form.deadline || "No deadline"}</p></div>
             </div>
             <div className={styles.previewFull}>
-              <strong>Categories</strong>
+              <strong>{t.categories}</strong>
               <p>
                 {categories.find((c: any) => String(c.id) === form.category)?.name || "None"} 
                 {form.subcategory ? " > " + subcategories.find((s: any) => String(s.id) === form.subcategory)?.name : ""}
               </p>
             </div>
             <div className={styles.previewFull}>
-              <strong>Description</strong>
+              <strong>{t.projectDescription}</strong>
               <p style={{ whiteSpace: "pre-wrap" }}>{form.description}</p>
             </div>
             
             <div className={styles.previewActions}>
               <button className={styles.secondaryBtn} onClick={() => setShowPreview(false)}>
-                Edit Details
+                {t.editDetails}
               </button>
               <button className={styles.secondaryBtn} onClick={() => {
-                alert("Draft saved locally. (Backend drafts pending)");
+                alert(lang === "fr" ? "Brouillon enregistré localement." : "Draft saved locally.");
                 setShowPreview(false);
               }}>
-                Save Draft
+                {t.saveDraft}
               </button>
               <button className={styles.submitBtn} onClick={handlePublish} disabled={submitting}>
-                <iconify-icon icon="lucide:send" /> {submitting ? "Publishing..." : "Publish Project"}
+                <iconify-icon icon="lucide:send" /> {submitting ? t.publishing : t.publishProject}
               </button>
             </div>
           </div>

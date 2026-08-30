@@ -11,6 +11,43 @@ import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonCard, SkeletonBlock } from "@/app/components/skeleton/Skeleton";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    messages: "Messages",
+    searchMessages: "Search messages...",
+    noMessagesYet: "No Messages Yet",
+    noMessagesSub: "When clients contact your company regarding quotes and projects, messages will appear here.",
+    noMessagesPreview: "No messages yet",
+    emptyChat: "No messages yet. Send a message to start communicating with the client!",
+    typeMessage: "Type your message to client...",
+    attachFile: "Attach file",
+    uploading: "Uploading...",
+    sendMessage: "Send Message",
+    sending: "Sending...",
+    selectConversation: "Select a conversation to start messaging.",
+    client: "Client",
+    attachment: "Attachment",
+    yesterday: "Yesterday",
+  },
+  fr: {
+    messages: "Messagerie",
+    searchMessages: "Rechercher dans les messages...",
+    noMessagesYet: "Aucun message pour l'instant",
+    noMessagesSub: "Lorsque les clients contacteront votre entreprise pour des devis ou des projets, les messages apparaîtront ici.",
+    noMessagesPreview: "Aucun message",
+    emptyChat: "Aucun message. Envoyez un message pour commencer à échanger avec le client !",
+    typeMessage: "Écrivez votre message au client...",
+    attachFile: "Joindre un fichier",
+    uploading: "Téléversement...",
+    sendMessage: "Envoyer",
+    sending: "Envoi en cours...",
+    selectConversation: "Sélectionnez une conversation pour commencer à échanger.",
+    client: "Client",
+    attachment: "Pièce jointe",
+    yesterday: "Hier",
+  }
+};
+
 type Message = {
   id: string;
   sender: number;
@@ -50,7 +87,20 @@ export default function CompanyMessages() {
   const [activeMessages, setActiveMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const [lang, setLang] = useState("en");
   const attachmentInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
 
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: rawConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
@@ -261,7 +311,7 @@ export default function CompanyMessages() {
       const diffMs = now.getTime() - date.getTime();
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       if (diffDays === 0) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      if (diffDays === 1) return "Yesterday";
+      if (diffDays === 1) return t.yesterday;
       if (diffDays < 7) return date.toLocaleDateString([], { weekday: 'long' });
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     } catch {
@@ -275,7 +325,7 @@ export default function CompanyMessages() {
         <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
           <div className={styles.panelHeader}>
             <div className={styles.panelTitleRow}>
-              <h1 className={styles.panelTitle}>Messages</h1>
+              <h1 className={styles.panelTitle}>{t.messages}</h1>
               <button className={styles.newMessageBtn}>
                 <iconify-icon icon="lucide:square-pen" />
               </button>
@@ -284,7 +334,7 @@ export default function CompanyMessages() {
               <iconify-icon icon="lucide:search" />
               <input
                 type="text"
-                placeholder="Search messages..."
+                placeholder={t.searchMessages}
                 value={threadSearch}
                 onChange={(e) => setThreadSearch(e.target.value)}
               />
@@ -303,8 +353,8 @@ export default function CompanyMessages() {
                 <div style={{ width: "64px", height: "64px", background: "#f8fafc", borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "#ff4500", boxShadow: "0 8px 16px rgba(255,69,0,0.1)" }}>
                   <iconify-icon icon="lucide:message-circle" style={{ fontSize: "32px" }}></iconify-icon>
                 </div>
-                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#001f3f", margin: "0 0 8px" }}>No Messages Yet</h3>
-                <p style={{ fontSize: "14px", margin: 0, lineHeight: "1.5" }}>When clients contact your company regarding quotes and projects, messages will appear here.</p>
+                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#001f3f", margin: "0 0 8px" }}>{t.noMessagesYet}</h3>
+                <p style={{ fontSize: "14px", margin: 0, lineHeight: "1.5" }}>{t.noMessagesSub}</p>
               </div>
             ) : (
               filteredConversations.map((c) => {
@@ -331,7 +381,7 @@ export default function CompanyMessages() {
                       )}
                       <div className={styles.conversationPreviewRow}>
                         <p className={`${styles.conversationPreview} ${c.unreadCount > 0 ? styles.conversationPreviewStrong : ""}`}>
-                          {c.lastMessage || "No messages yet"}
+                          {c.lastMessage || t.noMessagesPreview}
                         </p>
                         {c.unreadCount > 0 && <span className={styles.unreadPill}>{c.unreadCount}</span>}
                       </div>
@@ -361,7 +411,7 @@ export default function CompanyMessages() {
                   <div className={styles.chatUserDetails}>
                     <strong>{activeConv.participant.name}</strong>
                     <span>
-                      {activeConv.participant.role || "Client"}
+                      {activeConv.participant.role || t.client}
                       {activeConv.taskTitle ? ` • ${activeConv.taskTitle}` : ""}
                     </span>
                   </div>
@@ -377,7 +427,7 @@ export default function CompanyMessages() {
                 ) : activeMessages.length === 0 ? (
                   <div className={styles.emptyChat}>
                     <iconify-icon icon="lucide:message-circle" style={{ fontSize: 40, opacity: 0.3 }} />
-                    <p>No messages yet. Send a message to start communicating with the client!</p>
+                    <p>{t.emptyChat}</p>
                   </div>
                 ) : (
                   activeMessages.map((msg: any) => {
@@ -388,7 +438,7 @@ export default function CompanyMessages() {
                         {msg.attachment_url && (
                           <a href={msg.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
                             <iconify-icon icon="lucide:paperclip" />
-                            <span>{msg.attachment_name || "Attachment"}</span>
+                            <span>{msg.attachment_name || t.attachment}</span>
                           </a>
                         )}
                         <div className={styles.messageMeta}>
@@ -414,7 +464,7 @@ export default function CompanyMessages() {
                 <div className={styles.composerField}>
                   <textarea
                     className={styles.composerTextarea}
-                    placeholder="Type your message to client..."
+                    placeholder={t.typeMessage}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => {
@@ -438,14 +488,14 @@ export default function CompanyMessages() {
                       style={{ background: "none", border: "none", display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", color: "#64748b", fontSize: "13px" }}
                     >
                       <iconify-icon icon="lucide:paperclip" style={{ fontSize: "16px" }} />
-                      <span>{attachmentUploading ? "Uploading..." : "Attach file"}</span>
+                      <span>{attachmentUploading ? t.uploading : t.attachFile}</span>
                     </button>
                     <button
                       type="submit"
                       className={styles.sendButton}
                       disabled={sending || (!draft.trim() && !attachmentDraft)}
                     >
-                      {sending ? "Sending..." : "Send Message"}
+                      {sending ? t.sending : t.sendMessage}
                     </button>
                   </div>
                 </div>
@@ -454,7 +504,7 @@ export default function CompanyMessages() {
           ) : (
             <div className={styles.emptyChat}>
               <iconify-icon icon="lucide:messages-square" style={{ fontSize: 48, opacity: 0.3 }} />
-              <p>Select a conversation to start messaging.</p>
+              <p>{t.selectConversation}</p>
             </div>
           )}
         </section>
@@ -462,3 +512,4 @@ export default function CompanyMessages() {
     </>
   );
 }
+
