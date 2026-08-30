@@ -15,9 +15,66 @@ interface DashboardHeaderProps {
   setSearchQuery?: (val: string) => void;
 }
 
+const headerTranslations: Record<string, Record<string, string>> = {
+  en: {
+    searchPlaceholder: "Search tasks, resources...",
+    proPlan: "Pro Plan",
+    freeTier: "Free Tier • Upgrade",
+    notifications: "Notifications",
+    markAllRead: "Mark all read",
+    allCaughtUp: "You're all caught up!",
+    newNotif: "New Notification",
+    viewProfile: "View Public Profile",
+    settings: "Account Settings",
+    logout: "Logout",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher des tâches, ressources...",
+    proPlan: "Forfait Pro",
+    freeTier: "Forfait Gratuit • Mettre à niveau",
+    notifications: "Notifications",
+    markAllRead: "Tout marquer comme lu",
+    allCaughtUp: "Vous êtes à jour !",
+    newNotif: "Nouvelle notification",
+    viewProfile: "Voir le profil public",
+    settings: "Paramètres du compte",
+    logout: "Se déconnecter",
+  },
+  rw: {
+    searchPlaceholder: "Shakisha imirimo, ubufasha...",
+    proPlan: "Ifatabuguzi rya Pro",
+    freeTier: "Ubuntu • Guhindura",
+    notifications: "Imenyekanisha",
+    markAllRead: "Soma byose",
+    allCaughtUp: "Nta bishya bihari!",
+    newNotif: "Imenyekanisha rishya",
+    viewProfile: "Reba umwirondoro",
+    settings: "Igenamiterere rya konti",
+    logout: "Sohoka",
+  },
+  ar: {
+    searchPlaceholder: "البحث عن المهام والموارد...",
+    proPlan: "خطة برو",
+    freeTier: "المستوى المجاني • ترقية",
+    notifications: "الإشعارات",
+    markAllRead: "تحديد الكل كمقروء",
+    allCaughtUp: "لقد اطلعت على كل شيء!",
+    newNotif: "إشعار جديد",
+    viewProfile: "عرض الملف العام",
+    settings: "إعدادات الحساب",
+    logout: "تسجيل الخروج",
+  }
+};
+
+const LANGUAGES = [
+  { code: "en", name: "English", flag: "🇬🇧" },
+  { code: "fr", name: "Français", flag: "🇫🇷" },
+  { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
+];
+
 export default function DashboardHeader({
   onMenuClick,
-  searchPlaceholder = "Search tasks, resources...",
+  searchPlaceholder,
   searchQuery,
   setSearchQuery,
 }: DashboardHeaderProps) {
@@ -25,9 +82,34 @@ export default function DashboardHeader({
   const [isPending, startTransition] = useTransition();
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [lang, setLang] = useState("en");
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateLang = () => {
+      const current = localStorage.getItem("lang") || "en";
+      setLang(current);
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = headerTranslations[lang] || headerTranslations["en"];
+  const currentLangObj = LANGUAGES.find((l) => l.code === lang) || LANGUAGES[0];
+
+  const handleLanguageChange = (code: string) => {
+    localStorage.setItem("lang", code);
+    localStorage.setItem("user_selected_lang", "true");
+    setLang(code);
+    setLangOpen(false);
+    document.documentElement.dir = code === "ar" ? "rtl" : "ltr";
+    window.dispatchEvent(new Event("languageChange"));
+  };
 
   // Fetch User and Notifications data
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
@@ -94,6 +176,9 @@ export default function DashboardHeader({
       }
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -197,7 +282,7 @@ export default function DashboardHeader({
               type="search"
               value={searchQuery || ""}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={searchPlaceholder}
+              placeholder={searchPlaceholder || t.searchPlaceholder}
             />
           </div>
         )}
@@ -228,9 +313,90 @@ export default function DashboardHeader({
               icon={isVerified ? "lucide:sparkles" : "lucide:arrow-up-circle"}
               style={{ color: "#ff4500", fontSize: 15 }}
             />
-            <span>{isVerified ? "Pro Plan" : "Free Tier • Upgrade"}</span>
+            <span>{isVerified ? t.proPlan : t.freeTier}</span>
           </Link>
         )}
+
+        {/* LANGUAGE SWITCHER FLAG DROPDOWN */}
+        <div className={styles.actionWrapper} ref={langRef}>
+          <button
+            type="button"
+            className={`${styles.iconButton} ${langOpen ? styles.iconButtonActive : ""}`}
+            onClick={() => {
+              setLangOpen(!langOpen);
+              setNotifOpen(false);
+              setProfileOpen(false);
+            }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "0 10px",
+              width: "auto",
+              minWidth: "44px",
+              borderRadius: "12px",
+              fontWeight: 700,
+              fontSize: "13px",
+              color: "#001f3f"
+            }}
+            aria-label="Change Language"
+          >
+            <span style={{ fontSize: "17px", lineHeight: 1 }}>{currentLangObj.flag}</span>
+            <span style={{ textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.5px" }}>{currentLangObj.code}</span>
+            <iconify-icon icon="lucide:chevron-down" style={{ fontSize: "14px", color: "#64748b" }} />
+          </button>
+
+          {langOpen && (
+            <div
+              className={styles.dropdown}
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: 0,
+                background: "#ffffff",
+                borderRadius: "14px",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 10px 25px rgba(0, 31, 63, 0.1)",
+                minWidth: "160px",
+                padding: "6px",
+                zIndex: 100,
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px"
+              }}
+            >
+              {LANGUAGES.map((item) => (
+                <button
+                  type="button"
+                  key={item.code}
+                  onClick={() => handleLanguageChange(item.code)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "none",
+                    background: lang === item.code ? "rgba(255, 69, 0, 0.08)" : "transparent",
+                    color: lang === item.code ? "#ff4500" : "#001f3f",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: lang === item.code ? 700 : 500,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  <span style={{ fontSize: "16px" }}>{item.flag}</span>
+                  <span>{item.name}</span>
+                  {lang === item.code && (
+                    <iconify-icon icon="lucide:check" style={{ marginLeft: "auto", color: "#ff4500" }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Notifications button and dropdown */}
         <div className={styles.actionWrapper} ref={notifRef}>
@@ -240,6 +406,7 @@ export default function DashboardHeader({
             onClick={() => {
               setNotifOpen(!notifOpen);
               setProfileOpen(false);
+              setLangOpen(false);
             }}
             aria-label={`Notifications, ${unreadCount} unread`}
           >
@@ -250,10 +417,10 @@ export default function DashboardHeader({
           {notifOpen && (
             <div className={`${styles.dropdown} ${styles.notificationDropdown}`}>
               <div className={styles.dropdownHeader}>
-                <span className={styles.dropdownTitle}>Notifications</span>
+                <span className={styles.dropdownTitle}>{t.notifications}</span>
                 {unreadCount > 0 && (
                   <button type="button" className={styles.markAllButton} onClick={handleMarkAllRead}>
-                    Mark all read
+                    {t.markAllRead}
                   </button>
                 )}
               </div>
@@ -261,7 +428,7 @@ export default function DashboardHeader({
                 {notifications.length === 0 ? (
                   <div className={styles.emptyState}>
                     <iconify-icon icon="lucide:check-circle" />
-                    <p>You&apos;re all caught up!</p>
+                    <p>{t.allCaughtUp}</p>
                   </div>
                 ) : (
                   notifications.map((notif: any) => (
@@ -274,11 +441,11 @@ export default function DashboardHeader({
                         <iconify-icon icon={notif.category === "dispute" ? "lucide:alert-circle" : notif.category === "payment" ? "lucide:credit-card" : "lucide:info"} />
                       </div>
                       <div className={styles.notificationItemContent}>
-                        <div className={styles.notificationItemTitle}>{notif.title || "New Notification"}</div>
+                        <div className={styles.notificationItemTitle}>{notif.title || t.newNotif}</div>
                         <div className={styles.notificationItemBody}>{notif.body || ""}</div>
                         {notif.created_at && (
                           <div className={styles.notificationItemTime}>
-                            {new Date(notif.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            {new Date(notif.created_at).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </div>
                         )}
                       </div>
@@ -298,6 +465,7 @@ export default function DashboardHeader({
             onClick={() => {
               setProfileOpen(!profileOpen);
               setNotifOpen(false);
+              setLangOpen(false);
             }}
           >
             <div className={styles.userAvatar}>
@@ -362,16 +530,16 @@ export default function DashboardHeader({
               </div>
               <Link href={getProfileLink()} className={styles.profileMenuLink} onClick={() => setProfileOpen(false)}>
                 <iconify-icon icon="lucide:eye" />
-                <span>View Public Profile</span>
+                <span>{t.viewProfile}</span>
               </Link>
               <Link href={getSettingsLink()} className={styles.profileMenuLink} onClick={() => setProfileOpen(false)}>
                 <iconify-icon icon="lucide:settings" />
-                <span>Account Settings</span>
+                <span>{t.settings}</span>
               </Link>
               <div className={styles.profileDivider} />
               <button type="button" className={styles.profileLogoutButton} onClick={handleLogout}>
                 <iconify-icon icon="lucide:log-out" />
-                <span>Logout</span>
+                <span>{t.logout}</span>
               </button>
             </div>
           )}
@@ -380,3 +548,4 @@ export default function DashboardHeader({
     </header>
   );
 }
+

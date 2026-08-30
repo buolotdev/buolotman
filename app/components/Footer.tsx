@@ -7,7 +7,6 @@ import { useFetch } from "../lib/useFetch";
 import CountrySelector from "./CountrySelector";
 import "./footer.css";
 
-
 const translations: Record<string, Record<string, string>> = {
   en: {
     desc: "Africa's professional marketplace for technicians, engineers, freelancers, and verified companies — built on trust, escrow, and secure delivery.",
@@ -23,9 +22,57 @@ const translations: Record<string, Record<string, string>> = {
     company: "Company",
     copyright: "© 2026 Boulot Man Engineering Company",
     label: "English",
+    // Clients
+    postTask: "Post a Task",
+    browseServices: "Browse Services",
+    findTechnicians: "Find Technicians",
+    hireCompanies: "Hire Companies",
+    buildTeam: "Build a Team",
+    concierge: "Concierge",
+    itOnDemand: "IT on Demand",
+    // Technicians
+    joinAsTechnician: "Join as Technician",
+    myProfile: "My Profile",
+    postServices: "Post Services",
+    findTasks: "Find Tasks",
+    earnings: "Earnings",
+    verification: "Verification",
+    upgradePlan: "Upgrade Plan",
+    // Companies
+    registerCompany: "Register Company",
+    companyProfile: "Company Profile",
+    contracts: "Contracts",
+    enterprise: "Enterprise",
+    compliance: "Compliance",
+    partnerships: "Partnerships",
+    // Payments
+    escrowSystem: "Escrow System",
+    milestones: "Milestones",
+    securePayments: "Secure Payments",
+    refunds: "Refunds",
+    disputes: "Disputes",
+    trustSafety: "Trust & Safety",
+    // Resources
+    howItWorks: "How It Works",
+    helpCenter: "Help Center",
+    paymentsEarnings: "Payments & Earnings",
+    pricingUpgrades: "Pricing & Upgrades",
+    reviews: "Reviews",
+    pressMedia: "Press & Media",
+    developers: "Developers",
+    apiDoc: "API",
+    pagesTitle: "Pages",
+    // Company
+    aboutUs: "About Us",
+    careers: "Careers",
+    investors: "Investors",
+    legal: "Legal",
+    terms: "Terms",
+    privacy: "Privacy",
+    contact: "Contact",
   },
   fr: {
-    desc: "La plateforme professionnelle africaine pour les techniciens, ingénieurs et entreprises vérifiées.",
+    desc: "La plateforme professionnelle africaine pour les techniciens, ingénieurs, indépendants et entreprises vérifiées — fondée sur la confiance, le séquestre et des prestations sécurisées.",
     b1: "✔ Professionnels vérifiés",
     b2: "✔ Paiements sous séquestre",
     b3: "✔ Résolution des litiges",
@@ -38,6 +85,54 @@ const translations: Record<string, Record<string, string>> = {
     company: "Entreprise",
     copyright: "© 2026 Boulot Man Engineering Company",
     label: "Français",
+    // Clients
+    postTask: "Publier une tâche",
+    browseServices: "Parcourir les services",
+    findTechnicians: "Trouver des techniciens",
+    hireCompanies: "Engager des entreprises",
+    buildTeam: "Former une équipe",
+    concierge: "Service Concierge",
+    itOnDemand: "Informatique à la demande",
+    // Technicians
+    joinAsTechnician: "Devenir Technicien",
+    myProfile: "Mon Profil",
+    postServices: "Publier des services",
+    findTasks: "Trouver des missions",
+    earnings: "Revenus & Portefeuille",
+    verification: "Vérification de profil",
+    upgradePlan: "Changer de forfait",
+    // Companies
+    registerCompany: "Inscrire une Entreprise",
+    companyProfile: "Profil Entreprise",
+    contracts: "Contrats & Appels d'offres",
+    enterprise: "Solutions Entreprises",
+    compliance: "Conformité & Légal",
+    partnerships: "Partenariats institutionnels",
+    // Payments
+    escrowSystem: "Système de Séquestre",
+    milestones: "Jalons de paiement",
+    securePayments: "Paiements sécurisés",
+    refunds: "Remboursements",
+    disputes: "Gestion des litiges",
+    trustSafety: "Confiance & Sécurité",
+    // Resources
+    howItWorks: "Comment ça marche",
+    helpCenter: "Centre d'aide & FAQ",
+    paymentsEarnings: "Paiements & Gains",
+    pricingUpgrades: "Tarifs & Forfaits",
+    reviews: "Avis & Évaluations",
+    pressMedia: "Presse & Médias",
+    developers: "Développeurs",
+    apiDoc: "Documentation API",
+    pagesTitle: "Pages publiques",
+    // Company
+    aboutUs: "À propos de nous",
+    careers: "Carrières & Recrutement",
+    investors: "Investisseurs",
+    legal: "Mentions légales",
+    terms: "Conditions d'utilisation",
+    privacy: "Politique de confidentialité",
+    contact: "Contactez-nous",
   },
   rw: {
     desc: "Urubuga rw'umwuga ruhuza abatekinisiye n'ibigo byemewe muri Afurika.",
@@ -53,6 +148,48 @@ const translations: Record<string, Record<string, string>> = {
     company: "Ikigo",
     copyright: "© 2026 Boulot Man Engineering Company",
     label: "Kinyarwanda",
+    postTask: "Tanga akazi",
+    browseServices: "Reba serivisi",
+    findTechnicians: "Shaka abatekinisiye",
+    hireCompanies: "Koresha ibigo",
+    buildTeam: "Kora itsinda",
+    concierge: "Concierge",
+    itOnDemand: "IT on Demand",
+    joinAsTechnician: "Iyandikishe nk'umutekinisiye",
+    myProfile: "Umwirondoro wanjye",
+    postServices: "Tanga serivisi",
+    findTasks: "Shaka imirimo",
+    earnings: "Inyungu",
+    verification: "Isuzuma",
+    upgradePlan: "Guhindura ifatabuguzi",
+    registerCompany: "Iyandikishe nk'ikigo",
+    companyProfile: "Umwirondoro w'ikigo",
+    contracts: "Amasezerano",
+    enterprise: "Ibigo binini",
+    compliance: "Amategeko",
+    partnerships: "Ubufatanye",
+    escrowSystem: "Uburyo bwa Escrow",
+    milestones: "Ibyiciro by'akazi",
+    securePayments: "Kwishyura birinzwe",
+    refunds: "Gusubizwa amafaranga",
+    disputes: "Gukemura amakimbirane",
+    trustSafety: "Umutekano n'icyizere",
+    howItWorks: "Uko bikora",
+    helpCenter: "Ubufasha",
+    paymentsEarnings: "Kwishyura & Inyungu",
+    pricingUpgrades: "Ibiciro",
+    reviews: "Ubuhamya",
+    pressMedia: "Amakuru",
+    developers: "Abateza imbere",
+    apiDoc: "API",
+    pagesTitle: "Impapuro",
+    aboutUs: "Ibyerekeye twebwe",
+    careers: "Imyanya y'akazi",
+    investors: "Abashoramari",
+    legal: "Amategeko",
+    terms: "Amabwiriza",
+    privacy: "Ubuzima bwite",
+    contact: "Tuvugishe",
   },
   ar: {
     desc: "السوق المهنية الرائدة في أفريقيا للفنيين والمهندسين والشركات المعتمدة.",
@@ -68,25 +205,66 @@ const translations: Record<string, Record<string, string>> = {
     company: "الشركة",
     copyright: "© 2026 شركة بولوت مان الهندسية",
     label: "العربية",
+    postTask: "نشر مهمة",
+    browseServices: "تصفح الخدمات",
+    findTechnicians: "البحث عن فنيين",
+    hireCompanies: "توظيف الشركات",
+    buildTeam: "بناء فريق",
+    concierge: "الكونسيرج",
+    itOnDemand: "تكنولوجيا المعلومات عند الطلب",
+    joinAsTechnician: "انضم كفني",
+    myProfile: "ملفي الشخصي",
+    postServices: "نشر الخدمات",
+    findTasks: "البحث عن مهام",
+    earnings: "الأرباح",
+    verification: "التحقق",
+    upgradePlan: "ترقية الخطة",
+    registerCompany: "تسجيل شركة",
+    companyProfile: "ملف الشركة",
+    contracts: "العقود",
+    enterprise: "المؤسسات",
+    compliance: "الامتثال",
+    partnerships: "الشراكات",
+    escrowSystem: "نظام الضمان",
+    milestones: "المراحل",
+    securePayments: "مدفوعات آمنة",
+    refunds: "المستردات",
+    disputes: "النزاعات",
+    trustSafety: "الثقة والأمان",
+    howItWorks: "كيف يعمل",
+    helpCenter: "مركز المساعدة",
+    paymentsEarnings: "المدفوعats والأرباح",
+    pricingUpgrades: "الأسعار والترقيات",
+    reviews: "التقييمات",
+    pressMedia: "الصحافة والإعلام",
+    developers: "المطورون",
+    apiDoc: "واجهة برمجة التطبيقات",
+    pagesTitle: "الصفحات",
+    aboutUs: "معلومات عنا",
+    careers: "وظائف",
+    investors: "المستثمرون",
+    legal: "قانوني",
+    terms: "الشروط",
+    privacy: "الخصوصية",
+    contact: "اتصل بنا",
   },
 };
 
 export default function Footer() {
-  const [lang, setLangState] = useState(() => {
-    if (typeof window === "undefined") return "en";
-    return localStorage.getItem("lang") || "en";
-  });
-  const [country, setCountryState] = useState(() => {
-    if (typeof window === "undefined") return "Rwanda";
-    return localStorage.getItem("country") || "Rwanda";
-  });
+  const [lang, setLangState] = useState("en");
   const [langOpen, setLangOpen] = useState(false);
-  const [countryOpen, setCountryOpen] = useState(false);
   const { data: pagesData } = useFetch(() => api.getPublicPages(), []);
 
   useEffect(() => {
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  }, [lang]);
+    const updateLang = () => {
+      const currentLang = localStorage.getItem("lang") || "en";
+      setLangState(currentLang);
+      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
 
   const t = translations[lang] || translations["en"];
   const pages = Array.isArray(pagesData) ? pagesData : [];
@@ -98,15 +276,8 @@ export default function Footer() {
     document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
     setLangOpen(false);
     if (typeof window !== "undefined") {
-      window.location.reload();
+      window.dispatchEvent(new Event("languageChange"));
     }
-  };
-
-  const changeCountry = (c: string) => {
-    setCountryState(c);
-    localStorage.setItem("country", c);
-    localStorage.setItem("user_selected_country", "true");
-    setCountryOpen(false);
   };
 
   return (
@@ -135,64 +306,62 @@ export default function Footer() {
           {/* CLIENTS */}
           <div className="footer-col">
             <h4>{t.clients}</h4>
-            <Link href="/post-task">Post a Task</Link>
-            <Link href="/search">Browse Services</Link>
-            <Link href="/service-providers/technicians">Find Technicians</Link>
-            <Link href="/search?type=company">Hire Companies</Link>
-            <Link href="/build-a-team">Build a Team</Link>
-            <Link href="/concierge">Concierge</Link>
-            <Link href="/it-on-demand">IT on Demand</Link>
+            <Link href="/post-task">{t.postTask}</Link>
+            <Link href="/search">{t.browseServices}</Link>
+            <Link href="/service-providers/technicians">{t.findTechnicians}</Link>
+            <Link href="/search?type=company">{t.hireCompanies}</Link>
+            <Link href="/build-a-team">{t.buildTeam}</Link>
+            <Link href="/concierge">{t.concierge}</Link>
+            <Link href="/it-on-demand">{t.itOnDemand}</Link>
           </div>
-
 
           {/* TECHNICIANS */}
           <div className="footer-col">
             <h4>{t.technicians}</h4>
-            <Link href="/signup?role=technician">Join as Technician</Link>
-            <Link href="/dashboard/technician/profile">My Profile</Link>
-            <Link href="/dashboard/company/services">Post Services</Link>
-            <Link href="/dashboard/technician/tasks">Find Tasks</Link>
-            <Link href="/dashboard/technician/wallet">Earnings</Link>
-            <Link href="/signup/verify">Verification</Link>
-            <Link href="/upgrade">Upgrade Plan</Link>
+            <Link href="/signup?role=technician">{t.joinAsTechnician}</Link>
+            <Link href="/dashboard/technician/profile">{t.myProfile}</Link>
+            <Link href="/dashboard/company/services">{t.postServices}</Link>
+            <Link href="/dashboard/technician/tasks">{t.findTasks}</Link>
+            <Link href="/dashboard/technician/wallet">{t.earnings}</Link>
+            <Link href="/signup/verify">{t.verification}</Link>
+            <Link href="/upgrade">{t.upgradePlan}</Link>
           </div>
 
           {/* COMPANIES */}
           <div className="footer-col">
             <h4>{t.companies}</h4>
-            <Link href="/signup?role=company">Register Company</Link>
-            <Link href="/dashboard/company/profile">Company Profile</Link>
-            <Link href="/dashboard/company/services">Post Services</Link>
-            <Link href="/contractors">Contracts</Link>
-            <Link href="/contractors">Enterprise</Link>
-            <Link href="/dashboard/admin/verification">Compliance</Link>
-            <Link href="/partnerships">Partnerships</Link>
+            <Link href="/signup?role=company">{t.registerCompany}</Link>
+            <Link href="/dashboard/company/profile">{t.companyProfile}</Link>
+            <Link href="/dashboard/company/services">{t.postServices}</Link>
+            <Link href="/contractors">{t.contracts}</Link>
+            <Link href="/contractors">{t.enterprise}</Link>
+            <Link href="/dashboard/admin/verification">{t.compliance}</Link>
+            <Link href="/partnerships">{t.partnerships}</Link>
           </div>
 
           {/* PAYMENTS */}
           <div className="footer-col">
             <h4>{t.payments}</h4>
-            <Link href="/dashboard/client/payments">Escrow System</Link>
-            <Link href="/dashboard/company/projects/tracking">Milestones</Link>
-            <Link href="/dashboard/client/payments">Secure Payments</Link>
-            <Link href="/dashboard/client/payments">Refunds</Link>
-            <Link href="/dispute-resolution">Disputes</Link>
-            <Link href="/signup/verify">Trust &amp; Safety</Link>
+            <Link href="/dashboard/client/payments">{t.escrowSystem}</Link>
+            <Link href="/dashboard/company/projects/tracking">{t.milestones}</Link>
+            <Link href="/dashboard/client/payments">{t.securePayments}</Link>
+            <Link href="/dashboard/client/payments">{t.refunds}</Link>
+            <Link href="/dispute-resolution">{t.disputes}</Link>
+            <Link href="/signup/verify">{t.trustSafety}</Link>
           </div>
 
           {/* RESOURCES */}
           <div className="footer-col">
             <h4>{t.resources}</h4>
-            <Link href="/how-it-works">How It Works</Link>
-            <Link href="/help-center">Help Center</Link>
-
-            <Link href="/payments-and-earnings">Payments &amp; Earnings</Link>
-            <Link href="/upgrade">Pricing &amp; Upgrades</Link>
-            <Link href="/search">Reviews</Link>
-            <Link href="/press">Press &amp; Media</Link>
-            <Link href="/">Developers</Link>
-            <Link href="/search">API</Link>
-            {pages.length > 0 ? <h4 style={{ marginTop: 18 }}>Pages</h4> : null}
+            <Link href="/how-it-works">{t.howItWorks}</Link>
+            <Link href="/help-center">{t.helpCenter}</Link>
+            <Link href="/payments-and-earnings">{t.paymentsEarnings}</Link>
+            <Link href="/upgrade">{t.pricingUpgrades}</Link>
+            <Link href="/search">{t.reviews}</Link>
+            <Link href="/press">{t.pressMedia}</Link>
+            <Link href="/">{t.developers}</Link>
+            <Link href="/search">{t.apiDoc}</Link>
+            {pages.length > 0 ? <h4 style={{ marginTop: 18 }}>{t.pagesTitle}</h4> : null}
             {pages.slice(0, 6).map((page: any) => (
               <Link key={page.id} href={`/pages/${page.slug}`}>
                 {page.title}
@@ -203,16 +372,14 @@ export default function Footer() {
           {/* COMPANY */}
           <div className="footer-col">
             <h4>{t.company}</h4>
-            <Link href="/about">About Us</Link>
-            <Link href="/careers">Careers</Link>
-            <Link href="/investors">Investors</Link>
-            <Link href="/terms">Legal</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/contact">Contact</Link>
+            <Link href="/about">{t.aboutUs}</Link>
+            <Link href="/careers">{t.careers}</Link>
+            <Link href="/investors">{t.investors}</Link>
+            <Link href="/terms">{t.legal}</Link>
+            <Link href="/terms">{t.terms}</Link>
+            <Link href="/privacy">{t.privacy}</Link>
+            <Link href="/contact">{t.contact}</Link>
           </div>
-
-
 
         </div>
 
@@ -225,15 +392,15 @@ export default function Footer() {
           <div className="footer-switch">
             {/* LANGUAGE */}
             <div className="switch">
-              <div className="switch-btn" onClick={() => { setLangOpen(!langOpen); setCountryOpen(false); }}>
+              <div className="switch-btn" onClick={() => setLangOpen(!langOpen)}>
                 🌐 <span>{t.label}</span>
               </div>
               {langOpen && (
                 <div className="switch-list" style={{ display: "block" }}>
-                  <button onClick={() => changeLang("en")}>English</button>
-                  <button onClick={() => changeLang("fr")}>Français</button>
-                  <button onClick={() => changeLang("rw")}>Kinyarwanda</button>
-                  <button onClick={() => changeLang("ar")}>العربية</button>
+                  <button type="button" onClick={() => changeLang("en")}>English</button>
+                  <button type="button" onClick={() => changeLang("fr")}>Français</button>
+                  <button type="button" onClick={() => changeLang("rw")}>Kinyarwanda</button>
+                  <button type="button" onClick={() => changeLang("ar")}>العربية</button>
                 </div>
               )}
             </div>
@@ -254,3 +421,4 @@ export default function Footer() {
     </footer>
   );
 }
+

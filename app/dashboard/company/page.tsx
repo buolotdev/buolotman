@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
@@ -10,10 +11,138 @@ import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
 
+const companyTranslations: Record<string, Record<string, any>> = {
+  en: {
+    dashboardOverview: "Dashboard Overview",
+    welcome: "Welcome",
+    readyToGrow: "Ready to grow?",
+    verified: "Verified",
+    welcomeDesc: "Track your active projects, review new quote requests, manage your services, and communicate with clients seamlessly.",
+    postService: "Post a Service",
+    manageServices: "Manage Services",
+    quoteRequestsDirectHires: "Quote Requests & Direct Hires",
+    newLabel: "New",
+    companyTrustTitle: "Company Trust & Verification Level",
+    verifiedEnterprise: "Verified Enterprise ✓",
+    capabilityVerified: "Capability Verified ✓",
+    insured: "Insured ✓",
+    companyTrustDesc: "Your enterprise profile is actively matched with high-budget commercial tenders and institutional contracts.",
+    manageEnterpriseHub: "Manage Enterprise Hub",
+    tier1: "1. Registered",
+    tier2: "2. Business Verified ✓",
+    tier3: "3. Capability Verified ✓",
+    tier4: "4. Verified Company",
+    profileViews: "Profile Views",
+    quoteRequests: "Quote Requests",
+    messages: "Messages",
+    hiresCompleted: "Hires Completed",
+    projectOverview: "Project Overview",
+    viewAll: "View All",
+    colProject: "Project",
+    colStatus: "Status",
+    colBudget: "Budget",
+    loadingProjects: "Loading projects...",
+    noActiveProjects: "No active projects yet.",
+    recentQuoteRequests: "Recent Quote Requests",
+    loadingQuotes: "Loading quotes...",
+    colClient: "Client",
+    colService: "Service",
+    colDeadline: "Deadline",
+    noQuoteRequests: "No quote requests yet.",
+    servicesOffered: "Services Offered",
+    manage: "Manage",
+    loadingServices: "Loading services...",
+    noServices: "No services added yet.",
+    availableBalance: "Available Balance",
+    recentMessages: "Recent Messages",
+    noMessages: "No messages yet.",
+    recentActivity: "Recent Activity",
+    loadingActivity: "Loading activity...",
+    recently: "Recently",
+    noActivity: "No recent activity to show.",
+    ratingSnapshot: "Rating Snapshot",
+    stars: "Stars",
+    quickActions: "Quick Actions",
+    addService: "Add Service",
+    toastWaitTitle: "Wait for Verification",
+    toastWaitDescPost: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can post services.",
+    toastWaitDescManage: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can manage services.",
+    toastWaitDescQuotes: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can access quote requests."
+  },
+  fr: {
+    dashboardOverview: "Vue d'ensemble",
+    welcome: "Bienvenue",
+    readyToGrow: "Prêt à développer vos activités ?",
+    verified: "Vérifié",
+    welcomeDesc: "Suivez vos projets en cours, traitez les nouvelles demandes de devis, gérez votre catalogue de prestations et échangez facilement avec vos clients.",
+    postService: "Publier un service",
+    manageServices: "Gérer les services",
+    quoteRequestsDirectHires: "Demandes de Devis & Recrutements Directs",
+    newLabel: "Nouveau",
+    companyTrustTitle: "Niveau de Confiance & Vérification Entreprise",
+    verifiedEnterprise: "Entreprise Agréée ✓",
+    capabilityVerified: "Capacités Certifiées ✓",
+    insured: "Assurée ✓",
+    companyTrustDesc: "Votre profil d'entreprise est activement proposé pour les appels d'offres commerciaux à fort budget et les contrats institutionnels.",
+    manageEnterpriseHub: "Gérer l'Espace Entreprise",
+    tier1: "1. Immatriculation",
+    tier2: "2. Entreprise Validée ✓",
+    tier3: "3. Capacités Certifiées ✓",
+    tier4: "4. Entreprise Agréée",
+    profileViews: "Vues du Profil",
+    quoteRequests: "Demandes de Devis",
+    messages: "Messages",
+    hiresCompleted: "Contrats Réalisés",
+    projectOverview: "Aperçu des Projets",
+    viewAll: "Voir Tout",
+    colProject: "Projet",
+    colStatus: "Statut",
+    colBudget: "Budget",
+    loadingProjects: "Chargement des projets...",
+    noActiveProjects: "Aucun projet en cours pour l'instant.",
+    recentQuoteRequests: "Demandes de Devis Récentes",
+    loadingQuotes: "Chargement des devis...",
+    colClient: "Client",
+    colService: "Service",
+    colDeadline: "Échéance",
+    noQuoteRequests: "Aucune demande de devis pour l'instant.",
+    servicesOffered: "Services Proposés",
+    manage: "Gérer",
+    loadingServices: "Chargement des services...",
+    noServices: "Aucun service ajouté pour le moment.",
+    availableBalance: "Solde Disponible",
+    recentMessages: "Messages Récents",
+    noMessages: "Aucun message pour l'instant.",
+    recentActivity: "Activité Récente",
+    loadingActivity: "Chargement des activités...",
+    recently: "Récemment",
+    noActivity: "Aucune activité récente à afficher.",
+    ratingSnapshot: "Synthèse des Évaluations",
+    stars: "Étoiles",
+    quickActions: "Actions Rapides",
+    addService: "Ajouter un Service",
+    toastWaitTitle: "En attente de vérification",
+    toastWaitDescPost: "Veuillez patienter pendant la validation de votre entreprise par l'administrateur. Une fois approuvé, vous pourrez publier des services.",
+    toastWaitDescManage: "Veuillez patienter pendant la validation de votre entreprise par l'administrateur. Une fois approuvé, vous pourrez gérer vos services.",
+    toastWaitDescQuotes: "Veuillez patienter pendant la validation de votre entreprise par l'administrateur. Une fois approuvé, vous pourrez accéder aux demandes de devis."
+  }
+};
+
 export default function CompanyDashboard() {
   const router = useRouter();
   const toast = useToast();
+  const [lang, setLang] = useState("en");
 
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = companyTranslations[lang] || companyTranslations["en"];
 
   // Shared Data
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
@@ -54,24 +183,24 @@ export default function CompanyDashboard() {
         {/* NEW WELCOME BANNER (Matches Client Portal) */}
         <section className={styles.welcomeSection}>
           <div className={styles.welcomeContent}>
-            <p className={styles.eyebrow}>Dashboard Overview</p>
+            <p className={styles.eyebrow}>{t.dashboardOverview}</p>
             <h2 className={styles.welcomeTitle}>
-              Welcome, {companyName}! Ready to grow?
+              {t.welcome}, {companyName}! {t.readyToGrow}
               {isVerified && (
-                <span className={styles.heroVerifiedBadge} title="Verified Enterprise">
+                <span className={styles.heroVerifiedBadge} title={t.verified}>
                   <iconify-icon icon="lucide:badge-check" style={{ fontSize: '18px', color: '#16a34a' }} />
-                  <span>Verified</span>
+                  <span>{t.verified}</span>
                 </span>
               )}
             </h2>
-            <p className={styles.welcomeSubtitle}>Track your active projects, review new quote requests, manage your services, and communicate with clients seamlessly.</p>
+            <p className={styles.welcomeSubtitle}>{t.welcomeDesc}</p>
           </div>
           <div className={styles.welcomeActions}>
             <button
               type="button"
               onClick={() => {
                 if (!isVerified) {
-                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can post services.");
+                  toast.warning(t.toastWaitTitle, t.toastWaitDescPost);
                   return;
                 }
                 router.push("/dashboard/company/projects/new");
@@ -79,13 +208,13 @@ export default function CompanyDashboard() {
               className={styles.primaryButton}
               style={{ border: "none", cursor: "pointer" }}
             >
-              <iconify-icon icon="lucide:plus" /> Post a Service
+              <iconify-icon icon="lucide:plus" /> {t.postService}
             </button>
             <button
               type="button"
               onClick={() => {
                 if (!isVerified) {
-                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can manage services.");
+                  toast.warning(t.toastWaitTitle, t.toastWaitDescManage);
                   return;
                 }
                 router.push("/dashboard/company/services");
@@ -93,13 +222,13 @@ export default function CompanyDashboard() {
               className={styles.secondaryButton}
               style={{ border: "none", cursor: "pointer" }}
             >
-              Manage Services
+              {t.manageServices}
             </button>
             <button 
               type="button"
               onClick={() => {
                 if (!isVerified) {
-                  toast.warning("Wait for Verification", "Please wait for verification. Your company account is currently under review by admin. Once approved, you can access quote requests.");
+                  toast.warning(t.toastWaitTitle, t.toastWaitDescQuotes);
                   return;
                 }
                 router.push("/dashboard/company/quotes");
@@ -122,44 +251,42 @@ export default function CompanyDashboard() {
               }}
             >
               <iconify-icon icon="lucide:file-text" style={{ color: '#38bdf8', fontSize: '18px' }} />
-              Quote Requests & Direct Hires
+              {t.quoteRequestsDirectHires}
               {quoteRequestsCount > 0 && (
                 <span style={{ background: '#ff4500', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '999px', fontWeight: 800 }}>
-                  {quoteRequestsCount} New
+                  {quoteRequestsCount} {t.newLabel}
                 </span>
               )}
             </button>
           </div>
-
         </section>
-
 
         {/* 4-TIER COMPANY VERIFICATION & TRUST SCORE */}
         <section className={styles.accountStatusSection} style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', padding: '24px', boxShadow: '0 8px 24px rgba(0,31,63,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#001f3f' }}>Company Trust & Verification Level</h3>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#001f3f' }}>{t.companyTrustTitle}</h3>
                 {isVerified ? (
                   <span className={styles.verifiedPill} style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <iconify-icon icon="lucide:shield-check" /> Verified Enterprise ✓
+                    <iconify-icon icon="lucide:shield-check" /> {t.verifiedEnterprise}
                   </span>
                 ) : (
                   <span style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <iconify-icon icon="lucide:award" /> Capability Verified ✓
+                    <iconify-icon icon="lucide:award" /> {t.capabilityVerified}
                   </span>
                 )}
                 <span style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <iconify-icon icon="lucide:check-circle-2" /> Insured ✓
+                  <iconify-icon icon="lucide:check-circle-2" /> {t.insured}
                 </span>
               </div>
               <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
-                Your enterprise profile is actively matched with high-budget commercial tenders and institutional contracts.
+                {t.companyTrustDesc}
               </p>
             </div>
 
             <Link href="/dashboard/company/profile" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#001f3f', color: '#ffffff', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>
-              <iconify-icon icon="lucide:sliders" /> Manage Enterprise Hub
+              <iconify-icon icon="lucide:sliders" /> {t.manageEnterpriseHub}
             </Link>
           </div>
 
@@ -167,19 +294,19 @@ export default function CompanyDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginTop: '12px', background: '#f8fafc', padding: '14px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#166534', fontWeight: 700 }}>
               <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 16, color: '#16a34a' }} />
-              <span>1. Registered</span>
+              <span>{t.tier1}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#166534', fontWeight: 700 }}>
               <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 16, color: '#16a34a' }} />
-              <span>2. Business Verified ✓</span>
+              <span>{t.tier2}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#0284c7', fontWeight: 800 }}>
               <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: '#0284c7' }} />
-              <span>3. Capability Verified ✓</span>
+              <span>{t.tier3}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#166534' : '#64748b', fontWeight: 700 }}>
               <iconify-icon icon={isVerified ? "lucide:check-circle-2" : "lucide:circle-dot"} style={{ fontSize: 16, color: isVerified ? '#16a34a' : '#94a3b8' }} />
-              <span>4. Verified Company</span>
+              <span>{t.tier4}</span>
             </div>
           </div>
         </section>
@@ -190,28 +317,28 @@ export default function CompanyDashboard() {
             <div className={`${styles.statIcon} ${styles.statPrimary}`}><iconify-icon icon="lucide:eye" /></div>
             <div>
               <div className={styles.statValue}>{profileLoading ? "..." : profileViews}</div>
-              <p>Profile Views</p>
+              <p>{t.profileViews}</p>
             </div>
           </article>
           <article className={styles.statCard}>
             <div className={`${styles.statIcon} ${styles.statWarning}`}><iconify-icon icon="lucide:file-text" /></div>
             <div>
               <div className={styles.statValue}>{quotesLoading ? "..." : quoteRequestsCount}</div>
-              <p>Quote Requests</p>
+              <p>{t.quoteRequests}</p>
             </div>
           </article>
           <article className={styles.statCard}>
             <div className={`${styles.statIcon} ${styles.statAccent}`}><iconify-icon icon="lucide:message-square" /></div>
             <div>
               <div className={styles.statValue}>{convLoading ? "..." : messagesCount}</div>
-              <p>Messages</p>
+              <p>{t.messages}</p>
             </div>
           </article>
           <article className={styles.statCard}>
             <div className={`${styles.statIcon} ${styles.statSuccess}`}><iconify-icon icon="lucide:check-circle" /></div>
             <div>
               <div className={styles.statValue}>{projectsLoading ? "..." : completedProjects}</div>
-              <p>Hires Completed</p>
+              <p>{t.hiresCompleted}</p>
             </div>
           </article>
         </section>
@@ -224,19 +351,19 @@ export default function CompanyDashboard() {
             {/* PROJECT OVERVIEW */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Project Overview</h3>
-                <Link href="/dashboard/company/projects" className={styles.linkButton}>View All</Link>
+                <h3>{t.projectOverview}</h3>
+                <Link href="/dashboard/company/projects" className={styles.linkButton}>{t.viewAll}</Link>
               </div>
               {projectsLoading ? (
-                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>Loading projects...</div>
+                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>{t.loadingProjects}</div>
               ) : projects.length > 0 ? (
                 <div className={styles.tableWrapper}>
                   <table className={styles.table}>
                     <thead>
                       <tr>
-                        <th>Project</th>
-                        <th>Status</th>
-                        <th>Budget</th>
+                        <th>{t.colProject}</th>
+                        <th>{t.colStatus}</th>
+                        <th>{t.colBudget}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -255,28 +382,28 @@ export default function CompanyDashboard() {
                   </table>
                 </div>
               ) : (
-                <div className={styles.emptyState}>No active projects yet.</div>
+                <div className={styles.emptyState}>{t.noActiveProjects}</div>
               )}
             </div>
 
             {/* QUOTES */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Recent Quote Requests</h3>
-                <Link href="/dashboard/company/quotes" className={styles.linkButton}>View All</Link>
+                <h3>{t.recentQuoteRequests}</h3>
+                <Link href="/dashboard/company/quotes" className={styles.linkButton}>{t.viewAll}</Link>
               </div>
               {quotesLoading ? (
-                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>Loading quotes...</div>
+                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>{t.loadingQuotes}</div>
               ) : quotes.length > 0 ? (
                 <div className={styles.tableWrapper}>
                   <table className={styles.table}>
                     <thead>
                       <tr>
-                        <th>Client</th>
-                        <th>Service</th>
-                        <th>Budget</th>
-                        <th>Deadline</th>
-                        <th>Status</th>
+                        <th>{t.colClient}</th>
+                        <th>{t.colService}</th>
+                        <th>{t.colBudget}</th>
+                        <th>{t.colDeadline}</th>
+                        <th>{t.colStatus}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -297,19 +424,19 @@ export default function CompanyDashboard() {
                   </table>
                 </div>
               ) : (
-                <div className={styles.emptyState}>No quote requests yet.</div>
+                <div className={styles.emptyState}>{t.noQuoteRequests}</div>
               )}
             </div>
             
             {/* SERVICES OFFERED */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Services Offered</h3>
-                <Link href="/dashboard/company/services" className={styles.linkButton}>Manage</Link>
+                <h3>{t.servicesOffered}</h3>
+                <Link href="/dashboard/company/services" className={styles.linkButton}>{t.manage}</Link>
               </div>
               <div className={styles.teamList}>
                 {servicesLoading ? (
-                  <div style={{ padding: 12 }}>Loading services...</div>
+                  <div style={{ padding: 12 }}>{t.loadingServices}</div>
                 ) : services.length > 0 ? (
                   services.slice(0, 3).map((service: any) => (
                     <div key={service.id} className={styles.teamItem}>
@@ -323,7 +450,7 @@ export default function CompanyDashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className={styles.emptyState}>No services added yet.</div>
+                  <div className={styles.emptyState}>{t.noServices}</div>
                 )}
               </div>
             </div>
@@ -336,7 +463,7 @@ export default function CompanyDashboard() {
             {/* WALLET / BALANCES */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Available Balance</h3>
+                <h3>{t.availableBalance}</h3>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div className={styles.statIcon} style={{ background: 'rgba(22,163,74,0.1)', color: '#16a34a' }}>
@@ -353,7 +480,7 @@ export default function CompanyDashboard() {
             {/* MESSAGES */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Recent Messages</h3>
+                <h3>{t.recentMessages}</h3>
               </div>
               {convLoading ? (
                 <div>
@@ -375,18 +502,18 @@ export default function CompanyDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className={styles.emptyState}>No messages yet.</div>
+                <div className={styles.emptyState}>{t.noMessages}</div>
               )}
             </div>
 
             {/* ACTIVITY TIMELINE */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Recent Activity</h3>
+                <h3>{t.recentActivity}</h3>
               </div>
               <div className={styles.timeline}>
                 {activitiesLoading ? (
-                  <div>Loading activity...</div>
+                  <div>{t.loadingActivity}</div>
                 ) : activities.length > 0 ? (
                   activities.slice(0, 4).map((activity: any) => (
                     <div key={activity.id} className={styles.timelineItem}>
@@ -395,12 +522,12 @@ export default function CompanyDashboard() {
                       </div>
                       <div className={styles.timelineContent}>
                         <h4>{activity.text}</h4>
-                        <p>Recently</p>
+                        <p>{t.recently}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className={styles.emptyState}>No recent activity to show.</div>
+                  <div className={styles.emptyState}>{t.noActivity}</div>
                 )}
               </div>
             </div>
@@ -408,7 +535,7 @@ export default function CompanyDashboard() {
             {/* RATINGS */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Rating Snapshot</h3>
+                <h3>{t.ratingSnapshot}</h3>
               </div>
               <div className={styles.ratingSnapshot}>
                 <div className={styles.ratingOverall}>
@@ -418,7 +545,7 @@ export default function CompanyDashboard() {
                 
                 {[5, 4, 3, 2, 1].map(stars => (
                   <div key={stars} className={styles.ratingRow}>
-                    <div className={styles.ratingLabel}>{stars} Stars ({ratingDist[stars.toString()]})</div>
+                    <div className={styles.ratingLabel}>{stars} {t.stars} ({ratingDist[stars.toString()]})</div>
                     <div className={styles.ratingTrack}>
                       <span className={styles.ratingFill} style={{ width: `${(ratingDist[stars.toString()] / totalReviews) * 100}%` }}></span>
                     </div>
@@ -430,14 +557,14 @@ export default function CompanyDashboard() {
             {/* QUICK ACTIONS */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Quick Actions</h3>
+                <h3>{t.quickActions}</h3>
               </div>
               <div className={styles.actionGrid}>
                 <Link href="/dashboard/company/projects/new" className={styles.actionBtn}>
-                  <iconify-icon icon="lucide:briefcase" /> Post a Service
+                  <iconify-icon icon="lucide:briefcase" /> {t.postService}
                 </Link>
                 <Link href="/dashboard/company/services" className={styles.actionBtn}>
-                  <iconify-icon icon="lucide:layers" /> Add Service
+                  <iconify-icon icon="lucide:layers" /> {t.addService}
                 </Link>
               </div>
             </div>
@@ -448,3 +575,4 @@ export default function CompanyDashboard() {
     </>
   );
 }
+
