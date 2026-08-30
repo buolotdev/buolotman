@@ -129,10 +129,27 @@
   box-shadow: 0 24px 48px rgba(0, 31, 63, 0.12);
 }
 .heroCard { overflow: hidden; }
-.cover { height: 180px; background: linear-gradient(135deg, #001f3f 0%, #003366 100%); overflow: hidden; }
-.bannerOverlay { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding: 14px 18px; opacity: 0.85; transition: opacity 0.25s ease; }
+.cover {
+  height: 200px;
+  background: linear-gradient(135deg, #00132b 0%, #001f3f 40%, #003366 75%, #004b93 100%);
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 18% 35%, rgba(255, 69, 0, 0.35) 0%, transparent 45%),
+    radial-gradient(circle at 82% 65%, rgba(2, 132, 199, 0.35) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+  pointer-events: none;
+}
+.bannerOverlay { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding: 14px 18px; opacity: 0.9; transition: opacity 0.25s ease; z-index: 2; }
 .cover:hover .bannerOverlay { opacity: 1; }
-.bannerUploadHint { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 99px; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none; }
+.bannerUploadHint { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 99px; background: rgba(0, 31, 63, 0.75); backdrop-filter: blur(10px); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 4px 18px rgba(0,0,0,0.3); pointer-events: none; transition: all 0.2s ease; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinIcon { animation: spin 0.9s linear infinite; }
 .heroBody { justify-content: space-between; align-items: flex-end; gap: 24px; padding: 24px 32px 32px; margin-top: -64px; flex-wrap: wrap; }
@@ -464,17 +481,38 @@
 }
 
 /* ================= TAB NAVIGATION ================= */
-.tabNav {
+.tabNavWrapper {
   display: flex;
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  padding: 8px;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.04);
-  overflow-x: auto;
+  padding: 6px 8px;
+  border-radius: 18px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 4px 18px rgba(0, 31, 63, 0.05);
   margin-bottom: 24px;
+  position: relative;
+}
+
+.tabNav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  flex: 1;
+  padding: 2px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.tabNav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabNav::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .tabBtn {
@@ -494,14 +532,64 @@
 }
 
 .tabBtn:hover {
-  background: #f8fafc;
+  background: #f1f5f9;
   color: #001f3f;
 }
 
 .tabBtnActive {
   background: #001f3f !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 31, 63, 0.22);
+}
+
+.tabNavArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #001f3f;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.tabNavArrow:hover {
+  background: #001f3f;
+  color: #ffffff;
+  border-color: #001f3f;
+}
+
+/* ================= STEP WIZARD FOOTER ================= */
+.wizardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 18px 24px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 6px 20px rgba(0, 31, 63, 0.05);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .wizardFooter {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+  .wizardFooter > div {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 /* ================= 3-TIER VERIFICATION TRACKER ================= */

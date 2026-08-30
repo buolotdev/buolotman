@@ -176,6 +176,14 @@ export default function TechnicianProfilePage() {
   const [matchSupervisor, setMatchSupervisor] = useState(true);
 
   const isInitialSyncedRef = useRef(false);
+  const tabNavRef = useRef<HTMLDivElement>(null);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabNavRef.current) {
+      const offset = direction === 'left' ? -220 : 220;
+      tabNavRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
 
   // Load Saved Preferences, Profile Customizations & Documents from localStorage on mount
   useEffect(() => {
@@ -565,6 +573,47 @@ export default function TechnicianProfilePage() {
   const certDoc = getSlotDoc("license") || getSlotDoc("trade");
   const selfieDoc = getSlotDoc("selfie") || getSlotDoc("portrait");
 
+  type TabType = "overview" | "verification" | "portfolio" | "availability" | "pricing" | "tools" | "payouts";
+
+  const TABS: Array<{ key: TabType; label: string; icon: string }> = [
+    { key: "overview", label: "1. Profile & Bio", icon: "lucide:user" },
+    { key: "verification", label: `2. 3-Tier Verification (${allDocuments.length})`, icon: "lucide:shield-check" },
+    { key: "portfolio", label: `3. Visual Portfolio (${portfolioList.length})`, icon: "lucide:image" },
+    { key: "availability", label: "4. Availability & Radius", icon: "lucide:clock" },
+    { key: "pricing", label: "5. Pricing Models", icon: "lucide:tag" },
+    { key: "tools", label: "6. Tools & Mobility", icon: "lucide:hammer" },
+    { key: "payouts", label: "7. Payouts & Teams", icon: "lucide:wallet" },
+  ];
+
+  const currentTabIndex = TABS.findIndex((t) => t.key === activeTab);
+  const isFirstTab = currentTabIndex <= 0;
+  const isLastTab = currentTabIndex >= TABS.length - 1;
+
+  const handlePrevTab = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(TABS[currentTabIndex - 1].key);
+      const el = document.getElementById("profile-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleNextTab = () => {
+    if (currentTabIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentTabIndex + 1].key);
+      const el = document.getElementById("profile-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleSaveAndNext = async () => {
+    await handleSaveProfile();
+    if (currentTabIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentTabIndex + 1].key);
+      const el = document.getElementById("profile-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.layout}>
@@ -748,28 +797,42 @@ export default function TechnicianProfilePage() {
               </div>
             </section>
 
-            {/* ==================== 7-TAB NAVIGATION ==================== */}
-            <div className={styles.tabNav}>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "overview" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("overview")}>
-                <iconify-icon icon="lucide:user" /> 1. Profile & Bio
+            {/* ==================== 7-TAB STEP NAVIGATION ==================== */}
+            <div id="profile-tabs-anchor" style={{ scrollMarginTop: 90 }} />
+            <div className={styles.tabNavWrapper}>
+              <button
+                type="button"
+                className={styles.tabNavArrow}
+                onClick={() => scrollTabs('left')}
+                title="Scroll left"
+                aria-label="Scroll left"
+              >
+                <iconify-icon icon="lucide:chevron-left" />
               </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "verification" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("verification")}>
-                <iconify-icon icon="lucide:shield-check" /> 2. 3-Tier Verification ({allDocuments.length})
-              </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "portfolio" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("portfolio")}>
-                <iconify-icon icon="lucide:image" /> 3. Visual Portfolio ({portfolioList.length})
-              </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "availability" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("availability")}>
-                <iconify-icon icon="lucide:clock" /> 4. Availability & Radius
-              </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "pricing" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("pricing")}>
-                <iconify-icon icon="lucide:tag" /> 5. Pricing Models
-              </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "tools" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("tools")}>
-                <iconify-icon icon="lucide:hammer" /> 6. Tools & Mobility
-              </button>
-              <button type="button" className={`${styles.tabBtn} ${activeTab === "payouts" ? styles.tabBtnActive : ""}`} onClick={() => setActiveTab("payouts")}>
-                <iconify-icon icon="lucide:wallet" /> 7. Payouts & Teams
+              <div className={styles.tabNav} ref={tabNavRef}>
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`${styles.tabBtn} ${activeTab === tab.key ? styles.tabBtnActive : ""}`}
+                    onClick={() => {
+                      setActiveTab(tab.key);
+                      const el = document.getElementById("profile-tabs-anchor");
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                  >
+                    <iconify-icon icon={tab.icon} /> {tab.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className={styles.tabNavArrow}
+                onClick={() => scrollTabs('right')}
+                title="Scroll right"
+                aria-label="Scroll right"
+              >
+                <iconify-icon icon="lucide:chevron-right" />
               </button>
             </div>
 
@@ -1564,21 +1627,60 @@ export default function TechnicianProfilePage() {
               </section>
             )}
 
-            {/* ==================== BOTTOM SAVE ACTION ==================== */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 14, marginTop: 10 }}>
-              <Link href="/dashboard/technician" className={styles.outlineButton}>
-                Back to Dashboard
-              </Link>
-              <button
-                type="button"
-                className={styles.primaryButton}
-                onClick={handleSaveProfile}
-                disabled={profileSaving}
-                style={{ minHeight: 48, padding: "0 32px", fontSize: 15 }}
-              >
-                <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:save"} className={profileSaving ? styles.spinIcon : ""} />
-                {profileSaving ? "Saving All Changes..." : "Save Specialist Profile"}
-              </button>
+            {/* ==================== STEP WIZARD ACTION BAR ==================== */}
+            <div className={styles.wizardFooter}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                {!isFirstTab && (
+                  <button
+                    type="button"
+                    className={styles.outlineButton}
+                    onClick={handlePrevTab}
+                    style={{ minHeight: 46, padding: "0 18px", fontSize: 13.5 }}
+                  >
+                    <iconify-icon icon="lucide:arrow-left" /> Previous Step
+                  </button>
+                )}
+                <Link href="/dashboard/technician" className={styles.outlineButton} style={{ minHeight: 46, padding: "0 16px", fontSize: 13.5 }}>
+                  Back to Dashboard
+                </Link>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className={styles.outlineButton}
+                  onClick={handleSaveProfile}
+                  disabled={profileSaving}
+                  style={{ minHeight: 46, padding: "0 20px", fontSize: 13.5 }}
+                >
+                  <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:save"} className={profileSaving ? styles.spinIcon : ""} />
+                  {profileSaving ? "Saving..." : "Save Progress"}
+                </button>
+
+                {!isLastTab ? (
+                  <button
+                    type="button"
+                    className={styles.primaryButton}
+                    onClick={handleSaveAndNext}
+                    disabled={profileSaving}
+                    style={{ minHeight: 46, padding: "0 24px", fontSize: 14, background: "linear-gradient(135deg, #ff4500, #ff7a1f)" }}
+                  >
+                    {profileSaving ? "Saving..." : "Save & Next Step"}
+                    <iconify-icon icon="lucide:arrow-right" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.primaryButton}
+                    onClick={handleSaveProfile}
+                    disabled={profileSaving}
+                    style={{ minHeight: 46, padding: "0 28px", fontSize: 14.5, background: "linear-gradient(135deg, #16a34a, #15803d)" }}
+                  >
+                    <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:check-circle-2"} className={profileSaving ? styles.spinIcon : ""} />
+                    {profileSaving ? "Saving All Changes..." : "Complete & Save Profile ✓"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
