@@ -209,7 +209,7 @@ export default function PublicProfilePage() {
   const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || "";
 
   const skillsList = (Array.isArray(profile?.skills) && profile.skills.length > 0)
-    ? profile.skills
+    ? profile.skills.map((s: any) => typeof s === "string" ? s : (s?.name || "")).filter(Boolean)
     : isCompany
     ? (Array.isArray(profile?.services_offered) && profile.services_offered.length > 0 ? profile.services_offered : [])
     : [];
@@ -220,9 +220,14 @@ export default function PublicProfilePage() {
     ? (profile as any).projects
     : [];
 
-  const toolsList = (Array.isArray(profile?.tools) && profile.tools.length > 0)
-    ? profile.tools
-    : [];
+  const rawTools = profile?.tools || profile?.technician_profile?.languages || (profile as any)?.languages;
+  const toolsList: string[] = Array.isArray(rawTools)
+    ? rawTools
+    : (rawTools && typeof rawTools === "object" && Array.isArray(rawTools.tools) ? rawTools.tools : []);
+
+  const hourlyRateDisplay = profile?.hourly_rate || profile?.technician_profile?.hourly_rate;
+  const dailyRateDisplay = profile?.daily_rate || (rawTools && typeof rawTools === "object" && rawTools.pricing?.daily_rate);
+  const inspectionFeeDisplay = profile?.inspection_fee || (rawTools && typeof rawTools === "object" && rawTools.pricing?.inspection_fee);
 
   const expertiseLevel = profile?.expertise_level || profile?.technician_profile?.expertise_level || "Verified Specialist";
   const educationLevel = profile?.education_level || profile?.technician_profile?.education_level || "Professional Certification";
@@ -513,25 +518,31 @@ export default function PublicProfilePage() {
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Hourly Rate</span>
                       <span className={styles.pricingValue}>
-                        {profile.hourly_rate 
-                          ? (profile.hourly_rate.includes("XOF") || profile.hourly_rate.includes("/ hr") ? profile.hourly_rate : `${profile.hourly_rate} XOF / hr`) 
-                          : "5,000 XOF / hr"}
+                        {hourlyRateDisplay 
+                          ? (String(hourlyRateDisplay).includes("XOF") || String(hourlyRateDisplay).includes("/ hr") || String(hourlyRateDisplay).includes("Quote") || String(hourlyRateDisplay).includes("Negotiable") 
+                              ? hourlyRateDisplay 
+                              : `${hourlyRateDisplay} XOF / hr`) 
+                          : "Negotiable / Quote on Request"}
                       </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Full Day Rate</span>
                       <span className={styles.pricingValue}>
-                        {profile.daily_rate 
-                          ? (profile.daily_rate.includes("XOF") || profile.daily_rate.includes("/ day") ? profile.daily_rate : `${profile.daily_rate} XOF / day`) 
-                          : "35,000 XOF / day"}
+                        {dailyRateDisplay 
+                          ? (String(dailyRateDisplay).includes("XOF") || String(dailyRateDisplay).includes("/ day") || String(dailyRateDisplay).includes("Negotiable") 
+                              ? dailyRateDisplay 
+                              : `${dailyRateDisplay} XOF / day`) 
+                          : "Negotiable Daily Rate"}
                       </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Diagnostic Inspection</span>
                       <span className={styles.pricingValue}>
-                        {profile.inspection_fee 
-                          ? (profile.inspection_fee.includes("XOF") ? profile.inspection_fee : `${profile.inspection_fee} XOF`) 
-                          : "10,000 XOF"}
+                        {inspectionFeeDisplay 
+                          ? (String(inspectionFeeDisplay).includes("XOF") || String(inspectionFeeDisplay).includes("Inspection") || String(inspectionFeeDisplay).includes("Contact") 
+                              ? inspectionFeeDisplay 
+                              : `${inspectionFeeDisplay} XOF`) 
+                          : "Contact for Inspection"}
                       </span>
                     </div>
                   </div>

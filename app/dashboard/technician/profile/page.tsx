@@ -415,6 +415,10 @@ export default function TechnicianProfilePage() {
           expertise_level: expertiseLevel,
           headline: headline.trim(),
           hourly_rate: numericHourly || null,
+          daily_rate: dailyRate.trim(),
+          inspection_fee: inspectionFee.trim(),
+          starting_price: startingPrice.trim(),
+          is_negotiable: isNegotiable,
           technician_profile: {
             bio: bio.trim(),
             city: city.trim(),
@@ -422,6 +426,10 @@ export default function TechnicianProfilePage() {
             headline: headline.trim(),
             experience_years: experienceYears,
             hourly_rate: numericHourly || null,
+            daily_rate: dailyRate.trim(),
+            inspection_fee: inspectionFee.trim(),
+            starting_price: startingPrice.trim(),
+            is_negotiable: isNegotiable,
             portfolio: portfolioList,
             tools: toolsList,
           }
@@ -454,6 +462,10 @@ export default function TechnicianProfilePage() {
       const updated = [...skills, val];
       setSkills(updated);
       localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
+      api.updateProfile({
+        skills: updated,
+        technician_profile: { skills: updated }
+      }).catch((err) => console.warn("Skills auto-sync note:", err));
     }
     setNewSkill("");
   };
@@ -462,6 +474,10 @@ export default function TechnicianProfilePage() {
     const updated = skills.filter((_, i) => i !== index);
     setSkills(updated);
     localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
+    api.updateProfile({
+      skills: updated,
+      technician_profile: { skills: updated }
+    }).catch((err) => console.warn("Skills auto-sync note:", err));
   };
 
   // Add Tool
@@ -472,6 +488,10 @@ export default function TechnicianProfilePage() {
       const updated = [...toolsList, val];
       setToolsList(updated);
       localStorage.setItem("boulotman_technician_tools", JSON.stringify(updated));
+      api.updateProfile({
+        tools: updated,
+        technician_profile: { tools: updated }
+      }).catch((err) => console.warn("Tools auto-sync note:", err));
     }
     setNewTool("");
   };
@@ -480,6 +500,10 @@ export default function TechnicianProfilePage() {
     const updated = toolsList.filter(t => t !== tool);
     setToolsList(updated);
     localStorage.setItem("boulotman_technician_tools", JSON.stringify(updated));
+    api.updateProfile({
+      tools: updated,
+      technician_profile: { tools: updated }
+    }).catch((err) => console.warn("Tools auto-sync note:", err));
   };
 
   // Add Portfolio

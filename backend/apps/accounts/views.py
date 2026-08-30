@@ -318,13 +318,14 @@ def list_users(request):
             profile = getattr(user, 'technician_profile', None)
             if profile:
                 item['bio'] = profile.bio
-                item['hourly_rate'] = str(profile.hourly_rate) if profile.hourly_rate else None
-                item['skills'] = [s.name for s in profile.skills.all()]
-                item['completed_jobs'] = profile.completed_jobs
-                item['average_rating'] = str(profile.average_rating)
-                item['availability_status'] = profile.availability_status
-        data.append(item)
-    return Response(data)
+    role = request.query_params.get('role')
+    users = User.objects.filter(is_active=True).exclude(role='ADMIN').order_by('-id')
+    if role:
+        users = users.filter(role=role.upper())
+
+    from .serializers import UserPublicSerializer
+    serializer = UserPublicSerializer(users, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -349,27 +350,38 @@ def user_public_profile(request, user_id):
     if user.role == 'TECHNICIAN':
         from apps.accounts.models import TechnicianProfile, PortfolioItem
         profile, _ = TechnicianProfile.objects.get_or_create(user=user)
-        hourly_val = str(profile.hourly_rate) if profile.hourly_rate else "5000"
-        clean_hourly = ''.join(c for c in hourly_val if c.isdigit() or c == '.') or '5000'
-        try:
-            num_hourly = float(clean_hourly)
-            if num_hourly.is_integer():
-                formatted_hourly = f"{int(num_hourly):,} XOF / hr"
-                formatted_daily = f"{int(num_hourly * 7):,} XOF / day"
-            else:
-                formatted_hourly = f"{num_hourly:,.2f} XOF / hr"
-                formatted_daily = f"{(num_hourly * 7):,.2f} XOF / day"
-        except:
-            formatted_hourly = f"{hourly_val} XOF / hr"
-            formatted_daily = "35,000 XOF / day"
 
-        data['hourly_rate'] = formatted_hourly
-        data['daily_rate'] = formatted_daily
-        data['inspection_fee'] = "10,000 XOF"
+        # Extract tools & pricing
+        tools_list = []
+        pricing_data = {}
+        if isinstance(profile.languages, dict):
+            tools_list = profile.languages.get('tools', [])
+            pricing_data = profile.languages.get('pricing', {})
+        elif isinstance(profile.languages, list):
+            tools_list = profile.languages
+
+        # Format hourly rate
+        if profile.hourly_rate:
+            hourly_num = float(profile.hourly_rate)
+            formatted_hourly = f"{int(hourly_num):,} XOF / hr" if hourly_num.is_integer() else f"{hourly_num:,.2f} XOF / hr"
+            computed_daily = f"{int(hourly_num * 7):,} XOF / day" if hourly_num.is_integer() else f"{(hourly_num * 7):,.2f} XOF / day"
+        else:
+            formatted_hourly = ""
+            computed_daily = ""
+
+        custom_daily = pricing_data.get('daily_rate')
+        custom_insp = pricing_data.get('inspection_fee')
+        custom_start = pricing_data.get('starting_price')
+
+        data['hourly_rate'] = formatted_hourly or "Negotiable / Quote on Request"
+        data['daily_rate'] = custom_daily or computed_daily or "Negotiable Daily Rate"
+        data['inspection_fee'] = custom_insp or "Contact for Inspection"
+        data['starting_price'] = custom_start or "On Request"
+
         data['bio'] = profile.bio or ''
         data['about'] = profile.bio or ''
         data['skills'] = [s.name for s in profile.skills.all()]
-        data['tools'] = profile.languages if isinstance(profile.languages, list) else []
+        data['tools'] = tools_list
         data['languages'] = ['French', 'English']
         data['completed_jobs'] = profile.completed_jobs
         data['average_rating'] = str(profile.average_rating)

@@ -162,17 +162,23 @@ class UserPublicSerializer(serializers.ModelSerializer):
         tech = getattr(obj, "technician_profile", None)
         if tech and tech.hourly_rate:
             return f"{int(tech.hourly_rate):,} XOF / hr"
-        return "5,000 XOF / hr"
+        return "Negotiable / Quote upon Request"
 
     def get_daily_rate(self, obj):
         tech = getattr(obj, "technician_profile", None)
-        if tech and tech.hourly_rate:
-            daily = int(tech.hourly_rate) * 7
-            return f"{daily:,} XOF / day"
-        return "35,000 XOF / day"
+        if tech:
+            if isinstance(tech.languages, dict) and tech.languages.get('pricing', {}).get('daily_rate'):
+                return tech.languages['pricing']['daily_rate']
+            if tech.hourly_rate:
+                daily = int(tech.hourly_rate) * 7
+                return f"{daily:,} XOF / day"
+        return "Negotiable Daily Rate"
 
     def get_inspection_fee(self, obj):
-        return "10,000 XOF"
+        tech = getattr(obj, "technician_profile", None)
+        if tech and isinstance(tech.languages, dict) and tech.languages.get('pricing', {}).get('inspection_fee'):
+            return tech.languages['pricing']['inspection_fee']
+        return "Contact for Inspection"
 
     def get_average_rating(self, obj):
         tech = getattr(obj, "technician_profile", None)
