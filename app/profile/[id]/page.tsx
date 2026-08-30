@@ -176,7 +176,7 @@ export default function PublicProfilePage() {
 
   const headline = profile?.headline 
     || profile?.technician_profile?.headline 
-    || (userCategory ? `Certified ${userCategory} Specialist` : (isCompany ? "Corporate Engineering Contractor" : "Certified Electrician & Solar Specialist"));
+    || (userCategory ? `Certified ${userCategory} Specialist` : (isCompany ? "Corporate Engineering Contractor" : "Verified Technical Specialist"));
 
   const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || (displayName?.[0]?.toUpperCase()) || "SP";
   
@@ -193,20 +193,13 @@ export default function PublicProfilePage() {
   const completedJobs = profile?.tasks_completed_count || profile?.completed_jobs || 0;
   const completionRate = profile?.completion_rate ? `${profile.completion_rate}%` : "100%";
 
-  const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || "Certified multi-disciplinary technical specialist providing verified technical installations, emergency repairs, maintenance, and precision system diagnostics.";
+  const bioText = profile?.bio || profile?.about || profile?.technician_profile?.bio || "";
 
-  const defaultSkills = [
-    "Electrical Installation & Wiring",
-    "Solar PV System Design & Inverters",
-    "System Diagnostics & Fault Finding",
-    "Safety Compliance & Grounding Systems",
-  ];
-
-  const skillsList = (profile?.skills && profile.skills.length > 0)
+  const skillsList = (Array.isArray(profile?.skills) && profile.skills.length > 0)
     ? profile.skills
     : isCompany
-    ? (profile?.services_offered && profile.services_offered.length > 0 ? profile.services_offered : [])
-    : defaultSkills;
+    ? (Array.isArray(profile?.services_offered) && profile.services_offered.length > 0 ? profile.services_offered : [])
+    : [];
 
   const portfolioList = (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0)
     ? profile.portfolio
@@ -214,24 +207,15 @@ export default function PublicProfilePage() {
     ? (profile as any).projects
     : [];
 
-  const defaultTools = [
-    "Digital Multimeter (Fluke)",
-    "Heavy Duty Rotary Hammer Drill",
-    "Solar PV Crimping & Testing Kit",
-    "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
-    "Insulated VDE Screwdriver Set (1000V)",
-    "Cable Puller & Conduit Bender"
-  ];
-
-  const toolsList = (profile?.tools && profile.tools.length > 0)
+  const toolsList = (Array.isArray(profile?.tools) && profile.tools.length > 0)
     ? profile.tools
-    : defaultTools;
+    : [];
 
-  const expertiseLevel = profile?.expertise_level || "Senior Specialist";
-  const educationLevel = profile?.education_level || "B.Sc. Electrical Engineering";
+  const expertiseLevel = profile?.expertise_level || profile?.technician_profile?.expertise_level || "Verified Specialist";
+  const educationLevel = profile?.education_level || profile?.technician_profile?.education_level || "Professional Certification";
   const experienceYears = profile?.experience_years || profile?.technician_profile?.experience_years 
     ? `${profile?.experience_years || profile?.technician_profile?.experience_years} Years` 
-    : "8 Years";
+    : "Hands-on Experience";
 
   if (validId === null) {
     return (
@@ -414,20 +398,21 @@ export default function PublicProfilePage() {
                     <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500" }} />
                     {isCompany ? "Verified Services & Trade Domains" : "Trade Skills & Verified Specializations"}
                   </h2>
-                  <div className={styles.skillsContainer}>
-                    {skillsList.length === 0 ? (
-                      <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
-                        No specific trade skills listed yet.
-                      </p>
-                    ) : (
-                      skillsList.map((s: string, i: number) => (
+                  {skillsList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:wrench" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>No trade skills or specializations listed yet.</p>
+                    </div>
+                  ) : (
+                    <div className={styles.skillsContainer}>
+                      {skillsList.map((s: string, i: number) => (
                         <span key={i} className={styles.skillChip}>
                           <iconify-icon icon="lucide:check" style={{ color: "#16a34a" }} />
                           {s}
                         </span>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
 
                 {/* 3. Visual Portfolio Grid */}
@@ -488,20 +473,21 @@ export default function PublicProfilePage() {
                     <iconify-icon icon="lucide:hammer" style={{ color: "#ff4500" }} />
                     Verified Equipment, Mobility & Safety Gear
                   </h2>
-                  <div className={styles.skillsContainer}>
-                    {toolsList.length === 0 ? (
-                      <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
-                        No specific tools or equipment listed yet.
-                      </p>
-                    ) : (
-                      toolsList.map((tool: string, i: number) => (
+                  {toolsList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:hammer" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>No specialized equipment or tools declared yet.</p>
+                    </div>
+                  ) : (
+                    <div className={styles.skillsContainer}>
+                      {toolsList.map((tool: string, i: number) => (
                         <span key={i} className={styles.skillChip} style={{ background: "#f8fafc" }}>
                           <iconify-icon icon="lucide:shield" style={{ color: "#001f3f" }} />
                           {tool}
                         </span>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
 
                 {/* 5. Standard Pricing Models */}

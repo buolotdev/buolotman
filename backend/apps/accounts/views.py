@@ -240,7 +240,9 @@ def me(request):
                     tech_profile.hourly_rate = None
             if 'response_time' in request.data:
                 tech_profile.response_time = str(request.data.get('response_time') or '')
-            if 'languages' in request.data:
+            if 'tools' in request.data:
+                tech_profile.languages = request.data.get('tools') or []
+            elif 'languages' in request.data:
                 tech_profile.languages = request.data.get('languages') or []
             if 'portfolio' in request.data:
                 tech_profile.portfolio = request.data.get('portfolio') or []
@@ -263,6 +265,7 @@ def me(request):
             res_data['bio'] = tech_profile.bio
             res_data['about'] = tech_profile.bio
             res_data['skills'] = [s.name for s in tech_profile.skills.all()]
+            res_data['tools'] = tech_profile.languages if isinstance(tech_profile.languages, list) else []
             res_data['portfolio'] = tech_profile.portfolio
             res_data['hourly_rate'] = str(tech_profile.hourly_rate) if tech_profile.hourly_rate else None
             res_data['response_time'] = tech_profile.response_time
@@ -359,20 +362,14 @@ def user_public_profile(request, user_id):
         data['hourly_rate'] = formatted_hourly
         data['daily_rate'] = formatted_daily
         data['inspection_fee'] = "10,000 XOF"
-        data['skills'] = [s.name for s in profile.skills.all()] or ['Electrical & Solar Energy', 'System Diagnostics', 'Technical Installation & Maintenance']
-        data['languages'] = profile.languages or ['French', 'English']
+        data['bio'] = profile.bio or ''
+        data['skills'] = [s.name for s in profile.skills.all()]
+        data['tools'] = profile.languages if isinstance(profile.languages, list) else []
+        data['languages'] = ['French', 'English']
         data['completed_jobs'] = profile.completed_jobs
         data['average_rating'] = str(profile.average_rating)
         data['availability_status'] = profile.availability_status
         data['response_time'] = profile.response_time or 'Within 2 hours'
-        data['tools'] = [
-            "Digital Multimeter (Fluke)",
-            "Heavy Duty Rotary Hammer Drill",
-            "Solar PV Crimping & Testing Kit",
-            "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
-            "Insulated VDE Screwdriver Set (1000V)",
-            "Cable Puller & Conduit Bender"
-        ]
 
         if profile.portfolio and isinstance(profile.portfolio, list) and len(profile.portfolio) > 0:
             data['portfolio'] = profile.portfolio

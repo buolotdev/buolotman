@@ -126,8 +126,10 @@ class UserPublicSerializer(serializers.ModelSerializer):
         return (tech.bio if tech else '') or ''
 
     def get_headline(self, obj):
-        trade = getattr(obj, "education_level", None) or "Certified Electrician & Solar Specialist"
-        return f"Certified {trade}" if not str(trade).startswith("Certified") else str(trade)
+        trade = getattr(obj, "education_level", None) or getattr(obj, "expertise_level", None)
+        if trade:
+            return f"Certified {trade}" if not str(trade).startswith("Certified") else str(trade)
+        return "Professional Specialist"
 
     def get_skills(self, obj):
         tech = getattr(obj, "technician_profile", None)
@@ -146,14 +148,15 @@ class UserPublicSerializer(serializers.ModelSerializer):
         return []
 
     def get_tools(self, obj):
-        return [
-            "Digital Multimeter (Fluke)",
-            "Heavy Duty Rotary Hammer Drill",
-            "Solar PV Crimping & Testing Kit",
-            "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
-            "Insulated VDE Screwdriver Set (1000V)",
-            "Cable Puller & Conduit Bender"
-        ]
+        tech = getattr(obj, "technician_profile", None)
+        if tech:
+            if hasattr(tech, 'tools') and tech.tools and isinstance(tech.tools, list):
+                return tech.tools
+            if getattr(tech, 'languages', None) and isinstance(tech.languages, list) and tech.languages:
+                return tech.languages
+            if getattr(tech, 'languages', None) and isinstance(tech.languages, dict) and 'tools' in tech.languages:
+                return tech.languages['tools']
+        return []
 
     def get_hourly_rate(self, obj):
         tech = getattr(obj, "technician_profile", None)

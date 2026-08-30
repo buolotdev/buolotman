@@ -406,6 +406,7 @@ export default function TechnicianProfilePage() {
           bio: bio.trim(),
           about: bio.trim(),
           skills: skills,
+          tools: toolsList,
           portfolio: portfolioList,
           country: country.trim(),
           city: city.trim(),
@@ -422,6 +423,7 @@ export default function TechnicianProfilePage() {
             experience_years: experienceYears,
             hourly_rate: numericHourly || null,
             portfolio: portfolioList,
+            tools: toolsList,
           }
         });
         try { await refetchUser(); } catch {}
