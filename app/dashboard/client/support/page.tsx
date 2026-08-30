@@ -1,38 +1,69 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import styles from "@/app/components/Tickets.module.css";
 import pageStyles from "@/app/dashboard/client/page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ClientSidebar from "@/app/components/ClientSidebar";
-
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-  { key: "explore", label: "Service Providers", icon: "lucide:users", href: "/service-providers/technicians", match: (p: string) => p.startsWith("/service-providers") },
-];
-
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    myTickets: "My Tickets",
+    newTicket: "New",
+    noTickets: "No support tickets yet.",
+    backToTickets: "Back to Tickets",
+    createNewTicket: "Create New Support Ticket",
+    subject: "Subject",
+    subjectPlaceholder: "E.g. Issue with payment",
+    describeIssue: "Describe your issue",
+    issuePlaceholder: "Please provide details so we can help you...",
+    cancel: "Cancel",
+    submitTicket: "Submit Ticket",
+    typeReply: "Type your reply to Support...",
+    sendReply: "Send Reply",
+    selectOrCreate: "Select a ticket or create a new one",
+    searchHeader: "Search tickets...",
+  },
+  fr: {
+    myTickets: "Mes Tickets",
+    newTicket: "Nouveau",
+    noTickets: "Aucun ticket d'assistance pour le moment.",
+    backToTickets: "Retour aux tickets",
+    createNewTicket: "Créer un Nouveau Ticket d'Assistance",
+    subject: "Objet",
+    subjectPlaceholder: "Ex. Problème avec un paiement",
+    describeIssue: "Décrivez votre problème",
+    issuePlaceholder: "Veuillez fournir des détails afin que nous puissions vous aider...",
+    cancel: "Annuler",
+    submitTicket: "Envoyer le Ticket",
+    typeReply: "Écrivez votre réponse au Support...",
+    sendReply: "Envoyer la Réponse",
+    selectOrCreate: "Sélectionnez un ticket ou créez-en un nouveau",
+    searchHeader: "Rechercher des tickets...",
+  }
+};
+
 export default function ClientSupportPage() {
-  const router = useRouter();
-  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [newSubject, setNewSubject] = useState("");
   const [sending, setSending] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getMySupportTickets(), []);
   const tickets = Array.isArray(fetchedTickets) ? fetchedTickets : [];
@@ -94,7 +125,7 @@ export default function ClientSupportPage() {
         <div className={pageStyles.main}>
           <DashboardHeader
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search tickets..."
+            searchPlaceholder={t.searchHeader}
             searchQuery=""
             setSearchQuery={() => {}}
           />
@@ -104,14 +135,14 @@ export default function ClientSupportPage() {
               {/* INBOX */}
               <div className={`${styles.inbox} ${(activeTicket || isCreating) ? styles.inboxHiddenMobile : ""}`}>
                 <div className={styles.inboxHeader}>
-                  <h3>My Tickets</h3>
+                  <h3>{t.myTickets}</h3>
                   <button className={styles.newTicketBtn} onClick={() => { setIsCreating(true); setActiveTicket(null); }}>
-                    <iconify-icon icon="lucide:plus"></iconify-icon> New
+                    <iconify-icon icon="lucide:plus"></iconify-icon> {t.newTicket}
                   </button>
                 </div>
                 <div className={styles.ticketList}>
                   {tickets.length > 0 ? (
-                    tickets.map(ticket => (
+                    tickets.map((ticket: any) => (
                       <div 
                         key={ticket.id} 
                         className={`${styles.ticketItem} ${activeTicket?.id === ticket.id ? styles.ticketItemActive : ""}`}
@@ -124,7 +155,7 @@ export default function ClientSupportPage() {
                     ))
                   ) : (
                     <div style={{ padding: 24, textAlign: "center", color: "#64748b", fontSize: 14 }}>
-                      No support tickets yet.
+                      {t.noTickets}
                     </div>
                   )}
                 </div>
@@ -138,25 +169,25 @@ export default function ClientSupportPage() {
                     className={styles.backToTicketsBtn} 
                     onClick={() => { setIsCreating(false); setActiveTicket(tickets[0] || null); }}
                   >
-                    <iconify-icon icon="lucide:arrow-left"></iconify-icon> Back to Tickets
+                    <iconify-icon icon="lucide:arrow-left"></iconify-icon> {t.backToTickets}
                   </button>
-                  <h2 style={{ color: "#001F3F", marginBottom: 20, fontSize: "1.2rem" }}>Create New Support Ticket</h2>
+                  <h2 style={{ color: "#001F3F", marginBottom: 20, fontSize: "1.2rem" }}>{t.createNewTicket}</h2>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     <div>
-                      <label style={{ display: "block", marginBottom: 8, fontWeight: 600, fontSize: "14px" }}>Subject</label>
+                      <label style={{ display: "block", marginBottom: 8, fontWeight: 600, fontSize: "14px" }}>{t.subject}</label>
                       <input 
                         type="text" 
                         value={newSubject}
                         onChange={(e) => setNewSubject(e.target.value)}
-                        placeholder="E.g. Issue with payment"
+                        placeholder={t.subjectPlaceholder}
                         style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0", outline: "none", fontSize: "14px" }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: "block", marginBottom: 8, fontWeight: 600, fontSize: "14px" }}>Describe your issue</label>
+                      <label style={{ display: "block", marginBottom: 8, fontWeight: 600, fontSize: "14px" }}>{t.describeIssue}</label>
                       <textarea 
                         className={styles.textarea} 
-                        placeholder="Please provide details so we can help you..." 
+                        placeholder={t.issuePlaceholder} 
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                       ></textarea>
@@ -166,10 +197,10 @@ export default function ClientSupportPage() {
                         style={{ padding: "10px 20px", background: "#f1f5f9", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}
                         onClick={() => setIsCreating(false)}
                       >
-                        Cancel
+                        {t.cancel}
                       </button>
                       <button className={styles.sendBtn} onClick={handleCreateTicket}>
-                        Submit Ticket
+                        {t.submitTicket}
                       </button>
                     </div>
                   </div>
@@ -182,7 +213,7 @@ export default function ClientSupportPage() {
                       className={styles.backToTicketsBtn} 
                       onClick={() => setActiveTicket(null)}
                     >
-                      <iconify-icon icon="lucide:arrow-left"></iconify-icon> Back to Tickets
+                      <iconify-icon icon="lucide:arrow-left"></iconify-icon> {t.backToTickets}
                     </button>
                     <h2>{activeTicket.subject}</h2>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -211,13 +242,13 @@ export default function ClientSupportPage() {
                   <div className={styles.composer}>
                     <textarea 
                       className={styles.textarea} 
-                      placeholder="Type your reply to Support..." 
+                      placeholder={t.typeReply} 
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                     ></textarea>
                     <div className={styles.composerActions}>
                       <button className={styles.sendBtn} onClick={handleSend}>
-                        <iconify-icon icon="lucide:send"></iconify-icon> Send Reply
+                        <iconify-icon icon="lucide:send"></iconify-icon> {t.sendReply}
                       </button>
                     </div>
                   </div>
@@ -225,7 +256,7 @@ export default function ClientSupportPage() {
               ) : (
                 <div className={`${styles.emptyState} ${styles.chatAreaHiddenMobile}`}>
                   <iconify-icon icon="lucide:inbox"></iconify-icon>
-                  <h3>Select a ticket or create a new one</h3>
+                  <h3>{t.selectOrCreate}</h3>
                 </div>
               )}
             </div>
@@ -235,3 +266,4 @@ export default function ClientSupportPage() {
     </main>
   );
 }
+

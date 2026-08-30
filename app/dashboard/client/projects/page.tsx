@@ -10,11 +10,94 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    searchHeader: "Search projects, technicians...",
+    eyebrow: "PROJECT MANAGEMENT & DIRECT HIRING",
+    pageTitle: "My Projects & Direct Hires",
+    pageSubtitle: "Track all your active engagements, verify technician acceptance status, collaborate in real-time, and manage secure escrow payments.",
+    postNewTask: "Post New Task / Hire Pro",
+    statTotalProjects: "Total Projects",
+    statDirectHires: "Direct Hires",
+    statInProgress: "Active / In Progress",
+    statPending: "Pending Acceptance",
+    tabAll: "All Projects",
+    tabDirect: "Direct Hires",
+    tabMarketplace: "Marketplace Bids",
+    tabCompleted: "Completed",
+    filterPlaceholder: "Filter by title or technician...",
+    loading: "Loading your projects...",
+    noProjects: "No Projects Found",
+    noProjectsDesc: "You don't have any projects in this view yet. Directly hire verified technicians from their profiles or publish a public task.",
+    browseTechs: "Browse Verified Technicians",
+    enterpriseContract: "Enterprise Company Contract",
+    directHire: "Direct Hire",
+    completedBadge: "Completed & Handed Over",
+    acceptedBadge: "Accepted & In Progress 🚀",
+    pendingBadge: "Pending Technician Acceptance",
+    budgetLabel: "PROJECT BUDGET",
+    negotiable: "Negotiable",
+    assignedPro: "Assigned Professional",
+    escrowProtection: "Escrow Protection",
+    vaultProtected: "🛡️ Funds Vault Protected",
+    awaitingAcceptance: "⏳ Awaiting Acceptance",
+    progressLabel: "Progress",
+    chatWith: "Chat with",
+    openWorkspace: "Open Project Workspace →",
+  },
+  fr: {
+    searchHeader: "Rechercher des projets, artisans...",
+    eyebrow: "GESTION DE PROJETS & RECRUTEMENT DIRECT",
+    pageTitle: "Mes Projets & Recrutements Directs",
+    pageSubtitle: "Suivez vos missions en cours, confirmez la disponibilité des artisans, collaborez en temps réel et sécurisez vos paiements sous séquestre.",
+    postNewTask: "Publier une Mission / Embaucher",
+    statTotalProjects: "Total des Projets",
+    statDirectHires: "Recrutements Directs",
+    statInProgress: "En cours d'Exécution",
+    statPending: "En attente d'Acceptation",
+    tabAll: "Tous les Projets",
+    tabDirect: "Recrutements Directs",
+    tabMarketplace: "Offres du Marché",
+    tabCompleted: "Terminés",
+    filterPlaceholder: "Filtrer par titre ou artisan...",
+    loading: "Chargement de vos projets...",
+    noProjects: "Aucun Projet Trouvé",
+    noProjectsDesc: "Vous n'avez pas encore de projet dans cette vue. Embauchez directement un artisan vérifié ou publiez une mission.",
+    browseTechs: "Trouver des Artisans Vérifiés",
+    enterpriseContract: "Contrat Entreprise",
+    directHire: "Recrutement Direct",
+    completedBadge: "Terminé & Livré",
+    acceptedBadge: "Accepté & En cours 🚀",
+    pendingBadge: "En attente de validation par l'artisan",
+    budgetLabel: "BUDGET DU PROJET",
+    negotiable: "Négociable",
+    assignedPro: "Professionnel Assigné",
+    escrowProtection: "Protection Séquestre",
+    vaultProtected: "🛡️ Fonds Protégés sous Séquestre",
+    awaitingAcceptance: "⏳ En attente d'Acceptation",
+    progressLabel: "Progression",
+    chatWith: "Discuter avec",
+    openWorkspace: "Ouvrir l'Espace Projet →",
+  }
+};
+
 export default function ClientProjectsPage() {
   const router = useRouter();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "direct" | "marketplace" | "completed">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: myTasksData, loading: tasksLoading, refetch: refetchTasks } = useFetch(() => api.getMyTasks(), []);
@@ -134,23 +217,23 @@ export default function ClientProjectsPage() {
         <main className={styles.main}>
           <DashboardHeader 
             onMenuClick={() => setMobileNavOpen(true)}
-            searchPlaceholder="Search projects, technicians..."
+            searchPlaceholder={t.searchHeader}
           />
 
           <div className={styles.content}>
             {/* HERO SECTION */}
             <div className={styles.hero}>
               <div>
-                <p className={styles.eyebrow}>PROJECT MANAGEMENT & DIRECT HIRING</p>
-                <h1>My Projects & Direct Hires</h1>
+                <p className={styles.eyebrow}>{t.eyebrow}</p>
+                <h1>{t.pageTitle}</h1>
                 <p>
-                  Track all your active engagements, verify technician acceptance status, collaborate in real-time, and manage secure escrow payments.
+                  {t.pageSubtitle}
                 </p>
               </div>
 
               <Link href="/post-task" className={styles.btnPrimary}>
                 <iconify-icon icon="lucide:plus-circle" style={{ fontSize: "18px" }} />
-                Post New Task / Hire Pro
+                {t.postNewTask}
               </Link>
             </div>
 
@@ -162,7 +245,7 @@ export default function ClientProjectsPage() {
                 </div>
                 <div>
                   <div className={styles.statValue}>{combinedProjects.length}</div>
-                  <div className={styles.statLabel}>Total Projects</div>
+                  <div className={styles.statLabel}>{t.statTotalProjects}</div>
                 </div>
               </div>
 
@@ -172,7 +255,7 @@ export default function ClientProjectsPage() {
                 </div>
                 <div>
                   <div className={styles.statValue}>{totalDirectHires}</div>
-                  <div className={styles.statLabel}>Direct Hires</div>
+                  <div className={styles.statLabel}>{t.statDirectHires}</div>
                 </div>
               </div>
 
@@ -182,7 +265,7 @@ export default function ClientProjectsPage() {
                 </div>
                 <div>
                   <div className={styles.statValue}>{inProgressProjects}</div>
-                  <div className={styles.statLabel}>Active / In Progress</div>
+                  <div className={styles.statLabel}>{t.statInProgress}</div>
                 </div>
               </div>
 
@@ -192,10 +275,11 @@ export default function ClientProjectsPage() {
                 </div>
                 <div>
                   <div className={styles.statValue}>{pendingHires}</div>
-                  <div className={styles.statLabel}>Pending Acceptance</div>
+                  <div className={styles.statLabel}>{t.statPending}</div>
                 </div>
               </div>
             </div>
+
 
             {/* FILTER BAR */}
             <div className={styles.filterBar}>
@@ -204,32 +288,32 @@ export default function ClientProjectsPage() {
                   className={`${styles.filterTab} ${activeFilter === "all" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("all")}
                 >
-                  All Projects ({combinedProjects.length})
+                  {t.tabAll} ({combinedProjects.length})
                 </button>
                 <button 
                   className={`${styles.filterTab} ${activeFilter === "direct" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("direct")}
                 >
-                  Direct Hires ({totalDirectHires})
+                  {t.tabDirect} ({totalDirectHires})
                 </button>
                 <button 
                   className={`${styles.filterTab} ${activeFilter === "marketplace" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("marketplace")}
                 >
-                  Marketplace Bids
+                  {t.tabMarketplace}
                 </button>
                 <button 
                   className={`${styles.filterTab} ${activeFilter === "completed" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("completed")}
                 >
-                  Completed
+                  {t.tabCompleted}
                 </button>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <input 
                   type="text" 
-                  placeholder="Filter by title or technician..." 
+                  placeholder={t.filterPlaceholder} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
@@ -246,16 +330,16 @@ export default function ClientProjectsPage() {
 
             {/* PROJECTS LIST */}
             {tasksLoading ? (
-              <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>Loading your projects...</div>
+              <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>{t.loading}</div>
             ) : filteredProjects.length === 0 ? (
               <div className={styles.emptyState}>
                 <iconify-icon icon="lucide:folder-search" style={{ fontSize: "48px", color: "#94a3b8" }} />
-                <h3 style={{ margin: 0, fontSize: "18px", color: "#001f3f" }}>No Projects Found</h3>
+                <h3 style={{ margin: 0, fontSize: "18px", color: "#001f3f" }}>{t.noProjects}</h3>
                 <p style={{ margin: 0, color: "#64748b", fontSize: "14px", maxWidth: "400px" }}>
-                  You don't have any projects in this view yet. Directly hire verified technicians from their profiles or publish a public task.
+                  {t.noProjectsDesc}
                 </p>
                 <Link href="/technicians" className={styles.btnPrimary} style={{ marginTop: "10px" }}>
-                  Browse Verified Technicians
+                  {t.browseTechs}
                 </Link>
               </div>
             ) : (
@@ -271,26 +355,25 @@ export default function ClientProjectsPage() {
                           <div className={styles.projectBadges}>
                             {project.isCompany ? (
                               <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <iconify-icon icon="lucide:building-2" /> Enterprise Company Contract
+                                <iconify-icon icon="lucide:building-2" /> {t.enterpriseContract}
                               </span>
                             ) : project.isDirect ? (
                               <span className={styles.badgeDirect}>
-                                <iconify-icon icon="lucide:user-check" /> Direct Hire
+                                <iconify-icon icon="lucide:user-check" /> {t.directHire}
                               </span>
                             ) : null}
 
-
                             {project.isCompleted ? (
                               <span className={styles.badgeCompleted}>
-                                <iconify-icon icon="lucide:check-circle" /> Completed & Handed Over
+                                <iconify-icon icon="lucide:check-circle" /> {t.completedBadge}
                               </span>
                             ) : project.isAccepted ? (
                               <span className={styles.badgeAccepted}>
-                                <iconify-icon icon="lucide:check-circle" /> Accepted & In Progress 🚀
+                                <iconify-icon icon="lucide:check-circle" /> {t.acceptedBadge}
                               </span>
                             ) : (
                               <span className={styles.badgePending}>
-                                <iconify-icon icon="lucide:clock" /> Pending Technician Acceptance
+                                <iconify-icon icon="lucide:clock" /> {t.pendingBadge}
                               </span>
                             )}
                           </div>
@@ -300,17 +383,17 @@ export default function ClientProjectsPage() {
                           <div className={styles.projectMeta}>
                             <span>📍 {project.location}</span>
                             <span>•</span>
-                            <span>📅 Initiated: {new Date(project.created_at).toLocaleDateString()}</span>
+                            <span>📅 {new Date(project.created_at).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US")}</span>
                           </div>
                         </div>
 
                         {/* RIGHT ACTION STATUS */}
                         <div style={{ textAlign: "right" }}>
                           <span style={{ fontSize: "12px", color: "#64748b", fontWeight: 600, display: "block", marginBottom: "2px" }}>
-                            PROJECT BUDGET
+                            {t.budgetLabel}
                           </span>
                           <span style={{ fontSize: "20px", fontWeight: 800, color: "#001f3f" }}>
-                            {project.budget > 0 ? `${project.budget.toLocaleString()} XOF` : "Negotiable"}
+                            {project.budget > 0 ? `${project.budget.toLocaleString()} XOF` : t.negotiable}
                           </span>
                         </div>
                       </div>
@@ -323,7 +406,7 @@ export default function ClientProjectsPage() {
                             {techInitials}
                           </div>
                           <div className={styles.specialistInfo}>
-                            <span className={styles.specialistRole}>Assigned Professional</span>
+                            <span className={styles.specialistRole}>{t.assignedPro}</span>
                             <span className={styles.specialistName}>{project.specialistName}</span>
                           </div>
                         </div>
@@ -332,17 +415,17 @@ export default function ClientProjectsPage() {
                         <div className={styles.escrowBox}>
                           <span className={styles.escrowLabel}>
                             <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} />
-                            Escrow Protection
+                            {t.escrowProtection}
                           </span>
                           <span className={styles.escrowAmount}>
-                            {project.isAccepted ? "🛡️ Funds Vault Protected" : "⏳ Awaiting Acceptance"}
+                            {project.isAccepted ? t.vaultProtected : t.awaitingAcceptance}
                           </span>
                         </div>
 
                         {/* PROGRESS */}
                         <div className={styles.progressCol}>
                           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
-                            <span>Progress</span>
+                            <span>{t.progressLabel}</span>
                             <span>{project.isCompleted ? "100%" : project.isAccepted ? "50%" : "20%"}</span>
                           </div>
                           <div className={styles.progressBarBg}>
@@ -364,15 +447,14 @@ export default function ClientProjectsPage() {
                           className={styles.btnOutline}
                         >
                           <iconify-icon icon="lucide:message-square" />
-                          Chat with {project.specialistName}
+                          {t.chatWith} {project.specialistName}
                         </Link>
-
 
                         <Link 
                           href={`/dashboard/client/projects/${project.id}`}
                           className={styles.btnPrimary}
                         >
-                          Open Project Workspace →
+                          {t.openWorkspace}
                         </Link>
                       </div>
                     </div>
@@ -386,3 +468,4 @@ export default function ClientProjectsPage() {
     </div>
   );
 }
+

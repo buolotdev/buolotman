@@ -13,43 +13,32 @@ import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-  { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
-
-];
-
-function formatTime(iso: string | null | undefined): string {
-  if (!iso) return "";
-  try {
-    const d = new Date(iso);
-    const now = new Date();
-    const diff = (now.getTime() - d.getTime()) / 1000;
-    if (diff < 60) return "Just now";
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return d.toLocaleDateString();
-  } catch {
-    return "";
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    panelTitle: "Messages",
+    searchPlaceholder: "Search messages...",
+    noConvos: "No conversations yet.",
+    noConvosDesc: "Accept a proposal to start chatting with a technician.",
+    noMessages: "No messages yet. Say hi!",
+    typeMessage: "Type your message...",
+    uploading: "Uploading...",
+    send: "Send",
+    selectConvo: "Select a conversation to start messaging.",
+    noMessagesYet: "No messages yet.",
+  },
+  fr: {
+    panelTitle: "Messagerie",
+    searchPlaceholder: "Rechercher dans les messages...",
+    noConvos: "Aucune conversation pour le moment.",
+    noConvosDesc: "Acceptez une offre pour démarrer une discussion avec un artisan.",
+    noMessages: "Aucun message pour l'instant. Dites bonjour !",
+    typeMessage: "Écrivez votre message...",
+    uploading: "Téléchargement...",
+    send: "Envoyer",
+    selectConvo: "Sélectionnez une conversation pour commencer à échanger.",
+    noMessagesYet: "Aucun message pour l'instant.",
   }
-}
-
-function formatMessageTime(iso: string | null | undefined): string {
-  if (!iso) return "";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "";
-  }
-}
+};
 
 export default function ClientMessagesPage() {
   const router = useRouter();
@@ -68,7 +57,20 @@ export default function ClientMessagesPage() {
   const [activeMessages, setActiveMessages] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [lang, setLang] = useState("en");
   const attachmentInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
 
   const { data: apiConversations, loading, refetch: refetchConvos } = useFetch(() => api.getConversations(), []);
   const { data: userData } = useFetch(() => api.getMe(), []);
@@ -312,7 +314,7 @@ export default function ClientMessagesPage() {
             <aside className={`${styles.conversationPanel} ${mobileConversationOpen ? styles.conversationPanelHiddenMobile : ""}`}>
               <div className={styles.panelHeader}>
                 <div className={styles.panelTitleRow}>
-                  <h1 className={styles.panelTitle}>Messages</h1>
+                  <h1 className={styles.panelTitle}>{t.panelTitle}</h1>
                 </div>
                 <label className={styles.threadSearch}>
                   <iconify-icon icon="lucide:search" />
@@ -320,7 +322,7 @@ export default function ClientMessagesPage() {
                     type="search"
                     value={threadSearch}
                     onChange={(event) => setThreadSearch(event.target.value)}
-                    placeholder="Search messages..."
+                    placeholder={t.searchPlaceholder}
                     aria-label="Search messages"
                   />
                 </label>
@@ -336,7 +338,7 @@ export default function ClientMessagesPage() {
                 ) : filteredConversations.length ? (
                   filteredConversations.map((conversation: any) => {
                     const isActive = String(conversation.id) === activeConversationId;
-                    const preview = conversation.last_message?.text || "No messages yet.";
+                    const preview = conversation.last_message?.text || t.noMessagesYet;
                     return (
                       <button
                         key={conversation.id}
@@ -350,7 +352,7 @@ export default function ClientMessagesPage() {
                         <div className={styles.conversationContent}>
                           <div className={styles.conversationMeta}>
                             <strong>{conversation.other_participant?.name || ""}</strong>
-                            <span>{formatTime(conversation.last_message_at || conversation.last_message?.time)}</span>
+                            <span>{conversation.last_message_at || conversation.last_message?.time ? new Date(conversation.last_message_at || conversation.last_message?.time).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US") : ""}</span>
                           </div>
                           <div className={styles.conversationPreviewRow}>
                             <span className={`${styles.conversationPreview} ${conversation.unread_count ? styles.conversationPreviewStrong : ""}`}>
@@ -380,8 +382,8 @@ export default function ClientMessagesPage() {
                 ) : (
                   <div className={styles.emptyThreads}>
                     <iconify-icon icon="lucide:message-square" style={{ fontSize: 32, opacity: 0.4 }} />
-                    <p>No conversations yet.</p>
-                    <span>Accept a proposal to start chatting with a technician.</span>
+                    <p>{t.noConvos}</p>
+                    <span>{t.noConvosDesc}</span>
                   </div>
                 )}
               </div>
@@ -414,14 +416,13 @@ export default function ClientMessagesPage() {
                     ) : activeMessages.length === 0 ? (
                       <div className={styles.emptyChat}>
                         <iconify-icon icon="lucide:message-circle" style={{ fontSize: 40, opacity: 0.3 }} />
-                        <p>No messages yet. Say hi!</p>
+                        <p>{t.noMessages}</p>
                       </div>
                     ) : (
                       activeMessages.map((message: any) => {
                         const isMine = message.sender === userData?.id || message.sender_id === userData?.id || message.isClient === true;
                         return (
                           <article key={message.id} className={`${styles.messageGroup} ${isMine ? styles.messageGroupSent : styles.messageGroupReceived}`}>
-
                             <div className={styles.messageBubble}>{message.text}</div>
                             {message.attachment_url ? (
                               <a href={message.attachment_url} target="_blank" rel="noreferrer" className={styles.attachmentBubble}>
@@ -430,7 +431,7 @@ export default function ClientMessagesPage() {
                               </a>
                             ) : null}
                             <div className={styles.messageMeta}>
-                              <span>{formatMessageTime(message.created_at)}</span>
+                              <span>{message.created_at ? new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}</span>
                               {isMine ? <iconify-icon icon="lucide:check-check" /> : null}
                             </div>
                           </article>
@@ -459,7 +460,7 @@ export default function ClientMessagesPage() {
                             handleSendMessage();
                           }
                         }}
-                        placeholder="Type your message..."
+                        placeholder={t.typeMessage}
                         aria-label="Type a message"
                         rows={3}
                       />
@@ -475,7 +476,7 @@ export default function ClientMessagesPage() {
                               handleAttachmentPick(file);
                             }}
                           />
-                          {attachmentUploading && <span style={{ fontSize: 12, color: '#64748b' }}>Uploading...</span>}
+                          {attachmentUploading && <span style={{ fontSize: 12, color: '#64748b' }}>{t.uploading}</span>}
                           {attachmentDraft && !attachmentUploading && (
                             <button type="button" className={styles.attachmentChip} onClick={() => { setAttachmentDraft(null); if (attachmentInputRef.current) attachmentInputRef.current.value = ""; }}>
                               <span>{attachmentDraft.name}</span>
@@ -484,7 +485,7 @@ export default function ClientMessagesPage() {
                           )}
                         </div>
                         <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={(!draft.trim() && !attachmentDraft) || sending || attachmentUploading}>
-                          Send
+                          {t.send}
                         </button>
                       </div>
                     </div>
@@ -493,7 +494,7 @@ export default function ClientMessagesPage() {
               ) : (
                 <div className={styles.emptyChat}>
                   <iconify-icon icon="lucide:message-square" style={{ fontSize: 48, opacity: 0.3 }} />
-                  <p>Select a conversation to start messaging.</p>
+                  <p>{t.selectConvo}</p>
                 </div>
               )}
             </section>
@@ -503,3 +504,4 @@ export default function ClientMessagesPage() {
     </main>
   );
 }
+

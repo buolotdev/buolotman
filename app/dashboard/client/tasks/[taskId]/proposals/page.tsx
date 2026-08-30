@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
@@ -12,22 +12,78 @@ import { cleanDescription } from "@/app/lib/format";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks" },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages" },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card" },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark" },
-  { key: "profile", label: "Profile", icon: "lucide:user" },
-];
-
-const sortOptions = [
-  { id: "best-match", label: "Best Match" },
-  { id: "lowest-price", label: "Lowest Price" },
-  { id: "top-rated", label: "Top Rated" },
-] as const;
-
-type SortId = (typeof sortOptions)[number]["id"];
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    backToTasks: "Back to My Tasks",
+    taskProposals: "Task Proposals",
+    proposalsReceived: "proposals received",
+    viewTask: "Full Posting",
+    clientBudget: "Client Budget",
+    location: "Location",
+    timeline: "Timeline",
+    propertyType: "Property Type",
+    taskDescription: "Task Description",
+    taskAttachments: "Task Attachments",
+    bidInsights: "Bid Insights",
+    acceptedProposal: "Accepted Proposal",
+    totalProposals: "Total Proposals",
+    averageBid: "Average Bid",
+    lowestBid: "Lowest Bid",
+    highestBid: "Highest Bid",
+    labor: "Labor",
+    materials: "Materials",
+    fees: "Fees / Extras",
+    totalProposal: "Total Proposal",
+    successRate: "Success Rate",
+    duration: "Duration",
+    availability: "Availability",
+    warranty: "Warranty",
+    viewProfile: "View Profile",
+    acceptHire: "Accept & Hire",
+    message: "Message",
+    verifiedPro: "Verified Pro",
+    sortBestMatch: "Best Match",
+    sortLowestPrice: "Lowest Price",
+    sortTopRated: "Top Rated",
+    noProposals: "No proposals found matching your filter.",
+    alreadyHired: "Task already hired",
+  },
+  fr: {
+    backToTasks: "Retour à mes tâches",
+    taskProposals: "Offres pour la mission",
+    proposalsReceived: "offres reçues",
+    viewTask: "Voir l'annonce complète",
+    clientBudget: "Budget Client",
+    location: "Lieu",
+    timeline: "Délai",
+    propertyType: "Type de bien",
+    taskDescription: "Description de la mission",
+    taskAttachments: "Pièces jointes",
+    bidInsights: "Aperçu des Offres",
+    acceptedProposal: "Offre acceptée",
+    totalProposals: "Total des offres",
+    averageBid: "Offre moyenne",
+    lowestBid: "Offre la plus basse",
+    highestBid: "Offre la plus haute",
+    labor: "Main d'œuvre",
+    materials: "Matériaux",
+    fees: "Frais / Équipement",
+    totalProposal: "Montant Total",
+    successRate: "Taux de réussite",
+    duration: "Durée",
+    availability: "Disponibilité",
+    warranty: "Garantie",
+    viewProfile: "Voir le Profil",
+    acceptHire: "Accepter & Réserver",
+    message: "Message",
+    verifiedPro: "Artisan Vérifié",
+    sortBestMatch: "Meilleure correspondance",
+    sortLowestPrice: "Prix le plus bas",
+    sortTopRated: "Mieux notés",
+    noProposals: "Aucune offre trouvée pour ce filtre.",
+    alreadyHired: "Mission déjà attribuée",
+  }
+};
 
 function parseAmount(value: any) {
   if (typeof value === "number") return value;
@@ -42,13 +98,26 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
   const pathname = usePathname();
   const toast = useToast();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<SortId>("best-match");
+  const [sortBy, setSortBy] = useState<string>("best-match");
   const [shortlistedIds, setShortlistedIds] = useState<string[]>([]);
   const [messagingId, setMessagingId] = useState<string | null>(null);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: bidsData, loading: bidsLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
   const { data: userData } = useFetch(() => api.getMe(), []);
+
 
   const userName = `${userData?.first_name ?? ""} ${userData?.last_name ?? ""}`.trim() || userData?.username || "";
   const userInitials = useMemo(() => {
@@ -147,38 +216,25 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                 <section className={styles.headerRow}>
                   <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.backLink}>
                     <iconify-icon icon="lucide:arrow-left" />
-                    Back to Task Details
+                    {t.backToTasks}
                   </Link>
 
                   <div className={styles.headerBar}>
                     <div>
                       <h1 className={styles.pageTitle}>
-                        {hasAcceptedProposal ? "Accepted Proposal" : "Review Proposals"} ({proposalCount})
+                        {hasAcceptedProposal ? t.acceptedProposal : t.taskProposals} ({proposalCount})
                       </h1>
-                      <div className={styles.timeline}>
-                        <span className={`${styles.timelineStep} ${styles.timelineDone}`}>Posted</span>
-                        <span className={`${styles.timelineLine} ${styles.timelineLineActive}`} />
-                        <span className={`${styles.timelineStep} ${styles.timelineActive}`}>
-                          {hasAcceptedProposal ? "Hired" : `Reviewing (${proposalCount})`}
-                        </span>
-                        <span className={styles.timelineLine} />
-                        <span className={`${styles.timelineStep} ${hasAcceptedProposal ? styles.timelineDone : ""}`}>Hired</span>
-                        <span className={styles.timelineLine} />
-                        <span className={styles.timelineStep}>Completed</span>
-                      </div>
                     </div>
 
                     {!hasAcceptedProposal ? (
                     <div className={styles.sortWrap}>
                       <label htmlFor="proposal-sort" className={styles.sortLabel}>
-                        Sort by
+                        {lang === "fr" ? "Trier par" : "Sort by"}
                       </label>
-                      <select id="proposal-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value as SortId)} className={styles.sortSelect}>
-                        {sortOptions.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.label}
-                          </option>
-                        ))}
+                      <select id="proposal-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value as any)} className={styles.sortSelect}>
+                        <option value="best-match">{t.sortBestMatch}</option>
+                        <option value="lowest-price">{t.sortLowestPrice}</option>
+                        <option value="top-rated">{t.sortTopRated}</option>
                       </select>
                     </div>
                     ) : null}
@@ -189,7 +245,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                   <div className={styles.overviewMain}>
                     <div className={styles.overviewTop}>
                       <div>
-                        <span className={styles.statusBadge}>{hasAcceptedProposal ? "Hired" : "Open for Bids"}</span>
+                        <span className={styles.statusBadge}>{hasAcceptedProposal ? (lang === "fr" ? "Attribué" : "Hired") : (lang === "fr" ? "Ouvert aux offres" : "Open for Bids")}</span>
                         <h2 className={styles.overviewTitle}>{task.title}</h2>
                         <p className={styles.overviewMeta}>
                           {task.posted_at || task.postedAt || ""} • ID: #{String(task.id).toUpperCase()}
@@ -197,31 +253,31 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                       </div>
 
                       <Link href={`/dashboard/client/tasks/${task.id}`} className={styles.outlineButton}>
-                        Full Posting
+                        {t.viewTask}
                       </Link>
                     </div>
 
                     <div className={styles.detailsGrid}>
                       <div>
-                        <span>Client Budget</span>
+                        <span>{t.clientBudget}</span>
                         <strong>{task.logistics?.budgetLabel || `${Number(task.budget_min || 0).toLocaleString()} XOF`}</strong>
                       </div>
                       <div>
-                        <span>Location</span>
+                        <span>{t.location}</span>
                         <strong>{task.city || task.location || "Not specified"}</strong>
                       </div>
                       <div>
-                        <span>Timeline</span>
+                        <span>{t.timeline}</span>
                         <strong>{task.logistics?.scheduleLabel || task.schedule || "Flexible"}</strong>
                       </div>
                       <div>
-                        <span>Property Type</span>
+                        <span>{t.propertyType}</span>
                         <strong>{task.logistics?.propertyType || task.property_type || "Not specified"}</strong>
                       </div>
                     </div>
 
                     <div className={styles.descriptionBlock}>
-                      <h3>Task Description</h3>
+                      <h3>{t.taskDescription}</h3>
                       <p>{cleanDescription(Array.isArray(task.description) ? task.description[0] : task.description) || "No description provided."}</p>
                       <div className={styles.skillRow}>
                         {(task.skills || []).map((skill: string) => (
@@ -233,7 +289,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                     </div>
 
                     <div className={styles.attachmentsBlock}>
-                      <h3>Task Attachments</h3>
+                      <h3>{t.taskAttachments}</h3>
                       <div className={styles.attachmentRow} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                         {(task.attachments || []).map((attachment: any, idx: number) => {
                           const isImage = attachment.file_type?.includes('image') || attachment.file_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i);
@@ -253,25 +309,19 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                   </div>
 
                   <aside className={styles.overviewSide}>
-                    <h3>Bid Insights</h3>
+                    <h3>{t.bidInsights}</h3>
                       <div className={styles.insightList}>
-                      <div><span>{hasAcceptedProposal ? "Accepted Proposal" : "Total Proposals"}</span><strong>{proposalCount}</strong></div>
-                      <div><span>Average Bid</span><strong>{averageBid.toLocaleString()} XOF</strong></div>
-                      <div><span>Lowest Bid</span><strong>{lowestBid ? `${lowestBid.toLocaleString()} XOF` : ""}</strong></div>
-                      <div><span>Highest Bid</span><strong>{highestBid ? `${highestBid.toLocaleString()} XOF` : ""}</strong></div>
-                      <div><span>Shortlisted</span><strong>{shortlistedCount}</strong></div>
+                      <div><span>{hasAcceptedProposal ? t.acceptedProposal : t.totalProposals}</span><strong>{proposalCount}</strong></div>
+                      <div><span>{t.averageBid}</span><strong>{averageBid.toLocaleString()} XOF</strong></div>
+                      <div><span>{t.lowestBid}</span><strong>{lowestBid ? `${lowestBid.toLocaleString()} XOF` : ""}</strong></div>
+                      <div><span>{t.highestBid}</span><strong>{highestBid ? `${highestBid.toLocaleString()} XOF` : ""}</strong></div>
                     </div>
-                    <p className={styles.insightNote}>
-                      {hasAcceptedProposal
-                        ? "This task already has an accepted proposal, so only the hired bid stays visible."
-                        : "Proposals are linked to this task only. That solves the routing issue: each task has its own review page and its own proposal set."}
-                    </p>
                   </aside>
                 </section>
 
                 <section className={styles.gridBids}>
                   {visibleBids.length ? (
-                    visibleBids.map((bid: any, index: number) => {
+                    visibleBids.map((bid: any) => {
                       const shortlisted = shortlistedIds.includes(String(bid.id));
                       const isAcceptedBid = String(bid.status || "").toLowerCase() === "accepted";
                       const labor = Math.round(parseAmount(bid.amount) * 0.67);
@@ -290,7 +340,7 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                                   </div>
                                   <div className={styles.bidMeta}>
                                     {bid.technician_rating != null && bid.technician_rating !== "" ? <span>{bid.technician_rating} ★</span> : null}
-                                    {bid.verified ? <span className={styles.verified}>Verified Pro</span> : null}
+                                    {bid.verified ? <span className={styles.verified}>{t.verifiedPro}</span> : null}
                                     {(task.city || task.location) ? <span><iconify-icon icon="lucide:map-pin" /> {task.city || task.location}</span> : null}
                                   </div>
                                 </div>
@@ -304,17 +354,17 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                           </div>
 
                           <div className={styles.costBreakdown}>
-                            <div><span>Labor</span><span>{labor.toLocaleString()} XOF</span></div>
-                            <div><span>Materials</span><span>{materials.toLocaleString()} XOF</span></div>
-                            <div><span>Fees / Extras</span><span>{fees.toLocaleString()} XOF</span></div>
-                            <div className={styles.totalRow}><span>Total Proposal</span><span>{bid.amount}</span></div>
+                            <div><span>{t.labor}</span><span>{labor.toLocaleString()} XOF</span></div>
+                            <div><span>{t.materials}</span><span>{materials.toLocaleString()} XOF</span></div>
+                            <div><span>{t.fees}</span><span>{fees.toLocaleString()} XOF</span></div>
+                            <div className={styles.totalRow}><span>{t.totalProposal}</span><span>{bid.amount}</span></div>
                           </div>
 
                           <div className={styles.statsGrid}>
-                            <div><span>Success Rate</span><strong>{bid.success_rate || ""}</strong></div>
-                            <div><span>Duration</span><strong>{bid.duration || ""}</strong></div>
-                            <div><span>Availability</span><strong>{bid.availability || ""}</strong></div>
-                            <div><span>Warranty</span><strong>{bid.warranty || ""}</strong></div>
+                            <div><span>{t.successRate}</span><strong>{bid.success_rate || ""}</strong></div>
+                            <div><span>{t.duration}</span><strong>{bid.duration || ""}</strong></div>
+                            <div><span>{t.availability}</span><strong>{bid.availability || ""}</strong></div>
+                            <div><span>{t.warranty}</span><strong>{bid.warranty || ""}</strong></div>
                           </div>
 
                           {bid.question ? (
@@ -341,19 +391,16 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
 
                           <div className={styles.bidActions}>
                             <Link href={`/dashboard/client/tasks/${task.id}/proposals/${bid.id}`} className={styles.outlineButton}>
-                              View Profile
+                              {t.viewProfile}
                             </Link>
                             {hasAcceptedProposal ? (
                               <span className={styles.acceptedButton}>
-                                {isAcceptedBid ? "Proposal accepted" : "Task already hired"}
+                                {isAcceptedBid ? t.acceptedProposal : t.alreadyHired}
                               </span>
                             ) : (
                               <>
-                                <button type="button" className={shortlisted ? styles.secondaryActiveButton : styles.outlineButton} onClick={() => toggleShortlist(String(bid.id))}>
-                                  {shortlisted ? "Shortlisted" : "Shortlist"}
-                                </button>
                                 <Link href={`/dashboard/client/tasks/${task.id}/proposals/${bid.id}/payment`} className={styles.primaryButton}>
-                                  Accept Proposal
+                                  {t.acceptHire}
                                 </Link>
                               </>
                             )}
@@ -387,10 +434,11 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                     })
                   ) : (
                     <div className={styles.emptyState}>
-                      {hasAcceptedProposal ? "This task already has an accepted proposal." : "No proposals have arrived for this task yet."}
+                      {t.noProposals}
                     </div>
                   )}
                 </section>
+
               </>
             ) : null}
           </div>

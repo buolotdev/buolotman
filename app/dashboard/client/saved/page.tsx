@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import DashboardHeader from "@/app/components/DashboardHeader";
@@ -21,23 +19,41 @@ type SavedItem = {
   };
 };
 
-const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/client", match: (p: string) => p === "/dashboard/client" },
-  { key: "tasks", label: "My Tasks", icon: "lucide:clipboard-list", href: "/dashboard/client/tasks", match: (p: string) => p.startsWith("/dashboard/client/tasks") },
-  { key: "projects", label: "My Projects", icon: "lucide:briefcase", href: "/dashboard/client/projects", match: (p: string) => p.startsWith("/dashboard/client/projects") },
-  { key: "messages", label: "Messages", icon: "lucide:message-square", href: "/dashboard/client/messages", match: (p: string) => p.startsWith("/dashboard/client/messages") },
-  { key: "payments", label: "Payments", icon: "lucide:credit-card", href: "/dashboard/client/payments", match: (p: string) => p.startsWith("/dashboard/client/payments") },
-  { key: "saved", label: "Saved", icon: "lucide:bookmark", href: "/dashboard/client/saved", match: (p: string) => p.startsWith("/dashboard/client/saved") },
-  { key: "support", label: "Support Tickets", icon: "lucide:life-buoy", href: "/dashboard/client/support", match: (p: string) => p.startsWith("/dashboard/client/support") },
-  { key: "settings", label: "Settings", icon: "lucide:settings", href: "/dashboard/client/settings", match: (p: string) => p.startsWith("/dashboard/client/settings") },
-  { key: "explore", label: "Explore Professionals", icon: "lucide:search", href: "/search", match: (p: string) => p.startsWith("/search") },
-
-];
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    headerTitle: "Saved Professionals",
+    headerSubtitle: "Manage your curated roster of technicians, freelancers, and business partners.",
+    loading: "Loading saved professionals...",
+    noSaved: "No saved professionals yet.",
+    noSavedDesc: "Bookmarks make it easy to contact your favorite providers later.",
+    viewProfile: "View Profile",
+    remove: "Remove",
+  },
+  fr: {
+    headerTitle: "Artisans Favoris",
+    headerSubtitle: "Gérez votre carnet d'artisans, freelances et partenaires préférés.",
+    loading: "Chargement des favoris...",
+    noSaved: "Aucun professionnel enregistré pour le moment.",
+    noSavedDesc: "Les favoris vous permettent de recontacter facilement vos prestataires préférés.",
+    viewProfile: "Voir le Profil",
+    remove: "Retirer",
+  }
+};
 
 export default function SavedProfessionalsPage() {
-  const router = useRouter();
-  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const { data, loading, refetch } = useFetch(() => api.getSavedPros(), []);
   const saved = Array.isArray(data) ? data : [];
@@ -56,20 +72,20 @@ export default function SavedProfessionalsPage() {
           <div className={styles.content}>
             <div className={styles.pageHeader}>
               <div>
-                <h1 className={styles.headerTitle}>Saved Professionals</h1>
-                <p className={styles.headerSubtitle}>Manage your curated roster of technicians, freelancers, and business partners.</p>
+                <h1 className={styles.headerTitle}>{t.headerTitle}</h1>
+                <p className={styles.headerSubtitle}>{t.headerSubtitle}</p>
               </div>
             </div>
 
             {loading ? (
               <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
-                <p>Loading saved professionals...</p>
+                <p>{t.loading}</p>
               </div>
             ) : saved.length === 0 ? (
               <div className={styles.emptyState}>
                 <iconify-icon icon="lucide:bookmark-x" />
-                <p>No saved professionals yet.</p>
-                <span style={{ fontSize: "13px", color: "#64748b" }}>Bookmarks make it easy to contact your favorite providers later.</span>
+                <p>{t.noSaved}</p>
+                <span style={{ fontSize: "13px", color: "#64748b" }}>{t.noSavedDesc}</span>
               </div>
             ) : (
               <section className={styles.cardsGrid}>
@@ -89,7 +105,7 @@ export default function SavedProfessionalsPage() {
                       </div>
                       <div className={styles.actions}>
                         <Link href={`/profile/${professional.id}`} className={styles.viewBtn}>
-                          View Profile
+                          {t.viewProfile}
                         </Link>
                         <button
                           type="button"
@@ -102,7 +118,7 @@ export default function SavedProfessionalsPage() {
                             refetch();
                           }}
                         >
-                          Remove
+                          {t.remove}
                         </button>
                       </div>
                     </article>
@@ -116,3 +132,4 @@ export default function SavedProfessionalsPage() {
     </main>
   );
 }
+

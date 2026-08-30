@@ -9,6 +9,135 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { cleanDescription, extractDirectInvitation } from "@/app/lib/format";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    projectWorkspace: "Project Workspace",
+    offerAcceptedActive: "Offer Accepted & Active",
+    directJobInvitation: "Direct Job Invitation",
+    fromClient: "From Client:",
+    projectAcceptedTitle: "Project Accepted — In Progress 🚀",
+    directJobTitle: "Direct Job Offer Received from Client",
+    projectAcceptedDesc: "This project is active. Client has been notified that you accepted. You can submit milestones and communicate directly.",
+    directJobDesc: "Client has directly selected and invited you for this task. Click Accept to confirm the assignment and notify client.",
+    acceptOffer: "Accept Job Offer",
+    acceptingOffer: "Accepting Offer...",
+    clientNotified: "Client Notified",
+    offerAcceptedNotice: "Job Offer Accepted! Client has been notified and your workspace is now active.",
+    projectOverview: "Project Overview",
+    client: "Client:",
+    startDate: "Start Date:",
+    totalProjectCost: "Total Project Cost:",
+    awaitingQuote: "Awaiting Quote",
+    status: "Status:",
+    overallProgress: "Overall Progress:",
+    milestones: "Milestones",
+    milestone: "Milestone",
+    percentage: "Percentage",
+    amount: "Amount",
+    action: "Action",
+    submit: "Submit",
+    released: "Released",
+    heldInEscrow: "Held in Escrow",
+    pending: "Pending",
+    workspaceDiscussion: "Workspace Discussion & Coordination",
+    workspaceDiscussionSubtitle: "Direct communication with Client. All messages are synced.",
+    noMessages: "No workspace messages yet.",
+    noMessagesSubtitle: "Send a message below to coordinate directly with the client.",
+    quickReplies: "Quick replies:",
+    uploadedPhotos: "📸 Uploaded photos",
+    onSchedule: "⏰ On schedule",
+    workCompleted: "👍 Work completed",
+    typeMessage: "Type a message or milestone update...",
+    send: "Send",
+    activityLog: "Activity Log",
+    paymentStatus: "Payment Status",
+    paymentReleased: "Released:",
+    paymentOnHold: "On Hold:",
+    paymentRemaining: "Remaining:",
+    quickActions: "Quick Actions",
+    submitPriceQuote: "Submit Price Quotation",
+    submitMilestoneUpdate: "Submit Milestone Update",
+    messageClient: "Message Client",
+    sendProjectQuotation: "Send Project Quotation",
+    sendProjectQuotationSubtitle: "Submit your proposed contract price to Client for this task.",
+    quoteAmount: "Quote Amount (XOF)",
+    cancel: "Cancel",
+    sendQuote: "Send Quote",
+    sendingQuote: "Sending Quote...",
+    submitProgressDeliverable: "Submit Progress Deliverable",
+    submitProgressSubtitle: "Provide proof of work and completion notes for Client to review.",
+    completionProgress: "Completion Progress (%)",
+    workSummary: "Work Summary & Details",
+    workSummaryPlaceholder: "Describe the tasks completed, measurements taken, or materials installed...",
+    uploadProof: "Upload Proof Photos / Docs (Optional)",
+    submitForClientReview: "Submit for Client Review",
+    submitting: "Submitting...",
+  },
+  fr: {
+    projectWorkspace: "Espace Projet",
+    offerAcceptedActive: "Offre Acceptée & Active",
+    directJobInvitation: "Invitation Directe à une Mission",
+    fromClient: "Du Client :",
+    projectAcceptedTitle: "Projet Accepté — En Cours 🚀",
+    directJobTitle: "Proposition de Mission Reçue du Client",
+    projectAcceptedDesc: "Ce projet est actif. Le client a été informé de votre acceptation. Vous pouvez soumettre vos jalons et échanger directement.",
+    directJobDesc: "Le client vous a directement sélectionné et invité pour cette mission. Cliquez sur Accepter pour confirmer l'attribution.",
+    acceptOffer: "Accepter la Mission",
+    acceptingOffer: "Acceptation en cours...",
+    clientNotified: "Client Notifié",
+    offerAcceptedNotice: "Offre de mission acceptée ! Le client a été notifié et votre espace de travail est actif.",
+    projectOverview: "Aperçu du Projet",
+    client: "Client :",
+    startDate: "Date de début :",
+    totalProjectCost: "Coût Total du Projet :",
+    awaitingQuote: "En attente de devis",
+    status: "Statut :",
+    overallProgress: "Progression globale :",
+    milestones: "Jalons",
+    milestone: "Jalon",
+    percentage: "Pourcentage",
+    amount: "Montant",
+    action: "Action",
+    submit: "Soumettre",
+    released: "Libéré",
+    heldInEscrow: "Bloqué sous Séquestre",
+    pending: "En attente",
+    workspaceDiscussion: "Discussion & Coordination du Projet",
+    workspaceDiscussionSubtitle: "Communication directe avec le client. Tous les messages sont synchronisés.",
+    noMessages: "Aucun message pour l'instant.",
+    noMessagesSubtitle: "Envoyez un message ci-dessous pour coordonner directement avec le client.",
+    quickReplies: "Réponses rapides :",
+    uploadedPhotos: "📸 Photos ajoutées",
+    onSchedule: "⏰ Dans les délais",
+    workCompleted: "👍 Travail terminé",
+    typeMessage: "Écrivez un message ou une mise à jour...",
+    send: "Envoyer",
+    activityLog: "Journal d'Activité",
+    paymentStatus: "Statut des Paiements",
+    paymentReleased: "Libéré :",
+    paymentOnHold: "Bloqué :",
+    paymentRemaining: "Restant :",
+    quickActions: "Actions Rapides",
+    submitPriceQuote: "Soumettre un Devis de Prix",
+    submitMilestoneUpdate: "Soumettre l'Avancement du Jalon",
+    messageClient: "Contacter le Client",
+    sendProjectQuotation: "Envoyer un Devis pour le Projet",
+    sendProjectQuotationSubtitle: "Proposez votre tarif contractuel au client pour cette tâche.",
+    quoteAmount: "Montant du Devis (XOF)",
+    cancel: "Annuler",
+    sendQuote: "Envoyer le Devis",
+    sendingQuote: "Envoi du devis...",
+    submitProgressDeliverable: "Soumettre un Livrable d'Avancement",
+    submitProgressSubtitle: "Fournissez des preuves de réalisation et des notes d'achèvement pour le client.",
+    completionProgress: "Progression de l'Achèvement (%)",
+    workSummary: "Résumé des Travaux & Détails",
+    workSummaryPlaceholder: "Décrivez les tâches accomplies, les mesures prises ou les matériaux installés...",
+    uploadProof: "Télécharger Photos / Documents de Preuve (Optionnel)",
+    submitForClientReview: "Soumettre pour Validation du Client",
+    submitting: "Soumission en cours...",
+  }
+};
+
 export default function TechnicianWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const taskId = parseInt(id) || 1;
@@ -28,6 +157,19 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
   const [quoteAmount, setQuoteAmount] = useState("");
   const [submittingQuote, setSubmittingQuote] = useState(false);
   const [quoteSuccess, setQuoteSuccess] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -291,7 +433,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
           <div className={styles.content}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800 }}>Project Workspace</h1>
+              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800 }}>{t.projectWorkspace}</h1>
               <span style={{ fontSize: "14px", color: "#64748b" }}>{taskTitle} – {clientName}</span>
             </div>
 
@@ -321,19 +463,19 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     letterSpacing: "0.04em",
                     textTransform: "uppercase"
                   }}>
-                    {isAccepted ? "Offer Accepted & Active" : "Direct Job Invitation"}
+                    {isAccepted ? t.offerAcceptedActive : t.directJobInvitation}
                   </span>
                   <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)" }}>
-                    From Client: <strong>{clientName}</strong>
+                    {t.fromClient} <strong>{clientName}</strong>
                   </span>
                 </div>
                 <h3 style={{ margin: "0 0 4px", fontSize: "19px", fontWeight: 800 }}>
-                  {isAccepted ? "Project Accepted — In Progress 🚀" : "Direct Job Offer Received from Client"}
+                  {isAccepted ? t.projectAcceptedTitle : t.directJobTitle}
                 </h3>
                 <p style={{ margin: 0, fontSize: "13.5px", color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
                   {isAccepted
-                    ? `This project is active. Client ${clientName} has been notified that you accepted. You can submit milestones and communicate directly.`
-                    : `Client ${clientName} has directly selected and invited you for this task. Click Accept to confirm the assignment and notify ${clientName}.`}
+                    ? t.projectAcceptedDesc
+                    : t.directJobDesc}
                 </p>
               </div>
 
@@ -359,13 +501,13 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     }}
                   >
                     <iconify-icon icon="lucide:check-circle" style={{ fontSize: "18px" }} />
-                    {accepting ? "Accepting Offer..." : "Accept Job Offer"}
+                    {accepting ? t.acceptingOffer : t.acceptOffer}
                   </button>
                 </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.15)", padding: "8px 16px", borderRadius: "10px" }}>
                   <iconify-icon icon="lucide:check-check" style={{ fontSize: "20px", color: "#86efac" }} />
-                  <span style={{ fontSize: "13.5px", fontWeight: 700 }}>Client Notified</span>
+                  <span style={{ fontSize: "13.5px", fontWeight: 700 }}>{t.clientNotified}</span>
                 </div>
               )}
             </div>
@@ -385,7 +527,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                 fontSize: "14px"
               }}>
                 <iconify-icon icon="lucide:bell-ring" style={{ fontSize: "20px", color: "#16a34a" }} />
-                <span>Job Offer Accepted! Client {clientName} has been notified and your workspace is now active.</span>
+                <span>{t.offerAcceptedNotice}</span>
               </div>
             )}
 
@@ -395,22 +537,22 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                 
                 {/* PROJECT OVERVIEW */}
                 <section className={styles.card}>
-                  <h3>Project Overview</h3>
+                  <h3>{t.projectOverview}</h3>
                   <div className={styles.overviewGrid}>
                     <div>
-                      <span className={styles.metaLabel}>Client:</span>
+                      <span className={styles.metaLabel}>{t.client}</span>
                       <strong>{clientName}</strong>
                     </div>
                     <div>
-                      <span className={styles.metaLabel}>Start Date:</span>
+                      <span className={styles.metaLabel}>{t.startDate}</span>
                       <strong>{startDate}</strong>
                     </div>
                     <div>
-                      <span className={styles.metaLabel}>Total Project Cost:</span>
-                      <strong>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : "Awaiting Quote"}</strong>
+                      <span className={styles.metaLabel}>{t.totalProjectCost}</span>
+                      <strong>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : t.awaitingQuote}</strong>
                     </div>
                     <div>
-                      <span className={styles.metaLabel}>Status:</span>
+                      <span className={styles.metaLabel}>{t.status}</span>
                       <span className={`${styles.statusBadge} ${getStatusClass(statusDisplay)}`}>
                         {statusDisplay}
                       </span>
@@ -421,22 +563,22 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     <div className={styles.progressBarBg}>
                       <div className={styles.progressBarFill} style={{ width: `${progressPercent}%` }} />
                     </div>
-                    <span className={styles.progressText}>Overall Progress: {progressPercent}%</span>
+                    <span className={styles.progressText}>{t.overallProgress} {progressPercent}%</span>
                   </div>
                 </section>
 
                 {/* MILESTONES */}
                 <section className={styles.card}>
-                  <h3>Milestones</h3>
+                  <h3>{t.milestones}</h3>
                   <div className={styles.tableWrapper}>
                     <table className={styles.table}>
                       <thead>
                         <tr>
-                          <th>Milestone</th>
-                          <th>Percentage</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                          <th>Action</th>
+                          <th>{t.milestone}</th>
+                          <th>{t.percentage}</th>
+                          <th>{t.amount}</th>
+                          <th>{t.status}</th>
+                          <th>{t.action}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -454,7 +596,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                               <td>
                                 {m.status !== "Released" && !isCompleted ? (
                                   <button className={`${styles.outlineButton} ${styles.smallButton}`} onClick={() => setIsModalOpen(true)}>
-                                    Submit
+                                    {t.submit}
                                   </button>
                                 ) : (
                                   "—"
@@ -466,16 +608,16 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                           <tr>
                             <td>{taskTitle || "Project Execution & Handover"}</td>
                             <td>100%</td>
-                            <td>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : "Pending Quote"}</td>
+                            <td>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : t.awaitingQuote}</td>
                             <td>
                               <span className={`${styles.statusBadge} ${isCompleted ? styles.statusReleased : (escrowHeld > 0 ? styles.statusHold : styles.statusPending)}`}>
-                                {isCompleted ? "Released" : (escrowHeld > 0 ? "Held in Escrow" : "Pending")}
+                                {isCompleted ? t.released : (escrowHeld > 0 ? t.heldInEscrow : t.pending)}
                               </span>
                             </td>
                             <td>
                               {!isCompleted ? (
                                 <button className={`${styles.outlineButton} ${styles.smallButton}`} onClick={() => setIsModalOpen(true)}>
-                                  Submit
+                                  {t.submit}
                                 </button>
                               ) : (
                                 "—"
@@ -495,9 +637,9 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                       <iconify-icon icon="lucide:messages-square" />
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 800 }}>Workspace Discussion & Coordination</h3>
+                      <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 800 }}>{t.workspaceDiscussion}</h3>
                       <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#64748b" }}>
-                        Direct communication with Client <strong>{clientName}</strong>. All messages are synced.
+                        {t.workspaceDiscussionSubtitle}
                       </p>
                     </div>
                   </div>
@@ -526,21 +668,21 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     ) : (
                       <div className={styles.emptyChatBox}>
                         <iconify-icon icon="lucide:message-square" style={{ fontSize: 28, color: "#cbd5e1" }} />
-                        <p>No workspace messages yet.</p>
-                        <span>Send a message below to coordinate directly with the client.</span>
+                        <p>{t.noMessages}</p>
+                        <span>{t.noMessagesSubtitle}</span>
                       </div>
                     )}
 
                     <div className={styles.quickReplyRow}>
-                      <span>Quick replies:</span>
-                      <button type="button" onClick={() => handleQuickReply("Progress photos have been uploaded for your review.")}>
-                        📸 Uploaded photos
+                      <span>{t.quickReplies}</span>
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "Des photos de l'avancement ont été ajoutées pour votre examen." : "Progress photos have been uploaded for your review.")}>
+                        {t.uploadedPhotos}
                       </button>
-                      <button type="button" onClick={() => handleQuickReply("On track to finish task today.")}>
-                        ⏰ On schedule
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "En bonne voie pour terminer la mission aujourd'hui." : "On track to finish task today.")}>
+                        {t.onSchedule}
                       </button>
-                      <button type="button" onClick={() => handleQuickReply("Milestone completed, please inspect.")}>
-                        👍 Work completed
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "Jalon terminé, veuillez vérifier les livrables." : "Milestone completed, please inspect.")}>
+                        {t.workCompleted}
                       </button>
                     </div>
 
@@ -548,13 +690,13 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                       <input
                         type="text"
                         className={styles.chatInput}
-                        placeholder="Type a message or milestone update..."
+                        placeholder={t.typeMessage}
                         value={chatDraft}
                         onChange={(e) => setChatDraft(e.target.value)}
                       />
                       <button type="submit" className={styles.chatSendBtn} disabled={!chatDraft.trim()}>
                         <iconify-icon icon="lucide:send" />
-                        Send
+                        {t.send}
                       </button>
                     </form>
                   </div>
@@ -562,32 +704,32 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
                 {/* ACTIVITY LOG */}
                 <section className={styles.card}>
-                  <h3>Activity Log</h3>
+                  <h3>{t.activityLog}</h3>
                   <div className={styles.logItem}>
-                    ✔ Task initiated and assigned to your workspace
+                    ✔ {lang === "fr" ? "Mission initiée et attribuée à votre espace de travail" : "Task initiated and assigned to your workspace"}
                   </div>
                   {isAccepted && (
                     <div className={styles.logItem}>
-                      🤝 Direct job offer accepted by technician
+                      🤝 {lang === "fr" ? "Offre directe acceptée par l'artisan" : "Direct job offer accepted by technician"}
                     </div>
                   )}
                   {hasEscrow && (
                     <div className={styles.logItem}>
-                      🛡 Escrow funds of {totalCost.toLocaleString()} XOF deposited & protected in vault
+                      🛡 {lang === "fr" ? `Fonds séquestre de ${totalCost.toLocaleString()} XOF déposés & protégés` : `Escrow funds of ${totalCost.toLocaleString()} XOF deposited & protected in vault`}
                     </div>
                   )}
                   {showSuccess && (
                     <div className={styles.logItem}>
-                      📤 Progress deliverable submitted for client review
+                      📤 {lang === "fr" ? "Livrable d'avancement soumis pour validation" : "Progress deliverable submitted for client review"}
                     </div>
                   )}
                   {!isCompleted ? (
                     <div className={styles.logItem}>
-                      ⏳ Awaiting milestone completion and client confirmation
+                      ⏳ {lang === "fr" ? "En attente de réalisation du jalon et confirmation client" : "Awaiting milestone completion and client confirmation"}
                     </div>
                   ) : (
                     <div className={styles.logItem}>
-                      ✔ Task marked completed – Payment released to wallet
+                      ✔ {lang === "fr" ? "Mission terminée – Paiement versé sur votre portefeuille" : "Task marked completed – Payment released to wallet"}
                     </div>
                   )}
                 </section>
@@ -599,24 +741,24 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                 
                 {/* PAYMENT STATUS */}
                 <section className={styles.card}>
-                  <h3>Payment Status</h3>
+                  <h3>{t.paymentStatus}</h3>
                   <div className={styles.paymentRow}>
-                    <span>Released:</span>
+                    <span>{t.paymentReleased}</span>
                     <strong>{releasedAmount > 0 ? `${releasedAmount.toLocaleString()} XOF` : "0 XOF"}</strong>
                   </div>
                   <div className={styles.paymentRow}>
-                    <span>On Hold:</span>
+                    <span>{t.paymentOnHold}</span>
                     <strong>{escrowHeld > 0 ? `${escrowHeld.toLocaleString()} XOF` : "0 XOF"}</strong>
                   </div>
                   <div className={styles.paymentRow}>
-                    <span>Remaining:</span>
+                    <span>{t.paymentRemaining}</span>
                     <strong>{remainingAmount > 0 ? `${remainingAmount.toLocaleString()} XOF` : "0 XOF"}</strong>
                   </div>
                 </section>
 
                 {/* QUICK ACTIONS */}
                 <section className={styles.card}>
-                  <h3>Quick Actions</h3>
+                  <h3>{t.quickActions}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                     {!isAccepted && (
                       <button 
@@ -625,7 +767,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                         disabled={accepting}
                         onClick={handleAcceptOffer}
                       >
-                        <iconify-icon icon="lucide:check-circle" /> {accepting ? "Accepting..." : "Accept Job Offer"}
+                        <iconify-icon icon="lucide:check-circle" /> {accepting ? t.acceptingOffer : t.acceptOffer}
                       </button>
                     )}
                     {totalCost === 0 && (
@@ -634,18 +776,18 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                         style={{ background: "#FF4500" }}
                         onClick={() => setQuoteModalOpen(true)}
                       >
-                        <iconify-icon icon="lucide:file-text" /> Submit Price Quotation
+                        <iconify-icon icon="lucide:file-text" /> {t.submitPriceQuote}
                       </button>
                     )}
                     <button className={styles.primaryButton} onClick={() => setIsModalOpen(true)}>
-                      Submit Milestone Update
+                      {t.submitMilestoneUpdate}
                     </button>
                     <Link 
                       href={`/dashboard/technician/messages?client=${clientId}&name=${encodeURIComponent(clientName)}&task=${taskId}`} 
                       className={styles.outlineButton} 
                       style={{ textDecoration: "none", boxSizing: "border-box", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                     >
-                      <iconify-icon icon="lucide:message-square" /> Message Client ({clientName})
+                      <iconify-icon icon="lucide:message-square" /> {t.messageClient} ({clientName})
                     </Link>
                   </div>
                 </section>
@@ -660,15 +802,15 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
       {quoteModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setQuoteModalOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3>Send Project Quotation</h3>
+            <h3>{t.sendProjectQuotation}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "-8px", marginBottom: "16px" }}>
-              Submit your proposed contract price to Client {clientName} for this task.
+              {t.sendProjectQuotationSubtitle}
             </p>
 
             <form onSubmit={handleSendQuote}>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                  Quote Amount (XOF)
+                  {t.quoteAmount}
                 </label>
                 <input
                   type="number"
@@ -683,7 +825,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
               {quoteSuccess ? (
                 <div style={{ background: "#dcfce7", color: "#15803d", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
-                  ✔ Quotation sent to client successfully!
+                  ✔ {lang === "fr" ? "Devis envoyé au client avec succès !" : "Quotation sent to client successfully!"}
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
@@ -694,7 +836,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     onClick={() => setQuoteModalOpen(false)}
                     disabled={submittingQuote}
                   >
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button
                     type="submit"
@@ -702,7 +844,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     style={{ flex: 1 }}
                     disabled={submittingQuote || !quoteAmount}
                   >
-                    {submittingQuote ? "Sending Quote..." : "Send Quote"}
+                    {submittingQuote ? t.sendingQuote : t.sendQuote}
                   </button>
                 </div>
               )}
@@ -715,35 +857,35 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
       {isModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3>Submit Progress Deliverable</h3>
+            <h3>{t.submitProgressDeliverable}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "-8px", marginBottom: "16px" }}>
-              Provide proof of work and completion notes for Client {clientName} to review.
+              {t.submitProgressSubtitle}
             </p>
 
             <form onSubmit={handleMilestoneSubmit}>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                  Completion Progress (%)
+                  {t.completionProgress}
                 </label>
                 <select 
                   className={styles.input} 
                   value={completionPercentage} 
                   onChange={(e) => setCompletionPercentage(e.target.value)}
                 >
-                  <option value="25">25% - Initial Assessment & Prep</option>
-                  <option value="50">50% - Work In Progress</option>
-                  <option value="75">75% - Testing & Refinements</option>
-                  <option value="100">100% - Fully Finished & Ready for Release</option>
+                  <option value="25">{lang === "fr" ? "25% - Évaluation initiale & Préparation" : "25% - Initial Assessment & Prep"}</option>
+                  <option value="50">{lang === "fr" ? "50% - Travaux en cours" : "50% - Work In Progress"}</option>
+                  <option value="75">{lang === "fr" ? "75% - Tests & Finitions" : "75% - Testing & Refinements"}</option>
+                  <option value="100">{lang === "fr" ? "100% - Totalement terminé & Prêt pour validation" : "100% - Fully Finished & Ready for Release"}</option>
                 </select>
               </div>
 
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                  Work Summary & Details
+                  {t.workSummary}
                 </label>
                 <textarea
                   className={styles.textarea}
-                  placeholder="Describe the tasks completed, measurements taken, or materials installed..."
+                  placeholder={t.workSummaryPlaceholder}
                   value={submissionNotes}
                   onChange={(e) => setSubmissionNotes(e.target.value)}
                   required
@@ -752,7 +894,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                  Upload Proof Photos / Docs (Optional)
+                  {t.uploadProof}
                 </label>
                 <input
                   type="file"
@@ -764,7 +906,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
               {showSuccess && (
                 <div style={{ padding: "10px", background: "#dcfce7", color: "#166534", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", textAlign: "center" }}>
-                  ✔ Milestone update submitted to Client {clientName} for approval!
+                  ✔ {lang === "fr" ? "Avancement du jalon soumis pour approbation !" : "Milestone update submitted to Client for approval!"}
                 </div>
               )}
 
@@ -775,20 +917,21 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                   onClick={() => setIsModalOpen(false)}
                   disabled={submittingDeliverable}
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
                   className={styles.primaryButton}
                   disabled={submittingDeliverable}
                 >
-                  {submittingDeliverable ? "Submitting..." : "Submit for Client Review"}
+                  {submittingDeliverable ? t.submitting : t.submitForClientReview}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }

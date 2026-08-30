@@ -12,6 +12,135 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { cleanDescription, extractDirectInvitation } from "@/app/lib/format";
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    workspaceEyebrow: "Project Workspace & Escrow",
+    client: "Client",
+    specialist: "Specialist",
+    escrowVault: "BoulotMan Escrow Vault",
+    fundEscrow: "Fund Escrow",
+    releaseEscrow: "Release Escrow",
+    completedAndPaid: "Completed & Paid",
+    backToProjects: "Back to Projects",
+    inspectionTitle: "Deliverable Inspection & Escrow Release",
+    confirmAndRelease: "Confirm & Release Escrow",
+    totalBudget: "Total Budget",
+    agreedBudget: "Agreed Task Budget",
+    awaitingQuote: "Awaiting Quote",
+    heldInEscrow: "Held in Escrow",
+    protectedInVault: "100% Protected in Vault",
+    noActiveDeposit: "No active escrow deposit",
+    releasedToSpecialist: "Released to Specialist",
+    payoutCompleted: "Payout Completed",
+    awaitingSignoff: "Awaiting Final Sign-off",
+    taskStatus: "Task Status",
+    milestonesSchedule: "Milestones & Escrow Schedule",
+    milestonesSubtitle: "Funds remain locked securely in escrow until you approve the work deliverables.",
+    milestoneDeliverable: "Milestone Deliverable",
+    allocation: "Allocation",
+    escrowAmount: "Escrow Amount",
+    status: "Status",
+    action: "Action",
+    phase1Title: "Phase 1: Project Delivery & Sign-off",
+    phase1Desc: "Full project execution, site inspection, and final handover",
+    projectFiles: "Project Files & Deliverables",
+    projectFilesSubtitle: "Upload blueprints, site photos, invoices, or specifications for this project.",
+    uploadFile: "Upload File",
+    noFiles: "No files uploaded for this project yet.",
+    workspaceDiscussion: "Workspace Discussion & Coordination",
+    workspaceDiscussionSubtitle: "Direct communication with your specialist. All agreements are tracked for audit.",
+    quickReplies: "Quick replies:",
+    requestPhotos: "📸 Request photos",
+    checkSchedule: "⏰ Check schedule",
+    approveWork: "👍 Approve work",
+    typeMessage: "Type a message or project update...",
+    send: "Send",
+    assignedProfessional: "Assigned Professional",
+    verifiedSpecialist: "Verified Specialist",
+    rating: "Rating",
+    completed: "Completed",
+    available: "Available",
+    awaitingAssignment: "Awaiting Assignment",
+    reviewProposals: "Review Task Proposals →",
+    activityAudit: "Activity & Audit Trail",
+    taskCreated: "Task Created",
+    specialistAssigned: "Specialist Assigned",
+    milestoneReleased: "Milestone Released",
+    needHelp: "Need Help or Mediation?",
+    needHelpSubtitle: "Our 24/7 client protection team is on standby to assist with milestone disputes or questions.",
+    openTicket: "Open Support Ticket →",
+    confirmReleaseTitle: "Confirm Milestone Release",
+    confirmReleaseDesc: "This action confirms that you have inspected and approved all deliverables for this milestone.",
+    cancel: "Cancel",
+    yesRelease: "Yes, Release Funds",
+    releasing: "Releasing...",
+    searchPlaceholder: "Search project workspace...",
+  },
+  fr: {
+    workspaceEyebrow: "Espace Projet & Séquestre",
+    client: "Client",
+    specialist: "Artisan",
+    escrowVault: "Coffre Séquestre BoulotMan",
+    fundEscrow: "Alimenter le Séquestre",
+    releaseEscrow: "Libérer le Séquestre",
+    completedAndPaid: "Terminé & Payé",
+    backToProjects: "Retour aux Projets",
+    inspectionTitle: "Inspection des Livrables & Déblocage des Fonds",
+    confirmAndRelease: "Confirmer & Libérer le Séquestre",
+    totalBudget: "Budget Total",
+    agreedBudget: "Budget Convenu",
+    awaitingQuote: "En attente de devis",
+    heldInEscrow: "Bloqué sous Séquestre",
+    protectedInVault: "100% Protégé dans le Coffre",
+    noActiveDeposit: "Aucun dépôt séquestre actif",
+    releasedToSpecialist: "Versé à l'Artisan",
+    payoutCompleted: "Paiement Effectué",
+    awaitingSignoff: "En attente de validation finale",
+    taskStatus: "Statut de la Mission",
+    milestonesSchedule: "Jalons & Calendrier du Séquestre",
+    milestonesSubtitle: "Les fonds restent bloqués en toute sécurité jusqu'à ce que vous validiez les livrables.",
+    milestoneDeliverable: "Livrable du Jalon",
+    allocation: "Répartition",
+    escrowAmount: "Montant Séquestre",
+    status: "Statut",
+    action: "Action",
+    phase1Title: "Phase 1 : Réalisation & Validation du Projet",
+    phase1Desc: "Exécution complète de la mission, visite de chantier et livraison finale",
+    projectFiles: "Fichiers & Livrables du Projet",
+    projectFilesSubtitle: "Téléchargez plans, photos du chantier, factures ou devis pour ce projet.",
+    uploadFile: "Télécharger un Fichier",
+    noFiles: "Aucun fichier téléchargé pour ce projet.",
+    workspaceDiscussion: "Discussion & Coordination du Projet",
+    workspaceDiscussionSubtitle: "Communication directe avec l'artisan. Tous les accords sont archivés.",
+    quickReplies: "Réponses rapides :",
+    requestPhotos: "📸 Demander des photos",
+    checkSchedule: "⏰ Vérifier l'horaire",
+    approveWork: "👍 Valider les travaux",
+    typeMessage: "Écrivez un message ou une mise à jour...",
+    send: "Envoyer",
+    assignedProfessional: "Artisan Attribué",
+    verifiedSpecialist: "Artisan Vérifié",
+    rating: "Note",
+    completed: "Terminé",
+    available: "Disponible",
+    awaitingAssignment: "En attente d'attribution",
+    reviewProposals: "Consulter les Offres →",
+    activityAudit: "Activité & Journal d'Audit",
+    taskCreated: "Mission Créée",
+    specialistAssigned: "Artisan Attribué",
+    milestoneReleased: "Jalon Débloqué",
+    needHelp: "Besoin d'Aide ou Médiation ?",
+    needHelpSubtitle: "Notre équipe de protection client est disponible pour vous assister.",
+    openTicket: "Ouvrir un Ticket d'Assistance →",
+    confirmReleaseTitle: "Confirmer le Déblocage du Jalon",
+    confirmReleaseDesc: "Cette action confirme que vous avez inspecté et approuvé tous les livrables.",
+    cancel: "Annuler",
+    yesRelease: "Oui, Libérer les Fonds",
+    releasing: "Libération en cours...",
+    searchPlaceholder: "Rechercher dans l'espace projet...",
+  }
+};
+
 export default function ProjectWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const taskId = parseInt(id) || 1;
@@ -22,6 +151,19 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
 
   // Escrow Funding Modal for Direct Hire
   const [fundModalOpen, setFundModalOpen] = useState(false);
@@ -333,7 +475,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               <div className={styles.heroCopy}>
                 <div className={styles.heroEyebrow}>
                   <iconify-icon icon="lucide:briefcase" />
-                  <span>Project Workspace & Escrow</span>
+                  <span>{t.workspaceEyebrow}</span>
                 </div>
                 <h1>{projectTitle}</h1>
                 <p className={styles.heroDescription}>
@@ -342,7 +484,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
                 {directInvite && (
                   <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255, 69, 0, 0.15)", color: "#ff8c42", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 700, border: "1px solid rgba(255, 69, 0, 0.35)", marginBottom: "14px" }}>
-                    <span>🎯 Direct Specialist Invitation:</span>
+                    <span>🎯 {lang === "fr" ? "Invitation Directe d'Artisan :" : "Direct Specialist Invitation:"}</span>
                     <strong style={{ color: "#ffffff" }}>{directInvite.specialistName || executorName}</strong>
                   </div>
                 )}
@@ -351,11 +493,11 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 <div className={styles.heroMetaRow}>
                   <div className={styles.heroMetaPill}>
                     <iconify-icon icon="lucide:user" style={{ color: "#ff8c42" }} />
-                    <span><strong>Client:</strong> {clientName}</span>
+                    <span><strong>{t.client}:</strong> {clientName}</span>
                   </div>
                   <div className={styles.heroMetaPill}>
                     <iconify-icon icon="lucide:wrench" style={{ color: "#38bdf8" }} />
-                    <span><strong>Specialist:</strong> {executorName}</span>
+                    <span><strong>{t.specialist}:</strong> {executorName}</span>
                   </div>
                   <div className={styles.heroMetaPill}>
                     <iconify-icon icon="lucide:map-pin" style={{ color: "#4ade80" }} />
@@ -363,7 +505,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   </div>
                   <div className={styles.heroMetaPill}>
                     <iconify-icon icon="lucide:shield-check" style={{ color: "#c084fc" }} />
-                    <span>BoulotMan Escrow Vault</span>
+                    <span>{t.escrowVault}</span>
                   </div>
                 </div>
               </div>
@@ -376,7 +518,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     onClick={() => setFundModalOpen(true)}
                   >
                     <iconify-icon icon="lucide:lock" style={{ fontSize: 18 }} />
-                    <span>Fund Escrow</span>
+                    <span>{t.fundEscrow}</span>
                   </button>
                 ) : !isCompleted ? (
                   <button
@@ -386,17 +528,17 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     disabled={!hasEscrow && totalCost === 0}
                   >
                     <iconify-icon icon="lucide:shield-check" style={{ fontSize: 18 }} />
-                    <span>Release Escrow</span>
+                    <span>{t.releaseEscrow}</span>
                   </button>
                 ) : (
                   <div className={styles.heroCompletedBadge}>
                     <iconify-icon icon="lucide:check-circle-2" />
-                    <span>Completed & Paid</span>
+                    <span>{t.completedAndPaid}</span>
                   </div>
                 )}
                 <Link href="/dashboard/client/projects" className={styles.heroSecondaryBtn}>
                   <iconify-icon icon="lucide:arrow-left" />
-                  <span>Back to Projects</span>
+                  <span>{t.backToProjects}</span>
                 </Link>
               </div>
             </section>
@@ -416,9 +558,11 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <iconify-icon icon="lucide:shield-alert" />
                 </div>
                 <div className={styles.inspectionTextWrap}>
-                  <strong>Deliverable Inspection & Escrow Release</strong>
+                  <strong>{t.inspectionTitle}</strong>
                   <p>
-                    Your specialist is working on this task. Review deliverables and discussion below. Once you are satisfied with the completed work, click <strong>Confirm & Release Escrow</strong> to pay {totalCost.toLocaleString()} XOF to {executorName}.
+                    {lang === "fr" 
+                      ? `Votre artisan travaille sur cette tâche. Examinez les livrables et la discussion ci-dessous. Une fois satisfait du travail accompli, cliquez sur Confirmer & Libérer le Séquestre pour verser ${totalCost.toLocaleString()} XOF à ${executorName}.`
+                      : `Your specialist is working on this task. Review deliverables and discussion below. Once you are satisfied with the completed work, click Confirm & Release Escrow to pay ${totalCost.toLocaleString()} XOF to ${executorName}.`}
                   </p>
                 </div>
                 <button
@@ -427,7 +571,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   onClick={() => setConfirmModalOpen(true)}
                 >
                   <iconify-icon icon="lucide:shield-check" />
-                  <span>Confirm & Release Escrow</span>
+                  <span>{t.confirmAndRelease}</span>
                 </button>
               </div>
             )}
@@ -439,12 +583,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <iconify-icon icon="lucide:wallet" />
                 </div>
                 <div className={styles.statInfo}>
-                  <span className={styles.statLabel}>Total Budget</span>
+                  <span className={styles.statLabel}>{t.totalBudget}</span>
                   <strong className={styles.statValue}>
                     {totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : "Unspecified"}
                   </strong>
                   <span className={styles.statSub}>
-                    {totalCost > 0 ? "Agreed Task Budget" : "Awaiting Quote"}
+                    {totalCost > 0 ? t.agreedBudget : t.awaitingQuote}
                   </span>
                 </div>
               </div>
@@ -454,12 +598,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <iconify-icon icon="lucide:shield" />
                 </div>
                 <div className={styles.statInfo}>
-                  <span className={styles.statLabel}>Held in Escrow</span>
+                  <span className={styles.statLabel}>{t.heldInEscrow}</span>
                   <strong className={styles.statValue} style={{ color: escrowHeld > 0 ? "#0284c7" : "#64748b" }}>
                     {escrowHeld > 0 ? `${escrowHeld.toLocaleString()} XOF` : "0 XOF"}
                   </strong>
                   <span className={styles.statSub}>
-                    {escrowHeld > 0 ? "100% Protected in Vault" : "No active escrow deposit"}
+                    {escrowHeld > 0 ? t.protectedInVault : t.noActiveDeposit}
                   </span>
                 </div>
               </div>
@@ -469,12 +613,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <iconify-icon icon="lucide:check-circle-2" />
                 </div>
                 <div className={styles.statInfo}>
-                  <span className={styles.statLabel}>Released to Specialist</span>
+                  <span className={styles.statLabel}>{t.releasedToSpecialist}</span>
                   <strong className={styles.statValue} style={{ color: releasedAmount > 0 ? "#16a34a" : "#64748b" }}>
                     {releasedAmount > 0 ? `${releasedAmount.toLocaleString()} XOF` : "0 XOF"}
                   </strong>
                   <span className={styles.statSub}>
-                    {isCompleted ? "Payout Completed" : "Awaiting Final Sign-off"}
+                    {isCompleted ? t.payoutCompleted : t.awaitingSignoff}
                   </span>
                 </div>
               </div>
@@ -484,9 +628,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <iconify-icon icon="lucide:activity" />
                 </div>
                 <div className={styles.statInfo}>
-                  <span className={styles.statLabel}>Task Status</span>
+                  <span className={styles.statLabel}>{t.taskStatus}</span>
                   <strong className={styles.statValue} style={{ textTransform: "capitalize" }}>
-                    {isCompleted ? "Completed" : (task?.status || "Open")}
+                    {isCompleted ? t.completed : (task?.status || "Open")}
                   </strong>
                   <div className={styles.progressBarWrap}>
                     <div
@@ -497,6 +641,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 </div>
               </div>
             </section>
+
 
             {/* TWO COLUMN WORKSPACE BODY */}
             <div className={styles.workspaceGrid}>
@@ -509,8 +654,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                         <iconify-icon icon="lucide:milestone" />
                       </div>
                       <div>
-                        <h3>Milestones & Escrow Schedule</h3>
-                        <p>Funds remain locked securely in escrow until you approve the work deliverables.</p>
+                        <h3>{t.milestonesSchedule}</h3>
+                        <p>{t.milestonesSubtitle}</p>
                       </div>
                     </div>
                   </div>
@@ -520,19 +665,19 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                       <table className={styles.table}>
                         <thead>
                           <tr>
-                            <th>Milestone Deliverable</th>
-                            <th>Allocation</th>
-                            <th>Escrow Amount</th>
-                            <th>Status</th>
-                            <th style={{ textAlign: "right" }}>Action</th>
+                            <th>{t.milestoneDeliverable}</th>
+                            <th>{t.allocation}</th>
+                            <th>{t.escrowAmount}</th>
+                            <th>{t.status}</th>
+                            <th style={{ textAlign: "right" }}>{t.action}</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
                             <td>
                               <div className={styles.milestoneInfo}>
-                                <strong>Phase 1: Project Delivery & Sign-off</strong>
-                                <span>Full project execution, site inspection, and final handover</span>
+                                <strong>{t.phase1Title}</strong>
+                                <span>{t.phase1Desc}</span>
                               </div>
                             </td>
                             <td>
@@ -544,7 +689,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                             <td>
                               <span className={`${styles.statusBadge} ${isCompleted ? styles.statusSuccess : (escrowHeld > 0 ? styles.statusPending : styles.statusNeutral)}`}>
                                 <iconify-icon icon={isCompleted ? "lucide:check-circle" : (escrowHeld > 0 ? "lucide:lock" : "lucide:clock")} />
-                                {isCompleted ? "Released" : (escrowHeld > 0 ? "Held in Escrow" : "Pending Funding")}
+                                {isCompleted ? (lang === "fr" ? "Libéré" : "Released") : (escrowHeld > 0 ? t.heldInEscrow : (lang === "fr" ? "En attente de dépôt" : "Pending Funding"))}
                               </span>
                             </td>
                             <td style={{ textAlign: "right" }}>
@@ -555,11 +700,11 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                                   onClick={() => setConfirmModalOpen(true)}
                                 >
                                   <iconify-icon icon="lucide:unlock" />
-                                  Confirm & Release
+                                  {t.confirmAndRelease}
                                 </button>
                               ) : (
                                 <span className={styles.releasedStatusText}>
-                                  <iconify-icon icon="lucide:check" /> Completed
+                                  <iconify-icon icon="lucide:check" /> {t.completed}
                                 </span>
                               )}
                             </td>
@@ -570,8 +715,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   ) : (
                     <div className={styles.emptyCardBox}>
                       <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 32, color: "#ff4500" }} />
-                      <p>No escrow budget deposited yet for this task.</p>
-                      <span>Lock funds securely in the BoulotMan Escrow Vault to activate this contract with {executorName}.</span>
+                      <p>{lang === "fr" ? "Aucun budget séquestre déposé pour cette tâche." : "No escrow budget deposited yet for this task."}</p>
+                      <span>{lang === "fr" ? `Bloquez les fonds en toute sécurité dans le Coffre Séquestre BoulotMan pour activer ce contrat avec ${executorName}.` : `Lock funds securely in the BoulotMan Escrow Vault to activate this contract with ${executorName}.`}</span>
                       <button
                         type="button"
                         className={styles.heroOrangeBtn}
@@ -579,7 +724,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                         onClick={() => setFundModalOpen(true)}
                       >
                         <iconify-icon icon="lucide:lock" />
-                        <span>Set Budget & Deposit Escrow</span>
+                        <span>{t.fundEscrow}</span>
                       </button>
                     </div>
                   )}
@@ -587,7 +732,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   <div className={styles.escrowNoticeBox}>
                     <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a", fontSize: 20 }} />
                     <span>
-                      <strong>BoulotMan Escrow Guarantee:</strong> Payouts are protected. Funds are only transferred once you inspect and approve the completed service.
+                      <strong>{lang === "fr" ? "Garantie Séquestre BoulotMan :" : "BoulotMan Escrow Guarantee:"}</strong> {lang === "fr" ? "Les paiements sont protégés. Les fonds ne sont transférés qu'après inspection et validation de la prestation." : "Payouts are protected. Funds are only transferred once you inspect and approve the completed service."}
                     </span>
                   </div>
                 </section>
@@ -600,14 +745,14 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                         <iconify-icon icon="lucide:folder" />
                       </div>
                       <div>
-                        <h3>Project Files & Deliverables</h3>
-                        <p>Upload blueprints, site photos, invoices, or specifications for this project.</p>
+                        <h3>{t.projectFiles}</h3>
+                        <p>{t.projectFilesSubtitle}</p>
                       </div>
                     </div>
 
                     <label className={styles.uploadFileBtn}>
                       <iconify-icon icon="lucide:upload-cloud" />
-                      <span>Upload File</span>
+                      <span>{t.uploadFile}</span>
                       <input type="file" multiple style={{ display: "none" }} onChange={handleFileUpload} />
                     </label>
                   </div>
@@ -631,9 +776,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                             )}
                           </div>
                           <div className={styles.fileDetails}>
-
                             <strong title={file.name}>{file.name}</strong>
-                            <span>{file.size} • Attached</span>
+                            <span>{file.size} • {lang === "fr" ? "Joint" : "Attached"}</span>
                           </div>
                           <div className={styles.fileItemActions}>
                             <button
@@ -652,7 +796,6 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                             >
                               <iconify-icon icon="lucide:trash-2" />
                             </button>
-
                           </div>
                         </div>
                       ))}
@@ -660,8 +803,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   ) : (
                     <div className={styles.emptyCardBox}>
                       <iconify-icon icon="lucide:folder-plus" style={{ fontSize: 32, color: "#94a3b8" }} />
-                      <p>No files uploaded for this project yet.</p>
-                      <span>Click &quot;Upload File&quot; above to attach task specifications, blueprints, or site photos.</span>
+                      <p>{t.noFiles}</p>
+                      <span>{lang === "fr" ? "Cliquez sur \"Télécharger un Fichier\" ci-dessus pour joindre plans ou photos de chantier." : "Click \"Upload File\" above to attach task specifications, blueprints, or site photos."}</span>
                     </div>
                   )}
                 </section>
@@ -674,8 +817,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                         <iconify-icon icon="lucide:messages-square" />
                       </div>
                       <div>
-                        <h3>Workspace Discussion & Coordination</h3>
-                        <p>Direct communication with {executorName}. All agreements are tracked for audit.</p>
+                        <h3>{t.workspaceDiscussion}</h3>
+                        <p>{t.workspaceDiscussionSubtitle}</p>
                       </div>
                     </div>
                   </div>
@@ -704,21 +847,21 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     ) : (
                       <div className={styles.emptyChatBox}>
                         <iconify-icon icon="lucide:message-square" style={{ fontSize: 28, color: "#cbd5e1" }} />
-                        <p>No workspace messages yet.</p>
-                        <span>Send a message below to coordinate directly with the assigned specialist.</span>
+                        <p>{lang === "fr" ? "Aucun message dans l'espace projet pour le moment." : "No workspace messages yet."}</p>
+                        <span>{lang === "fr" ? "Envoyez un message ci-dessous pour coordonner directement avec l'artisan." : "Send a message below to coordinate directly with the assigned specialist."}</span>
                       </div>
                     )}
 
                     <div className={styles.quickReplyRow}>
-                      <span>Quick replies:</span>
-                      <button type="button" onClick={() => handleQuickReply("Please share the latest progress photos.")}>
-                        📸 Request photos
+                      <span>{t.quickReplies}</span>
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "Pouvez-vous partager les dernières photos de l'avancement ?" : "Please share the latest progress photos.")}>
+                        {t.requestPhotos}
                       </button>
-                      <button type="button" onClick={() => handleQuickReply("When is the expected completion time today?")}>
-                        ⏰ Check schedule
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "À quelle heure prévoyez-vous de terminer aujourd'hui ?" : "When is the expected completion time today?")}>
+                        {t.checkSchedule}
                       </button>
-                      <button type="button" onClick={() => handleQuickReply("Work looks great, ready to release milestone!")}>
-                        👍 Approve work
+                      <button type="button" onClick={() => handleQuickReply(lang === "fr" ? "Le travail est parfait, prêt à débloquer le jalon !" : "Work looks great, ready to release milestone!")}>
+                        {t.approveWork}
                       </button>
                     </div>
 
@@ -726,13 +869,13 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                       <input
                         type="text"
                         className={styles.chatInput}
-                        placeholder="Type a message or project update..."
+                        placeholder={t.typeMessage}
                         value={chatDraft}
                         onChange={(e) => setChatDraft(e.target.value)}
                       />
                       <button type="submit" className={styles.chatSendBtn} disabled={!chatDraft.trim()}>
                         <iconify-icon icon="lucide:send" />
-                        Send
+                        {t.send}
                       </button>
                     </form>
                   </div>
@@ -743,7 +886,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               <div className={styles.sideColumn}>
                 {/* ASSIGNED SPECIALIST CARD */}
                 <div className={styles.sideCard}>
-                  <h4 className={styles.sideCardTitle}>Assigned Professional</h4>
+                  <h4 className={styles.sideCardTitle}>{t.assignedProfessional}</h4>
                   {hasSpecialist ? (
                     <>
                       <div className={styles.specialistRow}>
@@ -755,12 +898,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                           {task?.assigned_to_verified ? (
                             <span className={styles.verifiedTag}>
                               <iconify-icon icon="lucide:badge-check" style={{ color: "#16a34a" }} />
-                              Verified Specialist
+                              {t.verifiedSpecialist}
                             </span>
                           ) : (
                             <span className={styles.pendingTag}>
                               <iconify-icon icon="lucide:clock" />
-                              Active Specialist
+                              {lang === "fr" ? "Artisan Actif" : "Active Specialist"}
                             </span>
                           )}
                         </div>
@@ -768,30 +911,30 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
                       <div className={styles.specialistMetrics}>
                         <div>
-                          <span>Rating</span>
+                          <span>{t.rating}</span>
                           <strong>
                             {task?.assigned_to_rating ? `★ ${Number(task.assigned_to_rating).toFixed(1)}` : "★ 5.0"}
                           </strong>
                         </div>
                         <div>
-                          <span>Completed</span>
+                          <span>{t.completed}</span>
                           <strong>
-                            {task?.assigned_to_jobs != null ? `${task.assigned_to_jobs} Jobs` : "Verified"}
+                            {task?.assigned_to_jobs != null ? `${task.assigned_to_jobs} ${lang === "fr" ? "Missions" : "Jobs"}` : (lang === "fr" ? "Vérifié" : "Verified")}
                           </strong>
                         </div>
                         <div>
-                          <span>Status</span>
-                          <strong style={{ color: "#16a34a" }}>Available</strong>
+                          <span>{t.status}</span>
+                          <strong style={{ color: "#16a34a" }}>{t.available}</strong>
                         </div>
                       </div>
                     </>
                   ) : (
                     <div className={styles.unassignedBox}>
                       <iconify-icon icon="lucide:user-x" style={{ fontSize: 32, color: "#94a3b8" }} />
-                      <strong>Awaiting Assignment</strong>
-                      <p>This task is currently open for bids. Review proposals to assign a professional.</p>
+                      <strong>{t.awaitingAssignment}</strong>
+                      <p>{lang === "fr" ? "Cette tâche est actuellement ouverte aux offres." : "This task is currently open for bids. Review proposals to assign a professional."}</p>
                       <Link href="/dashboard/client/tasks" className={styles.reviewProposalsBtn}>
-                        Review Task Proposals →
+                        {t.reviewProposals}
                       </Link>
                     </div>
                   )}
@@ -799,15 +942,15 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
                 {/* ACTIVITY & AUDIT TRAIL */}
                 <div className={styles.sideCard}>
-                  <h4 className={styles.sideCardTitle}>Activity & Audit Trail</h4>
+                  <h4 className={styles.sideCardTitle}>{t.activityAudit}</h4>
                   <div className={styles.timeline}>
                     <div className={styles.timelineItem}>
                       <div className={styles.timelineDot} style={{ background: "#16a34a" }}>
                         <iconify-icon icon="lucide:check" />
                       </div>
                       <div className={styles.timelineContent}>
-                        <strong>Task Created</strong>
-                        <span>Workspace initialized</span>
+                        <strong>{t.taskCreated}</strong>
+                        <span>{lang === "fr" ? "Espace de travail initialisé" : "Workspace initialized"}</span>
                         <time>{taskCreatedDate}</time>
                       </div>
                     </div>
@@ -818,9 +961,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                           <iconify-icon icon="lucide:user-check" />
                         </div>
                         <div className={styles.timelineContent}>
-                          <strong>Specialist Assigned</strong>
-                          <span>{executorName} assigned</span>
-                          <time>Active</time>
+                          <strong>{t.specialistAssigned}</strong>
+                          <span>{executorName}</span>
+                          <time>{lang === "fr" ? "Actif" : "Active"}</time>
                         </div>
                       </div>
                     )}
@@ -831,9 +974,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                           <iconify-icon icon="lucide:shield-check" />
                         </div>
                         <div className={styles.timelineContent}>
-                          <strong>Milestone Released</strong>
-                          <span>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF sent` : "Funds released"}</span>
-                          <time>Just now</time>
+                          <strong>{t.milestoneReleased}</strong>
+                          <span>{totalCost > 0 ? `${totalCost.toLocaleString()} XOF` : ""}</span>
+                          <time>{lang === "fr" ? "À l'instant" : "Just now"}</time>
                         </div>
                       </div>
                     )}
@@ -844,15 +987,16 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 <div className={styles.supportBox}>
                   <iconify-icon icon="lucide:shield-alert" style={{ fontSize: 26, color: "#ff4500" }} />
                   <div>
-                    <strong>Need Help or Mediation?</strong>
-                    <p>Our 24/7 client protection team is on standby to assist with milestone disputes or questions.</p>
+                    <strong>{t.needHelp}</strong>
+                    <p>{t.needHelpSubtitle}</p>
                     <Link href="/dashboard/client/support" className={styles.supportLink}>
-                      Open Support Ticket →
+                      {t.openTicket}
                     </Link>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -867,12 +1011,14 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
             <div className={styles.modalIconWrap}>
               <iconify-icon icon="lucide:shield-check" />
             </div>
-            <h3>Confirm Milestone Release</h3>
+            <h3>{t.confirmReleaseTitle}</h3>
             <p>
-              Are you sure you want to release <strong>{totalCost.toLocaleString()} XOF</strong> from escrow to <strong>{executorName}</strong>?
+              {lang === "fr" 
+                ? `Êtes-vous sûr de vouloir débloquer ${totalCost.toLocaleString()} XOF du séquestre vers ${executorName} ?`
+                : `Are you sure you want to release ${totalCost.toLocaleString()} XOF from escrow to ${executorName}?`}
             </p>
             <p style={{ fontSize: 13, color: "#64748b" }}>
-              This action confirms that you have inspected and approved all deliverables for this milestone.
+              {t.confirmReleaseDesc}
             </p>
 
             <div className={styles.modalButtons}>
@@ -882,7 +1028,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 onClick={() => setConfirmModalOpen(false)}
                 disabled={actionLoading}
               >
-                Cancel
+                {t.cancel}
               </button>
               <button
                 type="button"
@@ -890,7 +1036,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 onClick={handleReleaseEscrow}
                 disabled={actionLoading}
               >
-                {actionLoading ? "Releasing..." : "Yes, Release Funds"}
+                {actionLoading ? t.releasing : t.yesRelease}
               </button>
             </div>
           </div>
@@ -958,7 +1104,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                       gap: "6px"
                     }}
                   >
-                    <iconify-icon icon="lucide:download" /> Open / Download
+                    <iconify-icon icon="lucide:download" /> {lang === "fr" ? "Ouvrir / Télécharger" : "Open / Download"}
                   </a>
                 )}
                 <button
@@ -1045,7 +1191,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               style={{ width: "100%", background: "#FF4500", color: "#fff", padding: "14px", borderRadius: "12px", border: "none", fontWeight: 800, fontSize: "14.5px", cursor: "pointer" }}
               onClick={() => setPreviewMedia(null)}
             >
-              Close Preview
+              {lang === "fr" ? "Fermer l'Aperçu" : "Close Preview"}
             </button>
           </div>
         </div>
@@ -1063,15 +1209,15 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 <iconify-icon icon="lucide:shield-check" style={{ fontSize: 28 }} />
               </div>
               <div className={styles.modalTitleWrap}>
-                <h3>Set Budget & Fund Escrow</h3>
-                <p>Deposit funds into the BoulotMan Escrow Vault to activate this contract.</p>
+                <h3>{lang === "fr" ? "Définir le Budget & Alimenter le Séquestre" : "Set Budget & Fund Escrow"}</h3>
+                <p>{lang === "fr" ? "Déposez les fonds dans le Coffre Séquestre BoulotMan pour activer ce contrat." : "Deposit funds into the BoulotMan Escrow Vault to activate this contract."}</p>
               </div>
             </div>
 
             <form onSubmit={handleFundEscrow} className={styles.modalBody} style={{ padding: "0 24px 20px" }}>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#001f3f", marginBottom: "6px" }}>
-                  Contract Budget Amount (XOF)
+                  {lang === "fr" ? "Montant du Budget Contractuel (XOF)" : "Contract Budget Amount (XOF)"}
                 </label>
                 <div style={{ position: "relative" }}>
                   <input
@@ -1104,9 +1250,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "12px 14px", marginBottom: "20px", fontSize: "12.5px", color: "#475569" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#16a34a", fontWeight: 700, marginBottom: "4px" }}>
                   <iconify-icon icon="lucide:shield-check" style={{ fontSize: 16 }} />
-                  <span>Escrow Protection Active</span>
+                  <span>{lang === "fr" ? "Protection Séquestre Active" : "Escrow Protection Active"}</span>
                 </div>
-                <span>Your funds are locked in the secure vault and will only be released to {executorName} after you inspect and approve the completed work.</span>
+                <span>{lang === "fr" ? `Vos fonds sont bloqués dans le coffre sécurisé et ne seront versés à ${executorName} qu'après votre validation des travaux.` : `Your funds are locked in the secure vault and will only be released to ${executorName} after you inspect and approve the completed work.`}</span>
               </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
@@ -1117,7 +1263,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   disabled={fundingLoading}
                   style={{ flex: 1 }}
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
@@ -1128,12 +1274,12 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                   {fundingLoading ? (
                     <>
                       <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} />
-                      <span>Locking Vault...</span>
+                      <span>{lang === "fr" ? "Verrouillage..." : "Locking Vault..."}</span>
                     </>
                   ) : (
                     <>
                       <iconify-icon icon="lucide:lock" />
-                      <span>Deposit & Lock</span>
+                      <span>{lang === "fr" ? "Déposer & Bloquer" : "Deposit & Lock"}</span>
                     </>
                   )}
                 </button>
@@ -1142,6 +1288,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
           </div>
         </div>
       )}
+
 
     </main>
   );
