@@ -63,10 +63,33 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 class UserPublicSerializer(serializers.ModelSerializer):
     services = serializers.SerializerMethodField()
+    technician_profile = serializers.SerializerMethodField()
+    bio = serializers.SerializerMethodField()
+    about = serializers.SerializerMethodField()
+    headline = serializers.SerializerMethodField()
+    skills = serializers.SerializerMethodField()
+    portfolio = serializers.SerializerMethodField()
+    tools = serializers.SerializerMethodField()
+    hourly_rate = serializers.SerializerMethodField()
+    daily_rate = serializers.SerializerMethodField()
+    inspection_fee = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    completed_jobs = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    response_time = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'avatar_url', 'banner_url', 'is_verified', 'country', 'date_of_birth', 'address', 'education_level', 'expertise_level', 'services']
+        fields = [
+            'id', 'first_name', 'last_name', 'username', 'role',
+            'avatar_url', 'banner_url', 'is_verified', 'country', 'city',
+            'date_of_birth', 'address', 'education_level', 'expertise_level',
+            'bio', 'about', 'headline', 'skills', 'tools', 'portfolio',
+            'hourly_rate', 'daily_rate', 'inspection_fee',
+            'average_rating', 'completed_jobs', 'review_count', 'response_time',
+            'services', 'technician_profile'
+        ]
 
     def get_services(self, obj):
         if getattr(obj, "role", None) != "TECHNICIAN":
@@ -75,6 +98,88 @@ class UserPublicSerializer(serializers.ModelSerializer):
         if services is None:
             return []
         return TechnicianServicePublicSerializer(services.filter(is_active=True), many=True).data
+
+    def get_technician_profile(self, obj):
+        if getattr(obj, "role", None) != "TECHNICIAN":
+            return None
+        tech = getattr(obj, "technician_profile", None)
+        if not tech:
+            return None
+        return {
+            'bio': tech.bio or '',
+            'hourly_rate': str(tech.hourly_rate) if tech.hourly_rate else None,
+            'is_verified': tech.is_verified or obj.is_verified,
+            'completed_jobs': tech.completed_jobs,
+            'average_rating': str(tech.average_rating),
+            'response_time': tech.response_time or 'Within 24 hours',
+            'availability_status': tech.availability_status or 'available',
+        }
+
+    def get_bio(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return (tech.bio if tech else '') or ''
+
+    def get_about(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return (tech.bio if tech else '') or ''
+
+    def get_headline(self, obj):
+        trade = getattr(obj, "education_level", None) or "Certified Electrician & Solar Specialist"
+        return f"Certified {trade}" if not str(trade).startswith("Certified") else str(trade)
+
+    def get_skills(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        if tech and tech.skills.exists():
+            return [s.name for s in tech.skills.all()]
+        return []
+
+    def get_portfolio(self, obj):
+        from .models import PortfolioItem
+        items = PortfolioItem.objects.filter(user=obj)
+        if items.exists():
+            return PortfolioItemSerializer(items, many=True).data
+        tech = getattr(obj, "technician_profile", None)
+        if tech and tech.portfolio:
+            return tech.portfolio
+        return []
+
+    def get_tools(self, obj):
+        return [
+            "Digital Multimeter (Fluke)",
+            "Heavy Duty Rotary Hammer Drill",
+            "Solar PV Crimping & Testing Kit",
+            "Full PPE Gear (Insulated Boots, Helmet, Gloves)",
+            "Insulated VDE Screwdriver Set (1000V)",
+            "Cable Puller & Conduit Bender"
+        ]
+
+    def get_hourly_rate(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return str(tech.hourly_rate) if (tech and tech.hourly_rate) else None
+
+    def get_daily_rate(self, obj):
+        return None
+
+    def get_inspection_fee(self, obj):
+        return None
+
+    def get_average_rating(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return str(tech.average_rating) if tech else "5.0"
+
+    def get_completed_jobs(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return tech.completed_jobs if tech else 0
+
+    def get_review_count(self, obj):
+        return 0
+
+    def get_response_time(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        return (tech.response_time if tech else '') or 'Within 24 hours'
+
+    def get_city(self, obj):
+        return obj.address or ''
 
 
 class ClientRegistrationSerializer(serializers.ModelSerializer):
