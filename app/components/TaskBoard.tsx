@@ -10,9 +10,134 @@ import { SkeletonBlock } from "./skeleton/Skeleton";
 
 import { useLocation } from "@/app/context/LocationContext";
 
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    heroBadge: "LIVE TASK MARKETPLACE",
+    heroHeading: "Find High-Paying Tasks & Verified Projects",
+    heroSubheading: "Connect directly with verified clients across Africa. Submit competitive proposals, work with 100% escrow protection, and get paid instantly upon milestone completion.",
+    stat1: "100% Escrow Protected",
+    stat2: "Instant Client Hiring",
+    stat3: "Zero Commission On Escrow",
+    searchPlaceholder: "Search by title, skill, or keyword...",
+    allLocations: "📍 All Locations",
+    remoteWork: "🌐 Remote Work",
+    allCategories: "🗂️ All Categories",
+    anyTimeline: "⏱️ Any Timeline",
+    urgentPriority: "⚡ Urgent Priority",
+    flexibleTimeline: "🌱 Flexible Timeline",
+    scheduledProject: "📅 Scheduled Project",
+    btnFindTasks: "Find Tasks",
+    pillAll: "All Tasks",
+    pillUrgent: "Urgent Priority",
+    pillRemote: "Remote Work",
+    pillHighBudget: "High Budget",
+    btnReset: "Reset Filters",
+    showingText: "Showing",
+    activeTaskText: "active task",
+    activeTasksText: "active tasks",
+    sortBy: "Sort by:",
+    sortNewest: "Newest First",
+    sortBudgetHigh: "Budget: High to Low",
+    sortBudgetLow: "Budget: Low to High",
+    errorLoading: "Error loading tasks",
+    btnRetry: "Retry",
+    noMatching: "No matching tasks found",
+    noMatchingDesc: "Try clearing your search keyword, changing location, or resetting the filters to discover more opportunities.",
+    btnClearAll: "Clear All Filters",
+    postedBy: "Posted by Client",
+    urgentBadge: "Urgent",
+    flexibleBadge: "Flexible",
+    proposalsCount: "proposals",
+    hourlyRate: "Hourly Rate",
+    estimatedBudget: "Estimated Budget",
+    negotiable: "Negotiable",
+    btnDetails: "Details",
+    btnBidPlaced: "Bid Placed",
+    btnApplyNow: "Apply Now",
+    modalTaskDesc: "Task Description",
+    modalClientBudget: "Client Budget",
+    modalUrgency: "Urgency",
+    modalProposedPrice: "Your Proposed Price",
+    modalCoverMessage: "Cover Message / Proposal Pitch",
+    modalCoverPlaceholder: "Describe your qualifications, equipment, and when you can start...",
+    modalSubmitting: "Submitting Proposal...",
+    modalSubmit: "Submit Proposal",
+    modalSuccess: "✔ Proposal submitted successfully!",
+    modalLoginPrompt: "Please log in to submit a proposal on this task.",
+    modalGoLogin: "Go to Login"
+  },
+  fr: {
+    heroBadge: "PLACE DE MARCHÉ DES MISSIONS",
+    heroHeading: "Trouvez des Missions Rémunératrices & Projets Vérifiés",
+    heroSubheading: "Connectez-vous directement avec des clients vérifiés à travers l'Afrique. Soumettez vos offres, travaillez avec une garantie sous séquestre à 100% et recevez vos paiements instantanément.",
+    stat1: "100% Sécurisé sous Séquestre",
+    stat2: "Recrutement Direct",
+    stat3: "Zéro Commission sur Séquestre",
+    searchPlaceholder: "Rechercher par titre, compétence ou mot-clé...",
+    allLocations: "📍 Toutes les localisations",
+    remoteWork: "🌐 Travail à distance",
+    allCategories: "🗂️ Toutes les catégories",
+    anyTimeline: "⏱️ Tous les délais",
+    urgentPriority: "⚡ Priorité Urgente",
+    flexibleTimeline: "🌱 Délai Flexible",
+    scheduledProject: "📅 Projet Planifié",
+    btnFindTasks: "Rechercher",
+    pillAll: "Toutes les tâches",
+    pillUrgent: "Priorité Urgente",
+    pillRemote: "Télétravail",
+    pillHighBudget: "Gros Budget",
+    btnReset: "Réinitialiser",
+    showingText: "Affichage de",
+    activeTaskText: "mission active",
+    activeTasksText: "missions actives",
+    sortBy: "Trier par :",
+    sortNewest: "Plus récentes",
+    sortBudgetHigh: "Budget : Décroissant",
+    sortBudgetLow: "Budget : Croissant",
+    errorLoading: "Erreur lors du chargement des tâches",
+    btnRetry: "Réessayer",
+    noMatching: "Aucune tâche correspondante trouvée",
+    noMatchingDesc: "Essayez d'ajuster vos mots-clés, de modifier la localisation ou de réinitialiser les filtres.",
+    btnClearAll: "Effacer tous les filtres",
+    postedBy: "Publié par un client",
+    urgentBadge: "Urgent",
+    flexibleBadge: "Flexible",
+    proposalsCount: "offres",
+    hourlyRate: "Tarif horaire",
+    estimatedBudget: "Budget estimé",
+    negotiable: "Négociable",
+    btnDetails: "Détails",
+    btnBidPlaced: "Offre envoyée",
+    btnApplyNow: "Postuler",
+    modalTaskDesc: "Description de la tâche",
+    modalClientBudget: "Budget du client",
+    modalUrgency: "Délai / Urgence",
+    modalProposedPrice: "Votre tarif proposé",
+    modalCoverMessage: "Message d'accompagnement / Proposition",
+    modalCoverPlaceholder: "Présentez vos qualifications, votre matériel et vos disponibilités...",
+    modalSubmitting: "Envoi en cours...",
+    modalSubmit: "Envoyer la proposition",
+    modalSuccess: "✔ Proposition envoyée avec succès !",
+    modalLoginPrompt: "Veuillez vous connecter pour soumettre une offre sur cette tâche.",
+    modalGoLogin: "Se connecter"
+  }
+};
+
 export default function TaskBoard() {
   const router = useRouter();
   const { location, formatPrice } = useLocation();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
   
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -212,29 +337,29 @@ export default function TaskBoard() {
       <section className={styles.heroBanner}>
         <div className={styles.heroBadge}>
           <span className={styles.pulseDot}></span>
-          <span>LIVE TASK MARKETPLACE</span>
+          <span>{t.heroBadge}</span>
         </div>
         <h1 className={styles.heroHeading}>
-          Find High-Paying Tasks &amp; Verified Projects
+          {t.heroHeading}
         </h1>
         <p className={styles.heroSubheading}>
-          Connect directly with verified clients across Africa. Submit competitive proposals, work with 100% escrow protection, and get paid instantly upon milestone completion.
+          {t.heroSubheading}
         </p>
 
         <div className={styles.heroStatsRow}>
           <div className={styles.heroStatItem}>
             <iconify-icon icon="lucide:shield-check" className={styles.heroStatIcon} style={{ color: "#10b981" }} />
-            <span>100% Escrow Protected</span>
+            <span>{t.stat1}</span>
           </div>
           <div className={styles.heroStatDivider}></div>
           <div className={styles.heroStatItem}>
             <iconify-icon icon="lucide:zap" className={styles.heroStatIcon} style={{ color: "#f59e0b" }} />
-            <span>Instant Client Hiring</span>
+            <span>{t.stat2}</span>
           </div>
           <div className={styles.heroStatDivider}></div>
           <div className={styles.heroStatItem}>
             <iconify-icon icon="lucide:check-circle" className={styles.heroStatIcon} style={{ color: "#3b82f6" }} />
-            <span>Zero Commission On Escrow</span>
+            <span>{t.stat3}</span>
           </div>
         </div>
       </section>
@@ -248,7 +373,7 @@ export default function TaskBoard() {
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Search by title, skill, or keyword..."
+              placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -267,14 +392,14 @@ export default function TaskBoard() {
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
-              <option value="all">📍 All Locations</option>
+              <option value="all">{t.allLocations}</option>
               <option value="kigali">Kigali, Rwanda</option>
               <option value="abidjan">Abidjan, Ivory Coast</option>
               <option value="cotonou">Cotonou, Benin</option>
               <option value="rubavu">Rubavu</option>
               <option value="huye">Huye</option>
               <option value="musanze">Musanze</option>
-              <option value="remote">🌐 Remote Work</option>
+              <option value="remote">{t.remoteWork}</option>
             </select>
           </div>
 
@@ -286,7 +411,7 @@ export default function TaskBoard() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              <option value="all">🗂️ All Categories</option>
+              <option value="all">{t.allCategories}</option>
               {categories.map((c: any) => (
                 <option key={c.id || c.slug} value={c.slug || c.name}>
                   {c.name}
@@ -303,17 +428,17 @@ export default function TaskBoard() {
               value={selectedUrgency}
               onChange={(e) => setSelectedUrgency(e.target.value)}
             >
-              <option value="all">⏱️ Any Timeline</option>
-              <option value="urgent">⚡ Urgent Priority</option>
-              <option value="flexible">🌱 Flexible Timeline</option>
-              <option value="scheduled">📅 Scheduled Project</option>
+              <option value="all">{t.anyTimeline}</option>
+              <option value="urgent">{t.urgentPriority}</option>
+              <option value="flexible">{t.flexibleTimeline}</option>
+              <option value="scheduled">{t.scheduledProject}</option>
             </select>
           </div>
 
           {/* Action Button */}
           <button className={styles.searchSubmitBtn} onClick={() => refetch()}>
             <iconify-icon icon="lucide:search" />
-            <span>Find Tasks</span>
+            <span>{t.btnFindTasks}</span>
           </button>
         </div>
 
@@ -324,13 +449,13 @@ export default function TaskBoard() {
               className={`${styles.filterPill} ${activePill === "all" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("all")}
             >
-              <iconify-icon icon="lucide:layers" /> All Tasks
+              <iconify-icon icon="lucide:layers" /> {t.pillAll}
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "urgent" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("urgent")}
             >
-              <iconify-icon icon="lucide:zap" style={{ color: "#ef4444" }} /> Urgent Priority
+              <iconify-icon icon="lucide:zap" style={{ color: "#ef4444" }} /> {t.pillUrgent}
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "local" ? styles.filterPillActive : ""}`}
@@ -342,19 +467,19 @@ export default function TaskBoard() {
               className={`${styles.filterPill} ${activePill === "remote" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("remote")}
             >
-              <iconify-icon icon="lucide:globe" style={{ color: "#10b981" }} /> Remote Work
+              <iconify-icon icon="lucide:globe" style={{ color: "#10b981" }} /> {t.pillRemote}
             </button>
             <button
               className={`${styles.filterPill} ${activePill === "high_budget" ? styles.filterPillActive : ""}`}
               onClick={() => setActivePill("high_budget")}
             >
-              <iconify-icon icon="lucide:badge-dollar-sign" style={{ color: "#f59e0b" }} /> High Budget
+              <iconify-icon icon="lucide:badge-dollar-sign" style={{ color: "#f59e0b" }} /> {t.pillHighBudget}
             </button>
           </div>
 
           {(searchQuery || selectedCategory !== "all" || selectedLocation !== "all" || selectedUrgency !== "all" || activePill !== "all") && (
             <button className={styles.resetFiltersBtn} onClick={handleResetFilters}>
-              <iconify-icon icon="lucide:rotate-ccw" /> Reset Filters
+              <iconify-icon icon="lucide:rotate-ccw" /> {t.btnReset}
             </button>
           )}
         </div>
@@ -365,17 +490,17 @@ export default function TaskBoard() {
         <div className={styles.resultCountWrap}>
           <span className={styles.liveIndicator}></span>
           <p className={styles.resultCount}>
-            Showing <strong>{filteredTasks.length}</strong> active {filteredTasks.length === 1 ? "task" : "tasks"}
+            {t.showingText} <strong>{filteredTasks.length}</strong> {filteredTasks.length === 1 ? t.activeTaskText : t.activeTasksText}
           </p>
         </div>
 
         <div className={styles.sortWrap}>
-          <span className={styles.sortLabel}>Sort by:</span>
+          <span className={styles.sortLabel}>{t.sortBy}</span>
           <div className={styles.sortSelectWrapper}>
             <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="newest">Newest First</option>
-              <option value="budget_high">Budget: High to Low</option>
-              <option value="budget_low">Budget: Low to High</option>
+              <option value="newest">{t.sortNewest}</option>
+              <option value="budget_high">{t.sortBudgetHigh}</option>
+              <option value="budget_low">{t.sortBudgetLow}</option>
             </select>
             <iconify-icon icon="lucide:chevron-down" className={styles.sortCaret} />
           </div>
@@ -394,10 +519,10 @@ export default function TaskBoard() {
           <div className={styles.emptyIconWrap} style={{ background: "#fef2f2", color: "#dc2626" }}>
             <iconify-icon icon="lucide:alert-circle" />
           </div>
-          <h3 className={styles.emptyTitle}>Error loading tasks</h3>
+          <h3 className={styles.emptyTitle}>{t.errorLoading}</h3>
           <p className={styles.emptyText}>{error}</p>
           <button className={styles.emptyResetBtn} onClick={() => refetch()}>
-            <iconify-icon icon="lucide:refresh-cw" /> Retry
+            <iconify-icon icon="lucide:refresh-cw" /> {t.btnRetry}
           </button>
         </div>
       ) : filteredTasks.length === 0 ? (
@@ -405,12 +530,12 @@ export default function TaskBoard() {
           <div className={styles.emptyIconWrap}>
             <iconify-icon icon="lucide:search-x" />
           </div>
-          <h3 className={styles.emptyTitle}>No matching tasks found</h3>
+          <h3 className={styles.emptyTitle}>{t.noMatching}</h3>
           <p className={styles.emptyText}>
-            Try clearing your search keyword, changing location, or resetting the filters to discover more opportunities.
+            {t.noMatchingDesc}
           </p>
           <button className={styles.emptyResetBtn} onClick={handleResetFilters}>
-            <iconify-icon icon="lucide:rotate-ccw" /> Clear All Filters
+            <iconify-icon icon="lucide:rotate-ccw" /> {t.btnClearAll}
           </button>
         </div>
       ) : (
@@ -422,7 +547,7 @@ export default function TaskBoard() {
               ? `${Number(task.budget_min || 0).toLocaleString()} - ${Number(task.budget_max).toLocaleString()} ${location.currency}`
               : task.budget_min
               ? `${Number(task.budget_min).toLocaleString()} ${location.currency}`
-              : "Negotiable";
+              : t.negotiable;
 
             return (
               <div key={task.id} className={styles.taskCard}>
@@ -441,18 +566,18 @@ export default function TaskBoard() {
                           <strong className={styles.clientName}>{task.client_name || "Verified Client"}</strong>
                           <iconify-icon icon="lucide:badge-check" style={{ color: "#10b981", fontSize: "14px" }} title="Identity Verified" />
                         </div>
-                        <span className={styles.clientLabel}>Posted by Client</span>
+                        <span className={styles.clientLabel}>{t.postedBy}</span>
                       </div>
                     </div>
 
                     <div className={styles.badgesGroup}>
                       {task.urgency === "urgent" ? (
                         <span className={`${styles.urgencyBadge} ${styles.urgencyUrgent}`}>
-                          <iconify-icon icon="lucide:zap" /> Urgent
+                          <iconify-icon icon="lucide:zap" /> {t.urgentBadge}
                         </span>
                       ) : (
                         <span className={`${styles.urgencyBadge} ${styles.urgencyFlexible}`}>
-                          <iconify-icon icon="lucide:sparkles" /> Flexible
+                          <iconify-icon icon="lucide:sparkles" /> {t.flexibleBadge}
                         </span>
                       )}
                     </div>
@@ -487,7 +612,7 @@ export default function TaskBoard() {
                       </span>
                       <span className={styles.metaItem} title="Active Proposals">
                         <iconify-icon icon="lucide:users-round" style={{ color: "#8b5cf6" }} />
-                        <span>{task.bids_count || 0} proposals</span>
+                        <span>{task.bids_count || 0} {t.proposalsCount}</span>
                       </span>
                     </div>
                   </div>
@@ -497,7 +622,7 @@ export default function TaskBoard() {
                 <div className={styles.cardFooter}>
                   <div className={styles.budgetBox}>
                     <span className={styles.budgetLabel}>
-                      {task.budget_mode === "hourly" ? "Hourly Rate" : "Estimated Budget"}
+                      {task.budget_mode === "hourly" ? t.hourlyRate : t.estimatedBudget}
                     </span>
                     <span className={styles.budgetAmount}>
                       <iconify-icon icon="lucide:coins" style={{ color: "#f59e0b", fontSize: "16px" }} />
@@ -507,13 +632,13 @@ export default function TaskBoard() {
 
                   <div className={styles.cardActions}>
                     <Link href={`/dashboard/technician/tasks/${task.id}`} className={styles.detailsBtn}>
-                      <span>Details</span>
+                      <span>{t.btnDetails}</span>
                       <iconify-icon icon="lucide:arrow-up-right" />
                     </Link>
                     {appliedTaskIds.has(Number(task.id)) ? (
                       <Link href={`/dashboard/technician/bids`} className={styles.appliedBtn}>
                         <iconify-icon icon="lucide:check-circle-2" />
-                        <span>Bid Placed</span>
+                        <span>{t.btnBidPlaced}</span>
                       </Link>
                     ) : task.status && task.status !== "open" ? (
                       <span className={styles.inProgressPill}>
@@ -523,7 +648,7 @@ export default function TaskBoard() {
                     ) : (
                       <button className={styles.applyBtn} onClick={() => handleApply(task)}>
                         <iconify-icon icon="lucide:send" />
-                        <span>Apply Now</span>
+                        <span>{t.btnApplyNow}</span>
                       </button>
                     )}
                   </div>
@@ -556,19 +681,19 @@ export default function TaskBoard() {
             </div>
 
             <div className={styles.modalBlock}>
-              <label>Task Description</label>
+              <label>{t.modalTaskDesc}</label>
               <p>{selectedTask.description || "No specific details provided."}</p>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div className={styles.modalBlock}>
-                <label>Client Budget</label>
+                <label>{t.modalClientBudget}</label>
                 <p style={{ fontWeight: 800, color: "#001f3f" }}>
                   {selectedTask.budget_min || 0} - {selectedTask.budget_max || "N/A"} XOF
                 </p>
               </div>
               <div className={styles.modalBlock}>
-                <label>Urgency</label>
+                <label>{t.modalUrgency}</label>
                 <p style={{ textTransform: "capitalize" }}>{selectedTask.urgency || "Flexible"}</p>
               </div>
             </div>
@@ -577,7 +702,7 @@ export default function TaskBoard() {
               <form className={styles.actionBox} onSubmit={submitApplication}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <label style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "#475569" }}>
-                    Your Proposed Price (XOF)
+                    {t.modalProposedPrice} (XOF)
                   </label>
                   <input
                     type="number"
@@ -591,12 +716,12 @@ export default function TaskBoard() {
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <label style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "#475569" }}>
-                    Cover Message / Proposal Pitch
+                    {t.modalCoverMessage}
                   </label>
                   <textarea
                     rows={3}
                     className={styles.modalTextarea}
-                    placeholder="Describe your qualifications, equipment, and when you can start..."
+                    placeholder={t.modalCoverPlaceholder}
                     required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -605,28 +730,28 @@ export default function TaskBoard() {
 
                 <button type="submit" className={styles.modalSubmitBtn} disabled={isSubmitting}>
                   {isSubmitting ? (
-                    <><iconify-icon icon="lucide:loader" style={{ animation: "spin 1s linear infinite" }} /> Submitting Proposal...</>
+                    <><iconify-icon icon="lucide:loader" style={{ animation: "spin 1s linear infinite" }} /> {t.modalSubmitting}</>
                   ) : (
-                    <><iconify-icon icon="lucide:send" /> Submit Proposal</>
+                    <><iconify-icon icon="lucide:send" /> {t.modalSubmit}</>
                   )}
                 </button>
 
                 {submitError && <p style={{ color: "#dc2626", fontSize: 13, fontWeight: 600, margin: 0 }}>{submitError}</p>}
                 {showSuccess && (
                   <p style={{ color: "#16a34a", fontSize: 13, fontWeight: 700, margin: 0 }}>
-                    ✔ Proposal submitted successfully!
+                    {t.modalSuccess}
                   </p>
                 )}
               </form>
             ) : (
               <div style={{ textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: 12 }}>
-                <p style={{ color: "#64748b", margin: "0 0 14px" }}>Please log in to submit a proposal on this task.</p>
+                <p style={{ color: "#64748b", margin: "0 0 14px" }}>{t.modalLoginPrompt}</p>
                 <button
                   onClick={() => router.push("/login?redirect=/find-tasks")}
                   className={styles.modalSubmitBtn}
                   style={{ width: "100%" }}
                 >
-                  Go to Login
+                  {t.modalGoLogin}
                 </button>
               </div>
             )}

@@ -1,13 +1,61 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import styles from "./ProviderBoard.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    headerTitle: "Connecting clients with verified technicians and engineers — securely and efficiently.",
+    headerSubtitle: "Browse our directory of top-rated service providers ready to tackle your projects.",
+    searchPlaceholder: "Search by name, skill, or keyword...",
+    allCategories: "All Categories",
+    anyLocation: "Any Location",
+    remote: "Remote",
+    btnFindPros: "Find Pros",
+    loadingError: "Failed to load providers:",
+    noProvidersTitle: "No Verified Service Providers Found",
+    noProvidersDesc: "Try adjusting your search query or location filters.",
+    verifiedRole: "Verified Technician",
+    defaultBio: "Certified technical professional ready to help with your next project.",
+    btnViewProfile: "View Profile",
+    btnHireNow: "Hire Now"
+  },
+  fr: {
+    headerTitle: "Mise en relation sécurisée et directe avec des techniciens et ingénieurs vérifiés.",
+    headerSubtitle: "Consultez notre annuaire de prestataires qualifiés et prêts à intervenir sur vos projets.",
+    searchPlaceholder: "Rechercher par nom, compétence ou mot-clé...",
+    allCategories: "Toutes les catégories",
+    anyLocation: "Toutes les localisations",
+    remote: "Télétravail / À distance",
+    btnFindPros: "Trouver un pro",
+    loadingError: "Échec du chargement des prestataires :",
+    noProvidersTitle: "Aucun prestataire vérifié trouvé",
+    noProvidersDesc: "Essayez de modifier vos critères de recherche ou de changer de localisation.",
+    verifiedRole: "Technicien Vérifié",
+    defaultBio: "Professionnel technique certifié prêt à intervenir sur votre prochain projet.",
+    btnViewProfile: "Voir le Profil",
+    btnHireNow: "Engager"
+  }
+};
+
 export default function ProviderBoard() {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedLocation, setSelectedLocation] = useState("Any Location");
@@ -76,10 +124,10 @@ export default function ProviderBoard() {
         {/* HEADER SECTION */}
         <div className={styles.header}>
           <h2 className={styles.headerTitle}>
-            Connecting clients with verified technicians and engineers — securely and efficiently.
+            {t.headerTitle}
           </h2>
           <p className={styles.headerSubtitle}>
-            Browse our directory of top-rated service providers ready to tackle your projects.
+            {t.headerSubtitle}
           </p>
         </div>
 
@@ -87,7 +135,7 @@ export default function ProviderBoard() {
         <div className={styles.filterBar}>
           <input 
             type="text" 
-            placeholder="Search by name, skill, or keyword..." 
+            placeholder={t.searchPlaceholder} 
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -101,7 +149,7 @@ export default function ProviderBoard() {
               setCurrentPage(1);
             }}
           >
-            <option value="All Categories">All Categories</option>
+            <option value="All Categories">{t.allCategories}</option>
             {categories.map((c: any) => (
               <option key={c.id} value={c.name}>{c.name}</option>
             ))}
@@ -113,21 +161,21 @@ export default function ProviderBoard() {
               setCurrentPage(1);
             }}
           >
-            <option value="Any Location">Any Location</option>
+            <option value="Any Location">{t.anyLocation}</option>
             <option value="Rwanda">Rwanda</option>
             <option value="Kigali">Kigali</option>
             <option value="Cameroon">Cameroon</option>
             <option value="Nigeria">Nigeria</option>
             <option value="Ghana">Ghana</option>
             <option value="Kenya">Kenya</option>
-            <option value="Remote">Remote</option>
+            <option value="Remote">{t.remote}</option>
           </select>
           <button 
             type="button"
             className={styles.searchBtn}
             onClick={() => setCurrentPage(1)}
           >
-            Find Pros
+            {t.btnFindPros}
           </button>
         </div>
 
@@ -140,12 +188,12 @@ export default function ProviderBoard() {
             <SkeletonCard />
           </div>
         ) : error ? (
-          <p style={{ textAlign: "center", color: "red", padding: "40px 0" }}>Failed to load providers: {error}</p>
+          <p style={{ textAlign: "center", color: "red", padding: "40px 0" }}>{t.loadingError} {error}</p>
         ) : filteredProviders.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px", color: "#64748b" }}>
             <iconify-icon icon="lucide:user-x" style={{ fontSize: "48px", color: "#cbd5e1", marginBottom: "12px" }}></iconify-icon>
-            <h3 style={{ fontSize: "18px", color: "#001f3f", margin: "0 0 6px" }}>No Verified Service Providers Found</h3>
-            <p style={{ fontSize: "14px", margin: 0 }}>Try adjusting your search query or location filters.</p>
+            <h3 style={{ fontSize: "18px", color: "#001f3f", margin: "0 0 6px" }}>{t.noProvidersTitle}</h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>{t.noProvidersDesc}</p>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -166,7 +214,7 @@ export default function ProviderBoard() {
                     />
                     <div>
                       <h3 className={styles.name}>{fullName}</h3>
-                      <div className={styles.role}>{pro.title || pro.category || "Verified Technician"}</div>
+                      <div className={styles.role}>{pro.title || pro.category || t.verifiedRole}</div>
                     </div>
                   </div>
                   
@@ -181,15 +229,15 @@ export default function ProviderBoard() {
                   </div>
                   
                   <div className={styles.description}>
-                    {pro.bio || "Certified technical professional ready to help with your next project."}
+                    {pro.bio || t.defaultBio}
                   </div>
                   
                   <div className={styles.actions}>
                     <Link href={profileUrl} className={`${styles.btn} ${styles.btnView}`}>
-                      View Profile
+                      {t.btnViewProfile}
                     </Link>
                     <Link href={hireUrl} className={`${styles.btn} ${styles.btnHire}`}>
-                      Hire Now
+                      {t.btnHireNow}
                     </Link>
                   </div>
                 </div>
@@ -217,3 +265,4 @@ export default function ProviderBoard() {
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
@@ -66,13 +66,116 @@ const JOBS_DATA: JobPosition[] = [
   },
 ];
 
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    heroBadge: "Work With High Impact",
+    heroTitle: "Build the Operating System for African Labor",
+    heroSubtitle: "Join our mission to connect millions of skilled technicians, engineers, and companies with verified opportunities, transparent contracts, and guaranteed escrow payments.",
+    whyTitle: "Why Work at Boulot Man?",
+    whyDesc: "We are a high-velocity, mission-driven team committed to technical excellence and real-world African economic empowerment.",
+    benefit1Title: "Pan-African Remote First",
+    benefit1Desc: "Work from anywhere across Africa or join our regional innovation hubs with full flexibility and autonomy.",
+    benefit2Title: "Competitive Compensation & Equity",
+    benefit2Desc: "We offer competitive salaries benchmarked globally, stock options, and performance incentives.",
+    benefit3Title: "Comprehensive Health & Wellness",
+    benefit3Desc: "Top-tier medical coverage for you and your dependents, mental health support, and equipment stipends.",
+    openPositionsTitle: "Open Positions",
+    openPositionsDesc: "Find your next career chapter and help scale Africa's leading technical services infrastructure.",
+    deptAll: "All",
+    deptEngineering: "Engineering",
+    deptOperations: "Operations & Trust",
+    deptSales: "Sales & Growth",
+    deptCustomer: "Customer Experience",
+    btnApplyNow: "Apply Now",
+    ctaTitle: "Don't See the Right Role?",
+    ctaDesc: "We are always seeking exceptional engineering, operations, and product talent. Submit an open speculative application.",
+    btnGeneralApp: "Submit General Application",
+    speculativeTitle: "General / Speculative Application",
+    speculativeDept: "General Talent",
+    speculativeLoc: "Remote",
+    speculativeType: "Full-time / Part-time",
+    speculativeExp: "Any Level",
+    applyModalTitle: "Apply:",
+    successMsg: "🎉 Thank you for applying! Our talent acquisition team will review your application within 48 hours.",
+    labelFullName: "Full Name",
+    phFullName: "Jane Doe",
+    labelEmail: "Email Address",
+    phEmail: "jane@example.com",
+    labelPhone: "Phone / WhatsApp",
+    phPhone: "+250 788 123 456",
+    labelLinkedIn: "LinkedIn / Portfolio URL",
+    labelCover: "Cover Note / Why Boulot Man?",
+    phCover: "Tell us about your background and what excites you about our mission...",
+    btnSubmitApplication: "Submit Application"
+  },
+  fr: {
+    heroBadge: "Impactez l'Économie Africaine",
+    heroTitle: "Bâtissez le Système d'Exploitation du Travail en Afrique",
+    heroSubtitle: "Rejoignez notre mission : connecter des millions d'artisans, techniciens et entreprises à des opportunités fiables, des contrats transparents et des paiements garantis sous séquestre.",
+    whyTitle: "Pourquoi Rejoindre Boulot Man ?",
+    whyDesc: "Une équipe dynamique et passionnée qui place l'excellence technologique au service de l'autonomisation économique en Afrique.",
+    benefit1Title: "Télétravail Panafricain",
+    benefit1Desc: "Travaillez depuis n'importe quel pays africain ou rejoignez nos hubs d'innovation régionaux avec flexibilité et autonomie.",
+    benefit2Title: "Rémunération Compétitive & Actions",
+    benefit2Desc: "Salaires attractifs alignés sur les standards internationaux, stock-options et primes de performance.",
+    benefit3Title: "Couverture Santé & Bien-être",
+    benefit3Desc: "Assurance médicale de premier ordre pour vous et vos proches, soutien bien-être et budget équipement informatique.",
+    openPositionsTitle: "Postes Ouverts",
+    openPositionsDesc: "Trouvez votre prochaine opportunité et participez à l'essor de la plateforme de services techniques leader en Afrique.",
+    deptAll: "Tous",
+    deptEngineering: "Ingénierie",
+    deptOperations: "Opérations & Confiance",
+    deptSales: "Ventes & Croissance",
+    deptCustomer: "Expérience Client",
+    btnApplyNow: "Postuler",
+    ctaTitle: "Vous ne trouvez pas votre poste ?",
+    ctaDesc: "Nous recherchons en permanence des talents exceptionnels en tech, produit et opérations. Déposez une candidature spontanée.",
+    btnGeneralApp: "Candidature Spontanée",
+    speculativeTitle: "Candidature Générale / Spontanée",
+    speculativeDept: "Talents Généraux",
+    speculativeLoc: "À distance",
+    speculativeType: "Temps plein / Temps partiel",
+    speculativeExp: "Tous niveaux",
+    applyModalTitle: "Postuler :",
+    successMsg: "🎉 Merci pour votre candidature ! Notre équipe recrutement étudiera votre profil sous 48 heures.",
+    labelFullName: "Nom complet",
+    phFullName: "Jean Dupont",
+    labelEmail: "Adresse e-mail",
+    phEmail: "jean@exemple.com",
+    labelPhone: "Téléphone / WhatsApp",
+    phPhone: "+250 788 123 456",
+    labelLinkedIn: "Lien LinkedIn / Portfolio",
+    labelCover: "Lettre de motivation / Pourquoi Boulot Man ?",
+    phCover: "Présentez-nous votre parcours et vos motivations pour rejoindre l'aventure...",
+    btnSubmitApplication: "Envoyer la candidature"
+  }
+};
+
 export default function CareersPage() {
   const [selectedDept, setSelectedDept] = useState("All");
   const [selectedJob, setSelectedJob] = useState<JobPosition | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", linkedin: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [lang, setLang] = useState("en");
 
-  const departments = ["All", "Engineering", "Operations & Trust", "Sales & Growth", "Customer Experience"];
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
+  const departments = [
+    { key: "All", label: t.deptAll },
+    { key: "Engineering", label: t.deptEngineering },
+    { key: "Operations & Trust", label: t.deptOperations },
+    { key: "Sales & Growth", label: t.deptSales },
+    { key: "Customer Experience", label: t.deptCustomer }
+  ];
 
   const filteredJobs = selectedDept === "All" 
     ? JOBS_DATA 
@@ -96,11 +199,11 @@ export default function CareersPage() {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <div className={styles.heroBadge}>
-            <iconify-icon icon="lucide:rocket" /> Work With High Impact
+            <iconify-icon icon="lucide:rocket" /> {t.heroBadge}
           </div>
-          <h1 className={styles.heroTitle}>Build the Operating System for African Labor</h1>
+          <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroSubtitle}>
-            Join our mission to connect millions of skilled technicians, engineers, and companies with verified opportunities, transparent contracts, and guaranteed escrow payments.
+            {t.heroSubtitle}
           </p>
         </div>
       </section>
@@ -109,9 +212,9 @@ export default function CareersPage() {
         {/* CULTURE & PERKS */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Why Work at Boulot Man?</h2>
+            <h2 className={styles.sectionTitle}>{t.whyTitle}</h2>
             <p className={styles.sectionDesc}>
-              We are a high-velocity, mission-driven team committed to technical excellence and real-world African economic empowerment.
+              {t.whyDesc}
             </p>
           </div>
 
@@ -120,9 +223,9 @@ export default function CareersPage() {
               <div className={styles.benefitIconWrap}>
                 <iconify-icon icon="lucide:globe-2" />
               </div>
-              <h3 className={styles.benefitTitle}>Pan-African Remote First</h3>
+              <h3 className={styles.benefitTitle}>{t.benefit1Title}</h3>
               <p className={styles.benefitDesc}>
-                Work from anywhere across Africa or join our regional innovation hubs with full flexibility and autonomy.
+                {t.benefit1Desc}
               </p>
             </div>
 
@@ -130,9 +233,9 @@ export default function CareersPage() {
               <div className={styles.benefitIconWrap}>
                 <iconify-icon icon="lucide:award" />
               </div>
-              <h3 className={styles.benefitTitle}>Competitive Compensation &amp; Equity</h3>
+              <h3 className={styles.benefitTitle}>{t.benefit2Title}</h3>
               <p className={styles.benefitDesc}>
-                We offer competitive salaries benchmarked globally, stock options, and performance incentives.
+                {t.benefit2Desc}
               </p>
             </div>
 
@@ -140,9 +243,9 @@ export default function CareersPage() {
               <div className={styles.benefitIconWrap}>
                 <iconify-icon icon="lucide:heart-pulse" />
               </div>
-              <h3 className={styles.benefitTitle}>Comprehensive Health &amp; Wellness</h3>
+              <h3 className={styles.benefitTitle}>{t.benefit3Title}</h3>
               <p className={styles.benefitDesc}>
-                Top-tier medical coverage for you and your dependents, mental health support, and equipment stipends.
+                {t.benefit3Desc}
               </p>
             </div>
           </div>
@@ -151,9 +254,9 @@ export default function CareersPage() {
         {/* OPEN POSITIONS */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Open Positions</h2>
+            <h2 className={styles.sectionTitle}>{t.openPositionsTitle}</h2>
             <p className={styles.sectionDesc}>
-              Find your next career chapter and help scale Africa&apos;s leading technical services infrastructure.
+              {t.openPositionsDesc}
             </p>
           </div>
 
@@ -162,11 +265,11 @@ export default function CareersPage() {
             {departments.map((dept) => (
               <button
                 type="button"
-                key={dept}
-                onClick={() => setSelectedDept(dept)}
-                className={`${styles.filterBtn} ${selectedDept === dept ? styles.filterBtnActive : ""}`}
+                key={dept.key}
+                onClick={() => setSelectedDept(dept.key)}
+                className={`${styles.filterBtn} ${selectedDept === dept.key ? styles.filterBtnActive : ""}`}
               >
-                {dept}
+                {dept.label}
               </button>
             ))}
           </div>
@@ -196,7 +299,7 @@ export default function CareersPage() {
                   onClick={() => setSelectedJob(job)}
                   className={styles.applyBtn}
                 >
-                  Apply Now <iconify-icon icon="lucide:arrow-right" />
+                  {t.btnApplyNow} <iconify-icon icon="lucide:arrow-right" />
                 </button>
               </div>
             ))}
@@ -206,24 +309,24 @@ export default function CareersPage() {
         {/* CTA BANNER */}
         <section className={styles.cta}>
           <div>
-            <h2 className={styles.ctaTitle}>Don&apos;t See the Right Role?</h2>
+            <h2 className={styles.ctaTitle}>{t.ctaTitle}</h2>
             <p className={styles.ctaDesc}>
-              We are always seeking exceptional engineering, operations, and product talent. Submit an open speculative application.
+              {t.ctaDesc}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setSelectedJob({
               id: "speculative",
-              title: "General / Speculative Application",
-              department: "General Talent",
-              location: "Remote",
-              type: "Full-time / Part-time",
-              experience: "Any Level",
+              title: t.speculativeTitle,
+              department: t.speculativeDept,
+              location: t.speculativeLoc,
+              type: t.speculativeType,
+              experience: t.speculativeExp,
             })}
             className={styles.ctaBtn}
           >
-            Submit General Application <iconify-icon icon="lucide:send" />
+            {t.btnGeneralApp} <iconify-icon icon="lucide:send" />
           </button>
         </section>
       </main>
@@ -235,52 +338,52 @@ export default function CareersPage() {
         <div className={styles.modalOverlay} onClick={() => setSelectedJob(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <button className={styles.modalClose} onClick={() => setSelectedJob(null)}>×</button>
-            <h2>Apply: {selectedJob.title}</h2>
+            <h2>{t.applyModalTitle} {selectedJob.title}</h2>
             <p style={{ color: "#64748b", fontSize: "14px", margin: "0 0 20px" }}>
               {selectedJob.department} • {selectedJob.location}
             </p>
 
             {submitted ? (
               <div className={styles.successMsg}>
-                🎉 Thank you for applying! Our talent acquisition team will review your application within 48 hours.
+                {t.successMsg}
               </div>
             ) : (
               <form onSubmit={handleApply}>
                 <div className={styles.formGroup}>
-                  <label>Full Name</label>
+                  <label>{t.labelFullName}</label>
                   <input
                     required
                     type="text"
-                    placeholder="Jane Doe"
+                    placeholder={t.phFullName}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Email Address</label>
+                  <label>{t.labelEmail}</label>
                   <input
                     required
                     type="email"
-                    placeholder="jane@example.com"
+                    placeholder={t.phEmail}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Phone / WhatsApp</label>
+                  <label>{t.labelPhone}</label>
                   <input
                     required
                     type="tel"
-                    placeholder="+250 788 123 456"
+                    placeholder={t.phPhone}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>LinkedIn / Portfolio URL</label>
+                  <label>{t.labelLinkedIn}</label>
                   <input
                     type="url"
                     placeholder="https://linkedin.com/in/username"
@@ -290,17 +393,17 @@ export default function CareersPage() {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Cover Note / Why Boulot Man?</label>
+                  <label>{t.labelCover}</label>
                   <textarea
                     rows={3}
-                    placeholder="Tell us about your background and what excites you about our mission..."
+                    placeholder={t.phCover}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   />
                 </div>
 
                 <button type="submit" className={styles.submitBtn}>
-                  Submit Application <iconify-icon icon="lucide:send" />
+                  {t.btnSubmitApplication} <iconify-icon icon="lucide:send" />
                 </button>
               </form>
             )}
@@ -310,3 +413,4 @@ export default function CareersPage() {
     </div>
   );
 }
+

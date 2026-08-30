@@ -73,7 +73,7 @@ const translations: Record<string, Record<string, any>> = {
     q5Bullet3: "Escrow protection",
     q5Bullet4: "Withdrawals & transaction tracking",
     q6Title: "What is Escrow and how does it work?",
-    q6Answer: "{t.q6Answer}",
+    q6Answer: "Funds are held securely until the task is completed and approved. This protects both clients and providers, ensuring payment is only released when milestones are achieved.",
     contactTitle: "Still need help?",
     contactDesc: "Can't find the answer you're looking for? Our dedicated support team is here to assist you with any questions or concerns.",
     contactBtn: "Contact Support"

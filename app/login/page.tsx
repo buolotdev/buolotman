@@ -47,14 +47,113 @@ const parseErrorMsg = (errMessage: string) => {
       }
     }
   } catch(e) {
-    // not json
   }
   return errMessage;
+};
+
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    infoTitle: "Boulot Man",
+    infoDesc: "Secure platform connecting clients, technicians and companies through escrow, milestones and verified work.",
+    infoBadge: "Trusted technical services across home, office and field work",
+    networkLive: "Service Network Live",
+    nowShowing: "Now showing: engineering, IT, energy, beauty, construction and more.",
+    optClientTitle: "Looking for Technicians / Service providers",
+    optClientSub: "Client account",
+    optCompanyTitle: "I am a company",
+    optCompanySub: "Company account",
+    optTechTitle: "I am a technician / Freelancer",
+    optTechSub: "Technician account",
+    or: "or",
+    continueGoogle: "Continue with Google",
+    haveAccount: "I have an account?",
+    btnLogin: "Login",
+    btnBack: "← Back",
+    labelAccountType: "Account Type",
+    labelCountry: "Country",
+    selectCountry: "Select Country",
+    labelFullName: "Full Name / Company Name",
+    phFullName: "Your full name",
+    labelEmail: "Email",
+    labelPassword: "Password",
+    phPassword: "Create a password (min. 8 characters)",
+    labelConfirmPassword: "Confirm Password",
+    phConfirmPassword: "Confirm your password",
+    btnCreatingAccount: "Creating Account...",
+    btnCreateAccount: "Create Account",
+    alreadyRegistered: "Already registered?",
+    forgotPassword: "Forgot password?",
+    phLoginPassword: "Your password",
+    btnLoggingIn: "Logging in...",
+    btnSubmitLogin: "Log in",
+    noAccount: "Don't have an account?",
+    btnSignUp: "Sign up",
+    backToLogin: "← Back to Login",
+    enterEmail: "Enter your email",
+    btnSending: "Sending...",
+    btnSendReset: "Send reset link",
+    backLoginPlain: "Back to login"
+  },
+  fr: {
+    infoTitle: "Boulot Man",
+    infoDesc: "Plateforme sécurisée reliant clients, techniciens et entreprises via séquestre, jalons et prestations vérifiées.",
+    infoBadge: "Services techniques fiables pour maison, entreprise et chantiers",
+    networkLive: "Réseau de Services en Direct",
+    nowShowing: "Actuellement : ingénierie, informatique, énergie, beauté, BTP et plus.",
+    optClientTitle: "Je recherche un technicien / prestataire",
+    optClientSub: "Compte Client",
+    optCompanyTitle: "Je suis une entreprise / société",
+    optCompanySub: "Compte Entreprise",
+    optTechTitle: "Je suis un technicien / indépendant",
+    optTechSub: "Compte Prestataire",
+    or: "ou",
+    continueGoogle: "Continuer avec Google",
+    haveAccount: "Vous avez déjà un compte ?",
+    btnLogin: "Se connecter",
+    btnBack: "← Retour",
+    labelAccountType: "Type de compte",
+    labelCountry: "Pays",
+    selectCountry: "Sélectionnez le pays",
+    labelFullName: "Nom complet / Raison sociale",
+    phFullName: "Votre nom complet",
+    labelEmail: "Adresse e-mail",
+    labelPassword: "Mot de passe",
+    phPassword: "Créer un mot de passe (8 car. min.)",
+    labelConfirmPassword: "Confirmer le mot de passe",
+    phConfirmPassword: "Confirmez votre mot de passe",
+    btnCreatingAccount: "Création du compte...",
+    btnCreateAccount: "Créer un compte",
+    alreadyRegistered: "Déjà inscrit ?",
+    forgotPassword: "Mot de passe oublié ?",
+    phLoginPassword: "Votre mot de passe",
+    btnLoggingIn: "Connexion en cours...",
+    btnSubmitLogin: "Se connecter",
+    noAccount: "Vous n'avez pas de compte ?",
+    btnSignUp: "S'inscrire",
+    backToLogin: "← Retour à la connexion",
+    enterEmail: "Entrez votre adresse e-mail",
+    btnSending: "Envoi en cours...",
+    btnSendReset: "Envoyer le lien de réinitialisation",
+    backLoginPlain: "Retour à la connexion"
+  }
 };
 
 export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const [step, setStep] = useState<Step>(initialStep || (pathname?.startsWith("/signup") ? "account" : "login"));
   const [selectedRole, setSelectedRole] = useState("");
   const [nextPath, setNextPath] = useState<string | null>(null);
@@ -63,11 +162,9 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Login form
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Signup form
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
@@ -75,7 +172,6 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupCountry, setSignupCountry] = useState("");
 
-  // Forgot
   const [resetEmail, setResetEmail] = useState("");
 
   const handleGoogleAuth = useGoogleLogin({
@@ -119,7 +215,6 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setNextPath(safeNext(params.get("next") ?? undefined));
-    // If URL has ?mode=login, go straight to login
     if (params.get("mode") === "login") setStep("login");
   }, []);
 
@@ -222,7 +317,6 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
         throw regErr;
       }
 
-      // Auto-login after signup
       const loginData = await api.login(signupEmail, signupPassword);
       const role: string = (loginData.role || "client").toLowerCase();
       localStorage.setItem("access_token", loginData.access);
@@ -268,25 +362,22 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
     <main className={styles.page}>
       <div className={styles.wrapper}>
 
-        {/* ===== LEFT PANEL ===== */}
         <div className={styles.info}>
-          <h1 className={styles.infoTitle}>Boulot Man</h1>
+          <h1 className={styles.infoTitle}>{t.infoTitle}</h1>
           <p className={styles.infoDesc}>
-            Secure platform connecting clients, technicians and companies
-            through escrow, milestones and verified work.
+            {t.infoDesc}
           </p>
           <div className={styles.infoBadge}>
             <span className={styles.dot} />
-            <span>Trusted technical services across home, office and field work</span>
+            <span>{t.infoBadge}</span>
           </div>
 
-          {/* Animated service showcase */}
           <div className={styles.serviceShowcase}>
             <div className={styles.videoTopbar}>
               <div className={styles.videoDots}>
                 <span /><span /><span />
               </div>
-              <div className={styles.videoLabel}>Service Network Live</div>
+              <div className={styles.videoLabel}>{t.networkLive}</div>
             </div>
 
             <div className={styles.videoFrame}>
@@ -305,12 +396,11 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
             </div>
 
             <div className={styles.videoCaption}>
-              <span><strong>Now showing:</strong> engineering, IT, energy, beauty, construction and more.</span>
+              <span>{t.nowShowing}</span>
             </div>
           </div>
         </div>
 
-        {/* ===== RIGHT PANEL ===== */}
         <div className={styles.content}>
           <div className={styles.logo}>
             <Image
@@ -322,52 +412,50 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
             />
           </div>
 
-          {/* STEP 1: Account Type Selection */}
           <div className={`${styles.step} ${step === "account" ? styles.active : ""}`}>
             <div className={styles.option} onClick={() => selectType("Client")}>
-              <span className={styles.optionTitle}>Looking for Technicians / Service providers</span>
-              <span className={styles.optionSub}>Client account</span>
+              <span className={styles.optionTitle}>{t.optClientTitle}</span>
+              <span className={styles.optionSub}>{t.optClientSub}</span>
             </div>
             <div className={styles.option} onClick={() => selectType("Company")}>
-              <span className={styles.optionTitle}>I am a company</span>
-              <span className={styles.optionSub}>Company account</span>
+              <span className={styles.optionTitle}>{t.optCompanyTitle}</span>
+              <span className={styles.optionSub}>{t.optCompanySub}</span>
             </div>
             <div className={styles.option} onClick={() => selectType("Technician")}>
-              <span className={styles.optionTitle}>I am a technician / Freelancer</span>
-              <span className={styles.optionSub}>Technician account</span>
+              <span className={styles.optionTitle}>{t.optTechTitle}</span>
+              <span className={styles.optionSub}>{t.optTechSub}</span>
             </div>
 
-            <div className={styles.divider} style={{ margin: '1rem 0' }}>or</div>
+            <div className={styles.divider} style={{ margin: '1rem 0' }}>{t.or}</div>
             
             <button className={styles.socialBtn} type="button" onClick={() => handleGoogleAuth()} disabled={isLoading}>
               <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.48h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.859-3.048.859-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-              Continue with Google
+              {t.continueGoogle}
             </button>
 
             <div className={styles.link} style={{ marginTop: '1rem' }}>
-              I have an account?{" "}
-              <span onClick={() => { setError(null); setStep("login"); router.push("/login"); }} className={styles.linkAction} style={{cursor: "pointer"}}>Login</span>
+              {t.haveAccount}{" "}
+              <span onClick={() => { setError(null); setStep("login"); router.push("/login"); }} className={styles.linkAction} style={{cursor: "pointer"}}>{t.btnLogin}</span>
             </div>
           </div>
 
-          {/* STEP 2: Sign Up */}
           <div className={`${styles.step} ${step === "signup" ? styles.active : ""}`}>
-            <button className={styles.backBtn} onClick={() => { setError(null); setStep("account"); }}>← Back</button>
+            <button className={styles.backBtn} onClick={() => { setError(null); setStep("account"); }}>{t.btnBack}</button>
 
             <button className={styles.socialBtn} type="button" onClick={() => handleGoogleAuth()} disabled={isLoading}>
               <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.48h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.859-3.048.859-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-              Continue with Google
+              {t.continueGoogle}
             </button>
 
-            <div className={styles.divider}>or</div>
+            <div className={styles.divider}>{t.or}</div>
 
             <form onSubmit={handleSignup}>
-              <label className={styles.fieldLabel}>Account Type</label>
+              <label className={styles.fieldLabel}>{t.labelAccountType}</label>
               <input className={styles.input} value={selectedRole} readOnly />
 
-              <label className={styles.fieldLabel}>Country</label>
+              <label className={styles.fieldLabel}>{t.labelCountry}</label>
               <select className={styles.select} value={signupCountry} onChange={e => setSignupCountry(e.target.value)} required>
-                <option value="">Select Country</option>
+                <option value="">{t.selectCountry}</option>
                 <option>Rwanda</option>
                 <option>Nigeria</option>
                 <option>Kenya</option>
@@ -378,23 +466,23 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
                 <option>Uganda</option>
               </select>
 
-              <label className={styles.fieldLabel}>Full Name / Company Name</label>
-              <input className={styles.input} value={signupName} onChange={e => setSignupName(e.target.value)} placeholder="Your full name" required />
+              <label className={styles.fieldLabel}>{t.labelFullName}</label>
+              <input className={styles.input} value={signupName} onChange={e => setSignupName(e.target.value)} placeholder={t.phFullName} required />
 
-              <label className={styles.fieldLabel}>Email</label>
+              <label className={styles.fieldLabel}>{t.labelEmail}</label>
               <input className={styles.input} type="email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} placeholder="your@email.com" required />
 
-              <label className={styles.fieldLabel}>Password</label>
+              <label className={styles.fieldLabel}>{t.labelPassword}</label>
               <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showPassword ? "text" : "password"} value={signupPassword} onChange={e => setSignupPassword(e.target.value)} placeholder="Create a password (min. 8 characters)" required />
+                <input className={styles.input} type={showPassword ? "text" : "password"} value={signupPassword} onChange={e => setSignupPassword(e.target.value)} placeholder={t.phPassword} required />
                 <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
                   <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
                 </button>
               </div>
 
-              <label className={styles.fieldLabel}>Confirm Password</label>
+              <label className={styles.fieldLabel}>{t.labelConfirmPassword}</label>
               <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showConfirmPassword ? "text" : "password"} value={signupConfirmPassword} onChange={e => setSignupConfirmPassword(e.target.value)} placeholder="Confirm your password" required />
+                <input className={styles.input} type={showConfirmPassword ? "text" : "password"} value={signupConfirmPassword} onChange={e => setSignupConfirmPassword(e.target.value)} placeholder={t.phConfirmPassword} required />
                 <button type="button" className={styles.eyeBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
                 </button>
@@ -402,37 +490,36 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
               {error && <div className={styles.errorMsg}>{error}</div>}
               <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Create Account"}
+                {isLoading ? t.btnCreatingAccount : t.btnCreateAccount}
               </button>
             </form>
 
             <div className={styles.link}>
-              Already registered?{" "}
-              <Link href="/login" className={styles.linkAction} onClick={() => setError(null)}>Login</Link>
+              {t.alreadyRegistered}{" "}
+              <Link href="/login" className={styles.linkAction} onClick={() => setError(null)}>{t.btnLogin}</Link>
             </div>
           </div>
 
-          {/* STEP 3: Login */}
           <div className={`${styles.step} ${step === "login" ? styles.active : ""}`}>
             <button className={styles.socialBtn} type="button" onClick={() => handleGoogleAuth()} disabled={isLoading}>
               <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.48h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.859-3.048.859-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-              Login with Google
+              {t.continueGoogle}
             </button>
 
-            <div className={styles.divider}>or</div>
+            <div className={styles.divider}>{t.or}</div>
 
             <form onSubmit={handleLogin}>
-              <label className={styles.fieldLabel}>Email</label>
+              <label className={styles.fieldLabel}>{t.labelEmail}</label>
               <input className={styles.input} type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="your@email.com" autoComplete="email" required />
 
               <div className={styles.labelRow}>
-                <label className={styles.fieldLabel}>Password</label>
+                <label className={styles.fieldLabel}>{t.labelPassword}</label>
                 <button type="button" className={styles.linkAction} style={{ fontSize: '0.76rem' }} onClick={() => { setError(null); setStep("forgot"); }}>
-                  Forgot password?
+                  {t.forgotPassword}
                 </button>
               </div>
               <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showPassword ? "text" : "password"} value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="Your password" autoComplete="current-password" required />
+                <input className={styles.input} type={showPassword ? "text" : "password"} value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder={t.phLoginPassword} autoComplete="current-password" required />
                 <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
                   <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
                 </button>
@@ -440,34 +527,33 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
               {error && <div className={styles.errorMsg}>{error}</div>}
               <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Log in"}
+                {isLoading ? t.btnLoggingIn : t.btnSubmitLogin}
               </button>
             </form>
 
             <div className={styles.link}>
-              Don&apos;t have an account?{" "}
-              <span onClick={() => { setError(null); setStep("account"); router.push("/signup"); }} className={styles.linkAction} style={{cursor: "pointer"}}>Sign up</span>
+              {t.noAccount}{" "}
+              <span onClick={() => { setError(null); setStep("account"); router.push("/signup"); }} className={styles.linkAction} style={{cursor: "pointer"}}>{t.btnSignUp}</span>
             </div>
           </div>
 
-          {/* STEP 4: Forgot Password */}
           <div className={`${styles.step} ${step === "forgot" ? styles.active : ""}`}>
-            <button className={styles.backBtn} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>← Back to Login</button>
+            <button className={styles.backBtn} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>{t.backToLogin}</button>
 
             <form onSubmit={handleForgot}>
-              <label className={styles.fieldLabel}>Enter your email</label>
+              <label className={styles.fieldLabel}>{t.enterEmail}</label>
               <input className={styles.input} type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="your@email.com" required />
 
               {error && <div className={styles.errorMsg}>{error}</div>}
               {successMsg && <div className={styles.successMsg}>{successMsg}</div>}
 
               <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
-                {isLoading ? "Sending..." : "Send reset link"}
+                {isLoading ? t.btnSending : t.btnSendReset}
               </button>
             </form>
 
             <div className={styles.link}>
-              <button className={styles.linkAction} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>Back to login</button>
+              <button className={styles.linkAction} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>{t.backLoginPlain}</button>
             </div>
           </div>
         </div>
