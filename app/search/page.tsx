@@ -38,24 +38,78 @@ function CardMedia({ result }: { result: SearchResult }) {
   );
 }
 
-const professionalTypes = [
-  { value: "any", label: "Any" },
-  { value: "technician", label: "Independent Technician" },
-  { value: "company", label: "Registered Company" },
-];
-
-const ratings = [
-  { value: "4.5", label: "4.5 & up" },
-  { value: "4.0", label: "4.0 & up" },
-  { value: "3.0", label: "3.0 & up" },
-];
-
-const tabs = [
-  { value: "all", label: "All results" },
-  { value: "services", label: "Services" },
-  { value: "technician", label: "Technicians" },
-  { value: "company", label: "Companies" },
-];
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    searchPlaceholder: "Service",
+    btnSearch: "Search",
+    filtersTitle: "Filters",
+    clearAll: "Clear all",
+    serviceCat: "Service Category",
+    allCats: "All categories",
+    budgetTitle: "Budget (XOF)",
+    min: "Min",
+    max: "Max",
+    proTypeTitle: "Professional Type",
+    anyType: "Any",
+    indTech: "Independent Technician",
+    regComp: "Registered Company",
+    minRatingTitle: "Minimum Rating",
+    anyRating: "Any rating",
+    andUp: "& up",
+    tabAll: "All results",
+    tabServices: "Services",
+    tabTechs: "Technicians",
+    tabComps: "Companies",
+    sortBy: "Sort by:",
+    sortRelevance: "Relevance",
+    sortHighest: "Highest rated",
+    sortLowest: "Lowest price",
+    noResults: "No results found. Try adjusting your filters.",
+    verified: "Verified",
+    verifiedComp: "Verified Company",
+    viewProfile: "View Profile",
+    requestQuote: "Request Quote",
+    hireSpecialist: "Hire Specialist",
+    requestService: "Request Service",
+    previous: "Previous",
+    next: "Next",
+  },
+  fr: {
+    searchPlaceholder: "Rechercher un service...",
+    btnSearch: "Rechercher",
+    filtersTitle: "Filtres",
+    clearAll: "Tout réinitialiser",
+    serviceCat: "Catégorie de service",
+    allCats: "Toutes les catégories",
+    budgetTitle: "Budget (XOF)",
+    min: "Min",
+    max: "Max",
+    proTypeTitle: "Type de professionnel",
+    anyType: "Tous",
+    indTech: "Technicien indépendant",
+    regComp: "Entreprise enregistrée",
+    minRatingTitle: "Évaluation minimale",
+    anyRating: "Toutes les notes",
+    andUp: "et plus",
+    tabAll: "Tous les résultats",
+    tabServices: "Services",
+    tabTechs: "Techniciens",
+    tabComps: "Entreprises",
+    sortBy: "Trier par :",
+    sortRelevance: "Pertinence",
+    sortHighest: "Mieux notés",
+    sortLowest: "Prix croissant",
+    noResults: "Aucun résultat trouvé. Essayez de modifier vos filtres.",
+    verified: "Vérifié",
+    verifiedComp: "Entreprise vérifiée",
+    viewProfile: "Voir le profil",
+    requestQuote: "Demander un devis",
+    hireSpecialist: "Recruter le spécialiste",
+    requestService: "Demander le service",
+    previous: "Précédent",
+    next: "Suivant",
+  }
+};
 
 type SearchResult = {
   id: string | number;
@@ -77,6 +131,37 @@ type SearchResult = {
 };
 
 export default function SearchPage() {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
+  const professionalTypes = [
+    { value: "any", label: t.anyType },
+    { value: "technician", label: t.indTech },
+    { value: "company", label: t.regComp },
+  ];
+
+  const ratings = [
+    { value: "4.5", label: `4.5 ${t.andUp}` },
+    { value: "4.0", label: `4.0 ${t.andUp}` },
+    { value: "3.0", label: `3.0 ${t.andUp}` },
+  ];
+
+  const tabs = [
+    { value: "all", label: t.tabAll },
+    { value: "services", label: t.tabServices },
+    { value: "technician", label: t.tabTechs },
+    { value: "company", label: t.tabComps },
+  ];
 
   const [userInitials, setUserInitials] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -225,8 +310,8 @@ export default function SearchPage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Service"
-              aria-label="Service"
+              placeholder={t.searchPlaceholder}
+              aria-label={t.searchPlaceholder}
             />
           </label>
           <label className={styles.searchField}>
@@ -250,7 +335,7 @@ export default function SearchPage() {
               </select>
           </label>
           <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
-            Search
+            {t.btnSearch}
           </button>
         </form>
       </div>
@@ -258,7 +343,7 @@ export default function SearchPage() {
       <main className={`${styles.container} ${styles.main}`}>
         <aside className={styles.sidebar}>
           <div className={styles.filterHeader}>
-            <h1 className={styles.filterTitle}>Filters</h1>
+            <h1 className={styles.filterTitle}>{t.filtersTitle}</h1>
             <button
               type="button"
               className={styles.clearButton}
@@ -273,13 +358,13 @@ export default function SearchPage() {
                 setPage(1);
               }}
             >
-              Clear all
+              {t.clearAll}
             </button>
           </div>
 
           <section className={styles.filterSection} aria-labelledby="service-category-title">
             <h2 id="service-category-title" className={styles.sectionTitle}>
-              Service Category
+              {t.serviceCat}
             </h2>
             <div className={styles.optionList}>
               <button
@@ -292,7 +377,7 @@ export default function SearchPage() {
                   <iconify-icon icon="lucide:check" />
                 </span>
                 <span className={styles.optionLabel}>
-                  All categories
+                  {t.allCats}
                 </span>
               </button>
               {categories.map((category) => (
@@ -314,11 +399,11 @@ export default function SearchPage() {
 
           <section className={styles.filterSection} aria-labelledby="budget-title">
             <h2 id="budget-title" className={styles.sectionTitle}>
-              Budget (XOF)
+              {t.budgetTitle}
             </h2>
             <div className={styles.budgetGrid}>
               <label className={styles.budgetField}>
-                <span>Min</span>
+                <span>{t.min}</span>
                 <input
                   className={styles.inputFake}
                   type="number"
@@ -329,7 +414,7 @@ export default function SearchPage() {
                 />
               </label>
               <label className={styles.budgetField}>
-                <span>Max</span>
+                <span>{t.max}</span>
                 <input
                   className={styles.inputFake}
                   type="number"
@@ -344,7 +429,7 @@ export default function SearchPage() {
 
           <section className={styles.filterSection} aria-labelledby="professional-type-title">
             <h2 id="professional-type-title" className={styles.sectionTitle}>
-              Professional Type
+              {t.proTypeTitle}
             </h2>
             <div className={styles.optionList}>
               {professionalTypes.map((option) => (
@@ -364,7 +449,7 @@ export default function SearchPage() {
 
           <section className={styles.filterSection} aria-labelledby="rating-title">
             <h2 id="rating-title" className={styles.sectionTitle}>
-              Minimum Rating
+              {t.minRatingTitle}
             </h2>
             <div className={styles.optionList}>
               <button
@@ -374,7 +459,7 @@ export default function SearchPage() {
                 onClick={() => setActiveRating("")}
               >
                 <span className={styles.radioCircle} aria-hidden="true" />
-                <span className={styles.optionLabel}>Any rating</span>
+                <span className={styles.optionLabel}>{t.anyRating}</span>
               </button>
               {ratings.map((rating) => (
                 <button
@@ -415,15 +500,15 @@ export default function SearchPage() {
             </div>
 
             <label className={styles.sortBy}>
-              <span>Sort by:</span>
+              <span>{t.sortBy}</span>
               <select
                 aria-label="Sort results"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="relevance">Relevance</option>
-                <option value="highest">Highest rated</option>
-                <option value="lowest">Lowest price</option>
+                <option value="relevance">{t.sortRelevance}</option>
+                <option value="highest">{t.sortHighest}</option>
+                <option value="lowest">{t.sortLowest}</option>
               </select>
             </label>
           </div>
@@ -437,7 +522,7 @@ export default function SearchPage() {
               </div>
             ) : filteredByTab.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>No results found. Try adjusting your filters.</p>
+                <p>{t.noResults}</p>
               </div>
             ) : (
               filteredByTab.map((result, idx) => (
@@ -456,7 +541,7 @@ export default function SearchPage() {
                           <iconify-icon
                             icon={result.type === "company" ? "lucide:building-2" : "lucide:shield-check"}
                           />
-                          {result.type === "company" ? "Verified Company" : "Verified"}
+                          {result.type === "company" ? t.verifiedComp : t.verified}
                         </span>
                       ) : null}
                     </div>
@@ -499,28 +584,28 @@ export default function SearchPage() {
                       href={result.link || (result.type === "company" ? `/companies/${result.id}` : `/profile/${result.id}`)}
                       className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
-                      View Profile
+                      {t.viewProfile}
                     </Link>
                     {result.type === "company" ? (
                       <Link
                         href={`/post-task?company_id=${result.id}&company_name=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
                       >
-                        Request Quote
+                        {t.requestQuote}
                       </Link>
                     ) : result.type === "technician" ? (
                       <Link
                         href={`/post-task?specialist_id=${result.id}&specialist_name=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
                       >
-                        Hire Specialist
+                        {t.hireSpecialist}
                       </Link>
                     ) : (
                       <Link
                         href={`/post-task?service=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
                       >
-                        Request Service
+                        {t.requestService}
                       </Link>
                     )}
                   </div>
@@ -539,7 +624,7 @@ export default function SearchPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
                 <iconify-icon icon="lucide:chevron-left" />
-                Previous
+                {t.previous}
               </button>
               <div className={styles.pageNumbers}>
                 <button
@@ -555,7 +640,7 @@ export default function SearchPage() {
                 className={styles.pageButton}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Next
+                {t.next}
                 <iconify-icon icon="lucide:chevron-right" />
               </button>
             </nav>
@@ -566,4 +651,5 @@ export default function SearchPage() {
       <Footer />
     </div>
   );
+
 }

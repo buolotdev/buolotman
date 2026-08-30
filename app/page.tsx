@@ -835,6 +835,33 @@ export default function Home() {
                       </Link>
                     );
                   })}
+                  
+            {/* 16th Card: All Categories & Custom Trades */}
+            {categories.length > 0 && categories.length % 4 !== 0 && (
+              <Link
+                href="/search"
+                className="card category-card"
+                data-media-type="banani-button"
+                style={{ border: "1.5px dashed rgba(255, 69, 0, 0.45)", background: "linear-gradient(135deg, #0f2c4a, #001f3f)" }}
+              >
+                <div className="category-icon">
+                  <div className="icon-wrap" style={{ fontSize: "28px", color: "#FF4500" }}>
+                    <iconify-icon icon="lucide:layout-grid"></iconify-icon>
+                  </div>
+                </div>
+                <h3 className="category-title" style={{ color: "#FF4500" }}>
+                  {lang === 'fr' ? "Toutes les catégories" : "All Categories & Trades"}
+                </h3>
+                <p className="category-copy" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  {lang === 'fr' 
+                    ? "Explorez tous les métiers spécialisés, solutions industrielles et prestataires vérifiés." 
+                    : "Discover custom trades, specialized engineering, and all vetted service categories."}
+                </p>
+                <div className="category-count" style={{ color: "#FF4500", fontWeight: 700 }}>
+                  {lang === 'fr' ? "Voir tout le répertoire →" : "Browse Full Directory →"}
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       </section>

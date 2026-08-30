@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { api } from "../../lib/api";
@@ -20,14 +20,146 @@ const ICON_BY_KEY: Record<string, string> = {
   default: "lucide:wrench",
 };
 
-const HOW_STEPS = [
-  { title: "Post or Search", description: "Describe your job or browse the directory." },
-  { title: "Compare Quotes", description: "Review profiles, ratings, and pricing side by side." },
-  { title: "Hire Safely", description: "Confirm the booking and pay securely through escrow." },
-];
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    home: "Home",
+    categories: "Categories",
+    services: "Services",
+    heroDesc: "Find trusted, certified professionals for your project.",
+    catAvail: "categories available",
+    proList: "professionals listed",
+    escrow: "Secure escrow payments",
+    exploreSub: "Explore Subcategories",
+    noSub: "No subcategories available.",
+    browse: "Browse",
+    popServices: "Popular Services",
+    noServices: "No services listed yet.",
+    featPros: "Featured Professionals",
+    showingFiltered: "filtered technicians",
+    browseAll: "Browse all professionals",
+    rec: "Recommended",
+    noMatchTech: "No technicians match your filters.",
+    fastResp: "Fast Responder",
+    topRated: "Top Rated",
+    contact: "Contact",
+    bookNow: "Book Now",
+    cantFind: "Can't find the perfect match?",
+    cantFindDesc: "Post your job once and let qualified professionals come to you with competitive quotes.",
+    postFree: "Post a Job for Free",
+    topAgencies: "Top Rated Agencies",
+    topAgenciesDesc: "For large commercial or industrial projects",
+    noMatchComp: "No companies match your filters.",
+    viewProfile: "View Profile",
+    filters: "Filters",
+    clearAll: "Clear all",
+    avail: "Availability",
+    availToday: "Available Today",
+    emergency247: "Emergency (24/7)",
+    proType: "Professional Type",
+    any: "Any",
+    indTech: "Independent Technician",
+    regComp: "Registered Company",
+    exp: "Years of Experience",
+    minRating: "Minimum Rating",
+    andUp: "& up",
+    proPromoTitle: "Are you a certified Professional?",
+    proPromoDesc: "Join thousands of professionals earning more on Boulot Man. Get verified and access premium clients today.",
+    applyPro: "Apply as a Pro",
+    howTitle: "How to hire on Boulot Man",
+    step1Title: "Post or Search",
+    step1Desc: "Describe your job or browse the directory.",
+    step2Title: "Compare Quotes",
+    step2Desc: "Review profiles, ratings, and pricing side by side.",
+    step3Title: "Hire Safely",
+    step3Desc: "Confirm the booking and pay securely through escrow.",
+    reviewsTitle: "Recent Verified Reviews",
+    reviewsEmpty: "Reviews are published once a client confirms a completed task.",
+    faqTitle: "Frequently Asked Questions",
+    faq1Q: "How do I know if a professional is certified?",
+    faq1A: "All verified professionals on Boulot Man pass identity, license, and reference checks before taking jobs.",
+    faq2Q: "What if I have an emergency?",
+    faq2A: "Use the emergency and fast responder filters to narrow the list to pros who can move immediately.",
+    faq3Q: "Can I get a custom quote for a large project?",
+    faq3A: "Yes. Companies on the platform can provide custom quotes for commercial and industrial jobs."
+  },
+  fr: {
+    home: "Accueil",
+    categories: "Catégories",
+    services: "Services",
+    heroDesc: "Trouvez des professionnels certifiés et de confiance pour vos projets.",
+    catAvail: "catégories disponibles",
+    proList: "professionnels répertoriés",
+    escrow: "Paiements sécurisés sous séquestre",
+    exploreSub: "Explorer les sous-catégories",
+    noSub: "Aucune sous-catégorie disponible.",
+    browse: "Parcourir",
+    popServices: "Services populaires",
+    noServices: "Aucun service répertorié pour le moment.",
+    featPros: "Professionnels en vedette",
+    showingFiltered: "techniciens filtrés",
+    browseAll: "Parcourir tous les professionnels",
+    rec: "Recommandé",
+    noMatchTech: "Aucun technicien ne correspond à vos filtres.",
+    fastResp: "Réponse rapide",
+    topRated: "Mieux noté",
+    contact: "Contact",
+    bookNow: "Réserver",
+    cantFind: "Vous ne trouvez pas le prestataire idéal ?",
+    cantFindDesc: "Publiez votre tâche et laissez les professionnels qualifiés vous soumettre des devis compétitifs.",
+    postFree: "Publier une tâche gratuitement",
+    topAgencies: "Entreprises et Agences certifiées",
+    topAgenciesDesc: "Pour les grands chantiers commerciaux ou industriels",
+    noMatchComp: "Aucune entreprise ne correspond à vos filtres.",
+    viewProfile: "Voir le profil",
+    filters: "Filtres",
+    clearAll: "Tout réinitialiser",
+    avail: "Disponibilité",
+    availToday: "Disponible aujourd'hui",
+    emergency247: "Urgence (24/7)",
+    proType: "Type de professionnel",
+    any: "Tous",
+    indTech: "Technicien indépendant",
+    regComp: "Entreprise enregistrée",
+    exp: "Années d'expérience",
+    minRating: "Évaluation minimale",
+    andUp: "et plus",
+    proPromoTitle: "Êtes-vous un professionnel qualifié ?",
+    proPromoDesc: "Rejoignez des milliers de professionnels sur Boulot Man. Faites-vous vérifier et accédez à des missions exclusives.",
+    applyPro: "Devenir prestataire",
+    howTitle: "Comment recruter sur Boulot Man",
+    step1Title: "Publier ou Rechercher",
+    step1Desc: "Décrivez votre besoin ou parcourez le répertoire.",
+    step2Title: "Comparer les devis",
+    step2Desc: "Examinez les profils, les avis et les tarifs proposés.",
+    step3Title: "Recruter en toute sécurité",
+    step3Desc: "Confirmez la réservation et réglez en toute sécurité sous séquestre.",
+    reviewsTitle: "Avis vérifiés récents",
+    reviewsEmpty: "Les avis sont publiés dès qu'un client valide la fin d'une prestation.",
+    faqTitle: "Foire Aux Questions",
+    faq1Q: "Comment savoir si un professionnel est certifié ?",
+    faq1A: "Tous les professionnels vérifiés sur Boulot Man font l'objet d'une vérification d'identité et de qualifications.",
+    faq2Q: "Que faire en cas d'urgence ?",
+    faq2A: "Utilisez les filtres d'urgence et d'intervention immédiate pour contacter les pros disponibles tout de suite.",
+    faq3Q: "Puis-je obtenir un devis sur-mesure pour un grand projet ?",
+    faq3A: "Oui. Les entreprises enregistrées peuvent établir des devis personnalisés pour chantiers d'envergure."
+  }
+};
 
 export default function Page({ params }: { params: { categorySlug: string } }) {
   const { categorySlug } = params;
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   const { data: categoriesData, loading: categoriesLoading } = useFetch(
     () => api.getCategories(),
     []
@@ -104,10 +236,16 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
   const featured = filtered.filter((pro) => pro.type === "technician");
   const companies = filtered.filter((pro) => pro.type === "company");
 
+  const howSteps = [
+    { title: t.step1Title, description: t.step1Desc },
+    { title: t.step2Title, description: t.step2Desc },
+    { title: t.step3Title, description: t.step3Desc },
+  ];
+
   const faqs = [
-    ["How do I know if a professional is certified?", "All verified professionals on Boulot Man pass identity, license, and reference checks before taking jobs."],
-    ["What if I have an emergency?", "Use the emergency and fast responder filters to narrow the list to pros who can move immediately."],
-    ["Can I get a custom quote for a large project?", "Yes. Companies on the platform can provide custom quotes for commercial and industrial jobs."],
+    [t.faq1Q, t.faq1A],
+    [t.faq2Q, t.faq2A],
+    [t.faq3Q, t.faq3A],
   ];
 
   return (
@@ -117,33 +255,34 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.breadcrumbs}>
-            <Link href="/">Home</Link>
+            <Link href="/">{t.home}</Link>
             <span>/</span>
-            <span>Categories</span>
+            <span>{t.categories}</span>
             <span>/</span>
             <strong style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")}</strong>
           </div>
-          <h1 style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")} Services</h1>
-          <p>Find trusted, certified professionals for your project.</p>
+          <h1 style={{ textTransform: "capitalize" }}>{categorySlug.replace(/-/g, " ")} {t.services}</h1>
+          <p>{t.heroDesc}</p>
           <div className={styles.heroStats}>
             {categoriesLoading ? (
               <SkeletonBlock style={{ width: 140, height: 18 }} />
             ) : (
-              <div>{categoriesData?.length ?? 0} categories available</div>
+              <div>{categoriesData?.length ?? 0} {t.catAvail}</div>
             )}
             {tasksLoading ? (
               <SkeletonBlock style={{ width: 140, height: 18 }} />
             ) : (
-              <div>{professionals.length} professionals listed</div>
+              <div>{professionals.length} {t.proList}</div>
             )}
-            <div>Secure escrow payments</div>
+            <div>{t.escrow}</div>
           </div>
         </div>
       </section>
 
+
       <section className={styles.section}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Explore Subcategories</h2>
+          <h2 className={styles.sectionTitle}>{t.exploreSub}</h2>
           <div className={styles.subcategoryRow}>
             {skillsLoading
               ? Array.from({ length: 5 }).map((_, i) => (
@@ -157,12 +296,12 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
                 ))
               : subcategories.length === 0
                 ? (
-                  <div style={{ padding: "24px 0", color: "#64748b" }}>No subcategories available.</div>
+                  <div style={{ padding: "24px 0", color: "#64748b" }}>{t.noSub}</div>
                 )
                 : subcategories.map((sub, i) => (
                     <button key={i} type="button" className={styles.subcategoryCard}>
                       <span className={styles.iconBox}><iconify-icon icon={sub.icon} /></span>
-                      <span><strong>{sub.title}</strong><small>Browse</small></span>
+                      <span><strong>{sub.title}</strong><small>{t.browse}</small></span>
                     </button>
                   ))}
           </div>
@@ -171,21 +310,21 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
 
       <section className={styles.section}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>Popular Services</h2>
+          <h2 className={styles.sectionTitle}>{t.popServices}</h2>
           <div className={styles.servicesGrid}>
             {tasksLoading
               ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
               : services.length === 0
                 ? (
-                  <div style={{ padding: "24px 0", color: "#64748b" }}>No services listed yet.</div>
+                  <div style={{ padding: "24px 0", color: "#64748b" }}>{t.noServices}</div>
                 )
                 : services.map((service, i) => (
                     <article key={i} className={styles.serviceCard}>
                       <span className={styles.serviceIcon}><iconify-icon icon={service.icon} /></span>
                       <h3>{service.title}</h3>
                       <div className={styles.servicePrice}>
-                        <span>Starting price</span>
-                        <strong>{service.price != null ? formatXOF(service.price) : "Contact for pricing"}</strong>
+                        <span>{t.contact}</span>
+                        <strong>{service.price != null ? formatXOF(service.price) : "Contact"}</strong>
                       </div>
                     </article>
                   ))}
@@ -197,14 +336,14 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
         <section className={styles.mainColumn}>
           <div className={styles.headerRow}>
             <div>
-              <h2>Featured Professionals</h2>
-              <p>{tasksLoading ? "Loading…" : `Showing ${featured.length} filtered technicians`}</p>
+              <h2>{t.featPros}</h2>
+              <p>{tasksLoading ? "..." : `${featured.length} ${t.showingFiltered}`}</p>
             </div>
             <div className={styles.headerActions}>
               <Link href={`/categories/${categorySlug}/listings`} className={styles.primarySmall}>
-                Browse all professionals
+                {t.browseAll}
               </Link>
-              <button type="button" className={styles.ghostButton}>Recommended</button>
+              <button type="button" className={styles.ghostButton}>{t.rec}</button>
             </div>
           </div>
 
@@ -213,7 +352,7 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
               : featured.length === 0
                 ? (
-                  <div style={{ padding: "24px 0", color: "#64748b" }}>No technicians match your filters.</div>
+                  <div style={{ padding: "24px 0", color: "#64748b" }}>{t.noMatchTech}</div>
                 )
                 : featured.map((pro) => (
                     <article key={pro.id} className={styles.proCard}>
@@ -225,8 +364,8 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
                       </div>
                       <div className={styles.cardBody}>
                         <div className={styles.badges}>
-                          {pro.fastResponder ? <span className={styles.badgePrimary}>Fast Responder</span> : null}
-                          {pro.topRated ? <span className={styles.badgeAccent}>Top Rated</span> : null}
+                          {pro.fastResponder ? <span className={styles.badgePrimary}>{t.fastResp}</span> : null}
+                          {pro.topRated ? <span className={styles.badgeAccent}>{t.topRated}</span> : null}
                           <span className={styles.badgeMuted}>{pro.hiresLabel}</span>
                         </div>
                         <h3>{pro.name}</h3>
@@ -236,8 +375,8 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
                           {pro.location ? ` · ${pro.location}` : ""}
                         </div>
                         <div className={styles.cardFooter}>
-                          <div><strong>{pro.price != null ? formatXOF(pro.price) : "Contact"}</strong><small>{pro.priceUnit}</small></div>
-                          <Link href={`/profile/${pro.id}`} className={styles.primarySmall}>Book Now</Link>
+                          <div><strong>{pro.price != null ? formatXOF(pro.price) : t.contact}</strong><small>{pro.priceUnit}</small></div>
+                          <Link href={`/profile/${pro.id}`} className={styles.primarySmall}>{t.bookNow}</Link>
                         </div>
                       </div>
                     </article>
@@ -246,16 +385,16 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
 
           <section className={styles.banner}>
             <div>
-              <h3>Can&apos;t find the perfect match?</h3>
-              <p>Post your job once and let qualified professionals come to you with competitive quotes.</p>
+              <h3>{t.cantFind}</h3>
+              <p>{t.cantFindDesc}</p>
             </div>
-            <Link href="/post-task" className={styles.whiteButton}>Post a Job for Free</Link>
+            <Link href="/post-task" className={styles.whiteButton}>{t.postFree}</Link>
           </section>
 
           <div className={styles.headerRow}>
             <div>
-              <h2>Top Rated Agencies</h2>
-              <p>For large commercial or industrial projects</p>
+              <h2>{t.topAgencies}</h2>
+              <p>{t.topAgenciesDesc}</p>
             </div>
           </div>
 
@@ -264,7 +403,7 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
               ? Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)
               : companies.length === 0
                 ? (
-                  <div style={{ padding: "24px 0", color: "#64748b" }}>No companies match your filters.</div>
+                  <div style={{ padding: "24px 0", color: "#64748b" }}>{t.noMatchComp}</div>
                 )
                 : companies.map((pro) => (
                     <article key={pro.id} className={styles.proCard}>
@@ -280,8 +419,8 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
                           {pro.location ? ` · ${pro.location}` : ""}
                         </div>
                         <div className={styles.cardFooter}>
-                          <div><strong>{pro.price != null ? formatXOF(pro.price) : "Custom Quote"}</strong><small>{pro.priceUnit}</small></div>
-                          <Link href={`/profile/${pro.id}`} className={styles.secondarySmall}>View Profile</Link>
+                          <div><strong>{pro.price != null ? formatXOF(pro.price) : t.contact}</strong><small>{pro.priceUnit}</small></div>
+                          <Link href={`/profile/${pro.id}`} className={styles.secondarySmall}>{t.viewProfile}</Link>
                         </div>
                       </div>
                     </article>
@@ -291,55 +430,55 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
 
         <aside className={styles.sidebar}>
           <div className={styles.filterHeader}>
-            <h2>Filters</h2>
+            <h2>{t.filters}</h2>
             <button type="button" className={styles.clearLink} onClick={() => {
               setAvailability({ today: false, emergency: false });
               setType("any");
               setYears(0);
               setRating(0);
-            }}>Clear all</button>
+            }}>{t.clearAll}</button>
           </div>
 
           <div className={styles.filterBlock}>
-            <h3>Availability</h3>
-            <label><input type="checkbox" checked={availability.today} onChange={() => setAvailability((v) => ({ ...v, today: !v.today }))} /> Available Today</label>
-            <label><input type="checkbox" checked={availability.emergency} onChange={() => setAvailability((v) => ({ ...v, emergency: !v.emergency }))} /> Emergency (24/7)</label>
+            <h3>{t.avail}</h3>
+            <label><input type="checkbox" checked={availability.today} onChange={() => setAvailability((v) => ({ ...v, today: !v.today }))} /> {t.availToday}</label>
+            <label><input type="checkbox" checked={availability.emergency} onChange={() => setAvailability((v) => ({ ...v, emergency: !v.emergency }))} /> {t.emergency247}</label>
           </div>
 
           <div className={styles.filterBlock}>
-            <h3>Professional Type</h3>
-            <label><input type="radio" name="type" checked={type === "any"} onChange={() => setType("any")} /> Any</label>
-            <label><input type="radio" name="type" checked={type === "technician"} onChange={() => setType("technician")} /> Independent Technician</label>
-            <label><input type="radio" name="type" checked={type === "company"} onChange={() => setType("company")} /> Registered Company</label>
+            <h3>{t.proType}</h3>
+            <label><input type="radio" name="type" checked={type === "any"} onChange={() => setType("any")} /> {t.any}</label>
+            <label><input type="radio" name="type" checked={type === "technician"} onChange={() => setType("technician")} /> {t.indTech}</label>
+            <label><input type="radio" name="type" checked={type === "company"} onChange={() => setType("company")} /> {t.regComp}</label>
           </div>
 
           <div className={styles.filterBlock}>
-            <h3>Years of Experience</h3>
+            <h3>{t.exp}</h3>
             {[0, 3, 5, 10].map((value) => (
-              <label key={value}><input type="radio" name="years" checked={years === value} onChange={() => setYears(value)} /> {value === 0 ? "Any" : `${value}+ Years`}</label>
+              <label key={value}><input type="radio" name="years" checked={years === value} onChange={() => setYears(value)} /> {value === 0 ? t.any : `${value}+ Years`}</label>
             ))}
           </div>
 
           <div className={styles.filterBlock}>
-            <h3>Minimum Rating</h3>
+            <h3>{t.minRating}</h3>
             {[0, 3.0, 4.0, 4.5].map((value) => (
-              <label key={value}><input type="radio" name="rating" checked={rating === value} onChange={() => setRating(value)} /> {value === 0 ? "Any" : `${value} & up`}</label>
+              <label key={value}><input type="radio" name="rating" checked={rating === value} onChange={() => setRating(value)} /> {value === 0 ? t.any : `${value} ${t.andUp}`}</label>
             ))}
           </div>
 
           <div className={styles.sidebarPromo}>
-            <h3>Are you a certified Professional?</h3>
-            <p>Join thousands of professionals earning more on Boulot Man. Get verified and access premium clients today.</p>
-            <Link href="/signup" className={styles.primaryFull}>Apply as a Pro</Link>
+            <h3>{t.proPromoTitle}</h3>
+            <p>{t.proPromoDesc}</p>
+            <Link href="/signup" className={styles.primaryFull}>{t.applyPro}</Link>
           </div>
         </aside>
       </main>
 
       <section className={styles.howSection}>
         <div className={styles.container}>
-          <h2 className={styles.centerTitle}>How to hire an electrician on Boulot Man</h2>
+          <h2 className={styles.centerTitle}>{t.howTitle}</h2>
           <div className={styles.stepsGrid}>
-            {HOW_STEPS.map((step, index) => (
+            {howSteps.map((step, index) => (
               <article key={step.title} className={styles.stepCard}>
                 <div className={styles.stepNumber}>{index + 1}</div>
                 <h3>{step.title}</h3>
@@ -353,17 +492,17 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.headerRow}>
-            <h2>Recent Verified Reviews</h2>
+            <h2>{t.reviewsTitle}</h2>
           </div>
           <div className={styles.reviewGrid}>
-            <div style={{ padding: "24px 0", color: "#64748b" }}>Reviews are published once a client confirms a completed task.</div>
+            <div style={{ padding: "24px 0", color: "#64748b" }}>{t.reviewsEmpty}</div>
           </div>
         </div>
       </section>
 
       <section className={styles.section}>
         <div className={styles.container}>
-          <h2 className={styles.centerTitle}>Frequently Asked Questions</h2>
+          <h2 className={styles.centerTitle}>{t.faqTitle}</h2>
           <div className={styles.faqList}>
             {faqs.map(([question, answer], index) => (
               <button
@@ -384,3 +523,4 @@ export default function Page({ params }: { params: { categorySlug: string } }) {
     </div>
   );
 }
+

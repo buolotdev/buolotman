@@ -20,6 +20,150 @@ type ContactMethod = "in-app" | "phone" | "whatsapp";
 import { toArray } from "@/app/lib/dataShape";
 import { useLocation } from "@/app/context/LocationContext";
 
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    reqEnterpriseQuote: "Request Enterprise Quotation",
+    directAssignment: "Direct Task Assignment",
+    postATask: "Post a Task",
+    descEnterprise: "Fill out your project specifications to request a formal quotation from",
+    descDirect: "Assign this task directly to",
+    descDefault: "Provide detailed information to find the best professional for your job.",
+    step1: "Draft",
+    step2: "Preview",
+    step3: "Publish",
+    verifNoticeTitle: "Account Verification Notice",
+    verifNoticeDesc: "Your account is currently under review by Admin. You can draft your project specifications, and it will be published once verified by Admin.",
+    draftSavedTitle: "Draft saved",
+    draftSavedDesc: "Your draft is saved locally so you can keep editing before publishing.",
+    backDashboard: "Back to dashboard",
+    couldNotPublish: "Could not publish task",
+    taskOverview: "Task Overview",
+    taskTitle: "Task Title",
+    taskTitlePlaceholder: "e.g. Need a professional electrician for panel installation",
+    category: "Category",
+    subCategory: "Sub-Category",
+    subCategoryPlaceholder: "e.g. specialized task",
+    selectSubCategory: "Select a sub-category",
+    description: "Description",
+    skillsRequired: "Specific Skills Required (Optional)",
+    skillPlaceholder: "e.g. Panel Installation, Python, React...",
+    add: "Add",
+    locationDetails: "Location Details",
+    streetAddress: "Street Address",
+    apartment: "Apartment, suite, etc. (Optional)",
+    city: "City",
+    mediaAttachments: "Media & Attachments",
+    optional: "(Optional)",
+    uploadText: "Click to upload or drag and drop",
+    uploadSubtext: "SVG, PNG, JPG or PDF (max. 10MB)",
+    taskSetup: "Task Setup",
+    serviceType: "Service Type",
+    onsite: "Onsite",
+    remote: "Remote",
+    hybrid: "Hybrid",
+    expectedDate: "Expected Date",
+    timePreference: "Time Preference",
+    timePreferencePlaceholder: "e.g. Morning",
+    urgencyLevel: "Urgency Level",
+    urgent: "Urgent",
+    standardFlexible: "Standard / Flexible",
+    budgetRange: "Budget Range",
+    minimum: "Minimum",
+    maximum: "Maximum",
+    preferredPayment: "Preferred Payment Option",
+    choosePayment: "Choose payment option",
+    cashOnCompletion: "Cash on completion",
+    milestonePayment: "Milestone payment",
+    escrowPayment: "Escrow (recommended)",
+    preferences: "Preferences",
+    materialsProvided: "Materials Provided",
+    materialsProvidedSub: "Client provides materials",
+    contactMethod: "Contact Method",
+    inAppMessaging: "In-app Messaging",
+    phoneCall: "Phone Call",
+    whatsApp: "WhatsApp",
+    taskSummary: "Task Summary",
+    schedule: "Schedule",
+    budget: "Budget",
+    contact: "Contact",
+    notScheduled: "Not scheduled",
+    noContactSelected: "No contact methods selected",
+    publishing: "Publishing…",
+    reviewAndPublish: "Review & Publish",
+    saveAsDraft: "Save as Draft",
+  },
+  fr: {
+    reqEnterpriseQuote: "Demande de Devis Entreprise",
+    directAssignment: "Attribution Directe de Mission",
+    postATask: "Publier une Tâche",
+    descEnterprise: "Remplissez les détails de votre projet pour demander un devis formel à",
+    descDirect: "Assigner cette tâche directement à",
+    descDefault: "Fournissez des détails complets pour trouver le meilleur professionnel.",
+    step1: "Brouillon",
+    step2: "Aperçu",
+    step3: "Publier",
+    verifNoticeTitle: "Avis de vérification du compte",
+    verifNoticeDesc: "Votre compte est en cours d'examen par l'administrateur. Vous pouvez préparer votre projet, il sera publié dès validation.",
+    draftSavedTitle: "Brouillon enregistré",
+    draftSavedDesc: "Votre brouillon est sauvegardé localement pour continuer vos modifications.",
+    backDashboard: "Retour au tableau de bord",
+    couldNotPublish: "Impossible de publier la tâche",
+    taskOverview: "Détails de la tâche",
+    taskTitle: "Titre de la tâche",
+    taskTitlePlaceholder: "ex. Besoin d'un électricien pour tableau électrique",
+    category: "Catégorie",
+    subCategory: "Sous-Catégorie",
+    subCategoryPlaceholder: "ex. tâche spécialisée",
+    selectSubCategory: "Sélectionnez une sous-catégorie",
+    description: "Description détaillée",
+    skillsRequired: "Compétences spécifiques requises (Optionnel)",
+    skillPlaceholder: "ex. Câblage, Plomberie, Python...",
+    add: "Ajouter",
+    locationDetails: "Localisation",
+    streetAddress: "Adresse",
+    apartment: "Appartement, suite, etc. (Optionnel)",
+    city: "Ville",
+    mediaAttachments: "Médias et Pièces jointes",
+    optional: "(Optionnel)",
+    uploadText: "Cliquez pour téléverser ou glissez-déposez",
+    uploadSubtext: "SVG, PNG, JPG ou PDF (max. 10 Mo)",
+    taskSetup: "Configuration",
+    serviceType: "Type de prestation",
+    onsite: "Sur place",
+    remote: "À distance",
+    hybrid: "Hybride",
+    expectedDate: "Date souhaitée",
+    timePreference: "Créneau horaire",
+    timePreferencePlaceholder: "ex. Matin",
+    urgencyLevel: "Niveau d'urgence",
+    urgent: "Urgent",
+    standardFlexible: "Standard / Flexible",
+    budgetRange: "Fourchette de budget",
+    minimum: "Minimum",
+    maximum: "Maximum",
+    preferredPayment: "Mode de paiement souhaité",
+    choosePayment: "Sélectionnez une option de paiement",
+    cashOnCompletion: "Espèces à la fin des travaux",
+    milestonePayment: "Paiement par étapes (Jalons)",
+    escrowPayment: "Sous séquestre garanti (Recommandé)",
+    preferences: "Préférences",
+    materialsProvided: "Matériaux fournis",
+    materialsProvidedSub: "Le client fournit les matériaux",
+    contactMethod: "Mode de contact",
+    inAppMessaging: "Messagerie interne",
+    phoneCall: "Appel téléphonique",
+    whatsApp: "WhatsApp",
+    taskSummary: "Récapitulatif",
+    schedule: "Planning",
+    budget: "Budget",
+    contact: "Contact",
+    notScheduled: "Non planifié",
+    noContactSelected: "Aucun moyen de contact sélectionné",
+    publishing: "Publication en cours…",
+    reviewAndPublish: "Vérifier et Publier",
+    saveAsDraft: "Enregistrer en brouillon",
+  }
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EMPTY_SKILLS: any[] = [];
@@ -29,6 +173,18 @@ function PostTaskForm() {
   const searchParams = useSearchParams();
   const inviteCompanyId = searchParams.get("invite_company");
   const inviteSpecialistId = searchParams.get("invite");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      setLang(localStorage.getItem("lang") || "en");
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
 
   const [authState, setAuthState] = useState<"checking" | "authed" | "guest">("checking");
   const { data: meData } = useFetch(
@@ -49,8 +205,6 @@ function PostTaskForm() {
     [inviteSpecialistId]
   );
 
-
-
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [serviceType, setServiceType] = useState<ServiceType>("onsite");
   const [urgency, setUrgency] = useState<Urgency>("standard");
@@ -64,6 +218,7 @@ function PostTaskForm() {
   const { files, setFiles } = useTaskDraft();
   const [previewMedia, setPreviewMedia] = useState<any | null>(null);
   const { location } = useLocation();
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -328,30 +483,30 @@ function PostTaskForm() {
             <div className={styles.contentInner}>
               <section className={styles.pageHeader}>
                 <div>
-                  <h2>{inviteCompanyId ? "Request Enterprise Quotation" : inviteSpecialistId ? "Direct Task Assignment" : "Post a Task"}</h2>
+                  <h2>{inviteCompanyId ? t.reqEnterpriseQuote : inviteSpecialistId ? t.directAssignment : t.postATask}</h2>
                   <p>
                     {inviteCompanyId
-                      ? `Fill out your project specifications to request a formal quotation from ${invitedCompany?.company_name || "the enterprise"}.`
+                      ? `${t.descEnterprise} ${invitedCompany?.company_name || "the enterprise"}.`
                       : inviteSpecialistId
-                      ? `Assign this task directly to ${invitedSpecialist?.first_name || "the selected specialist"}.`
-                      : "Provide detailed information to find the best professional for your job."}
+                      ? `${t.descDirect} ${invitedSpecialist?.first_name || "the selected specialist"}.`
+                      : t.descDefault}
                   </p>
                 </div>
 
                 <div className={styles.stepper} aria-label="Task publishing progress">
                   <div className={`${styles.step} ${styles.stepActive}`}>
                     <span className={styles.stepNumber}>1</span>
-                    <span className={styles.stepText}>Draft</span>
+                    <span className={styles.stepText}>{t.step1}</span>
                   </div>
                   <span className={styles.stepLine} />
                   <div className={styles.step}>
                     <span className={styles.stepNumber}>2</span>
-                    <span className={styles.stepText}>Preview</span>
+                    <span className={styles.stepText}>{t.step2}</span>
                   </div>
                   <span className={styles.stepLine} />
                   <div className={styles.step}>
                     <span className={styles.stepNumber}>3</span>
-                    <span className={styles.stepText}>Publish</span>
+                    <span className={styles.stepText}>{t.step3}</span>
                   </div>
                 </div>
               </section>
@@ -362,8 +517,8 @@ function PostTaskForm() {
                     <iconify-icon icon="lucide:shield-alert"></iconify-icon>
                   </div>
                   <div>
-                    <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>Account Verification Notice</strong>
-                    <span style={{ color: "#b45309", fontSize: 13 }}>Your account is currently under review by Admin. You can draft your project specifications, and it will be published once verified by Admin.</span>
+                    <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>{t.verifNoticeTitle}</strong>
+                    <span style={{ color: "#b45309", fontSize: 13 }}>{t.verifNoticeDesc}</span>
                   </div>
                 </div>
               )}
@@ -375,7 +530,7 @@ function PostTaskForm() {
                     <iconify-icon icon="lucide:building-2"></iconify-icon>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Enterprise Quote Request</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>{t.reqEnterpriseQuote}</div>
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Requesting quotation from {invitedCompany?.company_name || "Selected Company"}</h3>
                   </div>
                 </div>
@@ -387,7 +542,7 @@ function PostTaskForm() {
                     <iconify-icon icon="lucide:user-check"></iconify-icon>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>Direct Specialist Assignment</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#ff8c42" }}>{t.directAssignment}</div>
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Directly inviting {invitedSpecialist ? `${invitedSpecialist.first_name || ""} ${invitedSpecialist.last_name || ""}`.trim() || invitedSpecialist.username : "Technician"}</h3>
                   </div>
                 </div>
@@ -396,11 +551,11 @@ function PostTaskForm() {
               {saved ? (
                 <section className={`${styles.banner} ${styles.bannerDraft}`}>
                   <div>
-                    <strong>Draft saved</strong>
-                    <p>Your draft is saved locally so you can keep editing before publishing.</p>
+                    <strong>{t.draftSavedTitle}</strong>
+                    <p>{t.draftSavedDesc}</p>
                   </div>
                   <Link href="/dashboard/client" className={styles.bannerLink}>
-                    Back to dashboard
+                    {t.backDashboard}
                   </Link>
                 </section>
               ) : null}
@@ -408,7 +563,7 @@ function PostTaskForm() {
               {submitError ? (
                 <section className={`${styles.banner} ${styles.bannerDraft}`} style={{ borderColor: "#ef4444" }}>
                   <div>
-                    <strong>Could not publish task</strong>
+                    <strong>{t.couldNotPublish}</strong>
                     <p>{submitError}</p>
                   </div>
                 </section>
@@ -419,16 +574,16 @@ function PostTaskForm() {
 
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
-                      <h3>Task Overview</h3>
+                      <h3>{t.taskOverview}</h3>
                     </div>
 
                     <div className={styles.formGrid}>
                       <div className={styles.formGroupFull}>
-                        <label htmlFor="title" className={styles.label}>Task Title</label>
+                        <label htmlFor="title" className={styles.label}>{t.taskTitle}</label>
                         <input
                           id="title"
                           className={styles.input}
-                          placeholder="e.g. Need a professional electrician for panel installation"
+                          placeholder={t.taskTitlePlaceholder}
                           value={formData.title}
                           onChange={(event) => updateField("title", event.target.value)}
                           required
@@ -436,7 +591,7 @@ function PostTaskForm() {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="category" className={styles.label}>Category</label>
+                        <label htmlFor="category" className={styles.label}>{t.category}</label>
                         <select
                           id="category"
                           className={styles.select}
@@ -457,13 +612,13 @@ function PostTaskForm() {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="subcategory" className={styles.label}>Sub-Category</label>
+                        <label htmlFor="subcategory" className={styles.label}>{t.subCategory}</label>
                         {selectedCategoryName === "Other" || (!skillsLoading && subcategories.length === 0) ? (
                           <input
                             id="subcategory"
                             type="text"
                             className={styles.input}
-                            placeholder="e.g. specialized task"
+                            placeholder={t.subCategoryPlaceholder}
                             value={formData.subcategory}
                             onChange={(event) => updateField("subcategory", event.target.value)}
                           />
@@ -478,7 +633,7 @@ function PostTaskForm() {
                               <option>Loading…</option>
                             ) : (
                               <>
-                                <option value="" disabled>Select a sub-category</option>
+                                <option value="" disabled>{t.selectSubCategory}</option>
                                 {subcategories.map((sub) => (
                                   <option key={String(sub.id)} value={sub.name}>{sub.name}</option>
                                 ))}
@@ -489,7 +644,7 @@ function PostTaskForm() {
                       </div>
 
                       <div className={styles.formGroupFull}>
-                        <label htmlFor="description" className={styles.label}>Description</label>
+                        <label htmlFor="description" className={styles.label}>{t.description}</label>
                         <textarea
                           id="description"
                           className={styles.textarea}
@@ -500,12 +655,12 @@ function PostTaskForm() {
                       </div>
 
                       <div className={styles.formGroupFull}>
-                        <label htmlFor="skill-input" className={styles.label}>Specific Skills Required (Optional)</label>
+                        <label htmlFor="skill-input" className={styles.label}>{t.skillsRequired}</label>
                         <div className={styles.inlineInputRow}>
                           <input
                             id="skill-input"
                             className={styles.input}
-                            placeholder="e.g. Panel Installation, Python, React..."
+                            placeholder={t.skillPlaceholder}
                             value={skillInput}
                             onChange={(event) => setSkillInput(event.target.value)}
                             onKeyDown={(event) => {
@@ -522,7 +677,7 @@ function PostTaskForm() {
                             id="add-skill-btn"
                           >
                             <iconify-icon icon="lucide:plus" style={{ fontSize: 18 }} />
-                            <span>Add</span>
+                            <span>{t.add}</span>
                           </button>
                         </div>
 
@@ -543,7 +698,7 @@ function PostTaskForm() {
 
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
-                      <h3>Location Details</h3>
+                      <h3>{t.locationDetails}</h3>
                     </div>
 
                     <div className={styles.mapPreview} style={{ padding: 0, overflow: 'hidden' }}>
@@ -561,17 +716,17 @@ function PostTaskForm() {
 
                     <div className={styles.formGrid}>
                       <div className={styles.formGroupFull}>
-                        <label htmlFor="address" className={styles.label}>Street Address</label>
+                        <label htmlFor="address" className={styles.label}>{t.streetAddress}</label>
                         <input id="address" className={styles.input} value={formData.address} onChange={(event) => updateField("address", event.target.value)} required />
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="apartment" className={styles.label}>Apartment, suite, etc. (Optional)</label>
+                        <label htmlFor="apartment" className={styles.label}>{t.apartment}</label>
                         <input id="apartment" className={styles.input} value={formData.apartment} onChange={(event) => updateField("apartment", event.target.value)} />
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="city" className={styles.label}>City</label>
+                        <label htmlFor="city" className={styles.label}>{t.city}</label>
                         <input id="city" className={styles.input} value={formData.city} onChange={(event) => updateField("city", event.target.value)} required />
                       </div>
                     </div>
@@ -579,16 +734,16 @@ function PostTaskForm() {
 
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
-                      <h3>Media & Attachments</h3>
-                      <span>(Optional)</span>
+                      <h3>{t.mediaAttachments}</h3>
+                      <span>{t.optional}</span>
                     </div>
 
                     <button type="button" className={styles.uploadZone} onClick={() => fileInputRef?.current?.click()}>
                       <div className={styles.uploadIcon}>
                         <iconify-icon icon="lucide:upload-cloud" />
                       </div>
-                      <strong>Click to upload or drag and drop</strong>
-                      <span>SVG, PNG, JPG or PDF (max. 10MB)</span>
+                      <strong>{t.uploadText}</strong>
+                      <span>{t.uploadSubtext}</span>
                     </button>
                     <input
                       type="file"
@@ -661,17 +816,17 @@ function PostTaskForm() {
                 <aside className={styles.sidePanel}>
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
-                      <h3>Task Setup</h3>
+                      <h3>{t.taskSetup}</h3>
                     </div>
 
                     <div className={styles.stack}>
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Service Type</label>
+                        <label className={styles.label}>{t.serviceType}</label>
                         <div className={styles.segmentedControl}>
                           {[
-                            { value: "onsite", label: "Onsite" },
-                            { value: "remote", label: "Remote" },
-                            { value: "hybrid", label: "Hybrid" },
+                            { value: "onsite", label: t.onsite },
+                            { value: "remote", label: t.remote },
+                            { value: "hybrid", label: t.hybrid },
                           ].map((option) => (
                             <button key={option.value} type="button" className={`${styles.segment} ${serviceType === option.value ? styles.segmentActive : ""}`} onClick={() => setServiceType(option.value as ServiceType)}>
                               {option.label}
@@ -683,21 +838,21 @@ function PostTaskForm() {
                       <div className={styles.divider} />
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="expectedDate" className={styles.label}>Expected Date</label>
+                        <label htmlFor="expectedDate" className={styles.label}>{t.expectedDate}</label>
                         <input id="expectedDate" type="date" className={styles.input} value={formData.expectedDate} onChange={(event) => updateField("expectedDate", event.target.value)} />
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="timePreference" className={styles.label}>Time Preference</label>
-                        <input id="timePreference" className={styles.input} placeholder="e.g. Morning" value={formData.timePreference} onChange={(event) => updateField("timePreference", event.target.value)} />
+                        <label htmlFor="timePreference" className={styles.label}>{t.timePreference}</label>
+                        <input id="timePreference" className={styles.input} placeholder={t.timePreferencePlaceholder} value={formData.timePreference} onChange={(event) => updateField("timePreference", event.target.value)} />
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Urgency Level</label>
+                        <label className={styles.label}>{t.urgencyLevel}</label>
                         <div className={styles.stackCompact}>
                           {[
-                            { value: "urgent", label: "Urgent" },
-                            { value: "standard", label: "Standard / Flexible" },
+                            { value: "urgent", label: t.urgent },
+                            { value: "standard", label: t.standardFlexible },
                           ].map((option) => (
                             <button key={option.value} type="button" className={`${styles.radioCard} ${urgency === option.value ? styles.radioCardActive : ""}`} onClick={() => setUrgency(option.value as any)}>
                               <span className={styles.radioIndicator} />
@@ -710,21 +865,21 @@ function PostTaskForm() {
                       <div className={styles.divider} />
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Budget Range ({location.currency})</label>
+                        <label className={styles.label}>{t.budgetRange} ({location.currency})</label>
                         <div className={styles.inlineInputRow}>
                           <input
                             type="number"
                             className={styles.input}
                             value={formData.budgetMin}
                             onChange={(event) => updateField("budgetMin", event.target.value)}
-                            placeholder="Minimum"
+                            placeholder={t.minimum}
                           />
                           <input
                             type="number"
                             className={styles.input}
                             value={formData.budgetMax}
                             onChange={(event) => updateField("budgetMax", event.target.value)}
-                            placeholder="Maximum"
+                            placeholder={t.maximum}
                           />
                         </div>
                       </div>
@@ -732,7 +887,7 @@ function PostTaskForm() {
                       <div className={styles.divider} />
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="paymentOption" className={styles.label}>Preferred Payment Option</label>
+                        <label htmlFor="paymentOption" className={styles.label}>{t.preferredPayment}</label>
                         <select
                           id="paymentOption"
                           className={styles.select}
@@ -740,10 +895,10 @@ function PostTaskForm() {
                           onChange={(event) => updateField("paymentOption", event.target.value)}
                           required
                         >
-                          <option value="">Choose payment option</option>
-                          <option value="Cash on completion">Cash on completion</option>
-                          <option value="Milestone payment">Milestone payment</option>
-                          <option value="Escrow">Escrow (recommended)</option>
+                          <option value="">{t.choosePayment}</option>
+                          <option value="Cash on completion">{t.cashOnCompletion}</option>
+                          <option value="Milestone payment">{t.milestonePayment}</option>
+                          <option value="Escrow">{t.escrowPayment}</option>
                         </select>
                       </div>
                     </div>
@@ -751,14 +906,14 @@ function PostTaskForm() {
 
                   <section className={styles.card}>
                     <div className={styles.sectionTitle}>
-                      <h3>Preferences</h3>
+                      <h3>{t.preferences}</h3>
                     </div>
 
                     <div className={styles.stack}>
                       <div className={styles.toggleRow}>
                         <div>
-                          <strong>Materials Provided</strong>
-                          <span>Client provides materials</span>
+                          <strong>{t.materialsProvided}</strong>
+                          <span>{t.materialsProvidedSub}</span>
                         </div>
                         <button type="button" className={`${styles.toggle} ${materialsProvided ? styles.toggleOn : ""}`} onClick={() => setMaterialsProvided((current) => !current)} aria-pressed={materialsProvided}>
                           <span />
@@ -766,12 +921,12 @@ function PostTaskForm() {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Contact Method</label>
+                        <label className={styles.label}>{t.contactMethod}</label>
                         <div className={styles.stackCompact}>
                           {[
-                            { value: "in-app", label: "In-app Messaging" },
-                            { value: "phone", label: "Phone Call" },
-                            { value: "whatsapp", label: "WhatsApp" },
+                            { value: "in-app", label: t.inAppMessaging },
+                            { value: "phone", label: t.phoneCall },
+                            { value: "whatsapp", label: t.whatsApp },
                           ].map((option) => {
                             const checked = contactMethods.includes(option.value as ContactMethod);
 
@@ -791,33 +946,33 @@ function PostTaskForm() {
 
                   <section className={`${styles.card} ${styles.summaryCard}`}>
                     <div className={styles.sectionTitle}>
-                      <h3>Task Summary</h3>
+                      <h3>{t.taskSummary}</h3>
                     </div>
 
                     <div className={styles.summaryList}>
                       <div>
-                        <span>Category</span>
+                        <span>{t.category}</span>
                         <strong>{taskSummary.categoryLabel}</strong>
                       </div>
                       <div>
-                        <span>Schedule</span>
+                        <span>{t.schedule}</span>
                         <strong>{taskSummary.scheduleLabel}</strong>
                       </div>
                       <div>
-                        <span>Budget</span>
+                        <span>{t.budget}</span>
                         <strong>{taskSummary.budgetLabel}</strong>
                       </div>
                       <div>
-                        <span>Contact</span>
+                        <span>{t.contact}</span>
                         <strong>{taskSummary.contactLabel}</strong>
                       </div>
                     </div>
 
                     <div className={styles.actionStack}>
                       <button type="submit" className={styles.primaryButtonBlock} disabled={submitting}>
-                        {submitting ? "Publishing…" : "Review & Publish"}
+                        {submitting ? t.publishing : t.reviewAndPublish}
                       </button>
-                      <button type="button" className={styles.secondaryButtonBlock} onClick={saveDraft}>Save as Draft</button>
+                      <button type="button" className={styles.secondaryButtonBlock} onClick={saveDraft}>{t.saveAsDraft}</button>
                     </div>
                   </section>
                 </aside>

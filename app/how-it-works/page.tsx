@@ -1,10 +1,306 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
+
+const translations: Record<string, Record<string, any>> = {
+  en: {
+    heroTitle: "How Boulot Man Works",
+    heroDesc: "Boulot Man connects clients with verified technicians, engineers, freelancers, and companies across Africa — making it easy to find, manage, and pay for trusted services.",
+    navClients: "Clients",
+    navPostTask: "Post a Task",
+    navFindServices: "Find Technicians & Companies",
+    navPayments: "Payments & Escrow",
+    navDisputes: "Disputes",
+    navTechnicians: "Technicians",
+    navCompanies: "Companies",
+    
+    // Clients section
+    clientsTitle: "For Clients",
+    postTaskTitle: "How to Post a Task",
+    postTaskDesc: "Posting a task allows you to receive multiple offers from qualified technicians or companies and choose the best option.",
+    postTaskSteps: [
+      "Log in to your Boulot Man account",
+      "Click Post a Task",
+      "Select the service category",
+      "Describe your task clearly",
+      "Set location, schedule, urgency, and budget",
+      "Preview, edit, save as draft, or publish"
+    ],
+    goToPostTask: "Go to Post a Task →",
+
+    findServicesTitle: "Finding Technicians & Companies",
+    findServicesDesc: "You can either post a task or directly browse verified technicians and companies.",
+    findServicesSteps: [
+      "Browse by category, location, or rating",
+      "View verified profiles and portfolios",
+      "Check experience and completed jobs"
+    ],
+    browseTechs: "Browse Technicians →",
+    browseComps: "Browse Companies →",
+
+    compareTitle: "Comparing Offers & Profiles",
+    compareSteps: [
+      "Compare prices from multiple providers",
+      "Check ratings & reviews",
+      "Review experience and certifications",
+      "Ask questions before confirming"
+    ],
+
+    paymentsTitle: "Understanding Payments & Escrow",
+    paymentsDesc: "Boulot Man uses BPay Wallet & Escrow to protect both clients and service providers.",
+    paymentsSteps: [
+      "Pay via Mobile Money, Card, or Bank",
+      "Funds can be held securely in escrow",
+      "Payment is released only after approval"
+    ],
+    learnPayments: "Learn about Payments & Escrow →",
+
+    disputesTitle: "Reporting Issues or Disputes",
+    disputesSteps: [
+      "Raise disputes directly from your dashboard",
+      "Submit evidence (photos, messages, reports)",
+      "Boulot Man mediates fairly"
+    ],
+    disputesCta: "Dispute Resolution →",
+
+    // Technicians section
+    techsTitle: "For Technicians & Free Agents",
+    createTechTitle: "Creating a Technician Profile",
+    createTechSteps: [
+      "Register as a technician or free agent",
+      "Add skills, experience, and services",
+      "Upload certificates and portfolio",
+      "Complete verification"
+    ],
+    createTechCta: "Create Technician Profile →",
+
+    postServicesTitle: "Posting Your Services",
+    postServicesSteps: [
+      "Create service listings",
+      "Select categories and pricing",
+      "Choose onsite or remote services"
+    ],
+
+    biddingTitle: "Finding & Bidding on Tasks",
+    biddingSteps: [
+      "Browse posted tasks",
+      "Bid with price and message",
+      "Negotiate and accept jobs"
+    ],
+
+    receivingPaymentsTitle: "Receiving Payments & Withdrawals",
+    receivingPaymentsSteps: [
+      "Get paid through BPay Wallet",
+      "Escrow-secured payments",
+      "Withdraw to bank or mobile money"
+    ],
+
+    verificationTitle: "Verification & Certification",
+    verificationSteps: [
+      "ID and skill verification",
+      "Optional certifications",
+      "Tier upgrades (Basic → Pro)"
+    ],
+    viewTiers: "View Tier Levels →",
+
+    // Companies section
+    companiesTitle: "For Companies",
+    registerCompTitle: "Registering a Company",
+    registerCompSteps: [
+      "Create a company account",
+      "Submit licenses & documents",
+      "Get verified by Boulot Man"
+    ],
+    registerCompCta: "Register Company →",
+
+    postCompServicesTitle: "Posting Company Services",
+    postCompServicesSteps: [
+      "List company services",
+      "Showcase portfolio & past projects",
+      "Receive corporate job requests"
+    ],
+
+    manageCompTitle: "Managing Company Profiles",
+    manageCompSteps: [
+      "Update company info",
+      "Manage staff and services",
+      "Track ratings and performance"
+    ],
+
+    contractsTitle: "Contracts & Long-Term Projects",
+    contractsSteps: [
+      "Access Build-a-Team services",
+      "Use escrow for large contracts",
+      "Project management & reporting"
+    ],
+
+    complianceTitle: "Compliance & Verification",
+    complianceSteps: [
+      "License validation",
+      "Safety and quality standards",
+      "Enterprise-level compliance"
+    ],
+    enterpriseCta: "Enterprise Services →"
+  },
+  fr: {
+    heroTitle: "Comment fonctionne Boulot Man",
+    heroDesc: "Boulot Man connecte les clients avec des techniciens, ingénieurs, freelances et entreprises vérifiés à travers l'Afrique — facilitant la recherche, la gestion et le paiement de services de confiance.",
+    navClients: "Clients",
+    navPostTask: "Publier une tâche",
+    navFindServices: "Trouver des techniciens & entreprises",
+    navPayments: "Paiements & Séquestre",
+    navDisputes: "Litiges",
+    navTechnicians: "Techniciens",
+    navCompanies: "Entreprises",
+    
+    // Clients section
+    clientsTitle: "Pour les Clients",
+    postTaskTitle: "Comment publier une tâche",
+    postTaskDesc: "Publier une tâche vous permet de recevoir plusieurs offres de techniciens ou entreprises qualifiés et de choisir la meilleure option.",
+    postTaskSteps: [
+      "Connectez-vous à votre compte Boulot Man",
+      "Cliquez sur Publier une tâche",
+      "Sélectionnez la catégorie de service",
+      "Décrivez clairement votre tâche",
+      "Définissez le lieu, le calendrier, l'urgence et le budget",
+      "Prévisualisez, modifiez, enregistrez en brouillon ou publiez"
+    ],
+    goToPostTask: "Aller à Publier une tâche →",
+
+    findServicesTitle: "Trouver des techniciens & entreprises",
+    findServicesDesc: "Vous pouvez soit publier une tâche, soit parcourir directement les techniciens et entreprises vérifiés.",
+    findServicesSteps: [
+      "Parcourir par catégorie, localisation ou évaluation",
+      "Consulter les profils et portfolios vérifiés",
+      "Vérifier l'expérience et les tâches accomplies"
+    ],
+    browseTechs: "Parcourir les techniciens →",
+    browseComps: "Parcourir les entreprises →",
+
+    compareTitle: "Comparer les offres & profils",
+    compareSteps: [
+      "Comparer les prix de plusieurs prestataires",
+      "Consulter les avis et évaluations",
+      "Examiner l'expérience et les certifications",
+      "Poser des questions avant de confirmer"
+    ],
+
+    paymentsTitle: "Comprendre les paiements & le séquestre",
+    paymentsDesc: "Boulot Man utilise le portefeuille BPay et le séquestre pour protéger à la fois les clients et les prestataires de services.",
+    paymentsSteps: [
+      "Payer par Mobile Money, Carte ou Virement bancaire",
+      "Les fonds sont conservés en toute sécurité sous séquestre",
+      "Le paiement n'est débloqué qu'après validation"
+    ],
+    learnPayments: "En savoir plus sur les paiements & séquestre →",
+
+    disputesTitle: "Signaler des problèmes ou des litiges",
+    disputesSteps: [
+      "Ouvrir un litige directement depuis votre tableau de bord",
+      "Soumettre des preuves (photos, messages, rapports)",
+      "Boulot Man arbitre de manière impartiale"
+    ],
+    disputesCta: "Résolution des litiges →",
+
+    // Technicians section
+    techsTitle: "Pour les Techniciens & Agents Indépendants",
+    createTechTitle: "Créer un profil de technicien",
+    createTechSteps: [
+      "Inscrivez-vous en tant que technicien ou indépendant",
+      "Ajoutez vos compétences, votre expérience et vos services",
+      "Téléversez vos diplômes, certificats et portfolio",
+      "Complétez la vérification d'identité"
+    ],
+    createTechCta: "Créer un profil technicien →",
+
+    postServicesTitle: "Publier vos services",
+    postServicesSteps: [
+      "Créer des offres de services",
+      "Définir vos catégories et tarifs",
+      "Choisir des prestations sur site ou à distance"
+    ],
+
+    biddingTitle: "Trouver des tâches & postuler",
+    biddingSteps: [
+      "Parcourir les tâches publiées",
+      "Proposer votre tarif avec un message personnalisé",
+      "Négocier et accepter les missions"
+    ],
+
+    receivingPaymentsTitle: "Recevoir des paiements & retraits",
+    receivingPaymentsSteps: [
+      "Être payé directement via le portefeuille BPay",
+      "Paiements garantis et sécurisés sous séquestre",
+      "Retirer vers votre compte bancaire ou Mobile Money"
+    ],
+
+    verificationTitle: "Vérification & Certification",
+    verificationSteps: [
+      "Vérification d'identité et des qualifications",
+      "Certifications professionnelles optionnelles",
+      "Niveaux de badges (Basique → Pro)"
+    ],
+    viewTiers: "Voir les niveaux de badges →",
+
+    // Companies section
+    companiesTitle: "Pour les Entreprises",
+    registerCompTitle: "Enregistrer une entreprise",
+    registerCompSteps: [
+      "Créer un compte entreprise",
+      "Soumettre vos licences et documents administratifs",
+      "Obtenir la validation de conformité Boulot Man"
+    ],
+    registerCompCta: "Inscrire une entreprise →",
+
+    postCompServicesTitle: "Publier les services de l'entreprise",
+    postCompServicesSteps: [
+      "Lister vos domaines d'expertise et prestations",
+      "Mettre en avant votre portfolio et chantiers réalisés",
+      "Recevoir des appels d'offres et demandes d'entreprises"
+    ],
+
+    manageCompTitle: "Gérer le profil de l'entreprise",
+    manageCompSteps: [
+      "Mettre à jour les informations de votre société",
+      "Gérer vos équipes et collaborateurs",
+      "Suivre les évaluations et la performance globale"
+    ],
+
+    contractsTitle: "Contrats & Grands Projets",
+    contractsSteps: [
+      "Accéder aux services de constitution d'équipe (Build-a-Team)",
+      "Utiliser le compte séquestre pour les contrats d'envergure",
+      "Gestion de projet et rapports d'avancement"
+    ],
+
+    complianceTitle: "Conformité & Vérification",
+    complianceSteps: [
+      "Validation légale et fiscale",
+      "Normes strictes de sécurité et de qualité",
+      "Conformité pour marchés d'entreprises"
+    ],
+    enterpriseCta: "Services Entreprises →"
+  }
+};
 
 export default function HowItWorksPage() {
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const updateLang = () => {
+      const saved = localStorage.getItem("lang") || "en";
+      setLang(saved);
+    };
+    updateLang();
+    window.addEventListener("languageChange", updateLang);
+    return () => window.removeEventListener("languageChange", updateLang);
+  }, []);
+
+  const t = translations[lang] || translations["en"];
+
   return (
     <div id="how-it-works-screen">
       <Header />
@@ -208,201 +504,189 @@ export default function HowItWorksPage() {
       <div className="hiw-container">
         {/* HERO */}
         <div className="hiw-hero">
-          <h1>How Boulot Man Works</h1>
-          <p>
-            Boulot Man connects clients with verified technicians, engineers, freelancers, 
-            and companies across Africa — making it easy to find, manage, and pay for trusted services.
-          </p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroDesc}</p>
         </div>
 
         {/* ANCHOR MENU */}
         <div className="hiw-anchor-menu">
-          <a href="#clients">Clients</a>
-          <a href="#post-task">Post a Task</a>
-          <a href="#find-services">Find Technicians & Companies</a>
-          <a href="#payments">Payments & Escrow</a>
-          <a href="#disputes">Disputes</a>
-          <a href="#technicians">Technicians</a>
-          <a href="#companies">Companies</a>
+          <a href="#clients">{t.navClients}</a>
+          <a href="#post-task">{t.navPostTask}</a>
+          <a href="#find-services">{t.navFindServices}</a>
+          <a href="#payments">{t.navPayments}</a>
+          <a href="#disputes">{t.navDisputes}</a>
+          <a href="#technicians">{t.navTechnicians}</a>
+          <a href="#companies">{t.navCompanies}</a>
         </div>
 
         {/* CLIENTS */}
         <div id="clients" className="hiw-section">
-          <h2>For Clients</h2>
+          <h2>{t.clientsTitle}</h2>
 
           <div id="post-task" className="hiw-card">
-            <h3>How to Post a Task</h3>
-            <p>
-              Posting a task allows you to receive multiple offers from qualified technicians
-              or companies and choose the best option.
-            </p>
+            <h3>{t.postTaskTitle}</h3>
+            <p>{t.postTaskDesc}</p>
             <ul>
-              <li>Log in to your Boulot Man account</li>
-              <li>Click <strong>Post a Task</strong></li>
-              <li>Select the service category</li>
-              <li>Describe your task clearly</li>
-              <li>Set location, schedule, urgency, and budget</li>
-              <li>Preview, edit, save as draft, or publish</li>
+              {t.postTaskSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="/post-task">Go to Post a Task →</Link></p>
+            <p><Link href="/post-task">{t.goToPostTask}</Link></p>
           </div>
 
           <div id="find-services" className="hiw-card">
-            <h3>Finding Technicians & Companies</h3>
-            <p>
-              You can either post a task or directly browse verified technicians and companies.
-            </p>
+            <h3>{t.findServicesTitle}</h3>
+            <p>{t.findServicesDesc}</p>
             <ul>
-              <li>Browse by category, location, or rating</li>
-              <li>View verified profiles and portfolios</li>
-              <li>Check experience and completed jobs</li>
+              {t.findServicesSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
             <p>
-              <Link href="/technicians">Browse Technicians →</Link><br/>
-              <Link href="/companies">Browse Companies →</Link>
+              <Link href="/technicians">{t.browseTechs}</Link><br/>
+              <Link href="/companies">{t.browseComps}</Link>
             </p>
           </div>
 
           <div className="hiw-card">
-            <h3>Comparing Offers & Profiles</h3>
+            <h3>{t.compareTitle}</h3>
             <ul>
-              <li>Compare prices from multiple providers</li>
-              <li>Check ratings & reviews</li>
-              <li>Review experience and certifications</li>
-              <li>Ask questions before confirming</li>
+              {t.compareSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
           </div>
 
           <div id="payments" className="hiw-card">
-            <h3>Understanding Payments & Escrow</h3>
-            <p>
-              Boulot Man uses <strong>BPay Wallet & Escrow</strong> to protect both clients and service providers.
-            </p>
+            <h3>{t.paymentsTitle}</h3>
+            <p>{t.paymentsDesc}</p>
             <ul>
-              <li>Pay via Mobile Money, Card, or Bank</li>
-              <li>Funds can be held securely in escrow</li>
-              <li>Payment is released only after approval</li>
+              {t.paymentsSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="#">Learn about Payments & Escrow →</Link></p>
+            <p><Link href="/help-center">{t.learnPayments}</Link></p>
           </div>
 
           <div id="disputes" className="hiw-card">
-            <h3>Reporting Issues or Disputes</h3>
+            <h3>{t.disputesTitle}</h3>
             <ul>
-              <li>Raise disputes directly from your dashboard</li>
-              <li>Submit evidence (photos, messages, reports)</li>
-              <li>Boulot Man mediates fairly</li>
+              {t.disputesSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="#">Dispute Resolution →</Link></p>
+            <p><Link href="/help-center">{t.disputesCta}</Link></p>
           </div>
         </div>
 
         {/* TECHNICIANS */}
         <div id="technicians" className="hiw-section hiw-divider">
-          <h2>For Technicians & Free Agents</h2>
+          <h2>{t.techsTitle}</h2>
 
           <div className="hiw-card">
-            <h3>Creating a Technician Profile</h3>
+            <h3>{t.createTechTitle}</h3>
             <ul>
-              <li>Register as a technician or free agent</li>
-              <li>Add skills, experience, and services</li>
-              <li>Upload certificates and portfolio</li>
-              <li>Complete verification</li>
+              {t.createTechSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="/signup">Create Technician Profile →</Link></p>
+            <p><Link href="/signup">{t.createTechCta}</Link></p>
           </div>
 
           <div className="hiw-card">
-            <h3>Posting Your Services</h3>
+            <h3>{t.postServicesTitle}</h3>
             <ul>
-              <li>Create service listings</li>
-              <li>Select categories and pricing</li>
-              <li>Choose onsite or remote services</li>
-            </ul>
-          </div>
-
-          <div className="hiw-card">
-            <h3>Finding & Bidding on Tasks</h3>
-            <ul>
-              <li>Browse posted tasks</li>
-              <li>Bid with price and message</li>
-              <li>Negotiate and accept jobs</li>
+              {t.postServicesSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
           </div>
 
           <div className="hiw-card">
-            <h3>Receiving Payments & Withdrawals</h3>
+            <h3>{t.biddingTitle}</h3>
             <ul>
-              <li>Get paid through BPay Wallet</li>
-              <li>Escrow-secured payments</li>
-              <li>Withdraw to bank or mobile money</li>
+              {t.biddingSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
           </div>
 
           <div className="hiw-card">
-            <h3>Verification & Certification</h3>
+            <h3>{t.receivingPaymentsTitle}</h3>
             <ul>
-              <li>ID and skill verification</li>
-              <li>Optional certifications</li>
-              <li>Tier upgrades (Basic → Pro)</li>
+              {t.receivingPaymentsSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="#">View Tier Levels →</Link></p>
+          </div>
+
+          <div className="hiw-card">
+            <h3>{t.verificationTitle}</h3>
+            <ul>
+              {t.verificationSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ul>
+            <p><Link href="/help-center">{t.viewTiers}</Link></p>
           </div>
         </div>
 
         {/* COMPANIES */}
         <div id="companies" className="hiw-section hiw-divider">
-          <h2>For Companies</h2>
+          <h2>{t.companiesTitle}</h2>
 
           <div className="hiw-card">
-            <h3>Registering a Company</h3>
+            <h3>{t.registerCompTitle}</h3>
             <ul>
-              <li>Create a company account</li>
-              <li>Submit licenses & documents</li>
-              <li>Get verified by Boulot Man</li>
+              {t.registerCompSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="/signup">Register Company →</Link></p>
+            <p><Link href="/signup">{t.registerCompCta}</Link></p>
           </div>
 
           <div className="hiw-card">
-            <h3>Posting Company Services</h3>
+            <h3>{t.postCompServicesTitle}</h3>
             <ul>
-              <li>List company services</li>
-              <li>Showcase portfolio & past projects</li>
-              <li>Receive corporate job requests</li>
-            </ul>
-          </div>
-
-          <div className="hiw-card">
-            <h3>Managing Company Profiles</h3>
-            <ul>
-              <li>Update company info</li>
-              <li>Manage staff and services</li>
-              <li>Track ratings and performance</li>
+              {t.postCompServicesSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
           </div>
 
           <div className="hiw-card">
-            <h3>Contracts & Long-Term Projects</h3>
+            <h3>{t.manageCompTitle}</h3>
             <ul>
-              <li>Access Build-a-Team services</li>
-              <li>Use escrow for large contracts</li>
-              <li>Project management & reporting</li>
+              {t.manageCompSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
           </div>
 
           <div className="hiw-card">
-            <h3>Compliance & Verification</h3>
+            <h3>{t.contractsTitle}</h3>
             <ul>
-              <li>License validation</li>
-              <li>Safety and quality standards</li>
-              <li>Enterprise-level compliance</li>
+              {t.contractsSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
             </ul>
-            <p><Link href="#">Enterprise Services →</Link></p>
+          </div>
+
+          <div className="hiw-card">
+            <h3>{t.complianceTitle}</h3>
+            <ul>
+              {t.complianceSteps.map((step: string, index: number) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ul>
+            <p><Link href="/contractors">{t.enterpriseCta}</Link></p>
           </div>
         </div>
 
       </div>
+
+      <Footer />
     </div>
   );
 }
+
