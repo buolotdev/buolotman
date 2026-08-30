@@ -397,9 +397,10 @@ export default function TechnicianProfilePage() {
         bio: bio.trim(),
         about: bio.trim(),
         skills: skills,
+        portfolio: portfolioList,
         country: country.trim(),
         city: city.trim(),
-        address: address.trim(),
+        address: address.trim() || city.trim(),
         date_of_birth: dateOfBirth || null,
         education_level: educationLevel,
         expertise_level: expertiseLevel,
@@ -414,6 +415,7 @@ export default function TechnicianProfilePage() {
           headline: headline.trim(),
           experience_years: experienceYears,
           hourly_rate: hourlyRate,
+          portfolio: portfolioList,
         }
       });
 

@@ -227,7 +227,12 @@ def me(request):
                 tech_profile.bio = str(bio)
             
             if 'hourly_rate' in request.data:
-                tech_profile.hourly_rate = request.data.get('hourly_rate') or None
+                hr_val = request.data.get('hourly_rate')
+                if hr_val:
+                    clean_hr = ''.join(c for c in str(hr_val) if c.isdigit() or c == '.')
+                    tech_profile.hourly_rate = float(clean_hr) if clean_hr else None
+                else:
+                    tech_profile.hourly_rate = None
             if 'response_time' in request.data:
                 tech_profile.response_time = str(request.data.get('response_time') or '')
             if 'languages' in request.data:
