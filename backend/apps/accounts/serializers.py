@@ -155,13 +155,19 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
     def get_hourly_rate(self, obj):
         tech = getattr(obj, "technician_profile", None)
-        return str(tech.hourly_rate) if (tech and tech.hourly_rate) else None
+        if tech and tech.hourly_rate:
+            return f"{int(tech.hourly_rate):,} XOF / hr"
+        return "5,000 XOF / hr"
 
     def get_daily_rate(self, obj):
-        return None
+        tech = getattr(obj, "technician_profile", None)
+        if tech and tech.hourly_rate:
+            daily = int(tech.hourly_rate) * 7
+            return f"{daily:,} XOF / day"
+        return "35,000 XOF / day"
 
     def get_inspection_fee(self, obj):
-        return None
+        return "10,000 XOF"
 
     def get_average_rating(self, obj):
         tech = getattr(obj, "technician_profile", None)

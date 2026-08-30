@@ -215,6 +215,18 @@ export default function TechnicianProfilePage() {
 
       const rawDocs = localStorage.getItem("boulotman_technician_documents");
       if (rawDocs) { try { setLocalDocs(JSON.parse(rawDocs)); } catch {} }
+
+      const rawPricing = localStorage.getItem("boulotman_technician_pricing");
+      if (rawPricing) {
+        try {
+          const pr = JSON.parse(rawPricing);
+          if (pr.startingPrice) setStartingPrice(pr.startingPrice);
+          if (pr.hourlyRate) setHourlyRate(pr.hourlyRate);
+          if (pr.dailyRate) setDailyRate(pr.dailyRate);
+          if (pr.inspectionFee) setInspectionFee(pr.inspectionFee);
+          if (pr.isNegotiable !== undefined) setIsNegotiable(pr.isNegotiable);
+        } catch {}
+      }
     }
   }, []);
 
@@ -253,6 +265,11 @@ export default function TechnicianProfilePage() {
 
       if (userData.avatar_url) setAvatarUrl(userData.avatar_url);
       if (userData.banner_url) setBannerUrl(userData.banner_url);
+
+      const techProf = (userData as any)?.technician_profile;
+      if (techProf?.hourly_rate && !savedP.hourlyRate) {
+        setHourlyRate(`${techProf.hourly_rate} XOF / hr`);
+      }
     }
   }, [userData]);
 
@@ -351,6 +368,11 @@ export default function TechnicianProfilePage() {
         educationLevel: educationLevel.trim(),
         expertiseLevel,
         skills,
+        startingPrice,
+        hourlyRate,
+        dailyRate,
+        inspectionFee,
+        isNegotiable,
       };
       localStorage.setItem("boulotman_technician_profile_custom", JSON.stringify(customProfileData));
       localStorage.setItem("boulotman_technician_skills", JSON.stringify(skills));
@@ -358,6 +380,13 @@ export default function TechnicianProfilePage() {
       localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
       localStorage.setItem("boulotman_technician_available_now", String(availableNow));
       localStorage.setItem("boulotman_technician_documents", JSON.stringify(localDocs));
+      localStorage.setItem("boulotman_technician_pricing", JSON.stringify({
+        startingPrice,
+        hourlyRate,
+        dailyRate,
+        inspectionFee,
+        isNegotiable,
+      }));
 
       // 2. Send complete payload to backend
       await api.updateProfile({
@@ -375,17 +404,21 @@ export default function TechnicianProfilePage() {
         education_level: educationLevel,
         expertise_level: expertiseLevel,
         headline: headline.trim(),
+        hourly_rate: hourlyRate,
+        daily_rate: dailyRate,
+        inspection_fee: inspectionFee,
         technician_profile: {
           bio: bio.trim(),
           city: city.trim(),
           country: country.trim(),
           headline: headline.trim(),
           experience_years: experienceYears,
+          hourly_rate: hourlyRate,
         }
       });
 
       try { await refetchUser(); } catch {}
-      toast.success("Profile Saved", "All technician profile details updated successfully.");
+      toast.success("Profile Saved", "All technician profile details and pricing updated successfully.");
     } catch (err: any) {
       toast.error("Save failed", err?.message || "Please try again.");
     } finally {

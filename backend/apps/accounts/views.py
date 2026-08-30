@@ -332,8 +332,12 @@ def user_public_profile(request, user_id):
         from apps.accounts.models import TechnicianProfile, PortfolioItem
         profile, _ = TechnicianProfile.objects.get_or_create(user=user)
         data['bio'] = profile.bio or 'Senior Certified Technician with extensive multi-disciplinary field experience and verified standards compliance.'
-        data['about'] = profile.bio or 'Senior Certified Technician with extensive multi-disciplinary field experience and verified standards compliance.'
-        data['hourly_rate'] = str(profile.hourly_rate) if profile.hourly_rate else None
+        hourly_val = str(profile.hourly_rate) if profile.hourly_rate else "5000"
+        clean_hourly = ''.join(c for c in hourly_val if c.isdigit()) or '5000'
+        num_hourly = int(clean_hourly)
+        data['hourly_rate'] = f"{num_hourly:,} XOF / hr"
+        data['daily_rate'] = f"{(num_hourly * 7):,} XOF / day"
+        data['inspection_fee'] = "10,000 XOF"
         data['skills'] = [s.name for s in profile.skills.all()] or ['Electrical & Solar Energy', 'System Diagnostics', 'Technical Installation & Maintenance']
         data['languages'] = profile.languages or ['French', 'English']
         data['completed_jobs'] = profile.completed_jobs

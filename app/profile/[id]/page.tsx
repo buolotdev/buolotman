@@ -140,6 +140,21 @@ export default function PublicProfilePage() {
               };
             }
           }
+          const rawPricing = localStorage.getItem("boulotman_technician_pricing");
+          if (rawPricing) {
+            try {
+              const pr = JSON.parse(rawPricing);
+              if (pr) {
+                baseUser = {
+                  ...(baseUser || {}),
+                  starting_price: pr.startingPrice || baseUser?.starting_price,
+                  hourly_rate: pr.hourlyRate || baseUser?.hourly_rate,
+                  daily_rate: pr.dailyRate || baseUser?.daily_rate,
+                  inspection_fee: pr.inspectionFee || baseUser?.inspection_fee,
+                };
+              }
+            } catch {}
+          }
         } catch {}
       }
 
@@ -510,19 +525,25 @@ export default function PublicProfilePage() {
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Hourly Rate</span>
                       <span className={styles.pricingValue}>
-                        {profile.hourly_rate ? `${profile.hourly_rate} / hr` : "Quote on Request"}
+                        {profile.hourly_rate 
+                          ? (profile.hourly_rate.includes("XOF") || profile.hourly_rate.includes("/ hr") ? profile.hourly_rate : `${profile.hourly_rate} XOF / hr`) 
+                          : "5,000 XOF / hr"}
                       </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Full Day Rate</span>
                       <span className={styles.pricingValue}>
-                        {profile.daily_rate ? `${profile.daily_rate} / day` : "Quote on Request"}
+                        {profile.daily_rate 
+                          ? (profile.daily_rate.includes("XOF") || profile.daily_rate.includes("/ day") ? profile.daily_rate : `${profile.daily_rate} XOF / day`) 
+                          : "35,000 XOF / day"}
                       </span>
                     </div>
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>Diagnostic Inspection</span>
                       <span className={styles.pricingValue}>
-                        {profile.inspection_fee || "On Request"}
+                        {profile.inspection_fee 
+                          ? (profile.inspection_fee.includes("XOF") ? profile.inspection_fee : `${profile.inspection_fee} XOF`) 
+                          : "10,000 XOF"}
                       </span>
                     </div>
                   </div>
