@@ -71,6 +71,8 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupCountry, setSignupCountry] = useState("");
 
   // Forgot
@@ -158,6 +160,20 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!signupPassword) {
+      setError("Please enter a password.");
+      return;
+    }
+    if (signupPassword.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (signupPassword !== signupConfirmPassword) {
+      setError("Passwords do not match. Please verify and try again.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload: any = {
@@ -370,9 +386,17 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
               <label className={styles.fieldLabel}>Password</label>
               <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showPassword ? "text" : "password"} value={signupPassword} onChange={e => setSignupPassword(e.target.value)} placeholder="Create a password" required />
+                <input className={styles.input} type={showPassword ? "text" : "password"} value={signupPassword} onChange={e => setSignupPassword(e.target.value)} placeholder="Create a password (min. 8 characters)" required />
                 <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
                   <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
+                </button>
+              </div>
+
+              <label className={styles.fieldLabel}>Confirm Password</label>
+              <div className={styles.passwordWrapper}>
+                <input className={styles.input} type={showConfirmPassword ? "text" : "password"} value={signupConfirmPassword} onChange={e => setSignupConfirmPassword(e.target.value)} placeholder="Confirm your password" required />
+                <button type="button" className={styles.eyeBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
                 </button>
               </div>
 
