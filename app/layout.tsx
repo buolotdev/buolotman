@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import SuppressHydrationWarnings from "./components/SuppressHydrationWarnings";
 import IconifyLoader from "./components/IconifyLoader";
 import Providers from "./components/Providers";
+import MaintenanceGuard from "./components/MaintenanceGuard";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,7 +43,11 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <SuppressHydrationWarnings />
-        <Providers>{children}</Providers>
+        <Providers>
+          <MaintenanceGuard>
+            {children}
+          </MaintenanceGuard>
+        </Providers>
         <IconifyLoader />
       </body>
     </html>
