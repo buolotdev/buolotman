@@ -343,10 +343,21 @@ def user_public_profile(request, user_id):
         profile, _ = TechnicianProfile.objects.get_or_create(user=user)
         data['bio'] = profile.bio or 'Senior Certified Technician with extensive multi-disciplinary field experience and verified standards compliance.'
         hourly_val = str(profile.hourly_rate) if profile.hourly_rate else "5000"
-        clean_hourly = ''.join(c for c in hourly_val if c.isdigit()) or '5000'
-        num_hourly = int(clean_hourly)
-        data['hourly_rate'] = f"{num_hourly:,} XOF / hr"
-        data['daily_rate'] = f"{(num_hourly * 7):,} XOF / day"
+        clean_hourly = ''.join(c for c in hourly_val if c.isdigit() or c == '.') or '5000'
+        try:
+            num_hourly = float(clean_hourly)
+            if num_hourly.is_integer():
+                formatted_hourly = f"{int(num_hourly):,} XOF / hr"
+                formatted_daily = f"{int(num_hourly * 7):,} XOF / day"
+            else:
+                formatted_hourly = f"{num_hourly:,.2f} XOF / hr"
+                formatted_daily = f"{(num_hourly * 7):,.2f} XOF / day"
+        except:
+            formatted_hourly = f"{hourly_val} XOF / hr"
+            formatted_daily = "35,000 XOF / day"
+
+        data['hourly_rate'] = formatted_hourly
+        data['daily_rate'] = formatted_daily
         data['inspection_fee'] = "10,000 XOF"
         data['skills'] = [s.name for s in profile.skills.all()] or ['Electrical & Solar Energy', 'System Diagnostics', 'Technical Installation & Maintenance']
         data['languages'] = profile.languages or ['French', 'English']
@@ -363,33 +374,15 @@ def user_public_profile(request, user_id):
             "Cable Puller & Conduit Bender"
         ]
 
-        portfolio_qs = PortfolioItem.objects.filter(user=user)
-        if portfolio_qs.exists():
-            from .serializers import PortfolioItemSerializer
-            data['portfolio'] = PortfolioItemSerializer(portfolio_qs, many=True).data
-        elif profile.portfolio:
+        if profile.portfolio and isinstance(profile.portfolio, list) and len(profile.portfolio) > 0:
             data['portfolio'] = profile.portfolio
         else:
-            data['portfolio'] = [
-                {
-                    "id": "port-1",
-                    "title": "15kVA Solar PV & Hybrid Inverter Installation",
-                    "category": "Electrical & Solar",
-                    "description": "Complete off-grid solar system with 12x 540W Mono panels and lithium battery bank.",
-                    "location": f"{user.address or 'Cotonou'}, {user.country or 'Benin'}",
-                    "completionDate": "Recent",
-                    "budget": "4,500,000 XOF"
-                },
-                {
-                    "id": "port-2",
-                    "title": "Commercial Building Electrical Distribution Board",
-                    "category": "Electrical & Power",
-                    "description": "Installation of 3-phase main distribution board, surge arresters, and cable tray systems.",
-                    "location": f"{user.address or 'Porto-Novo'}, {user.country or 'Benin'}",
-                    "completionDate": "Recent",
-                    "budget": "1,850,000 XOF"
-                }
-            ]
+            portfolio_qs = PortfolioItem.objects.filter(user=user)
+            if portfolio_qs.exists():
+                from .serializers import PortfolioItemSerializer
+                data['portfolio'] = PortfolioItemSerializer(portfolio_qs, many=True).data
+            else:
+                data['portfolio'] = []
     elif user.role == 'COMPANY':
         company = getattr(user, 'company_profile', None)
         if company:

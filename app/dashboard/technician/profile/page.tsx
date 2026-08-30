@@ -504,6 +504,12 @@ export default function TechnicianProfilePage() {
     setNewProjPhotoUrl("");
     setShowAddProjectModal(false);
     toast.success("Portfolio Added", "Your completed work has been added to your profile gallery.");
+
+    // Auto-sync with backend
+    api.updateProfile({
+      portfolio: updated,
+      technician_profile: { portfolio: updated }
+    }).catch((err) => console.warn("Portfolio auto-sync note:", err));
   };
 
   const handleDeletePortfolio = (id: string) => {
@@ -511,6 +517,12 @@ export default function TechnicianProfilePage() {
     setPortfolioList(updated);
     localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(updated));
     toast.info("Project Removed", "Portfolio project deleted.");
+
+    // Auto-sync with backend
+    api.updateProfile({
+      portfolio: updated,
+      technician_profile: { portfolio: updated }
+    }).catch((err) => console.warn("Portfolio auto-sync note:", err));
   };
 
   // Document Upload for Specific Slots (Front ID, Back ID, Trade Cert, Selfie)
@@ -1311,78 +1323,6 @@ export default function TechnicianProfilePage() {
                     </div>
                   ))}
                 </div>
-
-                {/* Add Portfolio Modal */}
-                {showAddProjectModal && (
-                  <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.75)", backdropFilter: "blur(8px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-                    <div style={{ background: "#ffffff", borderRadius: 20, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", padding: 24 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #f1f5f9", paddingBottom: 12 }}>
-                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#001f3f" }}>Add Completed Work / Project</h3>
-                        <button type="button" onClick={() => setShowAddProjectModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <iconify-icon icon="lucide:x" />
-                        </button>
-                      </div>
-
-                      <form onSubmit={handleAddPortfolio}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                          <div>
-                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Title *</label>
-                            <input className={styles.formInput} value={newProjTitle} onChange={(e) => setNewProjTitle(e.target.value)} placeholder="e.g. 10kVA Solar System & Distribution Panel" required />
-                          </div>
-                          <div>
-                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Trade Category ({PLATFORM_TRADE_CATEGORIES.length} Categories)</label>
-                            <select className={styles.formInput} value={newProjCategory} onChange={(e) => setNewProjCategory(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 8 }}>
-                              {PLATFORM_TRADE_CATEGORIES.map((cat) => (
-                                <option key={cat} value={cat}>{cat}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Description</label>
-                            <textarea className={styles.formTextarea} rows={3} value={newProjDesc} onChange={(e) => setNewProjDesc(e.target.value)} placeholder="Explain the problem solved, materials installed, and outcome..." />
-                          </div>
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                            <div>
-                              <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Location</label>
-                              <input className={styles.formInput} value={newProjLocation} onChange={(e) => setNewProjLocation(e.target.value)} placeholder="e.g. Haie Vive, Cotonou" />
-                            </div>
-                            <div>
-                              <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Value (Optional)</label>
-                              <input className={styles.formInput} value={newProjBudget} onChange={(e) => setNewProjBudget(e.target.value)} placeholder="e.g. 750,000 XOF" />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Project Cover Photo (Optional)</label>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className={styles.formInput}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = () => setNewProjPhotoUrl(reader.result as string);
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                            {newProjPhotoUrl && (
-                              <div style={{ marginTop: 8, width: "100%", height: 100, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0" }}>
-                                <img src={newProjPhotoUrl} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-                          <button type="button" onClick={() => setShowAddProjectModal(false)} className={styles.outlineButton} style={{ flex: 1, justifyContent: "center" }}>Cancel</button>
-                          <button type="submit" className={styles.primaryButton} style={{ flex: 1.2, justifyContent: "center" }}>Save Project</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
               </section>
             )}
 
@@ -1685,6 +1625,78 @@ export default function TechnicianProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* ADD PORTFOLIO MODAL (ROOT LEVEL - CANNOT BE OVERLAPPED) */}
+      {showAddProjectModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.85)", backdropFilter: "blur(10px)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#ffffff", borderRadius: 24, width: "100%", maxWidth: 540, maxHeight: "90vh", overflowY: "auto", padding: 28, boxShadow: "0 25px 60px rgba(0,0,0,0.35)", position: "relative" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, borderBottom: "1px solid #f1f5f9", paddingBottom: 14 }}>
+              <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>Add Completed Work / Project</h3>
+              <button type="button" onClick={() => setShowAddProjectModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <iconify-icon icon="lucide:x" style={{ fontSize: 18, color: "#64748b" }} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddPortfolio}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Title *</label>
+                  <input className={styles.formInput} value={newProjTitle} onChange={(e) => setNewProjTitle(e.target.value)} placeholder="e.g. 10kVA Solar System & Distribution Panel" required />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Trade Category ({PLATFORM_TRADE_CATEGORIES.length} Categories)</label>
+                  <select className={styles.formInput} value={newProjCategory} onChange={(e) => setNewProjCategory(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 8 }}>
+                    {PLATFORM_TRADE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Description</label>
+                  <textarea className={styles.formTextarea} rows={3} value={newProjDesc} onChange={(e) => setNewProjDesc(e.target.value)} placeholder="Explain the problem solved, materials installed, and outcome..." />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Location</label>
+                    <input className={styles.formInput} value={newProjLocation} onChange={(e) => setNewProjLocation(e.target.value)} placeholder="e.g. Haie Vive, Cotonou" />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Value (Optional)</label>
+                    <input className={styles.formInput} value={newProjBudget} onChange={(e) => setNewProjBudget(e.target.value)} placeholder="e.g. 750,000 XOF" />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Project Cover Photo (Optional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className={styles.formInput}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setNewProjPhotoUrl(reader.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  {newProjPhotoUrl && (
+                    <div style={{ marginTop: 8, width: "100%", height: 110, borderRadius: 12, overflow: "hidden", border: "1px solid #e2e8f0" }}>
+                      <img src={newProjPhotoUrl} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 12, marginTop: 22 }}>
+                <button type="button" onClick={() => setShowAddProjectModal(false)} className={styles.outlineButton} style={{ flex: 1, justifyContent: "center", minHeight: 46 }}>Cancel</button>
+                <button type="submit" className={styles.primaryButton} style={{ flex: 1.3, justifyContent: "center", minHeight: 46, background: "linear-gradient(135deg, #ff4500, #ff7a1f)" }}>Save Project</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

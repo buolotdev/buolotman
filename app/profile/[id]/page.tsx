@@ -208,30 +208,11 @@ export default function PublicProfilePage() {
     ? (profile?.services_offered && profile.services_offered.length > 0 ? profile.services_offered : [])
     : defaultSkills;
 
-  const defaultPortfolio = [
-    {
-      id: "port-1",
-      title: "15kVA Solar PV & Hybrid Inverter Installation",
-      category: "Electrical & Solar Energy",
-      description: "Complete off-grid solar system with 12x 540W Mono panels and lithium battery bank.",
-      location: location,
-      completionDate: "Recent",
-      budget: "4,500,000 XOF",
-    },
-    {
-      id: "port-2",
-      title: "Commercial Building Electrical Distribution Board",
-      category: "Electrical & Power",
-      description: "Installation of 3-phase main distribution board, surge arresters, and cable tray systems.",
-      location: location,
-      completionDate: "Recent",
-      budget: "1,850,000 XOF",
-    }
-  ];
-
-  const portfolioList = (profile?.portfolio && profile.portfolio.length > 0)
+  const portfolioList = (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0)
     ? profile.portfolio
-    : defaultPortfolio;
+    : (profile?.role === "COMPANY" && Array.isArray((profile as any)?.projects) && (profile as any).projects.length > 0)
+    ? (profile as any).projects
+    : [];
 
   const defaultTools = [
     "Digital Multimeter (Fluke)",
@@ -456,39 +437,47 @@ export default function PublicProfilePage() {
                     Visual Portfolio & Previous Completed Work
                   </h2>
                   {portfolioList.length === 0 ? (
-                    <p className={styles.sectionText} style={{ fontStyle: "italic", color: "#94a3b8" }}>
-                      No visual portfolio projects published yet.
-                    </p>
+                    <div style={{ textAlign: "center", padding: "32px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:briefcase" style={{ fontSize: 32, color: "#94a3b8", marginBottom: 8 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 14, fontWeight: 600 }}>No visual portfolio projects published yet.</p>
+                    </div>
                   ) : (
                     <div className={styles.portfolioGrid}>
-                      {portfolioList.map((item: any) => (
-                        <div key={item.id || item.title} className={styles.portfolioCard}>
-                          <div className={styles.portfolioVisual}>
-                            {item.photoUrl ? (
-                              <img src={getImageUrl(item.photoUrl)} alt={item.title} />
-                            ) : (
-                              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
-                                <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36 }} />
-                                <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified Job</span>
+                      {portfolioList.map((item: any, idx: number) => {
+                        const img = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url;
+                        const budgetVal = item.budget || item.project_value || (item.budget_xof ? `${item.budget_xof} XOF` : "");
+                        const compDate = item.completionDate || item.completion_date || item.completed_date || "Completed";
+                        const locVal = item.location || location;
+
+                        return (
+                          <div key={item.id || item.title || idx} className={styles.portfolioCard}>
+                            <div className={styles.portfolioVisual}>
+                              {img ? (
+                                <img src={getImageUrl(img)} alt={item.title || "Project photo"} />
+                              ) : (
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
+                                  <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36 }} />
+                                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified Job</span>
+                                </div>
+                              )}
+                              {budgetVal && (
+                                <span className={styles.portfolioBudgetBadge}>
+                                  {budgetVal}
+                                </span>
+                              )}
+                            </div>
+                            <div className={styles.portfolioBody}>
+                              <span className={styles.portfolioCategory}>{item.category || "General Technical"}</span>
+                              <h4 className={styles.portfolioTitle}>{item.title}</h4>
+                              <p className={styles.portfolioDesc}>{item.description}</p>
+                              <div className={styles.portfolioFooter}>
+                                <span>📍 {locVal}</span>
+                                <span>⏳ {compDate}</span>
                               </div>
-                            )}
-                            {item.budget && (
-                              <span className={styles.portfolioBudgetBadge}>
-                                {item.budget}
-                              </span>
-                            )}
-                          </div>
-                          <div className={styles.portfolioBody}>
-                            <span className={styles.portfolioCategory}>{item.category || "General Technical"}</span>
-                            <h4 className={styles.portfolioTitle}>{item.title}</h4>
-                            <p className={styles.portfolioDesc}>{item.description}</p>
-                            <div className={styles.portfolioFooter}>
-                              <span>📍 {item.location || location}</span>
-                              <span>⏳ {item.completionDate || "Completed"}</span>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </section>
