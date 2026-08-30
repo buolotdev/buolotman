@@ -41,7 +41,7 @@ const translations: Record<string, Record<string, string>> = {
     portfolioCaseStudies: "Case Studies & Past Completed Contracts",
     noPortfolioListed: "No past project references published yet.",
     keyPersonnel: "Key Technical Personnel & Engineering Leadership",
-    noTeamListed: "No key engineering personnel listed yet.",
+    noTeamListed: "No key engineering personnel declared yet.",
     heavyFleet: "Owned Heavy Machinery, Equipment & Facilities",
     noEquipmentListed: "No specialized heavy machinery declared yet.",
     corporateComplianceVault: "Corporate Legal Compliance Vault",
@@ -51,6 +51,7 @@ const translations: Record<string, Record<string, string>> = {
     repVal: "Authorized Legal Representative",
     verifiedStatus: "Verified ✓",
     activeStatus: "Active ✓",
+    pendingStatus: "Under Review",
     corporateHQ: "Headquarters & Contact Details",
     physicalAddress: "Physical Headquarters Address",
     officialWebsite: "Official Website",
@@ -132,6 +133,7 @@ const translations: Record<string, Record<string, string>> = {
     repVal: "Représentant Légal Agréé",
     verifiedStatus: "Vérifié ✓",
     activeStatus: "Actif ✓",
+    pendingStatus: "En cours d'examen",
     corporateHQ: "Siège Social & Coordonnées",
     physicalAddress: "Adresse Physique du Siège",
     officialWebsite: "Site Web Officiel",
@@ -175,46 +177,6 @@ const translations: Record<string, Record<string, string>> = {
   }
 };
 
-const DEFAULT_COMPANY_CAPABILITIES = {
-  maxProjectBudget: "250,000,000 XOF",
-  simultaneousProjects: "5 Sites",
-  permanentWorkforce: "42 Staff",
-  qualifiedEngineers: "8 Engineers",
-  facilities: "Central Workshop & 1,200m² Storage Depot",
-  equipment: [
-    "Caterpillar 320D Excavator",
-    "2x Mercedes 20T Dump Trucks",
-    "Potain Self-Erecting Tower Crane",
-    "50kVA Perkins Diesel Backup Generator",
-    "Total Station Leica TS07 Survey Gear",
-    "Heavy Scaffolding Systems (2,000m²)"
-  ]
-};
-
-const DEFAULT_COMPANY_TEAM = [
-  {
-    id: "tm-1",
-    name: "Nelson Tagor",
-    role: "Managing Director / CEO",
-    qualification: "M.Sc. Civil & Structural Engineering",
-    experienceYears: "14+ Years",
-  },
-  {
-    id: "tm-2",
-    name: "Marcelle Dossou",
-    role: "Lead Project Manager",
-    qualification: "PMP Certified / B.Sc. Construction Mgmt",
-    experienceYears: "9+ Years",
-  },
-  {
-    id: "tm-3",
-    name: "Alexandre Houeto",
-    role: "Chief Electrical & Solar Engineer",
-    qualification: "Chartered Electrical Engineer (OIB)",
-    experienceYears: "11+ Years",
-  }
-];
-
 export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
   const id = Number(params?.id);
@@ -248,33 +210,37 @@ export default function PublicProfilePage() {
       } catch {}
 
       // 2. Try direct company endpoint
-      if (!baseUser || baseUser.role === "COMPANY") {
-        try {
-          const compRes = await api.getCompanyById(validId);
-          if (compRes && compRes.id) {
-            baseUser = {
-              ...(baseUser || {}),
-              ...compRes,
-              id: compRes.id,
-              role: "COMPANY",
-              company_name: compRes.company_name || baseUser?.company_name,
-              logo_url: compRes.logo || compRes.logo_url || baseUser?.logo_url,
-              banner_url: compRes.banner_url || compRes.cover_image || baseUser?.banner_url,
-              bio: compRes.description || compRes.bio || baseUser?.bio,
-              about: compRes.about || compRes.description || baseUser?.about,
-              city: compRes.city || baseUser?.city,
-              country: compRes.country || baseUser?.country,
-              headquarters: compRes.headquarters || baseUser?.headquarters,
-              is_verified: compRes.is_verified ?? true,
-              average_rating: compRes.average_rating || "4.9",
-              review_count: compRes.review_count || 86,
-              services_offered: compRes.services_offered || compRes.services || baseUser?.services_offered || [],
-              skills: compRes.skills || baseUser?.skills || [],
-              portfolio: compRes.portfolio || compRes.projects || baseUser?.portfolio || [],
-            };
-          }
-        } catch {}
-      }
+      try {
+        const compRes = await api.getCompanyById(validId);
+        if (compRes && compRes.id) {
+          baseUser = {
+            ...(baseUser || {}),
+            ...compRes,
+            role: "COMPANY",
+            company_name: compRes.company_name || baseUser?.company_name,
+            trading_name: compRes.trading_name || compRes.company_name || baseUser?.trading_name,
+            company_type: compRes.company_type || baseUser?.company_type,
+            year_founded: compRes.year_founded || baseUser?.year_founded,
+            industry: compRes.industry || baseUser?.industry,
+            subject_title: compRes.subject_title || baseUser?.subject_title,
+            about: compRes.about || compRes.description || baseUser?.about || baseUser?.bio,
+            website: compRes.website || baseUser?.website,
+            headquarters: compRes.headquarters || compRes.city || baseUser?.headquarters,
+            employee_count: compRes.employee_count || compRes.company_size || baseUser?.employee_count,
+            working_hours: compRes.working_hours || compRes.business_hours || baseUser?.working_hours,
+            preferred_language: compRes.preferred_language || baseUser?.preferred_language,
+            logo_url: compRes.logo || compRes.logo_url || baseUser?.logo_url,
+            banner_url: compRes.banner_url || compRes.cover_image || compRes.cover_url || baseUser?.banner_url,
+            is_verified: compRes.is_verified ?? baseUser?.is_verified ?? false,
+            average_rating: compRes.average_rating || baseUser?.average_rating,
+            review_count: compRes.review_count ?? baseUser?.review_count ?? 0,
+            completed_tasks: compRes.completed_tasks ?? baseUser?.completed_tasks ?? 0,
+            services: compRes.services || baseUser?.services || [],
+            projects: compRes.projects || compRes.portfolio || baseUser?.projects || [],
+            team: compRes.team_members || compRes.team || baseUser?.team || [],
+          };
+        }
+      } catch {}
 
       // 3. Fallback to technician users list
       if (!baseUser) {
@@ -305,16 +271,21 @@ export default function PublicProfilePage() {
           }
 
           if (isOwnProfile) {
-            const isComp = baseUser?.role === "COMPANY" || localStorage.getItem("user_role") === "COMPANY";
+            const rawRole = localStorage.getItem("user_role");
+            const isComp = baseUser?.role === "COMPANY" || rawRole === "COMPANY";
             if (isComp) {
               const rawCap = localStorage.getItem("boulotman_company_capabilities");
               const rawTeam = localStorage.getItem("boulotman_company_team");
-              baseUser = {
-                ...(baseUser || {}),
-                role: "COMPANY",
-                capabilities: rawCap ? JSON.parse(rawCap) : DEFAULT_COMPANY_CAPABILITIES,
-                team: rawTeam ? JSON.parse(rawTeam) : DEFAULT_COMPANY_TEAM,
-              };
+              if (rawCap) {
+                try {
+                  baseUser.capabilities = JSON.parse(rawCap);
+                } catch {}
+              }
+              if (rawTeam) {
+                try {
+                  baseUser.team = JSON.parse(rawTeam);
+                } catch {}
+              }
             } else {
               const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
               const rawPort = localStorage.getItem("boulotman_technician_portfolio");
@@ -361,17 +332,18 @@ export default function PublicProfilePage() {
   const avatarSrc = getImageUrl(profile?.avatar_url || profile?.logo_url || profile?.logo || "");
   const coverSrc = getImageUrl(profile?.banner_url || profile?.cover_url || profile?.cover_image || "");
 
-  // Corporate Specific Attributes
+  // Corporate Specific Attributes (Strictly real from DB / Form)
   const companyName = profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Enterprise Contractor";
-  const tradingName = profile?.trading_name || companyName;
-  const companyType = profile?.company_type || "Limited Liability Company (SARL / Ltd)";
-  const industry = profile?.industry || profile?.category || "Civil & Building Construction";
-  const corporateTagline = profile?.subject_title || profile?.headline || `${industry} • Corporate Contractor`;
-  const yearFounded = profile?.year_founded || "2015";
-  const employeeCount = profile?.employee_count || "25 - 50 Employees (8 Chartered Engineers)";
-  const headquarters = profile?.headquarters || profile?.city || profile?.address || "Cotonou, Benin";
-  const website = profile?.website || "https://boulotman.com";
-  const workingHours = profile?.working_hours || "Mon - Sat: 07:30 - 18:00";
+  const tradingName = profile?.trading_name || "";
+  const companyType = profile?.company_type || "";
+  const industry = profile?.industry || profile?.category || "Contracting";
+  const corporateTagline = profile?.subject_title || profile?.headline || (industry ? `${industry} • Corporate Contractor` : "Corporate Contractor");
+  const yearFounded = profile?.year_founded || "";
+  const employeeCount = profile?.employee_count || profile?.company_size || "";
+  const headquarters = profile?.headquarters || profile?.city || profile?.address || profile?.country || "";
+  const website = profile?.website || "";
+  const workingHours = profile?.working_hours || profile?.business_hours || "";
+  const preferredLang = profile?.preferred_language || "fr";
 
   // Individual Specialist Attributes
   const techDisplayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Specialist";
@@ -379,7 +351,7 @@ export default function PublicProfilePage() {
   const techHeadline = profile?.headline || profile?.technician_profile?.headline || `Certified ${techCategory} Specialist`;
   const techCity = profile?.city || profile?.technician_profile?.city || profile?.address || "";
   const techCountry = profile?.country || profile?.technician_profile?.country || "Benin";
-  const techLocation = techCity && techCountry ? `${techCity}, ${techCountry}` : (techCity || techCountry || "Cotonou, Benin");
+  const techLocation = techCity && techCountry ? `${techCity}, ${techCountry}` : (techCity || techCountry || "Benin");
 
   // Initials
   const initials = isCompany
@@ -390,16 +362,19 @@ export default function PublicProfilePage() {
   const hasRating = profile?.average_rating && Number(profile.average_rating) > 0;
   const ratingDisplay = hasRating
     ? `${Number(profile?.average_rating).toFixed(1)} / 5.0`
-    : "4.9 / 5.0";
+    : "5.0 / 5.0";
 
-  const reviewsCount = profile?.review_count || 86;
-  const completedJobs = profile?.tasks_completed_count || profile?.completed_jobs || 14;
+  const reviewsCount = profile?.review_count ?? 0;
+  const completedJobs = profile?.completed_tasks ?? profile?.tasks_completed_count ?? profile?.completed_jobs ?? 0;
   const completionRate = profile?.completion_rate ? `${profile.completion_rate}%` : "100%";
 
   const bioText = profile?.about || profile?.bio || profile?.technician_profile?.bio || "";
 
-  // Lists
+  // Lists (NO hardcoded fake entries)
   const servicesList: any[] = useMemo(() => {
+    if (Array.isArray(profile?.services) && profile.services.length > 0) {
+      return profile.services;
+    }
     if (Array.isArray(profile?.services_offered) && profile.services_offered.length > 0) {
       return profile.services_offered.map((s: any) => {
         if (typeof s === "string") {
@@ -407,47 +382,37 @@ export default function PublicProfilePage() {
             title: s,
             category: industry,
             pricing_model: "Request Quote (Enterprise Tender)",
-            description: `Professional commercial ${s.toLowerCase()} executed by certified technicians and chartered engineers.`,
+            description: "",
           };
         }
         return s;
       });
     }
-    return [
-      {
-        title: "Civil & Structural Building Construction",
-        category: "Civil & Construction",
-        pricing_model: "Request Quote (Enterprise Tender)",
-        description: "Full turnkey civil engineering, structural concrete, foundations, and commercial building execution.",
-      },
-      {
-        title: "Commercial Electrical & Solar PV Installations",
-        category: "Electrical & Solar",
-        pricing_model: "Fixed Project Price",
-        description: "High-voltage distribution, commercial solar mini-grids, industrial backup systems and wiring.",
-      },
-      {
-        title: "HVAC & Industrial Cooling Systems",
-        category: "HVAC & Cooling",
-        pricing_model: "Enterprise Tender",
-        description: "Centralized HVAC, commercial cold rooms, ventilation, and preventive chiller servicing.",
-      }
-    ];
+    return [];
   }, [profile, industry]);
 
   const portfolioList: any[] = useMemo(() => {
-    if (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0) return profile.portfolio;
     if (Array.isArray(profile?.projects) && profile.projects.length > 0) return profile.projects;
+    if (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0) return profile.portfolio;
     return [];
   }, [profile]);
 
   const teamList: any[] = useMemo(() => {
     if (Array.isArray(profile?.team) && profile.team.length > 0) return profile.team;
-    return DEFAULT_COMPANY_TEAM;
+    if (Array.isArray(profile?.team_members) && profile.team_members.length > 0) return profile.team_members;
+    return [];
   }, [profile]);
 
-  const capabilities = profile?.capabilities || DEFAULT_COMPANY_CAPABILITIES;
-  const equipmentList: string[] = capabilities?.equipment || DEFAULT_COMPANY_CAPABILITIES.equipment;
+  const capabilities = profile?.capabilities || null;
+  const equipmentList: string[] = useMemo(() => {
+    if (Array.isArray(capabilities?.equipment) && capabilities.equipment.length > 0) {
+      return capabilities.equipment;
+    }
+    if (Array.isArray(profile?.equipment) && profile.equipment.length > 0) {
+      return profile.equipment;
+    }
+    return [];
+  }, [capabilities, profile]);
 
   // Individual specialist pricing & tools
   const rawTools = profile?.tools || profile?.technician_profile?.languages || profile?.languages;
@@ -564,18 +529,26 @@ export default function PublicProfilePage() {
                     </div>
 
                     <div className={styles.corporateMetaList}>
-                      <span>
-                        <iconify-icon icon="lucide:map-pin" /> {headquarters}
-                      </span>
-                      <span>
-                        <iconify-icon icon="lucide:calendar" /> Est. {yearFounded}
-                      </span>
-                      <span>
-                        <iconify-icon icon="lucide:users" /> {employeeCount}
-                      </span>
-                      <span>
-                        <iconify-icon icon="lucide:landmark" /> {companyType}
-                      </span>
+                      {headquarters && (
+                        <span>
+                          <iconify-icon icon="lucide:map-pin" /> {headquarters}
+                        </span>
+                      )}
+                      {yearFounded && (
+                        <span>
+                          <iconify-icon icon="lucide:calendar" /> Est. {yearFounded}
+                        </span>
+                      )}
+                      {employeeCount && (
+                        <span>
+                          <iconify-icon icon="lucide:users" /> {employeeCount}
+                        </span>
+                      )}
+                      {companyType && (
+                        <span>
+                          <iconify-icon icon="lucide:landmark" /> {companyType}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -610,7 +583,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className={styles.corporateStatLabel}>{t.maxTenderCapacity}</div>
-                  <h3 className={styles.corporateStatValue}>{capabilities.maxProjectBudget || "250,000,000 XOF"}</h3>
+                  <h3 className={styles.corporateStatValue}>{capabilities?.maxProjectBudget || "Tender Quote Basis"}</h3>
                 </div>
               </div>
 
@@ -620,7 +593,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className={styles.corporateStatLabel}>{t.simultaneousSites}</div>
-                  <h3 className={styles.corporateStatValue}>{capabilities.simultaneousProjects || "5+ Active Sites"}</h3>
+                  <h3 className={styles.corporateStatValue}>{capabilities?.simultaneousProjects || "Multi-Site Execution"}</h3>
                 </div>
               </div>
 
@@ -630,7 +603,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className={styles.corporateStatLabel}>{t.workforceEngineers}</div>
-                  <h3 className={styles.corporateStatValue}>{capabilities.permanentWorkforce || "42 Staff • 8 Engineers"}</h3>
+                  <h3 className={styles.corporateStatValue}>{capabilities?.permanentWorkforce || employeeCount || "Technical Team"}</h3>
                 </div>
               </div>
 
@@ -640,7 +613,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className={styles.corporateStatLabel}>{t.insuranceCover}</div>
-                  <h3 className={styles.corporateStatValue}>500M XOF {t.insuredBadge}</h3>
+                  <h3 className={styles.corporateStatValue}>{profile?.is_verified ? t.insuredBadge : t.escrowGuaranteed}</h3>
                 </div>
               </div>
             </div>
@@ -659,7 +632,7 @@ export default function PublicProfilePage() {
                   </p>
 
                   {/* Operational Facilities */}
-                  {capabilities.facilities && (
+                  {capabilities?.facilities && (
                     <div style={{ marginTop: 16, padding: "14px 18px", background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: 10 }}>
                       <iconify-icon icon="lucide:warehouse" style={{ fontSize: 22, color: "#001f3f" }} />
                       <span style={{ fontSize: 13.5, color: "#334155", fontWeight: 700 }}>
@@ -677,6 +650,7 @@ export default function PublicProfilePage() {
                   </h2>
                   {servicesList.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:layers" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
                       <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>{t.noServicesListed}</p>
                     </div>
                   ) : (
@@ -688,7 +662,7 @@ export default function PublicProfilePage() {
                           <span className={styles.servicePricing}>
                             <iconify-icon icon="lucide:tag" /> {srv.pricing_model || "Request Quote"}
                           </span>
-                          <p className={styles.serviceDesc}>{srv.description}</p>
+                          {srv.description && <p className={styles.serviceDesc}>{srv.description}</p>}
                         </div>
                       ))}
                     </div>
@@ -699,7 +673,7 @@ export default function PublicProfilePage() {
                 <section className={styles.section}>
                   <h2 className={styles.sectionTitle}>
                     <iconify-icon icon="lucide:folder-check" style={{ color: "#ff4500" }} />
-                    {t.portfolioCaseStudies}
+                    {t.portfolioCaseStudies} ({portfolioList.length})
                   </h2>
                   {portfolioList.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "32px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
@@ -711,7 +685,7 @@ export default function PublicProfilePage() {
                       {portfolioList.map((item: any, idx: number) => {
                         const img = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url;
                         const budgetVal = item.budget || item.project_value || (item.budget_xof ? `${item.budget_xof} XOF` : "");
-                        const compDate = item.completionDate || item.completion_date || item.completed_date || "Completed";
+                        const compDate = item.completionDate || item.completion_date || item.completed_date || item.timeline || "Completed";
                         const clientName = item.client || item.client_name || "Enterprise Partner";
 
                         return (
@@ -734,7 +708,7 @@ export default function PublicProfilePage() {
                             <div className={styles.portfolioBody}>
                               <span className={styles.portfolioCategory}>{item.category || industry}</span>
                               <h4 className={styles.portfolioTitle}>{item.title}</h4>
-                              <p className={styles.portfolioDesc}>{item.description}</p>
+                              {item.description && <p className={styles.portfolioDesc}>{item.description}</p>}
                               <div className={styles.portfolioFooter}>
                                 <span>🏛️ {clientName}</span>
                                 <span>⏳ {compDate}</span>
@@ -751,43 +725,57 @@ export default function PublicProfilePage() {
                 <section className={styles.section}>
                   <h2 className={styles.sectionTitle}>
                     <iconify-icon icon="lucide:users" style={{ color: "#ff4500" }} />
-                    {t.keyPersonnel}
+                    {t.keyPersonnel} ({teamList.length})
                   </h2>
-                  <div className={styles.teamGrid}>
-                    {teamList.map((member: any) => (
-                      <div key={member.id || member.name} className={styles.teamCard}>
-                        <div className={styles.teamAvatar}>
-                          {member.name.substring(0, 2).toUpperCase()}
+                  {teamList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:users" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>{t.noTeamListed}</p>
+                    </div>
+                  ) : (
+                    <div className={styles.teamGrid}>
+                      {teamList.map((member: any, idx: number) => (
+                        <div key={member.id || idx} className={styles.teamCard}>
+                          <div className={styles.teamAvatar}>
+                            {(member.name || "TM").substring(0, 2).toUpperCase()}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <h4 className={styles.teamName}>{member.name}</h4>
+                            <div className={styles.teamRole}>{member.role}</div>
+                            {member.qualification && <p className={styles.teamQual}>🎓 {member.qualification}</p>}
+                            {member.experienceYears && (
+                              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, display: "inline-block", marginTop: 4 }}>
+                                ⏳ {member.experienceYears} {t.experience}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h4 className={styles.teamName}>{member.name}</h4>
-                          <div className={styles.teamRole}>{member.role}</div>
-                          <p className={styles.teamQual}>🎓 {member.qualification}</p>
-                          {member.experienceYears && (
-                            <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, display: "inline-block", marginTop: 4 }}>
-                              ⏳ {member.experienceYears} {t.experience}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
 
                 {/* 5. Heavy Machinery Fleet & Equipment */}
                 <section className={styles.section}>
                   <h2 className={styles.sectionTitle}>
                     <iconify-icon icon="lucide:truck" style={{ color: "#ff4500" }} />
-                    {t.heavyFleet}
+                    {t.heavyFleet} ({equipmentList.length})
                   </h2>
-                  <div className={styles.equipmentGrid}>
-                    {equipmentList.map((eq: string, i: number) => (
-                      <div key={i} className={styles.equipmentChip}>
-                        <iconify-icon icon="lucide:check-circle" />
-                        <span>{eq}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {equipmentList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:truck" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>{t.noEquipmentListed}</p>
+                    </div>
+                  ) : (
+                    <div className={styles.equipmentGrid}>
+                      {equipmentList.map((eq: string, i: number) => (
+                        <div key={i} className={styles.equipmentChip}>
+                          <iconify-icon icon="lucide:check-circle" />
+                          <span>{eq}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
               </div>
 
@@ -806,7 +794,7 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:building" /></div>
                         <span className={styles.vaultTitle}>{t.rccmRegVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{t.verifiedStatus}</span>
+                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -814,7 +802,7 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:receipt" /></div>
                         <span className={styles.vaultTitle}>{t.ifuTaxVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{t.verifiedStatus}</span>
+                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -822,7 +810,7 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:shield-check" /></div>
                         <span className={styles.vaultTitle}>{t.insuranceVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{t.activeStatus}</span>
+                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.activeStatus : t.pendingStatus}</span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -830,7 +818,7 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:user-check" /></div>
                         <span className={styles.vaultTitle}>{t.repVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{t.verifiedStatus}</span>
+                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
                     </div>
                   </div>
                 </div>
@@ -843,23 +831,31 @@ export default function PublicProfilePage() {
                   </h3>
 
                   <ul className={styles.detailsList}>
-                    <li className={styles.detailsItem}>
-                      <span className={styles.detailsLabel}>{t.physicalAddress}</span>
-                      <span className={styles.detailsValue}>{headquarters}</span>
-                    </li>
-                    <li className={styles.detailsItem}>
-                      <span className={styles.detailsLabel}>{t.officialWebsite}</span>
-                      <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noreferrer" style={{ color: "#ff4500", fontWeight: 700, fontSize: 13.5, textDecoration: "none" }}>
-                        {website.replace("https://", "").replace("http://", "")} ↗
-                      </a>
-                    </li>
-                    <li className={styles.detailsItem}>
-                      <span className={styles.detailsLabel}>{t.operatingHours}</span>
-                      <span className={styles.detailsValue}>{workingHours}</span>
-                    </li>
+                    {headquarters && (
+                      <li className={styles.detailsItem}>
+                        <span className={styles.detailsLabel}>{t.physicalAddress}</span>
+                        <span className={styles.detailsValue}>{headquarters}</span>
+                      </li>
+                    )}
+                    {website && (
+                      <li className={styles.detailsItem}>
+                        <span className={styles.detailsLabel}>{t.officialWebsite}</span>
+                        <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noreferrer" style={{ color: "#ff4500", fontWeight: 700, fontSize: 13.5, textDecoration: "none" }}>
+                          {website.replace("https://", "").replace("http://", "")} ↗
+                        </a>
+                      </li>
+                    )}
+                    {workingHours && (
+                      <li className={styles.detailsItem}>
+                        <span className={styles.detailsLabel}>{t.operatingHours}</span>
+                        <span className={styles.detailsValue}>{workingHours}</span>
+                      </li>
+                    )}
                     <li className={styles.detailsItem}>
                       <span className={styles.detailsLabel}>{t.languagesSpoken}</span>
-                      <span className={styles.detailsValue}>Français (French), English</span>
+                      <span className={styles.detailsValue}>
+                        {preferredLang === "en" ? "English" : "Français (French)"}
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -1042,7 +1038,7 @@ export default function PublicProfilePage() {
                 <section className={styles.section}>
                   <h2 className={styles.sectionTitle}>
                     <iconify-icon icon="lucide:image" style={{ color: "#ff4500" }} />
-                    {t.visualPortfolio}
+                    {t.visualPortfolio} ({portfolioList.length})
                   </h2>
                   {portfolioList.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "32px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
@@ -1054,7 +1050,7 @@ export default function PublicProfilePage() {
                       {portfolioList.map((item: any, idx: number) => {
                         const img = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url;
                         const budgetVal = item.budget || item.project_value || (item.budget_xof ? `${item.budget_xof} XOF` : "");
-                        const compDate = item.completionDate || item.completion_date || item.completed_date || "Completed";
+                        const compDate = item.completionDate || item.completion_date || item.completed_date || item.timeline || "Completed";
 
                         return (
                           <div key={item.id || item.title || idx} className={styles.portfolioCard}>
@@ -1076,7 +1072,7 @@ export default function PublicProfilePage() {
                             <div className={styles.portfolioBody}>
                               <span className={styles.portfolioCategory}>{item.category || techCategory}</span>
                               <h4 className={styles.portfolioTitle}>{item.title}</h4>
-                              <p className={styles.portfolioDesc}>{item.description}</p>
+                              {item.description && <p className={styles.portfolioDesc}>{item.description}</p>}
                               <div className={styles.portfolioFooter}>
                                 <span>📍 {techLocation}</span>
                                 <span>⏳ {compDate}</span>
