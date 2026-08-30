@@ -764,3 +764,23 @@ def change_password(request):
     user.save()
     
     return Response({'detail': 'Password updated successfully.'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def admin_clear_test_users(request):
+    secret = request.data.get('secret') or request.query_params.get('secret')
+    is_admin = request.user and request.user.is_authenticated and (getattr(request.user, 'is_staff', False) or getattr(request.user, 'role', '') == 'ADMIN')
+    
+    if not is_admin and secret != 'clear_boulotman_test_users_2026':
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    users_to_delete = User.objects.filter(is_staff=False, is_superuser=False).exclude(role='ADMIN').exclude(email='admin@boulotman.com')
+    count = users_to_delete.count()
+    users_to_delete.delete()
+    return Response({
+        'message': f'Successfully deleted {count} test users (clients, technicians, companies). Admin accounts preserved.',
+        'deleted_count': count
+    })

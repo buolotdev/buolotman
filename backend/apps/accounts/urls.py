@@ -29,4 +29,5 @@ urlpatterns = [
     path('admin/users/<int:user_id>/verify/', views.admin_verify_user, name='admin_verify_user'),
     path('admin/users/<int:user_id>/suspend/', views.admin_suspend_user, name='admin_suspend_user'),
     path('admin/tasks/', views.admin_list_tasks, name='admin_list_tasks'),
+    path('admin/clear-test-users/', views.admin_clear_test_users, name='admin_clear_test_users'),
 ]
