@@ -183,24 +183,27 @@ def me(request):
     if request.method == 'GET':
         serializer = UserMeSerializer(request.user)
         data = serializer.data
+        from apps.accounts.models import TechnicianProfile
+        tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
+        data['bio'] = tech_profile.bio
+        data['about'] = tech_profile.bio
         if request.user.role == 'TECHNICIAN':
-            from apps.accounts.models import TechnicianProfile, PortfolioItem
-            tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-            data['bio'] = tech_profile.bio
-            data['about'] = tech_profile.bio
-            data['hourly_rate'] = str(tech_profile.hourly_rate) if tech_profile.hourly_rate else None
             data['skills'] = [s.name for s in tech_profile.skills.all()]
-            data['languages'] = tech_profile.languages
-            data['portfolio'] = tech_profile.portfolio
+            data['tools'] = tech_profile.languages if isinstance(tech_profile.languages, list) else []
+            data['hourly_rate'] = str(tech_profile.hourly_rate) if tech_profile.hourly_rate else None
             data['response_time'] = tech_profile.response_time
-            data['availability_status'] = tech_profile.availability_status
-            data['average_rating'] = str(tech_profile.average_rating)
             data['completed_jobs'] = tech_profile.completed_jobs
-            
-            items = PortfolioItem.objects.filter(user=request.user)
-            if items.exists():
-                from .serializers import PortfolioItemSerializer
-                data['portfolio'] = PortfolioItemSerializer(items, many=True).data
+            data['average_rating'] = str(tech_profile.average_rating)
+            data['availability_status'] = tech_profile.availability_status
+            if tech_profile.portfolio and len(tech_profile.portfolio) > 0:
+                data['portfolio'] = tech_profile.portfolio
+            else:
+                items = PortfolioItem.objects.filter(user=request.user)
+                if items.exists():
+                    from .serializers import PortfolioItemSerializer
+                    data['portfolio'] = PortfolioItemSerializer(items, many=True).data
+                else:
+                    data['portfolio'] = []
         return Response(data)
     elif request.method == 'PATCH':
         role_to_set = request.data.get('role')
@@ -212,7 +215,9 @@ def me(request):
         for k in ['first_name', 'last_name', 'phone', 'avatar_url', 'banner_url', 'language_preference', 'country', 'address', 'education_level', 'expertise_level']:
             if k in request.data:
                 user_update_data[k] = request.data[k]
-        
+        if 'city' in request.data and 'address' not in request.data:
+            user_update_data['address'] = request.data['city']
+
         if 'date_of_birth' in request.data:
             dob = request.data.get('date_of_birth')
             user_update_data['date_of_birth'] = dob if dob else None
@@ -221,49 +226,49 @@ def me(request):
         if serializer.is_valid():
             serializer.save()
 
-        # Update TechnicianProfile if user is technician
-        if request.user.role == 'TECHNICIAN':
-            from apps.accounts.models import TechnicianProfile
-            tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-            
-            tech_data = request.data.get('technician_profile') or {}
-            bio = request.data.get('bio') or request.data.get('about') or tech_data.get('bio')
-            if bio is not None:
-                tech_profile.bio = str(bio)
-            
-            if 'hourly_rate' in request.data:
-                hr_val = request.data.get('hourly_rate')
-                if hr_val:
-                    clean_hr = ''.join(c for c in str(hr_val) if c.isdigit() or c == '.')
-                    tech_profile.hourly_rate = float(clean_hr) if clean_hr else None
-                else:
-                    tech_profile.hourly_rate = None
-            if 'response_time' in request.data:
-                tech_profile.response_time = str(request.data.get('response_time') or '')
-            if 'tools' in request.data:
-                tech_profile.languages = request.data.get('tools') or []
-            elif 'languages' in request.data:
-                tech_profile.languages = request.data.get('languages') or []
-            if 'portfolio' in request.data:
-                tech_profile.portfolio = request.data.get('portfolio') or []
-            if 'skills' in request.data:
-                skill_names = request.data.get('skills') or []
-                if isinstance(skill_names, list):
-                    from apps.tasks.models import Skill
-                    tech_profile.skills.clear()
-                    for sname in skill_names:
-                        if sname and isinstance(sname, str):
-                            skill_obj, _ = Skill.objects.get_or_create(name=sname.strip())
-                            tech_profile.skills.add(skill_obj)
-            tech_profile.save()
+        # Update TechnicianProfile bio/about for all users, plus technician-specific fields
+        from apps.accounts.models import TechnicianProfile
+        tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
+        
+        tech_data = request.data.get('technician_profile') or {}
+        bio = request.data.get('bio') or request.data.get('about') or tech_data.get('bio') or tech_data.get('about')
+        if bio is not None:
+            tech_profile.bio = str(bio)
+
+        if 'hourly_rate' in request.data or 'hourly_rate' in tech_data:
+            hr_val = request.data.get('hourly_rate') or tech_data.get('hourly_rate')
+            if hr_val:
+                clean_hr = ''.join(c for c in str(hr_val) if c.isdigit() or c == '.')
+                tech_profile.hourly_rate = float(clean_hr) if clean_hr else None
+            else:
+                tech_profile.hourly_rate = None
+        if 'response_time' in request.data or 'response_time' in tech_data:
+            tech_profile.response_time = str(request.data.get('response_time') or tech_data.get('response_time') or '')
+        if 'tools' in request.data or 'tools' in tech_data:
+            tools_val = request.data.get('tools') or tech_data.get('tools') or []
+            tech_profile.languages = tools_val if isinstance(tools_val, list) else []
+        elif 'languages' in request.data:
+            tech_profile.languages = request.data.get('languages') or []
+        if 'portfolio' in request.data or 'portfolio' in tech_data:
+            port_val = request.data.get('portfolio') or tech_data.get('portfolio') or []
+            tech_profile.portfolio = port_val if isinstance(port_val, list) else []
+        if 'skills' in request.data or 'skills' in tech_data:
+            skill_items = request.data.get('skills') or tech_data.get('skills') or []
+            if isinstance(skill_items, list):
+                from apps.tasks.models import Skill
+                tech_profile.skills.clear()
+                for item in skill_items:
+                    s_name = item.get('name') if isinstance(item, dict) else (str(item) if item else "")
+                    if s_name and s_name.strip():
+                        skill_obj, _ = Skill.objects.get_or_create(name=s_name.strip())
+                        tech_profile.skills.add(skill_obj)
+        tech_profile.save()
 
         res_serializer = UserMeSerializer(request.user)
         res_data = res_serializer.data
+        res_data['bio'] = tech_profile.bio
+        res_data['about'] = tech_profile.bio
         if request.user.role == 'TECHNICIAN':
-            from apps.accounts.models import TechnicianProfile
-            tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-            res_data['bio'] = tech_profile.bio
-            res_data['about'] = tech_profile.bio
             res_data['skills'] = [s.name for s in tech_profile.skills.all()]
             res_data['tools'] = tech_profile.languages if isinstance(tech_profile.languages, list) else []
             res_data['portfolio'] = tech_profile.portfolio
@@ -344,7 +349,6 @@ def user_public_profile(request, user_id):
     if user.role == 'TECHNICIAN':
         from apps.accounts.models import TechnicianProfile, PortfolioItem
         profile, _ = TechnicianProfile.objects.get_or_create(user=user)
-        data['bio'] = profile.bio or 'Senior Certified Technician with extensive multi-disciplinary field experience and verified standards compliance.'
         hourly_val = str(profile.hourly_rate) if profile.hourly_rate else "5000"
         clean_hourly = ''.join(c for c in hourly_val if c.isdigit() or c == '.') or '5000'
         try:
@@ -363,6 +367,7 @@ def user_public_profile(request, user_id):
         data['daily_rate'] = formatted_daily
         data['inspection_fee'] = "10,000 XOF"
         data['bio'] = profile.bio or ''
+        data['about'] = profile.bio or ''
         data['skills'] = [s.name for s in profile.skills.all()]
         data['tools'] = profile.languages if isinstance(profile.languages, list) else []
         data['languages'] = ['French', 'English']

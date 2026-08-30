@@ -109,51 +109,64 @@ export default function PublicProfilePage() {
         } catch {}
       }
 
-      // 4. If current viewer is previewing profile or local data is present, blend seamlessly
+      // 4. If current viewer is previewing their own profile, blend active local edits seamlessly
       if (typeof window !== "undefined") {
         try {
-          const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
-          const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-          const rawTools = localStorage.getItem("boulotman_technician_tools");
-          const rawSkills = localStorage.getItem("boulotman_technician_skills");
-
-          if (rawCustom) {
-            const c = JSON.parse(rawCustom);
-            if (c) {
-              baseUser = {
-                ...(baseUser || {}),
-                id: validId,
-                role: baseUser?.role || "TECHNICIAN",
-                first_name: baseUser?.first_name || c.firstName,
-                last_name: baseUser?.last_name || c.lastName,
-                headline: baseUser?.headline || c.headline,
-                bio: baseUser?.bio || c.bio,
-                about: baseUser?.about || c.bio,
-                city: baseUser?.city || c.city,
-                country: baseUser?.country || c.country,
-                experience_years: baseUser?.experience_years || c.experienceYears,
-                education_level: baseUser?.education_level || c.educationLevel,
-                expertise_level: baseUser?.expertise_level || c.expertiseLevel,
-                skills: (baseUser?.skills && baseUser.skills.length > 0) ? baseUser.skills : (rawSkills ? JSON.parse(rawSkills) : []),
-                portfolio: (baseUser?.portfolio && baseUser.portfolio.length > 0) ? baseUser.portfolio : (rawPort ? JSON.parse(rawPort) : []),
-                tools: (baseUser?.tools && baseUser.tools.length > 0) ? baseUser.tools : (rawTools ? JSON.parse(rawTools) : []),
-              };
-            }
-          }
-          const rawPricing = localStorage.getItem("boulotman_technician_pricing");
-          if (rawPricing) {
+          const rawMe = localStorage.getItem("boulotman_user");
+          let isOwnProfile = false;
+          if (rawMe) {
             try {
-              const pr = JSON.parse(rawPricing);
-              if (pr) {
-                baseUser = {
-                  ...(baseUser || {}),
-                  starting_price: pr.startingPrice || baseUser?.starting_price,
-                  hourly_rate: pr.hourlyRate || baseUser?.hourly_rate,
-                  daily_rate: pr.dailyRate || baseUser?.daily_rate,
-                  inspection_fee: pr.inspectionFee || baseUser?.inspection_fee,
-                };
+              const meObj = JSON.parse(rawMe);
+              if (meObj && (meObj.id === validId || meObj.user_id === validId)) {
+                isOwnProfile = true;
               }
             } catch {}
+          }
+
+          if (isOwnProfile) {
+            const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
+            const rawPort = localStorage.getItem("boulotman_technician_portfolio");
+            const rawTools = localStorage.getItem("boulotman_technician_tools");
+            const rawSkills = localStorage.getItem("boulotman_technician_skills");
+
+            if (rawCustom) {
+              const c = JSON.parse(rawCustom);
+              if (c) {
+                baseUser = {
+                  ...(baseUser || {}),
+                  id: validId,
+                  role: baseUser?.role || "TECHNICIAN",
+                  first_name: c.firstName || baseUser?.first_name,
+                  last_name: c.lastName || baseUser?.last_name,
+                  headline: c.headline || baseUser?.headline,
+                  bio: c.bio || baseUser?.bio,
+                  about: c.bio || baseUser?.about,
+                  city: c.city || baseUser?.city,
+                  country: c.country || baseUser?.country,
+                  experience_years: c.experienceYears || baseUser?.experience_years,
+                  education_level: c.educationLevel || baseUser?.education_level,
+                  expertise_level: c.expertiseLevel || baseUser?.expertise_level,
+                  skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
+                  portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
+                  tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
+                };
+              }
+            }
+            const rawPricing = localStorage.getItem("boulotman_technician_pricing");
+            if (rawPricing) {
+              try {
+                const pr = JSON.parse(rawPricing);
+                if (pr) {
+                  baseUser = {
+                    ...(baseUser || {}),
+                    starting_price: pr.startingPrice || baseUser?.starting_price,
+                    hourly_rate: pr.hourlyRate || baseUser?.hourly_rate,
+                    daily_rate: pr.dailyRate || baseUser?.daily_rate,
+                    inspection_fee: pr.inspectionFee || baseUser?.inspection_fee,
+                  };
+                }
+              } catch {}
+            }
           }
         } catch {}
       }

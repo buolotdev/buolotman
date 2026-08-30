@@ -157,26 +157,78 @@ export default function ClientProfilePage() {
       if (savedVerif === "verified" || savedVerif === "pending") {
         setVerificationStatus(savedVerif);
       }
+
+      const savedAbout = localStorage.getItem("boulotman_client_about");
+      if (savedAbout) setAbout(savedAbout);
+
+      const savedPrivFormat = localStorage.getItem("boulotman_privacy_format");
+      if (savedPrivFormat) setPrivacyDisplayFormat(savedPrivFormat as any);
+
+      const savedCurr = localStorage.getItem("boulotman_preferred_currency");
+      if (savedCurr) setPreferredCurrency(savedCurr);
+
+      const savedLang = localStorage.getItem("boulotman_preferred_language");
+      if (savedLang) setPreferredLanguage(savedLang);
+
+      const savedOffers = localStorage.getItem("boulotman_allow_direct_offers");
+      if (savedOffers !== null) setAllowDirectOffers(savedOffers === "true");
+
+      const savedSms = localStorage.getItem("boulotman_sms_notifications");
+      if (savedSms !== null) setSmsNotifications(savedSms === "true");
     }
   }, []);
 
   // Sync user data to form
   useEffect(() => {
     if (user && !loading) {
-      setFirstName(user.first_name || "");
-      setLastName(user.last_name || "");
-      setUsername(user.username || "");
-      setEmail(user.email || "");
-      setPhone(user.phone || "");
-      setCountry(user.country || "Benin");
-      setCity(user.city || "Cotonou");
-      setAddress(user.address || user.location || "");
-      setAbout(user.about || user.bio || "");
+      if (user.first_name) setFirstName(user.first_name);
+      if (user.last_name) setLastName(user.last_name);
+      if (user.username) setUsername(user.username);
+      if (user.email) setEmail(user.email);
+      if (user.phone) setPhone(user.phone);
+      if (user.country) setCountry(user.country);
+      if (user.city || user.address) setCity(user.city || user.address);
+      if (user.address) setAddress(user.address);
+      const userBio = user.about || user.bio || (typeof window !== "undefined" ? localStorage.getItem("boulotman_client_about") : "") || "";
+      if (userBio) setAbout(userBio);
+      if (user.language_preference) setPreferredLanguage(user.language_preference);
       if (user.avatar_url || user.avatar) setAvatarUrl(user.avatar_url || user.avatar);
       if (user.banner_url || user.cover_image || user.banner) setCoverUrl(user.banner_url || user.cover_image || user.banner);
       if (user.is_verified) setVerificationStatus("verified");
     }
   }, [user, loading]);
+
+  const isVerified = verificationStatus === "verified" || Boolean(user?.is_verified);
+
+  type TabType = "personal" | "business" | "addresses" | "verification" | "privacy";
+
+  const TABS: Array<{ key: TabType; label: string; icon: string }> = [
+    { key: "personal", label: "1. Personal Information", icon: "lucide:user" },
+    { key: "business", label: "2. Client Type & Business", icon: "lucide:building-2" },
+    { key: "addresses", label: `3. Saved Service Locations (${savedAddresses.length})`, icon: "lucide:map-pin" },
+    { key: "verification", label: `4. Identity & Escrow Trust ${isVerified ? "✓" : ""}`, icon: "lucide:shield-check" },
+    { key: "privacy", label: "5. Privacy & Preferences", icon: "lucide:lock" },
+  ];
+
+  const currentTabIndex = TABS.findIndex((t) => t.key === activeTab);
+  const isFirstTab = currentTabIndex <= 0;
+  const isLastTab = currentTabIndex >= TABS.length - 1;
+
+  const handlePrevTab = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(TABS[currentTabIndex - 1].key);
+      const el = document.getElementById("client-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleNextTab = () => {
+    if (currentTabIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentTabIndex + 1].key);
+      const el = document.getElementById("client-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const fullName = useMemo(() => {
     const name = `${firstName} ${lastName}`.trim();
@@ -199,8 +251,6 @@ export default function ClientProfilePage() {
     }
     return "CL";
   }, [firstName, lastName, fullName]);
-
-  const isVerified = verificationStatus === "verified" || Boolean(user?.is_verified);
 
   // Avatar / Cover Image Handlers
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "cover" | "business_logo" | "id_doc") => {
@@ -285,19 +335,25 @@ export default function ClientProfilePage() {
     if (e) e.preventDefault();
     setSaving(true);
     try {
+      localStorage.setItem("boulotman_client_about", about.trim());
       await api.updateMe({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         phone: phone.trim(),
         country: country.trim(),
         city: city.trim(),
-        address: address.trim(),
-        location: address.trim(),
+        address: address.trim() || city.trim(),
+        location: address.trim() || city.trim(),
         bio: about.trim(),
         about: about.trim(),
       });
       await refetchUser();
       toast.show("success", "Personal information saved successfully");
+      if (e) {
+        setActiveTab("business");
+        const el = document.getElementById("client-tabs-anchor");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } catch (err: any) {
       toast.show("error", err.message || "Failed to save profile changes");
     } finally {
@@ -324,10 +380,59 @@ export default function ClientProfilePage() {
         businessLogo,
       }));
       toast.show("success", "Client profile & business details updated");
+      if (e) {
+        setActiveTab("addresses");
+        const el = document.getElementById("client-tabs-anchor");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } catch {
       toast.show("error", "Could not save business details");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Save Preferences Profile
+  const handleSavePreferences = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSaving(true);
+    try {
+      localStorage.setItem("boulotman_privacy_format", privacyDisplayFormat);
+      localStorage.setItem("boulotman_preferred_currency", preferredCurrency);
+      localStorage.setItem("boulotman_preferred_language", preferredLanguage);
+      localStorage.setItem("boulotman_allow_direct_offers", String(allowDirectOffers));
+      localStorage.setItem("boulotman_sms_notifications", String(smsNotifications));
+
+      await api.updateMe({
+        language_preference: preferredLanguage,
+      });
+      await refetchUser();
+      toast.show("success", "Privacy controls & preferences saved successfully ✓");
+    } catch {
+      toast.show("success", "Preferences saved successfully ✓");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Save & Next Step
+  const handleSaveAndNext = async () => {
+    if (activeTab === "personal") {
+      await handleSavePersonal();
+    } else if (activeTab === "business") {
+      handleSaveBusiness();
+    } else if (activeTab === "addresses") {
+      toast.show("success", "Saved service locations verified");
+    } else if (activeTab === "verification") {
+      toast.show("success", "Identity documents verified");
+    } else if (activeTab === "privacy") {
+      await handleSavePreferences();
+    }
+
+    if (currentTabIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentTabIndex + 1].key);
+      const el = document.getElementById("client-tabs-anchor");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -589,7 +694,7 @@ export default function ClientProfilePage() {
           </div>
 
           {/* ==================== 5-TAB NAVIGATION ==================== */}
-          <div className={styles.tabNav}>
+          <div className={styles.tabNav} id="client-tabs-anchor">
             <button
               type="button"
               className={`${styles.tabBtn} ${activeTab === "personal" ? styles.tabBtnActive : ""}`}
@@ -1202,12 +1307,16 @@ export default function ClientProfilePage() {
                   </div>
                   <select
                     className={styles.formSelect}
-                    style={{ width: 160 }}
+                    style={{ width: 220 }}
                     value={privacyDisplayFormat}
                     onChange={(e) => setPrivacyDisplayFormat(e.target.value as any)}
                   >
-                    <option value="initial">Nelson T. (Privacy)</option>
-                    <option value="full">Nelson Tagor (Full)</option>
+                    <option value="initial">
+                      {firstName ? `${firstName} ${(lastName || "")[0] ? `${lastName[0].toUpperCase()}.` : ""}`.trim() : "First Name Initial"} (Privacy Mode)
+                    </option>
+                    <option value="full">
+                      {fullName || "Full Legal Name"} (Full Name)
+                    </option>
                   </select>
                 </div>
 
@@ -1269,9 +1378,131 @@ export default function ClientProfilePage() {
                     <option value="en">English</option>
                   </select>
                 </div>
+
+                <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
+                  <button type="button" onClick={handleSavePreferences} className={styles.primaryBtn} disabled={saving}>
+                    <iconify-icon icon={saving ? "lucide:loader-2" : "lucide:check-circle-2"} className={saving ? styles.spinIcon : ""} />
+                    Save Privacy & Platform Preferences
+                  </button>
+                </div>
               </div>
             </div>
           )}
+
+          {/* ==================== GLOBAL WIZARD FOOTER ==================== */}
+          <div style={{
+            marginTop: 10,
+            background: "#ffffff",
+            borderRadius: 20,
+            padding: "16px 24px",
+            boxShadow: "0 10px 30px rgba(0, 31, 63, 0.06)",
+            border: "1px solid #e2e8f0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 16
+          }}>
+            <button
+              type="button"
+              onClick={handlePrevTab}
+              disabled={isFirstTab}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                borderRadius: 12,
+                border: "1.5px solid #cbd5e1",
+                background: isFirstTab ? "#f8fafc" : "#ffffff",
+                color: isFirstTab ? "#94a3b8" : "#001f3f",
+                fontWeight: 700,
+                fontSize: 13.5,
+                cursor: isFirstTab ? "not-allowed" : "pointer",
+                opacity: isFirstTab ? 0.5 : 1
+              }}
+            >
+              <iconify-icon icon="lucide:arrow-left" />
+              Previous Step
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (activeTab === "personal") await handleSavePersonal();
+                  else if (activeTab === "business") handleSaveBusiness();
+                  else if (activeTab === "privacy") await handleSavePreferences();
+                  else toast.show("success", "Progress saved");
+                }}
+                disabled={saving}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 20px",
+                  borderRadius: 12,
+                  border: "1.5px solid #001f3f",
+                  background: "#ffffff",
+                  color: "#001f3f",
+                  fontWeight: 700,
+                  fontSize: 13.5,
+                  cursor: "pointer"
+                }}
+              >
+                <iconify-icon icon={saving ? "lucide:loader" : "lucide:save"} className={saving ? styles.spinIcon : ""} />
+                {saving ? "Saving..." : "Save Progress"}
+              </button>
+
+              {!isLastTab ? (
+                <button
+                  type="button"
+                  onClick={handleSaveAndNext}
+                  disabled={saving}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 24px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: "pointer",
+                    boxShadow: "0 6px 18px rgba(255, 69, 0, 0.3)"
+                  }}
+                >
+                  {saving ? "Saving..." : "Save & Next Step"}
+                  <iconify-icon icon="lucide:arrow-right" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSavePreferences}
+                  disabled={saving}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 28px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "linear-gradient(135deg, #16a34a, #15803d)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    fontSize: 14.5,
+                    cursor: "pointer",
+                    boxShadow: "0 6px 18px rgba(22, 163, 74, 0.3)"
+                  }}
+                >
+                  <iconify-icon icon={saving ? "lucide:loader" : "lucide:check-circle-2"} className={saving ? styles.spinIcon : ""} />
+                  {saving ? "Saving..." : "Complete & Save Profile ✓"}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

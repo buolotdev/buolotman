@@ -1,4 +1,4 @@
-dfrom django.db import migrations
+from django.db import migrations
 
 
 def clear_test_users(apps, schema_editor):
