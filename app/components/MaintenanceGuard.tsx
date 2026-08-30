@@ -88,19 +88,19 @@ export default function MaintenanceGuard({ children }: { children: React.ReactNo
               display: "inline-block",
             }}
           />
-          404: DEPLOYMENT INACTIVE
+          SERVICE NOT AVAILABLE
         </div>
 
         <h1
           style={{
-            fontSize: "28px",
+            fontSize: "30px",
             fontWeight: 800,
             color: "#ffffff",
             margin: "0 0 14px",
             lineHeight: 1.3,
           }}
         >
-          Project Not Found
+          Not Available
         </h1>
 
         <p
@@ -111,7 +111,7 @@ export default function MaintenanceGuard({ children }: { children: React.ReactNo
             margin: "0 0 28px",
           }}
         >
-          The requested deployment or web application could not be found or has been suspended. The instance may have been archived, paused, or domain routing is temporarily disabled by the project maintainer.
+          This service is currently not available. Access to this platform has been temporarily disabled. Please check back later or contact the administrator.
         </p>
 
         <div
@@ -128,10 +128,10 @@ export default function MaintenanceGuard({ children }: { children: React.ReactNo
           }}
         >
           <div style={{ marginBottom: "4px" }}>
-            <span style={{ color: "#94a3b8" }}>Status:</span> 404 NOT_FOUND
+            <span style={{ color: "#94a3b8" }}>Status:</span> 503 SERVICE_UNAVAILABLE
           </div>
           <div style={{ marginBottom: "4px" }}>
-            <span style={{ color: "#94a3b8" }}>Code:</span> ERR_PROJECT_SUSPENDED_OR_UNAVAILABLE
+            <span style={{ color: "#94a3b8" }}>Code:</span> ERR_SERVICE_NOT_AVAILABLE
           </div>
           <div>
             <span style={{ color: "#94a3b8" }}>Host:</span> boulotman.com
@@ -146,7 +146,7 @@ export default function MaintenanceGuard({ children }: { children: React.ReactNo
             marginBottom: 0,
           }}
         >
-          If you are the owner, please contact your developer or platform administrator to re-activate this service.
+          If you are the administrator, please contact the developer to restore access.
         </p>
       </div>
     </div>
