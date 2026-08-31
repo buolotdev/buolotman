@@ -165,6 +165,7 @@ export default function SearchPage() {
 
   const [userInitials, setUserInitials] = useState("");
   const [userRole, setUserRole] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | number | null>(null);
   const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
@@ -174,6 +175,7 @@ export default function SearchPage() {
       setIsAuth(true);
       setUserRole(role || "client");
       api.getMe().then(user => {
+        if (user?.id) setCurrentUserId(user.id);
         const initials = `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase();
         setUserInitials(initials || user.username?.[0]?.toUpperCase() || "U");
       }).catch(() => {
@@ -597,7 +599,15 @@ export default function SearchPage() {
                     >
                       {t.viewProfile}
                     </Link>
-                    {result.type === "company" ? (
+                    {currentUserId && String(currentUserId) === String(result.id) ? (
+                      <Link
+                        href={result.type === "company" ? "/dashboard/company/profile" : "/dashboard/technician/profile"}
+                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
+                        style={{ background: "#001f3f", borderColor: "#001f3f" }}
+                      >
+                        Edit Profile
+                      </Link>
+                    ) : result.type === "company" ? (
                       <Link
                         href={`/post-task?invite_company=${result.id}&company_name=${encodeURIComponent(result.name)}`}
                         className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}

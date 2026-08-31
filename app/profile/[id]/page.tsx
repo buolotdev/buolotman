@@ -333,6 +333,23 @@ export default function PublicProfilePage() {
     [validId]
   );
 
+  const { data: meData } = useFetch(
+    () => {
+      if (typeof window === "undefined") return Promise.resolve(null);
+      return localStorage.getItem("access_token") ? api.getMe() : Promise.resolve(null);
+    },
+    []
+  );
+
+  const isOwnProfile = Boolean(
+    meData?.id && (
+      String(meData.id) === String(validId) ||
+      String(meData.id) === String(profile?.id) ||
+      (profile?.user_id && String(meData.id) === String(profile.user_id)) ||
+      (profile?.username && meData.username === profile.username)
+    )
+  );
+
   const isCompany = profile?.role === "COMPANY" || Boolean(profile?.company_name && !profile?.first_name);
 
   // Common media
@@ -576,23 +593,36 @@ export default function PublicProfilePage() {
                   </div>
 
                   <div className={styles.actionButtons}>
-                    <Link
-                      href={`/post-task?invite_company=${profile.id || validId}`}
-                      className={styles.btnPrimary}
-                      style={{ padding: "14px 28px", fontSize: 15 }}
-                    >
-                      <iconify-icon icon="lucide:file-signature" />
-                      {t.requestProjectQuote}
-                    </Link>
+                    {isOwnProfile ? (
+                      <Link
+                        href="/dashboard/company/profile"
+                        className={styles.btnPrimary}
+                        style={{ padding: "14px 28px", fontSize: 15 }}
+                      >
+                        <iconify-icon icon="lucide:edit-3" />
+                        Edit Company Profile
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          href={`/post-task?invite_company=${profile.id || validId}`}
+                          className={styles.btnPrimary}
+                          style={{ padding: "14px 28px", fontSize: 15 }}
+                        >
+                          <iconify-icon icon="lucide:file-signature" />
+                          {t.requestProjectQuote}
+                        </Link>
 
-                    <Link
-                      href={`/dashboard/messages?recipient=${profile.id || validId}&name=${encodeURIComponent(companyName)}`}
-                      className={styles.btnOutline}
-                      style={{ padding: "14px 22px", fontSize: 15 }}
-                    >
-                      <iconify-icon icon="lucide:message-square" />
-                      {t.directMessage}
-                    </Link>
+                        <Link
+                          href={`/dashboard/messages?recipient=${profile.id || validId}&name=${encodeURIComponent(companyName)}`}
+                          className={styles.btnOutline}
+                          style={{ padding: "14px 22px", fontSize: 15 }}
+                        >
+                          <iconify-icon icon="lucide:message-square" />
+                          {t.directMessage}
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -860,17 +890,33 @@ export default function PublicProfilePage() {
                   </ul>
                 </div>
 
-                {/* 3. RFP Tender Invitation CTA Box */}
+                {/* 3. RFP Tender Invitation CTA Box / Manage Profile */}
                 <div className={styles.contactBox}>
-                  <h3 className={styles.contactTitle}>{t.needCommercialQuote}</h3>
-                  <p className={styles.contactText}>{t.commercialQuoteSub}</p>
-                  <Link
-                    href={`/post-task?invite_company=${profile.id || validId}`}
-                    className={styles.contactBtn}
-                  >
-                    <iconify-icon icon="lucide:send" />
-                    {t.inviteToBid}
-                  </Link>
+                  {isOwnProfile ? (
+                    <>
+                      <h3 className={styles.contactTitle}>Your Corporate Profile</h3>
+                      <p className={styles.contactText}>Manage your corporate compliance credentials, services catalog, and team directory.</p>
+                      <Link
+                        href="/dashboard/company/profile"
+                        className={styles.contactBtn}
+                      >
+                        <iconify-icon icon="lucide:settings" />
+                        Manage Company Profile
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className={styles.contactTitle}>{t.needCommercialQuote}</h3>
+                      <p className={styles.contactText}>{t.commercialQuoteSub}</p>
+                      <Link
+                        href={`/post-task?invite_company=${profile.id || validId}`}
+                        className={styles.contactBtn}
+                      >
+                        <iconify-icon icon="lucide:send" />
+                        {t.inviteToBid}
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -934,21 +980,33 @@ export default function PublicProfilePage() {
                   </div>
 
                   <div className={styles.actionButtons}>
-                    <Link
-                      href={`/post-task?invite=${profile.id || validId}`}
-                      className={styles.btnPrimary}
-                    >
-                      <iconify-icon icon="lucide:briefcase" />
-                      {t.hireSpecialist}
-                    </Link>
+                    {isOwnProfile ? (
+                      <Link
+                        href="/dashboard/technician/profile"
+                        className={styles.btnPrimary}
+                      >
+                        <iconify-icon icon="lucide:edit-3" />
+                        Edit My Profile
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          href={`/post-task?invite=${profile.id || validId}`}
+                          className={styles.btnPrimary}
+                        >
+                          <iconify-icon icon="lucide:briefcase" />
+                          {t.hireSpecialist}
+                        </Link>
 
-                    <Link
-                      href={`/dashboard/messages?recipient=${profile.id || validId}&name=${encodeURIComponent(techDisplayName)}`}
-                      className={styles.btnOutline}
-                    >
-                      <iconify-icon icon="lucide:message-square" />
-                      {t.directMessage}
-                    </Link>
+                        <Link
+                          href={`/dashboard/messages?recipient=${profile.id || validId}&name=${encodeURIComponent(techDisplayName)}`}
+                          className={styles.btnOutline}
+                        >
+                          <iconify-icon icon="lucide:message-square" />
+                          {t.directMessage}
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1211,17 +1269,33 @@ export default function PublicProfilePage() {
                   </ul>
                 </div>
 
-                {/* 3. Ready to Hire CTA Box */}
+                {/* 3. Ready to Hire CTA Box / Manage Profile */}
                 <div className={styles.contactBox}>
-                  <h3 className={styles.contactTitle}>{t.readyToHire}</h3>
-                  <p className={styles.contactText}>{t.readyToHireSub}</p>
-                  <Link
-                    href={`/post-task?invite=${profile.id || validId}`}
-                    className={styles.contactBtn}
-                  >
-                    <iconify-icon icon="lucide:send" />
-                    {t.hireProBtn}
-                  </Link>
+                  {isOwnProfile ? (
+                    <>
+                      <h3 className={styles.contactTitle}>Your Technician Profile</h3>
+                      <p className={styles.contactText}>Keep your trade skills, portfolio, and pricing structure updated for clients.</p>
+                      <Link
+                        href="/dashboard/technician/profile"
+                        className={styles.contactBtn}
+                      >
+                        <iconify-icon icon="lucide:settings" />
+                        Manage Profile & Rates
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className={styles.contactTitle}>{t.readyToHire}</h3>
+                      <p className={styles.contactText}>{t.readyToHireSub}</p>
+                      <Link
+                        href={`/post-task?invite=${profile.id || validId}`}
+                        className={styles.contactBtn}
+                      >
+                        <iconify-icon icon="lucide:send" />
+                        {t.hireProBtn}
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

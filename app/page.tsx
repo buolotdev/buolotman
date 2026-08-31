@@ -679,28 +679,39 @@ export default function Home() {
             {prosLoading ? (
               <div style={{ padding: "20px", color: "#64748b" }}>{t.prosLoading}</div>
             ) : prosData && prosData.length > 0 ? (
-              prosData.slice(0, 3).map((pro: any) => (
-                <div className="bm-ftx-card" key={pro.id}>
-                  <div className="bm-ftx-profile">
-                    <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
-                    <div>
-                      <div className="bm-ftx-name">{pro.first_name} {pro.last_name}</div>
-                      <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
+              prosData.slice(0, 3).map((pro: any) => {
+                const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
+                return (
+                  <div className="bm-ftx-card" key={pro.id}>
+                    <div className="bm-ftx-profile">
+                      <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
+                      <div>
+                        <div className="bm-ftx-name">{pro.first_name} {pro.last_name}</div>
+                        <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
+                      </div>
+                    </div>
+                    <div className="bm-ftx-rating">
+                      <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
+                    </div>
+                    <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • {t.ftxMeta}</div>
+                    <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {pro.bio || "Professional technical services and support."}
+                    </div>
+                    <div className="bm-ftx-actions">
+                      <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">{t.ftxBtnView}</Link>
+                      {isSelf ? (
+                        <Link href="/dashboard/technician/profile" className="bm-ftx-btn bm-ftx-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
+                          Edit Profile
+                        </Link>
+                      ) : (
+                        <Link href={isLoggedIn ? `/post-task?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">
+                          {t.ftxBtnHire}
+                        </Link>
+                      )}
                     </div>
                   </div>
-                  <div className="bm-ftx-rating">
-                    <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
-                  </div>
-                  <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • {t.ftxMeta}</div>
-                  <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {pro.bio || "Professional technical services and support."}
-                  </div>
-                  <div className="bm-ftx-actions">
-                    <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">{t.ftxBtnView}</Link>
-                    <Link href={isLoggedIn ? `/post-task?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">{t.ftxBtnHire}</Link>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
                <div style={{ padding: "20px", color: "#64748b" }}>{t.prosNoTasks}</div>
             )}
@@ -723,29 +734,39 @@ export default function Home() {
             {companiesLoading ? (
               <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
             ) : companiesData && companiesData.length > 0 ? (
-              companiesData.slice(0, 3).map((company: any) => (
-                <div className="bm-enterprise-card" key={company.id}>
-                  <div className="bm-enterprise-profile">
-                    <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
-                    <div>
-                      <div className="bm-enterprise-name">{company.company_name}</div>
-                      <div className="bm-enterprise-role">{t.entRoleComp}</div>
+              companiesData.slice(0, 3).map((company: any) => {
+                const isSelf = Boolean(meData?.id && (String(meData.id) === String(company.id) || (company.user_id && String(meData.id) === String(company.user_id)) || meData.username === company.username));
+                return (
+                  <div className="bm-enterprise-card" key={company.id}>
+                    <div className="bm-enterprise-profile">
+                      <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
+                      <div>
+                        <div className="bm-enterprise-name">{company.company_name}</div>
+                        <div className="bm-enterprise-role">{t.entRoleComp}</div>
+                      </div>
+                    </div>
+                    <div className="bm-enterprise-rating">
+                      <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
+                    </div>
+                    <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
+                    <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {company.description || t.entDescFallback}
+                    </div>
+                    <div className="bm-enterprise-actions">
+                      <Link href={`/profile/${company.user_id || company.id}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
+                      {isSelf ? (
+                        <Link href="/dashboard/company/profile" className="bm-enterprise-btn bm-enterprise-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
+                          Edit Profile
+                        </Link>
+                      ) : (
+                        <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">
+                          {t.entBtnHire}
+                        </Link>
+                      )}
                     </div>
                   </div>
-                  <div className="bm-enterprise-rating">
-                    <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
-                  </div>
-                  <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
-                  <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {company.description || t.entDescFallback}
-                  </div>
-                  <div className="bm-enterprise-actions">
-                    <Link href={`/profile/${company.user_id || company.id}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
-                    <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">{t.entBtnHire}</Link>
-                  </div>
-
-                </div>
-              ))
+                );
+              })
             ) : (
               <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesNoTasks}</div>
             )}
