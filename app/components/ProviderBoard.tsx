@@ -169,7 +169,6 @@ export default function ProviderBoard() {
             <option value="South Africa">South Africa</option>
             <option value="Ivory Coast">Ivory Coast</option>
             <option value="Cameroon">Cameroon</option>
-            <option value="Uganda">Uganda</option>
             <option value="Remote">{t.remote}</option>
           </select>
           <button 

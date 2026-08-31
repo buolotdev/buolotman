@@ -58,7 +58,6 @@ const COUNTRIES = [
   "South Africa",
   "Ivory Coast",
   "Cameroon",
-  "Uganda",
 ];
 
 const translations: Record<string, Record<string, any>> = {

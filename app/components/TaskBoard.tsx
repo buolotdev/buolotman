@@ -401,7 +401,6 @@ export default function TaskBoard() {
               <option value="South Africa">South Africa</option>
               <option value="Ivory Coast">Ivory Coast</option>
               <option value="Cameroon">Cameroon</option>
-              <option value="Uganda">Uganda</option>
               <option value="remote">{t.remoteWork}</option>
             </select>
           </div>
