@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import JSZip from "jszip";
 import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
@@ -44,6 +45,7 @@ export default function AdminVerificationPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<{ title: string; url: string; type: string } | null>(null);
   const [selectedUserModal, setSelectedUserModal] = useState<VerificationUser | null>(null);
+  const [downloadingZipUserId, setDownloadingZipUserId] = useState<number | null>(null);
 
   const { data: usersData, loading, refetch } = useFetch(
     () => api.adminListUsers(),
@@ -288,6 +290,107 @@ export default function AdminVerificationPage() {
     }
   };
 
+  const handleDownloadAllZip = async (u: VerificationUser, docs: DocItem[]) => {
+    if (!docs || docs.length === 0) {
+      toast.error("No documents available", "This user has not uploaded any identity or compliance files.");
+      return;
+    }
+    setDownloadingZipUserId(u.id);
+    toast.info("Preparing ZIP Package", `Packaging ${docs.length} file(s) for ${u.first_name || u.username}...`);
+
+    try {
+      const zip = new JSZip();
+      const fullName = `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username;
+      const folderName = `BoulotMan_${u.role}_${fullName.replace(/[^a-zA-Z0-9_-]/g, "_")}_${u.id}`;
+      const userFolder = zip.folder(folderName) || zip;
+
+      // 1. Add dossier summary text file
+      const summaryText = [
+        `================================================================`,
+        `BOULOT MAN - APPLICANT VERIFICATION DOSSIER`,
+        `================================================================`,
+        `Applicant Name : ${fullName}`,
+        `Account Role   : ${u.role}`,
+        `Email Address  : ${u.email}`,
+        `Phone Number   : ${u.phone || "Not provided"}`,
+        `Country        : ${u.country || "Global"}`,
+        `Username       : @${u.username}`,
+        `Registered Date: ${u.created_at ? new Date(u.created_at).toLocaleString() : "N/A"}`,
+        `Status         : ${u.is_verified ? "VERIFIED" : "PENDING REVIEW"}`,
+        ``,
+        `SUBMITTED IDENTITY & COMPLIANCE DOCUMENTS (${docs.length}):`,
+        ...docs.map((d, idx) => `  ${idx + 1}. [${getDocTypeLabel(d.document_type)}] ${d.title} (URL: ${getImageUrl(d.file_url)})`),
+        `================================================================`,
+        `Generated on: ${new Date().toLocaleString()}`,
+      ].join("\n");
+      userFolder.file("applicant_dossier_summary.txt", summaryText);
+
+      // 2. Fetch and add each document file
+      let addedCount = 0;
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const rawUrl = doc.file_url;
+        const fileUrl = getImageUrl(rawUrl);
+        if (!fileUrl) continue;
+
+        try {
+          let extension = "pdf";
+          const urlClean = fileUrl.split("?")[0].split("#")[0];
+          const matchExt = urlClean.match(/\.(jpg|jpeg|png|webp|gif|pdf|docx|doc|txt)$/i);
+          if (matchExt) {
+            extension = matchExt[1].toLowerCase();
+          } else if (fileUrl.startsWith("data:image/png")) {
+            extension = "png";
+          } else if (fileUrl.startsWith("data:image/jpeg") || fileUrl.startsWith("data:image/jpg")) {
+            extension = "jpg";
+          } else if (fileUrl.startsWith("data:application/pdf")) {
+            extension = "pdf";
+          }
+
+          const safeTitle = (doc.title || `doc_${i + 1}`).replace(/[^a-zA-Z0-9_-]/g, "_");
+          const fileName = `${i + 1}_${safeTitle}.${extension}`;
+
+          if (fileUrl.startsWith("data:")) {
+            const base64Data = fileUrl.split(",")[1];
+            if (base64Data) {
+              userFolder.file(fileName, base64Data, { base64: true });
+              addedCount++;
+            }
+          } else {
+            const response = await fetch(fileUrl);
+            if (response.ok) {
+              const blob = await response.blob();
+              userFolder.file(fileName, blob);
+              addedCount++;
+            } else {
+              userFolder.file(`${i + 1}_${safeTitle}_link.txt`, `Document URL: ${fileUrl}`);
+            }
+          }
+        } catch (fileErr) {
+          userFolder.file(`${i + 1}_error_note.txt`, `Could not fetch ${doc.title} (${fileUrl}): ${String(fileErr)}`);
+        }
+      }
+
+      // 3. Generate zip blob
+      const content = await zip.generateAsync({ type: "blob" });
+      const downloadUrl = window.URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${folderName}_documents.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast.success("Download Complete", `Downloaded ZIP package with ${addedCount} document(s).`);
+    } catch (err: any) {
+      console.error("ZIP Generation error:", err);
+      toast.error("ZIP Generation Failed", err?.message || "Could not create ZIP file.");
+    } finally {
+      setDownloadingZipUserId(null);
+    }
+  };
+
   const getDocTypeLabel = (type: string) => {
     switch (type) {
       case "id":
@@ -476,10 +579,36 @@ export default function AdminVerificationPage() {
 
                   {/* Documents Section */}
                   <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: "14px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: 6 }}>
                       <strong style={{ fontSize: "13px", color: "#001f3f", display: "flex", alignItems: "center", gap: 6 }}>
                         <iconify-icon icon="lucide:paperclip" style={{ color: "#ff4500" }} /> Submitted Documents ({docs.length})
                       </strong>
+                      {docs.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadAllZip(u, docs)}
+                          disabled={downloadingZipUserId === u.id}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "4px 10px",
+                            background: "linear-gradient(135deg, #001f3f 0%, #0a2d52 100%)",
+                            color: "#ffffff",
+                            borderRadius: "8px",
+                            fontSize: "11.5px",
+                            fontWeight: 700,
+                            border: "none",
+                            cursor: downloadingZipUserId === u.id ? "wait" : "pointer",
+                            boxShadow: "0 2px 6px rgba(0,31,63,0.15)",
+                            transition: "all 0.2s ease",
+                          }}
+                          title="Download all documents of this user in a single ZIP archive"
+                        >
+                          <iconify-icon icon={downloadingZipUserId === u.id ? "lucide:loader-2" : "lucide:folder-down"} style={downloadingZipUserId === u.id ? { animation: "spin 1s linear infinite" } : {}} />
+                          {downloadingZipUserId === u.id ? "Zipping..." : "Download ZIP"}
+                        </button>
+                      )}
                     </div>
 
                     {docs.length === 0 ? (
@@ -652,9 +781,36 @@ export default function AdminVerificationPage() {
                 const modalDocs = extractUserDocs(selectedUserModal);
                 return (
                   <div style={{ marginBottom: 24 }}>
-                    <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                      Identity & Compliance Documents ({modalDocs.length})
-                    </strong>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+                      <strong style={{ fontSize: 13, color: "#001f3f", display: "flex", alignItems: "center", gap: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        Identity & Compliance Documents ({modalDocs.length})
+                      </strong>
+                      {modalDocs.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadAllZip(selectedUserModal, modalDocs)}
+                          disabled={downloadingZipUserId === selectedUserModal.id}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 14px",
+                            background: "linear-gradient(135deg, #ff4500 0%, #e03e00 100%)",
+                            color: "#ffffff",
+                            borderRadius: "10px",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            border: "none",
+                            cursor: downloadingZipUserId === selectedUserModal.id ? "wait" : "pointer",
+                            boxShadow: "0 3px 10px rgba(255,69,0,0.25)",
+                          }}
+                          title="Download all documents of this user as a single ZIP archive"
+                        >
+                          <iconify-icon icon={downloadingZipUserId === selectedUserModal.id ? "lucide:loader-2" : "lucide:folder-archive"} style={downloadingZipUserId === selectedUserModal.id ? { animation: "spin 1s linear infinite" } : {}} />
+                          {downloadingZipUserId === selectedUserModal.id ? "Packaging ZIP..." : "Download All Documents (.ZIP)"}
+                        </button>
+                      )}
+                    </div>
                     {modalDocs.length === 0 ? (
                       <div style={{ padding: 20, textAlign: "center", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 13 }}>
                         No KYC documents uploaded by this user.
