@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 // Set to TRUE to show "Project Not Found" screen. Set to FALSE to restore full website normally.
-export const IS_LOCK_ACTIVE = true;
+export const IS_LOCK_ACTIVE = false;
 
 export default function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const [isBypassed, setIsBypassed] = useState(false);
