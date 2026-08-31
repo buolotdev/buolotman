@@ -664,6 +664,9 @@ export default function TechnicianProfilePage() {
       const updated = [newDoc, ...filtered];
       setLocalDocs(updated);
       localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
+      if (userData?.id) {
+        localStorage.setItem(`boulotman_technician_documents_${userData.id}`, JSON.stringify(updated));
+      }
 
       try { await mutateDocuments(); } catch {}
       toast.success("Document Uploaded", `${slotTitle} submitted for review.`);
@@ -683,6 +686,9 @@ export default function TechnicianProfilePage() {
     const updated = localDocs.filter(d => String(d.id) !== String(id) && d.title !== title);
     setLocalDocs(updated);
     localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_documents_${userData.id}`, JSON.stringify(updated));
+    }
     try { await mutateDocuments(); } catch {}
     toast.info("Document Deleted", "Document removed.");
   };

@@ -155,6 +155,54 @@ export default function AdminVerificationPage() {
         });
       }
     }
+
+    if (typeof window !== "undefined") {
+      try {
+        const rawLocal = (u.id ? localStorage.getItem(`boulotman_technician_documents_${u.id}`) : null)
+          || (u.user_id ? localStorage.getItem(`boulotman_technician_documents_${u.user_id}`) : null)
+          || (u.role === "TECHNICIAN" ? localStorage.getItem("boulotman_technician_documents") : null);
+        if (rawLocal) {
+          const parsed = JSON.parse(rawLocal);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((d: any, idx: number) => {
+              const fileUrl = d.preview_url || d.file_url || d.url || d.file;
+              if (fileUrl && !result.some(r => r.title.toLowerCase() === (d.title || "").toLowerCase() || r.file_url === fileUrl)) {
+                result.push({
+                  id: d.id || idx + 500,
+                  title: d.title || "National ID / Certificate",
+                  document_type: d.document_type || "id",
+                  file_url: fileUrl,
+                  is_verified: d.status === "verified" || u.is_verified,
+                  created_at: d.uploaded_at || u.created_at || new Date().toISOString(),
+                });
+              }
+            });
+          }
+        }
+
+        const rawCompDocs = (u.id ? localStorage.getItem(`boulotman_company_documents_${u.id}`) : null)
+          || (u.user_id ? localStorage.getItem(`boulotman_company_documents_${u.user_id}`) : null)
+          || (u.role === "COMPANY" ? localStorage.getItem("boulotman_company_documents") : null);
+        if (rawCompDocs) {
+          const parsed = JSON.parse(rawCompDocs);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((d: any, idx: number) => {
+              const fileUrl = d.preview_url || d.file_url || d.url || d.file;
+              if (fileUrl && !result.some(r => r.title.toLowerCase() === (d.title || "").toLowerCase() || r.file_url === fileUrl)) {
+                result.push({
+                  id: d.id || idx + 600,
+                  title: d.title || "Corporate Document",
+                  document_type: d.document_type || "business_license",
+                  file_url: fileUrl,
+                  is_verified: d.status === "verified" || u.is_verified,
+                  created_at: d.uploaded_at || u.created_at || new Date().toISOString(),
+                });
+              }
+            });
+          }
+        }
+      } catch {}
+    }
     return result;
   };
 
