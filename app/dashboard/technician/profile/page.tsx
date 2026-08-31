@@ -389,6 +389,31 @@ export default function TechnicianProfilePage() {
     return Array.from(map.values());
   }, [rawDocuments, localDocs]);
 
+  // Auto-sync any local documents to backend if they don't exist on server yet
+  useEffect(() => {
+    if (userData && Array.isArray(localDocs) && localDocs.length > 0 && Array.isArray(rawDocuments)) {
+      localDocs.forEach(async (ld) => {
+        const alreadyOnServer = rawDocuments.some((rd: any) => 
+          rd.title?.toLowerCase() === ld.title?.toLowerCase() || 
+          rd.file_url === ld.file_url
+        );
+        if (!alreadyOnServer && ld.file_url) {
+          try {
+            const dt = ld.document_type === "certificate" ? "certificate" : "id";
+            await api.createTechnicianDocument({
+              title: ld.title,
+              document_type: dt,
+              file_url: ld.file_url,
+            });
+            mutateDocuments();
+          } catch (err) {
+            console.warn("Auto-sync local doc note:", err);
+          }
+        }
+      });
+    }
+  }, [userData, rawDocuments, localDocs]);
+
   // Helper to find document by slot keyword
   const getSlotDoc = (keyword: string) => {
     return allDocuments.find(d => d.title.toLowerCase().includes(keyword.toLowerCase())) || null;
@@ -658,6 +683,25 @@ export default function TechnicianProfilePage() {
         uploaded_at: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
         file_name: file.name,
       };
+
+      const docTypeMap: Record<string, "id" | "certificate" | "insurance" | "other"> = {
+        identity: "id",
+        certificate: "certificate",
+        selfie: "id",
+      };
+
+      try {
+        const createdDoc = await api.createTechnicianDocument({
+          title: slotTitle,
+          document_type: docTypeMap[docType] || "id",
+          file_url: serverUrl || dataUrl,
+        });
+        if (createdDoc && createdDoc.id) {
+          newDoc.id = createdDoc.id;
+        }
+      } catch (backendErr) {
+        console.warn("Backend document record create note:", backendErr);
+      }
 
       // Filter out existing doc for same slot title
       const filtered = localDocs.filter(d => !d.title.toLowerCase().includes(slotKey) && String(d.id) !== String(newDoc.id));

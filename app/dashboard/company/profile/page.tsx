@@ -849,7 +849,12 @@ export default function CompanyProfilePage() {
   const handleDocumentUpload = async (file: File, slotName: string, docType: string) => {
     setUploadingSlot(slotName);
     try {
-      await api.uploadTechnicianDocument(file);
+      const res = await api.uploadTechnicianDocument(file);
+      await api.createTechnicianDocument({
+        title: slotName,
+        document_type: docType === "certificate" ? "certificate" : "id",
+        file_url: res.file_url,
+      });
       await mutateDocuments();
       toast.success("Document Uploaded", `${slotName} uploaded for admin verification.`);
     } catch (err: any) {

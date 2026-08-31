@@ -387,10 +387,15 @@ export default function ClientProfilePage() {
       }
     } else if (type === "id_doc") {
       try {
-        const res = await api.uploadAvatar(croppedFile);
-        const url = res.avatar_url || res.url || res.file_url;
+        const res = await api.uploadTechnicianDocument(croppedFile);
+        const url = res.file_url || (res as any).url;
         setIdDocUrl(url);
-        toast.show("success", "Identity document uploaded");
+        await api.createTechnicianDocument({
+          title: "Client National ID / Passport",
+          document_type: "id",
+          file_url: url,
+        });
+        toast.show("success", "Identity document uploaded for verification");
       } catch {
         setIdDocUrl(cropData.src);
         toast.show("success", "Document attached for review");
