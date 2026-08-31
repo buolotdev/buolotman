@@ -54,10 +54,114 @@ export default function AdminVerificationPage() {
     return Array.isArray(usersData) ? usersData : [];
   }, [usersData]);
 
+  const extractUserDocs = (u?: any): DocItem[] => {
+    if (!u) return [];
+    const result: DocItem[] = [];
+    if (Array.isArray(u.documents) && u.documents.length > 0) {
+      result.push(...u.documents);
+    }
+    if (Array.isArray(u.technician_profile?.documents) && u.technician_profile.documents.length > 0) {
+      u.technician_profile.documents.forEach((d: any, idx: number) => {
+        const fileUrl = d.file_url || d.url || d.file;
+        if (fileUrl && !result.some(r => r.file_url === fileUrl)) {
+          result.push({
+            id: d.id || idx + 100,
+            title: d.title || d.name || "Technician Certificate",
+            document_type: d.document_type || "certificate",
+            file_url: fileUrl,
+            is_verified: d.is_verified ?? u.is_verified,
+            created_at: d.created_at || u.created_at,
+          });
+        }
+      });
+    }
+    if (Array.isArray(u.company_profile?.documents) && u.company_profile.documents.length > 0) {
+      u.company_profile.documents.forEach((d: any, idx: number) => {
+        const fileUrl = d.file_url || d.url || d.file;
+        if (fileUrl && !result.some(r => r.file_url === fileUrl)) {
+          result.push({
+            id: d.id || idx + 200,
+            title: d.title || d.name || "Company Compliance Document",
+            document_type: d.document_type || "business_license",
+            file_url: fileUrl,
+            is_verified: d.is_verified ?? u.is_verified,
+            created_at: d.created_at || u.created_at,
+          });
+        }
+      });
+    }
+    // Check direct document fields
+    if (u.id_card_url || u.id_card_front) {
+      const url = u.id_card_url || u.id_card_front;
+      if (url && !result.some(r => r.file_url === url)) {
+        result.push({
+          id: 901,
+          title: "National ID Card (Front)",
+          document_type: "id",
+          file_url: url,
+          is_verified: u.is_verified,
+          created_at: u.created_at,
+        });
+      }
+    }
+    if (u.id_card_back) {
+      if (!result.some(r => r.file_url === u.id_card_back)) {
+        result.push({
+          id: 902,
+          title: "National ID Card (Back)",
+          document_type: "id",
+          file_url: u.id_card_back,
+          is_verified: u.is_verified,
+          created_at: u.created_at,
+        });
+      }
+    }
+    if (u.rccm_certificate || u.rccm_document) {
+      const url = u.rccm_certificate || u.rccm_document;
+      if (url && !result.some(r => r.file_url === url)) {
+        result.push({
+          id: 903,
+          title: "RCCM Commercial Registry",
+          document_type: "business_license",
+          file_url: url,
+          is_verified: u.is_verified,
+          created_at: u.created_at,
+        });
+      }
+    }
+    if (u.ifu_attestation || u.ifu_document) {
+      const url = u.ifu_attestation || u.ifu_document;
+      if (url && !result.some(r => r.file_url === url)) {
+        result.push({
+          id: 904,
+          title: "IFU Tax Clearance Certificate",
+          document_type: "tax_clearance",
+          file_url: url,
+          is_verified: u.is_verified,
+          created_at: u.created_at,
+        });
+      }
+    }
+    if (u.insurance_policy || u.insurance_document) {
+      const url = u.insurance_policy || u.insurance_document;
+      if (url && !result.some(r => r.file_url === url)) {
+        result.push({
+          id: 905,
+          title: "Public Liability Insurance Policy",
+          document_type: "insurance",
+          file_url: url,
+          is_verified: u.is_verified,
+          created_at: u.created_at,
+        });
+      }
+    }
+    return result;
+  };
+
   // Counts
   const pendingCount = users.filter((u) => !u.is_verified && u.role !== "ADMIN").length;
   const verifiedCount = users.filter((u) => u.is_verified && u.role !== "ADMIN").length;
-  const totalDocsCount = users.reduce((acc, u) => acc + (u.documents?.length || 0), 0);
+  const totalDocsCount = users.reduce((acc, u) => acc + extractUserDocs(u).length, 0);
 
   // Filtered Users
   const filteredUsers = useMemo(() => {
@@ -272,7 +376,7 @@ export default function AdminVerificationPage() {
             {filteredUsers.map((u) => {
               const fullName = `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username;
               const initials = `${(u.first_name || "")[0] || ""}${(u.last_name || "")[0] || ""}`.toUpperCase() || u.username?.[0]?.toUpperCase() || "U";
-              const docs = u.documents || [];
+              const docs = extractUserDocs(u);
 
               return (
                 <div key={u.id} className={styles.verificationCard}>
@@ -496,55 +600,61 @@ export default function AdminVerificationPage() {
               )}
 
               {/* Identity & KYC Documents */}
-              <div style={{ marginBottom: 24 }}>
-                <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                  Identity & Compliance Documents ({selectedUserModal.documents?.length || 0})
-                </strong>
-                {(!selectedUserModal.documents || selectedUserModal.documents.length === 0) ? (
-                  <div style={{ padding: 20, textAlign: "center", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 13 }}>
-                    No KYC documents uploaded by this user.
-                  </div>
-                ) : (
-                  <div>
-                    {selectedUserModal.documents.map((doc) => (
-                      <div key={doc.id} className={styles.documentItem} style={{ marginBottom: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                          <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
-                          <div>
-                            <strong style={{ display: "block", fontSize: 14, color: "#001f3f" }}>{doc.title || "KYC Credential"}</strong>
-                            <small style={{ color: "#64748b", fontSize: 12 }}>{getDocTypeLabel(doc.document_type)}</small>
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <button
-                            type="button"
-                            className={styles.docActionBtn}
-                            onClick={() => {
-                              setSelectedDoc({
-                                title: doc.title || getDocTypeLabel(doc.document_type),
-                                url: getImageUrl(doc.file_url),
-                                type: doc.document_type,
-                              });
-                            }}
-                          >
-                            <iconify-icon icon="lucide:maximize-2" /> Inspect
-                          </button>
-                          <a
-                            href={getImageUrl(doc.file_url)}
-                            target="_blank"
-                            rel="noreferrer"
-                            download
-                            className={styles.docActionBtn}
-                            style={{ background: "#ffffff", color: "#001f3f", border: "1px solid #cbd5e1" }}
-                          >
-                            <iconify-icon icon="lucide:download" /> Download
-                          </a>
-                        </div>
+              {(() => {
+                const modalDocs = extractUserDocs(selectedUserModal);
+                return (
+                  <div style={{ marginBottom: 24 }}>
+                    <strong style={{ fontSize: 13, color: "#001f3f", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                      Identity & Compliance Documents ({modalDocs.length})
+                    </strong>
+                    {modalDocs.length === 0 ? (
+                      <div style={{ padding: 20, textAlign: "center", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 13 }}>
+                        No KYC documents uploaded by this user.
                       </div>
-                    ))}
+                    ) : (
+                      <div>
+                        {modalDocs.map((doc) => (
+                          <div key={doc.id} className={styles.documentItem} style={{ marginBottom: 10 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                              <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
+                              <div>
+                                <strong style={{ display: "block", fontSize: 14, color: "#001f3f" }}>{doc.title || "KYC Credential"}</strong>
+                                <small style={{ color: "#64748b", fontSize: 12 }}>{getDocTypeLabel(doc.document_type)}</small>
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              <button
+                                type="button"
+                                className={styles.docActionBtn}
+                                onClick={() => {
+                                  setSelectedDoc({
+                                    title: doc.title || getDocTypeLabel(doc.document_type),
+                                    url: getImageUrl(doc.file_url),
+                                    type: doc.document_type,
+                                  });
+                                }}
+                              >
+                                <iconify-icon icon="lucide:maximize-2" /> Inspect
+                              </button>
+                              <a
+                                href={getImageUrl(doc.file_url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                download
+                                className={styles.docActionBtn}
+                                style={{ background: "#ffffff", color: "#001f3f", border: "1px solid #cbd5e1" }}
+                                title="Download document"
+                              >
+                                <iconify-icon icon="lucide:download" />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </div>
 
             {/* In-Modal Admin Decision Actions */}
