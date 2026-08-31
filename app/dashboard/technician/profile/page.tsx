@@ -465,14 +465,18 @@ export default function TechnicianProfilePage() {
       localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
       localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
       localStorage.setItem("boulotman_technician_available_now", String(availableNow));
-      localStorage.setItem("boulotman_technician_documents", JSON.stringify(localDocs));
-      localStorage.setItem("boulotman_technician_pricing", JSON.stringify({
-        startingPrice,
-        hourlyRate,
-        dailyRate,
-        inspectionFee,
+      const pricingObj = {
+        startingPrice: startingPrice.trim(),
+        hourlyRate: hourlyRate.trim(),
+        dailyRate: dailyRate.trim(),
+        inspectionFee: inspectionFee.trim(),
         isNegotiable,
-      }));
+      };
+      localStorage.setItem("boulotman_technician_pricing", JSON.stringify(pricingObj));
+      if (userData?.id) {
+        localStorage.setItem(`boulotman_technician_pricing_${userData.id}`, JSON.stringify(pricingObj));
+        localStorage.setItem(`boulotman_technician_profile_custom_${userData.id}`, JSON.stringify(customProfileData));
+      }
 
       // 2. Send clean payload to backend
       const numericHourly = hourlyRate ? hourlyRate.replace(/[^0-9.]/g, "") : "";

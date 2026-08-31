@@ -281,33 +281,48 @@ export default function PublicProfilePage() {
             } catch {}
           }
 
-          const rawCustom = localStorage.getItem("boulotman_technician_profile_custom");
+          const rawCustom = (validId ? localStorage.getItem(`boulotman_technician_profile_custom_${validId}`) : null)
+            || localStorage.getItem("boulotman_technician_profile_custom")
+            || (baseUser?.id ? localStorage.getItem(`boulotman_technician_profile_custom_${baseUser.id}`) : null);
+          const rawPricing = (validId ? localStorage.getItem(`boulotman_technician_pricing_${validId}`) : null)
+            || localStorage.getItem("boulotman_technician_pricing")
+            || (baseUser?.id ? localStorage.getItem(`boulotman_technician_pricing_${baseUser.id}`) : null);
           const rawPort = localStorage.getItem("boulotman_technician_portfolio");
           const rawTools = localStorage.getItem("boulotman_technician_tools");
           const rawSkills = localStorage.getItem("boulotman_technician_skills");
 
-          if (baseUser?.role !== "COMPANY" && rawCustom) {
-            const c = JSON.parse(rawCustom);
-            if (c) {
-              baseUser = {
-                ...(baseUser || {}),
-                id: validId,
-                role: "TECHNICIAN",
-                first_name: c.firstName || baseUser?.first_name,
-                last_name: c.lastName || baseUser?.last_name,
-                headline: c.headline || baseUser?.headline,
-                bio: c.bio || baseUser?.bio,
-                about: c.bio || baseUser?.about,
-                city: c.city || baseUser?.city,
-                country: c.country || baseUser?.country,
-                experience_years: c.experienceYears || baseUser?.experience_years,
-                education_level: c.educationLevel || baseUser?.education_level,
-                expertise_level: c.expertiseLevel || baseUser?.expertise_level,
-                skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
-                portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
-                tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
-              };
+          let pricingParsed: any = {};
+          if (rawPricing) {
+            try { pricingParsed = JSON.parse(rawPricing); } catch {}
+          }
+
+          if (baseUser?.role !== "COMPANY" && (rawCustom || rawPricing)) {
+            let c: any = {};
+            if (rawCustom) {
+              try { c = JSON.parse(rawCustom); } catch {}
             }
+            baseUser = {
+              ...(baseUser || {}),
+              id: validId,
+              role: "TECHNICIAN",
+              first_name: c.firstName || baseUser?.first_name,
+              last_name: c.lastName || baseUser?.last_name,
+              headline: c.headline || baseUser?.headline,
+              bio: c.bio || baseUser?.bio,
+              about: c.bio || baseUser?.about,
+              city: c.city || baseUser?.city,
+              country: c.country || baseUser?.country,
+              experience_years: c.experienceYears || baseUser?.experience_years,
+              education_level: c.educationLevel || baseUser?.education_level,
+              expertise_level: c.expertiseLevel || baseUser?.expertise_level,
+              hourly_rate: pricingParsed.hourlyRate || c.hourlyRate || baseUser?.hourly_rate || baseUser?.technician_profile?.hourly_rate,
+              daily_rate: pricingParsed.dailyRate || c.dailyRate || baseUser?.daily_rate || baseUser?.technician_profile?.daily_rate,
+              inspection_fee: pricingParsed.inspectionFee || c.inspectionFee || baseUser?.inspection_fee || baseUser?.technician_profile?.inspection_fee,
+              starting_price: pricingParsed.startingPrice || c.startingPrice || baseUser?.starting_price || baseUser?.technician_profile?.starting_price,
+              skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
+              portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
+              tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
+            };
           }
         } catch {}
       }
@@ -415,9 +430,22 @@ export default function PublicProfilePage() {
     ? rawTools
     : (rawTools && typeof rawTools === "object" && Array.isArray(rawTools.tools) ? rawTools.tools : []);
 
-  const hourlyRateDisplay = profile?.hourly_rate || profile?.technician_profile?.hourly_rate;
-  const dailyRateDisplay = profile?.daily_rate || (rawTools && typeof rawTools === "object" && rawTools.pricing?.daily_rate);
-  const inspectionFeeDisplay = profile?.inspection_fee || (rawTools && typeof rawTools === "object" && rawTools.pricing?.inspection_fee);
+  // Read direct or scoped pricing
+  let localPricing: any = {};
+  if (typeof window !== "undefined") {
+    try {
+      const pStr = (validId ? localStorage.getItem(`boulotman_technician_pricing_${validId}`) : null)
+        || localStorage.getItem("boulotman_technician_pricing")
+        || (profile?.id ? localStorage.getItem(`boulotman_technician_pricing_${profile.id}`) : null)
+        || (profile?.user_id ? localStorage.getItem(`boulotman_technician_pricing_${profile.user_id}`) : null);
+      if (pStr) localPricing = JSON.parse(pStr);
+    } catch {}
+  }
+
+  const startingPriceDisplay = profile?.starting_price || profile?.technician_profile?.starting_price || localPricing.startingPrice;
+  const hourlyRateDisplay = profile?.hourly_rate || profile?.technician_profile?.hourly_rate || localPricing.hourlyRate;
+  const dailyRateDisplay = profile?.daily_rate || profile?.technician_profile?.daily_rate || localPricing.dailyRate || (rawTools && typeof rawTools === "object" && rawTools.pricing?.daily_rate);
+  const inspectionFeeDisplay = profile?.inspection_fee || profile?.technician_profile?.inspection_fee || localPricing.inspectionFee || (rawTools && typeof rawTools === "object" && rawTools.pricing?.inspection_fee);
 
   const expertiseLevel = profile?.expertise_level || profile?.technician_profile?.expertise_level || "Verified Specialist";
   const educationLevel = profile?.education_level || profile?.technician_profile?.education_level || "Professional Certification";
@@ -1087,6 +1115,14 @@ export default function PublicProfilePage() {
                     {t.standardPricing}
                   </h2>
                   <div className={styles.pricingGrid}>
+                    {startingPriceDisplay && (
+                      <div className={styles.pricingBox}>
+                        <span className={styles.pricingLabel}>Starting Base Rate</span>
+                        <span className={styles.pricingValue}>
+                          {String(startingPriceDisplay).includes("XOF") ? startingPriceDisplay : `${startingPriceDisplay} XOF`}
+                        </span>
+                      </div>
+                    )}
                     <div className={styles.pricingBox}>
                       <span className={styles.pricingLabel}>{t.hourlyRate}</span>
                       <span className={styles.pricingValue}>
