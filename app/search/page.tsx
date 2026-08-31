@@ -13,27 +13,48 @@ import styles from "./search.module.css";
 
 function CardMedia({ result }: { result: SearchResult }) {
   const [hasError, setHasError] = useState(false);
-
-  if (result.image && !hasError) {
-    return (
-      <Image
-        src={result.image}
-        alt={result.name}
-        fill
-        unoptimized
-        sizes="280px"
-        className={styles.resultImage}
-        onError={() => setHasError(true)}
-      />
-    );
-  }
+  const initials = (result.name || "B")
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
-    <div
-      className={`${styles.companyPlaceholder} ${styles.companyPlaceholderPrimary}`}
-      aria-hidden="true"
-    >
-      <iconify-icon icon={result.type === "company" ? "lucide:building-2" : "lucide:user"} />
+    <div className={styles.cardHeaderArea}>
+      <div className={styles.cardCoverBanner}>
+        {result.type === "company" ? (
+          <div className={styles.bannerCompanyPattern} />
+        ) : (
+          <div className={styles.bannerTechPattern} />
+        )}
+      </div>
+
+      <div className={styles.avatarBadgeWrapper}>
+        <div className={styles.avatarBadge}>
+          {result.image && !hasError ? (
+            <img
+              src={result.image}
+              alt={result.name}
+              className={styles.avatarImg}
+              onError={() => setHasError(true)}
+            />
+          ) : (
+            <div
+              className={`${styles.avatarFallback} ${
+                result.type === "company" ? styles.avatarFallbackCompany : styles.avatarFallbackTech
+              }`}
+            >
+              {initials || (
+                <iconify-icon
+                  icon={result.type === "company" ? "lucide:building-2" : "lucide:user"}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -529,9 +550,7 @@ export default function SearchPage() {
             ) : (
               filteredByTab.map((result, idx) => (
                 <article key={`${result.type}-${result.id}-${idx}`} className={styles.resultCard}>
-                  <div className={styles.resultMedia}>
-                    <CardMedia result={result} />
-                  </div>
+                  <CardMedia result={result} />
 
                   <div className={styles.resultBody}>
                     <div className={styles.resultTitleRow}>
