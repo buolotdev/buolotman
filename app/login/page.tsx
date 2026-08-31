@@ -51,29 +51,14 @@ const parseErrorMsg = (errMessage: string) => {
 };
 
 const COUNTRIES = [
-  "Benin",
-  "Togo",
   "Nigeria",
-  "Ghana",
-  "Ivory Coast",
-  "Senegal",
-  "Cameroon",
   "Rwanda",
   "Kenya",
-  "Uganda",
-  "Burkina Faso",
-  "Mali",
-  "Guinea",
-  "Niger",
-  "Gabon",
-  "Congo",
-  "DR Congo",
+  "Ghana",
   "South Africa",
-  "France",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Other",
+  "Ivory Coast",
+  "Cameroon",
+  "Uganda",
 ];
 
 const translations: Record<string, Record<string, any>> = {
@@ -246,7 +231,7 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupCity, setSignupCity] = useState("");
   const [signupRegion, setSignupRegion] = useState("");
-  const [signupCountry, setSignupCountry] = useState("Benin");
+  const [signupCountry, setSignupCountry] = useState("");
   const [signupTermsAccepted, setSignupTermsAccepted] = useState(false);
 
   const [resetEmail, setResetEmail] = useState("");
