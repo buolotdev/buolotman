@@ -34,7 +34,6 @@ const SERVICES = [
 // Duplicate for seamless scroll
 const ALL_CARDS = [...SERVICES, ...SERVICES];
 
-
 const parseErrorMsg = (errMessage: string) => {
   try {
     const parsed = JSON.parse(errMessage);
@@ -50,6 +49,32 @@ const parseErrorMsg = (errMessage: string) => {
   }
   return errMessage;
 };
+
+const COUNTRIES = [
+  "Benin",
+  "Togo",
+  "Nigeria",
+  "Ghana",
+  "Ivory Coast",
+  "Senegal",
+  "Cameroon",
+  "Rwanda",
+  "Kenya",
+  "Uganda",
+  "Burkina Faso",
+  "Mali",
+  "Guinea",
+  "Niger",
+  "Gabon",
+  "Congo",
+  "DR Congo",
+  "South Africa",
+  "France",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Other",
+];
 
 const translations: Record<string, Record<string, any>> = {
   en: {
@@ -72,13 +97,35 @@ const translations: Record<string, Record<string, any>> = {
     labelAccountType: "Account Type",
     labelCountry: "Country",
     selectCountry: "Select Country",
-    labelFullName: "Full Name / Company Name",
-    phFullName: "Your full name",
-    labelEmail: "Email",
+    labelFirstName: "First Name",
+    phFirstName: "First name",
+    labelMiddleName: "Middle Name",
+    phMiddleName: "Middle name (optional)",
+    labelLastName: "Last Name",
+    phLastName: "Last name",
+    labelPhone: "Phone Number",
+    phPhone: "e.g. +229 97 00 00 00",
+    labelEmail: "Email Address",
+    phEmail: "your@email.com",
+    labelVerifyEmail: "Verify Email Address",
+    phVerifyEmail: "Re-enter your email",
+    labelCity: "City / Town",
+    phCity: "e.g. Cotonou, Porto-Novo, Lomé",
+    labelRegion: "Region / State",
+    phRegion: "e.g. Littoral, Atlantique, Maritime",
+    labelCompanyName: "Company Name",
+    phCompanyName: "e.g. Apex Engineering SARL",
     labelPassword: "Password",
     phPassword: "Create a password (min. 8 characters)",
     labelConfirmPassword: "Confirm Password",
     phConfirmPassword: "Confirm your password",
+    labelTerms: "I accept and agree to the",
+    termsOfService: "Terms of Service",
+    and: "and",
+    privacyPolicy: "Privacy Policy",
+    errEmailMismatch: "Email addresses do not match. Please verify your email.",
+    errPasswordMismatch: "Passwords do not match. Please verify and try again.",
+    errTermsRequired: "Please accept the Terms and Conditions to continue.",
     btnCreatingAccount: "Creating Account...",
     btnCreateAccount: "Create Account",
     alreadyRegistered: "Already registered?",
@@ -114,13 +161,35 @@ const translations: Record<string, Record<string, any>> = {
     labelAccountType: "Type de compte",
     labelCountry: "Pays",
     selectCountry: "Sélectionnez le pays",
-    labelFullName: "Nom complet / Raison sociale",
-    phFullName: "Votre nom complet",
+    labelFirstName: "Prénom",
+    phFirstName: "Votre prénom",
+    labelMiddleName: "Deuxième prénom",
+    phMiddleName: "Deuxième prénom (optionnel)",
+    labelLastName: "Nom de famille",
+    phLastName: "Votre nom",
+    labelPhone: "Numéro de téléphone",
+    phPhone: "ex. +229 97 00 00 00",
     labelEmail: "Adresse e-mail",
+    phEmail: "votre@email.com",
+    labelVerifyEmail: "Confirmer l'adresse e-mail",
+    phVerifyEmail: "Retapez votre adresse e-mail",
+    labelCity: "Ville / Commune",
+    phCity: "ex. Cotonou, Porto-Novo, Lomé",
+    labelRegion: "Région / Département",
+    phRegion: "ex. Littoral, Atlantique",
+    labelCompanyName: "Nom de l'entreprise",
+    phCompanyName: "ex. Apex Engineering SARL",
     labelPassword: "Mot de passe",
     phPassword: "Créer un mot de passe (8 car. min.)",
     labelConfirmPassword: "Confirmer le mot de passe",
     phConfirmPassword: "Confirmez votre mot de passe",
+    labelTerms: "J'accepte et j'approuve les",
+    termsOfService: "Conditions Générales d'Utilisation",
+    and: "et la",
+    privacyPolicy: "Politique de Confidentialité",
+    errEmailMismatch: "Les adresses e-mail ne correspondent pas.",
+    errPasswordMismatch: "Les mots de passe ne correspondent pas.",
+    errTermsRequired: "Veuillez accepter les Conditions Générales pour continuer.",
     btnCreatingAccount: "Création du compte...",
     btnCreateAccount: "Créer un compte",
     alreadyRegistered: "Déjà inscrit ?",
@@ -165,12 +234,20 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  const [signupName, setSignupName] = useState("");
+  const [signupFirstName, setSignupFirstName] = useState("");
+  const [signupMiddleName, setSignupMiddleName] = useState("");
+  const [signupLastName, setSignupLastName] = useState("");
+  const [signupCompanyName, setSignupCompanyName] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
+  const [signupVerifyEmail, setSignupVerifyEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [signupCountry, setSignupCountry] = useState("");
+  const [signupCity, setSignupCity] = useState("");
+  const [signupRegion, setSignupRegion] = useState("");
+  const [signupCountry, setSignupCountry] = useState("Benin");
+  const [signupTermsAccepted, setSignupTermsAccepted] = useState(false);
 
   const [resetEmail, setResetEmail] = useState("");
 
@@ -256,6 +333,13 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
     e.preventDefault();
     setError(null);
 
+    // Email verification check
+    if (signupEmail.trim().toLowerCase() !== signupVerifyEmail.trim().toLowerCase()) {
+      setError(t.errEmailMismatch || "Email addresses do not match. Please verify your email.");
+      return;
+    }
+
+    // Password validation
     if (!signupPassword) {
       setError("Please enter a password.");
       return;
@@ -265,22 +349,86 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
       return;
     }
     if (signupPassword !== signupConfirmPassword) {
-      setError("Passwords do not match. Please verify and try again.");
+      setError(t.errPasswordMismatch || "Passwords do not match. Please verify and try again.");
       return;
+    }
+
+    // Terms validation
+    if (!signupTermsAccepted) {
+      setError(t.errTermsRequired || "Please accept the Terms and Conditions to continue.");
+      return;
+    }
+
+    // Role-specific validation
+    if (selectedRole === "Technician") {
+      if (!signupFirstName.trim()) {
+        setError("Please enter your first name.");
+        return;
+      }
+      if (!signupLastName.trim()) {
+        setError("Please enter your last name.");
+        return;
+      }
+      if (!signupPhone.trim()) {
+        setError("Please enter your phone number.");
+        return;
+      }
+      if (!signupCity.trim()) {
+        setError("Please enter your city/town.");
+        return;
+      }
+      if (!signupRegion.trim()) {
+        setError("Please enter your region/state.");
+        return;
+      }
+      if (!signupCountry) {
+        setError("Please select your country.");
+        return;
+      }
+    } else if (selectedRole === "Company") {
+      if (!signupCompanyName.trim()) {
+        setError("Please enter your company name.");
+        return;
+      }
+      if (!signupPhone.trim()) {
+        setError("Please enter your phone number.");
+        return;
+      }
+      if (!signupCountry) {
+        setError("Please select your country.");
+        return;
+      }
+    } else {
+      if (!signupFirstName.trim()) {
+        setError("Please enter your first name.");
+        return;
+      }
+      if (!signupLastName.trim()) {
+        setError("Please enter your last name.");
+        return;
+      }
     }
 
     setIsLoading(true);
     try {
+      const fullFirstName = signupMiddleName.trim()
+        ? `${signupFirstName.trim()} ${signupMiddleName.trim()}`.trim()
+        : signupFirstName.trim();
+
       const payload: any = {
-        email: signupEmail,
+        email: signupEmail.trim().toLowerCase(),
         password: signupPassword,
-        first_name: signupName.split(" ")[0] || signupName,
-        last_name: signupName.split(" ").slice(1).join(" ") || "",
+        first_name: selectedRole === "Company" ? signupCompanyName.trim() : (fullFirstName || signupFirstName.trim()),
+        last_name: selectedRole === "Company" ? "" : signupLastName.trim(),
+        phone: signupPhone.trim(),
         country: signupCountry,
+        city: signupCity.trim(),
+        region: signupRegion.trim(),
+        address: `${signupCity.trim()}${signupRegion.trim() ? `, ${signupRegion.trim()}` : ""}`.trim(),
       };
 
       if (selectedRole === "Company") {
-        payload.company_name = signupName;
+        payload.company_name = signupCompanyName.trim();
       }
 
       try {
@@ -300,7 +448,7 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
           errMsg.toLowerCase().includes("duplicate")
         ) {
           try {
-            const loginData = await api.login(signupEmail, signupPassword);
+            const loginData = await api.login(signupEmail.trim().toLowerCase(), signupPassword);
             const role: string = (loginData.role || selectedRole || "client").toLowerCase();
             localStorage.setItem("access_token", loginData.access);
             localStorage.setItem("refresh_token", loginData.refresh);
@@ -317,8 +465,8 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
         throw regErr;
       }
 
-      const loginData = await api.login(signupEmail, signupPassword);
-      const role: string = (loginData.role || "client").toLowerCase();
+      const loginData = await api.login(signupEmail.trim().toLowerCase(), signupPassword);
+      const role: string = (loginData.role || selectedRole || "client").toLowerCase();
       localStorage.setItem("access_token", loginData.access);
       localStorage.setItem("refresh_token", loginData.refresh);
       localStorage.setItem("user_role", role);
@@ -453,40 +601,244 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
               <label className={styles.fieldLabel}>{t.labelAccountType}</label>
               <input className={styles.input} value={selectedRole} readOnly />
 
-              <label className={styles.fieldLabel}>{t.labelCountry}</label>
-              <select className={styles.select} value={signupCountry} onChange={e => setSignupCountry(e.target.value)} required>
-                <option value="">{t.selectCountry}</option>
-                <option>Rwanda</option>
-                <option>Nigeria</option>
-                <option>Kenya</option>
-                <option>Ghana</option>
-                <option>South Africa</option>
-                <option>Ivory Coast</option>
-                <option>Cameroon</option>
-                <option>Uganda</option>
-              </select>
+              {selectedRole === "Company" ? (
+                <>
+                  <label className={styles.fieldLabel}>{t.labelCompanyName}</label>
+                  <input
+                    className={styles.input}
+                    value={signupCompanyName}
+                    onChange={e => setSignupCompanyName(e.target.value)}
+                    placeholder={t.phCompanyName}
+                    required
+                  />
+                  <div className={styles.formGrid2}>
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.fieldLabel}>{t.labelFirstName}</label>
+                      <input
+                        className={styles.input}
+                        value={signupFirstName}
+                        onChange={e => setSignupFirstName(e.target.value)}
+                        placeholder={t.phFirstName}
+                        required
+                      />
+                    </div>
+                    <div className={styles.fieldGroup}>
+                      <label className={styles.fieldLabel}>{t.labelLastName}</label>
+                      <input
+                        className={styles.input}
+                        value={signupLastName}
+                        onChange={e => setSignupLastName(e.target.value)}
+                        placeholder={t.phLastName}
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : selectedRole === "Technician" ? (
+                /* ── EXACT TECHNICIAN SIGN UP ── */
+                <div className={styles.formGrid3}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t.labelFirstName}</label>
+                    <input
+                      className={styles.input}
+                      value={signupFirstName}
+                      onChange={e => setSignupFirstName(e.target.value)}
+                      placeholder={t.phFirstName}
+                      required
+                    />
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t.labelMiddleName}</label>
+                    <input
+                      className={styles.input}
+                      value={signupMiddleName}
+                      onChange={e => setSignupMiddleName(e.target.value)}
+                      placeholder={t.phMiddleName}
+                    />
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t.labelLastName}</label>
+                    <input
+                      className={styles.input}
+                      value={signupLastName}
+                      onChange={e => setSignupLastName(e.target.value)}
+                      placeholder={t.phLastName}
+                      required
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.formGrid2}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t.labelFirstName}</label>
+                    <input
+                      className={styles.input}
+                      value={signupFirstName}
+                      onChange={e => setSignupFirstName(e.target.value)}
+                      placeholder={t.phFirstName}
+                      required
+                    />
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t.labelLastName}</label>
+                    <input
+                      className={styles.input}
+                      value={signupLastName}
+                      onChange={e => setSignupLastName(e.target.value)}
+                      placeholder={t.phLastName}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
-              <label className={styles.fieldLabel}>{t.labelFullName}</label>
-              <input className={styles.input} value={signupName} onChange={e => setSignupName(e.target.value)} placeholder={t.phFullName} required />
-
-              <label className={styles.fieldLabel}>{t.labelEmail}</label>
-              <input className={styles.input} type="email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} placeholder="your@email.com" required />
-
-              <label className={styles.fieldLabel}>{t.labelPassword}</label>
-              <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showPassword ? "text" : "password"} value={signupPassword} onChange={e => setSignupPassword(e.target.value)} placeholder={t.phPassword} required />
-                <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
-                  <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
-                </button>
+              {/* Phone & Country */}
+              <div className={styles.formGrid2}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelPhone}</label>
+                  <input
+                    className={styles.input}
+                    type="tel"
+                    value={signupPhone}
+                    onChange={e => setSignupPhone(e.target.value)}
+                    placeholder={t.phPhone}
+                    required
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelCountry}</label>
+                  <select
+                    className={styles.select}
+                    value={signupCountry}
+                    onChange={e => setSignupCountry(e.target.value)}
+                    required
+                  >
+                    <option value="">{t.selectCountry}</option>
+                    {COUNTRIES.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <label className={styles.fieldLabel}>{t.labelConfirmPassword}</label>
-              <div className={styles.passwordWrapper}>
-                <input className={styles.input} type={showConfirmPassword ? "text" : "password"} value={signupConfirmPassword} onChange={e => setSignupConfirmPassword(e.target.value)} placeholder={t.phConfirmPassword} required />
-                <button type="button" className={styles.eyeBtn} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
-                </button>
+              {/* City / Town & Region / State */}
+              <div className={styles.formGrid2}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelCity}</label>
+                  <input
+                    className={styles.input}
+                    value={signupCity}
+                    onChange={e => setSignupCity(e.target.value)}
+                    placeholder={t.phCity}
+                    required
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelRegion}</label>
+                  <input
+                    className={styles.input}
+                    value={signupRegion}
+                    onChange={e => setSignupRegion(e.target.value)}
+                    placeholder={t.phRegion}
+                    required={selectedRole === "Technician"}
+                  />
+                </div>
               </div>
+
+              {/* Email & Verify Email */}
+              <div className={styles.formGrid2}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelEmail}</label>
+                  <input
+                    className={styles.input}
+                    type="email"
+                    value={signupEmail}
+                    onChange={e => setSignupEmail(e.target.value)}
+                    placeholder={t.phEmail}
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelVerifyEmail}</label>
+                  <input
+                    className={styles.input}
+                    type="email"
+                    value={signupVerifyEmail}
+                    onChange={e => setSignupVerifyEmail(e.target.value)}
+                    placeholder={t.phVerifyEmail}
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password & Confirm Password */}
+              <div className={styles.formGrid2}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelPassword}</label>
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      className={styles.input}
+                      type={showPassword ? "text" : "password"}
+                      value={signupPassword}
+                      onChange={e => setSignupPassword(e.target.value)}
+                      placeholder={t.phPassword}
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className={styles.eyeBtn}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>{t.labelConfirmPassword}</label>
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      className={styles.input}
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={signupConfirmPassword}
+                      onChange={e => setSignupConfirmPassword(e.target.value)}
+                      placeholder={t.phConfirmPassword}
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className={styles.eyeBtn}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      <iconify-icon icon={showConfirmPassword ? "lucide:eye-off" : "lucide:eye"} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Accept Terms & Conditions */}
+              <label className={styles.termsRow}>
+                <input
+                  type="checkbox"
+                  className={styles.termsCheckbox}
+                  checked={signupTermsAccepted}
+                  onChange={e => setSignupTermsAccepted(e.target.checked)}
+                  required
+                />
+                <span className={styles.termsLabel}>
+                  {t.labelTerms}{" "}
+                  <Link href="/terms" target="_blank" className={styles.linkAction}>
+                    {t.termsOfService}
+                  </Link>{" "}
+                  {t.and}{" "}
+                  <Link href="/privacy" target="_blank" className={styles.linkAction}>
+                    {t.privacyPolicy}
+                  </Link>
+                </span>
+              </label>
 
               {error && <div className={styles.errorMsg}>{error}</div>}
               <button type="submit" className={styles.primaryBtn} disabled={isLoading}>

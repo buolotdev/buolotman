@@ -226,10 +226,12 @@ class ClientRegistrationSerializer(serializers.ModelSerializer):
 
 class TechnicianRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    country = serializers.CharField(required=False, allow_blank=True)
+    address = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password', 'phone']
+        fields = ['first_name', 'last_name', 'email', 'password', 'phone', 'country', 'address']
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -244,6 +246,8 @@ class TechnicianRegistrationSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             phone=validated_data.get('phone', ''),
+            country=validated_data.get('country', ''),
+            address=validated_data.get('address', ''),
             role='TECHNICIAN',
         )
         TechnicianProfile.objects.create(user=user)

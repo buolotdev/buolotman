@@ -496,6 +496,53 @@
   font-weight: 500;
 }
 
+.formGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.formGrid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.termsRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 6px 0 16px;
+  cursor: pointer;
+}
+
+.termsCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff4500;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.termsLabel {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #556578;
+  cursor: pointer;
+}
+
+.termsLabel a, .termsLabel span {
+  color: #ff4500;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 960px) {
   .wrapper { flex-direction: column; }
