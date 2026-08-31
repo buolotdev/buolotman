@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./TaskBoard.module.css";
 import { api } from "../lib/api";
 import { useFetch } from "../lib/useFetch";
+import { formatTimeAgo, formatDateTime } from "../lib/format";
 import { SkeletonBlock } from "./skeleton/Skeleton";
 
 import { useLocation } from "@/app/context/LocationContext";
@@ -606,9 +607,9 @@ export default function TaskBoard() {
                         <iconify-icon icon="lucide:map-pin" style={{ color: "#0284c7" }} />
                         <span>{task.city ? `${task.city}, ${task.location || ""}`.trim() : task.location || "Remote Work"}</span>
                       </span>
-                      <span className={styles.metaItem} title="Posted date">
-                        <iconify-icon icon="lucide:calendar" style={{ color: "#64748b" }} />
-                        <span>{new Date(task.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                      <span className={styles.metaItem} title={task.created_at ? `Posted: ${formatDateTime(task.created_at, lang)}` : "Posted recently"}>
+                        <iconify-icon icon="lucide:clock" style={{ color: "#ff4500" }} />
+                        <span>{task.created_at ? `Posted ${formatTimeAgo(task.created_at, lang)}` : "Recently"}</span>
                       </span>
                       <span className={styles.metaItem} title="Active Proposals">
                         <iconify-icon icon="lucide:users-round" style={{ color: "#8b5cf6" }} />

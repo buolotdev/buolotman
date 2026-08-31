@@ -5,6 +5,7 @@ import { notFound, useRouter } from "next/navigation";
 import { use, useMemo, useState } from "react";
 import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { formatTimeAgo, formatDateTime } from "@/app/lib/format";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
@@ -94,7 +95,9 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
   const categoryName = task.category_name || task.category || "Specialist Assignment";
   const locationLabel = task.location_name || task.city || task.location || "On-Site Location";
   const scheduleDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : task.schedule || "Flexible";
-  const postedDate = task.created_at ? new Date(task.created_at).toLocaleDateString() : "Recent";
+  const postedDate = task.created_at
+    ? `${formatDateTime(task.created_at)} (${formatTimeAgo(task.created_at)})`
+    : "Recently";
 
   return (
     <main className={styles.page}>

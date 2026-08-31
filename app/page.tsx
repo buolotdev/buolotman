@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { api } from "./lib/api";
 import { useFetch } from "./lib/useFetch";
+import { formatTimeAgo, formatDateTime } from "./lib/format";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
 import { useLocation } from "./context/LocationContext";
 
@@ -619,7 +620,13 @@ export default function Home() {
                         </div>
                         <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>{lang === 'fr' ? 'Postuler' : 'Apply'}</a>
                       </div>
-                      <div className="bm-main-task-meta">📍 {task.location || 'Remote'} • {task.budget_type === 'fixed' ? (lang === 'fr' ? 'Fixe' : 'Fixed') : (lang === 'fr' ? 'Horaire' : 'Hourly')}</div>
+                      <div className="bm-main-task-meta" title={task.created_at ? `Posted: ${formatDateTime(task.created_at, lang)}` : "Live task"}>
+                        <span>📍 {task.location || 'Remote'}</span>
+                        <span> • {task.budget_type === 'fixed' ? (lang === 'fr' ? 'Fixe' : 'Fixed') : (lang === 'fr' ? 'Horaire' : 'Hourly')}</span>
+                        {task.created_at && (
+                          <span style={{ color: "#ff4500", fontWeight: 700, marginLeft: 4 }}> • {formatTimeAgo(task.created_at, lang)}</span>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (

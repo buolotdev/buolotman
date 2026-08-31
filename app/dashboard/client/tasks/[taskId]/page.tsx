@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { use, useMemo, useState, useEffect } from "react";
 import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { formatTimeAgo, formatDateTime } from "@/app/lib/format";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
@@ -247,9 +248,11 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                       <h1 className={styles.taskTitle}>{task.title}</h1>
                       <div className={styles.taskMeta}>
                         <span className={styles.categoryBadge}>{task.category}</span>
-                        <span>{task.posted_at || task.postedAt}</span>
-                        <span>{task.city || task.location}</span>
-                        <span>{task.views_count || task.views || 0} {t.views}</span>
+                        {task.created_at && (
+                          <span>⏱️ {formatDateTime(task.created_at, lang)} ({formatTimeAgo(task.created_at, lang)})</span>
+                        )}
+                        <span>📍 {task.city || task.location}</span>
+                        <span>👥 {task.views_count || task.views || 0} {t.views}</span>
                       </div>
                     </div>
 

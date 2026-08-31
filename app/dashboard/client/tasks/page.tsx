@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
+import { formatTimeAgo, formatDateTime } from "@/app/lib/format";
 import { toArray } from "@/app/lib/dataShape";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import styles from "./page.module.css";
@@ -144,9 +145,14 @@ export default function ClientTasksPage() {
                         </div>
                         <h3>{task.title}</h3>
                         <div className={styles.taskMeta}>
-                          <span>{task.category}</span>
-                          <span>{task.city || task.location}</span>
-                          <span>{task.schedule}</span>
+                          {task.category && <span>{task.category}</span>}
+                          {task.city || task.location ? <span>{task.city || task.location}</span> : null}
+                          {task.schedule && <span>📅 {task.schedule}</span>}
+                          {task.created_at && (
+                            <span title={`Posted: ${formatDateTime(task.created_at, lang)}`}>
+                              ⏱️ {formatTimeAgo(task.created_at, lang)}
+                            </span>
+                          )}
                         </div>
                         <div className={styles.progressBlock}>
                           <div className={styles.progressHeader}>
