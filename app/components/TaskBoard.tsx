@@ -394,12 +394,14 @@ export default function TaskBoard() {
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
               <option value="all">{t.allLocations}</option>
-              <option value="kigali">Kigali, Rwanda</option>
-              <option value="abidjan">Abidjan, Ivory Coast</option>
-              <option value="cotonou">Cotonou, Benin</option>
-              <option value="rubavu">Rubavu</option>
-              <option value="huye">Huye</option>
-              <option value="musanze">Musanze</option>
+              <option value="Nigeria">Nigeria</option>
+              <option value="Rwanda">Rwanda</option>
+              <option value="Kenya">Kenya</option>
+              <option value="Ghana">Ghana</option>
+              <option value="South Africa">South Africa</option>
+              <option value="Ivory Coast">Ivory Coast</option>
+              <option value="Cameroon">Cameroon</option>
+              <option value="Uganda">Uganda</option>
               <option value="remote">{t.remoteWork}</option>
             </select>
           </div>

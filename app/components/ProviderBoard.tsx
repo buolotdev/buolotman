@@ -162,12 +162,14 @@ export default function ProviderBoard() {
             }}
           >
             <option value="Any Location">{t.anyLocation}</option>
-            <option value="Rwanda">Rwanda</option>
-            <option value="Kigali">Kigali</option>
-            <option value="Cameroon">Cameroon</option>
             <option value="Nigeria">Nigeria</option>
-            <option value="Ghana">Ghana</option>
+            <option value="Rwanda">Rwanda</option>
             <option value="Kenya">Kenya</option>
+            <option value="Ghana">Ghana</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Ivory Coast">Ivory Coast</option>
+            <option value="Cameroon">Cameroon</option>
+            <option value="Uganda">Uganda</option>
             <option value="Remote">{t.remote}</option>
           </select>
           <button 
