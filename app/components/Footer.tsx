@@ -79,6 +79,273 @@ const LANGUAGES = [
   { label: "العربية", code: "ar" },
 ];
 
+const FOOTER_TRANSLATIONS: Record<string, Record<string, string>> = {
+  en: {
+    tagline: "Home for technicians and engineers in Africa.",
+    description:
+      "Boulot Man connects clients with verified technicians, engineers, professionals and companies for everyday services, skilled work and large projects across Africa.",
+    postTaskBtn: "Post a Task",
+    findProsBtn: "Find Professionals",
+    findCompaniesBtn: "Find Companies",
+
+    col1Title: "Boulot Man",
+    thePlatform: "The Platform",
+    howItWorks: "How it works",
+    locations: "Locations",
+    partnerships: "Partnerships",
+    invest: "Invest",
+    careers: "Career/Jobs",
+    press: "Press & Media",
+
+    col2Title: "Clients",
+    signUp: "Sign up",
+    postTask: "Post a Task",
+    browseServices: "Browse Services",
+    findTechnicians: "Find Technicians",
+    hireCompanies: "Hire Companies",
+    buildTeam: "Build a Team",
+    concierge: "Concierge",
+
+    col3Title: "Professionals",
+    joinTechnician: "Join as a Technician",
+    postServices: "Post Services",
+    browseTasks: "Browse Task",
+    myProfile: "My Profile",
+    contracts: "Contracts",
+    upgradePlan: "Upgrade Plan",
+
+    col4Title: "Companies",
+    joinCompany: "Join as a Company",
+    postCompanyServices: "Post Services",
+    browseProjects: "Browse Projects",
+    yourProfile: "Your profile",
+    subcontracting: "Subcontracting Opportunities",
+    contractors: "Contractors",
+
+    col5Title: "Resources & Community",
+    helpCenter: "Help Center",
+    safetyCenter: "Safety Center",
+    serviceCategories: "Service Categories",
+    pricingFees: "Pricing and Fees",
+    communityGuidelines: "Community Guidelines",
+    earnings: "Earnings",
+    escrowPayments: "Escrow & Safe Payments",
+
+    termsOfService: "Terms of Service",
+    privacyPolicy: "Privacy Policy",
+    trustSafety: "Trust & Safety",
+    paymentsEscrow: "Payments & Escrow",
+    refunds: "Refunds",
+    reviewsRatings: "Reviews & Ratings",
+    cookies: "Cookies",
+    legalCenter: "Legal Center",
+
+    copyright: "© 2026 Boulot Man Engineering Company. All rights reserved.",
+    selectRegion: "Select Region & Currency",
+    searchCountry: "Search country or currency...",
+    autoLocalizes: "Auto-localizes jobs & pricing",
+    noRegionFound: "No region found."
+  },
+  fr: {
+    tagline: "La maison des techniciens et ingénieurs en Afrique.",
+    description:
+      "Boulot Man met en relation des clients avec des techniciens certifiés, des ingénieurs, des professionnels et des entreprises pour les services du quotidien, les travaux qualifiés et les grands projets en Afrique.",
+    postTaskBtn: "Publier une tâche",
+    findProsBtn: "Trouver des professionnels",
+    findCompaniesBtn: "Trouver des entreprises",
+
+    col1Title: "Boulot Man",
+    thePlatform: "La Plateforme",
+    howItWorks: "Comment ça marche",
+    locations: "Emplacements",
+    partnerships: "Partenariats",
+    invest: "Investir",
+    careers: "Carrières & Emplois",
+    press: "Presse & Médias",
+
+    col2Title: "Clients",
+    signUp: "S'inscrire",
+    postTask: "Publier une tâche",
+    browseServices: "Parcourir les services",
+    findTechnicians: "Trouver des techniciens",
+    hireCompanies: "Engager des entreprises",
+    buildTeam: "Créer une équipe",
+    concierge: "Conciergerie",
+
+    col3Title: "Professionnels",
+    joinTechnician: "Devenir Technicien",
+    postServices: "Publier des services",
+    browseTasks: "Consulter les tâches",
+    myProfile: "Mon Profil",
+    contracts: "Contrats",
+    upgradePlan: "Mettre à niveau",
+
+    col4Title: "Entreprises",
+    joinCompany: "Devenir Entreprise",
+    postCompanyServices: "Publier des services",
+    browseProjects: "Consulter les projets",
+    yourProfile: "Votre profil",
+    subcontracting: "Opportunités de sous-traitance",
+    contractors: "Contractants",
+
+    col5Title: "Ressources & Communauté",
+    helpCenter: "Centre d'aide",
+    safetyCenter: "Centre de sécurité",
+    serviceCategories: "Catégories de services",
+    pricingFees: "Tarifs et frais",
+    communityGuidelines: "Règles communautaires",
+    earnings: "Gains & Rémunérations",
+    escrowPayments: "Paiements Sécurisés & Séquestre",
+
+    termsOfService: "Conditions d'utilisation",
+    privacyPolicy: "Politique de confidentialité",
+    trustSafety: "Confiance & Sécurité",
+    paymentsEscrow: "Paiements & Séquestre",
+    refunds: "Remboursements",
+    reviewsRatings: "Avis & Évaluations",
+    cookies: "Cookies",
+    legalCenter: "Centre juridique",
+
+    copyright: "© 2026 Boulot Man Engineering Company. Tous droits réservés.",
+    selectRegion: "Sélectionner la région et la devise",
+    searchCountry: "Rechercher un pays ou une devise...",
+    autoLocalizes: "Localisation automatique des prix",
+    noRegionFound: "Aucune région trouvée."
+  },
+  rw: {
+    tagline: "Ihuriro ry'abatekinisiye n'aba enjeniyeri muri Afurika.",
+    description:
+      "Boulot Man ihuza abakiriya n'abatekinisiye babifitiye ubushobozi, aba enjeniyeri n'ibigo by'ubwubatsi muri Afurika yose.",
+    postTaskBtn: "Tanga Akazi",
+    findProsBtn: "Shaka Abatekinisiye",
+    findCompaniesBtn: "Shaka Ibigo",
+
+    col1Title: "Boulot Man",
+    thePlatform: "Urubuga",
+    howItWorks: "Uko Bikora",
+    locations: "Aho Dukorera",
+    partnerships: "Ubufatanye",
+    invest: "Ishoramari",
+    careers: "Imyanya y'Akazi",
+    press: "Amakuru n'Ibitangazamakuru",
+
+    col2Title: "Abakiriya",
+    signUp: "Iyandikishe",
+    postTask: "Tanga Akazi",
+    browseServices: "Reba Serivisi",
+    findTechnicians: "Shaka Abatekinisiye",
+    hireCompanies: "Koresha Ibigo",
+    buildTeam: "Kora Ikipe",
+    concierge: "Serivisi Yihariye",
+
+    col3Title: "Abanyamwuga",
+    joinTechnician: "Iyandikishe nk'Umutekinisiye",
+    postServices: "Shyiraho Serivisi",
+    browseTasks: "Reba Imirimo Ihari",
+    myProfile: "Umwirondoro Wanjye",
+    contracts: "Amasezerano",
+    upgradePlan: "Kuzamura Konti",
+
+    col4Title: "Ibigo",
+    joinCompany: "Iyandikishe nk'Ikigo",
+    postCompanyServices: "Shyiraho Serivisi",
+    browseProjects: "Reba Imishinga",
+    yourProfile: "Umwirondoro w'Ikigo",
+    subcontracting: "Amasoko yo Gufatanya",
+    contractors: "Abakandarasi",
+
+    col5Title: "Ubufasha & Umuryango",
+    helpCenter: "Ikigo cy'Ubufasha",
+    safetyCenter: "Umutekano",
+    serviceCategories: "Ibyiciro bya Serivisi",
+    pricingFees: "Ibiciro n'Amafaranga",
+    communityGuidelines: "Amategeko Agenga Abanyamuryango",
+    earnings: "Inyungu",
+    escrowPayments: "Uburyo bwo Kwishyura Bwizewe",
+
+    termsOfService: "Amategeko n'Amabwiriza",
+    privacyPolicy: "Politiki y'Ubuzima Bwite",
+    trustSafety: "Icyizere n'Umutekano",
+    paymentsEscrow: "Kwishyura Binyuze muri Escrow",
+    refunds: "Gusubizwa Amafaranga",
+    reviewsRatings: "Ibitekerezo n'Amanota",
+    cookies: "Kuki (Cookies)",
+    legalCenter: "Ikigo cy'Amategeko",
+
+    copyright: "© 2026 Boulot Man Engineering Company. Uburenganzira bwose burabitswe.",
+    selectRegion: "Hitamo Igihugu & Ifaranga",
+    searchCountry: "Shakisha igihugu...",
+    autoLocalizes: "Kumenya ibiciro by'aho uri",
+    noRegionFound: "Nta gihugu cyabonetse."
+  },
+  ar: {
+    tagline: "المنصة الرائدة للفنيين والمهندسين في إفريقيا.",
+    description:
+      "تربط بولوت مان العملاء بالفنيين المعتمدين والمهندسين والشركات لتنفيذ المهام اليومية والمشاريع الكبرى في إفريقيا.",
+    postTaskBtn: "نشر مهمة",
+    findProsBtn: "البحث عن محترفين",
+    findCompaniesBtn: "البحث عن شركات",
+
+    col1Title: "بولوت مان",
+    thePlatform: "المنصة",
+    howItWorks: "كيف تعمل",
+    locations: "المواقع",
+    partnerships: "الشراكات",
+    invest: "الاستثمار",
+    careers: "الوظائف",
+    press: "الصحافة والإعلام",
+
+    col2Title: "العملاء",
+    signUp: "تسجيل جديد",
+    postTask: "نشر مهمة",
+    browseServices: "تصفح الخدمات",
+    findTechnicians: "البحث عن فنيين",
+    hireCompanies: "توظيف شركات",
+    buildTeam: "بناء فريق",
+    concierge: "الخدمة الممتازة",
+
+    col3Title: "المحترفون",
+    joinTechnician: "الانضمام كفني",
+    postServices: "إضافة خدمات",
+    browseTasks: "تصفح المهام",
+    myProfile: "ملفي الشخصي",
+    contracts: "العقود",
+    upgradePlan: "ترقية الخطة",
+
+    col4Title: "الشركات",
+    joinCompany: "الانضمام كشركة",
+    postCompanyServices: "إضافة خدمات الشركة",
+    browseProjects: "تصفح المشاريع",
+    yourProfile: "ملف الشركة",
+    subcontracting: "فرص المقاولة الفرعية",
+    contractors: "المقاولون",
+
+    col5Title: "الموارد والمجتمع",
+    helpCenter: "مركز المساعدة",
+    safetyCenter: "مركز الأمان",
+    serviceCategories: "فئات الخدمات",
+    pricingFees: "الأسعار والرسوم",
+    communityGuidelines: "إرشادات المجتمع",
+    earnings: "الأرباح",
+    escrowPayments: "الدفع الآمن والضمان",
+
+    termsOfService: "شروط الخدمة",
+    privacyPolicy: "سياسة الخصوصية",
+    trustSafety: "الثقة والأمان",
+    paymentsEscrow: "المدفوعات والضمان",
+    refunds: "استرداد الأموال",
+    reviewsRatings: "التقييمات والآراء",
+    cookies: "ملفات تعريف الارتباط",
+    legalCenter: "المركز القانوني",
+
+    copyright: "© 2026 شركة بولوت مان الهندسية. جميع الحقوق محفوظة.",
+    selectRegion: "اختر المنطقة والعملة",
+    searchCountry: "ابحث عن دولة أو عملة...",
+    autoLocalizes: "تحديد الموقع والأسعار تلقائياً",
+    noRegionFound: "لم يتم العثور على منطقة."
+  }
+};
+
 export default function Footer() {
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES_LIST[0]);
   const [countryOpen, setCountryOpen] = useState(false);
@@ -90,7 +357,17 @@ export default function Footer() {
   const countryPickerRef = useRef<HTMLDivElement>(null);
   const langPickerRef = useRef<HTMLDivElement>(null);
 
-  // Restore saved country & language on mount
+  const syncLanguageState = () => {
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem("lang") || "en";
+      const foundLang = LANGUAGES.find((l) => l.code === savedLang);
+      if (foundLang) {
+        setSelectedLang(foundLang);
+      }
+    }
+  };
+
+  // Restore saved country & language on mount + event listeners
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCountry = localStorage.getItem("bmSelectedCountry") || localStorage.getItem("country");
@@ -101,9 +378,28 @@ export default function Footer() {
         if (found) setSelectedCountry(found);
       }
 
-      const savedLang = localStorage.getItem("lang") || "en";
-      const foundLang = LANGUAGES.find((l) => l.code === savedLang);
-      if (foundLang) setSelectedLang(foundLang);
+      syncLanguageState();
+
+      const handleLangChange = () => {
+        syncLanguageState();
+      };
+
+      const handleCustomLangChange = (e: any) => {
+        if (e.detail && e.detail.code) {
+          const found = LANGUAGES.find((l) => l.code === e.detail.code);
+          if (found) setSelectedLang(found);
+        } else {
+          syncLanguageState();
+        }
+      };
+
+      window.addEventListener("languageChange", handleLangChange);
+      document.addEventListener("bmLanguageChanged", handleCustomLangChange);
+
+      return () => {
+        window.removeEventListener("languageChange", handleLangChange);
+        document.removeEventListener("bmLanguageChanged", handleCustomLangChange);
+      };
     }
   }, []);
 
@@ -166,6 +462,11 @@ export default function Footer() {
     }
   };
 
+  const t = (key: string): string => {
+    const dict = FOOTER_TRANSLATIONS[selectedLang.code] || FOOTER_TRANSLATIONS["en"];
+    return dict[key] || FOOTER_TRANSLATIONS["en"][key] || key;
+  };
+
   const filteredCountries = COUNTRIES_LIST.filter((c) => {
     const q = countrySearch.trim().toLowerCase();
     if (!q) return true;
@@ -194,27 +495,25 @@ export default function Footer() {
               <div className="bmf-brand-text">
                 <h2>Boulot Man</h2>
                 <p className="bmf-tagline">
-                  Home for technicians and engineers in Africa.
+                  {t("tagline")}
                 </p>
               </div>
             </Link>
 
             <p className="bmf-description">
-              Boulot Man connects clients with verified technicians, engineers,
-              professionals and companies for everyday services, skilled work
-              and large projects across Africa.
+              {t("description")}
             </p>
           </div>
 
           <div className="bmf-actions">
             <Link href="/post-task" className="bmf-action bmf-action-primary">
-              Post a Task
+              {t("postTaskBtn")}
             </Link>
             <Link href="/service-providers/technicians" className="bmf-action">
-              Find Professionals
+              {t("findProsBtn")}
             </Link>
             <Link href="/search?type=company" className="bmf-action">
-              Find Companies
+              {t("findCompaniesBtn")}
             </Link>
           </div>
         </section>
@@ -225,137 +524,137 @@ export default function Footer() {
         <nav className="bmf-navigation" aria-label="Boulot Man Footer Navigation">
           {/* COLUMN 1: BOULOT MAN */}
           <div className="bmf-nav-column">
-            <h3 className="bmf-nav-title">Boulot Man</h3>
+            <h3 className="bmf-nav-title">{t("col1Title")}</h3>
             <ul className="bmf-nav-list">
               <li>
-                <Link href="/about">The Platform</Link>
+                <Link href="/about">{t("thePlatform")}</Link>
               </li>
               <li>
-                <Link href="/how-it-works">How it works</Link>
+                <Link href="/how-it-works">{t("howItWorks")}</Link>
               </li>
               <li>
-                <Link href="/locations">Locations</Link>
+                <Link href="/locations">{t("locations")}</Link>
               </li>
               <li>
-                <Link href="/partnerships">Partnerships</Link>
+                <Link href="/partnerships">{t("partnerships")}</Link>
               </li>
               <li>
-                <Link href="/investors">Invest</Link>
+                <Link href="/investors">{t("invest")}</Link>
               </li>
               <li>
-                <Link href="/careers">Career/Jobs</Link>
+                <Link href="/careers">{t("careers")}</Link>
               </li>
               <li>
-                <Link href="/press">Press &amp; Media</Link>
+                <Link href="/press">{t("press")}</Link>
               </li>
             </ul>
           </div>
 
           {/* COLUMN 2: CLIENTS */}
           <div className="bmf-nav-column">
-            <h3 className="bmf-nav-title">Clients</h3>
+            <h3 className="bmf-nav-title">{t("col2Title")}</h3>
             <ul className="bmf-nav-list">
               <li>
-                <Link href="/signup?role=client">Sign up</Link>
+                <Link href="/signup?role=client">{t("signUp")}</Link>
               </li>
               <li>
-                <Link href="/post-task">Post a Task</Link>
+                <Link href="/post-task">{t("postTask")}</Link>
               </li>
               <li>
-                <Link href="/search">Browse Services</Link>
+                <Link href="/search">{t("browseServices")}</Link>
               </li>
               <li>
-                <Link href="/service-providers/technicians">Find Technicians</Link>
+                <Link href="/service-providers/technicians">{t("findTechnicians")}</Link>
               </li>
               <li>
-                <Link href="/search?type=company">Hire Companies</Link>
+                <Link href="/search?type=company">{t("hireCompanies")}</Link>
               </li>
               <li>
-                <Link href="/build-a-team">Build a Team</Link>
+                <Link href="/build-a-team">{t("buildTeam")}</Link>
               </li>
               <li>
-                <Link href="/concierge">Concierge</Link>
+                <Link href="/concierge">{t("concierge")}</Link>
               </li>
             </ul>
           </div>
 
           {/* COLUMN 3: PROFESSIONALS */}
           <div className="bmf-nav-column">
-            <h3 className="bmf-nav-title">Professionals</h3>
+            <h3 className="bmf-nav-title">{t("col3Title")}</h3>
             <ul className="bmf-nav-list">
               <li>
-                <Link href="/signup?role=technician">Join as a Technician</Link>
+                <Link href="/signup?role=technician">{t("joinTechnician")}</Link>
               </li>
               <li>
-                <Link href="/dashboard/technician/services/new">Post Services</Link>
+                <Link href="/dashboard/technician/services/new">{t("postServices")}</Link>
               </li>
               <li>
-                <Link href="/find-tasks">Browse Task</Link>
+                <Link href="/find-tasks">{t("browseTasks")}</Link>
               </li>
               <li>
-                <Link href="/dashboard/technician/profile">My Profile</Link>
+                <Link href="/dashboard/technician/profile">{t("myProfile")}</Link>
               </li>
               <li>
-                <Link href="/contractors">Contracts</Link>
+                <Link href="/contractors">{t("contracts")}</Link>
               </li>
               <li>
-                <Link href="/upgrade">Upgrade Plan</Link>
+                <Link href="/upgrade">{t("upgradePlan")}</Link>
               </li>
             </ul>
           </div>
 
           {/* COLUMN 4: COMPANIES */}
           <div className="bmf-nav-column">
-            <h3 className="bmf-nav-title">Companies</h3>
+            <h3 className="bmf-nav-title">{t("col4Title")}</h3>
             <ul className="bmf-nav-list">
               <li>
-                <Link href="/signup?role=company">Join as a Company</Link>
+                <Link href="/signup?role=company">{t("joinCompany")}</Link>
               </li>
               <li>
-                <Link href="/dashboard/company/services">Post Services</Link>
+                <Link href="/dashboard/company/services">{t("postCompanyServices")}</Link>
               </li>
               <li>
-                <Link href="/find-tasks">Browse Projects</Link>
+                <Link href="/find-tasks">{t("browseProjects")}</Link>
               </li>
               <li>
-                <Link href="/dashboard/company/profile">Your profile</Link>
+                <Link href="/dashboard/company/profile">{t("yourProfile")}</Link>
               </li>
               <li>
-                <Link href="/subcontracting">Subcontracting Opportunities</Link>
+                <Link href="/subcontracting">{t("subcontracting")}</Link>
               </li>
               <li>
-                <Link href="/contractors">Contractors</Link>
+                <Link href="/contractors">{t("contractors")}</Link>
               </li>
             </ul>
           </div>
 
           {/* COLUMN 5: RESOURCES & COMMUNITY */}
           <div className="bmf-nav-column">
-            <h3 className="bmf-nav-title">Resources &amp; Community</h3>
+            <h3 className="bmf-nav-title">{t("col5Title")}</h3>
             <ul className="bmf-nav-list">
               <li>
-                <Link href="/help-center">Help Center</Link>
+                <Link href="/help-center">{t("helpCenter")}</Link>
               </li>
               <li>
-                <Link href="/safety">Safety Center</Link>
+                <Link href="/safety">{t("safetyCenter")}</Link>
               </li>
               <li>
-                <Link href="/search">Service Categories</Link>
+                <Link href="/search">{t("serviceCategories")}</Link>
               </li>
               <li>
-                <Link href="/locations">Locations</Link>
+                <Link href="/locations">{t("locations")}</Link>
               </li>
               <li>
-                <Link href="/upgrade">Pricing and Fees</Link>
+                <Link href="/upgrade">{t("pricingFees")}</Link>
               </li>
               <li>
-                <Link href="/community-guidelines">Community Guidelines</Link>
+                <Link href="/community-guidelines">{t("communityGuidelines")}</Link>
               </li>
               <li>
-                <Link href="/payments-and-earnings">Earnings</Link>
+                <Link href="/payments-and-earnings">{t("earnings")}</Link>
               </li>
               <li>
-                <Link href="/dispute-resolution">Escrow &amp; Safe Payments</Link>
+                <Link href="/dispute-resolution">{t("escrowPayments")}</Link>
               </li>
             </ul>
           </div>
@@ -366,21 +665,21 @@ export default function Footer() {
         ====================================================== */}
         <div className="bmf-legal">
           <nav className="bmf-legal-links" aria-label="Boulot Man Legal Navigation">
-            <Link href="/terms">Terms of Service</Link>
+            <Link href="/terms">{t("termsOfService")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/privacy">{t("privacyPolicy")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/trust-and-safety">Trust &amp; Safety</Link>
+            <Link href="/trust-and-safety">{t("trustSafety")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/payments-and-escrow">Payments &amp; Escrow</Link>
+            <Link href="/payments-and-escrow">{t("paymentsEscrow")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/refunds">Refunds</Link>
+            <Link href="/refunds">{t("refunds")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/reviews-ratings">Reviews &amp; Ratings</Link>
+            <Link href="/reviews-ratings">{t("reviewsRatings")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/cookies">Cookies</Link>
+            <Link href="/cookies">{t("cookies")}</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/legal">Legal Center</Link>
+            <Link href="/legal">{t("legalCenter")}</Link>
           </nav>
         </div>
       </div>
@@ -394,7 +693,7 @@ export default function Footer() {
             {/* LEFT: COPYRIGHT */}
             <div className="bmf-bottom-left">
               <p className="bmf-copyright">
-                © 2026 Boulot Man Engineering Company. All rights reserved.
+                {t("copyright")}
               </p>
             </div>
 
@@ -436,12 +735,12 @@ export default function Footer() {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="bmf-country-header">
-                    <h4>Select Region &amp; Currency</h4>
+                    <h4>{t("selectRegion")}</h4>
                     <input
                       type="search"
                       className="bmf-country-search"
                       id="bmfCountrySearch"
-                      placeholder="Search country or currency..."
+                      placeholder={t("searchCountry")}
                       autoComplete="off"
                       value={countrySearch}
                       onChange={(e) => setCountrySearch(e.target.value)}
@@ -474,13 +773,13 @@ export default function Footer() {
                     })}
                     {filteredCountries.length === 0 && (
                       <div style={{ padding: "16px 14px", color: "#9fb1c3", fontSize: "13px", textAlign: "center" }}>
-                        No region found.
+                        {t("noRegionFound")}
                       </div>
                     )}
                   </div>
 
                   <div className="bmf-country-footer">
-                    <span>Auto-localizes jobs &amp; pricing</span>
+                    <span>{t("autoLocalizes")}</span>
                     <strong>Boulot Man Africa</strong>
                   </div>
                 </div>
