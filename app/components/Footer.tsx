@@ -575,7 +575,7 @@ export default function Footer() {
                 YouTube
               </a>
               <a
-                href="https://www.tiktok.com/@boulotman.inc?_r=1&_t=ZS-99N2jDEWSPA"
+                href="https://www.tiktok.com/@boulotman.inc?_r=1&_t=ZS-99N6bj2bAxA"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="TikTok"
