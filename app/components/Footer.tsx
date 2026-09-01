@@ -349,7 +349,7 @@ export default function Footer() {
                 <Link href="/upgrade">Pricing and Fees</Link>
               </li>
               <li>
-                <Link href="/terms">Community Guidelines</Link>
+                <Link href="/community-guidelines">Community Guidelines</Link>
               </li>
               <li>
                 <Link href="/payments-and-earnings">Earnings</Link>
