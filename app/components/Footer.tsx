@@ -234,7 +234,7 @@ export default function Footer() {
                 <Link href="/how-it-works">How it works</Link>
               </li>
               <li>
-                <Link href="/search">Locations</Link>
+                <Link href="/locations">Locations</Link>
               </li>
               <li>
                 <Link href="/partnerships">Partnerships</Link>
@@ -337,13 +337,13 @@ export default function Footer() {
                 <Link href="/help-center">Help Center</Link>
               </li>
               <li>
-                <Link href="/help-center">Safety Center</Link>
+                <Link href="/safety">Safety Center</Link>
               </li>
               <li>
                 <Link href="/search">Service Categories</Link>
               </li>
               <li>
-                <Link href="/search">Locations</Link>
+                <Link href="/locations">Locations</Link>
               </li>
               <li>
                 <Link href="/upgrade">Pricing and Fees</Link>
