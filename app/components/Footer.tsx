@@ -370,7 +370,7 @@ export default function Footer() {
             <span aria-hidden="true">•</span>
             <Link href="/privacy">Privacy Policy</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/signup/verify">Trust &amp; Safety</Link>
+            <Link href="/trust-and-safety">Trust &amp; Safety</Link>
             <span aria-hidden="true">•</span>
             <Link href="/dispute-resolution">Payments &amp; Escrow</Link>
             <span aria-hidden="true">•</span>
