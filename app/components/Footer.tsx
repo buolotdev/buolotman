@@ -1,424 +1,599 @@
 "use client";
+
 import Link from "next/link";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import { api } from "../lib/api";
-import { useFetch } from "../lib/useFetch";
-import CountrySelector from "./CountrySelector";
+import React, { useEffect, useState, useRef } from "react";
 import "./footer.css";
 
-const translations: Record<string, Record<string, string>> = {
-  en: {
-    desc: "Africa's professional marketplace for technicians, engineers, freelancers, and verified companies — built on trust, escrow, and secure delivery.",
-    b1: "✔ Verified Professionals",
-    b2: "✔ Escrow Payments",
-    b3: "✔ Dispute Resolution",
-    b4: "✔ Secure Infrastructure",
-    clients: "Clients",
-    technicians: "Technicians",
-    companies: "Companies",
-    payments: "Payments",
-    resources: "Resources",
-    company: "Company",
-    copyright: "© 2026 Boulot Man Engineering Company",
-    label: "English",
-    // Clients
-    postTask: "Post a Task",
-    browseServices: "Browse Services",
-    findTechnicians: "Find Technicians",
-    hireCompanies: "Hire Companies",
-    buildTeam: "Build a Team",
-    concierge: "Concierge",
-    itOnDemand: "IT on Demand",
-    // Technicians
-    joinAsTechnician: "Join as Technician",
-    myProfile: "My Profile",
-    postServices: "Post Services",
-    findTasks: "Find Tasks",
-    earnings: "Earnings",
-    verification: "Verification",
-    upgradePlan: "Upgrade Plan",
-    // Companies
-    registerCompany: "Register Company",
-    companyProfile: "Company Profile",
-    contracts: "Contracts",
-    enterprise: "Enterprise",
-    compliance: "Compliance",
-    partnerships: "Partnerships",
-    // Payments
-    escrowSystem: "Escrow System",
-    milestones: "Milestones",
-    securePayments: "Secure Payments",
-    refunds: "Refunds",
-    disputes: "Disputes",
-    trustSafety: "Trust & Safety",
-    // Resources
-    howItWorks: "How It Works",
-    helpCenter: "Help Center",
-    paymentsEarnings: "Payments & Earnings",
-    pricingUpgrades: "Pricing & Upgrades",
-    reviews: "Reviews",
-    pressMedia: "Press & Media",
-    developers: "Developers",
-    apiDoc: "API",
-    pagesTitle: "Pages",
-    // Company
-    aboutUs: "About Us",
-    careers: "Careers",
-    investors: "Investors",
-    legal: "Legal",
-    terms: "Terms",
-    privacy: "Privacy",
-    contact: "Contact",
+interface CountryOption {
+  country: string;
+  currency: string;
+  symbol: string;
+  city: string;
+  callingCode: string;
+  flag: string;
+}
+
+const COUNTRIES_LIST: CountryOption[] = [
+  {
+    country: "Cameroon",
+    currency: "XAF",
+    symbol: "FCFA",
+    city: "Douala",
+    callingCode: "+237",
+    flag: "https://flagcdn.com/w80/cm.png",
   },
-  fr: {
-    desc: "La plateforme professionnelle africaine pour les techniciens, ingénieurs, indépendants et entreprises vérifiées — fondée sur la confiance, le séquestre et des prestations sécurisées.",
-    b1: "✔ Professionnels vérifiés",
-    b2: "✔ Paiements sous séquestre",
-    b3: "✔ Résolution des litiges",
-    b4: "✔ Infrastructure sécurisée",
-    clients: "Clients",
-    technicians: "Techniciens",
-    companies: "Entreprises",
-    payments: "Paiements",
-    resources: "Ressources",
-    company: "Entreprise",
-    copyright: "© 2026 Boulot Man Engineering Company",
-    label: "Français",
-    // Clients
-    postTask: "Publier une tâche",
-    browseServices: "Parcourir les services",
-    findTechnicians: "Trouver des techniciens",
-    hireCompanies: "Engager des entreprises",
-    buildTeam: "Former une équipe",
-    concierge: "Service Concierge",
-    itOnDemand: "Informatique à la demande",
-    // Technicians
-    joinAsTechnician: "Devenir Technicien",
-    myProfile: "Mon Profil",
-    postServices: "Publier des services",
-    findTasks: "Trouver des missions",
-    earnings: "Revenus & Portefeuille",
-    verification: "Vérification de profil",
-    upgradePlan: "Changer de forfait",
-    // Companies
-    registerCompany: "Inscrire une Entreprise",
-    companyProfile: "Profil Entreprise",
-    contracts: "Contrats & Appels d'offres",
-    enterprise: "Solutions Entreprises",
-    compliance: "Conformité & Légal",
-    partnerships: "Partenariats institutionnels",
-    // Payments
-    escrowSystem: "Système de Séquestre",
-    milestones: "Jalons de paiement",
-    securePayments: "Paiements sécurisés",
-    refunds: "Remboursements",
-    disputes: "Gestion des litiges",
-    trustSafety: "Confiance & Sécurité",
-    // Resources
-    howItWorks: "Comment ça marche",
-    helpCenter: "Centre d'aide & FAQ",
-    paymentsEarnings: "Paiements & Gains",
-    pricingUpgrades: "Tarifs & Forfaits",
-    reviews: "Avis & Évaluations",
-    pressMedia: "Presse & Médias",
-    developers: "Développeurs",
-    apiDoc: "Documentation API",
-    pagesTitle: "Pages publiques",
-    // Company
-    aboutUs: "À propos de nous",
-    careers: "Carrières & Recrutement",
-    investors: "Investisseurs",
-    legal: "Mentions légales",
-    terms: "Conditions d'utilisation",
-    privacy: "Politique de confidentialité",
-    contact: "Contactez-nous",
+  {
+    country: "Rwanda",
+    currency: "RWF",
+    symbol: "FRw",
+    city: "Kigali",
+    callingCode: "+250",
+    flag: "https://flagcdn.com/w80/rw.png",
   },
-  rw: {
-    desc: "Urubuga rw'umwuga ruhuza abatekinisiye n'ibigo byemewe muri Afurika.",
-    b1: "✔ Abanyamwuga bemewe",
-    b2: "✔ Ubwishyu bwa escrow",
-    b3: "✔ Gukemura amakimbirane",
-    b4: "✔ Ikoranabuhanga ryizewe",
-    clients: "Abakiriya",
-    technicians: "Abatekinisiye",
-    companies: "Ibigo",
-    payments: "Ubwishyu",
-    resources: "Inyunganizi",
-    company: "Ikigo",
-    copyright: "© 2026 Boulot Man Engineering Company",
-    label: "Kinyarwanda",
-    postTask: "Tanga akazi",
-    browseServices: "Reba serivisi",
-    findTechnicians: "Shaka abatekinisiye",
-    hireCompanies: "Koresha ibigo",
-    buildTeam: "Kora itsinda",
-    concierge: "Concierge",
-    itOnDemand: "IT on Demand",
-    joinAsTechnician: "Iyandikishe nk'umutekinisiye",
-    myProfile: "Umwirondoro wanjye",
-    postServices: "Tanga serivisi",
-    findTasks: "Shaka imirimo",
-    earnings: "Inyungu",
-    verification: "Isuzuma",
-    upgradePlan: "Guhindura ifatabuguzi",
-    registerCompany: "Iyandikishe nk'ikigo",
-    companyProfile: "Umwirondoro w'ikigo",
-    contracts: "Amasezerano",
-    enterprise: "Ibigo binini",
-    compliance: "Amategeko",
-    partnerships: "Ubufatanye",
-    escrowSystem: "Uburyo bwa Escrow",
-    milestones: "Ibyiciro by'akazi",
-    securePayments: "Kwishyura birinzwe",
-    refunds: "Gusubizwa amafaranga",
-    disputes: "Gukemura amakimbirane",
-    trustSafety: "Umutekano n'icyizere",
-    howItWorks: "Uko bikora",
-    helpCenter: "Ubufasha",
-    paymentsEarnings: "Kwishyura & Inyungu",
-    pricingUpgrades: "Ibiciro",
-    reviews: "Ubuhamya",
-    pressMedia: "Amakuru",
-    developers: "Abateza imbere",
-    apiDoc: "API",
-    pagesTitle: "Impapuro",
-    aboutUs: "Ibyerekeye twebwe",
-    careers: "Imyanya y'akazi",
-    investors: "Abashoramari",
-    legal: "Amategeko",
-    terms: "Amabwiriza",
-    privacy: "Ubuzima bwite",
-    contact: "Tuvugishe",
+  {
+    country: "Nigeria",
+    currency: "NGN",
+    symbol: "₦",
+    city: "Lagos",
+    callingCode: "+234",
+    flag: "https://flagcdn.com/w80/ng.png",
   },
-  ar: {
-    desc: "السوق المهنية الرائدة في أفريقيا للفنيين والمهندسين والشركات المعتمدة.",
-    b1: "✔ محترفون معتمدون",
-    b2: "✔ مدفوعات مضمونة",
-    b3: "✔ حل النزاعات",
-    b4: "✔ بنية تحتية آمنة",
-    clients: "العملاء",
-    technicians: "الفنيون",
-    companies: "الشركات",
-    payments: "المدفوعات",
-    resources: "الموارد",
-    company: "الشركة",
-    copyright: "© 2026 شركة بولوت مان الهندسية",
-    label: "العربية",
-    postTask: "نشر مهمة",
-    browseServices: "تصفح الخدمات",
-    findTechnicians: "البحث عن فنيين",
-    hireCompanies: "توظيف الشركات",
-    buildTeam: "بناء فريق",
-    concierge: "الكونسيرج",
-    itOnDemand: "تكنولوجيا المعلومات عند الطلب",
-    joinAsTechnician: "انضم كفني",
-    myProfile: "ملفي الشخصي",
-    postServices: "نشر الخدمات",
-    findTasks: "البحث عن مهام",
-    earnings: "الأرباح",
-    verification: "التحقق",
-    upgradePlan: "ترقية الخطة",
-    registerCompany: "تسجيل شركة",
-    companyProfile: "ملف الشركة",
-    contracts: "العقود",
-    enterprise: "المؤسسات",
-    compliance: "الامتثال",
-    partnerships: "الشراكات",
-    escrowSystem: "نظام الضمان",
-    milestones: "المراحل",
-    securePayments: "مدفوعات آمنة",
-    refunds: "المستردات",
-    disputes: "النزاعات",
-    trustSafety: "الثقة والأمان",
-    howItWorks: "كيف يعمل",
-    helpCenter: "مركز المساعدة",
-    paymentsEarnings: "المدفوعats والأرباح",
-    pricingUpgrades: "الأسعار والترقيات",
-    reviews: "التقييمات",
-    pressMedia: "الصحافة والإعلام",
-    developers: "المطورون",
-    apiDoc: "واجهة برمجة التطبيقات",
-    pagesTitle: "الصفحات",
-    aboutUs: "معلومات عنا",
-    careers: "وظائف",
-    investors: "المستثمرون",
-    legal: "قانوني",
-    terms: "الشروط",
-    privacy: "الخصوصية",
-    contact: "اتصل بنا",
+  {
+    country: "Ivory Coast",
+    currency: "XOF",
+    symbol: "CFA",
+    city: "Abidjan",
+    callingCode: "+225",
+    flag: "https://flagcdn.com/w80/ci.png",
   },
-};
+  {
+    country: "Ghana",
+    currency: "GHS",
+    symbol: "GH₵",
+    city: "Accra",
+    callingCode: "+233",
+    flag: "https://flagcdn.com/w80/gh.png",
+  },
+  {
+    country: "Kenya",
+    currency: "KES",
+    symbol: "KSh",
+    city: "Nairobi",
+    callingCode: "+254",
+    flag: "https://flagcdn.com/w80/ke.png",
+  },
+  {
+    country: "South Africa",
+    currency: "ZAR",
+    symbol: "R",
+    city: "Johannesburg",
+    callingCode: "+27",
+    flag: "https://flagcdn.com/w80/za.png",
+  },
+];
+
+const LANGUAGES = [
+  { label: "English", code: "en" },
+  { label: "Français", code: "fr" },
+  { label: "Kinyarwanda", code: "rw" },
+  { label: "العربية", code: "ar" },
+];
 
 export default function Footer() {
-  const [lang, setLangState] = useState("en");
-  const [langOpen, setLangOpen] = useState(false);
-  const { data: pagesData } = useFetch(() => api.getPublicPages(), []);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES_LIST[0]);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
 
+  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+  const [langOpen, setLangOpen] = useState(false);
+
+  const countryPickerRef = useRef<HTMLDivElement>(null);
+  const langPickerRef = useRef<HTMLDivElement>(null);
+
+  // Restore saved country & language on mount
   useEffect(() => {
-    const updateLang = () => {
-      const currentLang = localStorage.getItem("lang") || "en";
-      setLangState(currentLang);
-      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
-    };
-    updateLang();
-    window.addEventListener("languageChange", updateLang);
-    return () => window.removeEventListener("languageChange", updateLang);
+    if (typeof window !== "undefined") {
+      const savedCountry = localStorage.getItem("bmSelectedCountry") || localStorage.getItem("country");
+      if (savedCountry) {
+        const found = COUNTRIES_LIST.find(
+          (c) => c.country.toLowerCase() === savedCountry.toLowerCase()
+        );
+        if (found) setSelectedCountry(found);
+      }
+
+      const savedLang = localStorage.getItem("lang") || "en";
+      const foundLang = LANGUAGES.find((l) => l.code === savedLang);
+      if (foundLang) setSelectedLang(foundLang);
+    }
   }, []);
 
-  const t = translations[lang] || translations["en"];
-  const pages = Array.isArray(pagesData) ? pagesData : [];
+  // Close dropdowns on outside click or escape
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (countryPickerRef.current && !countryPickerRef.current.contains(e.target as Node)) {
+        setCountryOpen(false);
+        setCountrySearch("");
+      }
+      if (langPickerRef.current && !langPickerRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
 
-  const changeLang = (l: string) => {
-    setLangState(l);
-    localStorage.setItem("lang", l);
-    localStorage.setItem("user_selected_lang", "true");
-    document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
-    setLangOpen(false);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setCountryOpen(false);
+        setLangOpen(false);
+        setCountrySearch("");
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const handleCountrySelect = (c: CountryOption) => {
+    setSelectedCountry(c);
+    setCountryOpen(false);
+    setCountrySearch("");
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("languageChange"));
+      localStorage.setItem("bmSelectedCountry", c.country);
+      localStorage.setItem("country", c.country);
+      localStorage.setItem("bmSelectedCurrency", c.currency);
+      localStorage.setItem("bmSelectedCurrencySymbol", c.symbol);
+      localStorage.setItem("bmSelectedCountryFlag", c.flag);
+      document.dispatchEvent(
+        new CustomEvent("bmCountryChanged", { detail: c })
+      );
     }
   };
 
+  const handleLanguageSelect = (lang: (typeof LANGUAGES)[0]) => {
+    setSelectedLang(lang);
+    setLangOpen(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lang", lang.code);
+      localStorage.setItem("user_selected_lang", "true");
+      document.documentElement.dir = lang.code === "ar" ? "rtl" : "ltr";
+      document.documentElement.setAttribute("lang", lang.code);
+      window.dispatchEvent(new Event("languageChange"));
+      document.dispatchEvent(
+        new CustomEvent("bmLanguageChanged", { detail: lang })
+      );
+    }
+  };
+
+  const filteredCountries = COUNTRIES_LIST.filter((c) => {
+    const q = countrySearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      c.country.toLowerCase().includes(q) ||
+      c.currency.toLowerCase().includes(q) ||
+      c.city.toLowerCase().includes(q) ||
+      c.callingCode.toLowerCase().includes(q)
+    );
+  });
+
   return (
-    <footer className="bm-footer">
-      <div className="footer-container">
-        <div className="footer-grid">
-
-          {/* BRAND */}
-          <div className="footer-brand">
-            <Image
-              className="footer-logo"
-              src="/boulotman-logo.png"
-              alt="Boulot Man Logo"
-              width={160}
-              height={48}
-            />
-            <p>{t.desc}</p>
-            <div className="footer-badges">
-              <span>{t.b1}</span>
-              <span>{t.b2}</span>
-              <span>{t.b3}</span>
-              <span>{t.b4}</span>
-            </div>
-          </div>
-
-          {/* CLIENTS */}
-          <div className="footer-col">
-            <h4>{t.clients}</h4>
-            <Link href="/post-task">{t.postTask}</Link>
-            <Link href="/search">{t.browseServices}</Link>
-            <Link href="/service-providers/technicians">{t.findTechnicians}</Link>
-            <Link href="/search?type=company">{t.hireCompanies}</Link>
-            <Link href="/build-a-team">{t.buildTeam}</Link>
-            <Link href="/concierge">{t.concierge}</Link>
-            <Link href="/it-on-demand">{t.itOnDemand}</Link>
-          </div>
-
-          {/* TECHNICIANS */}
-          <div className="footer-col">
-            <h4>{t.technicians}</h4>
-            <Link href="/signup?role=technician">{t.joinAsTechnician}</Link>
-            <Link href="/dashboard/technician/profile">{t.myProfile}</Link>
-            <Link href="/dashboard/company/services">{t.postServices}</Link>
-            <Link href="/dashboard/technician/tasks">{t.findTasks}</Link>
-            <Link href="/dashboard/technician/wallet">{t.earnings}</Link>
-            <Link href="/signup/verify">{t.verification}</Link>
-            <Link href="/upgrade">{t.upgradePlan}</Link>
-          </div>
-
-          {/* COMPANIES */}
-          <div className="footer-col">
-            <h4>{t.companies}</h4>
-            <Link href="/signup?role=company">{t.registerCompany}</Link>
-            <Link href="/dashboard/company/profile">{t.companyProfile}</Link>
-            <Link href="/dashboard/company/services">{t.postServices}</Link>
-            <Link href="/contractors">{t.contracts}</Link>
-            <Link href="/contractors">{t.enterprise}</Link>
-            <Link href="/dashboard/admin/verification">{t.compliance}</Link>
-            <Link href="/partnerships">{t.partnerships}</Link>
-          </div>
-
-          {/* PAYMENTS */}
-          <div className="footer-col">
-            <h4>{t.payments}</h4>
-            <Link href="/dashboard/client/payments">{t.escrowSystem}</Link>
-            <Link href="/dashboard/company/projects/tracking">{t.milestones}</Link>
-            <Link href="/dashboard/client/payments">{t.securePayments}</Link>
-            <Link href="/dashboard/client/payments">{t.refunds}</Link>
-            <Link href="/dispute-resolution">{t.disputes}</Link>
-            <Link href="/signup/verify">{t.trustSafety}</Link>
-          </div>
-
-          {/* RESOURCES */}
-          <div className="footer-col">
-            <h4>{t.resources}</h4>
-            <Link href="/how-it-works">{t.howItWorks}</Link>
-            <Link href="/help-center">{t.helpCenter}</Link>
-            <Link href="/payments-and-earnings">{t.paymentsEarnings}</Link>
-            <Link href="/upgrade">{t.pricingUpgrades}</Link>
-            <Link href="/search">{t.reviews}</Link>
-            <Link href="/press">{t.pressMedia}</Link>
-            <Link href="/">{t.developers}</Link>
-            <Link href="/search">{t.apiDoc}</Link>
-            {pages.length > 0 ? <h4 style={{ marginTop: 18 }}>{t.pagesTitle}</h4> : null}
-            {pages.slice(0, 6).map((page: any) => (
-              <Link key={page.id} href={`/pages/${page.slug}`}>
-                {page.title}
-              </Link>
-            ))}
-          </div>
-
-          {/* COMPANY */}
-          <div className="footer-col">
-            <h4>{t.company}</h4>
-            <Link href="/about">{t.aboutUs}</Link>
-            <Link href="/careers">{t.careers}</Link>
-            <Link href="/investors">{t.investors}</Link>
-            <Link href="/terms">{t.legal}</Link>
-            <Link href="/terms">{t.terms}</Link>
-            <Link href="/privacy">{t.privacy}</Link>
-            <Link href="/contact">{t.contact}</Link>
-          </div>
-
-        </div>
-
-        <div className="footer-divider" />
-
-        {/* BOTTOM BAR */}
-        <div className="footer-bottom">
-          <div>{t.copyright}</div>
-
-          <div className="footer-switch">
-            {/* LANGUAGE */}
-            <div className="switch">
-              <div className="switch-btn" onClick={() => setLangOpen(!langOpen)}>
-                🌐 <span>{t.label}</span>
+    <footer className="bmf-footer" id="bmfFooter">
+      <div className="bmf-inner">
+        {/* =====================================================
+             TOP SECTION: BRAND + ACTION BUTTONS
+        ====================================================== */}
+        <section className="bmf-top">
+          <div className="bmf-brand">
+            <Link href="/" className="bmf-brand-link" aria-label="Boulot Man Home">
+              <img
+                src="/boulotman-logo.png"
+                alt="Boulot Man"
+                className="bmf-logo"
+              />
+              <div className="bmf-brand-text">
+                <h2>Boulot Man</h2>
+                <p className="bmf-tagline">
+                  Home for technicians and engineers in Africa.
+                </p>
               </div>
-              {langOpen && (
-                <div className="switch-list" style={{ display: "block" }}>
-                  <button type="button" onClick={() => changeLang("en")}>English</button>
-                  <button type="button" onClick={() => changeLang("fr")}>Français</button>
-                  <button type="button" onClick={() => changeLang("rw")}>Kinyarwanda</button>
-                  <button type="button" onClick={() => changeLang("ar")}>العربية</button>
-                </div>
-              )}
+            </Link>
+
+            <p className="bmf-description">
+              Boulot Man connects clients with verified technicians, engineers,
+              professionals and companies for everyday services, skilled work
+              and large projects across Africa.
+            </p>
+          </div>
+
+          <div className="bmf-actions">
+            <Link href="/post-task" className="bmf-action bmf-action-primary">
+              Post a Task
+            </Link>
+            <Link href="/service-providers/technicians" className="bmf-action">
+              Find Professionals
+            </Link>
+            <Link href="/search?type=company" className="bmf-action">
+              Find Companies
+            </Link>
+          </div>
+        </section>
+
+        {/* =====================================================
+             MAIN 5-COLUMN NAVIGATION
+        ====================================================== */}
+        <nav className="bmf-navigation" aria-label="Boulot Man Footer Navigation">
+          {/* COLUMN 1: BOULOT MAN */}
+          <div className="bmf-nav-column">
+            <h3 className="bmf-nav-title">Boulot Man</h3>
+            <ul className="bmf-nav-list">
+              <li>
+                <Link href="/about">The Platform</Link>
+              </li>
+              <li>
+                <Link href="/how-it-works">How it works</Link>
+              </li>
+              <li>
+                <Link href="/search">Locations</Link>
+              </li>
+              <li>
+                <Link href="/partnerships">Partnerships</Link>
+              </li>
+              <li>
+                <Link href="/investors">Invest</Link>
+              </li>
+              <li>
+                <Link href="/careers">Career/Jobs</Link>
+              </li>
+              <li>
+                <Link href="/press">Press &amp; Media</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 2: CLIENTS */}
+          <div className="bmf-nav-column">
+            <h3 className="bmf-nav-title">Clients</h3>
+            <ul className="bmf-nav-list">
+              <li>
+                <Link href="/signup?role=client">Sign up</Link>
+              </li>
+              <li>
+                <Link href="/post-task">Post a Task</Link>
+              </li>
+              <li>
+                <Link href="/search">Browse Services</Link>
+              </li>
+              <li>
+                <Link href="/service-providers/technicians">Find Technicians</Link>
+              </li>
+              <li>
+                <Link href="/search?type=company">Hire Companies</Link>
+              </li>
+              <li>
+                <Link href="/build-a-team">Build a Team</Link>
+              </li>
+              <li>
+                <Link href="/concierge">Concierge</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 3: PROFESSIONALS */}
+          <div className="bmf-nav-column">
+            <h3 className="bmf-nav-title">Professionals</h3>
+            <ul className="bmf-nav-list">
+              <li>
+                <Link href="/signup?role=technician">Join as a Technician</Link>
+              </li>
+              <li>
+                <Link href="/dashboard/technician/services/new">Post Services</Link>
+              </li>
+              <li>
+                <Link href="/find-tasks">Browse Task</Link>
+              </li>
+              <li>
+                <Link href="/dashboard/technician/profile">My Profile</Link>
+              </li>
+              <li>
+                <Link href="/contractors">Contracts</Link>
+              </li>
+              <li>
+                <Link href="/upgrade">Upgrade Plan</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 4: COMPANIES */}
+          <div className="bmf-nav-column">
+            <h3 className="bmf-nav-title">Companies</h3>
+            <ul className="bmf-nav-list">
+              <li>
+                <Link href="/signup?role=company">Join as a Company</Link>
+              </li>
+              <li>
+                <Link href="/dashboard/company/services">Post Services</Link>
+              </li>
+              <li>
+                <Link href="/find-tasks">Browse Projects</Link>
+              </li>
+              <li>
+                <Link href="/dashboard/company/profile">Your profile</Link>
+              </li>
+              <li>
+                <Link href="/contractors">Subcontracting Opportunities</Link>
+              </li>
+              <li>
+                <Link href="/contractors">Contractors</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 5: RESOURCES & COMMUNITY */}
+          <div className="bmf-nav-column">
+            <h3 className="bmf-nav-title">Resources &amp; Community</h3>
+            <ul className="bmf-nav-list">
+              <li>
+                <Link href="/help-center">Help Center</Link>
+              </li>
+              <li>
+                <Link href="/help-center">Safety Center</Link>
+              </li>
+              <li>
+                <Link href="/search">Service Categories</Link>
+              </li>
+              <li>
+                <Link href="/search">Locations</Link>
+              </li>
+              <li>
+                <Link href="/upgrade">Pricing and Fees</Link>
+              </li>
+              <li>
+                <Link href="/terms">Community Guidelines</Link>
+              </li>
+              <li>
+                <Link href="/payments-and-earnings">Earnings</Link>
+              </li>
+              <li>
+                <Link href="/dispute-resolution">Escrow &amp; Safe Payments</Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        {/* =====================================================
+             LEGAL LINKS STRIP
+        ====================================================== */}
+        <div className="bmf-legal">
+          <nav className="bmf-legal-links" aria-label="Boulot Man Legal Navigation">
+            <Link href="/terms">Terms of Service</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/privacy">Privacy Policy</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/signup/verify">Trust &amp; Safety</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/dispute-resolution">Payments &amp; Escrow</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/dispute-resolution">Refunds</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/search">Reviews &amp; Ratings</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/privacy">Cookies</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/terms">Legal Center</Link>
+          </nav>
+        </div>
+      </div>
+
+      {/* =====================================================
+           BOTTOM BAR: COPYRIGHT + PICKERS + SOCIALS
+      ====================================================== */}
+      <div className="bmf-bottom">
+        <div className="bmf-bottom-inner">
+          <div className="bmf-bottom-grid">
+            {/* LEFT: COPYRIGHT */}
+            <div className="bmf-bottom-left">
+              <p className="bmf-copyright">
+                © 2026 Boulot Man Engineering Company. All rights reserved.
+              </p>
             </div>
 
-            {/* COUNTRY */}
-            <CountrySelector variant="footer" />
-          </div>
+            {/* CENTER: COUNTRY & LANGUAGE PICKERS */}
+            <div className="bmf-bottom-center">
+              {/* COUNTRY PICKER */}
+              <div className="bmf-picker bmf-country-picker" ref={countryPickerRef}>
+                <button
+                  type="button"
+                  className={`bmf-picker-button ${countryOpen ? "is-open" : ""}`}
+                  id="bmfCountryButton"
+                  aria-expanded={countryOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCountryOpen(!countryOpen);
+                    setLangOpen(false);
+                  }}
+                >
+                  <span className="bmf-picker-main">
+                    <span className="bmf-selected-flag" id="bmfSelectedFlag">
+                      <img
+                        src={selectedCountry.flag}
+                        alt={`${selectedCountry.country} flag`}
+                      />
+                    </span>
+                    <span className="bmf-picker-label" id="bmfCountryLabel">
+                      {selectedCountry.country} · {selectedCountry.currency}
+                    </span>
+                  </span>
+                  <span className="bmf-picker-arrow" aria-hidden="true">
+                    ▾
+                  </span>
+                </button>
 
-          <div className="footer-socials">
-            <a href="https://cm.linkedin.com/company/boulotman" target="_blank" rel="noreferrer">LinkedIn</a>
-            <a href="https://x.com/boulotman" target="_blank" rel="noreferrer">Twitter</a>
-            <a href="https://www.facebook.com/boulotman.inc/" target="_blank" rel="noreferrer">Facebook</a>
-            <a href="https://www.instagram.com/boulotman?igsh=M3NmZWFiemt1ZHly" target="_blank" rel="noreferrer">Instagram</a>
+                {/* COUNTRY DROPDOWN */}
+                <div
+                  className={`bmf-country-dropdown ${countryOpen ? "is-open" : ""}`}
+                  id="bmfCountryDropdown"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="bmf-country-header">
+                    <h4>Select Region &amp; Currency</h4>
+                    <input
+                      type="search"
+                      className="bmf-country-search"
+                      id="bmfCountrySearch"
+                      placeholder="Search country or currency..."
+                      autoComplete="off"
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      autoFocus={countryOpen}
+                    />
+                  </div>
+
+                  <div className="bmf-country-list" id="bmfCountryList">
+                    {filteredCountries.map((c) => {
+                      const isSelected = c.country === selectedCountry.country;
+                      return (
+                        <button
+                          key={c.country}
+                          type="button"
+                          className={`bmf-country-option ${isSelected ? "is-selected" : ""}`}
+                          onClick={() => handleCountrySelect(c)}
+                        >
+                          <span className="bmf-option-flag">
+                            <img src={c.flag} alt={`${c.country} flag`} />
+                          </span>
+                          <span className="bmf-option-copy">
+                            <strong>{c.country}</strong>
+                            <small>{c.city} · {c.callingCode}</small>
+                          </span>
+                          <span className="bmf-option-currency">
+                            {c.currency}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {filteredCountries.length === 0 && (
+                      <div style={{ padding: "16px 14px", color: "#9fb1c3", fontSize: "13px", textAlign: "center" }}>
+                        No region found.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bmf-country-footer">
+                    <span>Auto-localizes jobs &amp; pricing</span>
+                    <strong>Boulot Man Africa</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* LANGUAGE PICKER */}
+              <div className="bmf-picker bmf-language-picker" ref={langPickerRef}>
+                <button
+                  type="button"
+                  className={`bmf-picker-button ${langOpen ? "is-open" : ""}`}
+                  id="bmfLanguageButton"
+                  aria-expanded={langOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLangOpen(!langOpen);
+                    setCountryOpen(false);
+                  }}
+                >
+                  <span className="bmf-picker-main">
+                    <span className="bmf-language-icon" aria-hidden="true">
+                      🌐
+                    </span>
+                    <span className="bmf-picker-label" id="bmfLanguageLabel">
+                      {selectedLang.label}
+                    </span>
+                  </span>
+                  <span className="bmf-picker-arrow" aria-hidden="true">
+                    ▾
+                  </span>
+                </button>
+
+                {/* LANGUAGE DROPDOWN */}
+                <div
+                  className={`bmf-language-dropdown ${langOpen ? "is-open" : ""}`}
+                  id="bmfLanguageDropdown"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l.code}
+                      type="button"
+                      className={`bmf-language-option ${l.code === selectedLang.code ? "is-selected" : ""}`}
+                      onClick={() => handleLanguageSelect(l)}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: SOCIAL MEDIA */}
+            <nav className="bmf-social" aria-label="Boulot Man Social Media">
+              <a
+                href="https://cm.linkedin.com/company/boulotman"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn"
+              >
+                LinkedIn
+              </a>
+              <a
+                href="https://x.com/boulotman"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="X"
+              >
+                X
+              </a>
+              <a
+                href="https://www.facebook.com/boulotman.inc/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+              >
+                Facebook
+              </a>
+              <a
+                href="https://www.instagram.com/boulotman?igsh=M3NmZWFiemt1ZHly"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+              >
+                Instagram
+              </a>
+              <a
+                href="https://youtube.com/@boulotman"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="YouTube"
+              >
+                YouTube
+              </a>
+              <a
+                href="https://tiktok.com/@boulotman"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="TikTok"
+              >
+                TikTok
+              </a>
+              <a
+                href="https://pinterest.com/boulotman"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Pinterest"
+              >
+                Pinterest
+              </a>
+            </nav>
           </div>
         </div>
-
       </div>
     </footer>
   );
 }
-
