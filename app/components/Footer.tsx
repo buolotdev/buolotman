@@ -380,7 +380,7 @@ export default function Footer() {
             <span aria-hidden="true">•</span>
             <Link href="/privacy">Cookies</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/terms">Legal Center</Link>
+            <Link href="/legal">Legal Center</Link>
           </nav>
         </div>
       </div>
