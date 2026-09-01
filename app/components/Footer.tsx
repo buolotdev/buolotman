@@ -374,7 +374,7 @@ export default function Footer() {
             <span aria-hidden="true">•</span>
             <Link href="/dispute-resolution">Payments &amp; Escrow</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/dispute-resolution">Refunds</Link>
+            <Link href="/refunds">Refunds</Link>
             <span aria-hidden="true">•</span>
             <Link href="/search">Reviews &amp; Ratings</Link>
             <span aria-hidden="true">•</span>
