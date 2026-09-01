@@ -10,7 +10,10 @@
    - Footer height = content height only
 ========================================================= */
 
-/* FOOTER RESET */
+/* =========================================================
+   PAGE RESET
+========================================================= */
+
 .bmf-footer,
 .bmf-footer *,
 .bmf-footer *::before,
@@ -18,7 +21,10 @@
     box-sizing: border-box;
 }
 
-/* FOOTER ROOT */
+/* =========================================================
+   FOOTER ROOT
+========================================================= */
+
 .bmf-footer {
     --bmf-blue: #001F3F;
     --bmf-blue-deep: #00152b;
@@ -37,6 +43,12 @@
     --bmf-border-strong: rgba(255, 255, 255, 0.20);
 
     position: relative;
+
+    /*
+       TRUE NATURAL HEIGHT.
+       DO NOT PUT min-height HERE.
+    */
+
     width: 100%;
     height: auto !important;
     min-height: 0 !important;
@@ -47,6 +59,7 @@
     overflow: visible;
     border: 0;
     border-top: 2px solid var(--bmf-orange);
+
     background:
         radial-gradient(
             circle at 16% 0%,
@@ -59,8 +72,17 @@
             var(--bmf-blue) 48%,
             var(--bmf-blue-deep) 100%
         );
+
     color: var(--bmf-text);
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
     font-size: 16px;
     line-height: 1.55;
     font-weight: 400;
@@ -69,11 +91,19 @@
     text-rendering: optimizeLegibility;
 }
 
+/* =========================================================
+   IMPORTANT — ABSOLUTELY NO GENERATED SPACE
+========================================================= */
+
 .bmf-footer::before,
 .bmf-footer::after {
     content: none !important;
     display: none !important;
 }
+
+/* =========================================================
+   GENERAL
+========================================================= */
 
 .bmf-footer a {
     color: inherit;
@@ -82,32 +112,52 @@
 
 .bmf-footer button,
 .bmf-footer input {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
 }
 
-/* INTERNAL WIDTH */
+/* =========================================================
+   INTERNAL WIDTH
+========================================================= */
+
 .bmf-inner,
 .bmf-bottom-inner {
-    width: min(1200px, calc(100% - 48px));
+    width: min(
+        1420px,
+        calc(100% - 48px)
+    );
     margin: 0 auto;
     padding-left: 0;
     padding-right: 0;
 }
 
-/* TOP */
+/* =========================================================
+   TOP
+========================================================= */
+
 .bmf-top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 36px;
+    gap: 56px;
     margin: 0;
-    padding: 30px 0 24px;
+    padding: 48px 0 39px;
     border-bottom: 1px solid var(--bmf-border);
 }
 
-/* BRAND */
+/* =========================================================
+   BRAND
+========================================================= */
+
 .bmf-brand {
-    max-width: 580px;
+    max-width: 610px;
     margin: 0;
     padding: 0;
 }
@@ -115,16 +165,16 @@
 .bmf-brand-link {
     display: inline-flex;
     align-items: center;
-    gap: 15px;
-    margin: 0 0 10px;
+    gap: 17px;
+    margin: 0 0 17px;
     padding: 0;
     text-decoration: none;
 }
 
 .bmf-logo {
     display: block;
-    width: 64px;
-    height: 64px;
+    width: 82px;
+    height: 82px;
     flex: 0 0 auto;
     margin: 0;
     padding: 0;
@@ -140,32 +190,35 @@
     margin: 0;
     padding: 0;
     color: var(--bmf-white);
-    font-size: 26px;
+    font-size: 29px;
     line-height: 1.15;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.025em;
 }
 
 .bmf-tagline {
-    margin: 5px 0 0;
+    margin: 7px 0 0;
     padding: 0;
     color: #b9c9d7;
-    font-size: 13.5px;
-    line-height: 1.45;
+    font-size: 14px;
+    line-height: 1.5;
     font-weight: 400;
 }
 
 .bmf-description {
-    max-width: 540px;
+    max-width: 550px;
     margin: 0;
     padding: 0;
     color: #cad6e0;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 15px;
+    line-height: 1.68;
     font-weight: 400;
 }
 
-/* TOP ACTIONS */
+/* =========================================================
+   TOP ACTIONS
+========================================================= */
+
 .bmf-actions {
     display: flex;
     align-items: center;
@@ -177,8 +230,8 @@
 }
 
 .bmf-action {
-    min-height: 42px;
-    padding: 0 18px;
+    min-height: 45px;
+    padding: 0 19px;
     border: 1px solid var(--bmf-border-strong);
     border-radius: 8px;
     display: inline-flex;
@@ -187,10 +240,14 @@
     background: rgba(255, 255, 255, 0.055);
     color: var(--bmf-white);
     text-decoration: none;
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1;
     font-weight: 500;
-    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
     cursor: pointer;
 }
 
@@ -209,16 +266,22 @@
 .bmf-action-primary:hover {
     border-color: var(--bmf-orange-hover);
     background: var(--bmf-orange-hover);
-    box-shadow: 0 8px 22px rgba(255, 69, 0, 0.23);
+    box-shadow:
+        0 8px 22px
+        rgba(255, 69, 0, 0.23);
 }
 
-/* MAIN NAVIGATION */
+/* =========================================================
+   MAIN NAVIGATION
+========================================================= */
+
 .bmf-navigation {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 24px;
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+    gap: 48px;
     margin: 0;
-    padding: 30px 0 32px;
+    padding: 44px 0 47px;
 }
 
 .bmf-nav-column {
@@ -229,14 +292,12 @@
 
 .bmf-nav-title {
     position: relative;
-    margin: 0 0 14px;
-    padding: 0 0 8px;
+    margin: 0 0 18px;
+    padding: 0 0 11px;
     color: var(--bmf-white);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
-    font-weight: 700;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .bmf-nav-title::after {
@@ -244,7 +305,7 @@
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 24px;
+    width: 29px;
     height: 2px;
     border-radius: 100px;
     background: var(--bmf-orange);
@@ -262,7 +323,7 @@
 }
 
 .bmf-nav-list li {
-    margin: 0 0 8px;
+    margin: 0 0 9px;
     padding: 0;
 }
 
@@ -274,25 +335,30 @@
     display: inline-block;
     color: #c6d3df;
     text-decoration: none;
-    font-size: 13.5px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.55;
     font-weight: 400;
-    transition: color 0.17s ease, transform 0.17s ease;
+    transition:
+        color 0.17s ease,
+        transform 0.17s ease;
 }
 
 .bmf-nav-list a:hover {
     color: var(--bmf-white);
-    transform: translateX(3px);
+    transform: translateX(2px);
 }
 
 [dir="rtl"] .bmf-nav-list a:hover {
-    transform: translateX(-3px);
+    transform: translateX(-2px);
 }
 
-/* LEGAL */
+/* =========================================================
+   LEGAL
+========================================================= */
+
 .bmf-legal {
     margin: 0;
-    padding: 14px 0;
+    padding: 18px 0;
     border-top: 1px solid var(--bmf-border);
 }
 
@@ -301,7 +367,7 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 8px 15px;
     margin: 0;
     padding: 0;
 }
@@ -325,7 +391,17 @@
     line-height: 1;
 }
 
-/* BOTTOM BAR */
+/* =========================================================
+   BOTTOM BAR
+
+   THIS IS NOW THE ACTUAL END OF THE FOOTER.
+
+   IMPORTANT:
+   NO margin-top:auto
+   NO flexible expansion
+   NO viewport filler
+========================================================= */
+
 .bmf-bottom {
     position: relative;
     width: 100%;
@@ -335,8 +411,13 @@
     padding: 0 !important;
     display: block;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(0, 0, 0, 0.22);
+    border-bottom: 0;
+    background: rgba(0, 0, 0, 0.18);
 }
+
+/* =========================================================
+   BOTTOM INNER
+========================================================= */
 
 .bmf-bottom-inner {
     margin-top: 0 !important;
@@ -345,18 +426,28 @@
     padding-bottom: 0 !important;
 }
 
+/* =========================================================
+   BOTTOM GRID
+========================================================= */
+
 .bmf-bottom-grid {
-    min-height: 64px;
+    min-height: 82px;
     height: auto;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        minmax(0, 1fr);
     align-items: center;
-    gap: 24px;
+    gap: 28px;
     margin: 0 !important;
-    padding: 10px 0 !important;
+    padding: 0 !important;
 }
 
-/* LEFT */
+/* =========================================================
+   LEFT
+========================================================= */
+
 .bmf-bottom-left {
     min-width: 0;
     display: flex;
@@ -375,12 +466,15 @@
     font-weight: 400;
 }
 
-/* CENTER */
+/* =========================================================
+   CENTER
+========================================================= */
+
 .bmf-bottom-center {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 9px;
     margin: 0;
     padding: 0;
     white-space: nowrap;
@@ -393,42 +487,55 @@
 }
 
 .bmf-country-picker {
-    width: 205px;
+    width: 190px;
 }
 
 .bmf-language-picker {
-    width: 155px;
+    width: 145px;
 }
 
-/* PICKER BUTTON */
+/* =========================================================
+   PICKER BUTTON
+========================================================= */
+
 .bmf-picker-button {
     width: 100%;
     height: 42px;
     margin: 0;
-    padding: 0 12px;
+    padding: 0 11px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 8px;
+    border-radius: 7px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 9px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.065),
+            rgba(255, 255, 255, 0.035)
+        );
     color: var(--bmf-white);
     cursor: pointer;
     outline: none;
     font-size: 13px;
     font-weight: 400;
-    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .bmf-picker-button:hover,
 .bmf-picker-button.is-open {
     border-color: rgba(255, 69, 0, 0.68);
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .bmf-picker-button.is-open {
-    box-shadow: 0 0 0 1px rgba(255, 69, 0, 0.2);
+    box-shadow:
+        0 0 0 1px
+        rgba(255, 69, 0, 0.07);
 }
 
 .bmf-picker-main {
@@ -444,7 +551,7 @@
     color: #ebf0f5;
     font-size: 13px;
     line-height: 1;
-    font-weight: 500;
+    font-weight: 400;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -461,7 +568,10 @@
     transform: rotate(180deg);
 }
 
-/* FLAGS */
+/* =========================================================
+   FLAGS
+========================================================= */
+
 .bmf-selected-flag,
 .bmf-option-flag {
     display: inline-flex;
@@ -470,17 +580,18 @@
     flex: 0 0 auto;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 4px;
 }
 
 .bmf-selected-flag {
-    width: 26px;
-    height: 18px;
+    width: 28px;
+    height: 20px;
+    border-radius: 4px;
 }
 
 .bmf-option-flag {
-    width: 32px;
-    height: 22px;
+    width: 34px;
+    height: 24px;
+    border-radius: 4px;
 }
 
 .bmf-selected-flag img,
@@ -491,37 +602,48 @@
     object-fit: cover;
 }
 
-/* LANGUAGE ICON */
+/* =========================================================
+   LANGUAGE ICON
+========================================================= */
+
 .bmf-language-icon {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1;
 }
 
-/* COUNTRY DROPDOWN */
+/* =========================================================
+   COUNTRY DROPDOWN
+========================================================= */
+
 .bmf-country-dropdown {
     position: absolute;
     left: 0;
     bottom: calc(100% + 10px);
     z-index: 99999;
-    width: 360px;
+    width: 370px;
     margin: 0;
     padding: 0;
     overflow: hidden;
     border: 1px solid rgba(255, 69, 0, 0.48);
-    border-radius: 12px;
+    border-radius: 10px;
     background: #082e57;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+    box-shadow:
+        0 20px 48px
+        rgba(0, 0, 0, 0.43);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transform: translateY(8px);
-    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+    transition:
+        opacity 0.18s ease,
+        visibility 0.18s ease,
+        transform 0.18s ease;
 }
 
 .bmf-country-dropdown.is-open {
@@ -531,9 +653,13 @@
     transform: translateY(0);
 }
 
+/* =========================================================
+   COUNTRY HEADER
+========================================================= */
+
 .bmf-country-header {
     margin: 0;
-    padding: 14px 14px 12px;
+    padding: 15px 14px 13px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
@@ -541,20 +667,20 @@
     margin: 0 0 10px;
     padding: 0;
     color: var(--bmf-white);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.4;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-weight: 600;
+    letter-spacing: 0.035em;
     text-transform: uppercase;
 }
 
 .bmf-country-search {
     width: 100%;
-    height: 40px;
+    height: 41px;
     margin: 0;
     padding: 0 12px;
     border: 1px solid rgba(255, 69, 0, 0.60);
-    border-radius: 8px;
+    border-radius: 7px;
     outline: none;
     background: #0d3a69;
     color: var(--bmf-white);
@@ -569,18 +695,24 @@
 
 .bmf-country-search:focus {
     border-color: var(--bmf-orange);
-    box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.15);
+    box-shadow:
+        0 0 0 2px
+        rgba(255, 69, 0, 0.08);
 }
 
+/* =========================================================
+   COUNTRY LIST
+========================================================= */
+
 .bmf-country-list {
-    max-height: 290px;
+    max-height: 315px;
     margin: 0;
-    padding: 6px 0;
+    padding: 5px 0;
     overflow-y: auto;
 }
 
 .bmf-country-list::-webkit-scrollbar {
-    width: 6px;
+    width: 7px;
 }
 
 .bmf-country-list::-webkit-scrollbar-track {
@@ -589,17 +721,24 @@
 
 .bmf-country-list::-webkit-scrollbar-thumb {
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.22);
 }
+
+/* =========================================================
+   COUNTRY OPTIONS
+========================================================= */
 
 .bmf-country-option {
     width: 100%;
-    min-height: 56px;
+    min-height: 61px;
     margin: 0;
-    padding: 8px 14px;
+    padding: 9px 14px;
     border: 0;
     display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) auto;
+    grid-template-columns:
+        34px
+        minmax(0, 1fr)
+        auto;
     align-items: center;
     gap: 12px;
     background: transparent;
@@ -610,11 +749,11 @@
 }
 
 .bmf-country-option:hover {
-    background: rgba(255, 255, 255, 0.075);
+    background: rgba(255, 255, 255, 0.065);
 }
 
 .bmf-country-option.is-selected {
-    background: rgba(255, 69, 0, 0.12);
+    background: rgba(255, 69, 0, 0.09);
 }
 
 .bmf-option-copy {
@@ -628,8 +767,8 @@
     overflow: hidden;
     color: #f5f8fb;
     font-size: 14px;
-    line-height: 1.35;
-    font-weight: 600;
+    line-height: 1.4;
+    font-weight: 500;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -637,26 +776,30 @@
 .bmf-option-copy small {
     color: #a2b5c7;
     font-size: 11px;
-    line-height: 1.3;
+    line-height: 1.4;
     font-weight: 400;
 }
 
 .bmf-option-currency {
-    min-width: 48px;
-    padding: 5px 8px;
+    min-width: 50px;
+    padding: 6px 9px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
     color: #d3dee8;
     font-size: 11px;
     line-height: 1;
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
 }
 
 .bmf-country-option.is-selected .bmf-option-currency {
-    background: rgba(255, 69, 0, 0.22);
+    background: rgba(255, 69, 0, 0.16);
     color: var(--bmf-white);
 }
+
+/* =========================================================
+   COUNTRY FOOT
+========================================================= */
 
 .bmf-country-footer {
     display: flex;
@@ -664,7 +807,7 @@
     justify-content: space-between;
     gap: 10px;
     margin: 0;
-    padding: 10px 14px;
+    padding: 11px 13px;
     border-top: 1px solid rgba(255, 255, 255, 0.09);
     color: #9bafc1;
     font-size: 10px;
@@ -676,28 +819,36 @@
     color: var(--bmf-orange);
     font-size: 10px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: 500;
 }
 
-/* LANGUAGE DROPDOWN */
+/* =========================================================
+   LANGUAGE DROPDOWN
+========================================================= */
+
 .bmf-language-dropdown {
     position: absolute;
     left: 0;
     bottom: calc(100% + 10px);
     z-index: 99999;
     width: 100%;
-    min-width: 155px;
+    min-width: 145px;
     margin: 0;
     padding: 6px;
     border: 1px solid rgba(255, 69, 0, 0.48);
-    border-radius: 10px;
+    border-radius: 9px;
     background: #082e57;
-    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.45);
+    box-shadow:
+        0 20px 42px
+        rgba(0, 0, 0, 0.40);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transform: translateY(8px);
-    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+    transition:
+        opacity 0.18s ease,
+        visibility 0.18s ease,
+        transform 0.18s ease;
 }
 
 .bmf-language-dropdown.is-open {
@@ -709,9 +860,9 @@
 
 .bmf-language-option {
     width: 100%;
-    min-height: 38px;
+    min-height: 41px;
     margin: 0;
-    padding: 8px 12px;
+    padding: 9px 11px;
     border: 0;
     border-radius: 6px;
     display: block;
@@ -723,28 +874,33 @@
     font-weight: 400;
     text-align: left;
     white-space: nowrap;
-    transition: background 0.16s ease, color 0.16s ease;
+    transition:
+        background 0.16s ease,
+        color 0.16s ease;
 }
 
 .bmf-language-option:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
     color: var(--bmf-white);
 }
 
 .bmf-language-option.is-selected {
-    background: rgba(255, 69, 0, 0.15);
+    background: rgba(255, 69, 0, 0.10);
     color: var(--bmf-white);
-    font-weight: 600;
+    font-weight: 500;
 }
 
-/* SOCIAL */
+/* =========================================================
+   SOCIAL
+========================================================= */
+
 .bmf-social {
     min-width: 0;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: 8px 14px;
+    gap: 6px 13px;
     margin: 0;
     padding: 0;
 }
@@ -754,16 +910,43 @@
     text-decoration: none;
     font-size: 12px;
     line-height: 1.4;
-    font-weight: 500;
+    font-weight: 400;
     white-space: nowrap;
     transition: color 0.16s ease;
 }
 
 .bmf-social a:hover {
-    color: var(--bmf-orange);
+    color: var(--bmf-white);
 }
 
-/* ACCESSIBILITY */
+/* =========================================================
+   HARD STOP
+
+   THE BOTTOM BAR'S LAST EDGE IS THE FOOTER'S LAST EDGE.
+========================================================= */
+
+.bmf-bottom:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.bmf-bottom-inner:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.bmf-bottom-grid:last-child {
+    margin-bottom: 0 !important;
+}
+
+.bmf-footer > .bmf-bottom:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
 .bmf-footer a:focus-visible,
 .bmf-footer button:focus-visible,
 .bmf-footer input:focus-visible {
@@ -771,26 +954,49 @@
     outline-offset: 2px;
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   LARGE TABLET
+========================================================= */
+
 @media (max-width: 1180px) {
     .bmf-navigation {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 36px 38px;
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+        gap: 38px 42px;
     }
 
     .bmf-bottom-grid {
-        grid-template-columns: minmax(180px, 1fr) auto minmax(250px, 1fr);
+        grid-template-columns:
+            minmax(180px, 1fr)
+            auto
+            minmax(250px, 1fr);
         gap: 18px;
     }
 
     .bmf-country-picker {
-        width: 180px;
+        width: 175px;
     }
 
     .bmf-language-picker {
-        width: 140px;
+        width: 135px;
+    }
+
+    .bmf-language-dropdown {
+        min-width: 135px;
+    }
+
+    .bmf-social {
+        gap: 5px 9px;
+    }
+
+    .bmf-social a {
+        font-size: 11px;
     }
 }
+
+/* =========================================================
+   TABLET
+========================================================= */
 
 @media (max-width: 940px) {
     .bmf-top {
@@ -803,9 +1009,11 @@
     }
 
     .bmf-bottom-grid {
-        grid-template-columns: 1fr auto;
+        grid-template-columns:
+            1fr
+            auto;
         gap: 16px 22px;
-        padding: 16px 0 !important;
+        padding: 17px 0 !important;
     }
 
     .bmf-bottom-left {
@@ -822,6 +1030,10 @@
     }
 }
 
+/* =========================================================
+   MOBILE TABLET
+========================================================= */
+
 @media (max-width: 760px) {
     .bmf-inner,
     .bmf-bottom-inner {
@@ -829,14 +1041,15 @@
     }
 
     .bmf-navigation {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 32px 24px;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+        gap: 34px 28px;
     }
 
     .bmf-bottom-grid {
         grid-template-columns: 1fr;
         justify-items: center;
-        gap: 16px;
+        gap: 14px;
         padding: 20px 0 !important;
     }
 
@@ -856,28 +1069,41 @@
     }
 }
 
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media (max-width: 540px) {
     .bmf-inner,
     .bmf-bottom-inner {
-        width: calc(100% - 24px);
+        width: calc(100% - 26px);
     }
 
     .bmf-top {
-        padding: 36px 0 28px;
+        padding: 38px 0 31px;
     }
 
     .bmf-brand-link {
-        gap: 12px;
-        margin-bottom: 12px;
+        gap: 13px;
+        margin-bottom: 14px;
     }
 
     .bmf-logo {
-        width: 60px;
-        height: 60px;
+        width: 68px;
+        height: 68px;
     }
 
     .bmf-brand-text h2 {
-        font-size: 23px;
+        font-size: 24px;
+    }
+
+    .bmf-tagline {
+        font-size: 13px;
+    }
+
+    .bmf-description {
+        font-size: 14px;
+        line-height: 1.62;
     }
 
     .bmf-actions {
@@ -887,17 +1113,26 @@
     .bmf-action {
         width: 100%;
         min-height: 46px;
+        font-size: 14px;
     }
 
     .bmf-navigation {
         grid-template-columns: 1fr;
-        gap: 28px;
-        padding: 32px 0 36px;
+        gap: 30px;
+        padding: 36px 0 40px;
+    }
+
+    .bmf-nav-title {
+        font-size: 16px;
+    }
+
+    .bmf-nav-list a {
+        font-size: 14px;
     }
 
     .bmf-legal-links {
         justify-content: flex-start;
-        gap: 8px 14px;
+        gap: 10px 18px;
     }
 
     .bmf-legal-links span {
@@ -905,30 +1140,82 @@
     }
 
     .bmf-legal-links a {
-        width: calc(50% - 8px);
+        width: calc(50% - 9px);
         font-size: 12px;
     }
 
     .bmf-bottom-center {
         width: 100%;
-        gap: 8px;
+        gap: 7px;
     }
 
     .bmf-country-picker {
-        width: min(58%, 200px);
+        width: min(58%, 205px);
     }
 
     .bmf-language-picker {
-        width: min(42%, 150px);
+        width: min(42%, 155px);
+    }
+
+    .bmf-picker-button {
+        height: 43px;
+        padding: 0 9px;
+    }
+
+    .bmf-picker-label {
+        font-size: 12px;
     }
 
     .bmf-country-dropdown {
         left: 0;
-        width: min(calc(100vw - 24px), 360px);
+        width: min(
+            calc(100vw - 26px),
+            370px
+        );
+    }
+
+    .bmf-language-dropdown {
+        left: 0;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .bmf-social {
+        gap: 8px 14px;
+    }
+
+    .bmf-social a {
+        font-size: 12px;
+    }
+
+    .bmf-copyright {
+        font-size: 11px;
     }
 }
 
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
 @media (max-width: 390px) {
+    .bmf-inner,
+    .bmf-bottom-inner {
+        width: calc(100% - 22px);
+    }
+
+    .bmf-logo {
+        width: 61px;
+        height: 61px;
+    }
+
+    .bmf-brand-text h2 {
+        font-size: 22px;
+    }
+
+    .bmf-legal-links a {
+        width: 100%;
+    }
+
     .bmf-bottom-center {
         flex-direction: column;
     }
