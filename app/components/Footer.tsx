@@ -321,7 +321,7 @@ export default function Footer() {
                 <Link href="/dashboard/company/profile">Your profile</Link>
               </li>
               <li>
-                <Link href="/contractors">Subcontracting Opportunities</Link>
+                <Link href="/subcontracting">Subcontracting Opportunities</Link>
               </li>
               <li>
                 <Link href="/contractors">Contractors</Link>
