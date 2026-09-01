@@ -567,7 +567,7 @@ export default function Footer() {
                 Instagram
               </a>
               <a
-                href="https://youtube.com/@boulotman"
+                href="https://youtube.com/@boulotmancameroon?si=m9FUCuWen8xLnmT4"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"
@@ -575,7 +575,7 @@ export default function Footer() {
                 YouTube
               </a>
               <a
-                href="https://tiktok.com/@boulotman"
+                href="https://www.tiktok.com/@boulotman.inc?_r=1&_t=ZS-99N2jDEWSPA"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="TikTok"
@@ -583,7 +583,7 @@ export default function Footer() {
                 TikTok
               </a>
               <a
-                href="https://pinterest.com/boulotman"
+                href="https://www.pinterest.com/boulotman/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Pinterest"
