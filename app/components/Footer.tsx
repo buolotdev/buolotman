@@ -372,13 +372,13 @@ export default function Footer() {
             <span aria-hidden="true">•</span>
             <Link href="/trust-and-safety">Trust &amp; Safety</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/dispute-resolution">Payments &amp; Escrow</Link>
+            <Link href="/payments-and-escrow">Payments &amp; Escrow</Link>
             <span aria-hidden="true">•</span>
             <Link href="/refunds">Refunds</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/search">Reviews &amp; Ratings</Link>
+            <Link href="/reviews-ratings">Reviews &amp; Ratings</Link>
             <span aria-hidden="true">•</span>
-            <Link href="/privacy">Cookies</Link>
+            <Link href="/cookies">Cookies</Link>
             <span aria-hidden="true">•</span>
             <Link href="/legal">Legal Center</Link>
           </nav>
