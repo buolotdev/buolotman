@@ -10,4 +10,11 @@ urlpatterns = [
     path('transactions/', views.transaction_list, name='transaction_list'),
     path('admin/transactions/', views.admin_transaction_list, name='admin_transaction_list'),
     path('release-escrow/<int:task_id>/', views.release_escrow, name='release_escrow'),
+
+    # CamPay Mobile Money Integration (Cameroon - MTN & Orange)
+    path('campay/collect/', views.campay_collect_payment, name='campay_collect'),
+    path('campay/status/<str:reference>/', views.campay_check_status_view, name='campay_status'),
+    path('campay/webhook/', views.campay_webhook_view, name='campay_webhook'),
+    path('campay/withdraw/', views.campay_withdraw_view, name='campay_withdraw'),
+    path('campay/balance/', views.campay_balance_view, name='campay_balance'),
 ]

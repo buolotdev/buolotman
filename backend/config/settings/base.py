@@ -158,3 +158,12 @@ else:
             "LOCATION": "boulotman-fallback",
         }
     }
+
+# CamPay Mobile Money Integration (Cameroon - MTN & Orange)
+CAMPAY_APP_ID = config('CAMPAY_APP_ID', default='3NL5dZ_iZtSJ7B6z8ODFA1LP1fQFFMNMWagZwo_MFkoQSRy48yHfLk-NhbxBN-U6_UDyMoY5HqrQ8WObjds3wA')
+CAMPAY_APP_USERNAME = config('CAMPAY_APP_USERNAME', default='CtuiKDZ0QRU33fJSggCxeNyZ_WA0Z4FM9-dHRr6Ish2iakwHuuFCqaTCXcxR5mkNo2n8IFUgNY0kjCGzKJSIA')
+CAMPAY_APP_PASSWORD = config('CAMPAY_APP_PASSWORD', default='bQbpWV8BMzGefmzTdCKXGcrIN1yGU2Q_BmmFvRVGMsEMa9Fl01uD9BEBdo3VsCb6NeZdigcERp3r-2mKQaLw5w')
+CAMPAY_PERMANENT_TOKEN = config('CAMPAY_PERMANENT_TOKEN', default='8e733aef0aaed45c53221bd71154ca82cb3fcb89')
+CAMPAY_WEBHOOK_KEY = config('CAMPAY_WEBHOOK_KEY', default='ol9ChLkYTSYPthEVCMyxyjPr0zMt3uq2qlteK1-YFGr0gTx6GqOmreQIB6n-43NtVG5HGwsBiJJxlOZqjW7f5A')
+CAMPAY_BASE_URL = config('CAMPAY_BASE_URL', default='https://www.campay.net/api')
+
