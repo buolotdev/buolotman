@@ -178,16 +178,51 @@ def register_company(request):
 
 
 KNOWN_PROFILE_FIELDS = {
-    'first_name', 'last_name', 'phone', 'avatar_url', 'banner_url',
-    'language_preference', 'country', 'city', 'address', 'date_of_birth',
-    'education_level', 'expertise_level', 'role',
-    'emergency_contact_name', 'emergency_contact_phone',
-    'bio', 'about', 'headline', 'experience_years',
-    'hourly_rate', 'daily_rate', 'starting_price', 'inspection_fee', 'is_negotiable',
-    'pricing', 'availability', 'availability_status', 'available_now',
-    'response_time', 'skills', 'tools', 'languages', 'portfolio',
-    'payout', 'payout_info', 'kyc', 'kyc_info', 'kyc_status', 'background_check_status',
-    'technician_profile'
+    # User / Basic fields (snake_case & camelCase)
+    'first_name', 'firstName', 'last_name', 'lastName', 'phone', 'phoneNumber', 'phone_number',
+    'avatar_url', 'avatarUrl', 'avatar', 'banner_url', 'bannerUrl', 'banner',
+    'language_preference', 'languagePreference', 'language',
+    'country', 'city', 'address',
+    'date_of_birth', 'dateOfBirth', 'dob',
+    'education_level', 'educationLevel', 'education',
+    'expertise_level', 'expertiseLevel', 'expertise',
+    'role',
+
+    # Emergency Contact
+    'emergency_contact_name', 'emergencyContactName', 'emergency_name', 'emergencyName',
+    'emergency_contact_phone', 'emergencyContactPhone', 'emergency_phone', 'emergencyPhone',
+
+    # Profile / Bio / Trade
+    'bio', 'about', 'headline', 'title', 'primary_occupation', 'primaryOccupation',
+    'experience_years', 'experienceYears', 'experience',
+
+    # Pricing fields
+    'hourly_rate', 'hourlyRate',
+    'daily_rate', 'dailyRate',
+    'starting_price', 'startingPrice',
+    'inspection_fee', 'inspectionFee',
+    'is_negotiable', 'isNegotiable', 'negotiable',
+    'pricing',
+
+    # Availability
+    'availability', 'availability_status', 'availabilityStatus',
+    'available_now', 'availableNow',
+    'response_time', 'responseTime',
+
+    # Skills, Tools, Portfolio
+    'skills', 'tools', 'languages', 'portfolio',
+
+    # Payout
+    'payout', 'payout_info', 'payoutInfo',
+
+    # KYC
+    'kyc', 'kyc_info', 'kycInfo', 'kyc_status', 'kycStatus',
+    'id_type', 'idType', 'id_number', 'idNumber',
+    'id_card_front', 'idCardFront', 'id_card_back', 'idCardBack',
+    'background_check_status', 'backgroundCheckStatus',
+
+    # Nested profile objects
+    'technician_profile', 'technicianProfile', 'profile'
 }
 
 
@@ -328,68 +363,104 @@ def me(request):
             request.user.role = new_role
             request.user.save(update_fields=['role'])
 
-        user_update_data = {}
-        for k in ['first_name', 'last_name', 'phone', 'avatar_url', 'banner_url', 'language_preference', 'country', 'address', 'education_level', 'expertise_level']:
-            if k in request.data:
-                user_update_data[k] = request.data[k]
-
-        if 'city' in request.data:
-            city_val = request.data.get('city')
-            if city_val is not None:
-                user_update_data['address'] = str(city_val)
-
-        if 'date_of_birth' in request.data:
-            dob = request.data.get('date_of_birth')
-            user_update_data['date_of_birth'] = dob if dob else None
-
-        serializer = UserMeSerializer(request.user, data=user_update_data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-
         # Update TechnicianProfile
         from apps.accounts.models import TechnicianProfile
         tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-        tech_data = request.data.get('technician_profile') or {}
+        tech_data = request.data.get('technician_profile') or request.data.get('technicianProfile') or request.data.get('profile') or {}
 
-        def get_field(key, default=None):
-            if key in request.data:
-                return request.data[key]
-            if isinstance(tech_data, dict) and key in tech_data:
-                return tech_data[key]
+        def get_field(*keys, default=None):
+            for key in keys:
+                if key in request.data:
+                    return request.data[key]
+                if isinstance(tech_data, dict) and key in tech_data:
+                    return tech_data[key]
             return default
+
+        # Update user fields with snake_case and camelCase mapping
+        user_update_data = {}
+        first_name = get_field('first_name', 'firstName')
+        if first_name is not None:
+            user_update_data['first_name'] = str(first_name)
+
+        last_name = get_field('last_name', 'lastName')
+        if last_name is not None:
+            user_update_data['last_name'] = str(last_name)
+
+        phone = get_field('phone', 'phoneNumber', 'phone_number')
+        if phone is not None:
+            user_update_data['phone'] = str(phone)
+
+        avatar_url = get_field('avatar_url', 'avatarUrl', 'avatar')
+        if avatar_url is not None:
+            user_update_data['avatar_url'] = str(avatar_url)
+
+        banner_url = get_field('banner_url', 'bannerUrl', 'banner')
+        if banner_url is not None:
+            user_update_data['banner_url'] = str(banner_url)
+
+        lang_pref = get_field('language_preference', 'languagePreference', 'language')
+        if lang_pref is not None:
+            user_update_data['language_preference'] = str(lang_pref)
+
+        country = get_field('country')
+        if country is not None:
+            user_update_data['country'] = str(country)
+
+        city = get_field('city')
+        address = get_field('address')
+        if address is not None:
+            user_update_data['address'] = str(address)
+        elif city is not None:
+            user_update_data['address'] = str(city)
+
+        dob = get_field('date_of_birth', 'dateOfBirth', 'dob')
+        if dob is not None:
+            user_update_data['date_of_birth'] = dob if dob else None
+
+        edu = get_field('education_level', 'educationLevel', 'education')
+        if edu is not None:
+            user_update_data['education_level'] = str(edu)
+
+        exp_lvl = get_field('expertise_level', 'expertiseLevel', 'expertise')
+        if exp_lvl is not None:
+            user_update_data['expertise_level'] = str(exp_lvl)
+
+        if user_update_data:
+            serializer = UserMeSerializer(request.user, data=user_update_data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
         # Maintain metadata dictionary in tech_profile.languages
         meta = tech_profile.languages if isinstance(tech_profile.languages, dict) else {}
         if isinstance(tech_profile.languages, list) and tech_profile.languages:
             meta['tools'] = tech_profile.languages
 
-        bio = get_field('bio', get_field('about'))
+        bio = get_field('bio', 'about')
         if bio is not None:
             tech_profile.bio = str(bio)
             meta['bio'] = str(bio)
 
-        headline = get_field('headline')
+        headline = get_field('headline', 'title', 'primary_occupation', 'primaryOccupation')
         if headline is not None:
             meta['headline'] = str(headline)
 
-        experience_years = get_field('experience_years')
+        experience_years = get_field('experience_years', 'experienceYears', 'experience')
         if experience_years is not None:
             meta['experience_years'] = str(experience_years)
 
-        em_name = get_field('emergency_contact_name')
+        em_name = get_field('emergency_contact_name', 'emergencyContactName', 'emergency_name', 'emergencyName')
         if em_name is not None:
             meta['emergency_contact_name'] = str(em_name)
 
-        em_phone = get_field('emergency_contact_phone')
+        em_phone = get_field('emergency_contact_phone', 'emergencyContactPhone', 'emergency_phone', 'emergencyPhone')
         if em_phone is not None:
             meta['emergency_contact_phone'] = str(em_phone)
 
-        city = get_field('city')
         if city is not None:
             meta['city'] = str(city)
 
-        hr_val = get_field('hourly_rate')
+        hr_val = get_field('hourly_rate', 'hourlyRate')
         if hr_val is not None:
             if hr_val:
                 clean_hr = ''.join(c for c in str(hr_val) if c.isdigit() or c == '.')
@@ -397,56 +468,63 @@ def me(request):
             else:
                 tech_profile.hourly_rate = None
 
-        daily_rate = get_field('daily_rate')
+        daily_rate = get_field('daily_rate', 'dailyRate')
         if daily_rate is not None:
             meta['daily_rate'] = str(daily_rate)
 
-        starting_price = get_field('starting_price')
+        starting_price = get_field('starting_price', 'startingPrice')
         if starting_price is not None:
             meta['starting_price'] = str(starting_price)
 
-        inspection_fee = get_field('inspection_fee')
+        inspection_fee = get_field('inspection_fee', 'inspectionFee')
         if inspection_fee is not None:
             meta['inspection_fee'] = str(inspection_fee)
 
-        is_negotiable = get_field('is_negotiable')
+        is_negotiable = get_field('is_negotiable', 'isNegotiable', 'negotiable')
         if is_negotiable is not None:
             meta['is_negotiable'] = bool(is_negotiable)
 
         pricing = get_field('pricing')
         if isinstance(pricing, dict):
             meta['pricing'] = pricing
-            if 'hourly_rate' in pricing:
-                clean_p_hr = ''.join(c for c in str(pricing['hourly_rate']) if c.isdigit() or c == '.')
+            p_hr = pricing.get('hourly_rate') or pricing.get('hourlyRate')
+            if p_hr is not None:
+                clean_p_hr = ''.join(c for c in str(p_hr) if c.isdigit() or c == '.')
                 tech_profile.hourly_rate = float(clean_p_hr) if clean_p_hr else None
-            if 'daily_rate' in pricing:
-                meta['daily_rate'] = str(pricing['daily_rate'])
-            if 'starting_price' in pricing:
-                meta['starting_price'] = str(pricing['starting_price'])
-            if 'inspection_fee' in pricing:
-                meta['inspection_fee'] = str(pricing['inspection_fee'])
-            if 'is_negotiable' in pricing:
-                meta['is_negotiable'] = bool(pricing['is_negotiable'])
+            p_daily = pricing.get('daily_rate') or pricing.get('dailyRate')
+            if p_daily is not None:
+                meta['daily_rate'] = str(p_daily)
+            p_start = pricing.get('starting_price') or pricing.get('startingPrice')
+            if p_start is not None:
+                meta['starting_price'] = str(p_start)
+            p_insp = pricing.get('inspection_fee') or pricing.get('inspectionFee')
+            if p_insp is not None:
+                meta['inspection_fee'] = str(p_insp)
+            p_neg = pricing.get('is_negotiable') or pricing.get('isNegotiable') or pricing.get('negotiable')
+            if p_neg is not None:
+                meta['is_negotiable'] = bool(p_neg)
 
-        resp_time = get_field('response_time')
+        resp_time = get_field('response_time', 'responseTime')
         if resp_time is not None:
             tech_profile.response_time = str(resp_time)
 
-        availability = get_field('availability', get_field('availability_status'))
+        availability = get_field('availability', 'availability_status', 'availabilityStatus')
         if availability is not None:
             tech_profile.availability_status = str(availability)
-        elif get_field('available_now') is not None:
-            tech_profile.availability_status = 'available' if get_field('available_now') else 'offline'
+        
+        available_now = get_field('available_now', 'availableNow')
+        if available_now is not None:
+            tech_profile.availability_status = 'available' if available_now else 'offline'
 
-        bg_status = get_field('background_check_status')
+        bg_status = get_field('background_check_status', 'backgroundCheckStatus')
         if bg_status is not None:
             tech_profile.background_check_status = str(bg_status)
 
-        payout = get_field('payout', get_field('payout_info'))
+        payout = get_field('payout', 'payout_info', 'payoutInfo')
         if payout is not None and isinstance(payout, dict):
             meta['payout'] = payout
 
-        kyc = get_field('kyc', get_field('kyc_info'))
+        kyc = get_field('kyc', 'kyc_info', 'kycInfo', 'kyc_status', 'kycStatus')
         if kyc is not None and isinstance(kyc, dict):
             meta['kyc'] = kyc
 
