@@ -295,6 +295,23 @@ def switch_role(request):
     return Response({"message": f"Role updated to {new_role}", "role": new_role})
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_account(request):
+    user = request.user
+    create_audit_log(
+        actor=user,
+        action="USER_DELETED_ACCOUNT",
+        entity_type="User",
+        entity_id=user.id,
+        summary=f"User {user.email} permanently deleted their account",
+        metadata={"email": user.email, "role": user.role},
+        ip_address=request.META.get('REMOTE_ADDR'),
+    )
+    user.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def list_users(request):
