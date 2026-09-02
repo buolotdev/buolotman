@@ -56,11 +56,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class UserMeSerializer(serializers.ModelSerializer):
     date_of_birth = serializers.DateField(required=False, allow_null=True)
+    city = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'username', 'role', 'phone', 'avatar_url', 'banner_url', 'is_verified', 'language_preference', 'country', 'date_of_birth', 'address', 'education_level', 'expertise_level', 'created_at']
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'username', 'role',
+            'phone', 'avatar_url', 'banner_url', 'is_verified',
+            'language_preference', 'country', 'city', 'date_of_birth',
+            'address', 'education_level', 'expertise_level', 'created_at'
+        ]
         read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'created_at']
+
+    def get_city(self, obj):
+        return obj.address or ""
 
 
 class UserPublicSerializer(serializers.ModelSerializer):

@@ -177,104 +177,312 @@ def register_company(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+KNOWN_PROFILE_FIELDS = {
+    'first_name', 'last_name', 'phone', 'avatar_url', 'banner_url',
+    'language_preference', 'country', 'city', 'address', 'date_of_birth',
+    'education_level', 'expertise_level', 'role',
+    'emergency_contact_name', 'emergency_contact_phone',
+    'bio', 'about', 'headline', 'experience_years',
+    'hourly_rate', 'daily_rate', 'starting_price', 'inspection_fee', 'is_negotiable',
+    'pricing', 'availability', 'availability_status', 'available_now',
+    'response_time', 'skills', 'tools', 'languages', 'portfolio',
+    'payout', 'payout_info', 'kyc', 'kyc_info', 'kyc_status', 'background_check_status',
+    'technician_profile'
+}
+
+
+def build_user_me_payload(user):
+    from apps.accounts.models import TechnicianProfile, PortfolioItem
+    from apps.accounts.serializers import UserMeSerializer, PortfolioItemSerializer
+
+    serializer = UserMeSerializer(user)
+    data = serializer.data
+    tech_profile, _ = TechnicianProfile.objects.get_or_create(user=user)
+
+    meta = tech_profile.languages if isinstance(tech_profile.languages, dict) else {}
+    tools_list = meta.get('tools') if isinstance(meta, dict) else (tech_profile.languages if isinstance(tech_profile.languages, list) else [])
+
+    headline = meta.get('headline')
+    if not headline:
+        trade = user.education_level or user.expertise_level
+        headline = f"Certified {trade}" if trade else "Professional Specialist"
+
+    experience_years = meta.get('experience_years') or ""
+    emergency_name = meta.get('emergency_contact_name') or ""
+    emergency_phone = meta.get('emergency_contact_phone') or ""
+
+    hourly_rate_str = str(tech_profile.hourly_rate) if tech_profile.hourly_rate is not None else None
+    daily_rate = meta.get('daily_rate') or (f"{int(tech_profile.hourly_rate)*7} XOF / day" if tech_profile.hourly_rate else "")
+    starting_price = meta.get('starting_price') or (hourly_rate_str or "")
+    inspection_fee = meta.get('inspection_fee') or ""
+    is_neg = meta.get('is_negotiable', True)
+
+    pricing = meta.get('pricing')
+    if not isinstance(pricing, dict):
+        pricing = {
+            "hourly_rate": hourly_rate_str,
+            "daily_rate": daily_rate,
+            "starting_price": starting_price,
+            "inspection_fee": inspection_fee,
+            "is_negotiable": is_neg,
+        }
+
+    payout = meta.get('payout') or meta.get('payout_info') or {}
+    kyc = meta.get('kyc') or meta.get('kyc_info') or {
+        "status": tech_profile.background_check_status,
+        "is_verified": tech_profile.is_verified or user.is_verified,
+    }
+
+    city = meta.get('city') or user.address or ""
+
+    data['bio'] = tech_profile.bio or ""
+    data['about'] = tech_profile.bio or ""
+    data['city'] = city
+    data['headline'] = headline
+    data['experience_years'] = experience_years
+    data['emergency_contact_name'] = emergency_name
+    data['emergency_contact_phone'] = emergency_phone
+    data['hourly_rate'] = hourly_rate_str
+    data['daily_rate'] = daily_rate
+    data['starting_price'] = starting_price
+    data['inspection_fee'] = inspection_fee
+    data['is_negotiable'] = is_neg
+    data['pricing'] = pricing
+    data['availability'] = tech_profile.availability_status
+    data['availability_status'] = tech_profile.availability_status
+    data['available_now'] = tech_profile.availability_status == 'available'
+    data['response_time'] = tech_profile.response_time or ""
+    data['completed_jobs'] = tech_profile.completed_jobs
+    data['average_rating'] = str(tech_profile.average_rating)
+    data['background_check_status'] = tech_profile.background_check_status
+    data['payout'] = payout
+    data['kyc'] = kyc
+
+    # Portfolio
+    if tech_profile.portfolio and len(tech_profile.portfolio) > 0:
+        data['portfolio'] = tech_profile.portfolio
+    else:
+        items = PortfolioItem.objects.filter(user=user)
+        if items.exists():
+            data['portfolio'] = PortfolioItemSerializer(items, many=True).data
+        else:
+            data['portfolio'] = []
+
+    # Skills & Tools
+    data['skills'] = [s.name for s in tech_profile.skills.all()]
+    data['tools'] = tools_list
+    data['languages'] = meta.get('languages') or []
+
+    # Nested technician_profile object for complete compatibility
+    data['technician_profile'] = {
+        'bio': tech_profile.bio or "",
+        'about': tech_profile.bio or "",
+        'headline': headline,
+        'experience_years': experience_years,
+        'emergency_contact_name': emergency_name,
+        'emergency_contact_phone': emergency_phone,
+        'city': city,
+        'country': user.country or "",
+        'hourly_rate': hourly_rate_str,
+        'daily_rate': daily_rate,
+        'starting_price': starting_price,
+        'inspection_fee': inspection_fee,
+        'is_negotiable': is_neg,
+        'pricing': pricing,
+        'availability': tech_profile.availability_status,
+        'availability_status': tech_profile.availability_status,
+        'available_now': tech_profile.availability_status == 'available',
+        'response_time': tech_profile.response_time or "",
+        'completed_jobs': tech_profile.completed_jobs,
+        'average_rating': str(tech_profile.average_rating),
+        'background_check_status': tech_profile.background_check_status,
+        'is_verified': tech_profile.is_verified or user.is_verified,
+        'skills': data['skills'],
+        'tools': tools_list,
+        'portfolio': data['portfolio'],
+        'payout': payout,
+        'kyc': kyc,
+    }
+
+    return data
+
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def me(request):
     if request.method == 'GET':
-        serializer = UserMeSerializer(request.user)
-        data = serializer.data
-        from apps.accounts.models import TechnicianProfile
-        tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-        data['bio'] = tech_profile.bio
-        data['about'] = tech_profile.bio
-        if request.user.role == 'TECHNICIAN':
-            data['skills'] = [s.name for s in tech_profile.skills.all()]
-            data['tools'] = tech_profile.languages if isinstance(tech_profile.languages, list) else []
-            data['hourly_rate'] = str(tech_profile.hourly_rate) if tech_profile.hourly_rate else None
-            data['response_time'] = tech_profile.response_time
-            data['completed_jobs'] = tech_profile.completed_jobs
-            data['average_rating'] = str(tech_profile.average_rating)
-            data['availability_status'] = tech_profile.availability_status
-            if tech_profile.portfolio and len(tech_profile.portfolio) > 0:
-                data['portfolio'] = tech_profile.portfolio
-            else:
-                items = PortfolioItem.objects.filter(user=request.user)
-                if items.exists():
-                    from .serializers import PortfolioItemSerializer
-                    data['portfolio'] = PortfolioItemSerializer(items, many=True).data
-                else:
-                    data['portfolio'] = []
-        return Response(data)
+        return Response(build_user_me_payload(request.user))
+
     elif request.method == 'PATCH':
+        # Reject unknown fields with HTTP 400
+        unknown_fields = [k for k in request.data.keys() if k not in KNOWN_PROFILE_FIELDS]
+        if unknown_fields:
+            return Response(
+                {field: ["Unknown field."] for field in unknown_fields},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         role_to_set = request.data.get('role')
         if role_to_set and str(role_to_set).upper() in ['CLIENT', 'TECHNICIAN', 'COMPANY']:
             new_role = str(role_to_set).upper()
             request.user.role = new_role
             request.user.save(update_fields=['role'])
+
         user_update_data = {}
         for k in ['first_name', 'last_name', 'phone', 'avatar_url', 'banner_url', 'language_preference', 'country', 'address', 'education_level', 'expertise_level']:
             if k in request.data:
                 user_update_data[k] = request.data[k]
-        if 'city' in request.data and 'address' not in request.data:
-            user_update_data['address'] = request.data['city']
+
+        if 'city' in request.data:
+            city_val = request.data.get('city')
+            if city_val is not None:
+                user_update_data['address'] = str(city_val)
 
         if 'date_of_birth' in request.data:
             dob = request.data.get('date_of_birth')
             user_update_data['date_of_birth'] = dob if dob else None
 
         serializer = UserMeSerializer(request.user, data=user_update_data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
-        # Update TechnicianProfile bio/about for all users, plus technician-specific fields
+        # Update TechnicianProfile
         from apps.accounts.models import TechnicianProfile
         tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
-        
         tech_data = request.data.get('technician_profile') or {}
-        bio = request.data.get('bio') or request.data.get('about') or tech_data.get('bio') or tech_data.get('about')
+
+        def get_field(key, default=None):
+            if key in request.data:
+                return request.data[key]
+            if isinstance(tech_data, dict) and key in tech_data:
+                return tech_data[key]
+            return default
+
+        # Maintain metadata dictionary in tech_profile.languages
+        meta = tech_profile.languages if isinstance(tech_profile.languages, dict) else {}
+        if isinstance(tech_profile.languages, list) and tech_profile.languages:
+            meta['tools'] = tech_profile.languages
+
+        bio = get_field('bio', get_field('about'))
         if bio is not None:
             tech_profile.bio = str(bio)
+            meta['bio'] = str(bio)
 
-        if 'hourly_rate' in request.data or 'hourly_rate' in tech_data:
-            hr_val = request.data.get('hourly_rate') or tech_data.get('hourly_rate')
+        headline = get_field('headline')
+        if headline is not None:
+            meta['headline'] = str(headline)
+
+        experience_years = get_field('experience_years')
+        if experience_years is not None:
+            meta['experience_years'] = str(experience_years)
+
+        em_name = get_field('emergency_contact_name')
+        if em_name is not None:
+            meta['emergency_contact_name'] = str(em_name)
+
+        em_phone = get_field('emergency_contact_phone')
+        if em_phone is not None:
+            meta['emergency_contact_phone'] = str(em_phone)
+
+        city = get_field('city')
+        if city is not None:
+            meta['city'] = str(city)
+
+        hr_val = get_field('hourly_rate')
+        if hr_val is not None:
             if hr_val:
                 clean_hr = ''.join(c for c in str(hr_val) if c.isdigit() or c == '.')
                 tech_profile.hourly_rate = float(clean_hr) if clean_hr else None
             else:
                 tech_profile.hourly_rate = None
-        if 'response_time' in request.data or 'response_time' in tech_data:
-            tech_profile.response_time = str(request.data.get('response_time') or tech_data.get('response_time') or '')
-        if 'tools' in request.data or 'tools' in tech_data:
-            tools_val = request.data.get('tools') or tech_data.get('tools') or []
-            tech_profile.languages = tools_val if isinstance(tools_val, list) else []
-        elif 'languages' in request.data:
-            tech_profile.languages = request.data.get('languages') or []
-        if 'portfolio' in request.data or 'portfolio' in tech_data:
-            port_val = request.data.get('portfolio') or tech_data.get('portfolio') or []
-            tech_profile.portfolio = port_val if isinstance(port_val, list) else []
-        if 'skills' in request.data or 'skills' in tech_data:
-            skill_items = request.data.get('skills') or tech_data.get('skills') or []
-            if isinstance(skill_items, list):
-                from apps.tasks.models import Skill
-                tech_profile.skills.clear()
-                for item in skill_items:
-                    s_name = item.get('name') if isinstance(item, dict) else (str(item) if item else "")
-                    if s_name and s_name.strip():
-                        skill_obj, _ = Skill.objects.get_or_create(name=s_name.strip())
-                        tech_profile.skills.add(skill_obj)
+
+        daily_rate = get_field('daily_rate')
+        if daily_rate is not None:
+            meta['daily_rate'] = str(daily_rate)
+
+        starting_price = get_field('starting_price')
+        if starting_price is not None:
+            meta['starting_price'] = str(starting_price)
+
+        inspection_fee = get_field('inspection_fee')
+        if inspection_fee is not None:
+            meta['inspection_fee'] = str(inspection_fee)
+
+        is_negotiable = get_field('is_negotiable')
+        if is_negotiable is not None:
+            meta['is_negotiable'] = bool(is_negotiable)
+
+        pricing = get_field('pricing')
+        if isinstance(pricing, dict):
+            meta['pricing'] = pricing
+            if 'hourly_rate' in pricing:
+                clean_p_hr = ''.join(c for c in str(pricing['hourly_rate']) if c.isdigit() or c == '.')
+                tech_profile.hourly_rate = float(clean_p_hr) if clean_p_hr else None
+            if 'daily_rate' in pricing:
+                meta['daily_rate'] = str(pricing['daily_rate'])
+            if 'starting_price' in pricing:
+                meta['starting_price'] = str(pricing['starting_price'])
+            if 'inspection_fee' in pricing:
+                meta['inspection_fee'] = str(pricing['inspection_fee'])
+            if 'is_negotiable' in pricing:
+                meta['is_negotiable'] = bool(pricing['is_negotiable'])
+
+        resp_time = get_field('response_time')
+        if resp_time is not None:
+            tech_profile.response_time = str(resp_time)
+
+        availability = get_field('availability', get_field('availability_status'))
+        if availability is not None:
+            tech_profile.availability_status = str(availability)
+        elif get_field('available_now') is not None:
+            tech_profile.availability_status = 'available' if get_field('available_now') else 'offline'
+
+        bg_status = get_field('background_check_status')
+        if bg_status is not None:
+            tech_profile.background_check_status = str(bg_status)
+
+        payout = get_field('payout', get_field('payout_info'))
+        if payout is not None and isinstance(payout, dict):
+            meta['payout'] = payout
+
+        kyc = get_field('kyc', get_field('kyc_info'))
+        if kyc is not None and isinstance(kyc, dict):
+            meta['kyc'] = kyc
+
+        tools = get_field('tools')
+        if tools is not None and isinstance(tools, list):
+            meta['tools'] = tools
+
+        languages = get_field('languages')
+        if languages is not None and isinstance(languages, list):
+            meta['languages'] = languages
+
+        portfolio = get_field('portfolio')
+        if portfolio is not None and isinstance(portfolio, list):
+            tech_profile.portfolio = portfolio
+
+        skills = get_field('skills')
+        if skills is not None and isinstance(skills, list):
+            from apps.tasks.models import Skill
+            from django.utils.text import slugify
+            tech_profile.skills.clear()
+            for item in skills:
+                s_name = item.get('name') if isinstance(item, dict) else (str(item) if item else "")
+                if s_name and s_name.strip():
+                    clean_name = s_name.strip()
+                    clean_slug = slugify(clean_name) or clean_name.lower()
+                    skill_obj = Skill.objects.filter(name=clean_name).first()
+                    if not skill_obj:
+                        skill_obj = Skill.objects.filter(slug=clean_slug).first()
+                    if not skill_obj:
+                        skill_obj = Skill.objects.create(name=clean_name, slug=clean_slug)
+                    tech_profile.skills.add(skill_obj)
+
+        tech_profile.languages = meta
         tech_profile.save()
 
-        res_serializer = UserMeSerializer(request.user)
-        res_data = res_serializer.data
-        res_data['bio'] = tech_profile.bio
-        res_data['about'] = tech_profile.bio
-        if request.user.role == 'TECHNICIAN':
-            res_data['skills'] = [s.name for s in tech_profile.skills.all()]
-            res_data['tools'] = tech_profile.languages if isinstance(tech_profile.languages, list) else []
-            res_data['portfolio'] = tech_profile.portfolio
-            res_data['hourly_rate'] = str(tech_profile.hourly_rate) if tech_profile.hourly_rate else None
-            res_data['response_time'] = tech_profile.response_time
-        return Response(res_data)
+        return Response(build_user_me_payload(request.user))
 
 
 @api_view(['POST'])
