@@ -299,6 +299,11 @@ def switch_role(request):
 @permission_classes([IsAuthenticated])
 def delete_account(request):
     user = request.user
+    if user.is_staff or user.is_superuser:
+        return Response(
+            {'error': 'Staff accounts cannot be deleted here.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
     create_audit_log(
         actor=user,
         action="USER_DELETED_ACCOUNT",
