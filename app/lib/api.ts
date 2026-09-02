@@ -283,7 +283,7 @@ export const api = {
   submitContact: (data: Record<string, string>) =>
     request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify({ ...data, inquiry_type: 'general' }), public: true } as any),
 
-  // Wallet & Subscriptions
+  // Wallet & Subscriptions (CamPay Mobile Money)
   getWallet: () => request<any>("/wallet/"),
   withdraw: (data: Record<string, any>) =>
     request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
@@ -291,7 +291,7 @@ export const api = {
     request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
   depositFunds: (data: { amount: number | string; payment_method?: string }) =>
     request<any>("/wallet/add-funds/", { method: "POST", body: JSON.stringify(data) }),
-  depositEscrow: (data: { task_id: number; bid_id: number; amount: number }) =>
+  depositEscrow: (data: { task_id: number; bid_id: number; amount: number | string }) =>
     request<any>("/wallet/deposit/", { method: "POST", body: JSON.stringify(data) }),
   releaseEscrow: (taskId: number) =>
     request<any>(`/wallet/release-escrow/${taskId}/`, { method: "POST" }),
@@ -305,6 +305,19 @@ export const api = {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any>(`/wallet/admin/transactions/${qs}`);
   },
+  campayCollect: (data: {
+    amount: number | string;
+    phone_number: string;
+    task_id?: number;
+    bid_id?: number;
+    purpose?: "escrow_deposit" | "wallet_topup";
+    description?: string;
+  }) => request<any>("/wallet/campay/collect/", { method: "POST", body: JSON.stringify(data) }),
+  campayCheckStatus: (reference: string) =>
+    request<any>(`/wallet/campay/status/${reference}/`),
+  campayWithdraw: (data: { amount: number | string; phone_number: string; description?: string }) =>
+    request<any>("/wallet/campay/withdraw/", { method: "POST", body: JSON.stringify(data) }),
+  campayGetBalance: () => request<any>("/wallet/campay/balance/"),
 
   // Conversations
   getConversations: () => request<any[]>("/conversations/"),
@@ -594,31 +607,5 @@ export const api = {
       tasks_posted_monthly: number;
       successful_completion: number;
     }>("/governance/platform-stats/", { public: true }),
-
-  // Wallet & Payments (CamPay Mobile Money)
-  getWallet: () => request<any>("/wallet/"),
-  getTransactions: (params?: Record<string, string>) => {
-    const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return request<any>(`/wallet/transactions/${qs}`);
-  },
-  withdrawFunds: (data: { amount: number | string; account_details?: any }) =>
-    request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
-  depositEscrow: (data: { task_id: number; bid_id?: number; amount: number | string }) =>
-    request<any>("/wallet/deposit/", { method: "POST", body: JSON.stringify(data) }),
-  releaseEscrow: (taskId: number) =>
-    request<any>(`/wallet/release-escrow/${taskId}/`, { method: "POST" }),
-  campayCollect: (data: {
-    amount: number | string;
-    phone_number: string;
-    task_id?: number;
-    bid_id?: number;
-    purpose?: "escrow_deposit" | "wallet_topup";
-    description?: string;
-  }) => request<any>("/wallet/campay/collect/", { method: "POST", body: JSON.stringify(data) }),
-  campayCheckStatus: (reference: string) =>
-    request<any>(`/wallet/campay/status/${reference}/`),
-  campayWithdraw: (data: { amount: number | string; phone_number: string; description?: string }) =>
-    request<any>("/wallet/campay/withdraw/", { method: "POST", body: JSON.stringify(data) }),
-  campayGetBalance: () => request<any>("/wallet/campay/balance/"),
 };
 

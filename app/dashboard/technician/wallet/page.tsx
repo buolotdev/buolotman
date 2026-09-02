@@ -133,10 +133,13 @@ export default function TechnicianWalletPage() {
   const [depositError, setDepositError] = useState<string | null>(null);
   const [depositSuccess, setDepositSuccess] = useState(false);
 
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [depositPhone, setDepositPhone] = useState("");
+
   const handleWithdraw = async () => {
     setWithdrawError(null);
     setWithdrawSuccess(false);
-    
+
     const amount = Number(withdrawAmount);
     if (!amount || amount <= 0) {
       setWithdrawError(lang === "fr" ? "Veuillez saisir un montant valide." : "Enter a valid amount.");
@@ -149,10 +152,25 @@ export default function TechnicianWalletPage() {
 
     setWithdrawing(true);
     try {
-      await api.withdrawFunds({
-        amount,
-        account_details: { method: withdrawMethod }
-      });
+      if (withdrawMethod.includes("Mobile Money")) {
+        if (!withdrawPhone.trim()) {
+          setWithdrawError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
+          setWithdrawing(false);
+          return;
+        }
+        const cleanPhone = withdrawPhone.replace(/[^0-9]/g, "");
+        const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
+        await api.campayWithdraw({
+          amount,
+          phone_number: formattedPhone,
+          description: `Technician Wallet Withdrawal (${amount} XAF)`
+        });
+      } else {
+        await api.withdrawFunds({
+          amount,
+          account_details: { method: withdrawMethod }
+        });
+      }
       setWithdrawSuccess(true);
       await refetchWallet();
       await refetchTx();
@@ -160,6 +178,7 @@ export default function TechnicianWalletPage() {
         setModalOpen(false);
         setWithdrawSuccess(false);
         setWithdrawAmount("");
+        setWithdrawPhone("");
       }, 2000);
     } catch (err: any) {
       setWithdrawError(err.message || "Failed to process withdrawal.");
@@ -180,17 +199,45 @@ export default function TechnicianWalletPage() {
 
     setDepositing(true);
     try {
-      await api.depositFunds({
-        amount,
-        payment_method: depositMethod,
-      });
-      setDepositSuccess(true);
-      await refetchWallet();
-      await refetchTx();
-      setTimeout(() => {
-        setDepositOpen(false);
-        setDepositSuccess(false);
-      }, 2000);
+      if (depositMethod.includes("Mobile Money")) {
+        if (!depositPhone.trim()) {
+          setDepositError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
+          setDepositing(false);
+          return;
+        }
+        const cleanPhone = depositPhone.replace(/[^0-9]/g, "");
+        const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
+        const res = await api.campayCollect({
+          amount,
+          phone_number: formattedPhone,
+          purpose: "wallet_topup",
+          description: `Wallet Top-Up (${amount} XAF)`
+        });
+        if (res?.success) {
+          setDepositSuccess(true);
+          await refetchWallet();
+          await refetchTx();
+          setTimeout(() => {
+            setDepositOpen(false);
+            setDepositSuccess(false);
+            setDepositPhone("");
+          }, 2500);
+        } else {
+          setDepositError(res?.error?.detail || "Failed to initiate Mobile Money deposit.");
+        }
+      } else {
+        await api.depositFunds({
+          amount,
+          payment_method: depositMethod,
+        });
+        setDepositSuccess(true);
+        await refetchWallet();
+        await refetchTx();
+        setTimeout(() => {
+          setDepositOpen(false);
+          setDepositSuccess(false);
+        }, 2000);
+      }
     } catch (err: any) {
       setDepositError(err.message || "Failed to process deposit.");
     } finally {
@@ -385,11 +432,24 @@ export default function TechnicianWalletPage() {
                 value={withdrawMethod}
                 onChange={(e) => setWithdrawMethod(e.target.value)}
               >
-                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange / MTN / Wave)</option>
+                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange / MTN / Wave - Cameroon)</option>
                 <option value="Direct Bank Wire Transfer">Virement Bancaire Direct</option>
                 <option value="International Transfer">Virement International</option>
               </select>
             </div>
+
+            {withdrawMethod.includes("Mobile Money") && (
+              <div className={styles.formGroup}>
+                <label>Numéro Mobile Money (Cameroun +237)</label>
+                <input 
+                  type="tel" 
+                  className={styles.formInput} 
+                  placeholder="67X XX XX XX or 69X XX XX XX" 
+                  value={withdrawPhone}
+                  onChange={(e) => setWithdrawPhone(e.target.value)}
+                />
+              </div>
+            )}
 
             {withdrawError && (
               <div className={styles.errorMessage}>
@@ -449,11 +509,24 @@ export default function TechnicianWalletPage() {
                 value={depositMethod}
                 onChange={(e) => setDepositMethod(e.target.value)}
               >
+                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange / MTN - Cameroon)</option>
                 <option value="Credit / Debit Card">Carte Bancaire (Visa, Mastercard)</option>
-                <option value="Mobile Money (Orange/MTN/Wave)">Mobile Money (Orange, MTN, Wave)</option>
                 <option value="Direct Bank Deposit">Virement Bancaire</option>
               </select>
             </div>
+
+            {depositMethod.includes("Mobile Money") && (
+              <div className={styles.formGroup}>
+                <label>Numéro Mobile Money (Cameroun +237)</label>
+                <input 
+                  type="tel" 
+                  className={styles.formInput} 
+                  placeholder="67X XX XX XX or 69X XX XX XX" 
+                  value={depositPhone}
+                  onChange={(e) => setDepositPhone(e.target.value)}
+                />
+              </div>
+            )}
 
             {depositError && (
               <div className={styles.errorMessage}>

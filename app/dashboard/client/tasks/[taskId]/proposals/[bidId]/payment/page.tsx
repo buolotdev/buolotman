@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
@@ -28,7 +28,13 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
   const { data: task, loading: taskLoading } = useFetch(() => api.getTask(Number(taskId)), [taskId]);
   const { data: bidsData, loading: bidLoading } = useFetch(() => api.getTaskBids(Number(taskId)), [taskId]);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [mobileOperator, setMobileOperator] = useState<"MTN" | "ORANGE">("MTN");
+  const [mobilePhone, setMobilePhone] = useState("");
+  const [momoPending, setMomoPending] = useState(false);
+  const [momoReference, setMomoReference] = useState<string | null>(null);
+  const [momoMessage, setMomoMessage] = useState<string | null>(null);
+
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mobile");
   const [note, setNote] = useState("");
   const [sameAsTaskAddress, setSameAsTaskAddress] = useState(true);
   const [billingAddress, setBillingAddress] = useState({
@@ -45,6 +51,28 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
   const [depositSubmitted, setDepositSubmitted] = useState(false);
   const [depositing, setDepositing] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
+
+  // Poll CamPay Mobile Money status
+  useEffect(() => {
+    if (!momoPending || !momoReference) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await api.campayCheckStatus(momoReference);
+        if (res?.status === "SUCCESSFUL" || res?.is_completed) {
+          clearInterval(interval);
+          setMomoPending(false);
+          setDepositSubmitted(true);
+        } else if (res?.status === "FAILED") {
+          clearInterval(interval);
+          setMomoPending(false);
+          setDepositError("Mobile Money transaction was declined or failed. Please try again.");
+        }
+      } catch (e) {
+        console.error("CamPay polling error:", e);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [momoPending, momoReference]);
 
   const loading = taskLoading || bidLoading;
 
@@ -314,13 +342,74 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                   <button type="button" className={styles.methodHeader} onClick={() => setPaymentMethod("mobile")}>
                     <div className={styles.methodTitle}>
                       <span className={styles.radioCircle} />
-                      <span>Mobile money</span>
+                      <span>Cameroon Mobile Money (MTN MoMo & Orange Money)</span>
                     </div>
-                    <span className={styles.methodIcon}>Mobile</span>
+                    <span className={styles.methodIcon} style={{ background: "#fef3c7", color: "#b45309", fontWeight: 700 }}>MoMo</span>
                   </button>
 
                   {paymentMethod === "mobile" ? (
-                    <div className={styles.methodNote}>Use your mobile wallet to complete escrow funding without leaving the checkout flow.</div>
+                    <div className={styles.methodBody}>
+                      <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                        <button
+                          type="button"
+                          onClick={() => setMobileOperator("MTN")}
+                          style={{
+                            flex: 1,
+                            padding: "12px 16px",
+                            borderRadius: 10,
+                            border: mobileOperator === "MTN" ? "2px solid #eab308" : "1px solid #e2e8f0",
+                            background: mobileOperator === "MTN" ? "#fefce8" : "#ffffff",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#eab308" }} />
+                          MTN Mobile Money
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMobileOperator("ORANGE")}
+                          style={{
+                            flex: 1,
+                            padding: "12px 16px",
+                            borderRadius: 10,
+                            border: mobileOperator === "ORANGE" ? "2px solid #f97316" : "1px solid #e2e8f0",
+                            background: mobileOperator === "ORANGE" ? "#fff7ed" : "#ffffff",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#f97316" }} />
+                          Orange Money
+                        </button>
+                      </div>
+
+                      <div className={styles.formField}>
+                        <label htmlFor="momo-phone">Mobile Money Number (Cameroon)</label>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <span style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: 8, fontWeight: 600, border: "1px solid #cbd5e1" }}>+237</span>
+                          <input
+                            id="momo-phone"
+                            type="tel"
+                            placeholder="67X XX XX XX or 69X XX XX XX"
+                            value={mobilePhone}
+                            onChange={(event) => setMobilePhone(event.target.value)}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                        <p style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
+                          A USSD push notification will be sent directly to this phone to enter your PIN.
+                        </p>
+                      </div>
+                    </div>
                   ) : null}
                 </article>
               </section>
@@ -378,10 +467,37 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                 <button
                   type="button"
                   className={styles.depositButton}
-                  disabled={!canSubmit || depositing}
+                  disabled={depositing || momoPending || (paymentMethod === "mobile" && !mobilePhone.trim()) || (paymentMethod === "card" && !cardForm.number.trim())}
                   onClick={async () => {
                     setDepositing(true);
                     setDepositError(null);
+
+                    if (paymentMethod === "mobile") {
+                      try {
+                        const cleanPhone = mobilePhone.replace(/[^0-9]/g, "");
+                        const res = await api.campayCollect({
+                          amount: total,
+                          phone_number: cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`,
+                          task_id: task.id,
+                          bid_id: Number(bidId),
+                          purpose: "escrow_deposit",
+                          description: `Escrow for ${task.title}`,
+                        });
+                        if (res?.success && res?.reference) {
+                          setMomoReference(res.reference);
+                          setMomoMessage(res.message || "Payment prompt sent. Please confirm on your mobile.");
+                          setMomoPending(true);
+                        } else {
+                          setDepositError(res?.error?.detail || "Failed to initiate Mobile Money request.");
+                        }
+                      } catch (err: any) {
+                        setDepositError(err?.message || "Mobile Money initiation failed.");
+                      } finally {
+                        setDepositing(false);
+                      }
+                      return;
+                    }
+
                     try {
                       await api.depositEscrow({
                         task_id: task.id,
@@ -396,10 +512,10 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
                     }
                   }}
                 >
-                  {depositing ? "Processing..." : "Deposit and start task"}
+                  {depositing ? "Processing..." : paymentMethod === "mobile" ? "Pay with Mobile Money" : "Deposit and start task"}
                 </button>
 
-                {depositError ? <p className={styles.terms} style={{ color: "#dc2626" }}>{depositError}</p> : null}
+                {depositError ? <p className={styles.terms} style={{ color: "#dc2626", fontWeight: 600 }}>{depositError}</p> : null}
 
                 <p className={styles.terms}>
                   By depositing, you agree to the escrow and service terms for this proposal.
@@ -408,6 +524,87 @@ export default function ProposalPaymentPage({ params }: { params: Promise<{ task
             </aside>
           </div>
         )}
+
+        {/* CamPay USSD Waiting Overlay Modal */}
+        {momoPending ? (
+          <div style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16
+          }}>
+            <div style={{
+              background: "#ffffff",
+              borderRadius: 16,
+              padding: "32px 24px",
+              maxWidth: 440,
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+            }}>
+              <div style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                background: "#fef3c7",
+                color: "#b45309",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 32,
+                margin: "0 auto 16px"
+              }}>
+                📲
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>
+                Approve Payment on Phone
+              </h3>
+              <p style={{ fontSize: 14, color: "#64748b", marginBottom: 16, lineHeight: 1.5 }}>
+                A USSD prompt for <strong>{formatXof(total)}</strong> has been sent to <strong>+237 {mobilePhone}</strong>.
+              </p>
+              <div style={{
+                padding: "12px 16px",
+                borderRadius: 8,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                fontSize: 13,
+                color: "#334155",
+                marginBottom: 24
+              }}>
+                ⏳ <strong>Waiting for your Mobile Money PIN...</strong>
+                <p style={{ marginTop: 4, fontSize: 12, color: "#64748b" }}>
+                  Please check your phone screen right now and enter your PIN to approve the escrow payment.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMomoPending(false);
+                    setMomoReference(null);
+                  }}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    border: "1px solid #cbd5e1",
+                    background: "#ffffff",
+                    color: "#475569",
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </main>
   );

@@ -47,9 +47,60 @@ export default function CompanyWalletPage() {
   const t = translations[lang] || translations["en"];
 
   const { data: wallet, loading: walletLoading, refetch: refetchWallet } = useFetch(() => api.getWallet(), []);
-  const { data: txData, loading: txLoading } = useFetch(() => api.getTransactions(), []);
+  const { data: txData, loading: txLoading, refetch: refetchTx } = useFetch(() => api.getTransactions(), []);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   const transactions = (txData as any)?.results || [];
+  const availableBalance = parseFloat(wallet?.available_balance) || 0;
+
+  const handleWithdraw = async () => {
+    setWithdrawError(null);
+    setWithdrawSuccess(false);
+
+    const amount = Number(withdrawAmount);
+    if (!amount || amount <= 0) {
+      setWithdrawError(lang === "fr" ? "Veuillez saisir un montant valide." : "Enter a valid amount.");
+      return;
+    }
+    if (amount > availableBalance) {
+      setWithdrawError(lang === "fr" ? "Solde disponible insuffisant." : "Insufficient available balance.");
+      return;
+    }
+    if (!withdrawPhone.trim()) {
+      setWithdrawError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
+      return;
+    }
+
+    setWithdrawing(true);
+    try {
+      const cleanPhone = withdrawPhone.replace(/[^0-9]/g, "");
+      const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
+      await api.campayWithdraw({
+        amount,
+        phone_number: formattedPhone,
+        description: `Company Wallet Withdrawal (${amount} XAF)`
+      });
+      setWithdrawSuccess(true);
+      await refetchWallet();
+      await refetchTx();
+      setTimeout(() => {
+        setModalOpen(false);
+        setWithdrawSuccess(false);
+        setWithdrawAmount("");
+        setWithdrawPhone("");
+      }, 2000);
+    } catch (err: any) {
+      setWithdrawError(err.message || "Failed to process withdrawal.");
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   return (
     <>
@@ -72,7 +123,7 @@ export default function CompanyWalletPage() {
               {walletLoading ? "..." : `${wallet?.available_balance || "0.00"} ${wallet?.currency || "XOF"}`}
             </h2>
           </div>
-          <button className={styles.withdrawBtn} onClick={() => alert(t.withdrawNotice)}>
+          <button className={styles.withdrawBtn} onClick={() => setModalOpen(true)}>
             <iconify-icon icon="lucide:arrow-up-right" /> {t.withdrawFunds}
           </button>
         </section>
@@ -115,6 +166,121 @@ export default function CompanyWalletPage() {
             </div>
           )}
         </section>
+
+        {/* Withdrawal Modal */}
+        {modalOpen && (
+          <div style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16
+          }} onClick={() => setModalOpen(false)}>
+            <div style={{
+              background: "#ffffff",
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 420,
+              width: "100%",
+              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)"
+            }} onClick={(e) => e.stopPropagation()}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>
+                {t.withdrawFunds}
+              </h3>
+              <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>
+                Instant disbursement via Cameroon MTN Mobile Money & Orange Money.
+              </p>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Amount (Available: {availableBalance.toLocaleString()} XAF)
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g. 10000"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: "1px solid #cbd5e1",
+                    fontSize: 14
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                  Mobile Money Phone Number (+237)
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <span style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: 8, fontWeight: 600, border: "1px solid #cbd5e1" }}>+237</span>
+                  <input
+                    type="tel"
+                    placeholder="67X XX XX XX or 69X XX XX XX"
+                    value={withdrawPhone}
+                    onChange={(e) => setWithdrawPhone(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      borderRadius: 8,
+                      border: "1px solid #cbd5e1",
+                      fontSize: 14
+                    }}
+                  />
+                </div>
+              </div>
+
+              {withdrawError && (
+                <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>{withdrawError}</p>
+              )}
+
+              {withdrawSuccess && (
+                <p style={{ color: "#16a34a", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>
+                  ✓ Withdrawal successfully sent to Mobile Money!
+                </p>
+              )}
+
+              <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  style={{
+                    padding: "10px 16px",
+                    borderRadius: 8,
+                    border: "1px solid #cbd5e1",
+                    background: "#ffffff",
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleWithdraw}
+                  disabled={withdrawing || withdrawSuccess}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#ff4500",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  }}
+                >
+                  {withdrawing ? "Processing..." : "Confirm Payout"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       </div>
     </>
