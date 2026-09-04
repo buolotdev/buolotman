@@ -148,10 +148,13 @@ body {
 }
 
 /* ================= HERO ================= */
-.bm-main-hero {
+.bm-main-hero,
+#hero.bm-main-hero {
   max-width: 1500px;
-  margin: auto;
-  padding: 70px 24px 50px;
+  margin: 0 auto;
+  padding: 50px 24px 60px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bm-main-hero-grid {

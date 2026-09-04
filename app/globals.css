@@ -239,8 +239,13 @@ body {
         }
       
 
-        #hero {
-          padding: 36px 0 72px;
+        #hero,
+        #hero.bm-main-hero {
+          max-width: 1500px;
+          margin: 0 auto;
+          padding: 50px 24px 60px;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .hero-shell {
@@ -1574,10 +1579,13 @@ body {
 }
 
 /* ================= HERO ================= */
-.bm-main-hero{
+.bm-main-hero,
+#hero.bm-main-hero{
   max-width:1500px;
-  margin:auto;
-  padding:70px 24px 50px;
+  margin:0 auto;
+  padding:50px 24px 60px;
+  width:100%;
+  box-sizing:border-box;
 }
 
 .bm-main-hero-grid{
@@ -3438,7 +3446,11 @@ body {
   .nav-actions .btn { padding: 10px 14px; font-size: 13px; }
 
   /* Hero */
-  #hero { padding: 20px 0 48px; }
+  #hero,
+  #hero.bm-main-hero {
+    padding: 24px 20px 48px;
+    box-sizing: border-box;
+  }
 
   .hero-shell {
     grid-template-columns: 1fr !important;
@@ -3856,10 +3868,13 @@ body {
 }
 
 /* ================= NEW HERO ================= */
-.bm-main-hero{
+.bm-main-hero,
+#hero.bm-main-hero{
   max-width:1500px;
-  margin:auto;
-  padding:70px 24px 50px;
+  margin:0 auto;
+  padding:50px 24px 60px;
+  width:100%;
+  box-sizing:border-box;
 }
 
 .bm-main-hero-grid{
