@@ -57,6 +57,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserMeSerializer(serializers.ModelSerializer):
     date_of_birth = serializers.DateField(required=False, allow_null=True)
     city = serializers.SerializerMethodField()
+    is_online = serializers.BooleanField(read_only=True)
+    last_seen = serializers.DateTimeField(read_only=True)
+    last_seen_display = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -64,9 +67,10 @@ class UserMeSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'email', 'username', 'role',
             'phone', 'avatar_url', 'banner_url', 'is_verified',
             'language_preference', 'country', 'city', 'date_of_birth',
-            'address', 'education_level', 'expertise_level', 'created_at'
+            'address', 'education_level', 'expertise_level', 'created_at',
+            'last_seen', 'is_online', 'last_seen_display'
         ]
-        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'created_at']
+        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'created_at', 'last_seen', 'is_online', 'last_seen_display']
 
     def get_city(self, obj):
         return obj.address or ""
@@ -89,6 +93,9 @@ class UserPublicSerializer(serializers.ModelSerializer):
     review_count = serializers.SerializerMethodField()
     response_time = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
+    is_online = serializers.BooleanField(read_only=True)
+    last_seen = serializers.DateTimeField(read_only=True)
+    last_seen_display = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -99,7 +106,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'bio', 'about', 'headline', 'skills', 'tools', 'portfolio',
             'hourly_rate', 'daily_rate', 'inspection_fee',
             'average_rating', 'completed_jobs', 'review_count', 'response_time',
-            'services', 'technician_profile'
+            'services', 'technician_profile', 'is_online', 'last_seen', 'last_seen_display'
         ]
 
     def get_services(self, obj):
@@ -124,6 +131,9 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'average_rating': str(tech.average_rating),
             'response_time': tech.response_time or 'Within 24 hours',
             'availability_status': tech.availability_status or 'available',
+            'is_online': obj.is_online,
+            'last_seen': obj.last_seen,
+            'last_seen_display': obj.last_seen_display,
         }
 
     def get_bio(self, obj):

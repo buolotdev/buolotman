@@ -56,6 +56,9 @@ class ConversationListSerializer(serializers.ModelSerializer):
                     'name': f'{other.first_name} {other.last_name}'.strip() or other.email,
                     'initials': (other.first_name[:1] if other.first_name else '') + (other.last_name[:1] if other.last_name else ''),
                     'role': other.role,
+                    'is_online': other.is_online,
+                    'last_seen': other.last_seen,
+                    'last_seen_display': other.last_seen_display,
                 }
         return None
 

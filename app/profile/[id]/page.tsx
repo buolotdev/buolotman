@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api, getImageUrl } from "@/app/lib/api";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import styles from "./profile.module.css";
 
 const translations: Record<string, Record<string, string>> = {
@@ -535,7 +536,13 @@ export default function PublicProfilePage() {
                       <span>{initials}</span>
                     )}
                   </div>
-                  <div className={styles.onlineBadge} title="Verified Enterprise Available for Tenders" />
+                  <OnlineStatusBadge
+                    isOnline={profile?.is_online}
+                    lastSeenDisplay={profile?.last_seen_display}
+                    showText={false}
+                    size="lg"
+                    style={{ position: "absolute", bottom: 6, right: 6 }}
+                  />
                 </div>
 
                 <div className={styles.headerRow}>
@@ -944,7 +951,13 @@ export default function PublicProfilePage() {
                       <span className={styles.initials}>{initials}</span>
                     )}
                   </div>
-                  <div className={styles.onlineBadge} title="Available Now for Hire" />
+                  <OnlineStatusBadge
+                    isOnline={profile?.is_online}
+                    lastSeenDisplay={profile?.last_seen_display}
+                    showText={false}
+                    size="lg"
+                    style={{ position: "absolute", bottom: 4, right: 4 }}
+                  />
                 </div>
 
                 <div className={styles.headerRow}>
@@ -953,9 +966,16 @@ export default function PublicProfilePage() {
                       <iconify-icon icon="lucide:award" />
                       {t.certifiedSpecialist}
                     </span>
-                    <h1 className={styles.name}>
-                      {techDisplayName}
-                    </h1>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+                      <h1 className={styles.name} style={{ margin: 0 }}>
+                        {techDisplayName}
+                      </h1>
+                      <OnlineStatusBadge
+                        isOnline={profile?.is_online}
+                        lastSeenDisplay={profile?.last_seen_display}
+                        size="md"
+                      />
+                    </div>
 
                     <div className={styles.headlineText}>
                       <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500" }} />

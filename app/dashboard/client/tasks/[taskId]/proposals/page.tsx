@@ -9,6 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import { cleanDescription } from "@/app/lib/format";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 
@@ -333,10 +334,24 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                           <div className={styles.bidHeader}>
                             <Link href={`/dashboard/client/tasks/${task.id}/proposals/${bid.id}`} className={styles.bidUserLink}>
                               <div className={styles.bidUser}>
-                                <div className={styles.bidAvatar}>{bid.technician_initials || bid.initials || "?"}</div>
+                                <div className={styles.bidAvatar} style={{ position: "relative" }}>
+                                  {bid.technician_initials || bid.initials || "?"}
+                                  <OnlineStatusBadge
+                                    isOnline={bid.technician_is_online}
+                                    lastSeenDisplay={bid.technician_last_seen_display}
+                                    showText={false}
+                                    size="sm"
+                                    style={{ position: "absolute", bottom: -2, right: -2 }}
+                                  />
+                                </div>
                                 <div>
-                                  <div className={styles.bidNameRow}>
-                                    <h3>{bid.technician_name || bid.bidder || ""}</h3>
+                                  <div className={styles.bidNameRow} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                    <h3 style={{ margin: 0 }}>{bid.technician_name || bid.bidder || ""}</h3>
+                                    <OnlineStatusBadge
+                                      isOnline={bid.technician_is_online}
+                                      lastSeenDisplay={bid.technician_last_seen_display}
+                                      size="sm"
+                                    />
                                   </div>
                                   <div className={styles.bidMeta}>
                                     {bid.technician_rating != null && bid.technician_rating !== "" ? <span>{bid.technician_rating} ★</span> : null}

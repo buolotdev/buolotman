@@ -293,6 +293,10 @@ def build_user_me_payload(user):
     data['payout'] = payout
     data['kyc'] = kyc
 
+    data['is_online'] = user.is_online
+    data['last_seen'] = user.last_seen
+    data['last_seen_display'] = user.last_seen_display
+
     # Portfolio
     if tech_profile.portfolio and len(tech_profile.portfolio) > 0:
         data['portfolio'] = tech_profile.portfolio
@@ -327,6 +331,9 @@ def build_user_me_payload(user):
         'availability': tech_profile.availability_status,
         'availability_status': tech_profile.availability_status,
         'available_now': tech_profile.availability_status == 'available',
+        'is_online': user.is_online,
+        'last_seen': user.last_seen,
+        'last_seen_display': user.last_seen_display,
         'response_time': tech_profile.response_time or "",
         'completed_jobs': tech_profile.completed_jobs,
         'average_rating': str(tech_profile.average_rating),
@@ -340,6 +347,21 @@ def build_user_me_payload(user):
     }
 
     return data
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def heartbeat(request):
+    user = request.user
+    from django.utils import timezone
+    user.last_seen = timezone.now()
+    user.save(update_fields=['last_seen'])
+    return Response({
+        "status": "ok",
+        "is_online": True,
+        "last_seen": user.last_seen,
+        "last_seen_display": "Online"
+    })
 
 
 @api_view(['GET', 'PATCH'])

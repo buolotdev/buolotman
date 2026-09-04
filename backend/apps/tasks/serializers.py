@@ -213,6 +213,9 @@ class BidListSerializer(serializers.ModelSerializer):
     technician_name = serializers.SerializerMethodField()
     technician_initials = serializers.SerializerMethodField()
     technician_rating = serializers.SerializerMethodField()
+    technician_is_online = serializers.BooleanField(source='technician.is_online', read_only=True)
+    technician_last_seen = serializers.DateTimeField(source='technician.last_seen', read_only=True)
+    technician_last_seen_display = serializers.CharField(source='technician.last_seen_display', read_only=True)
     task_id = serializers.IntegerField(source='task.id', read_only=True)
     task_title = serializers.CharField(source='task.title', read_only=True)
     task_status = serializers.CharField(source='task.status', read_only=True)
@@ -228,6 +231,7 @@ class BidListSerializer(serializers.ModelSerializer):
         model = Bid
         fields = ['id', 'task_id', 'task_title', 'task_status', 'amount', 'amount_type', 'message', 'duration', 'status',
                   'technician', 'technician_name', 'technician_initials', 'technician_rating',
+                  'technician_is_online', 'technician_last_seen', 'technician_last_seen_display',
                   'created_at', 'location', 'description', 'skills',
                   'client_first_name', 'client_last_name', 'client_rating', 'competing_bids']
 
@@ -259,12 +263,16 @@ class BidListSerializer(serializers.ModelSerializer):
 class BidDetailSerializer(serializers.ModelSerializer):
     technician_name = serializers.SerializerMethodField()
     technician_initials = serializers.SerializerMethodField()
+    technician_is_online = serializers.BooleanField(source='technician.is_online', read_only=True)
+    technician_last_seen = serializers.DateTimeField(source='technician.last_seen', read_only=True)
+    technician_last_seen_display = serializers.CharField(source='technician.last_seen_display', read_only=True)
     technician_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = Bid
         fields = ['id', 'amount', 'amount_type', 'message', 'duration', 'extra_notes',
                   'status', 'technician', 'technician_name', 'technician_initials',
+                  'technician_is_online', 'technician_last_seen', 'technician_last_seen_display',
                   'technician_profile', 'created_at', 'accepted_at', 'rejected_at']
 
     def get_technician_name(self, obj):
@@ -284,8 +292,11 @@ class BidDetailSerializer(serializers.ModelSerializer):
                 'skills': list(profile.skills.values_list('name', flat=True)),
                 'completed_jobs': profile.completed_jobs,
                 'average_rating': str(profile.average_rating),
+                'is_verified': profile.is_verified,
                 'availability_status': profile.availability_status,
-                'response_time': profile.response_time,
+                'is_online': obj.technician.is_online,
+                'last_seen': obj.technician.last_seen,
+                'last_seen_display': obj.technician.last_seen_display,
             }
         return None
 

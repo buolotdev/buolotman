@@ -9,6 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
@@ -346,8 +347,15 @@ export default function ClientMessagesPage() {
                         className={`${styles.conversationItem} ${isActive ? styles.conversationItemActive : ""}`}
                         onClick={() => selectConversation(String(conversation.id))}
                       >
-                        <div className={styles.conversationAvatarWrap}>
+                        <div className={styles.conversationAvatarWrap} style={{ position: "relative" }}>
                           <div className={styles.conversationAvatar}>{conversation.other_participant?.initials || "?"}</div>
+                          <OnlineStatusBadge
+                            isOnline={conversation.other_participant?.is_online}
+                            lastSeenDisplay={conversation.other_participant?.last_seen_display}
+                            showText={false}
+                            size="sm"
+                            style={{ position: "absolute", bottom: -2, right: -2 }}
+                          />
                         </div>
                         <div className={styles.conversationContent}>
                           <div className={styles.conversationMeta}>
@@ -397,11 +405,25 @@ export default function ClientMessagesPage() {
                       <button type="button" className={styles.mobileBackButton} aria-label="Back to conversations" onClick={() => setMobileConversationOpen(false)}>
                         <iconify-icon icon="lucide:arrow-left" />
                       </button>
-                      <div className={styles.chatAvatarWrap}>
+                      <div className={styles.chatAvatarWrap} style={{ position: "relative" }}>
                         <div className={styles.chatAvatar}>{activeConversation.other_participant?.initials || "?"}</div>
+                        <OnlineStatusBadge
+                          isOnline={activeConversation.other_participant?.is_online}
+                          lastSeenDisplay={activeConversation.other_participant?.last_seen_display}
+                          showText={false}
+                          size="sm"
+                          style={{ position: "absolute", bottom: -2, right: -2 }}
+                        />
                       </div>
                       <div className={styles.chatUserDetails}>
-                        <strong>{activeConversation.other_participant?.name || ""}</strong>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <strong>{activeConversation.other_participant?.name || ""}</strong>
+                          <OnlineStatusBadge
+                            isOnline={activeConversation.other_participant?.is_online}
+                            lastSeenDisplay={activeConversation.other_participant?.last_seen_display}
+                            size="sm"
+                          />
+                        </div>
                         <span>
                           {activeConversation.other_participant?.role ? activeConversation.other_participant.role.toLowerCase() : ""}
                           {activeConversation.task_title ? ` • ${activeConversation.task_title}` : ""}

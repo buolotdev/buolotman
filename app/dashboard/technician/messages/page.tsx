@@ -8,6 +8,7 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
@@ -102,7 +103,7 @@ export default function TechnicianMessagesPage() {
 
   type ConversationItem = {
     id: string;
-    participant: { name: string; initials: string; role: string };
+    participant: { name: string; initials: string; role: string; isOnline?: boolean; lastSeenDisplay?: string };
     taskTitle: string;
     lastMessagePreview: string;
     lastMessageAt: string | null;
@@ -123,6 +124,8 @@ export default function TechnicianMessagesPage() {
         name: c.other_participant?.name || "",
         initials: c.other_participant?.initials || "?",
         role: c.other_participant?.role || "",
+        isOnline: c.other_participant?.is_online,
+        lastSeenDisplay: c.other_participant?.last_seen_display,
       },
       taskTitle: c.task_title || "",
       lastMessagePreview: c.last_message?.text || "",
@@ -400,7 +403,16 @@ export default function TechnicianMessagesPage() {
                     className={`${styles.conversationItem} ${isActive ? styles.conversationItemActive : ""}`}
                     onClick={() => selectConversation(c.id)}
                   >
-                    <span className={styles.avatar}>{c.participant.initials}</span>
+                    <span className={styles.avatar} style={{ position: "relative" }}>
+                      {c.participant.initials}
+                      <OnlineStatusBadge
+                        isOnline={c.participant.isOnline}
+                        lastSeenDisplay={c.participant.lastSeenDisplay}
+                        showText={false}
+                        size="sm"
+                        style={{ position: "absolute", bottom: -2, right: -2 }}
+                      />
+                    </span>
                     <div className={styles.conversationInfo}>
                       <div className={styles.nameRow}>
                         <span className={styles.userName}>{c.participant.name}</span>
@@ -435,9 +447,25 @@ export default function TechnicianMessagesPage() {
                   <button type="button" className={styles.mobileBackButton} aria-label="Back to conversations" onClick={() => setMobileListOpen(true)}>
                     <iconify-icon icon="lucide:arrow-left" />
                   </button>
-                  <span className={styles.chatAvatar}>{activeConversation.participant.initials}</span>
+                  <span className={styles.chatAvatar} style={{ position: "relative" }}>
+                    {activeConversation.participant.initials}
+                    <OnlineStatusBadge
+                      isOnline={activeConversation.participant.isOnline}
+                      lastSeenDisplay={activeConversation.participant.lastSeenDisplay}
+                      showText={false}
+                      size="sm"
+                      style={{ position: "absolute", bottom: -2, right: -2 }}
+                    />
+                  </span>
                   <div className={styles.chatUserCopy}>
-                    <strong>{activeConversation.participant.name}</strong>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <strong>{activeConversation.participant.name}</strong>
+                      <OnlineStatusBadge
+                        isOnline={activeConversation.participant.isOnline}
+                        lastSeenDisplay={activeConversation.participant.lastSeenDisplay}
+                        size="sm"
+                      />
+                    </div>
                     <span className={styles.chatStatus}>
                       {activeConversation.participant.role ? activeConversation.participant.role.toLowerCase() : "contact"}
                       {activeConversation.taskTitle ? ` • ${activeConversation.taskTitle}` : ""}

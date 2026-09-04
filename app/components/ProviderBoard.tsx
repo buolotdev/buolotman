@@ -6,6 +6,7 @@ import styles from "./ProviderBoard.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 
 const translations: Record<string, Record<string, any>> = {
   en: {
@@ -208,13 +209,29 @@ export default function ProviderBoard() {
               return (
                 <div key={pro.id} className={styles.card}>
                   <div className={styles.profile}>
-                    <img 
-                      src={pro.avatar_url || `https://i.pravatar.cc/150?img=${(pro.id % 70) + 1}`} 
-                      alt={fullName} 
-                      className={styles.avatar} 
-                    />
+                    <div style={{ position: "relative", display: "inline-block" }}>
+                      <img 
+                        src={pro.avatar_url || `https://i.pravatar.cc/150?img=${(pro.id % 70) + 1}`} 
+                        alt={fullName} 
+                        className={styles.avatar} 
+                      />
+                      <OnlineStatusBadge
+                        isOnline={pro.is_online}
+                        lastSeenDisplay={pro.last_seen_display}
+                        showText={false}
+                        size="sm"
+                        style={{ position: "absolute", bottom: 2, right: 2 }}
+                      />
+                    </div>
                     <div>
-                      <h3 className={styles.name}>{fullName}</h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <h3 className={styles.name} style={{ margin: 0 }}>{fullName}</h3>
+                        <OnlineStatusBadge
+                          isOnline={pro.is_online}
+                          lastSeenDisplay={pro.last_seen_display}
+                          size="sm"
+                        />
+                      </div>
                       <div className={styles.role}>{pro.title || pro.category || t.verifiedRole}</div>
                     </div>
                   </div>

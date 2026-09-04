@@ -22,6 +22,7 @@ class User(AbstractUser):
     expertise_level = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_seen = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'accounts_user'
@@ -29,10 +30,44 @@ class User(AbstractUser):
             models.Index(fields=['role']),
             models.Index(fields=['email']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['last_seen']),
         ]
 
     def __str__(self):
         return f'{self.email} ({self.get_role_display()})'
+
+    @property
+    def is_online(self):
+        if not self.last_seen:
+            return False
+        from django.utils import timezone
+        from datetime import timedelta
+        return (timezone.now() - self.last_seen) < timedelta(minutes=5)
+
+    @property
+    def last_seen_display(self):
+        if not self.last_seen:
+            return "Offline"
+        if self.is_online:
+            return "Online"
+        from django.utils import timezone
+        now = timezone.now()
+        diff = now - self.last_seen
+        seconds = int(diff.total_seconds())
+        if seconds < 60:
+            return "Just now"
+        minutes = seconds // 60
+        if minutes < 60:
+            return f"Active {minutes}m ago"
+        hours = minutes // 60
+        if hours < 24:
+            return f"Active {hours}h ago"
+        days = hours // 24
+        if days == 1:
+            return "Active yesterday"
+        if days < 7:
+            return f"Active {days}d ago"
+        return self.last_seen.strftime("%b %d, %Y")
 
 
 class TechnicianProfile(models.Model):
@@ -70,6 +105,18 @@ class TechnicianProfile(models.Model):
 
     def __str__(self):
         return f'{self.user.email} - Technician Profile'
+
+    @property
+    def is_online(self):
+        return self.user.is_online
+
+    @property
+    def last_seen(self):
+        return self.user.last_seen
+
+    @property
+    def last_seen_display(self):
+        return self.user.last_seen_display
 
 
 class TechnicianService(models.Model):
