@@ -401,14 +401,23 @@ def me(request):
             )
 
         role_to_set = request.data.get('role')
+        role_changed = False
         if role_to_set and str(role_to_set).upper() in ['CLIENT', 'TECHNICIAN', 'COMPANY']:
             new_role = str(role_to_set).upper()
+            role_changed = (request.user.role != new_role)
             request.user.role = new_role
-            request.user.save(update_fields=['role'])
+            if role_changed and new_role in ['TECHNICIAN', 'COMPANY']:
+                request.user.is_verified = False
+                request.user.save(update_fields=['role', 'is_verified'])
+            else:
+                request.user.save(update_fields=['role'])
 
         # Update TechnicianProfile
         from apps.accounts.models import TechnicianProfile
         tech_profile, _ = TechnicianProfile.objects.get_or_create(user=request.user)
+        if role_changed and request.user.role == 'TECHNICIAN':
+            tech_profile.is_verified = False
+            tech_profile.save(update_fields=['is_verified'])
         tech_data = request.data.get('technician_profile') or request.data.get('technicianProfile') or request.data.get('profile') or {}
 
         def get_field(*keys, default=None):
