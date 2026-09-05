@@ -168,3 +168,14 @@ CAMPAY_PERMANENT_TOKEN = config('CAMPAY_PERMANENT_TOKEN', default='8e733aef0aaed
 CAMPAY_WEBHOOK_KEY = config('CAMPAY_WEBHOOK_KEY', default='ol9ChLkYTSYPthEVCMyxyjPr0zMt3uq2qlteK1-YFGr0gTx6GqOmreQIB6n-43NtVG5HGwsBiJJxlOZqjW7f5A')
 CAMPAY_BASE_URL = config('CAMPAY_BASE_URL', default='https://www.campay.net/api')
 
+# Email Configuration (AWS SES SMTP)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='xi7hknyhkkx8.zevm.mail-manager-smtp.amazonaws.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='inp-vnw2dra2na5ptb64l42mfrni')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='}^ymy*D@5_M?iTaa7u9P1&Ng2e-HMs%!')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='BoulotMan <no-reply@boulotman.com>')
+SERVER_EMAIL = config('SERVER_EMAIL', default='admin@boulotman.com')
+
+
