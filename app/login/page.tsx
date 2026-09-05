@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { api } from "../lib/api";
 import styles from "./login.module.css";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -209,6 +209,8 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
   const [step, setStep] = useState<Step>(initialStep || (pathname?.startsWith("/signup") ? "account" : "login"));
   const [selectedRole, setSelectedRole] = useState("");
+  const selectedRoleRef = useRef(selectedRole);
+  selectedRoleRef.current = selectedRole;
   const [nextPath, setNextPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -245,7 +247,8 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
       setError(null);
       setIsLoading(true);
       try {
-        const data = await api.googleLogin(tokenResponse.access_token, selectedRole || 'Client');
+        const roleToSend = selectedRoleRef.current || selectedRole || 'Client';
+        const data = await api.googleLogin(tokenResponse.access_token, roleToSend);
         const role: string = (data.role || "client").toLowerCase();
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
@@ -286,6 +289,7 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
   const selectType = (role: string) => {
     setSelectedRole(role);
+    selectedRoleRef.current = role;
     setError(null);
     setStep("signup");
   };

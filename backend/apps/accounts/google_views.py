@@ -49,8 +49,7 @@ def google_login(request):
         created = False
 
         if not user:
-            # Only regular clients start verified. Technicians & Companies must be reviewed & approved by Admin.
-            is_initial_verified = (requested_role == 'CLIENT')
+            # All newly created accounts start unverified until Admin Approval
             user = User.objects.create(
                 email=email_normalized,
                 first_name=first_name,
@@ -58,7 +57,7 @@ def google_login(request):
                 username=email_normalized.split('@')[0],
                 role=requested_role,
                 avatar_url=picture,
-                is_verified=is_initial_verified,
+                is_verified=False,
             )
             created = True
             try:
