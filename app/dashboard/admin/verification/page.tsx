@@ -290,6 +290,27 @@ export default function AdminVerificationPage() {
     }
   };
 
+  const handleUnverify = async (u: VerificationUser) => {
+    const name = `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.username;
+    const ok = await dialog.confirm({
+      title: "Move Back to Pending?",
+      message: `Are you sure you want to move ${name} back to the Pending Verification queue?`,
+      confirmText: "Move to Pending",
+    });
+    if (!ok) return;
+
+    try {
+      await api.adminVerifyUser(u.id, "unverify");
+      toast.info("Moved to Pending", `${name} is now back in the Pending Verification queue.`);
+      if (selectedUserModal && selectedUserModal.id === u.id) {
+        setSelectedUserModal(null);
+      }
+      refetch();
+    } catch (err: any) {
+      toast.error("Action Failed", err?.message || "Could not update user status.");
+    }
+  };
+
   const handleDownloadAllZip = async (u: VerificationUser, docs: DocItem[]) => {
     if (!docs || docs.length === 0) {
       toast.error("No documents available", "This user has not uploaded any identity or compliance files.");
@@ -678,9 +699,20 @@ export default function AdminVerificationPage() {
                         </button>
                       </>
                     ) : (
-                      <button type="button" onClick={() => handleReject(u)} className={styles.btnReject}>
-                        <iconify-icon icon="lucide:ban" /> Suspend
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleUnverify(u)}
+                          className={styles.btnReject}
+                          style={{ background: "#f59e0b", color: "#ffffff", borderColor: "#f59e0b" }}
+                          title="Move user back to pending review"
+                        >
+                          <iconify-icon icon="lucide:rotate-ccw" /> Move to Pending
+                        </button>
+                        <button type="button" onClick={() => handleReject(u)} className={styles.btnReject}>
+                          <iconify-icon icon="lucide:ban" /> Suspend
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -890,14 +922,24 @@ export default function AdminVerificationPage() {
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => handleReject(selectedUserModal)}
-                  className={styles.btnReject}
-                  style={{ flex: 1 }}
-                >
-                  <iconify-icon icon="lucide:ban" /> Suspend Account
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleUnverify(selectedUserModal)}
+                    className={styles.btnReject}
+                    style={{ flex: 1, background: "#f59e0b", color: "#ffffff", borderColor: "#f59e0b" }}
+                  >
+                    <iconify-icon icon="lucide:rotate-ccw" /> Move to Pending
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleReject(selectedUserModal)}
+                    className={styles.btnReject}
+                    style={{ flex: 1 }}
+                  >
+                    <iconify-icon icon="lucide:ban" /> Suspend Account
+                  </button>
+                </>
               )}
             </div>
           </div>

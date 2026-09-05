@@ -450,8 +450,8 @@ export const api = {
     return request<any[]>(`/auth/admin/users/${qs}`);
   },
   adminListTasks: () => request<any[]>("/auth/admin/tasks/"),
-  adminVerifyUser: (userId: number) =>
-    request<any>(`/auth/admin/users/${userId}/verify/`, { method: "POST" }),
+  adminVerifyUser: (userId: number, action: "verify" | "unverify" = "verify") =>
+    request<any>(`/auth/admin/users/${userId}/verify/`, { method: "POST", body: JSON.stringify({ action }) }),
   adminSuspendUser: (userId: number, action: "suspend" | "unsuspend" = "suspend") =>
     request<any>(`/auth/admin/users/${userId}/suspend/`, { method: "POST", body: JSON.stringify({ action }) }),
 

@@ -49,6 +49,8 @@ def google_login(request):
         created = False
 
         if not user:
+            # Only regular clients start verified. Technicians & Companies must be reviewed & approved by Admin.
+            is_initial_verified = (requested_role == 'CLIENT')
             user = User.objects.create(
                 email=email_normalized,
                 first_name=first_name,
@@ -56,7 +58,7 @@ def google_login(request):
                 username=email_normalized.split('@')[0],
                 role=requested_role,
                 avatar_url=picture,
-                is_verified=True,
+                is_verified=is_initial_verified,
             )
             created = True
             try:
@@ -69,9 +71,15 @@ def google_login(request):
         from apps.accounts.models import TechnicianProfile
         from apps.companies.models import CompanyProfile
         if user.role == 'TECHNICIAN':
-            TechnicianProfile.objects.get_or_create(user=user)
+            tech_prof, _ = TechnicianProfile.objects.get_or_create(user=user)
+            if created:
+                tech_prof.is_verified = False
+                tech_prof.save(update_fields=['is_verified'])
         elif user.role == 'COMPANY':
-            CompanyProfile.objects.get_or_create(user=user)
+            comp_prof, _ = CompanyProfile.objects.get_or_create(user=user)
+            if created:
+                comp_prof.is_verified = False
+                comp_prof.save(update_fields=['is_verified'])
 
 
         if not created:

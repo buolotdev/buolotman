@@ -18,8 +18,8 @@ def zip_backend():
                     continue
                     
                 for file in files:
-                    # Exclude journal lock files
-                    if file.endswith('.sqlite3-journal'):
+                    # Exclude database files to prevent overwriting live database
+                    if file.endswith('.sqlite3') or file.endswith('.sqlite3-journal') or file.endswith('.db'):
                         continue
                     file_path = os.path.join(root, file)
 

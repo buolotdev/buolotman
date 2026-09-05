@@ -920,33 +920,38 @@ def admin_verify_user(request, user_id):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-    user.is_verified = True
+
+    action = request.data.get('action', 'verify')
+    target_verified = False if (action in ('unverify', 'reject', 'reset', 'pending') or request.data.get('is_verified') is False) else True
+
+    user.is_verified = target_verified
     user.save(update_fields=['is_verified'])
-    user.technician_documents.all().update(is_verified=True)
+    user.technician_documents.all().update(is_verified=target_verified)
     if hasattr(user, 'technician_profile'):
-        user.technician_profile.is_verified = True
+        user.technician_profile.is_verified = target_verified
         user.technician_profile.save(update_fields=['is_verified'])
     if hasattr(user, 'company_profile'):
-        user.company_profile.is_verified = True
+        user.company_profile.is_verified = target_verified
         user.company_profile.save(update_fields=['is_verified'])
     create_audit_log(
         actor=request.user,
-        action="user_verified",
+        action="user_verified" if target_verified else "user_unverified",
         entity_type="user",
         entity_id=user.id,
         summary=user.email,
-        metadata={"verified": True},
+        metadata={"verified": target_verified},
         ip_address=request.META.get("REMOTE_ADDR"),
     )
-    create_notification(
-        user=user,
-        category="verification",
-        title="Account verified",
-        body="Your account and credentials have been verified by the admin team.",
-        link="/dashboard/client",
-        metadata={"user_id": user.id},
-    )
-    return Response({"message": f"{user.email} verified", "is_verified": True})
+    if target_verified:
+        create_notification(
+            user=user,
+            category="verification",
+            title="Account verified",
+            body="Your account and credentials have been verified by the admin team.",
+            link="/dashboard/technician" if user.role == "TECHNICIAN" else "/dashboard/client",
+            metadata={"user_id": user.id},
+        )
+    return Response({"message": f"{user.email} {'verified' if target_verified else 'unverified'}", "is_verified": target_verified})
 
 
 @api_view(['POST'])
