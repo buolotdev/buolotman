@@ -164,6 +164,20 @@ export const api = {
       public: true,
     } as any),
 
+  requestPasswordReset: (email: string) =>
+    request<{ message: string; challenge_id: number; email: string }>("/auth/password/reset/", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      public: true,
+    } as any),
+
+  confirmPasswordReset: (data: { email?: string; code: string; new_password: string; challenge_id?: number }) =>
+    request<{ message: string; success: boolean }>("/auth/password/reset/confirm/", {
+      method: "POST",
+      body: JSON.stringify(data),
+      public: true,
+    } as any),
+
 
   uploadServiceMedia: (file: File) => {
     const form = new FormData();

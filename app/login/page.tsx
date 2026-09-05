@@ -234,6 +234,11 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [signupTermsAccepted, setSignupTermsAccepted] = useState(false);
 
   const [resetEmail, setResetEmail] = useState("");
+  const [resetOtp, setResetOtp] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetChallengeId, setResetChallengeId] = useState<number | null>(null);
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -473,18 +478,67 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
 
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!resetEmail.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
     setError(null);
     setSuccessMsg(null);
     setIsLoading(true);
     try {
-      await fetch("http://127.0.0.1:8000/api/auth/password/reset/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resetEmail }),
+      const res = await api.requestPasswordReset(resetEmail.trim());
+      if (res?.challenge_id) {
+        setResetChallengeId(res.challenge_id);
+      }
+      setSuccessMsg(`✔ A 6-digit verification code has been sent to ${resetEmail.trim()}.`);
+      setStep("reset");
+    } catch (err: any) {
+      setError(err?.message || "Failed to send reset code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+
+    if (!resetOtp.trim()) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
+    if (!resetNewPassword) {
+      setError("Please enter a new password.");
+      return;
+    }
+    if (resetNewPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.confirmPasswordReset({
+        email: resetEmail.trim(),
+        code: resetOtp.trim(),
+        new_password: resetNewPassword,
+        challenge_id: resetChallengeId || undefined,
       });
-      setSuccessMsg("✔ If an account exists, a reset link has been sent to your email.");
-    } catch {
-      setSuccessMsg("✔ If an account exists, a reset link has been sent to your email.");
+      setSuccessMsg("✔ Password reset successfully! You can now log in.");
+      setLoginEmail(resetEmail.trim());
+      setResetOtp("");
+      setResetNewPassword("");
+      setResetConfirmPassword("");
+      setTimeout(() => {
+        setStep("login");
+      }, 2000);
+    } catch (err: any) {
+      setError(err?.message || "Failed to reset password. Please check your verification code.");
     } finally {
       setIsLoading(false);
     }
@@ -877,6 +931,9 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
             <button className={styles.backBtn} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>{t.backToLogin}</button>
 
             <form onSubmit={handleForgot}>
+              <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "16px", lineHeight: "1.4" }}>
+                Enter your registered email address and we will send you a 6-digit verification code to reset your password.
+              </p>
               <label className={styles.fieldLabel}>{t.enterEmail}</label>
               <input className={styles.input} type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="your@email.com" required />
 
@@ -884,12 +941,88 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
               {successMsg && <div className={styles.successMsg}>{successMsg}</div>}
 
               <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
-                {isLoading ? t.btnSending : t.btnSendReset}
+                {isLoading ? t.btnSending : "Send Verification Code"}
               </button>
             </form>
 
             <div className={styles.link}>
               <button className={styles.linkAction} onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}>{t.backLoginPlain}</button>
+            </div>
+          </div>
+
+          <div className={`${styles.step} ${step === "reset" ? styles.active : ""}`}>
+            <button className={styles.backBtn} onClick={() => { setError(null); setSuccessMsg(null); setStep("forgot"); }}>← Back</button>
+
+            <form onSubmit={handleResetPassword}>
+              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "12px", marginBottom: "16px", fontSize: "0.85rem", color: "#166534" }}>
+                We sent a 6-digit code to <strong>{resetEmail}</strong>. Check your inbox (and spam folder).
+              </div>
+
+              <label className={styles.fieldLabel}>6-Digit Verification Code</label>
+              <input
+                className={styles.input}
+                type="text"
+                maxLength={6}
+                value={resetOtp}
+                onChange={e => setResetOtp(e.target.value.replace(/\D/g, ""))}
+                placeholder="123456"
+                style={{ fontSize: "1.25rem", letterSpacing: "4px", textAlign: "center", fontWeight: "bold" }}
+                required
+              />
+
+              <div className={styles.labelRow}>
+                <label className={styles.fieldLabel}>New Password</label>
+              </div>
+              <div className={styles.passwordWrapper}>
+                <input
+                  className={styles.input}
+                  type={showResetPassword ? "text" : "password"}
+                  value={resetNewPassword}
+                  onChange={e => setResetNewPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  required
+                />
+                <button type="button" className={styles.eyeBtn} onClick={() => setShowResetPassword(!showResetPassword)}>
+                  <iconify-icon icon={showResetPassword ? "lucide:eye-off" : "lucide:eye"} />
+                </button>
+              </div>
+
+              <label className={styles.fieldLabel}>Confirm New Password</label>
+              <input
+                className={styles.input}
+                type={showResetPassword ? "text" : "password"}
+                value={resetConfirmPassword}
+                onChange={e => setResetConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+                required
+              />
+
+              {error && <div className={styles.errorMsg}>{error}</div>}
+              {successMsg && <div className={styles.successMsg}>{successMsg}</div>}
+
+              <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
+                {isLoading ? "Resetting Password..." : "Reset Password"}
+              </button>
+            </form>
+
+            <div className={styles.link} style={{ display: "flex", justifyContent: "space-between", marginTop: "16px" }}>
+              <button
+                type="button"
+                className={styles.linkAction}
+                style={{ fontSize: "0.8rem" }}
+                onClick={handleForgot}
+                disabled={isLoading}
+              >
+                Resend Code
+              </button>
+              <button
+                type="button"
+                className={styles.linkAction}
+                style={{ fontSize: "0.8rem" }}
+                onClick={() => { setError(null); setSuccessMsg(null); setStep("login"); }}
+              >
+                Back to Login
+              </button>
             </div>
           </div>
         </div>

@@ -64,7 +64,8 @@ def request_phone_otp(request):
         expires_at=timezone.now() + timedelta(minutes=10),
         metadata={"requested_from": "api"},
     )
-    send_otp(phone, code)
+    recipient_email = email or (user.email if user else None)
+    send_otp(phone, code, email=recipient_email, purpose=purpose, user_name=user.first_name if user else None)
 
     return Response({
         "message": "OTP sent",
@@ -133,6 +134,11 @@ def register_client(request):
             metadata={"role": user.role},
             ip_address=request.META.get("REMOTE_ADDR"),
         )
+        try:
+            from utils.email_service import send_welcome_email
+            send_welcome_email(user)
+        except Exception as e:
+            logger.warning("Could not send welcome email to %s: %s", user.email, e)
         return Response({"message": "Client registered successfully."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,6 +159,11 @@ def register_technician(request):
             metadata={"role": user.role},
             ip_address=request.META.get("REMOTE_ADDR"),
         )
+        try:
+            from utils.email_service import send_welcome_email
+            send_welcome_email(user)
+        except Exception as e:
+            logger.warning("Could not send welcome email to %s: %s", user.email, e)
         return Response({"message": "Technician registered successfully. Awaiting verification."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -173,8 +184,14 @@ def register_company(request):
             metadata={"role": user.role},
             ip_address=request.META.get("REMOTE_ADDR"),
         )
+        try:
+            from utils.email_service import send_welcome_email
+            send_welcome_email(user)
+        except Exception as e:
+            logger.warning("Could not send welcome email to %s: %s", user.email, e)
         return Response({"message": "Company registered successfully. Awaiting verification."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 KNOWN_PROFILE_FIELDS = {
@@ -1121,3 +1138,126 @@ def admin_clear_test_users(request):
         'message': f'Successfully deleted {count} test users (clients, technicians, companies). Admin accounts preserved.',
         'deleted_count': count
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    """
+    Initiate a password reset flow: sends a 6-digit OTP code to the provided email.
+    """
+    email = (request.data.get('email') or '').strip().lower()
+    if not email:
+        return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    user = User.objects.filter(email__iexact=email).first()
+
+    challenge_id = None
+    if user:
+        code = generate_otp()
+        challenge = PhoneOTPChallenge.objects.create(
+            user=user,
+            phone=user.phone or "",
+            email=user.email,
+            purpose='verification',  # valid in PURPOSE_CHOICES
+            code_hash=make_password(code),
+            expires_at=timezone.now() + timedelta(minutes=15),
+            metadata={"requested_from": "password_reset_api", "type": "password_reset"},
+        )
+        challenge_id = challenge.id
+        try:
+            from utils.email_service import send_otp_email
+            send_otp_email(
+                to_email=user.email,
+                code=code,
+                purpose='password_reset',
+                user_name=user.first_name or user.email.split('@')[0]
+            )
+        except Exception as e:
+            logger.error("Failed to send password reset email to %s: %s", user.email, e)
+
+    return Response({
+        "message": "If an account exists with this email, a verification code has been sent.",
+        "challenge_id": challenge_id,
+        "email": email,
+        "success": True,
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    """
+    Verify the 6-digit OTP code and update user's password.
+    """
+    email = (request.data.get('email') or '').strip().lower()
+    code = (request.data.get('code') or request.data.get('otp') or '').strip()
+    new_password = (request.data.get('new_password') or request.data.get('password') or '').strip()
+    challenge_id = request.data.get('challenge_id')
+
+    if not code or not new_password:
+        return Response({"error": "Verification code and new password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(new_password) < 6:
+        return Response({"error": "Password must be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    challenge = None
+    if challenge_id:
+        challenge = PhoneOTPChallenge.objects.filter(id=challenge_id).select_related('user').first()
+
+    if not challenge and email:
+        challenge = PhoneOTPChallenge.objects.filter(
+            email__iexact=email,
+            verified_at__isnull=True
+        ).order_by('-created_at').select_related('user').first()
+
+    if not challenge:
+        return Response({"error": "Invalid or expired password reset request."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if challenge.verified_at:
+        return Response({"error": "This verification code has already been used."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if challenge.expires_at < timezone.now():
+        return Response({"error": "Verification code has expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if challenge.attempts >= 5:
+        return Response({"error": "Too many failed attempts. Please request a new code."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+    challenge.attempts += 1
+    if not check_password(code, challenge.code_hash):
+        challenge.save(update_fields=['attempts'])
+        return Response({"error": "Invalid verification code."}, status=status.HTTP_400_BAD_REQUEST)
+
+    challenge.verified_at = timezone.now()
+    challenge.save(update_fields=['attempts', 'verified_at'])
+
+    user = challenge.user
+    if not user and email:
+        user = User.objects.filter(email__iexact=email).first()
+
+    if not user:
+        return Response({"error": "User account not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    user.set_password(new_password)
+    user.save()
+
+    create_audit_log(
+        actor=user,
+        action="password_reset",
+        entity_type="user",
+        entity_id=user.id,
+        summary=f"Password reset for {user.email}",
+        metadata={"challenge_id": challenge.id},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+
+    return Response({
+        "message": "Password has been successfully reset! You can now log in.",
+        "success": True
+    }, status=status.HTTP_200_OK)
+
