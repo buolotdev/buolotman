@@ -107,19 +107,11 @@
 /* ================= GRID ================= */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 28px;
 }
 
-@media(max-width: 1200px) {
-  .grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media(max-width: 900px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media(max-width: 600px) {
+@media(max-width: 768px) {
   .grid { grid-template-columns: 1fr; }
 }
 
@@ -128,13 +120,14 @@
 .card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 31, 63, 0.04);
 }
 
 .card::before {
@@ -229,11 +222,12 @@
   margin-top: auto;
   display: flex;
   gap: 12px;
+  width: 100%;
 }
 
 .btn {
   flex: 1;
-  padding: 12px 14px;
+  padding: 13px 18px;
   font-size: 14px;
   border-radius: 10px;
   text-align: center;
@@ -246,6 +240,7 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .btnView {

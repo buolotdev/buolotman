@@ -9,6 +9,7 @@ import styles from "./page.module.css";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 
 
 
@@ -62,11 +63,25 @@ export default function TechniciansPage() {
               <div key={tech.id} className={styles.card}>
                 <div className={styles.cardImageWrapper}>
                   <img src={tech.avatar_url || `https://i.pravatar.cc/300?img=${(tech.id % 70) + 1}`} alt={tech.first_name || tech.username} className={styles.cardImage} />
+                  <OnlineStatusBadge
+                    isOnline={tech.is_online}
+                    lastSeenDisplay={tech.last_seen_display}
+                    showText={false}
+                    size="sm"
+                    style={{ position: "absolute", bottom: 2, right: 2 }}
+                  />
                 </div>
-                <h3 className={styles.cardTitle}>{tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : (tech.username || "Unknown Technician")}</h3>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+                  <h3 className={styles.cardTitle}>{tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : (tech.username || "Unknown Technician")}</h3>
+                  <OnlineStatusBadge
+                    isOnline={tech.is_online}
+                    lastSeenDisplay={tech.last_seen_display}
+                    size="sm"
+                  />
+                </div>
                 <p className={styles.cardCategory}>{tech.category || "Professional"}</p>
                 <div className={styles.cardMeta}>
-                  <span className={styles.rating}>⭐ 4.8</span> • {tech.location || tech.country || "Kigali, Rwanda"}
+                  <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "4.8"}</span> • {tech.location || tech.country || "Kigali, Rwanda"}
                 </div>
                 <div className={styles.cardActions}>
                   <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>
