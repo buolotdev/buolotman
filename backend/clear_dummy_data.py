@@ -25,8 +25,9 @@ TechnicianService.objects.all().delete()
 CompanyProfile.objects.all().delete()
 TechnicianProfile.objects.all().delete()
 
-# Delete non-superuser users
-users_deleted, _ = User.objects.filter(is_superuser=False, is_staff=False).delete()
-print(f"Deleted {users_deleted} dummy users.")
+# User deletion permanently disabled to preserve real and client accounts
+# users_deleted, _ = User.objects.filter(is_superuser=False, is_staff=False).delete()
+# print(f"Deleted {users_deleted} dummy users.")
+print("User deletion is disabled. All user accounts are preserved.")
 
 print("Dummy data successfully removed.")

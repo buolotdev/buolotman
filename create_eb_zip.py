@@ -18,11 +18,15 @@ def zip_backend():
                     continue
                     
                 for file in files:
+                    # STRICTLY EXCLUDE local databases so live database is NEVER overwritten on deploy
+                    if file.endswith('.sqlite3') or file.endswith('.sqlite3-journal') or file.endswith('.db'):
+                        continue
                     file_path = os.path.join(root, file)
                     rel_path = os.path.relpath(file_path, backend_dir)
                     # Force Linux-compatible forward slashes
                     linux_path = rel_path.replace("\\", "/")
                     zipf.write(file_path, linux_path)
+
                     
         print(f"Created {zip_path} ({os.path.getsize(zip_path) / (1024*1024):.2f} MB)")
 

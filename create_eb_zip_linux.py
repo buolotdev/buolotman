@@ -11,11 +11,14 @@ def zip_backend():
                 continue
                 
             for file in files:
+                if file.endswith('.sqlite3') or file.endswith('.sqlite3-journal') or file.endswith('.db'):
+                    continue
                 file_path = os.path.join(root, file)
                 rel_path = os.path.relpath(file_path, backend_dir)
                 # FORCE FORWARD SLASHES FOR LINUX
                 linux_path = rel_path.replace("\\", "/")
                 zipf.write(file_path, linux_path)
+
                 
     print(f"Created {zip_path}")
 
