@@ -1,12 +1,39 @@
 from .base import *
 
 DEBUG = False
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+raw_hosts = config('ALLOWED_HOSTS', default='*')
+if '*' in raw_hosts:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(',') if h.strip()]
+    for d in ['boulotman.com', '.boulotman.com', '.elasticbeanstalk.com', 'localhost', '127.0.0.1']:
+        if d not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(d)
 
 import dj_database_url
 DATABASE_URL = config('DATABASE_URL', default='')
 if not DATABASE_URL:
-    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    import platform
+    if platform.system() == 'Linux':
+        persistent_dir = Path('/var/data')
+        try:
+            persistent_dir.mkdir(parents=True, exist_ok=True)
+            db_path = persistent_dir / 'boulotman.sqlite3'
+            if not db_path.exists() and (BASE_DIR / 'db.sqlite3').exists():
+                import shutil
+                shutil.copyfile(BASE_DIR / 'db.sqlite3', db_path)
+            import os
+            try:
+                os.chmod(persistent_dir, 0o777)
+                if db_path.exists():
+                    os.chmod(db_path, 0o666)
+            except Exception:
+                pass
+            DATABASE_URL = f"sqlite:///{db_path}"
+        except Exception:
+            DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    else:
+        DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
     
 ssl_require = DATABASE_URL.startswith('postgres')
 DATABASES = {
@@ -16,6 +43,7 @@ DATABASES = {
         ssl_require=ssl_require,
     )
 }
+
 
 # Security
 SECURE_BROWSER_XSS_FILTER = True

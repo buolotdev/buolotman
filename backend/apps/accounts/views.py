@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -6,6 +7,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
 from datetime import timedelta
+
+logger = logging.getLogger(__name__)
+
 
 from utils.cache import cached
 from utils.rate_limit import (

@@ -3,10 +3,23 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+import json
 from django.http import HttpResponse
+
+def health_check(request):
+    data = {"status": "ok"}
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        data["user_count"] = User.objects.count()
+        data["db"] = "connected"
+    except Exception as e:
+        data["db_error"] = str(e)
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 urlpatterns = [
     path('', lambda request: HttpResponse('OK', status=200)),
+    path('api/health-check/', health_check),
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.accounts.urls')),
     path('api/tasks/', include('apps.tasks.urls')),
