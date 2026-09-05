@@ -43,15 +43,34 @@ def google_login(request):
         else:
             requested_role = 'CLIENT'
 
-        # Get or create the user (All accounts start as unverified until Admin Approval)
+        # Signup must never reuse or mutate an existing account. Login omits
+        # this flag and is allowed to authenticate the existing account.
+        is_signup = request.data.get('flow') == 'signup'
+
+        # Login and signup are deliberately separate flows. Login must never
+        # provision a new account or silently default it to CLIENT.
+        existing_user = User.objects.filter(email__iexact=email).first()
+        if not is_signup and existing_user is None:
+            return Response(
+                {'error': 'No account was found with this Google email. Please sign up first.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # All newly created accounts start unverified until Admin approval.
         user, created = User.objects.get_or_create(email=email, defaults={
             'first_name': first_name,
             'last_name': last_name,
             'username': email.split('@')[0],
             'role': requested_role,
             'avatar_url': picture,
-            'is_verified': False, # Must be vetted and approved by Admin
+            'is_verified': False,
         })
+
+        if is_signup and not created:
+            return Response(
+                {'error': 'An account with this email already exists. Please log in instead.'},
+                status=status.HTTP_409_CONFLICT,
+            )
 
         from apps.accounts.models import TechnicianProfile
         if user.role == 'TECHNICIAN':
