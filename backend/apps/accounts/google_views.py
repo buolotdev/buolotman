@@ -66,6 +66,21 @@ def google_login(request):
             except Exception:
                 pass
 
+            try:
+                from apps.governance.services import create_notification
+                admins = User.objects.filter(role__iexact='ADMIN')
+                for adm in admins:
+                    create_notification(
+                        user=adm,
+                        category="verification",
+                        title=f"New {user.role} Verification Request",
+                        body=f"{user.first_name} {user.last_name} ({user.email}) registered as {user.role} and is awaiting approval.",
+                        link="/dashboard/admin/verification",
+                        metadata={"applicant_id": user.id, "applicant_email": user.email, "role": user.role}
+                    )
+            except Exception:
+                pass
+
 
         from apps.accounts.models import TechnicianProfile
         from apps.companies.models import CompanyProfile

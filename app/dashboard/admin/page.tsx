@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
@@ -62,7 +63,7 @@ export default function AdminDashboard() {
             <iconify-icon icon="lucide:briefcase" style={{ fontSize: "24px" }}></iconify-icon>
           </div>
         </div>
-        <div className={styles.metric}>
+        <Link href="/dashboard/admin/verification" className={styles.metric} style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className={styles.metricInfo}>
             <span>Pending Validations</span>
             <h3>{metrics.pending_validations.toLocaleString()}</h3>
@@ -70,7 +71,7 @@ export default function AdminDashboard() {
           <div className={`${styles.metricIcon} ${styles.iconOrange}`}>
             <iconify-icon icon="lucide:shield-check" style={{ fontSize: "24px" }}></iconify-icon>
           </div>
-        </div>
+        </Link>
         <div className={styles.metric}>
           <div className={styles.metricInfo}>
             <span>Open Disputes</span>
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
       {/* ALERTS */}
       <div className={styles.alerts}>
         {alerts.map((alert: any, i: number) => {
-          const targetHref = alert.type === 'danger' ? '/dashboard/admin/disputes' : '/dashboard/admin/tasks';
+          const targetHref = alert.link || (alert.type === 'danger' ? '/dashboard/admin/disputes' : '/dashboard/admin/tasks');
           return (
             <div key={i} className={`${styles.alert} ${alert.type === 'danger' ? styles.alertDanger : styles.alertWarning}`}>
               <div className={styles.alertIconBox}>

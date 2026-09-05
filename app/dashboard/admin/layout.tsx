@@ -29,7 +29,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
+  const { data: statsData } = useFetch(() => api.getAdminDashboardStats(), []);
 
+  const pendingVerifications = statsData?.metrics?.pending_validations || 0;
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";
   const userRole = user?.role || "";
@@ -65,7 +67,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }}
               >
                 <iconify-icon icon={item.icon} />
-                <span>{item.label}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.id === "verification" && pendingVerifications > 0 && (
+                  <span style={{
+                    background: '#ff4500',
+                    color: '#ffffff',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    boxShadow: '0 2px 6px rgba(255, 69, 0, 0.4)'
+                  }}>
+                    {pendingVerifications}
+                  </span>
+                )}
               </Link>
             );
           })}

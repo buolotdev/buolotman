@@ -413,7 +413,7 @@ def platform_stats(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_dashboard_stats(request):
-    if request.user.role != 'admin' and not request.user.is_superuser:
+    if str(getattr(request.user, 'role', '')).upper() != 'ADMIN' and not request.user.is_superuser:
         return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
         
     from apps.accounts.models import User
@@ -422,7 +422,7 @@ def admin_dashboard_stats(request):
     
     total_users = User.objects.count()
     active_projects = Task.objects.filter(status__in=['open', 'in_progress']).count()
-    pending_validations = Milestone.objects.filter(status='Awaiting Client').count()
+    pending_validations = User.objects.filter(is_verified=False).exclude(role__iexact='ADMIN').count()
     open_disputes = Dispute.objects.filter(status='OPEN').count()
     
     recent_tasks = Task.objects.order_by('-created_at')[:5]
@@ -440,8 +440,24 @@ def admin_dashboard_stats(request):
     
     recent_activities = [
         {'message': f"New user {u.first_name} {u.last_name} joined."} 
-        for u in User.objects.order_by('-date_joined')[:3]
+        for u in User.objects.order_by('-created_at')[:3]
     ]
+
+    alerts = []
+    if pending_validations > 0:
+        alerts.append({
+            'type': 'warning',
+            'title': f'{pending_validations} Verification Request{"s" if pending_validations > 1 else ""} Pending',
+            'description': f'{pending_validations} user account(s) are awaiting verification and review.',
+            'link': '/dashboard/admin/verification'
+        })
+    if open_disputes > 0:
+        alerts.append({
+            'type': 'danger',
+            'title': 'Disputed Projects',
+            'description': f'{open_disputes} projects flagged due to complaints.',
+            'link': '/dashboard/admin/disputes'
+        })
 
     return Response({
         'metrics': {
@@ -450,10 +466,7 @@ def admin_dashboard_stats(request):
             'pending_validations': pending_validations,
             'open_disputes': open_disputes,
         },
-        'alerts': [
-            {'type': 'warning', 'title': 'Pending Client Confirmations', 'description': f'{pending_validations} project milestones awaiting   validation.'},
-            {'type': 'danger', 'title': 'Disputed Projects', 'description': f'{open_disputes} projects flagged due to   complaints.'}
-        ],
+        'alerts': alerts,
         'active_projects': tasks_data,
         'recent_activity': recent_activities
     })
