@@ -43,38 +43,36 @@ def google_login(request):
         else:
             requested_role = 'CLIENT'
 
-        # Signup must never reuse or mutate an existing account. Login omits
-        # this flag and is allowed to authenticate the existing account.
-        is_signup = request.data.get('flow') == 'signup'
+        # Seamless Google Auth: If user exists, authenticate. If not, auto-create account.
+        email_normalized = email.strip().lower()
+        user = User.objects.filter(email__iexact=email_normalized).first()
+        created = False
 
-        # Login and signup are deliberately separate flows. Login must never
-        # provision a new account or silently default it to CLIENT.
-        existing_user = User.objects.filter(email__iexact=email).first()
-        if not is_signup and existing_user is None:
-            return Response(
-                {'error': 'No account was found with this Google email. Please sign up first.'},
-                status=status.HTTP_404_NOT_FOUND,
+        if not user:
+            user = User.objects.create(
+                email=email_normalized,
+                first_name=first_name,
+                last_name=last_name,
+                username=email_normalized.split('@')[0],
+                role=requested_role,
+                avatar_url=picture,
+                is_verified=True,
             )
+            created = True
+            try:
+                from utils.email_service import send_welcome_email
+                send_welcome_email(user)
+            except Exception:
+                pass
 
-        # All newly created accounts start unverified until Admin approval.
-        user, created = User.objects.get_or_create(email=email, defaults={
-            'first_name': first_name,
-            'last_name': last_name,
-            'username': email.split('@')[0],
-            'role': requested_role,
-            'avatar_url': picture,
-            'is_verified': False,
-        })
-
-        if is_signup and not created:
-            return Response(
-                {'error': 'An account with this email already exists. Please log in instead.'},
-                status=status.HTTP_409_CONFLICT,
-            )
 
         from apps.accounts.models import TechnicianProfile
+        from apps.companies.models import CompanyProfile
         if user.role == 'TECHNICIAN':
             TechnicianProfile.objects.get_or_create(user=user)
+        elif user.role == 'COMPANY':
+            CompanyProfile.objects.get_or_create(user=user)
+
 
         if not created:
             updated_fields = []
