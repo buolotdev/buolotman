@@ -1148,36 +1148,40 @@ def password_reset_request(request):
     User = get_user_model()
     user = User.objects.filter(email__iexact=email).first()
 
-    challenge_id = None
-    if user:
-        code = generate_otp()
-        challenge = PhoneOTPChallenge.objects.create(
-            user=user,
-            phone=user.phone or "",
-            email=user.email,
-            purpose='verification',  # valid in PURPOSE_CHOICES
-            code_hash=make_password(code),
-            expires_at=timezone.now() + timedelta(minutes=15),
-            metadata={"requested_from": "password_reset_api", "type": "password_reset"},
+    if not user:
+        return Response({
+            "error": "No account found with this email address. Please check your email or create an account first."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    code = generate_otp()
+    challenge = PhoneOTPChallenge.objects.create(
+        user=user,
+        phone=user.phone or "",
+        email=user.email,
+        purpose='verification',  # valid in PURPOSE_CHOICES
+        code_hash=make_password(code),
+        expires_at=timezone.now() + timedelta(minutes=15),
+        metadata={"requested_from": "password_reset_api", "type": "password_reset"},
+    )
+    challenge_id = challenge.id
+    try:
+        from utils.email_service import send_otp_email
+        send_otp_email(
+            to_email=user.email,
+            code=code,
+            purpose='password_reset',
+            user_name=user.first_name or user.email.split('@')[0]
         )
-        challenge_id = challenge.id
-        try:
-            from utils.email_service import send_otp_email
-            send_otp_email(
-                to_email=user.email,
-                code=code,
-                purpose='password_reset',
-                user_name=user.first_name or user.email.split('@')[0]
-            )
-        except Exception as e:
-            logger.error("Failed to send password reset email to %s: %s", user.email, e)
+    except Exception as e:
+        logger.error("Failed to send password reset email to %s: %s", user.email, e)
 
     return Response({
-        "message": "If an account exists with this email, a verification code has been sent.",
+        "message": f"Verification code has been sent to {user.email}.",
         "challenge_id": challenge_id,
         "email": email,
         "success": True,
     }, status=status.HTTP_200_OK)
+
 
 
 @api_view(['POST'])
