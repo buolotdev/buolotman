@@ -21,7 +21,7 @@ const clientTranslations: Record<string, Record<string, any>> = {
     verified: "Verified",
     welcomeDesc: "Track active jobs, review quotes, manage saved professionals, and move faster on your next project.",
     postTask: "Post a Task",
-    browseElectricians: "Browse electricians",
+    browseTechnicians: "Browse Technicians",
     directHiresProjects: "Direct Hires & Projects",
     clientProfile: "Client Profile",
     identityVerified: "Identity Verified ✓",
@@ -89,7 +89,7 @@ const clientTranslations: Record<string, Record<string, any>> = {
     verified: "Vérifié",
     welcomeDesc: "Suivez vos missions en cours, examinez les devis, gérez vos artisans favoris et gagnez du temps sur vos chantiers.",
     postTask: "Publier une tâche",
-    browseElectricians: "Trouver des électriciens",
+    browseTechnicians: "Trouver des techniciens",
     directHiresProjects: "Recrutements Directs & Projets",
     clientProfile: "Profil Client",
     identityVerified: "Identité Vérifiée ✓",
@@ -275,7 +275,7 @@ export default function ClientDashboardPage() {
               </div>
               <div className={styles.welcomeActions}>
                 <Link href="/post-task" className={styles.primaryButton}><iconify-icon icon="lucide:plus" /> {t.postTask}</Link>
-                <Link href="/search?q=electrician" className={styles.secondaryButton}>{t.browseElectricians}</Link>
+                <Link href="/search?tab=technician" className={styles.secondaryButton}>{t.browseTechnicians}</Link>
                 <Link 
                   href="/dashboard/client/projects" 
                   style={{
