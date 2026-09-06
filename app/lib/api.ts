@@ -117,10 +117,10 @@ export const api = {
       "/auth/login/",
       { method: "POST", body: JSON.stringify({ username: email, password }), public: true } as any
     ),
-  googleLogin: (token: string, role?: string) =>
+  googleLogin: (token: string, role?: string, isSignup?: boolean) =>
     request<{ access: string; refresh: string; role: string; user: any }>(
       "/auth/google-login/",
-      { method: "POST", body: JSON.stringify({ token, role }), public: true } as any
+      { method: "POST", body: JSON.stringify({ token, role, is_signup: Boolean(isSignup) }), public: true } as any
     ),
 
   registerClient: (data: Record<string, string>) =>
@@ -632,6 +632,12 @@ export const api = {
   checkUsername: (username: string) =>
     request<{ available: boolean; username?: string; message?: string }>(
       `/auth/check-username/?username=${encodeURIComponent(username)}`,
+      { public: true }
+    ),
+
+  checkEmail: (email: string) =>
+    request<{ available: boolean; role?: string; message?: string }>(
+      `/auth/check-email/?email=${encodeURIComponent(email)}`,
       { public: true }
     ),
 };

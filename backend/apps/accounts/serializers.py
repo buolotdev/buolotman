@@ -273,16 +273,19 @@ class ClientRegistrationSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'email', 'password', 'phone']
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
-        return value
+        clean = (value or '').strip().lower()
+        existing = User.objects.filter(email__iexact=clean).first()
+        if existing:
+            raise serializers.ValidationError(f"This email address is already in use by a {existing.role.title()} account. Please log in instead.")
+        return clean
 
     def create(self, validated_data):
+        clean_email = validated_data['email'].strip().lower()
         full_name = f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip()
-        username = generate_unique_username(base_name=full_name, email=validated_data['email'])
+        username = generate_unique_username(base_name=full_name, email=clean_email)
         user = User.objects.create_user(
             username=username,
-            email=validated_data['email'],
+            email=clean_email,
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
@@ -302,16 +305,19 @@ class TechnicianRegistrationSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'email', 'password', 'phone', 'country', 'address']
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
-        return value
+        clean = (value or '').strip().lower()
+        existing = User.objects.filter(email__iexact=clean).first()
+        if existing:
+            raise serializers.ValidationError(f"This email address is already in use by a {existing.role.title()} account. Please log in instead.")
+        return clean
 
     def create(self, validated_data):
+        clean_email = validated_data['email'].strip().lower()
         full_name = f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip()
-        username = generate_unique_username(base_name=full_name, email=validated_data['email'])
+        username = generate_unique_username(base_name=full_name, email=clean_email)
         user = User.objects.create_user(
             username=username,
-            email=validated_data['email'],
+            email=clean_email,
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
@@ -333,17 +339,20 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
         fields = ['email', 'password', 'company_name', 'phone']
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
-        return value
+        clean = (value or '').strip().lower()
+        existing = User.objects.filter(email__iexact=clean).first()
+        if existing:
+            raise serializers.ValidationError(f"This email address is already in use by a {existing.role.title()} account. Please log in instead.")
+        return clean
 
     def create(self, validated_data):
         from apps.companies.models import CompanyProfile
+        clean_email = validated_data['email'].strip().lower()
         company_name = validated_data.pop('company_name')
-        username = generate_unique_username(base_name=company_name, email=validated_data['email'])
+        username = generate_unique_username(base_name=company_name, email=clean_email)
         user = User.objects.create_user(
             username=username,
-            email=validated_data['email'],
+            email=clean_email,
             password=validated_data['password'],
             first_name=company_name,
             phone=validated_data.get('phone', ''),

@@ -38,15 +38,30 @@ def google_login(request):
 
         # Get requested role
         explicit_role = request.data.get('role')
+        is_signup = bool(request.data.get('is_signup'))
         if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'ADMIN']:
             requested_role = str(explicit_role).upper()
         else:
             requested_role = 'CLIENT'
 
-        # Seamless Google Auth: If user exists, authenticate. If not, auto-create account.
+        # Check existing user
         email_normalized = email.strip().lower()
         user = User.objects.filter(email__iexact=email_normalized).first()
         created = False
+
+        if user:
+            existing_role = (user.role or 'user').title()
+            # If user explicitly requested signup, reject because account already exists
+            if is_signup:
+                return Response({
+                    'error': f'An account with this email ({user.email}) already exists as a {existing_role}. An email cannot be used for multiple accounts. Please log in instead.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # If user requested a different role than the existing account, reject
+            if explicit_role and str(user.role).upper() != requested_role:
+                return Response({
+                    'error': f'This email ({user.email}) is already registered as a {existing_role}. You cannot register or sign in as a {requested_role.title()} with this email address.'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         if not user:
             from apps.accounts.serializers import generate_unique_username
@@ -84,7 +99,6 @@ def google_login(request):
             except Exception:
                 pass
 
-
         from apps.accounts.models import TechnicianProfile
         from apps.companies.models import CompanyProfile
         if user.role == 'TECHNICIAN':
@@ -98,21 +112,8 @@ def google_login(request):
                 comp_prof.is_verified = False
                 comp_prof.save(update_fields=['is_verified'])
 
-        if created:
-            try:
-                from utils.email_service import send_welcome_email
-                send_welcome_email(user)
-            except Exception:
-                pass
-
         if not created:
             updated_fields = []
-            # Only update role if an explicit new role was provided in the request (e.g. from signup flow)
-            if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'CLIENT'] and str(user.role).upper() != str(explicit_role).upper():
-                user.role = str(explicit_role).upper()
-                updated_fields.append('role')
-                if user.role == 'TECHNICIAN':
-                    TechnicianProfile.objects.get_or_create(user=user)
             if not user.first_name and first_name:
                 user.first_name = first_name
                 updated_fields.append('first_name')

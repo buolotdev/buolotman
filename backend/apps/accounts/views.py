@@ -44,7 +44,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 @permission_classes([AllowAny])
 def request_phone_otp(request):
     phone = (request.data.get('phone') or '').strip()
-    email = (request.data.get('email') or '').strip()
+    email = (request.data.get('email') or '').strip().lower()
     purpose = (request.data.get('purpose') or 'verification').strip()
 
     if not phone:
@@ -52,10 +52,27 @@ def request_phone_otp(request):
 
     from django.contrib.auth import get_user_model
     User = get_user_model()
+
+    if purpose == 'verification':
+        if email:
+            existing_email = User.objects.filter(email__iexact=email).first()
+            if existing_email:
+                role_label = (existing_email.role or 'user').title()
+                return Response({
+                    "error": f"An account with this email address already exists as a {role_label}. An email cannot be used for multiple accounts. Please log in instead."
+                }, status=status.HTTP_400_BAD_REQUEST)
+        if phone:
+            existing_phone = User.objects.filter(phone=phone).first()
+            if existing_phone:
+                role_label = (existing_phone.role or 'user').title()
+                return Response({
+                    "error": f"An account with this phone number already exists ({role_label}). Please log in instead."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
     user = None
     if email:
-        user = User.objects.filter(email=email).first()
-    if not user:
+        user = User.objects.filter(email__iexact=email).first()
+    if not user and phone:
         user = User.objects.filter(phone=phone).first()
 
     code = generate_otp()
@@ -747,6 +764,27 @@ def check_username_availability(request):
         return Response({"available": False, "message": "Username is already taken."}, status=status.HTTP_200_OK)
 
     return Response({"available": True, "username": raw.lower(), "message": "Username is available!"}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_email_availability(request):
+    raw = (request.query_params.get('email') or '').strip().lower()
+    if not raw:
+        return Response({"available": False, "message": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    existing = User.objects.filter(email__iexact=raw).first()
+    if existing:
+        role_label = (existing.role or 'user').title()
+        return Response({
+            "available": False,
+            "role": existing.role,
+            "message": f"This email is already in use by a {role_label} account. Please log in instead."
+        }, status=status.HTTP_200_OK)
+
+    return Response({"available": True, "email": raw, "message": "Email is available!"}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

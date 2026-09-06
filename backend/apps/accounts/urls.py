@@ -23,6 +23,7 @@ urlpatterns = [
     path('user/delete/', views.delete_account, name='delete_account'),
     path('users/', views.list_users, name='list_users'),
     path('check-username/', views.check_username_availability, name='check_username_availability'),
+    path('check-email/', views.check_email_availability, name='check_email_availability'),
     path('users/<str:user_id>/', views.user_public_profile, name='user_public_profile'),
     path('portfolio/', views.portfolio_items, name='portfolio_items'),
     path('portfolio/<int:item_id>/', views.portfolio_item_detail, name='portfolio_item_detail'),

@@ -238,6 +238,29 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
   const [signupRegion, setSignupRegion] = useState("");
   const [signupCountry, setSignupCountry] = useState("");
   const [signupTermsAccepted, setSignupTermsAccepted] = useState(false);
+  const [emailAvailability, setEmailAvailability] = useState<{ available: boolean; message: string } | null>(null);
+  const emailCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSignupEmailChange = (val: string) => {
+    setSignupEmail(val);
+    if (emailCheckTimerRef.current) clearTimeout(emailCheckTimerRef.current);
+    const clean = val.trim().toLowerCase();
+    if (!clean || !clean.includes("@") || !clean.includes(".")) {
+      setEmailAvailability(null);
+      return;
+    }
+    emailCheckTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await api.checkEmail(clean);
+        setEmailAvailability({
+          available: res.available,
+          message: res.message || (res.available ? "Email available ✓" : "Email already in use ✗")
+        });
+      } catch {
+        setEmailAvailability(null);
+      }
+    }, 450);
+  };
 
   const [resetEmail, setResetEmail] = useState("");
   const [resetOtp, setResetOtp] = useState("");
@@ -251,8 +274,9 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
       setError(null);
       setIsLoading(true);
       try {
-        const roleToSend = selectedRoleRef.current || selectedRole || 'Client';
-        const data = await api.googleLogin(tokenResponse.access_token, roleToSend);
+        const isSignup = step === "account" || step === "signup";
+        const roleToSend = isSignup ? (selectedRoleRef.current || selectedRole || 'Client') : undefined;
+        const data = await api.googleLogin(tokenResponse.access_token, roleToSend, isSignup);
         const role: string = (data.role || "client").toLowerCase();
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
@@ -428,6 +452,12 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
         payload.company_name = signupCompanyName.trim();
       }
 
+      if (emailAvailability && !emailAvailability.available) {
+        setError(emailAvailability.message);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         if (selectedRole === "Client") {
           await api.registerClient(payload);
@@ -437,29 +467,16 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
           await api.registerCompany(payload);
         }
       } catch (regErr: any) {
-        const errMsg = String(regErr?.message || regErr?.detail || "");
+        const rawMsg = String(regErr?.message || regErr?.detail || "");
+        const parsed = parseErrorMsg(rawMsg);
         if (
-          errMsg.toLowerCase().includes("already exists") ||
-          errMsg.toLowerCase().includes("already registered") ||
-          errMsg.toLowerCase().includes("user with this") ||
-          errMsg.toLowerCase().includes("duplicate")
+          rawMsg.toLowerCase().includes("already") ||
+          rawMsg.toLowerCase().includes("in use") ||
+          rawMsg.toLowerCase().includes("exists")
         ) {
-          try {
-            const loginData = await api.login(signupEmail.trim().toLowerCase(), signupPassword);
-            const role: string = (loginData.role || selectedRole || "client").toLowerCase();
-            localStorage.setItem("access_token", loginData.access);
-            localStorage.setItem("refresh_token", loginData.refresh);
-            localStorage.setItem("user_role", role);
-            if (role === "admin") router.push("/dashboard/admin");
-            else if (role === "company") router.push("/dashboard/company");
-            else if (role === "technician") router.push("/dashboard/technician");
-            else router.push("/dashboard/client");
-            return;
-          } catch {
-            throw new Error("This email is already registered. Please log in or use another email address.");
-          }
+          throw new Error(parsed || "This email address is already in use by an existing account. Please log in instead.");
         }
-        throw regErr;
+        throw new Error(parsed || "Failed to create account. Please check your information and try again.");
       }
 
       const loginData = await api.login(signupEmail.trim().toLowerCase(), signupPassword);
@@ -807,12 +824,23 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
               {/* Email & Verify Email */}
               <div className={styles.formGrid2}>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel}>{t.labelEmail}</label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label className={styles.fieldLabel}>{t.labelEmail}</label>
+                    {emailAvailability && (
+                      <span style={{
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: emailAvailability.available ? "#16a34a" : "#dc2626"
+                      }}>
+                        {emailAvailability.message}
+                      </span>
+                    )}
+                  </div>
                   <input
                     className={styles.input}
                     type="email"
                     value={signupEmail}
-                    onChange={e => setSignupEmail(e.target.value)}
+                    onChange={e => handleSignupEmailChange(e.target.value)}
                     placeholder={t.phEmail}
                     autoComplete="email"
                     required

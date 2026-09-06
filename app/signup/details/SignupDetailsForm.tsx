@@ -93,9 +93,14 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
         phone: formData.phone,
         challenge_id: res.challenge_id.toString(),
       });
-      router.push(`/signup/verify?${params.toString()}`);
     } catch (err: any) {
-      const message = err?.message || err?.detail || "Could not send OTP. Please try again.";
+      let message = err?.message || err?.detail || err?.error || "Could not send OTP. Please try again.";
+      try {
+        const parsed = typeof message === "string" ? JSON.parse(message) : message;
+        if (parsed?.error) message = parsed.error;
+        else if (parsed?.email) message = Array.isArray(parsed.email) ? parsed.email[0] : parsed.email;
+        else if (parsed?.phone) message = Array.isArray(parsed.phone) ? parsed.phone[0] : parsed.phone;
+      } catch {}
       setError(typeof message === "string" ? message : "Failed to send OTP.");
       setSubmitting(false);
     }
@@ -322,7 +327,27 @@ export default function SignupDetailsForm({ role }: { role: RoleKey }) {
             <p className={styles.errorText}>Passwords do not match.</p>
           ) : null}
 
-          {error ? <p className={styles.errorText}>{error}</p> : null}
+          {error ? (
+            <div style={{
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              padding: "12px 14px",
+              marginBottom: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 8
+            }}>
+              <span style={{ color: "#dc2626", fontSize: "13px", fontWeight: 600 }}>{error}</span>
+              {error.toLowerCase().includes("log in") || error.toLowerCase().includes("already") ? (
+                <Link href="/login" style={{ color: "#ff4500", fontWeight: 700, fontSize: "13px", textDecoration: "underline" }}>
+                  Go to Login &rarr;
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
 
           <label className={styles.checkboxRow}>
             <input
