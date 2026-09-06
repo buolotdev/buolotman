@@ -138,6 +138,11 @@ def search(request):
             base = UserPublicSerializer(user).data
             if user.role == 'TECHNICIAN':
                 profile = getattr(user, 'technician_profile', None)
+                tech_services = base.get('services') or []
+                service_titles = [s['title'] for s in tech_services if s.get('title')]
+                skills_list = [skill.name for skill in profile.skills.all()] if profile else []
+                all_skills = skills_list if skills_list else service_titles
+                category_name = tech_services[0].get('category') if (tech_services and tech_services[0].get('category')) else ''
                 results.append({
                     'id': user.id,
                     'type': 'technician',
@@ -145,14 +150,15 @@ def search(request):
                     'role': 'Technician',
                     'description': profile.bio if profile else '',
                     'image': user.avatar_url,
-                    'category': '',
+                    'category': category_name,
                     'rating': float(profile.average_rating) if profile else None,
                     'reviews': profile.completed_jobs if profile else 0,
                     'location': user.country or '',
                     'price': float(profile.hourly_rate) if profile and profile.hourly_rate is not None else None,
                     'priceLabel': 'hourly rate',
                     'verified': bool(user.is_verified or (profile and profile.is_verified)),
-                    'skills': [skill.name for skill in profile.skills.all()] if profile else [],
+                    'skills': all_skills,
+                    'services': tech_services,
                     'profile': base,
                 })
     if include_companies and tab in ('all', 'companies', 'professionals'):

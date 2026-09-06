@@ -1089,7 +1089,34 @@ export default function PublicProfilePage() {
                   </p>
                 </section>
 
-                {/* 2. Skills & Specializations */}
+                {/* 2. Services Offered Catalog */}
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>
+                    <iconify-icon icon="lucide:layers" style={{ color: "#ff4500" }} />
+                    {t.servicesCatalog} ({servicesList.length})
+                  </h2>
+                  {servicesList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "24px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:layers" style={{ fontSize: 28, color: "#94a3b8", marginBottom: 6 }} />
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13.5, fontWeight: 600 }}>{t.noServicesListed}</p>
+                    </div>
+                  ) : (
+                    <div className={styles.servicesGrid}>
+                      {servicesList.map((srv: any, idx: number) => (
+                        <div key={srv.id || idx} className={styles.serviceCard}>
+                          <span className={styles.serviceBadge}>{srv.category || "Technical Service"}</span>
+                          <h4 className={styles.serviceTitle}>{srv.title}</h4>
+                          <span className={styles.servicePricing}>
+                            <iconify-icon icon="lucide:tag" /> {srv.pricing_min ? `${srv.pricing_min} XOF (${srv.pricing_model || 'Fixed'})` : (srv.pricing_model || "Request Quote")}
+                          </span>
+                          {srv.description && <p className={styles.serviceDesc}>{srv.description}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                {/* 3. Skills & Specializations */}
                 <section className={styles.section}>
                   <h2 className={styles.sectionTitle}>
                     <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500" }} />

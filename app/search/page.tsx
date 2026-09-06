@@ -147,6 +147,7 @@ type SearchResult = {
   priceLabel?: string;
   verified?: boolean;
   skills?: string[];
+  services?: any[];
   link?: string;
   serviceType?: string;
 };
@@ -286,6 +287,7 @@ export default function SearchPage() {
             priceLabel: item.price_label,
             verified: item.verified ?? item.is_verified,
             skills: item.skills ?? [],
+            services: item.services || item.profile?.services || [],
             link: item.type === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : `/profile/${item.id}`,
             serviceType: item.serviceType,
           };
@@ -572,8 +574,15 @@ export default function SearchPage() {
                     </p>
 
                     <div className={styles.chips}>
-                      {result.skills && result.skills.length > 0 ? (
-                        result.skills.slice(0, 2).map((chip) => (
+                      {result.services && result.services.length > 0 ? (
+                        result.services.slice(0, 3).map((srv: any, sIdx: number) => (
+                          <span key={srv.id || sIdx} className={styles.chip} title={srv.description || srv.title} style={{ color: "#001f3f", background: "#f0fdf4", border: "1px solid #bbf7d0", fontWeight: 700 }}>
+                            <iconify-icon icon="lucide:wrench" style={{ color: "#16a34a", fontSize: "12px", marginRight: "3px" }} />
+                            {srv.title}
+                          </span>
+                        ))
+                      ) : result.skills && result.skills.length > 0 ? (
+                        result.skills.slice(0, 3).map((chip) => (
                           <span key={chip} className={styles.chip} title={chip}>
                             {chip}
                           </span>
@@ -583,12 +592,45 @@ export default function SearchPage() {
                           {result.category || (result.type === "company" ? "General Contracting" : "Technical Services")}
                         </span>
                       )}
-                      {result.skills && result.skills.length > 2 && (
-                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)" }}>
-                          +{result.skills.length - 2}
+                      {result.services && result.services.length > 3 ? (
+                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)", fontWeight: 700 }}>
+                          +{result.services.length - 3}
                         </span>
-                      )}
+                      ) : result.skills && result.skills.length > 3 ? (
+                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)", fontWeight: 700 }}>
+                          +{result.skills.length - 3}
+                        </span>
+                      ) : null}
                     </div>
+
+                    {result.services && result.services.length > 0 && (
+                      <div style={{ margin: "10px 0 12px 0", background: "#f8fafc", padding: "10px 12px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            {lang === "fr" ? "Services proposés" : "Services Offered"} ({result.services.length})
+                          </span>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                          {result.services.slice(0, 3).map((srv: any, sIdx: number) => (
+                            <div key={srv.id || sIdx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", color: "#1e293b" }}>
+                              <span style={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                                <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a", fontSize: "13px" }} />
+                                {srv.title}
+                              </span>
+                              {srv.pricing_min ? (
+                                <span style={{ fontWeight: 700, color: "#ff4500", fontSize: "11px" }}>
+                                  {formatXOF(srv.pricing_min)}
+                                </span>
+                              ) : srv.pricing_model ? (
+                                <span style={{ fontSize: "11px", color: "#64748b", textTransform: "capitalize" }}>
+                                  {srv.pricing_model}
+                                </span>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <p className={styles.resultDescription} title={result.description || ""}>
                       {result.description || (result.type === "company" 
