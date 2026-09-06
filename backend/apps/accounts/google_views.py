@@ -49,12 +49,15 @@ def google_login(request):
         created = False
 
         if not user:
+            from apps.accounts.serializers import generate_unique_username
+            clean_name = f"{first_name} {last_name}".strip()
+            unique_handle = generate_unique_username(base_name=clean_name, email=email_normalized)
             # All newly created accounts start unverified until Admin Approval
             user = User.objects.create(
                 email=email_normalized,
                 first_name=first_name,
                 last_name=last_name,
-                username=email_normalized.split('@')[0],
+                username=unique_handle,
                 role=requested_role,
                 avatar_url=picture,
                 is_verified=False,

@@ -8,7 +8,8 @@ User = get_user_model()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        username = (attrs.get(self.username_field) or '').strip().lower()
+        raw_login = (attrs.get(self.username_field) or '').strip()
+        login_input = raw_login.lower()
         password = attrs.get('password')
 
         # Auto-provision Demo Accounts if requested on live platform
@@ -19,13 +20,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'apex.company@boulotman.com': {'role': 'COMPANY', 'first_name': 'Apex', 'last_name': 'Engineering'},
         }
 
-        if username in demo_map and password == 'DemoPass123!':
-            user = User.objects.filter(email=username).first()
+        if login_input in demo_map and password == 'DemoPass123!':
+            user = User.objects.filter(email=login_input).first()
             if not user:
-                info = demo_map[username]
+                info = demo_map[login_input]
                 user = User.objects.create_user(
-                    email=username,
-                    username=username.split('@')[0],
+                    email=login_input,
+                    username=login_input.split('@')[0],
                     password=password,
                     first_name=info['first_name'],
                     last_name=info['last_name'],
@@ -44,6 +45,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                     user.set_password(password)
                     user.is_active = True
                     user.save()
+
+        # Support login by EMAIL or by USERNAME (with or without leading '@')
+        from django.db.models import Q
+        clean_handle = raw_login.lstrip('@')
+        matched_user = User.objects.filter(
+            Q(email__iexact=raw_login) | Q(username__iexact=raw_login) | Q(username__iexact=clean_handle)
+        ).first()
+        if matched_user:
+            attrs[self.username_field] = matched_user.username
 
         data = super().validate(attrs)
         data['role'] = self.user.role
@@ -218,6 +228,43 @@ class UserPublicSerializer(serializers.ModelSerializer):
         return obj.address or ''
 
 
+import re
+import random
+
+RESERVED_USERNAMES = {
+    'admin', 'administrator', 'boulotman', 'support', 'root', 'help', 'api',
+    'auth', 'null', 'undefined', 'moderator', 'system', 'dashboard', 'settings',
+    'login', 'register', 'signup', 'profile', 'user', 'users', 'billing'
+}
+
+def generate_unique_username(base_name='', email=''):
+    """
+    Generate a clean, unique alphanumeric + underscore username.
+    Example: 'Aneeq Nisar' -> 'aneeq_nisar', 'aneeq_nisar1'
+    """
+    raw = (base_name or '').strip()
+    if not raw and email:
+        raw = email.split('@')[0]
+    
+    # Replace spaces, dots, dashes with underscores
+    cleaned = re.sub(r'[^a-zA-Z0-9_]', '', raw.lower().replace(' ', '_').replace('.', '_').replace('-', '_'))
+    cleaned = re.sub(r'_+', '_', cleaned).strip('_')
+    
+    if len(cleaned) < 3 or cleaned in RESERVED_USERNAMES:
+        prefix = cleaned if len(cleaned) >= 3 else (email.split('@')[0] if email else 'user')
+        prefix = re.sub(r'[^a-zA-Z0-9_]', '', prefix.lower())[:15] or 'user'
+        cleaned = f"{prefix}_{random.randint(100, 999)}"
+        
+    candidate = cleaned[:24]
+    counter = 1
+    base_candidate = candidate
+    while User.objects.filter(username__iexact=candidate).exists():
+        candidate = f"{base_candidate}_{counter}"
+        counter += 1
+        
+    return candidate.lower()
+
+
 class ClientRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
 
@@ -231,8 +278,10 @@ class ClientRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        full_name = f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip()
+        username = generate_unique_username(base_name=full_name, email=validated_data['email'])
         user = User.objects.create_user(
-            username=validated_data['email'],
+            username=username,
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
@@ -258,8 +307,10 @@ class TechnicianRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        full_name = f"{validated_data.get('first_name', '')} {validated_data.get('last_name', '')}".strip()
+        username = generate_unique_username(base_name=full_name, email=validated_data['email'])
         user = User.objects.create_user(
-            username=validated_data['email'],
+            username=username,
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
@@ -289,8 +340,9 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         from apps.companies.models import CompanyProfile
         company_name = validated_data.pop('company_name')
+        username = generate_unique_username(base_name=company_name, email=validated_data['email'])
         user = User.objects.create_user(
-            username=validated_data['email'],
+            username=username,
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=company_name,

@@ -90,6 +90,8 @@ const translations: Record<string, Record<string, any>> = {
     labelPhone: "Phone Number",
     phPhone: "",
     labelEmail: "Email Address",
+    labelEmailOrUsername: "Email or Username",
+    phEmailOrUsername: "your@email.com or username",
     phEmail: "",
     labelVerifyEmail: "Verify Email Address",
     phVerifyEmail: "",
@@ -154,6 +156,8 @@ const translations: Record<string, Record<string, any>> = {
     labelPhone: "Numéro de téléphone",
     phPhone: "",
     labelEmail: "Adresse e-mail",
+    labelEmailOrUsername: "Email ou nom d'utilisateur",
+    phEmailOrUsername: "votre@email.com ou identifiant",
     phEmail: "",
     labelVerifyEmail: "Confirmer l'adresse e-mail",
     phVerifyEmail: "",
@@ -916,8 +920,8 @@ export default function LoginPage({ initialStep }: { initialStep?: Step }) {
             <div className={styles.divider}>{t.or}</div>
 
             <form onSubmit={handleLogin}>
-              <label className={styles.fieldLabel}>{t.labelEmail}</label>
-              <input className={styles.input} type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="your@email.com" autoComplete="email" required />
+              <label className={styles.fieldLabel}>{t.labelEmailOrUsername || "Email or Username"}</label>
+              <input className={styles.input} type="text" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder={t.phEmailOrUsername || "your@email.com or username"} autoComplete="username" required />
 
               <div className={styles.labelRow}>
                 <label className={styles.fieldLabel}>{t.labelPassword}</label>

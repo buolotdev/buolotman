@@ -200,6 +200,7 @@ def register_company(request):
 
 KNOWN_PROFILE_FIELDS = {
     # User / Basic fields (snake_case & camelCase)
+    'username', 'handle',
     'first_name', 'firstName', 'last_name', 'lastName', 'phone', 'phoneNumber', 'phone_number',
     'avatar_url', 'avatarUrl', 'avatar', 'banner_url', 'bannerUrl', 'banner',
     'language_preference', 'languagePreference', 'language',
@@ -430,6 +431,36 @@ def me(request):
 
         # Update user fields with snake_case and camelCase mapping
         user_update_data = {}
+
+        username_val = get_field('username', 'handle')
+        if username_val is not None:
+            raw_u = str(username_val).strip().lstrip('@')
+            if len(raw_u) < 3 or len(raw_u) > 30:
+                return Response(
+                    {"username": ["Username must be between 3 and 30 characters."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            import re
+            if not re.match(r'^[a-zA-Z0-9_]+$', raw_u):
+                return Response(
+                    {"username": ["Username can only contain letters, numbers, and underscores."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            from apps.accounts.serializers import RESERVED_USERNAMES
+            if raw_u.lower() in RESERVED_USERNAMES:
+                return Response(
+                    {"username": ["This username is reserved. Please choose another."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            from django.contrib.auth import get_user_model
+            UserModel = get_user_model()
+            if UserModel.objects.filter(username__iexact=raw_u).exclude(id=request.user.id).exists():
+                return Response(
+                    {"username": ["This username is already taken. Please choose another."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user_update_data['username'] = raw_u.lower()
+
         first_name = get_field('first_name', 'firstName')
         if first_name is not None:
             user_update_data['first_name'] = str(first_name)
@@ -690,18 +721,56 @@ def list_users(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def check_username_availability(request):
+    import re
+    from apps.accounts.serializers import RESERVED_USERNAMES
+    raw = (request.query_params.get('username') or '').strip().lstrip('@')
+    if not raw:
+        return Response({"available": False, "message": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(raw) < 3 or len(raw) > 30:
+        return Response({"available": False, "message": "Username must be between 3 and 30 characters."}, status=status.HTTP_200_OK)
+
+    if not re.match(r'^[a-zA-Z0-9_]+$', raw):
+        return Response({"available": False, "message": "Only letters, numbers, and underscores are allowed."}, status=status.HTTP_200_OK)
+
+    if raw.lower() in RESERVED_USERNAMES:
+        return Response({"available": False, "message": "This username is reserved."}, status=status.HTTP_200_OK)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    query = User.objects.filter(username__iexact=raw)
+    if request.user and request.user.is_authenticated:
+        query = query.exclude(id=request.user.id)
+
+    if query.exists():
+        return Response({"available": False, "message": "Username is already taken."}, status=status.HTTP_200_OK)
+
+    return Response({"available": True, "username": raw.lower(), "message": "Username is available!"}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def user_public_profile(request, user_id):
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        from apps.companies.models import CompanyProfile
-        try:
-            comp = CompanyProfile.objects.get(id=user_id)
-            user = comp.user
-        except CompanyProfile.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    target_str = str(user_id).strip()
+    clean_handle = target_str.lstrip('@')
+    user = None
+
+    if target_str.isdigit():
+        user = User.objects.filter(id=int(target_str)).first()
+        if not user:
+            from apps.companies.models import CompanyProfile
+            comp = CompanyProfile.objects.filter(id=int(target_str)).first()
+            if comp:
+                user = comp.user
+
+    if not user:
+        user = User.objects.filter(username__iexact=clean_handle).first()
+
+    if not user:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
     from .serializers import UserPublicSerializer
     serializer = UserPublicSerializer(user)

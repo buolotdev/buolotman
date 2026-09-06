@@ -211,7 +211,7 @@ export const api = {
     request<any>("/auth/me/", { method: "PATCH", body: JSON.stringify(data) }),
   changePassword: (data: { current_password?: string; old_password?: string; new_password: string }) =>
     request<any>("/auth/change-password/", { method: "POST", body: JSON.stringify(data) }),
-  getUserProfile: (id: number) => request<any>(`/auth/users/${id}/`),
+  getUserProfile: (id: number | string) => request<any>(`/auth/users/${id}/`, { public: true }),
   listUsers: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any[]>(`/auth/users/${qs}`);
@@ -628,5 +628,11 @@ export const api = {
       body: JSON.stringify(data),
       public: true,
     }),
+
+  checkUsername: (username: string) =>
+    request<{ available: boolean; username?: string; message?: string }>(
+      `/auth/check-username/?username=${encodeURIComponent(username)}`,
+      { public: true }
+    ),
 };
 

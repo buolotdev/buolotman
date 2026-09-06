@@ -176,8 +176,9 @@ const translations: Record<string, Record<string, string>> = {
 
 export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
-  const id = Number(params?.id);
-  const validId = Number.isFinite(id) ? id : null;
+  const rawParam = params?.id ? decodeURIComponent(params.id).trim() : "";
+  const validIdentifier = rawParam || null;
+  const numericId = /^\d+$/.test(rawParam) ? Number(rawParam) : null;
 
   const [lang, setLang] = useState("en");
 
@@ -194,50 +195,52 @@ export default function PublicProfilePage() {
 
   const { data: profile, loading, error } = useFetch<any>(
     async () => {
-      if (!validId) return null;
+      if (!validIdentifier) return null;
 
       let baseUser: any = null;
 
-      // 1. Try direct user profile
+      // 1. Try direct user profile (supports numeric ID or username / @username)
       try {
-        const userRes = await api.getUserProfile(validId);
+        const userRes = await api.getUserProfile(validIdentifier);
         if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
           baseUser = userRes;
         }
       } catch {}
 
       // 2. Try direct company endpoint
-      try {
-        const compRes = await api.getCompanyById(validId);
-        if (compRes && compRes.id) {
-          baseUser = {
-            ...(baseUser || {}),
-            ...compRes,
-            role: "COMPANY",
-            company_name: compRes.company_name || baseUser?.company_name,
-            trading_name: compRes.trading_name || compRes.company_name || baseUser?.trading_name,
-            company_type: compRes.company_type || baseUser?.company_type,
-            year_founded: compRes.year_founded || baseUser?.year_founded,
-            industry: compRes.industry || baseUser?.industry,
-            subject_title: compRes.subject_title || baseUser?.subject_title,
-            about: compRes.about || compRes.description || baseUser?.about || baseUser?.bio,
-            website: compRes.website || baseUser?.website,
-            headquarters: compRes.headquarters || compRes.city || baseUser?.headquarters,
-            employee_count: compRes.employee_count || compRes.company_size || baseUser?.employee_count,
-            working_hours: compRes.working_hours || compRes.business_hours || baseUser?.working_hours,
-            preferred_language: compRes.preferred_language || baseUser?.preferred_language,
-            logo_url: compRes.logo || compRes.logo_url || baseUser?.logo_url,
-            banner_url: compRes.banner_url || compRes.cover_image || compRes.cover_url || baseUser?.banner_url,
-            is_verified: compRes.is_verified ?? baseUser?.is_verified ?? false,
-            average_rating: compRes.average_rating || baseUser?.average_rating,
-            review_count: compRes.review_count ?? baseUser?.review_count ?? 0,
-            completed_tasks: compRes.completed_tasks ?? baseUser?.completed_tasks ?? 0,
-            services: compRes.services || baseUser?.services || [],
-            projects: compRes.projects || compRes.portfolio || baseUser?.projects || [],
-            team: compRes.team_members || compRes.team || baseUser?.team || [],
-          };
-        }
-      } catch {}
+      if (numericId) {
+        try {
+          const compRes = await api.getCompanyById(numericId);
+          if (compRes && compRes.id) {
+            baseUser = {
+              ...(baseUser || {}),
+              ...compRes,
+              role: "COMPANY",
+              company_name: compRes.company_name || baseUser?.company_name,
+              trading_name: compRes.trading_name || compRes.company_name || baseUser?.trading_name,
+              company_type: compRes.company_type || baseUser?.company_type,
+              year_founded: compRes.year_founded || baseUser?.year_founded,
+              industry: compRes.industry || baseUser?.industry,
+              subject_title: compRes.subject_title || baseUser?.subject_title,
+              about: compRes.about || compRes.description || baseUser?.about || baseUser?.bio,
+              website: compRes.website || baseUser?.website,
+              headquarters: compRes.headquarters || compRes.city || baseUser?.headquarters,
+              employee_count: compRes.employee_count || compRes.company_size || baseUser?.employee_count,
+              working_hours: compRes.working_hours || compRes.business_hours || baseUser?.working_hours,
+              preferred_language: compRes.preferred_language || baseUser?.preferred_language,
+              logo_url: compRes.logo || compRes.logo_url || baseUser?.logo_url,
+              banner_url: compRes.banner_url || compRes.cover_image || compRes.cover_url || baseUser?.banner_url,
+              is_verified: compRes.is_verified ?? baseUser?.is_verified ?? false,
+              average_rating: compRes.average_rating || baseUser?.average_rating,
+              review_count: compRes.review_count ?? baseUser?.review_count ?? 0,
+              completed_tasks: compRes.completed_tasks ?? baseUser?.completed_tasks ?? 0,
+              services: compRes.services || baseUser?.services || [],
+              projects: compRes.projects || compRes.portfolio || baseUser?.projects || [],
+              team: compRes.team_members || compRes.team || baseUser?.team || [],
+            };
+          }
+        } catch {}
+      }
 
       // 3. Fallback to technician users list
       if (!baseUser) {
@@ -331,8 +334,10 @@ export default function PublicProfilePage() {
       if (baseUser) return baseUser;
       throw new Error("Profile not found");
     },
-    [validId]
+    [validIdentifier]
   );
+
+  const validId = profile?.id || numericId;
 
   const { data: meData } = useFetch(
     () => {
@@ -471,12 +476,12 @@ export default function PublicProfilePage() {
     ? `${profile?.experience_years || profile?.technician_profile?.experience_years} ${t.years}` 
     : `10+ ${t.years}`;
 
-  if (validId === null) {
+  if (!validIdentifier) {
     return (
       <div className={styles.page}>
         <Header />
         <div className={styles.mainContent}>
-          <h2>Invalid profile ID.</h2>
+          <h2>Invalid profile URL.</h2>
         </div>
         <Footer />
       </div>

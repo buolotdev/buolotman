@@ -127,6 +127,32 @@ export default function ClientProfilePage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
+  const [usernameAvailability, setUsernameAvailability] = useState<{ available: boolean; message: string } | null>(null);
+  const usernameCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleUsernameChange = (val: string) => {
+    const clean = val.replace(/\s+/g, "_").toLowerCase();
+    setUsername(clean);
+    if (usernameCheckTimerRef.current) clearTimeout(usernameCheckTimerRef.current);
+    const candidate = clean.replace(/^@/, "").trim();
+    if (!candidate || candidate === (user?.username || "").toLowerCase()) {
+      setUsernameAvailability(null);
+      return;
+    }
+    if (candidate.length < 3) {
+      setUsernameAvailability({ available: false, message: "Min 3 characters" });
+      return;
+    }
+    usernameCheckTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await api.checkUsername(candidate);
+        setUsernameAvailability({ available: res.available, message: res.message || (res.available ? "Available ✓" : "Taken ✗") });
+      } catch {
+        setUsernameAvailability(null);
+      }
+    }, 400);
+  };
+
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("Benin");
@@ -412,6 +438,7 @@ export default function ClientProfilePage() {
       await api.updateMe({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
+        username: username.trim().replace(/^@/, ""),
         phone: phone.trim(),
         country: country.trim(),
         city: city.trim(),
@@ -820,6 +847,77 @@ export default function ClientProfilePage() {
 
               <form onSubmit={handleSavePersonal}>
                 <div className={styles.formGrid}>
+                  <div className={styles.formGroup} style={{ gridColumn: "1 / -1", background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, flexWrap: "wrap", gap: 6 }}>
+                      <label htmlFor="client_username" style={{ margin: 0, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, color: "#001f3f" }}>
+                        <iconify-icon icon="lucide:at-sign" style={{ color: "#ff4500", fontSize: 18 }} />
+                        Public Username / Handle
+                      </label>
+                      {usernameAvailability && (
+                        <span style={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: usernameAvailability.available ? "#16a34a" : "#dc2626",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4
+                        }}>
+                          <iconify-icon icon={usernameAvailability.available ? "lucide:check-circle-2" : "lucide:alert-circle"} />
+                          {usernameAvailability.message}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+                      <span style={{
+                        position: "absolute",
+                        left: 14,
+                        color: "#64748b",
+                        fontWeight: 700,
+                        fontSize: "15px",
+                        pointerEvents: "none"
+                      }}>@</span>
+                      <input
+                        id="client_username"
+                        type="text"
+                        className={styles.formInput}
+                        style={{ paddingLeft: 32, background: "#ffffff" }}
+                        value={username}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
+                        placeholder="your_handle"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                      <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
+                        Login with this username or share: <strong>boulotman.com/profile/@{username ? username.replace(/^@/, '') : 'handle'}</strong>
+                      </p>
+                      {username && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/@${username.replace(/^@/, '')}`;
+                            navigator.clipboard.writeText(url);
+                            toast.show("success", "Profile link copied!");
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#ff4500",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: 0
+                          }}
+                        >
+                          <iconify-icon icon="lucide:copy" /> Copy Profile Link
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <div className={styles.formGroup}>
                     <label htmlFor="first_name">
                       <iconify-icon icon="lucide:user" /> {t.firstName}
