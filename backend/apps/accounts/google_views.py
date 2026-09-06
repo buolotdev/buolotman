@@ -95,6 +95,12 @@ def google_login(request):
                 comp_prof.is_verified = False
                 comp_prof.save(update_fields=['is_verified'])
 
+        if created:
+            try:
+                from utils.email_service import send_welcome_email
+                send_welcome_email(user)
+            except Exception:
+                pass
 
         if not created:
             updated_fields = []

@@ -331,6 +331,11 @@ def task_bids(request, task_id):
                 link=f"/dashboard/client/tasks/{task.id}/proposals",
                 metadata={"task_id": task.id, "bid_id": bid.id},
             )
+            try:
+                from utils.email_service import send_new_proposal_email
+                send_new_proposal_email(task=task, bid=bid, client_user=task.client)
+            except Exception as e:
+                logger.warning("Could not send new proposal email: %s", e)
             return Response(BidDetailSerializer(bid).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -369,6 +374,11 @@ def bid_detail(request, bid_id):
                 link=f"/dashboard/technician/tasks/{bid.task.id}",
                 metadata={"task_id": bid.task.id, "bid_id": bid.id},
             )
+            try:
+                from utils.email_service import send_proposal_accepted_email
+                send_proposal_accepted_email(task=bid.task, bid=bid, tech_user=bid.technician)
+            except Exception as e:
+                logger.warning("Could not send proposal accepted email: %s", e)
         elif new_status == 'rejected':
             bid.rejected_at = timezone.now()
             create_notification(

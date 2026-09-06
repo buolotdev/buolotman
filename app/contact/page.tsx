@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./contact.module.css";
 
 const translations: Record<string, Record<string, any>> = {
@@ -102,10 +103,25 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      await api.submitContactForm({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        topic: formData.topic,
+        message: formData.message,
+      });
+    } catch (err) {
+      console.error("Error sending contact message:", err);
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -295,8 +311,8 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <button type="submit" className={styles.submitBtn}>
-                    {t.btnSend} <iconify-icon icon="lucide:send" />
+                  <button type="submit" className={styles.submitBtn} disabled={loading}>
+                    {loading ? "Sending..." : t.btnSend} <iconify-icon icon={loading ? "lucide:loader-2" : "lucide:send"} />
                   </button>
                 </form>
               )}

@@ -217,6 +217,25 @@ def deposit_escrow(request):
                 link=f"/dashboard/client/tasks/{task.id}",
                 metadata={"task_id": task.id, "bid_id": bid.id},
             )
+            try:
+                from utils.email_service import send_payment_escrow_email
+                send_payment_escrow_email(
+                    user=request.user,
+                    amount=amount,
+                    currency=wallet.currency,
+                    task_title=task.title,
+                    action_type='deposit'
+                )
+                if bid and bid.technician:
+                    send_payment_escrow_email(
+                        user=bid.technician,
+                        amount=amount,
+                        currency=wallet.currency,
+                        task_title=task.title,
+                        action_type='deposit'
+                    )
+            except Exception as e:
+                logger.warning("Could not send escrow deposit email: %s", e)
 
     return Response({
         "message": "Escrow deposited",
@@ -310,6 +329,27 @@ def release_escrow(request, task_id):
                 link="/dashboard/technician/wallet",
                 metadata={"task_id": task.id, "amount": str(amount)},
             )
+
+        try:
+            from utils.email_service import send_payment_escrow_email
+            if task.client:
+                send_payment_escrow_email(
+                    user=task.client,
+                    amount=amount,
+                    currency='XAF',
+                    task_title=task.title,
+                    action_type='release'
+                )
+            if task.assigned_to:
+                send_payment_escrow_email(
+                    user=task.assigned_to,
+                    amount=amount,
+                    currency='XAF',
+                    task_title=task.title,
+                    action_type='release'
+                )
+        except Exception as e:
+            logger.warning("Could not send escrow release email: %s", e)
 
     return Response({"message": "Escrow released", "amount": str(amount)})
 

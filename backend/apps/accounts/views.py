@@ -960,6 +960,11 @@ def admin_verify_user(request, user_id):
             link="/dashboard/technician" if user.role == "TECHNICIAN" else "/dashboard/client",
             metadata={"user_id": user.id},
         )
+        try:
+            from utils.email_service import send_verification_approved_email
+            send_verification_approved_email(user)
+        except Exception as e:
+            logger.warning("Could not send verification email to %s: %s", user.email, e)
     return Response({"message": f"{user.email} {'verified' if target_verified else 'unverified'}", "is_verified": target_verified})
 
 
@@ -1271,5 +1276,32 @@ def password_reset_confirm(request):
     return Response({
         "message": "Password has been successfully reset! You can now log in.",
         "success": True
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def submit_contact_form(request):
+    """
+    Handle visitor inquiries submitted via /contact page.
+    """
+    name = (request.data.get('name') or request.data.get('fullName') or '').strip()
+    email = (request.data.get('email') or '').strip()
+    phone = (request.data.get('phone') or '').strip()
+    topic = (request.data.get('topic') or request.data.get('inquiryTopic') or 'General Inquiry').strip()
+    message = (request.data.get('message') or request.data.get('messageDetails') or '').strip()
+
+    if not name or not email or not message:
+        return Response({"error": "Name, email, and message are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        from utils.email_service import send_contact_form_notification
+        send_contact_form_notification(name=name, email=email, phone=phone, topic=topic, message=message)
+    except Exception as e:
+        logger.warning("Could not process contact form notification: %s", e)
+
+    return Response({
+        "success": True,
+        "message": "Thank you for contacting BoulotMan. Your message has been received."
     }, status=status.HTTP_200_OK)
 

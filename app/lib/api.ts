@@ -621,5 +621,12 @@ export const api = {
       tasks_posted_monthly: number;
       successful_completion: number;
     }>("/governance/platform-stats/", { public: true }),
+
+  submitContactForm: (data: { name: string; email: string; phone?: string; topic?: string; message: string }) =>
+    request<{ success: boolean; message: string }>("/auth/contact/", {
+      method: "POST",
+      body: JSON.stringify(data),
+      public: true,
+    }),
 };
 
