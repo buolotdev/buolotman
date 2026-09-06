@@ -25,6 +25,18 @@ def company_profile(request):
         serializer = CompanyProfileSerializer(profile)
         return Response(serializer.data)
     elif request.method == 'PATCH':
+        if 'username' in request.data:
+            raw_u = str(request.data.get('username') or '').strip().lstrip('@')
+            if raw_u:
+                import re
+                from apps.accounts.serializers import RESERVED_USERNAMES
+                from django.contrib.auth import get_user_model
+                UserModel = get_user_model()
+                if len(raw_u) >= 3 and len(raw_u) <= 30 and re.match(r'^[a-zA-Z0-9_]+$', raw_u) and raw_u.lower() not in RESERVED_USERNAMES:
+                    if not UserModel.objects.filter(username__iexact=raw_u).exclude(id=request.user.id).exists():
+                        request.user.username = raw_u.lower()
+                        request.user.save(update_fields=['username'])
+
         serializer = CompanyProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
