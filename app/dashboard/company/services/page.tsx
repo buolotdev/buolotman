@@ -376,8 +376,8 @@ export default function ServicesManagement() {
                 {services.map(svc => (
                   <tr key={svc.id}>
                     <td><strong>{svc.title}</strong></td>
-                    <td>{svc.category || "Construction"}</td>
-                    <td>{svc.pricing_model || "Quote-based"}</td>
+                    <td>{svc.category || "—"}</td>
+                    <td>{svc.pricing_model || "—"}</td>
                     <td>
                       <span className={`${styles.status} ${svc.status === 'Inactive' ? styles.inactiveStatus : styles.activeStatus}`}>
                         {svc.status || 'Active'}

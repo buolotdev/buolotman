@@ -48,6 +48,8 @@ def company_public_profile(request, company_id):
     data['services'] = CompanyServiceSerializer(profile.services.all(), many=True).data
     data['certifications'] = CompanyCertificationSerializer(profile.certifications.all(), many=True).data
     data['reviews'] = CompanyReviewSerializer(profile.reviews.all()[:10], many=True).data
+    data['verification_documents'] = CompanyVerificationDocumentSerializer(profile.verification_documents.all(), many=True).data
+    data['team_members'] = [{'id': m.id, 'name': m.name, 'role': m.role, 'email': m.email, 'status': m.status} for m in profile.team_members.all()]
     return Response(data)
 
 

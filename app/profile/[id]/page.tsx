@@ -51,6 +51,8 @@ const translations: Record<string, Record<string, string>> = {
     verifiedStatus: "Verified ✓",
     activeStatus: "Active ✓",
     pendingStatus: "Under Review",
+    notSubmittedStatus: "Not Submitted",
+    notDeclaredStatus: "Not Declared",
     corporateHQ: "Headquarters & Contact Details",
     physicalAddress: "Physical Headquarters Address",
     officialWebsite: "Official Website",
@@ -131,6 +133,8 @@ const translations: Record<string, Record<string, string>> = {
     verifiedStatus: "Vérifié ✓",
     activeStatus: "Actif ✓",
     pendingStatus: "En cours d'examen",
+    notSubmittedStatus: "Non Fourni",
+    notDeclaredStatus: "Non Déclaré",
     corporateHQ: "Siège Social & Coordonnées",
     physicalAddress: "Adresse Physique du Siège",
     officialWebsite: "Site Web Officiel",
@@ -237,6 +241,8 @@ export default function PublicProfilePage() {
               services: compRes.services || baseUser?.services || [],
               projects: compRes.projects || compRes.portfolio || baseUser?.projects || [],
               team: compRes.team_members || compRes.team || baseUser?.team || [],
+              verification_documents: compRes.verification_documents || baseUser?.verification_documents || [],
+              registration_number: compRes.registration_number || baseUser?.registration_number || "",
             };
           }
         } catch {}
@@ -476,6 +482,78 @@ export default function PublicProfilePage() {
     ? `${profile?.experience_years || profile?.technician_profile?.experience_years} ${t.years}` 
     : `10+ ${t.years}`;
 
+  // Dynamic Legal Compliance Evaluation (Strictly Real Verification & Documents)
+  const docs: any[] = useMemo(() => {
+    if (Array.isArray(profile?.verification_documents) && profile.verification_documents.length > 0) {
+      return profile.verification_documents;
+    }
+    return [];
+  }, [profile]);
+
+  const regNumber = profile?.registration_number || profile?.rccm || "";
+
+  // 1. RCCM Commercial Registration
+  const rccmDoc = docs.find((d: any) => {
+    const title = (d.document_type || d.title || d.file_name || "").toLowerCase();
+    return title.includes("rccm") || title.includes("commercial") || title.includes("registration");
+  });
+  const isRccmVerified = (rccmDoc && rccmDoc.status === "approved") || (Boolean(regNumber) && Boolean(profile?.is_verified));
+  const isRccmPending = (rccmDoc && (rccmDoc.status === "pending" || rccmDoc.status === "under_review")) || (Boolean(regNumber) && !profile?.is_verified);
+  const rccmBadgeText = isRccmVerified 
+    ? t.verifiedStatus 
+    : isRccmPending 
+    ? t.pendingStatus 
+    : (t.notSubmittedStatus || "Not Submitted");
+
+  // 2. IFU Taxpayer Clearance
+  const ifuDoc = docs.find((d: any) => {
+    const title = (d.document_type || d.title || d.file_name || "").toLowerCase();
+    return title.includes("ifu") || title.includes("tax");
+  });
+  const isIfuVerified = ifuDoc && ifuDoc.status === "approved";
+  const isIfuPending = ifuDoc && (ifuDoc.status === "pending" || ifuDoc.status === "under_review");
+  const ifuBadgeText = isIfuVerified 
+    ? t.verifiedStatus 
+    : isIfuPending 
+    ? t.pendingStatus 
+    : (t.notSubmittedStatus || "Not Submitted");
+
+  // 3. Public Liability Insurance
+  const insuranceDoc = docs.find((d: any) => {
+    const title = (d.document_type || d.title || d.file_name || "").toLowerCase();
+    return title.includes("insurance") || title.includes("assurance");
+  });
+  const isInsuranceActive = (insuranceDoc && insuranceDoc.status === "approved") || Boolean(profile?.is_insured);
+  const isInsurancePending = insuranceDoc && (insuranceDoc.status === "pending" || insuranceDoc.status === "under_review");
+  const insuranceBadgeText = isInsuranceActive 
+    ? t.activeStatus 
+    : isInsurancePending 
+    ? t.pendingStatus 
+    : (t.notSubmittedStatus || "Not Submitted");
+
+  // 4. Authorized Legal Representative
+  const repDoc = docs.find((d: any) => {
+    const title = (d.document_type || d.title || d.file_name || "").toLowerCase();
+    return title.includes("representative") || title.includes("authorization") || title.includes("identity") || title.includes("passport");
+  });
+  const isRepVerified = (repDoc && repDoc.status === "approved") || (Boolean(profile?.is_verified) && Boolean(companyName));
+  const isRepPending = repDoc && (repDoc.status === "pending" || repDoc.status === "under_review");
+  const repBadgeText = isRepVerified 
+    ? t.verifiedStatus 
+    : isRepPending 
+    ? t.pendingStatus 
+    : (t.notDeclaredStatus || "Not Declared");
+
+  const getVaultBadgeStyle = (statusText: string) => {
+    if (statusText === t.verifiedStatus || statusText === t.activeStatus) {
+      return { background: "rgba(22, 163, 74, 0.12)", color: "#16a34a", border: "1px solid rgba(22, 163, 74, 0.25)" };
+    }
+    if (statusText === t.pendingStatus) {
+      return { background: "rgba(234, 179, 8, 0.15)", color: "#b45309", border: "1px solid rgba(234, 179, 8, 0.3)" };
+    }
+    return { background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" };
+  };
+
   if (!validIdentifier) {
     return (
       <div className={styles.page}>
@@ -546,27 +624,37 @@ export default function PublicProfilePage() {
                     lastSeenDisplay={profile?.last_seen_display}
                     showText={false}
                     size="lg"
-                    style={{ position: "absolute", bottom: 6, right: 6 }}
+                    style={{ position: "absolute", bottom: 8, right: 8 }}
                   />
                 </div>
 
                 <div className={styles.headerRow}>
                   <div className={styles.nameRole}>
-                    {/* Corporate Trust Badges Row */}
-                    <div className={styles.corporateBadgeRow}>
-                      <span className={`${styles.corporateBadgeItem} ${styles.badgeGreen}`}>
-                        <iconify-icon icon="lucide:building" /> {t.rccmVerified}
-                      </span>
-                      <span className={`${styles.corporateBadgeItem} ${styles.badgeBlue}`}>
-                        <iconify-icon icon="lucide:receipt" /> {t.ifuTaxCompliant}
-                      </span>
-                      <span className={`${styles.corporateBadgeItem} ${styles.badgeGreen}`}>
-                        <iconify-icon icon="lucide:shield-check" /> {t.insuredBadge}
-                      </span>
-                      <span className={`${styles.corporateBadgeItem} ${styles.badgeOrange}`}>
-                        <iconify-icon icon="lucide:award" /> {t.capabilityVerified}
-                      </span>
-                    </div>
+                    {/* Corporate Trust Badges Row - Strictly Conditional */}
+                    {(isRccmVerified || isIfuVerified || isInsuranceActive || profile?.is_verified) && (
+                      <div className={styles.corporateBadgeRow}>
+                        {isRccmVerified && (
+                          <span className={`${styles.corporateBadgeItem} ${styles.badgeGreen}`}>
+                            <iconify-icon icon="lucide:building" /> {t.rccmVerified}
+                          </span>
+                        )}
+                        {isIfuVerified && (
+                          <span className={`${styles.corporateBadgeItem} ${styles.badgeBlue}`}>
+                            <iconify-icon icon="lucide:receipt" /> {t.ifuTaxCompliant}
+                          </span>
+                        )}
+                        {isInsuranceActive && (
+                          <span className={`${styles.corporateBadgeItem} ${styles.badgeGreen}`}>
+                            <iconify-icon icon="lucide:shield-check" /> {t.insuredBadge}
+                          </span>
+                        )}
+                        {profile?.is_verified && (
+                          <span className={`${styles.corporateBadgeItem} ${styles.badgeOrange}`}>
+                            <iconify-icon icon="lucide:award" /> {t.capabilityVerified}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <h1 className={styles.name}>
                       {companyName}
@@ -678,7 +766,9 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className={styles.corporateStatLabel}>{t.insuranceCover}</div>
-                  <h3 className={styles.corporateStatValue}>{profile?.is_verified ? t.insuredBadge : t.escrowGuaranteed}</h3>
+                  <h3 className={styles.corporateStatValue}>
+                    {isInsuranceActive ? t.insuredBadge : isInsurancePending ? t.pendingStatus : (t.notDeclaredStatus || "Not Declared")}
+                  </h3>
                 </div>
               </div>
             </div>
@@ -834,9 +924,18 @@ export default function PublicProfilePage() {
                     <div className={styles.vaultItem}>
                       <div className={styles.vaultLeft}>
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:building" /></div>
-                        <span className={styles.vaultTitle}>{t.rccmRegVal}</span>
+                        <div>
+                          <span className={styles.vaultTitle}>{t.rccmRegVal}</span>
+                          {regNumber ? (
+                            <span style={{ display: "block", color: "#64748b", fontSize: 11, fontWeight: 500 }}>
+                              N° {regNumber}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
+                      <span className={styles.vaultBadge} style={getVaultBadgeStyle(rccmBadgeText)}>
+                        {rccmBadgeText}
+                      </span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -844,7 +943,9 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:receipt" /></div>
                         <span className={styles.vaultTitle}>{t.ifuTaxVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
+                      <span className={styles.vaultBadge} style={getVaultBadgeStyle(ifuBadgeText)}>
+                        {ifuBadgeText}
+                      </span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -852,7 +953,9 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:shield-check" /></div>
                         <span className={styles.vaultTitle}>{t.insuranceVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.activeStatus : t.pendingStatus}</span>
+                      <span className={styles.vaultBadge} style={getVaultBadgeStyle(insuranceBadgeText)}>
+                        {insuranceBadgeText}
+                      </span>
                     </div>
 
                     <div className={styles.vaultItem}>
@@ -860,7 +963,9 @@ export default function PublicProfilePage() {
                         <div className={styles.vaultIcon}><iconify-icon icon="lucide:user-check" /></div>
                         <span className={styles.vaultTitle}>{t.repVal}</span>
                       </div>
-                      <span className={styles.vaultBadge}>{profile?.is_verified ? t.verifiedStatus : t.pendingStatus}</span>
+                      <span className={styles.vaultBadge} style={getVaultBadgeStyle(repBadgeText)}>
+                        {repBadgeText}
+                      </span>
                     </div>
                   </div>
                 </div>
