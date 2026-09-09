@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from utils.rate_limit import AuthLoginThrottle
@@ -13,11 +14,49 @@ import requests as python_requests
 
 User = get_user_model()
 
+
+def generate_unique_username(email):
+    base = (email.split('@', 1)[0] or 'user').lower()
+    base = ''.join(ch for ch in base if ch.isalnum() or ch in '._-')[:140] or 'user'
+    username = base
+    suffix = 1
+    while User.objects.filter(username=username).exists():
+        suffix += 1
+        username = f'{base}_{suffix}'[:150]
+    return username
+
+
+def _send_google_signup_notifications(user):
+    try:
+        send_mail(
+            subject='Welcome to Boulot Man',
+            message=f'Welcome to Boulot Man, {user.first_name or user.email}. Your account is pending verification where required.',
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+    try:
+        from apps.governance.services import notify_users
+        admins = User.objects.filter(role='ADMIN', is_active=True)
+        notify_users(
+            admins,
+            category='verification',
+            title='New Google account requires review',
+            body=f'{user.email} registered as {user.role} and is awaiting verification.',
+            link=f'/admin/users/{user.id}',
+            metadata={'user_id': user.id, 'role': user.role},
+        )
+    except Exception:
+        pass
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @throttle_classes([AuthLoginThrottle])
 def google_login(request):
-    token = request.data.get('token')
+    token = request.data.get('token') or request.data.get('id_token')
     if not token:
         return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -38,82 +77,57 @@ def google_login(request):
 
         # Get requested role
         explicit_role = request.data.get('role')
-        is_signup = bool(request.data.get('is_signup'))
-        if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'ADMIN']:
+        if explicit_role and str(explicit_role).upper() in ['TECHNICIAN', 'COMPANY', 'CLIENT']:
             requested_role = str(explicit_role).upper()
         else:
             requested_role = 'CLIENT'
 
-        # Check existing user
-        email_normalized = email.strip().lower()
-        user = User.objects.filter(email__iexact=email_normalized).first()
-        created = False
+        # Signup must never reuse or mutate an existing account. Login omits
+        # this flag and is allowed to authenticate the existing account.
+        is_signup = request.data.get('is_signup') is True or str(request.data.get('is_signup', '')).lower() == 'true'
 
-        if user:
-            existing_role = (user.role or 'user').title()
-            # If user explicitly requested signup, reject because account already exists
-            if is_signup:
-                return Response({
-                    'error': f'An account with this email ({user.email}) already exists as a {existing_role}. An email cannot be used for multiple accounts. Please log in instead.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            # If user requested a different role than the existing account, reject
-            if explicit_role and str(user.role).upper() != requested_role:
-                return Response({
-                    'error': f'This email ({user.email}) is already registered as a {existing_role}. You cannot register or sign in as a {requested_role.title()} with this email address.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-        if not user:
-            from apps.accounts.serializers import generate_unique_username
-            clean_name = f"{first_name} {last_name}".strip()
-            unique_handle = generate_unique_username(base_name=clean_name, email=email_normalized)
-            # All newly created accounts start unverified until Admin Approval
-            user = User.objects.create(
-                email=email_normalized,
-                first_name=first_name,
-                last_name=last_name,
-                username=unique_handle,
-                role=requested_role,
-                avatar_url=picture,
-                is_verified=False,
+        # Login and signup are deliberately separate flows. Login must never
+        # provision a new account or silently default it to CLIENT.
+        existing_user = User.objects.filter(email__iexact=email).first()
+        if not is_signup and existing_user is None:
+            return Response(
+                {'error': 'No account was found with this Google email. Please sign up first.'},
+                status=status.HTTP_404_NOT_FOUND,
             )
-            created = True
-            try:
-                from utils.email_service import send_welcome_email
-                send_welcome_email(user)
-            except Exception:
-                pass
 
-            try:
-                from apps.governance.services import create_notification
-                admins = User.objects.filter(role__iexact='ADMIN')
-                for adm in admins:
-                    create_notification(
-                        user=adm,
-                        category="verification",
-                        title=f"New {user.role} Verification Request",
-                        body=f"{user.first_name} {user.last_name} ({user.email}) registered as {user.role} and is awaiting approval.",
-                        link="/dashboard/admin/verification",
-                        metadata={"applicant_id": user.id, "applicant_email": user.email, "role": user.role}
-                    )
-            except Exception:
-                pass
+        # All newly created accounts start unverified until Admin approval.
+        user, created = User.objects.get_or_create(email=email, defaults={
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': generate_unique_username(email),
+            'role': requested_role,
+            'avatar_url': picture,
+            'is_verified': False,
+        })
+
+        if is_signup and not created:
+            return Response(
+                {'error': 'An account with this email already exists. Please log in instead.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        if created:
+            if user.role == 'COMPANY':
+                from apps.companies.models import CompanyProfile
+                CompanyProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'company_name': f'{first_name} {last_name}'.strip() or email.split('@', 1)[0]},
+                )
+            _send_google_signup_notifications(user)
 
         from apps.accounts.models import TechnicianProfile
-        from apps.companies.models import CompanyProfile
         if user.role == 'TECHNICIAN':
-            tech_prof, _ = TechnicianProfile.objects.get_or_create(user=user)
-            if created:
-                tech_prof.is_verified = False
-                tech_prof.save(update_fields=['is_verified'])
-        elif user.role == 'COMPANY':
-            comp_prof, _ = CompanyProfile.objects.get_or_create(user=user)
-            if created:
-                comp_prof.is_verified = False
-                comp_prof.save(update_fields=['is_verified'])
+            TechnicianProfile.objects.get_or_create(user=user)
 
         if not created:
             updated_fields = []
+            # An existing account owns its role. Google login must never
+            # mutate RBAC based on a client-provided role value.
             if not user.first_name and first_name:
                 user.first_name = first_name
                 updated_fields.append('first_name')

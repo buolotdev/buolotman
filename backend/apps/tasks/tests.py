@@ -16,7 +16,8 @@ class TasksAPITests(APITestCase):
             role="CLIENT",
             first_name="John",
             last_name="Doe",
-            phone="+1234567890"
+            phone="+1234567890",
+            is_verified=True
         )
         self.tech_user = User.objects.create_user(
             username="tech@test.com",
@@ -25,7 +26,8 @@ class TasksAPITests(APITestCase):
             role="TECHNICIAN",
             first_name="Jane",
             last_name="Technician",
-            phone="+1987654321"
+            phone="+1987654321",
+            is_verified=True
         )
         
         # Create a category

@@ -26,7 +26,8 @@ class AccountsAPITests(APITestCase):
             role="TECHNICIAN",
             first_name="Jane",
             last_name="Technician",
-            phone="+1987654321"
+            phone="+1987654321",
+            is_verified=True,
         )
         self.admin_user = User.objects.create_user(
             username="admin@test.com",

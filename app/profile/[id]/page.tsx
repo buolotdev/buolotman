@@ -380,8 +380,8 @@ export default function PublicProfilePage() {
   const techCategory = profile?.category || profile?.primary_occupation || profile?.trade_category || "General Technical";
   const techHeadline = profile?.headline || profile?.technician_profile?.headline || `Certified ${techCategory} Specialist`;
   const techCity = profile?.city || profile?.technician_profile?.city || profile?.address || "";
-  const techCountry = profile?.country || profile?.technician_profile?.country || "Benin";
-  const techLocation = techCity && techCountry ? `${techCity}, ${techCountry}` : (techCity || techCountry || "Benin");
+  const techCountry = profile?.country || profile?.technician_profile?.country || "";
+  const techLocation = techCity && techCountry ? `${techCity}, ${techCountry}` : (techCity || techCountry || "");
 
   // Initials
   const initials = isCompany
@@ -389,10 +389,10 @@ export default function PublicProfilePage() {
     : (`${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase() || "SP");
 
   // Ratings & Completed
-  const hasRating = profile?.average_rating && Number(profile.average_rating) > 0;
+  const hasRating = Boolean(profile?.average_rating && Number(profile.average_rating) > 0 && profile?.review_count && Number(profile.review_count) > 0);
   const ratingDisplay = hasRating
     ? `${Number(profile?.average_rating).toFixed(1)} / 5.0`
-    : "5.0 / 5.0";
+    : "New";
 
   const reviewsCount = profile?.review_count ?? 0;
   const completedJobs = profile?.completed_tasks ?? profile?.tasks_completed_count ?? profile?.completed_jobs ?? 0;

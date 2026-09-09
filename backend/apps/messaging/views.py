@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from apps.governance.services import create_notification, create_audit_log
 from utils.storage import upload_file
@@ -56,6 +58,19 @@ def send_message(request, conversation_id):
         message = serializer.save(conversation=conversation, sender=request.user)
         conversation.last_message_at = timezone.now()
         conversation.save(update_fields=['last_message_at'])
+        # Broadcast to WebSocket clients in this conversation group
+        channel_layer = get_channel_layer()
+        if channel_layer is not None:
+            async_to_sync(channel_layer.group_send)(
+                f'conversation_{conversation.id}',
+                {
+                    'type': 'chat_message',
+                    'payload': {
+                        'type': 'message',
+                        'message': MessageSerializer(message).data,
+                    },
+                },
+            )
         recipients = [user for user in conversation.participants.all() if user != request.user]
         for recipient in recipients:
             create_notification(
@@ -121,6 +136,14 @@ def create_conversation(request):
     participant_id = request.data.get('participant_id')
     task_id = request.data.get('task_id')
     participant_name = request.data.get('participant_name')
+    context_type = str(request.data.get('context_type', '')).strip().lower()
+    context_id = request.data.get('context_id')
+    if context_type not in ('', 'quote', 'project', 'task'):
+        return Response({'error': 'Invalid conversation context.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        context_id = int(context_id) if context_id is not None else None
+    except (TypeError, ValueError):
+        return Response({'error': 'context_id must be numeric.'}, status=status.HTTP_400_BAD_REQUEST)
 
     from django.contrib.auth import get_user_model
     from django.db.models import Q
@@ -161,12 +184,18 @@ def create_conversation(request):
     existing = Conversation.objects.filter(participants=request.user).filter(participants=participant)
     if task_id:
         existing = existing.filter(task_id=task_id)
+    elif context_type and context_id:
+        existing = existing.filter(context_type=context_type, context_id=context_id)
     conversation = existing.first()
 
     if conversation:
         return Response(ConversationDetailSerializer(conversation).data)
 
-    conversation = Conversation.objects.create(task_id=task_id)
+    conversation = Conversation.objects.create(
+        task_id=task_id,
+        context_type=context_type,
+        context_id=context_id,
+    )
     conversation.participants.add(request.user, participant)
     create_audit_log(
         actor=request.user,

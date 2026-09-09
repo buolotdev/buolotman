@@ -31,9 +31,11 @@ class WalletAPITests(APITestCase):
         self.client_wallet, _ = Wallet.objects.get_or_create(user=self.client_user)
         self.tech_wallet, _ = Wallet.objects.get_or_create(user=self.tech_user)
 
-        # Pre-fund client wallet available balance to test withdrawals/escrow deposits
+        # Pre-fund wallets
         self.client_wallet.available_balance = 50000.00
         self.client_wallet.save()
+        self.tech_wallet.available_balance = 50000.00
+        self.tech_wallet.save()
 
         # Create category & task
         self.category = Category.objects.create(name="Plumbing", slug="plumbing")
@@ -63,7 +65,7 @@ class WalletAPITests(APITestCase):
         self.assertEqual(float(response.data["available_balance"]), 50000.00)
 
     def test_withdraw_funds(self):
-        self.client.force_authenticate(user=self.client_user)
+        self.client.force_authenticate(user=self.tech_user)
         url = reverse("withdraw_funds")
         data = {
             "amount": 20000.00,
@@ -71,8 +73,8 @@ class WalletAPITests(APITestCase):
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.client_wallet.refresh_from_db()
-        self.assertEqual(float(self.client_wallet.available_balance), 30000.00)
+        self.tech_wallet.refresh_from_db()
+        self.assertEqual(float(self.tech_wallet.available_balance), 30000.00)
 
     def test_deposit_and_release_escrow(self):
         self.client.force_authenticate(user=self.client_user)
@@ -105,4 +107,4 @@ class WalletAPITests(APITestCase):
         self.client_wallet.refresh_from_db()
         self.tech_wallet.refresh_from_db()
         self.assertEqual(float(self.client_wallet.pending_escrow), 0.00)
-        self.assertEqual(float(self.tech_wallet.available_balance), 15000.00)
+        self.assertEqual(float(self.tech_wallet.available_balance), 65000.00)  # 50000 pre-funded + 15000 escrow released

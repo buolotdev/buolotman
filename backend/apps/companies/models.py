@@ -126,6 +126,33 @@ class CompanyCertification(models.Model):
         return self.title
 
 
+class CompanyVerificationDocument(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+
+    company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='verification_documents')
+    document_type = models.CharField(max_length=100)
+    file_url = models.URLField(max_length=500)
+    storage_key = models.CharField(max_length=500, blank=True)
+    file_name = models.CharField(max_length=255)
+    file_size = models.PositiveIntegerField(default=0)
+    content_type = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_feedback = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'companies_verification_document'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.company.company_name} - {self.document_type}'
+
+
 class CompanyReview(models.Model):
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='reviews')
     reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='company_reviews')

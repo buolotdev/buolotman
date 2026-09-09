@@ -122,8 +122,32 @@ export default function ServicesManagement() {
     status: "Active"
   });
 
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const isVerified = Boolean(user?.is_verified || (profile as any)?.is_verified);
+
+  const handleEdit = (svc: any) => {
+    setEditingId(svc.id);
+    setForm({
+      title: svc.title || "",
+      category: svc.category || "Construction",
+      pricing_model: svc.pricing_model || "Quote-based",
+      description: svc.description || "",
+      status: svc.status || "Active"
+    });
+    window.scrollTo({ top: 220, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setForm({
+      title: "",
+      category: "Construction",
+      pricing_model: "Quote-based",
+      description: "",
+      status: "Active"
+    });
+  };
 
   const handleSave = async () => {
     if (!isVerified) {
@@ -140,8 +164,14 @@ export default function ServicesManagement() {
     }
     setSaving(true);
     try {
-      await api.createCompanyService(form);
-      toast.success(lang === "fr" ? "Service enregistré" : "Service saved", `"${form.title}"`);
+      if (editingId) {
+        await api.updateCompanyService(editingId, form);
+        toast.success(lang === "fr" ? "Service mis à jour" : "Service Updated", `"${form.title}"`);
+        setEditingId(null);
+      } else {
+        await api.createCompanyService(form);
+        toast.success(lang === "fr" ? "Service enregistré" : "Service saved", `"${form.title}"`);
+      }
       setForm({
         title: "",
         category: "Construction",
@@ -169,12 +199,14 @@ export default function ServicesManagement() {
           variant: "danger"
         });
         if (ok) {
-          await api.deleteCompanyService(id);
-          toast.success(lang === "fr" ? "Service désactivé" : "Service deactivated", lang === "fr" ? "Le service a été retiré." : "The service has been removed.");
+          await api.updateCompanyService(id, { status: 'Inactive' });
+          toast.success(lang === "fr" ? "Service désactivé" : "Service deactivated", lang === "fr" ? "Le service a été masqué." : "The service has been hidden.");
           await refetch();
         }
       } else {
-        toast.info(lang === "fr" ? "Mise à jour requise" : "Update required", lang === "fr" ? "La modification sera bientôt disponible." : "Editing services will be available soon.");
+        await api.updateCompanyService(id, { status: 'Active' });
+        toast.success(lang === "fr" ? "Service activé" : "Service activated", lang === "fr" ? "Le service est maintenant visible." : "The service is now visible to clients.");
+        await refetch();
       }
     } catch (err: any) {
       toast.error("Action failed", err.message);
@@ -250,9 +282,23 @@ export default function ServicesManagement() {
         </div>
       </div>
 
-      {/* ADD SERVICE FORM */}
+      {/* ADD / EDIT SERVICE FORM */}
       <div className={styles.card}>
-        <h3>{t.addNewService}</h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h3 style={{ margin: 0 }}>
+            {editingId ? (lang === "fr" ? "Modifier le Service" : "Edit Service") : t.addNewService}
+          </h3>
+          {editingId && (
+            <button
+              type="button"
+              className={styles.outline}
+              onClick={handleCancelEdit}
+              style={{ padding: "6px 14px", fontSize: 13 }}
+            >
+              {lang === "fr" ? "Annuler" : "Cancel Edit"}
+            </button>
+          )}
+        </div>
 
         <label className={styles.label}>{t.serviceName}</label>
         <input 
@@ -297,9 +343,16 @@ export default function ServicesManagement() {
           <option value="Inactive">{t.inactiveOption}</option>
         </select>
 
-        <button className={styles.primary} onClick={handleSave} disabled={saving}>
-          {saving ? t.saving : t.saveService}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+          <button className={styles.primary} onClick={handleSave} disabled={saving}>
+            {saving ? t.saving : editingId ? (lang === "fr" ? "Mettre à jour le service" : "Update Service") : t.saveService}
+          </button>
+          {editingId && (
+            <button type="button" className={styles.outline} onClick={handleCancelEdit}>
+              {lang === "fr" ? "Annuler" : "Cancel"}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* SERVICES LIST */}
@@ -331,7 +384,7 @@ export default function ServicesManagement() {
                       </span>
                     </td>
                     <td>
-                      <button className={styles.outline} onClick={() => toast.info("Edit", "Editing will open the form with data soon.")}>{t.edit}</button>
+                      <button className={styles.outline} onClick={() => handleEdit(svc)}>{t.edit}</button>
                       <button className={styles.outline} onClick={() => toggleStatus(svc.id, svc.status || 'Active')}>
                         {svc.status === 'Inactive' ? t.activate : t.deactivate}
                       </button>

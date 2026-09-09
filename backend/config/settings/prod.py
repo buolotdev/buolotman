@@ -15,23 +15,21 @@ DATABASE_URL = config('DATABASE_URL', default='')
 if not DATABASE_URL:
     import platform
     if platform.system() == 'Linux':
-        persistent_dir = Path('/var/data')
-        try:
-            persistent_dir.mkdir(parents=True, exist_ok=True)
-            db_path = persistent_dir / 'boulotman.sqlite3'
-            if not db_path.exists() and (BASE_DIR / 'db.sqlite3').exists():
-                import shutil
-                shutil.copyfile(BASE_DIR / 'db.sqlite3', db_path)
-            import os
+        import shutil
+        import os
+        db_path = Path('/tmp/boulotman.sqlite3')
+        orig_db = BASE_DIR / 'db.sqlite3'
+        if not db_path.exists() and orig_db.exists():
             try:
-                os.chmod(persistent_dir, 0o777)
-                if db_path.exists():
-                    os.chmod(db_path, 0o666)
+                shutil.copyfile(orig_db, db_path)
             except Exception:
                 pass
-            DATABASE_URL = f"sqlite:///{db_path}"
+        try:
+            if db_path.exists():
+                os.chmod(db_path, 0o666)
         except Exception:
-            DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+            pass
+        DATABASE_URL = f"sqlite:///{db_path}"
     else:
         DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
     

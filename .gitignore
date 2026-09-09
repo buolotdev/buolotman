@@ -58,6 +58,10 @@ db.sqlite3
 .mypy_cache/
 
 # Scratch / temp files
+*.bak
+_backups_*/
+mobile developer files/
+*.zip
 check_out.txt
 seed_out.txt
 server.err.log

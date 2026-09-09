@@ -331,46 +331,17 @@ export const TAB_ORDER = [
 
 export type TabType = typeof TAB_ORDER[number];
 
-const DEFAULT_TEAM: TeamMember[] = [
-  {
-    id: "tm-1",
-    name: "Nelson Tagor",
-    role: "Managing Director / CEO",
-    qualification: "M.Sc. Civil & Structural Engineering",
-    experienceYears: "14+ Years",
-  },
-  {
-    id: "tm-2",
-    name: "Marcelle Dossou",
-    role: "Lead Project Manager",
-    qualification: "PMP Certified / B.Sc. Construction Mgmt",
-    experienceYears: "9+ Years",
-  },
-  {
-    id: "tm-3",
-    name: "Alexandre Houeto",
-    role: "Chief Electrical & Solar Engineer",
-    qualification: "Chartered Electrical Engineer (OIB)",
-    experienceYears: "11+ Years",
-  }
-];
+const DEFAULT_TEAM: TeamMember[] = [];
 
 const DEFAULT_CAPABILITIES = {
-  maxProjectBudget: "250,000,000 XOF",
-  simultaneousProjects: "5 Sites",
-  permanentWorkforce: "42 Staff",
-  qualifiedEngineers: "8 Engineers",
-  fieldSupervisors: "6 Supervisors",
-  geographicMobility: "Nationwide & Cross-Border (West Africa)",
-  facilities: "Central Workshop & 1,200m² Storage Depot",
-  equipment: [
-    "Caterpillar 320D Excavator",
-    "2x Mercedes 20T Dump Trucks",
-    "Potain Self-Erecting Tower Crane",
-    "50kVA Perkins Diesel Backup Generator",
-    "Total Station Leica TS07 Survey Gear",
-    "Heavy Scaffolding Systems (2,000m²)"
-  ]
+  maxProjectBudget: "",
+  simultaneousProjects: "",
+  permanentWorkforce: "",
+  qualifiedEngineers: "",
+  fieldSupervisors: "",
+  geographicMobility: "",
+  facilities: "",
+  equipment: [] as string[]
 };
 
 export default function CompanyProfilePage() {
@@ -416,20 +387,20 @@ export default function CompanyProfilePage() {
     trading_name: "",
     company_type: "Limited Liability Company (SARL)",
     year_founded: "",
-    industry: "Civil & Building Construction",
+    industry: "",
     subject_title: "",
     about: "",
     website: "",
     country: "",
     city: "",
     headquarters: "",
-    employee_count: "25 - 50 Employees",
+    employee_count: "",
     primary_contact_name: "",
     primary_contact_role: "",
     primary_phone: "",
     primary_email: "",
     preferred_language: "fr",
-    working_hours: "Mon - Sat: 07:30 - 18:00",
+    working_hours: "",
     areas_of_expertise: [] as string[],
     services_offered: [] as string[],
   });
@@ -478,12 +449,12 @@ export default function CompanyProfilePage() {
   const [newTeamExp, setNewTeamExp] = useState("");
 
   // Form State - Insurance, Banking & Matchmaking
-  const [insurancePolicyNo, setInsurancePolicyNo] = useState("AXA-BENIN-PL-902341");
-  const [insuranceProvider, setInsuranceProvider] = useState("AXA Assurances Bénin");
-  const [insuranceCoverage, setInsuranceCoverage] = useState("500,000,000 XOF Public Liability");
-  const [bankName, setBankName] = useState("Bank of Africa (BOA)");
-  const [accountNumber, setAccountNumber] = useState("BJ061 01001 0023491823 45");
-  const [swiftBic, setSwiftBic] = useState("AFRIBJBJ");
+  const [insurancePolicyNo, setInsurancePolicyNo] = useState("");
+  const [insuranceProvider, setInsuranceProvider] = useState("");
+  const [insuranceCoverage, setInsuranceCoverage] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [swiftBic, setSwiftBic] = useState("");
   const [matchLargeBidding, setMatchLargeBidding] = useState(true);
   const [matchSubcontracting, setMatchSubcontracting] = useState(true);
   const [matchConcierge, setMatchConcierge] = useState(true);
@@ -524,20 +495,20 @@ export default function CompanyProfilePage() {
         trading_name: profile.trading_name || profile.company_name || user?.company_name || "",
         company_type: profile.company_type || "Limited Liability Company (SARL)",
         year_founded: profile.year_founded || "",
-        industry: profile.industry || "Construction",
+        industry: profile.industry || "",
         subject_title: profile.subject_title || "",
         about: profile.about || "",
         website: profile.website || "",
-        country: profile.country || user?.country || "Benin",
-        city: profile.city || user?.city || "Cotonou",
+        country: profile.country || user?.country || "",
+        city: profile.city || user?.city || "",
         headquarters: profile.headquarters || user?.address || "",
-        employee_count: profile.employee_count || "25 - 50 Employees",
+        employee_count: profile.employee_count || "",
         primary_contact_name: profile.primary_contact_name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim(),
-        primary_contact_role: profile.primary_contact_role || "Managing Director",
+        primary_contact_role: profile.primary_contact_role || "",
         primary_phone: profile.primary_phone || user?.phone || "",
         primary_email: profile.primary_email || user?.email || "",
         preferred_language: profile.preferred_language || "fr",
-        working_hours: profile.working_hours || "Mon - Sat: 07:30 - 18:00",
+        working_hours: profile.working_hours || "",
         areas_of_expertise: Array.isArray(profile.areas_of_expertise) ? profile.areas_of_expertise : [],
         services_offered: Array.isArray(profile.services_offered) ? profile.services_offered : [],
       });
@@ -1018,11 +989,22 @@ export default function CompanyProfilePage() {
                 </span>
               </div>
               <div className={styles.metaList}>
-                <span><iconify-icon icon="lucide:building-2" /> {form.industry || "Commercial & Industrial"}</span>
-                <span><iconify-icon icon="lucide:map-pin" /> {form.city ? `${form.city}, ` : ""}{form.country || "Benin"}</span>
-                {form.year_founded && <span><iconify-icon icon="lucide:calendar" /> Est. {form.year_founded}</span>}
-                {capabilities.permanentWorkforce && <span><iconify-icon icon="lucide:users" /> {capabilities.permanentWorkforce}</span>}
-                <span><iconify-icon icon="lucide:star" /> {profile?.average_rating && Number(profile.average_rating) > 0 ? Number(profile.average_rating).toFixed(1) : "5.0"} ({profile?.review_count ?? 0} {t.reviews})</span>
+                {form.industry && <span><iconify-icon icon="lucide:building-2" /> {form.industry}</span>}
+                {(form.city || form.country) ? (
+                  <span><iconify-icon icon="lucide:map-pin" /> {[form.city, form.country].filter(Boolean).join(", ")}</span>
+                ) : null}
+                {form.year_founded ? (
+                  <span><iconify-icon icon="lucide:calendar" /> Est. {form.year_founded}</span>
+                ) : null}
+                {(capabilities.permanentWorkforce || form.employee_count) ? (
+                  <span><iconify-icon icon="lucide:users" /> {capabilities.permanentWorkforce || form.employee_count}</span>
+                ) : null}
+                <span>
+                  <iconify-icon icon="lucide:star" />{" "}
+                  {profile?.review_count && Number(profile.review_count) > 0 && profile?.average_rating && Number(profile.average_rating) > 0
+                    ? `${Number(profile.average_rating).toFixed(1)} (${profile.review_count} ${t.reviews})`
+                    : `New (0 ${t.reviews})`}
+                </span>
               </div>
             </div>
           </div>
@@ -1564,19 +1546,19 @@ export default function CompanyProfilePage() {
           {/* Quick Metrics Grid */}
           <div className={styles.capabilitiesGrid}>
             <div className={styles.capStatCard}>
-              <span className={styles.capStatNumber}>{capabilities.maxProjectBudget}</span>
+              <span className={styles.capStatNumber}>{capabilities.maxProjectBudget || "—"}</span>
               <span className={styles.capStatLabel}>{t.maxProjectCapacity}</span>
             </div>
             <div className={styles.capStatCard}>
-              <span className={styles.capStatNumber}>{capabilities.simultaneousProjects}</span>
+              <span className={styles.capStatNumber}>{capabilities.simultaneousProjects || "—"}</span>
               <span className={styles.capStatLabel}>{t.concurrentSites}</span>
             </div>
             <div className={styles.capStatCard}>
-              <span className={styles.capStatNumber}>{capabilities.qualifiedEngineers}</span>
+              <span className={styles.capStatNumber}>{capabilities.qualifiedEngineers || "—"}</span>
               <span className={styles.capStatLabel}>{t.charteredEngineers}</span>
             </div>
             <div className={styles.capStatCard}>
-              <span className={styles.capStatNumber}>{capabilities.permanentWorkforce}</span>
+              <span className={styles.capStatNumber}>{capabilities.permanentWorkforce || form.employee_count || "—"}</span>
               <span className={styles.capStatLabel}>{t.permanentWorkforce}</span>
             </div>
           </div>

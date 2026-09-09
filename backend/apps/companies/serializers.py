@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyReview, QuoteRequest, CompanyActivity
+from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyVerificationDocument, CompanyReview, QuoteRequest, CompanyActivity
 
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
@@ -57,6 +57,13 @@ class CompanyCertificationSerializer(serializers.ModelSerializer):
         model = CompanyCertification
         fields = ['id', 'title', 'description', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class CompanyVerificationDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyVerificationDocument
+        fields = ['id', 'document_type', 'file_url', 'storage_key', 'file_name', 'file_size', 'content_type', 'status', 'admin_feedback', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'file_url', 'storage_key', 'file_name', 'file_size', 'content_type', 'status', 'admin_feedback', 'created_at', 'updated_at']
 
 class CompanyReviewSerializer(serializers.ModelSerializer):
     reviewer_name = serializers.SerializerMethodField()

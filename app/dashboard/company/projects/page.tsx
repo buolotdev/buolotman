@@ -10,6 +10,8 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import { formatXOF } from "@/app/lib/format";
+import { useToast } from "@/app/components/Toast";
+import { useDialog } from "@/app/components/Dialog";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -57,8 +59,11 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 export default function CompanyProjects() {
+  const toast = useToast();
+  const dialog = useDialog();
   const [activeNav, setActiveNav] = useState("projects");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending" | "completed">("all");
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   const [lang, setLang] = useState("en");
 
   useEffect(() => {
@@ -70,13 +75,47 @@ export default function CompanyProjects() {
     return () => window.removeEventListener("languageChange", updateLang);
   }, []);
 
+  useEffect(() => {
+    const closeMenu = () => setMenuOpenId(null);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, []);
+
   const t = translations[lang] || translations["en"];
 
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
-  const { data: projectsData, loading: projectsLoading, error } = useFetch(
+  const { data: projectsData, loading: projectsLoading, error, refetch: refetchProjects } = useFetch(
     () => api.getCompanyProjects(),
     []
   );
+
+  const handleDeleteProject = async (projectId: number, title: string) => {
+    setMenuOpenId(null);
+    const ok = await dialog.confirm({
+      title: lang === "fr" ? "Supprimer le projet ?" : "Delete Project?",
+      message: lang === "fr" ? `Êtes-vous sûr de vouloir supprimer "${title}" ?` : `Are you sure you want to delete "${title}"? This cannot be undone.`,
+      confirmText: lang === "fr" ? "Supprimer" : "Delete",
+      cancelText: lang === "fr" ? "Annuler" : "Cancel",
+      variant: "danger"
+    });
+    if (!ok) return;
+
+    try {
+      await api.deleteCompanyProject(projectId);
+      toast.success(lang === "fr" ? "Projet supprimé" : "Project Deleted", title);
+      await refetchProjects();
+    } catch (err: any) {
+      toast.error(lang === "fr" ? "Erreur" : "Error", err?.message || "Failed to delete project");
+    }
+  };
+
+  const handleCopyProjectId = (projectId: number) => {
+    setMenuOpenId(null);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(String(projectId));
+      toast.info(lang === "fr" ? "ID copié" : "Copied", `Project #${projectId} ID copied.`);
+    }
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const projects = (Array.isArray(projectsData) ? projectsData : projectsData?.results ?? []) as any[];
@@ -201,9 +240,130 @@ export default function CompanyProjects() {
                       <h3 className={styles.projectTitle}>{project.title || project.name || ""}</h3>
                       {statusBadge(project.status)}
                     </div>
-                    <button className={styles.btnIconOnly}>
-                      <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
-                    </button>
+                    <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className={styles.btnIconOnly}
+                        onClick={() => setMenuOpenId(menuOpenId === project.id ? null : project.id)}
+                        title="Options"
+                      >
+                        <iconify-icon icon="lucide:more-vertical" style={{ fontSize: "20px" }}></iconify-icon>
+                      </button>
+
+                      {menuOpenId === project.id && (
+                        <div style={{
+                          position: "absolute",
+                          right: 0,
+                          top: "calc(100% + 4px)",
+                          background: "#ffffff",
+                          borderRadius: "14px",
+                          boxShadow: "0 10px 30px rgba(0, 31, 63, 0.15), 0 2px 6px rgba(0,0,0,0.06)",
+                          border: "1px solid #e2e8f0",
+                          padding: "6px",
+                          minWidth: "210px",
+                          zIndex: 50,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "2px"
+                        }}>
+                          <Link
+                            href={`/dashboard/company/projects/tracking?projectId=${project.id}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "10px 14px",
+                              fontSize: "13.5px",
+                              fontWeight: 600,
+                              color: "#001f3f",
+                              textDecoration: "none",
+                              borderRadius: "8px",
+                              transition: "background 0.15s"
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <iconify-icon icon="lucide:sliders" style={{ color: "#ff4500", fontSize: "16px" }} />
+                            {lang === "fr" ? "Gérer & Suivre" : "Track & Milestones"}
+                          </Link>
+
+                          <Link
+                            href="/dashboard/company/messages"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "10px 14px",
+                              fontSize: "13.5px",
+                              fontWeight: 600,
+                              color: "#001f3f",
+                              textDecoration: "none",
+                              borderRadius: "8px",
+                              transition: "background 0.15s"
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <iconify-icon icon="lucide:message-square" style={{ color: "#0284c7", fontSize: "16px" }} />
+                            {lang === "fr" ? "Message au client" : "Message Client"}
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => handleCopyProjectId(project.id)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "10px 14px",
+                              fontSize: "13.5px",
+                              fontWeight: 600,
+                              color: "#001f3f",
+                              background: "none",
+                              border: "none",
+                              width: "100%",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              borderRadius: "8px",
+                              transition: "background 0.15s"
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <iconify-icon icon="lucide:copy" style={{ color: "#64748b", fontSize: "16px" }} />
+                            {lang === "fr" ? "Copier l'ID" : "Copy Project ID"}
+                          </button>
+
+                          <div style={{ height: 1, background: "#e2e8f0", margin: "4px 0" }} />
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(project.id, project.title || project.name || "Project")}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "10px 14px",
+                              fontSize: "13.5px",
+                              fontWeight: 600,
+                              color: "#dc2626",
+                              background: "none",
+                              border: "none",
+                              width: "100%",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              borderRadius: "8px",
+                              transition: "background 0.15s"
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#fee2e2")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <iconify-icon icon="lucide:trash-2" style={{ color: "#dc2626", fontSize: "16px" }} />
+                            {lang === "fr" ? "Supprimer le projet" : "Delete Project"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className={styles.projectDetailsGrid}>

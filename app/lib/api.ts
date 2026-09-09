@@ -399,9 +399,15 @@ export const api = {
   },
   createCompanyProject: (data: Record<string, any>) =>
     request<any>("/company/projects/", { method: "POST", body: JSON.stringify(data) }),
+  updateCompanyProject: (id: number, data: Record<string, any>) =>
+    request<any>(`/company/projects/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteCompanyProject: (id: number) =>
+    request<any>(`/company/projects/${id}/`, { method: "DELETE" }),
   getCompanyServices: () => request<any[]>("/company/services/"),
   createCompanyService: (data: Record<string, any>) =>
     request<any>("/company/services/", { method: "POST", body: JSON.stringify(data) }),
+  updateCompanyService: (id: number, data: Record<string, any>) =>
+    request<any>(`/company/services/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
   uploadCompanyServiceImage: (file: File) => {
     const form = new FormData();
     form.append("file", file);

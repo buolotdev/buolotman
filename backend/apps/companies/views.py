@@ -1,14 +1,17 @@
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db import transaction
+from utils.storage import upload_file, delete_file
 
 from utils.cache import cached
 
-from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyReview, QuoteRequest, CompanyActivity
+from .models import CompanyProfile, CompanyProject, CompanyService, CompanyCertification, CompanyVerificationDocument, CompanyTeamMember, CompanyReview, QuoteRequest, CompanyActivity
 from .serializers import (
     CompanyProfileSerializer, CompanyProjectSerializer,
-    CompanyServiceSerializer, CompanyCertificationSerializer, CompanyReviewSerializer,
+    CompanyServiceSerializer, CompanyCertificationSerializer, CompanyVerificationDocumentSerializer, CompanyReviewSerializer,
     QuoteRequestSerializer, CompanyActivitySerializer
 )
 
@@ -25,18 +28,6 @@ def company_profile(request):
         serializer = CompanyProfileSerializer(profile)
         return Response(serializer.data)
     elif request.method == 'PATCH':
-        if 'username' in request.data:
-            raw_u = str(request.data.get('username') or '').strip().lstrip('@')
-            if raw_u:
-                import re
-                from apps.accounts.serializers import RESERVED_USERNAMES
-                from django.contrib.auth import get_user_model
-                UserModel = get_user_model()
-                if len(raw_u) >= 3 and len(raw_u) <= 30 and re.match(r'^[a-zA-Z0-9_]+$', raw_u) and raw_u.lower() not in RESERVED_USERNAMES:
-                    if not UserModel.objects.filter(username__iexact=raw_u).exclude(id=request.user.id).exists():
-                        request.user.username = raw_u.lower()
-                        request.user.save(update_fields=['username'])
-
         serializer = CompanyProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -139,7 +130,7 @@ def company_services(request):
 
 
 
-@api_view(['DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_company_service(request, service_id):
     try:
@@ -150,7 +141,121 @@ def delete_company_service(request, service_id):
         service = profile.services.get(id=service_id)
     except CompanyService.DoesNotExist:
         return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response(CompanyServiceSerializer(service).data)
+    if request.method == 'PATCH':
+        if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({'error': 'Company verification is required before editing published services.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = CompanyServiceSerializer(service, data=request.data, partial=True)
+        if serializer.is_valid():
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     service.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def company_project_detail(request, project_id):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+        project = profile.projects.get(id=project_id)
+    except (CompanyProfile.DoesNotExist, CompanyProject.DoesNotExist):
+        return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response(CompanyProjectSerializer(project).data)
+    if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({'error': 'Company verification is required for project changes.'}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == 'PATCH':
+        serializer = CompanyProjectSerializer(project, data=request.data, partial=True)
+        if serializer.is_valid():
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    project.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def company_team(request):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+    except CompanyProfile.DoesNotExist:
+        return Response({'error': 'Company profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        members = profile.team_members.all()
+        return Response([{'id': m.id, 'name': m.name, 'role': m.role, 'email': m.email, 'status': m.status, 'created_at': m.created_at} for m in members])
+    if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({'error': 'Company verification is required before managing team members.'}, status=status.HTTP_403_FORBIDDEN)
+    required = ['name', 'role']
+    if any(not str(request.data.get(field, '')).strip() for field in required):
+        return Response({'error': 'name and role are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    member = profile.team_members.create(
+        name=str(request.data['name']).strip(), role=str(request.data['role']).strip(),
+        email=str(request.data.get('email', '')).strip(), status=str(request.data.get('status', 'active')).strip() or 'active',
+    )
+    return Response({'id': member.id, 'name': member.name, 'role': member.role, 'email': member.email, 'status': member.status, 'created_at': member.created_at}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def company_team_detail(request, member_id):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+    except CompanyProfile.DoesNotExist:
+        return Response({'error': 'Company profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    try:
+        member = profile.team_members.get(id=member_id)
+    except CompanyTeamMember.DoesNotExist:
+        return Response({'error': 'Team member not found'}, status=status.HTTP_404_NOT_FOUND)
+    if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({'error': 'Company verification is required before managing team members.'}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == 'PATCH':
+        for field in ('name', 'role', 'email', 'status'):
+            if field in request.data:
+                setattr(member, field, str(request.data[field]).strip())
+        member.save(update_fields=['name', 'role', 'email', 'status'])
+        return Response({'id': member.id, 'name': member.name, 'role': member.role, 'email': member.email, 'status': member.status, 'created_at': member.created_at})
+    member.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def company_verification_documents(request):
+    profile, _ = CompanyProfile.objects.get_or_create(user=request.user, defaults={'company_name': request.user.get_full_name() or 'My Company'})
+    if request.method == 'GET':
+        return Response(CompanyVerificationDocumentSerializer(profile.verification_documents.all(), many=True).data)
+    document_type = str(request.data.get('document_type', '')).strip()
+    file_obj = request.FILES.get('file') or request.FILES.get('document')
+    if not document_type or not file_obj:
+        return Response({'error': 'document_type and file are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        result = upload_file(file_obj, prefix=f'companies/{profile.id}/verification')
+    except ValueError as exc:
+        return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as exc:
+        return Response({'error': f'Upload failed: {exc}'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    document = CompanyVerificationDocument.objects.create(
+        company=profile, document_type=document_type, file_url=result['public_url'], storage_key=result['key'],
+        file_name=file_obj.name, file_size=result['size'], content_type=result['content_type'],
+    )
+    return Response(CompanyVerificationDocumentSerializer(document).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_company_verification_document(request, document_id):
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+        document = profile.verification_documents.get(id=document_id)
+    except (CompanyProfile.DoesNotExist, CompanyVerificationDocument.DoesNotExist):
+        return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
+    if document.status == 'approved':
+        return Response({'error': 'Approved documents cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
+    delete_file(document.storage_key)
+    document.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -167,6 +272,8 @@ def company_projects_list_create(request):
         serializer = CompanyProjectSerializer(projects, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
+        if not profile.is_verified and not request.user.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
+            return Response({'error': 'Your company account is pending Admin verification. You can publish projects once approved by Admin.'}, status=status.HTTP_403_FORBIDDEN)
         serializer = CompanyProjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(company=profile)
@@ -282,14 +389,24 @@ def update_company_quote(request, quote_id):
     except QuoteRequest.DoesNotExist:
         return Response({"error": "Quote not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    try:
+        profile = CompanyProfile.objects.get(user=request.user)
+    except CompanyProfile.DoesNotExist:
+        return Response({"error": "Company profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    if quote.company_id != profile.id and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({"error": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
+
     new_status = request.data.get('status')
+    if new_status not in ['approved', 'accepted', 'rejected']:
+        return Response({"error": "Status must be approved, accepted, or rejected."}, status=status.HTTP_400_BAD_REQUEST)
     if new_status:
         quote.status = new_status
         quote.save(update_fields=['status'])
 
     if new_status in ['approved', 'accepted']:
         from .models import CompanyProject
-        if not CompanyProject.objects.filter(company=quote.company, name__icontains=quote.service).exists():
+        project_title = quote.service or f"Contract with {quote.client_name}"
+        if not CompanyProject.objects.filter(company=quote.company, title__iexact=project_title).exists():
             numeric_budget = None
             if quote.budget:
                 import re
@@ -298,13 +415,12 @@ def update_company_quote(request, quote_id):
                     numeric_budget = float(''.join(nums))
             CompanyProject.objects.create(
                 company=quote.company,
-                name=quote.service or f"Contract with {quote.client_name}",
+                title=project_title,
                 client_name=quote.client_name,
                 budget=numeric_budget or 50000,
-                status='in_progress',
+                status='active',
                 progress=20,
             )
 
     serializer = QuoteRequestSerializer(quote)
     return Response(serializer.data)
-

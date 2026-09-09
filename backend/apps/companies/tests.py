@@ -13,7 +13,8 @@ class CompaniesAPITests(APITestCase):
             email="company@test.com",
             password="password123",
             role="COMPANY",
-            first_name="Acme Corp"
+            first_name="Acme Corp",
+            is_verified=True,
         )
         self.client_user = User.objects.create_user(
             username="client@test.com",
@@ -26,7 +27,7 @@ class CompaniesAPITests(APITestCase):
         # Verify if profile was automatically created during register
         self.company_profile, _ = CompanyProfile.objects.get_or_create(
             user=self.company_user,
-            defaults={"company_name": "Acme Corp"}
+            defaults={"company_name": "Acme Corp", "is_verified": True}
         )
 
     def test_company_profile(self):

@@ -107,6 +107,59 @@ const translations: Record<string, Record<string, string>> = {
   }
 };
 
+const DEFAULT_CATEGORIES: { id: string; name: string; skills: string[] }[] = [
+  {
+    id: "civil-building-construction",
+    name: "Civil & Building Construction",
+    skills: ["Masonry & Bricklaying", "Concrete & Foundations", "Structural Framework", "Roofing & Waterproofing", "Demolition & Excavation", "Flooring & Tiling", "Plastering & Painting"]
+  },
+  {
+    id: "electrical-solar-engineering",
+    name: "Electrical & Solar Engineering",
+    skills: ["Solar PV Installation & Inverters", "Building Electrical Wiring", "Industrial Switchgear & Panels", "Backup Generators & UPS", "Lighting Systems", "High Voltage Installations"]
+  },
+  {
+    id: "plumbing-water-systems",
+    name: "Plumbing, Piping & Water Systems",
+    skills: ["Water Distribution Piping", "Drainage & Sewerage Systems", "Water Pumps & Tanks", "Borehole & Wells", "Sanitary Fixture Installation", "Pipe Welding & Fitting"]
+  },
+  {
+    id: "it-networking-security",
+    name: "IT, Networking & Telecommunications",
+    skills: ["Structured Cabling & Fiber Optic", "CCTV & Surveillance Cameras", "Server & Cloud Administration", "Access Control & Alarms", "Firewall & Cybersecurity", "PBX & VoIP Phone Systems"]
+  },
+  {
+    id: "hvac-cooling-systems",
+    name: "HVAC & Industrial Cooling",
+    skills: ["Split & Central AC Installation", "Cold Room & Refrigeration", "Ventilation & Ducting", "Chiller Maintenance", "Thermostat & Automation Controls"]
+  },
+  {
+    id: "heavy-equipment-fleet",
+    name: "Heavy Equipment & Fleet Maintenance",
+    skills: ["Excavator & Crane Operation", "Diesel Engine Overhaul", "Hydraulic System Maintenance", "Fleet Diagnostic & Repair", "Machining & Lathe Works"]
+  },
+  {
+    id: "carpentry-metal-fabrication",
+    name: "Carpentry, Joinery & Metal Fabrication",
+    skills: ["Structural Steel & Welding", "Custom Cabinetry & Woodwork", "Aluminum Windows & Doors", "False Ceilings & Partitions", "Roof Trusses & Ironmongery"]
+  },
+  {
+    id: "logistics-haulage-earthworks",
+    name: "Logistics, Haulage & Earthworks",
+    skills: ["Heavy Tipper & Flatbed Haulage", "Site Grading & Compaction", "Crane & Rigging Services", "Material Supply & Procurement", "Warehouse Logistics"]
+  },
+  {
+    id: "facility-cleaning-environment",
+    name: "Facility Management & Environmental Services",
+    skills: ["Industrial & Post-Construction Cleaning", "Fumigation & Pest Control", "Industrial Painting & Epoxies", "Landscape & Grounds Maintenance", "Hazardous Waste Disposal"]
+  },
+  {
+    id: "general-contracting",
+    name: "General Contracting & Turnkey Projects",
+    skills: ["Full Turnkey Project Delivery", "Subcontractor Coordination", "Site Supervision & Safety", "Quantity Surveying & Audits", "Renovation & Remodeling"]
+  }
+];
+
 export default function CreateCompanyProjectPage() {
   const router = useRouter();
   const toast = useToast();
@@ -126,7 +179,6 @@ export default function CreateCompanyProjectPage() {
 
   const t = translations[lang] || translations["en"];
 
-
   const [form, setForm] = useState({
     companyName: "",
     title: "",
@@ -145,18 +197,38 @@ export default function CreateCompanyProjectPage() {
   const { data: companyProfile } = useFetch(() => api.getCompanyProfile(), []);
   const isVerified = Boolean(user?.is_verified || companyProfile?.is_verified || user?.company_profile?.is_verified);
 
-  const { data: categoriesData, loading: categoriesLoading } = useFetch(
-    () => api.getCategories(),
+  const { data: categoriesData } = useFetch(
+    () => api.getCategories().catch(() => []),
     []
   );
   
   const { data: subcategoriesData } = useFetch(
-    () => form.category ? api.getSkills(form.category) : Promise.resolve([]),
+    () => form.category ? api.getSkills(form.category).catch(() => []) : Promise.resolve([]),
     [form.category]
   );
   
-  const categories = categoriesData || [];
-  const subcategories = subcategoriesData || [];
+  const categories = (Array.isArray(categoriesData) && categoriesData.length > 0)
+    ? categoriesData
+    : DEFAULT_CATEGORIES.map(c => ({ id: c.name, name: c.name }));
+
+  const subcategories = (() => {
+    if (!form.category) return [];
+    if (Array.isArray(subcategoriesData) && subcategoriesData.length > 0) {
+      return subcategoriesData.map((s: any) => ({ id: s.id || s.name, name: s.name }));
+    }
+    const found = DEFAULT_CATEGORIES.find(
+      c => c.name === form.category || c.id === form.category || c.name.toLowerCase().includes(form.category.toLowerCase())
+    );
+    if (found) {
+      return found.skills.map(skill => ({ id: skill, name: skill }));
+    }
+    return [
+      { id: "General Installation", name: "General Installation" },
+      { id: "Repair & Maintenance", name: "Repair & Maintenance" },
+      { id: "Consultation & Inspection", name: "Consultation & Inspection" },
+      { id: "Turnkey Contracting", name: "Turnkey Contracting" }
+    ];
+  })();
 
 
   // Auto-detect location
@@ -327,13 +399,9 @@ export default function CreateCompanyProjectPage() {
                 required
               >
                 <option value="">{t.selectCategory}</option>
-                {categoriesLoading ? (
-                  <option>Loading...</option>
-                ) : (
-                  categories.map((cat: any) => (
-                    <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
-                  ))
-                )}
+                {categories.map((cat: any) => (
+                  <option key={cat.id || cat.name} value={cat.name}>{cat.name}</option>
+                ))}
               </select>
             </div>
 
@@ -348,7 +416,7 @@ export default function CreateCompanyProjectPage() {
               >
                 <option value="">{!form.category ? t.selectCategoryFirst : t.selectSubcategory}</option>
                 {subcategories.map((sub: any) => (
-                  <option key={sub.id} value={String(sub.id)}>{sub.name}</option>
+                  <option key={sub.id || sub.name} value={sub.name}>{sub.name}</option>
                 ))}
               </select>
             </div>

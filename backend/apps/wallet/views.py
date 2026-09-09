@@ -21,6 +21,12 @@ def wallet_detail(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def withdraw_funds(request):
+    role = str(getattr(request.user, 'role', '')).upper()
+    if role not in ('TECHNICIAN', 'COMPANY', 'ADMIN'):
+        return Response(
+            {"error": "Only technicians and companies can request withdrawals."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     wallet, _ = Wallet.objects.get_or_create(user=request.user)
     serializer = WithdrawSerializer(data=request.data)
     if not serializer.is_valid():
@@ -217,25 +223,6 @@ def deposit_escrow(request):
                 link=f"/dashboard/client/tasks/{task.id}",
                 metadata={"task_id": task.id, "bid_id": bid.id},
             )
-            try:
-                from utils.email_service import send_payment_escrow_email
-                send_payment_escrow_email(
-                    user=request.user,
-                    amount=amount,
-                    currency=wallet.currency,
-                    task_title=task.title,
-                    action_type='deposit'
-                )
-                if bid and bid.technician:
-                    send_payment_escrow_email(
-                        user=bid.technician,
-                        amount=amount,
-                        currency=wallet.currency,
-                        task_title=task.title,
-                        action_type='deposit'
-                    )
-            except Exception as e:
-                logger.warning("Could not send escrow deposit email: %s", e)
 
     return Response({
         "message": "Escrow deposited",
@@ -254,7 +241,29 @@ def release_escrow(request, task_id):
     except Task.DoesNotExist:
         return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.user != task.client and getattr(request.user, 'role', '') != 'ADMIN':
+        return Response({"error": "Only the client or an administrator can release escrow."}, status=status.HTTP_403_FORBIDDEN)
+
+    if Transaction.objects.filter(
+        reference=task,
+        category='escrow_release',
+        status='completed',
+    ).exists():
+        return Response({"error": "Escrow has already been released for this task."}, status=status.HTTP_409_CONFLICT)
+
+    if task.status not in ['completed', 'in_progress']:
+        return Response({"error": "Escrow can only be released for an active or completed task."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.user != task.client and str(getattr(request.user, 'role', '')).upper() != 'ADMIN':
+        return Response({"error": "Only the client or an admin can release escrow."}, status=status.HTTP_403_FORBIDDEN)
+
     client_wallet, _ = Wallet.objects.get_or_create(user=task.client)
+    if Transaction.objects.filter(
+        wallet=client_wallet,
+        reference=task,
+        category='escrow_release',
+    ).exists():
+        return Response({"message": "Escrow has already been released", "amount": "0.00"})
     pending_txs = Transaction.objects.filter(
         wallet=client_wallet,
         reference=task,
@@ -329,27 +338,6 @@ def release_escrow(request, task_id):
                 link="/dashboard/technician/wallet",
                 metadata={"task_id": task.id, "amount": str(amount)},
             )
-
-        try:
-            from utils.email_service import send_payment_escrow_email
-            if task.client:
-                send_payment_escrow_email(
-                    user=task.client,
-                    amount=amount,
-                    currency='XAF',
-                    task_title=task.title,
-                    action_type='release'
-                )
-            if task.assigned_to:
-                send_payment_escrow_email(
-                    user=task.assigned_to,
-                    amount=amount,
-                    currency='XAF',
-                    task_title=task.title,
-                    action_type='release'
-                )
-        except Exception as e:
-            logger.warning("Could not send escrow release email: %s", e)
 
     return Response({"message": "Escrow released", "amount": str(amount)})
 
@@ -811,5 +799,3 @@ def campay_balance_view(request):
     if not res.get("success"):
         return Response({"error": "Failed to fetch CamPay balance", "details": res.get("error")}, status=status.HTTP_400_BAD_REQUEST)
     return Response(res.get("data", {}))
-
-
