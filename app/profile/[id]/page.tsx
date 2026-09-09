@@ -185,6 +185,7 @@ export default function PublicProfilePage() {
   const numericId = /^\d+$/.test(rawParam) ? Number(rawParam) : null;
 
   const [lang, setLang] = useState("en");
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const updateLang = () => {
@@ -232,8 +233,9 @@ export default function PublicProfilePage() {
               employee_count: compRes.employee_count || compRes.company_size || baseUser?.employee_count,
               working_hours: compRes.working_hours || compRes.business_hours || baseUser?.working_hours,
               preferred_language: compRes.preferred_language || baseUser?.preferred_language,
-              logo_url: compRes.logo || compRes.logo_url || baseUser?.logo_url,
-              banner_url: compRes.banner_url || compRes.cover_image || compRes.cover_url || baseUser?.banner_url,
+              logo_url: compRes.logo || compRes.logo_url || "",
+              avatar_url: compRes.logo || compRes.logo_url || compRes.avatar_url || "",
+              banner_url: compRes.cover_url || compRes.banner_url || compRes.cover_image || baseUser?.banner_url,
               is_verified: compRes.is_verified ?? baseUser?.is_verified ?? false,
               average_rating: compRes.average_rating || baseUser?.average_rating,
               review_count: compRes.review_count ?? baseUser?.review_count ?? 0,
@@ -365,8 +367,16 @@ export default function PublicProfilePage() {
   const isCompany = profile?.role === "COMPANY" || Boolean(profile?.company_name && !profile?.first_name);
 
   // Common media
-  const avatarSrc = getImageUrl(profile?.avatar_url || profile?.logo_url || profile?.logo || "");
+  const avatarSrc = getImageUrl(
+    isCompany
+      ? (profile?.logo_url || profile?.logo || profile?.avatar_url || "")
+      : (profile?.avatar_url || profile?.logo_url || profile?.logo || "")
+  );
   const coverSrc = getImageUrl(profile?.banner_url || profile?.cover_url || profile?.cover_image || "");
+
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarSrc]);
 
   // Corporate Specific Attributes (Strictly real from DB / Form)
   const companyName = profile?.company_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Enterprise Contractor";
@@ -613,8 +623,13 @@ export default function PublicProfilePage() {
               <div className={styles.profileInfo}>
                 <div className={styles.corporateAvatarWrapper}>
                   <div className={styles.corporateAvatarInner}>
-                    {avatarSrc ? (
-                      <Image src={avatarSrc} alt={companyName} width={140} height={140} unoptimized style={{ objectFit: "cover" }} />
+                    {avatarSrc && !imageError ? (
+                      <img
+                        src={avatarSrc}
+                        alt={companyName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
+                        onError={() => setImageError(true)}
+                      />
                     ) : (
                       <span>{initials}</span>
                     )}
@@ -1055,8 +1070,13 @@ export default function PublicProfilePage() {
               <div className={styles.profileInfo}>
                 <div className={styles.avatarWrapper}>
                   <div className={styles.avatarInner}>
-                    {avatarSrc ? (
-                      <Image src={avatarSrc} alt={techDisplayName} width={136} height={136} unoptimized style={{ objectFit: "cover" }} />
+                    {avatarSrc && !imageError ? (
+                      <img
+                        src={avatarSrc}
+                        alt={techDisplayName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
+                        onError={() => setImageError(true)}
+                      />
                     ) : (
                       <span className={styles.initials}>{initials}</span>
                     )}
