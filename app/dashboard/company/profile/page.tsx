@@ -917,18 +917,27 @@ export default function CompanyProfilePage() {
               : "linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%)",
           }} />
           <div className={styles.bannerOverlay}>
-            <div className={styles.bannerUploadHint}>
+            <button
+              type="button"
+              className={styles.bannerUploadBtn}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                coverInputRef.current?.click();
+              }}
+              title={(coverUrl || profile?.cover_url) ? t.changeCover : t.addCover}
+            >
               {uploadingCover ? (
                 <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> {t.uploading}</>
               ) : (
-                <><iconify-icon icon="lucide:camera" /> {(coverUrl || profile?.cover_url) ? t.changeCover : t.addCover}</>
+                <><iconify-icon icon="lucide:camera" style={{ fontSize: "16px" }} /> {(coverUrl || profile?.cover_url) ? t.changeCover : t.addCover}</>
               )}
-            </div>
+            </button>
           </div>
           <input
             ref={coverInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/*"
             style={{ display: "none" }}
             onChange={(e) => onFileSelect(e, "cover")}
           />

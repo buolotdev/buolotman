@@ -26,10 +26,11 @@
 }
 
 .cover {
-  height: 200px;
+  height: 220px;
   background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .bannerOverlay {
@@ -38,30 +39,41 @@
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  padding: 14px 18px;
-  opacity: 0.85;
+  padding: 18px 24px;
+  opacity: 0.95;
   transition: opacity 0.25s ease;
-  z-index: 2;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .cover:hover .bannerOverlay {
   opacity: 1;
 }
 
-.bannerUploadHint {
+.bannerUploadBtn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 9px 18px;
   border-radius: 99px;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  font-size: 13px;
+  background: rgba(0, 31, 63, 0.85);
+  backdrop-filter: blur(12px);
+  color: #ffffff;
+  font-size: 13.5px;
   font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  pointer-events: none;
+  letter-spacing: 0.01em;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bannerUploadBtn:hover {
+  background: #ff4500;
+  border-color: #ff4500;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255, 69, 0, 0.45);
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -77,6 +89,11 @@
   flex-wrap: wrap;
   position: relative;
   z-index: 3;
+  pointer-events: none;
+}
+
+.heroBody > * {
+  pointer-events: auto;
 }
 
 .identityBlock {
