@@ -35,8 +35,10 @@ const translations: Record<string, Record<string, string>> = {
     security: "Security",
     enable2fa: "Enable Two-Factor Authentication (2FA)",
     logoutAll: "Logout all devices",
+    logoutAllConfirm: "Are you sure you want to log out from all devices? You will be signed out immediately.",
     paymentsWallet: "Payments & B-Wallet",
-    currentBalance: "Current Balance: 245,000 XOF",
+    currentBalanceLabel: "Current Balance",
+    currentBalance: "Current Balance: 0 XOF",
     paymentsNotice: "All payments and withdrawals are processed via B-Wallet securely.",
     managePayments: "Manage Payments",
     dangerZone: "Danger Zone",
@@ -75,8 +77,10 @@ const translations: Record<string, Record<string, string>> = {
     security: "Sécurité",
     enable2fa: "Activer l'authentification à deux facteurs (2FA)",
     logoutAll: "Déconnecter tous les appareils",
+    logoutAllConfirm: "Êtes-vous sûr de vouloir déconnecter tous vos appareils ? Vous serez déconnecté immédiatement.",
     paymentsWallet: "Paiements & B-Wallet",
-    currentBalance: "Solde Actuel : 245 000 XOF",
+    currentBalanceLabel: "Solde Actuel",
+    currentBalance: "Solde Actuel : 0 XOF",
     paymentsNotice: "Tous les paiements et retraits sont traités de manière sécurisée via B-Wallet.",
     managePayments: "Gérer les Paiements",
     dangerZone: "Zone Critique",
@@ -148,9 +152,29 @@ function CompanySettingsForm({
   onSave: (form: any) => Promise<void>;
   onOpenWallet: () => void;
 }) {
+  const { data: walletData } = useFetch(() => api.getWallet(), []);
   const [form, setForm] = useState(profile);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const balanceText = walletData?.balance !== undefined 
+    ? `${t.currentBalanceLabel || "Current Balance"}: ${Number(walletData.balance).toLocaleString()} ${walletData.currency || 'XOF'}`
+    : (t.currentBalance || "Current Balance: 0 XOF");
+
+  const handleLogoutAllDevices = () => {
+    const confirmed = window.confirm(t.logoutAllConfirm);
+    if (!confirmed) return;
+    try {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+      window.location.href = "/login?logged_out=all";
+    } catch {
+      window.location.href = "/login";
+    }
+  };
 
   const submit = async () => {
     setSaving(true);
@@ -263,13 +287,23 @@ function CompanySettingsForm({
           {t.enable2fa}
           <input type="checkbox" checked={!!form.sec_2fa} onChange={(e) => update('sec_2fa', e.target.checked)} />
         </label>
-        <button type="button" className={styles.outlineBtn} style={{ marginTop: 12 }}>{t.logoutAll}</button>
+        <div style={{ marginTop: 16 }}>
+          <button
+            type="button"
+            className={styles.logoutAllBtn}
+            onClick={handleLogoutAllDevices}
+            title={t.logoutAll}
+          >
+            <iconify-icon icon="lucide:log-out" style={{ fontSize: 16 }} />
+            {t.logoutAll}
+          </button>
+        </div>
       </section>
 
       {/* PAYMENTS */}
       <section className={styles.card}>
         <h3 className={styles.title} style={{ fontSize: 20, marginBottom: 24 }}>{t.paymentsWallet}</h3>
-        <div className={styles.balance}>{t.currentBalance}</div>
+        <div className={styles.balance}>{balanceText}</div>
         <p className={styles.notice}>{t.paymentsNotice}</p>
         <button type="button" className={styles.saveBtn} onClick={onOpenWallet} style={{ width: 'auto', padding: '0 24px' }}>
           {t.managePayments}
