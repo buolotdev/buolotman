@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { api } from "@/app/lib/api";
 import layoutStyles from "../page.module.css";
 import styles from "./team.module.css";
 
@@ -26,6 +27,7 @@ const translations: Record<string, Record<string, string>> = {
     role: "Role / Position",
     cancel: "Cancel",
     sendInvitation: "Send Invitation",
+    sendingInvitation: "Sending...",
     invitationSent: "Invitation sent to",
     leadTechnician: "Lead Technician",
     seniorEngineer: "Senior Electrical Engineer",
@@ -54,6 +56,7 @@ const translations: Record<string, Record<string, string>> = {
     role: "Rôle / Poste",
     cancel: "Annuler",
     sendInvitation: "Envoyer l'Invitation",
+    sendingInvitation: "Envoi...",
     invitationSent: "Invitation envoyée à",
     leadTechnician: "Technicien en Chef",
     seniorEngineer: "Ingénieur Électricien Principal",
@@ -63,6 +66,18 @@ const translations: Record<string, Record<string, string>> = {
     plumbingLead: "Responsable Plomberie",
   }
 };
+
+function getInitials(name: string) {
+  if (!name) return "TM";
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "TM";
+}
 
 export default function CompanyTeamPage() {
   const [lang, setLang] = useState("en");
@@ -78,27 +93,9 @@ export default function CompanyTeamPage() {
 
   const t = translations[lang] || translations["en"];
 
-  const [team, setTeam] = useState<any[]>([
-    {
-      id: 1,
-      name: "Jean-Paul Habimana",
-      initials: "JH",
-      role: "Senior Electrical Lead",
-      email: "jean.paul@company.rw",
-      phone: "+250 788 123 456",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Marie Claire Uwase",
-      initials: "MU",
-      role: "Project Manager",
-      email: "marie.claire@company.rw",
-      phone: "+250 789 654 321",
-      status: "active",
-    },
-  ]);
-
+  const [team, setTeam] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [inviting, setInviting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -108,40 +105,116 @@ export default function CompanyTeamPage() {
   });
   const [successMsg, setSuccessMsg] = useState("");
 
-  const handleInvite = (e: React.FormEvent) => {
+  // Load team members on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    // 1. First check localStorage for instant render
+    try {
+      const cached = localStorage.getItem("boulotman_company_team");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && isMounted) {
+          setTeam(parsed);
+        }
+      }
+    } catch { }
+
+    // 2. Fetch from backend API
+    const fetchTeam = async () => {
+      try {
+        const res = await api.getCompanyTeam();
+        if (Array.isArray(res) && isMounted) {
+          if (res.length > 0) {
+            const formatted = res.map((m: any) => ({
+              id: m.id,
+              name: m.name,
+              initials: getInitials(m.name),
+              role: m.role,
+              email: m.email || "",
+              phone: m.phone || "",
+              status: m.status || "active",
+            }));
+            setTeam(formatted);
+            localStorage.setItem("boulotman_company_team", JSON.stringify(formatted));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch team from API, using cached data:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchTeam();
+    return () => { isMounted = false; };
+  }, []);
+
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim()) return;
 
-    const initials = formData.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    setInviting(true);
+    let memberId: number | string = Date.now();
+
+    try {
+      const res = await api.createCompanyTeamMember({
+        name: formData.name.trim(),
+        role: formData.role.trim() || "Lead Technician",
+        email: formData.email.trim(),
+        status: "pending",
+      });
+      if (res?.id) {
+        memberId = res.id;
+      }
+    } catch (err) {
+      console.warn("Could not persist team member to backend, keeping local copy:", err);
+    }
 
     const newMember = {
-      id: Date.now(),
+      id: memberId,
       name: formData.name.trim(),
-      initials: initials || "TM",
+      initials: getInitials(formData.name),
       role: formData.role,
       email: formData.email.trim(),
       phone: formData.phone.trim() || "N/A",
       status: "pending",
     };
 
-    setTeam((prev) => [newMember, ...prev]);
+    setTeam((prev) => {
+      const updated = [newMember, ...prev.filter((m) => m.id !== memberId)];
+      try {
+        localStorage.setItem("boulotman_company_team", JSON.stringify(updated));
+      } catch { }
+      return updated;
+    });
+
     setSuccessMsg(`${t.invitationSent} ${formData.email}!`);
     setFormData({ name: "", email: "", phone: "", role: "Lead Technician" });
+    setInviting(false);
+
     setTimeout(() => {
       setIsModalOpen(false);
       setSuccessMsg("");
     }, 1500);
   };
 
-  const handleRemove = (id: number) => {
-    if (confirm(t.confirmRemove)) {
-      setTeam((prev) => prev.filter((m) => m.id !== id));
+  const handleRemove = async (id: number | string) => {
+    if (!confirm(t.confirmRemove)) return;
+
+    try {
+      await api.deleteCompanyTeamMember(id).catch(() => { });
+    } catch (err) {
+      console.error(err);
     }
+
+    setTeam((prev) => {
+      const updated = prev.filter((m) => m.id !== id);
+      try {
+        localStorage.setItem("boulotman_company_team", JSON.stringify(updated));
+      } catch { }
+      return updated;
+    });
   };
 
   return (

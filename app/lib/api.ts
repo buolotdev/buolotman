@@ -437,6 +437,11 @@ export const api = {
   updateCompanyQuote: (quoteId: number, data: Record<string, any>) =>
     request<any>(`/company/quotes/${quoteId}/`, { method: "PATCH", body: JSON.stringify(data) }),
   getCompanyActivities: () => request<any[]>("/company/activities/"),
+  getCompanyTeam: () => request<any[]>("/company/team/"),
+  createCompanyTeamMember: (data: Record<string, any>) =>
+    request<any>("/company/team/", { method: "POST", body: JSON.stringify(data) }),
+  deleteCompanyTeamMember: (memberId: number | string) =>
+    request<any>(`/company/team/${memberId}/`, { method: "DELETE" }),
 
 
 

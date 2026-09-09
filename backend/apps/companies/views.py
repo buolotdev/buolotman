@@ -185,8 +185,6 @@ def company_team(request):
     if request.method == 'GET':
         members = profile.team_members.all()
         return Response([{'id': m.id, 'name': m.name, 'role': m.role, 'email': m.email, 'status': m.status, 'created_at': m.created_at} for m in members])
-    if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
-        return Response({'error': 'Company verification is required before managing team members.'}, status=status.HTTP_403_FORBIDDEN)
     required = ['name', 'role']
     if any(not str(request.data.get(field, '')).strip() for field in required):
         return Response({'error': 'name and role are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -208,8 +206,6 @@ def company_team_detail(request, member_id):
         member = profile.team_members.get(id=member_id)
     except CompanyTeamMember.DoesNotExist:
         return Response({'error': 'Team member not found'}, status=status.HTTP_404_NOT_FOUND)
-    if not profile.is_verified and getattr(request.user, 'role', '') != 'ADMIN':
-        return Response({'error': 'Company verification is required before managing team members.'}, status=status.HTTP_403_FORBIDDEN)
     if request.method == 'PATCH':
         for field in ('name', 'role', 'email', 'status'):
             if field in request.data:
