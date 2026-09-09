@@ -384,10 +384,20 @@ export default function ServicesManagement() {
                       </span>
                     </td>
                     <td>
-                      <button className={styles.outline} onClick={() => handleEdit(svc)}>{t.edit}</button>
-                      <button className={styles.outline} onClick={() => toggleStatus(svc.id, svc.status || 'Active')}>
-                        {svc.status === 'Inactive' ? t.activate : t.deactivate}
-                      </button>
+                      <div className={styles.actionsCell}>
+                        <button className={styles.actionBtn} onClick={() => handleEdit(svc)} title={t.edit}>
+                          <iconify-icon icon="lucide:edit-2" style={{ fontSize: "14px" }}></iconify-icon>
+                          {t.edit}
+                        </button>
+                        <button
+                          className={`${styles.actionBtn} ${svc.status === 'Inactive' ? styles.activateBtn : styles.deactivateBtn}`}
+                          onClick={() => toggleStatus(svc.id, svc.status || 'Active')}
+                          title={svc.status === 'Inactive' ? t.activate : t.deactivate}
+                        >
+                          <iconify-icon icon={svc.status === 'Inactive' ? "lucide:check-circle" : "lucide:eye-off"} style={{ fontSize: "14px" }}></iconify-icon>
+                          {svc.status === 'Inactive' ? t.activate : t.deactivate}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

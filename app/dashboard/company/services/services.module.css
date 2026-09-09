@@ -105,6 +105,61 @@
   background: #f8fafc;
 }
 
+/* ACTIONS CELL */
+.actionsCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  background: #ffffff;
+  border: 1.5px solid #001f3f;
+  color: #001f3f;
+  line-height: 1.2;
+}
+
+.actionBtn:hover {
+  background: #001f3f;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.deactivateBtn {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.deactivateBtn:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.activateBtn {
+  border-color: #86efac;
+  color: #15803d;
+  background: #f0fdf4;
+}
+
+.activateBtn:hover {
+  background: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
 /* TABLE */
 .tableWrapper {
   width: 100%;
