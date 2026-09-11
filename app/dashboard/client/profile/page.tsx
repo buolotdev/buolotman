@@ -53,7 +53,8 @@ const clientProfileTranslations: Record<string, Record<string, string>> = {
     uploading: "Uploading...",
     verifiedClient: "Verified Client ✓",
     registeredClient: "Registered Client",
-    clientRating: "⭐ 4.9 Client Rating",
+    newClient: "⭐ New Client",
+    clientRating: "Client Rating",
     paymentReliability: "100% Payment Reliability",
     postTask: "Post a Task",
     tabPersonal: "Personal Information",
@@ -79,7 +80,8 @@ const clientProfileTranslations: Record<string, Record<string, string>> = {
     uploading: "Téléchargement...",
     verifiedClient: "Client Vérifié ✓",
     registeredClient: "Client Enregistré",
-    clientRating: "⭐ Note Client 4.9",
+    newClient: "⭐ Nouveau Client",
+    clientRating: "Note Client",
     paymentReliability: "Fiabilité de Paiement 100%",
     postTask: "Publier une Mission",
     tabPersonal: "Informations Personnelles",
@@ -323,6 +325,15 @@ export default function ClientProfilePage() {
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const clientRatingDisplay = useMemo(() => {
+    const rating = Number(user?.rating || user?.average_rating || 0);
+    const reviewsCount = Number(user?.reviews_count || user?.total_reviews || 0);
+    if (rating > 0 && reviewsCount > 0) {
+      return `⭐ ${rating.toFixed(1)} ${t.clientRating} (${reviewsCount})`;
+    }
+    return t.newClient;
+  }, [user, t.clientRating, t.newClient]);
 
   const fullName = useMemo(() => {
     const name = `${firstName} ${lastName}`.trim();
@@ -738,7 +749,7 @@ export default function ClientProfilePage() {
                       </span>
                     )}
                     <span style={{ background: "#f1f5f9", color: "#001f3f", padding: "4px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                      {t.clientRating}
+                      {clientRatingDisplay}
                     </span>
                   </div>
                   <p className={styles.companyTagline}>

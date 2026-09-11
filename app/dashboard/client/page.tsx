@@ -345,7 +345,11 @@ export default function ClientDashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '10px 14px', textAlign: 'center' }}>
                   <div style={{ fontSize: '16px', fontWeight: 800, color: '#001f3f', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                    ⭐ 4.9 <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 500 }}>(12)</span>
+                    {Number(user?.rating || user?.average_rating || 0) > 0 && Number(user?.reviews_count || user?.total_reviews || 0) > 0 ? (
+                      <>⭐ {Number(user?.rating || user?.average_rating).toFixed(1)} <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 500 }}>({Number(user?.reviews_count || user?.total_reviews)})</span></>
+                    ) : (
+                      <>⭐ {lang === "fr" ? "Nouveau" : "New"}</>
+                    )}
                   </div>
                   <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{t.clientRating}</div>
                 </div>
