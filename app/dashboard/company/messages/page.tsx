@@ -185,11 +185,14 @@ export default function CompanyMessages() {
               const list = data.messages;
               if (list.length > 0) {
                 const latest = list[list.length - 1];
+                const isSentByMe = user?.id 
+                  ? (String(latest.sender) === String(user.id) || String(latest.sender_id) === String(user.id))
+                  : false;
+
                 if (
                   lastMsgIdRef.current &&
-                  lastMsgIdRef.current !== latest.id &&
-                  latest.sender !== user?.id &&
-                  latest.sender_id !== user?.id
+                  String(lastMsgIdRef.current) !== String(latest.id) &&
+                  !isSentByMe
                 ) {
                   sound.playNotificationSound();
                 }

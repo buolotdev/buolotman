@@ -201,12 +201,14 @@ export default function TechnicianMessagesPage() {
               const list = data.messages;
               if (list.length > 0) {
                 const latest = list[list.length - 1];
+                const isSentByMe = userData?.id 
+                  ? (String(latest.sender) === String(userData.id) || String(latest.sender_id) === String(userData.id))
+                  : latest.isClient === false;
+
                 if (
                   lastMsgIdRef.current &&
-                  lastMsgIdRef.current !== latest.id &&
-                  latest.sender_id !== userData?.id &&
-                  latest.sender !== userData?.id &&
-                  latest.isClient !== false
+                  String(lastMsgIdRef.current) !== String(latest.id) &&
+                  !isSentByMe
                 ) {
                   sound.playNotificationSound();
                 }
