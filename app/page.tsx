@@ -323,13 +323,18 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setLiveTaskIndex((prev) => {
-        const count = liveTasks?.length || 0;
+        const raw = Array.isArray((liveTasksData as any)?.results)
+          ? (liveTasksData as any).results
+          : Array.isArray(liveTasksData)
+            ? liveTasksData
+            : [];
+        const count = raw.length || 0;
         if (count <= 1) return 0;
         return (prev + 1) % count;
       });
     }, 4000);
     return () => clearInterval(interval);
-  }, [liveTasks]);
+  }, [liveTasksData]);
 
   /* ── Intersection Observer for scroll animations ── */
   useEffect(() => {
