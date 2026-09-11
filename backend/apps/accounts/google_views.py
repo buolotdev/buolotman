@@ -28,13 +28,8 @@ def generate_unique_username(email):
 
 def _send_google_signup_notifications(user):
     try:
-        send_mail(
-            subject='Welcome to Boulot Man',
-            message=f'Welcome to Boulot Man, {user.first_name or user.email}. Your account is pending verification where required.',
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        from utils.email_service import send_welcome_email
+        send_welcome_email(user)
     except Exception:
         pass
 
