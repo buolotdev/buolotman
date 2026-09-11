@@ -3,19 +3,26 @@ const API_BASE = "/api";
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return "";
   
-  if (url.startsWith("https://") || url.startsWith("data:")) return url;
+  if (url.startsWith("data:")) return url;
+  
+  const backendBase = process.env.NEXT_PUBLIC_API_URL || "http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com";
+  const cleanBackend = backendBase.replace(/\/+$/, "");
+
+  if (url.startsWith("http://localhost:8000")) {
+    return url.replace("http://localhost:8000", cleanBackend);
+  }
+
+  if (url.startsWith("https://") || url.startsWith("http://")) {
+    return url;
+  }
   
   if (url.startsWith("/media/")) {
-    return url;
+    return `${cleanBackend}${url}`;
   }
   
   if (url.includes("/media/")) {
     const mediaIndex = url.indexOf("/media/");
-    return url.substring(mediaIndex);
-  }
-  
-  if (url.startsWith("http://localhost:8000")) {
-    return url.replace("http://localhost:8000", "");
+    return `${cleanBackend}${url.substring(mediaIndex)}`;
   }
   
   return url;

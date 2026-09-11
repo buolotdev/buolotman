@@ -294,7 +294,18 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                               backgroundColor: '#f8fafc', textDecoration: 'none'
                             }}>
                               {attachment.content_type?.includes('image') || attachment.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                                <img src={getImageUrl(attachment.file_url)} alt={attachment.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img
+                                  src={getImageUrl(attachment.file_url)}
+                                  alt={attachment.file_name}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                    const parent = (e.target as HTMLElement).parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;padding:8px;text-align:center;color:#64748b;font-size:11px"><iconify-icon icon="lucide:image" style="font-size:24px;margin-bottom:4px;color:#94a3b8"></iconify-icon><span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${attachment.file_name || 'Image'}</span></div>`;
+                                    }
+                                  }}
+                                />
                               ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '12px' }}>
                                   <iconify-icon icon="lucide:file-text" style={{ fontSize: '24px', marginBottom: '4px' }} />

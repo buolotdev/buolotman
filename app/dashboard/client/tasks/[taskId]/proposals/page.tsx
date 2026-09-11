@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, usePathname, useRouter } from "next/navigation";
 import { use, useMemo, useState, useEffect } from "react";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
@@ -293,13 +293,42 @@ export default function TaskProposalsPage({ params }: { params: Promise<{ taskId
                       <h3>{t.taskAttachments}</h3>
                       <div className={styles.attachmentRow} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                         {(task.attachments || []).map((attachment: any, idx: number) => {
-                          const isImage = attachment.file_type?.includes('image') || attachment.file_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                          const fileUrl = getImageUrl(attachment.file_url);
+                          const isImage = attachment.file_type?.includes('image') || attachment.content_type?.includes('image') || attachment.file_name?.match(/\.(jpeg|jpg|gif|png|webp)$/i) || fileUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i);
                           return isImage ? (
-                            <a key={attachment.id || idx} href={attachment.file_url} target="_blank" rel="noopener noreferrer">
-                              <img src={attachment.file_url} alt={attachment.file_name || 'Task Attachment'} style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                            <a
+                              key={attachment.id || idx}
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                width: '120px',
+                                height: '120px',
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                border: '1px solid #e2e8f0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#f8fafc',
+                                textDecoration: 'none',
+                              }}
+                            >
+                              <img
+                                src={fileUrl}
+                                alt={attachment.file_name || 'Task Attachment'}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                  const parent = (e.target as HTMLElement).parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;padding:8px;text-align:center;color:#64748b;font-size:11px"><iconify-icon icon="lucide:image" style="font-size:24px;margin-bottom:4px;color:#94a3b8"></iconify-icon><span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${attachment.file_name || 'Image'}</span></div>`;
+                                  }
+                                }}
+                              />
                             </a>
                           ) : (
-                            <a href={attachment.file_url} target="_blank" rel="noopener noreferrer" key={attachment.id || idx} className={styles.attachmentChip} style={{ textDecoration: 'none' }}>
+                            <a href={fileUrl} target="_blank" rel="noopener noreferrer" key={attachment.id || idx} className={styles.attachmentChip} style={{ textDecoration: 'none' }}>
                               <iconify-icon icon="lucide:file-text" />
                               <span>{attachment.file_name || 'View Attachment'}</span>
                             </a>
