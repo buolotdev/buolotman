@@ -10,6 +10,7 @@ import { formatTimeAgo, formatDateTime } from "../lib/format";
 import { SkeletonBlock } from "./skeleton/Skeleton";
 
 import { useLocation } from "@/app/context/LocationContext";
+import { mergeWithMasterCategories } from "../lib/categories";
 
 const translations: Record<string, Record<string, any>> = {
   en: {
@@ -215,7 +216,7 @@ export default function TaskBoard() {
   };
 
   const rawTasks = Array.isArray(tasksData) ? tasksData : ((tasksData as any)?.results || []);
-  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+  const categories = mergeWithMasterCategories(categoriesData);
 
   // Filter & Sort Tasks in real-time
   const filteredTasks = useMemo(() => {

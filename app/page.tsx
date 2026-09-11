@@ -10,6 +10,7 @@ import { useFetch } from "./lib/useFetch";
 import { formatTimeAgo, formatDateTime } from "./lib/format";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
 import { useLocation } from "./context/LocationContext";
+import { mergeWithMasterCategories } from "./lib/categories";
 
 const ICON_BY_KEY: Record<string, string> = {
   "software-and-digital-engineering": "lucide:cpu",
@@ -497,18 +498,14 @@ export default function Home() {
 
 
 
-  const categories = (categoriesData && categoriesData.length > 0
-    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      categoriesData.map((c: any) => {
-        const slug = (c.slug || c.name || "").toString().toLowerCase();
-        return {
-          name: c.name || c.title || slug,
-          slug,
-          icon: ICON_BY_KEY[slug] || ICON_BY_KEY.default,
-        };
-      })
-    : []
-  ).slice(0, 15);
+  const categories = mergeWithMasterCategories(categoriesData).map((c) => {
+    const slug = (c.slug || c.name || "").toString().toLowerCase();
+    return {
+      name: c.name || slug,
+      slug,
+      icon: ICON_BY_KEY[slug] || c.icon || ICON_BY_KEY.default,
+    };
+  }).slice(0, 15);
 
   const rawPros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
   const pros = filterByLocation(rawPros);

@@ -10,6 +10,7 @@ import Header from "../components/Header";
 import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
+import { mergeWithMasterCategories } from "../lib/categories";
 
 function CardMedia({ result }: { result: SearchResult }) {
   const [hasError, setHasError] = useState(false);
@@ -306,9 +307,8 @@ export default function SearchPage() {
     };
   }, [searchParams]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const categories = (categoriesData ?? []).map((c: any) => ({
-    label: c.name || c.title || c.slug,
+  const categories = mergeWithMasterCategories(categoriesData).map((c) => ({
+    label: c.name,
     slug: (c.slug || c.name || "").toString().toLowerCase(),
   }));
 

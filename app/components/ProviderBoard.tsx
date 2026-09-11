@@ -7,6 +7,7 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
+import { mergeWithMasterCategories } from "@/app/lib/categories";
 
 const translations: Record<string, Record<string, any>> = {
   en: {
@@ -66,7 +67,7 @@ export default function ProviderBoard() {
   const { data: categoriesData } = useFetch(() => api.getCategories(), []);
   
   const categories = useMemo(() => {
-    return Array.isArray(categoriesData) ? categoriesData : [];
+    return mergeWithMasterCategories(categoriesData);
   }, [categoriesData]);
 
   // Safe extraction (data could be array or { results: array })

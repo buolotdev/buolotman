@@ -10,14 +10,18 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
-
-
+import { mergeWithMasterCategories } from "@/app/lib/categories";
 
 export default function TechniciansPage() {
   const [selectedTech, setSelectedTech] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
 
   const { data, loading, error } = useFetch(() => api.listUsers({ role: "TECHNICIAN" }), []);
+  const { data: categoriesData } = useFetch(() => api.getCategories(), []);
   
+  const categories = mergeWithMasterCategories(categoriesData);
+
   // Safe extraction (data could be array or { results: array })
   const technicians = Array.isArray(data) ? data : ((data as any)?.results || []);
 
@@ -36,11 +40,15 @@ export default function TechniciansPage() {
           placeholder="Find technicians around you - fix it & build it" 
           className={styles.searchInput} 
         />
-        <select className={styles.searchSelect}>
+        <select 
+          className={styles.searchSelect}
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
           <option value="all">All Categories</option>
-          <option value="electrician">Electrician</option>
-          <option value="plumber">Plumber</option>
-          <option value="carpenter">Carpenter</option>
+          {categories.map((cat) => (
+            <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+          ))}
         </select>
         <button className={styles.searchButton}>Search</button>
       </div>

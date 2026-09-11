@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
+import { MASTER_CATEGORIES } from "@/app/lib/categories";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -312,11 +313,9 @@ export default function ServicesManagement() {
           <div>
             <label className={styles.label}>{t.category}</label>
             <select className={styles.select} value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-              <option value="Construction">Construction</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Renovation">Renovation</option>
-              <option value="Project Management">Project Management</option>
-              <option value="IT & Networking">IT & Networking</option>
+              {MASTER_CATEGORIES.map(cat => (
+                <option key={cat.slug} value={cat.name}>{cat.name}</option>
+              ))}
             </select>
           </div>
           <div>
