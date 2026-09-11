@@ -18,6 +18,7 @@ const DRAFT_KEY = "boulotman_post_task_draft";
 type DraftPayload = {
   title: string;
   category: string;
+  categoryName?: string;
   subcategory: string;
   description: string;
   address: string;
@@ -25,8 +26,11 @@ type DraftPayload = {
   city: string;
   expectedDate: string;
   timePreference: string;
-  budget: string;
-  budgetMode: string;
+  budget?: string;
+  budgetMin?: string;
+  budgetMax?: string;
+  budgetMode?: string;
+  paymentOption?: string;
   urgency: string;
   serviceType: string;
   contactMethods: string[];
@@ -61,6 +65,7 @@ function dataURLtoFile(dataurl: string, filename: string) {
 export default function TaskReviewPage() {
   const router = useRouter();
   const { data: meData } = useFetch(() => api.getMe(), []);
+  const { data: categoriesData } = useFetch(() => api.getCategories(), []);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [draft, setDraft] = useState<DraftPayload | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -84,11 +89,34 @@ export default function TaskReviewPage() {
 
   const title = draft?.title || "Untitled task";
   const description = draft?.description || "";
-  const category = draft?.category || "—";
+  
+  const categoryName = (() => {
+    if (draft?.categoryName && !/^\d+$/.test(draft.categoryName)) {
+      return draft.categoryName;
+    }
+    if (draft?.category && !/^\d+$/.test(draft.category)) {
+      return draft.category;
+    }
+    if (draft?.category && categoriesData) {
+      const list = Array.isArray(categoriesData) ? categoriesData : [];
+      const found = list.find((c: any) => String(c.id) === String(draft.category) || c.slug === draft.category);
+      if (found?.name) return found.name;
+    }
+    return "";
+  })();
+
   const subcategory = draft?.subcategory || "";
   const urgency = draft?.urgency === "urgent" ? "Urgent (Within 24h)" : "Standard / Flexible";
-  const budget = draft?.budget ? Number(draft.budget) : 0;
-  const budgetMode = draft?.budgetMode === "hourly" ? "Hourly Rate" : "Fixed Price";
+
+  const rawBudget = draft?.budget || draft?.budgetMax || draft?.budgetMin || "0";
+  const budget = parseFloat(String(rawBudget).replace(/[^0-9.]/g, "")) || 0;
+  const budgetMin = draft?.budgetMin ? parseFloat(String(draft.budgetMin).replace(/[^0-9.]/g, "")) : (budget || null);
+  const budgetMax = draft?.budgetMax ? parseFloat(String(draft.budgetMax).replace(/[^0-9.]/g, "")) : (budget || null);
+
+  const budgetMode =
+    draft?.budgetMode === "hourly" || draft?.paymentOption === "hourly"
+      ? "Hourly Rate"
+      : "Fixed Price";
   const serviceFee = Math.round(budget * 0.05);
   const total = budget + serviceFee;
   const skills = draft?.skills ?? [];
@@ -114,7 +142,7 @@ export default function TaskReviewPage() {
             client_name: userName || "Client",
             client_email: meData?.email || "",
             service: draft.title,
-            budget: draft.budget ? `${Number(draft.budget).toLocaleString()} XOF` : "Quote required",
+            budget: budget ? `${budget.toLocaleString()} XOF` : "Quote required",
             deadline: draft.expectedDate || "Flexible",
             location: address || draft.city || "Remote",
             priority: draft.urgency || "standard",
@@ -162,8 +190,8 @@ export default function TaskReviewPage() {
         urgency: draft.urgency || "standard",
         service_type: draft.serviceType || "onsite",
         budget_mode: draft.budgetMode || "fixed",
-        budget_min: budget || null,
-        budget_max: budget || null,
+        budget_min: budgetMin,
+        budget_max: budgetMax,
         materials_provided: !!draft.materialsProvided,
         contact_methods: contactMethodsWithTag,
         skills: skillsWithTag,
@@ -300,7 +328,7 @@ export default function TaskReviewPage() {
                   <section className={styles.card}>
 
                     <div className={styles.previewMeta}>
-                      <span className={styles.metaBadge}>{category}</span>
+                      {categoryName ? <span className={styles.metaBadge}>{categoryName}</span> : null}
                       {subcategory ? <span className={styles.metaBadge}>{subcategory}</span> : null}
                       <span className={`${styles.metaBadge} ${styles.metaUrgency}`}>{urgency}</span>
                     </div>
