@@ -3,6 +3,12 @@ from django.utils.text import slugify
 from .models import Task, TaskAttachment, Bid, Question, Category, Skill, ServiceInquiry, Milestone
 
 
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'slug', 'icon', 'parent', 'is_active', 'order', 'description']
+
+
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
 
@@ -11,8 +17,8 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'icon', 'parent', 'is_active', 'order', 'subcategories', 'description']
 
     def get_subcategories(self, obj):
-        if obj.subcategories.exists():
-            return CategorySerializer(obj.subcategories.filter(is_active=True), many=True).data
+        if obj.parent_id is None:
+            return SubCategorySerializer(obj.subcategories.filter(is_active=True).order_by('order', 'id'), many=True).data
         return []
 
 

@@ -262,10 +262,12 @@ DEFAULT_CATEGORIES_TREE = [
 
 
 def ensure_default_categories():
-    """Ensure standard 13 master categories exist in database and purge numeric artifacts."""
+    """Ensure standard master categories exist in database and purge numeric artifacts safely."""
     try:
-        # 1. Purge/Deactivate any numeric dummy category records (e.g. "12")
-        Category.objects.filter(Q(name__regex=r'^\d+$') | Q(slug__regex=r'^\d+$')).delete()
+        # 1. Safely purge numeric dummy category records if any
+        for c in Category.objects.all():
+            if c.name.isdigit() or c.slug.isdigit():
+                c.delete()
     except Exception:
         pass
 
@@ -315,13 +317,18 @@ def ensure_default_categories():
 @permission_classes([AllowAny])
 def category_list(request):
     if request.method == 'GET':
-        ensure_default_categories()
+        try:
+            ensure_default_categories()
+        except Exception:
+            pass
+
         categories = (
-            Category.objects.filter(is_active=True, parent=None)
-            .exclude(name__regex=r'^\d+$')
+            Category.objects.filter(is_active=True, parent__isnull=True)
             .order_by('order', 'id')
         )
-        serializer = CategorySerializer(categories, many=True)
+        # Filter out any purely numeric dummy records
+        valid_categories = [c for c in categories if not c.name.isdigit()]
+        serializer = CategorySerializer(valid_categories, many=True)
         return Response(serializer.data)
     
     elif request.method == 'POST':
