@@ -10,6 +10,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonCard, SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+import { sound } from "@/app/lib/sound";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -165,6 +166,8 @@ export default function CompanyMessages() {
     }
   }, [rawConversations, targetTaskId, targetClientName, targetClientId, conversations]);
 
+  const lastMsgIdRef = useRef<string | number | null>(null);
+
   useEffect(() => {
     if (!activeId) {
       setActiveMessages([]);
@@ -178,7 +181,22 @@ export default function CompanyMessages() {
       if (!isNaN(numericId)) {
         api.getConversation(numericId)
           .then((data: any) => {
-            if (!cancelled && data.messages) setActiveMessages(data.messages);
+            if (!cancelled && data.messages) {
+              const list = data.messages;
+              if (list.length > 0) {
+                const latest = list[list.length - 1];
+                if (
+                  lastMsgIdRef.current &&
+                  lastMsgIdRef.current !== latest.id &&
+                  latest.sender !== user?.id &&
+                  latest.sender_id !== user?.id
+                ) {
+                  sound.playNotificationSound();
+                }
+                lastMsgIdRef.current = latest.id;
+              }
+              setActiveMessages(list);
+            }
           })
           .catch(() => {});
       }
@@ -191,7 +209,7 @@ export default function CompanyMessages() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeId]);
+  }, [activeId, user]);
 
   useEffect(() => {
     const interval = setInterval(() => refetchConvos(), 3000);
@@ -240,6 +258,7 @@ export default function CompanyMessages() {
       time: new Date().toISOString() 
     };
     setActiveMessages((prev) => [...prev, optimistic]);
+    sound.playMessageSentSound();
     setDraft("");
     const attachment = attachmentDraft;
     setAttachmentDraft(null);

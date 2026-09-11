@@ -12,6 +12,7 @@ import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import { sound } from "@/app/lib/sound";
 
 function formatTime(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -182,6 +183,8 @@ export default function TechnicianMessagesPage() {
     return () => clearInterval(interval);
   }, [refetchConvos]);
 
+  const lastMsgIdRef = useRef<string | number | null>(null);
+
   // Load and poll messages
   useEffect(() => {
     if (!activeConversationId) return;
@@ -194,7 +197,23 @@ export default function TechnicianMessagesPage() {
       if (!isNaN(numericId)) {
         api.getConversation(numericId)
           .then((data: any) => {
-            if (!cancelled && data.messages) setActiveMessages(data.messages);
+            if (!cancelled && data.messages) {
+              const list = data.messages;
+              if (list.length > 0) {
+                const latest = list[list.length - 1];
+                if (
+                  lastMsgIdRef.current &&
+                  lastMsgIdRef.current !== latest.id &&
+                  latest.sender_id !== userData?.id &&
+                  latest.sender !== userData?.id &&
+                  latest.isClient !== false
+                ) {
+                  sound.playNotificationSound();
+                }
+                lastMsgIdRef.current = latest.id;
+              }
+              setActiveMessages(list);
+            }
           })
           .catch(() => {});
       }
@@ -207,7 +226,7 @@ export default function TechnicianMessagesPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId]);
+  }, [activeConversationId, userData]);
 
 
   useEffect(() => {
@@ -278,6 +297,7 @@ export default function TechnicianMessagesPage() {
     };
 
     setActiveMessages((prev) => [...prev, optimistic]);
+    sound.playMessageSentSound();
     setDraft("");
     const attachment = attachmentDraft;
     setAttachmentDraft(null);

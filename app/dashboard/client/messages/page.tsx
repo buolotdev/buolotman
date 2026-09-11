@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/app/lib/api";
+import { sound } from "@/app/lib/sound";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
@@ -139,6 +140,8 @@ export default function ClientMessagesPage() {
     return () => clearInterval(interval);
   }, [refetchConvos]);
 
+  const lastMsgIdRef = useRef<string | number | null>(null);
+
   useEffect(() => {
     if (!activeConversationId) return;
 
@@ -150,7 +153,23 @@ export default function ClientMessagesPage() {
       if (!isNaN(numericId)) {
         api.getConversation(numericId)
           .then((data: any) => {
-            if (!cancelled && data.messages) setActiveMessages(data.messages);
+            if (!cancelled && data.messages) {
+              const list = data.messages;
+              if (list.length > 0) {
+                const latest = list[list.length - 1];
+                if (
+                  lastMsgIdRef.current &&
+                  lastMsgIdRef.current !== latest.id &&
+                  latest.sender_id !== userData?.id &&
+                  latest.sender !== userData?.id &&
+                  !latest.isClient
+                ) {
+                  sound.playNotificationSound();
+                }
+                lastMsgIdRef.current = latest.id;
+              }
+              setActiveMessages(list);
+            }
           })
           .catch(() => {});
       }
@@ -163,7 +182,7 @@ export default function ClientMessagesPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [activeConversationId]);
+  }, [activeConversationId, userData]);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -210,6 +229,8 @@ export default function ClientMessagesPage() {
   const handleSendMessage = async () => {
     const message = draft.trim();
     if ((!message && !attachmentDraft) || !activeConversation || sending) return;
+
+    sound.playMessageSentSound();
 
     const tempId = `tmp-${Date.now()}`;
     const optimistic = {
