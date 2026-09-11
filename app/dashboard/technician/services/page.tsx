@@ -9,6 +9,7 @@ import { useToast } from "@/app/components/Toast";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import styles from "./page.module.css";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import { mergeWithMasterCategories } from "@/app/lib/categories";
 
 type MediaItem = {
   file_url: string;
@@ -218,7 +219,7 @@ export default function TechnicianServicesPage() {
   }, [servicesData, localServices]);
 
   const categories = useMemo(
-    () => (Array.isArray(categoriesData) ? categoriesData : []).filter((c: any) => !c.parent),
+    () => mergeWithMasterCategories(categoriesData),
     [categoriesData]
   );
 
