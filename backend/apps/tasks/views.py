@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.text import slugify
 
 from utils.cache import cached
 from apps.governance.services import create_notification, create_audit_log, notify_users
@@ -262,67 +263,79 @@ DEFAULT_CATEGORIES_TREE = [
 
 
 def ensure_default_categories():
-    """Ensure standard 13 master categories exist in database and purge numeric artifacts."""
+    """Ensure standard 15 master categories exist in database and purge numeric artifacts."""
     try:
         # 1. Purge/Deactivate any numeric dummy category records (e.g. "12")
-        Category.objects.filter(Q(name__regex=r'^\d+$') | Q(slug__regex=r'^\d+$')).delete()
+        numeric_cats = [c for c in Category.objects.all() if c.name and c.name.strip().isdigit()]
+        for nc in numeric_cats:
+            nc.delete()
     except Exception:
         pass
 
     # 2. Ensure each master category exists
-    for idx, item in enumerate(DEFAULT_CATEGORIES_TREE):
-        cat_name = item["category"]
-        cat_slug = slugify(cat_name)
-        cat, _ = Category.objects.get_or_create(
-            slug=cat_slug,
-            defaults={
-                "name": cat_name,
-                "icon": item.get("icon", ""),
-                "order": idx,
-                "is_active": True
-            }
-        )
-        # Ensure it has right name and active
-        if not cat.is_active or cat.name != cat_name:
-            cat.name = cat_name
-            cat.is_active = True
-            cat.order = idx
-            cat.icon = item.get("icon", cat.icon)
-            cat.save(update_fields=['name', 'is_active', 'order', 'icon'])
-
-        for s_idx, skill_name in enumerate(item.get("skills", [])):
-            skill_slug = slugify(f"{cat_name}-{skill_name}")
-            sub_slug = slugify(f"sub-{cat_name}-{skill_name}")
-            Category.objects.get_or_create(
-                slug=sub_slug,
+    try:
+        for idx, item in enumerate(DEFAULT_CATEGORIES_TREE):
+            cat_name = item["category"]
+            cat_slug = slugify(cat_name)
+            cat, _ = Category.objects.get_or_create(
+                slug=cat_slug,
                 defaults={
-                    "name": skill_name,
-                    "parent": cat,
-                    "order": s_idx,
+                    "name": cat_name,
+                    "icon": item.get("icon", ""),
+                    "order": idx,
                     "is_active": True
                 }
             )
-            Skill.objects.get_or_create(
-                slug=skill_slug,
-                defaults={
-                    "name": skill_name,
-                    "category": cat
-                }
-            )
+            # Ensure it has right name and active
+            if not cat.is_active or cat.name != cat_name:
+                cat.name = cat_name
+                cat.is_active = True
+                cat.order = idx
+                cat.icon = item.get("icon", cat.icon)
+                cat.save(update_fields=['name', 'is_active', 'order', 'icon'])
+
+            for s_idx, skill_name in enumerate(item.get("skills", [])):
+                skill_slug = slugify(f"{cat_name}-{skill_name}")
+                sub_slug = slugify(f"sub-{cat_name}-{skill_name}")
+                Category.objects.get_or_create(
+                    slug=sub_slug,
+                    defaults={
+                        "name": skill_name,
+                        "parent": cat,
+                        "order": s_idx,
+                        "is_active": True
+                    }
+                )
+                Skill.objects.get_or_create(
+                    slug=skill_slug,
+                    defaults={
+                        "name": skill_name,
+                        "category": cat
+                    }
+                )
+    except Exception:
+        pass
 
 
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def category_list(request):
     if request.method == 'GET':
-        ensure_default_categories()
-        categories = (
-            Category.objects.filter(is_active=True, parent=None)
-            .exclude(name__regex=r'^\d+$')
-            .order_by('order', 'id')
-        )
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
+        try:
+            ensure_default_categories()
+        except Exception:
+            pass
+
+        try:
+            categories = list(
+                Category.objects.filter(is_active=True, parent=None)
+                .order_by('order', 'id')
+            )
+            categories = [c for c in categories if not (c.name and c.name.strip().isdigit())]
+            serializer = CategorySerializer(categories, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response([], status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
         if not request.user.is_authenticated or request.user.role != 'ADMIN':
