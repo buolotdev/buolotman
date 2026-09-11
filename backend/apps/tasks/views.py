@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.text import slugify
 
 from utils.cache import cached
 from apps.governance.services import create_notification, create_audit_log, notify_users
