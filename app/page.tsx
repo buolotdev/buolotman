@@ -323,13 +323,13 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setLiveTaskIndex((prev) => {
-        const count = liveTasksData?.results?.length || 0;
-        if (count === 0) return 0;
+        const count = liveTasks?.length || 0;
+        if (count <= 1) return 0;
         return (prev + 1) % count;
       });
     }, 4000);
     return () => clearInterval(interval);
-  }, [liveTasksData]);
+  }, [liveTasks]);
 
   /* ── Intersection Observer for scroll animations ── */
   useEffect(() => {
@@ -607,9 +607,9 @@ export default function Home() {
                 className="bm-main-task-track"
                 style={{ transform: `translateY(-${liveTaskIndex * 85}px)` }}
               >
-                {liveTasksData?.results?.length > 0 ? (
-                  [...liveTasksData.results, ...liveTasksData.results].map((task: any, i: number) => (
-                    <div className="bm-main-task" key={`${task.id}-${i}`}>
+                {liveTasks.length > 0 ? (
+                  liveTasks.map((task: any, i: number) => (
+                    <div className="bm-main-task" key={`${task.id || i}`}>
                       <div className="bm-main-task-top">
                         <div className="bm-main-task-user">
                           <img src={`https://ui-avatars.com/api/?name=${task.client?.first_name || 'U'}&background=random`} alt="User" />
