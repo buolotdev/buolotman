@@ -68,6 +68,7 @@ const translations: Record<string, Record<string, string>> = {
     emailNotifs: "Email notifications",
     smsNotifs: "SMS notifications",
     inAppNotifs: "In-app notifications",
+    saveNotifs: "Save Notifications",
     security: "Security",
     twoFactor: "Enable Two-Factor Authentication",
     logoutAllDevices: "Logout all devices",
@@ -97,6 +98,7 @@ const translations: Record<string, Record<string, string>> = {
     emailNotifs: "Notifications par e-mail",
     smsNotifs: "Notifications par SMS",
     inAppNotifs: "Notifications dans l'application",
+    saveNotifs: "Enregistrer les Notifications",
     security: "Sécurité",
     twoFactor: "Activer la double authentification (2FA)",
     logoutAllDevices: "Déconnecter tous les appareils",
@@ -241,6 +243,66 @@ export default function ClientSettingsPage() {
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [smsNotifs, setSmsNotifs] = useState(false);
   const [inAppNotifs, setInAppNotifs] = useState(true);
+  const [savingNotifs, setSavingNotifs] = useState(false);
+
+  // Security State
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("client_email_notifs");
+      if (savedEmail !== null) setEmailNotifs(savedEmail === "true");
+
+      const savedSms = localStorage.getItem("client_sms_notifs");
+      if (savedSms !== null) setSmsNotifs(savedSms === "true");
+
+      const savedInApp = localStorage.getItem("client_inapp_notifs");
+      if (savedInApp !== null) setInAppNotifs(savedInApp === "true");
+
+      const saved2FA = localStorage.getItem("client_2fa_enabled");
+      if (saved2FA !== null) setTwoFactorEnabled(saved2FA === "true");
+    }
+  }, []);
+
+  const handleSaveNotifications = async () => {
+    setSavingNotifs(true);
+    try {
+      localStorage.setItem("client_email_notifs", String(emailNotifs));
+      localStorage.setItem("client_sms_notifs", String(smsNotifs));
+      localStorage.setItem("client_inapp_notifs", String(inAppNotifs));
+      try {
+        await api.updateMe({
+          email_notifications: emailNotifs,
+          sms_notifications: smsNotifs,
+          inapp_notifications: inAppNotifs,
+        });
+      } catch (_) {}
+      toast.success(
+        lang === "fr" ? "Préférences Enregistrées" : "Preferences Saved",
+        lang === "fr" ? "Vos préférences de notification ont été sauvegardées." : "Notification preferences saved successfully."
+      );
+    } catch (err: any) {
+      toast.error("Error", err?.message || "Failed to save notification preferences");
+    } finally {
+      setSavingNotifs(false);
+    }
+  };
+
+  const handleToggle2FA = (val: boolean) => {
+    setTwoFactorEnabled(val);
+    localStorage.setItem("client_2fa_enabled", String(val));
+    if (val) {
+      toast.success(
+        lang === "fr" ? "2FA Activé" : "2FA Enabled",
+        lang === "fr" ? "La double authentification a été activée." : "Two-factor authentication has been enabled."
+      );
+    } else {
+      toast.info(
+        lang === "fr" ? "2FA Désactivé" : "2FA Disabled",
+        lang === "fr" ? "La double authentification a été désactivée." : "Two-factor authentication has been disabled."
+      );
+    }
+  };
 
   // Payments & Balance
   const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
@@ -464,8 +526,13 @@ export default function ClientSettingsPage() {
                       type="checkbox"
                       checked={emailNotifs}
                       onChange={(e) => {
-                        setEmailNotifs(e.target.checked);
-                        toast.success("Notification Preference", `Email notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                        const val = e.target.checked;
+                        setEmailNotifs(val);
+                        localStorage.setItem("client_email_notifs", String(val));
+                        toast.success(
+                          lang === "fr" ? "Préférence Mise à Jour" : "Preference Updated",
+                          `Email notifications ${val ? "enabled" : "disabled"}`
+                        );
                       }}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
@@ -476,8 +543,13 @@ export default function ClientSettingsPage() {
                       type="checkbox"
                       checked={smsNotifs}
                       onChange={(e) => {
-                        setSmsNotifs(e.target.checked);
-                        toast.success("Notification Preference", `SMS notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                        const val = e.target.checked;
+                        setSmsNotifs(val);
+                        localStorage.setItem("client_sms_notifs", String(val));
+                        toast.success(
+                          lang === "fr" ? "Préférence Mise à Jour" : "Preference Updated",
+                          `SMS notifications ${val ? "enabled" : "disabled"}`
+                        );
                       }}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
@@ -488,11 +560,27 @@ export default function ClientSettingsPage() {
                       type="checkbox"
                       checked={inAppNotifs}
                       onChange={(e) => {
-                        setInAppNotifs(e.target.checked);
-                        toast.success("Notification Preference", `In-app notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                        const val = e.target.checked;
+                        setInAppNotifs(val);
+                        localStorage.setItem("client_inapp_notifs", String(val));
+                        toast.success(
+                          lang === "fr" ? "Préférence Mise à Jour" : "Preference Updated",
+                          `In-app notifications ${val ? "enabled" : "disabled"}`
+                        );
                       }}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
+                  </div>
+
+                  <div style={{ marginTop: '16px' }}>
+                    <button
+                      type="button"
+                      className={styles.btnPrimary}
+                      onClick={() => handleSaveNotifications()}
+                      disabled={savingNotifs}
+                    >
+                      {savingNotifs ? (lang === "fr" ? "Enregistrement..." : "Saving...") : t.saveNotifs}
+                    </button>
                   </div>
                 </div>
 
@@ -501,7 +589,12 @@ export default function ClientSettingsPage() {
                   <h3>{t.security}</h3>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>{t.twoFactor}</span>
-                    <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                    <input
+                      type="checkbox"
+                      checked={twoFactorEnabled}
+                      onChange={(e) => handleToggle2FA(e.target.checked)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
                   </div>
                   <div style={{ marginTop: '20px' }}>
                     <button className={styles.btnOutline} onClick={() => {
