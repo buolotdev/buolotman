@@ -17,6 +17,7 @@ const labels: Record<string, Record<string, string>> = {
     messages: "Messages",
     wallet: "Wallet",
     profile: "Edit Profile",
+    support: "Support Tickets",
     settings: "Settings",
   },
   fr: {
@@ -29,6 +30,7 @@ const labels: Record<string, Record<string, string>> = {
     messages: "Messages",
     wallet: "Portefeuille",
     profile: "Modifier le Profil",
+    support: "Tickets d'assistance",
     settings: "Paramètres",
   }
 };
@@ -42,6 +44,7 @@ const navItems = [
   { key: "messages", icon: "lucide:message-square", href: "/dashboard/technician/messages" },
   { key: "wallet", icon: "lucide:wallet", href: "/dashboard/technician/wallet" },
   { key: "profile", icon: "lucide:user-cog", href: "/dashboard/technician/profile" },
+  { key: "support", icon: "lucide:help-circle", href: "/dashboard/technician/support" },
   { key: "settings", icon: "lucide:settings", href: "/dashboard/technician/settings" },
 ];
 
