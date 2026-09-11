@@ -54,11 +54,118 @@ def send_platform_email(subject, message, recipient_list, html_message=None, sen
         return False
 
 
+def build_branded_email_html(
+    heading_title="BoulotMan",
+    heading_subtitle="Verified Work & Technical Services",
+    body_content="",
+    preheader=""
+):
+    """
+    Standard branded HTML email container with official BoulotMan logo and brand styling.
+    Brand Colors:
+      - Deep Navy: #001F3F / #0A2D52
+      - Accent Orange: #FF4500 / #E03E00
+      - Slate/Muted: #94A3B8, #64748B, #475569
+    """
+    preheader_tag = f'<span style="display:none; font-size:0px; line-height:0px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">{preheader}</span>' if preheader else ''
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{heading_title}</title>
+  {preheader_tag}
+</head>
+<body style="margin: 0; padding: 0; background-color: #F1F5F9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F1F5F9; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <!-- Main Email Container -->
+        <table role="presentation" width="100%" style="max-width: 560px; background-color: #FFFFFF; border-radius: 18px; box-shadow: 0 12px 36px rgba(0, 31, 63, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04); overflow: hidden; border: 1px solid #E2E8F0; border-collapse: separate;">
+          
+          <!-- Top Vibrant Brand Stripe -->
+          <tr>
+            <td style="background: linear-gradient(90deg, #FF4500 0%, #FF7A00 50%, #FF4500 100%); height: 6px; line-height: 6px; font-size: 6px;">&nbsp;</td>
+          </tr>
+
+          <!-- Navy Brand Header with Official Logo -->
+          <tr>
+            <td style="padding: 34px 28px 28px 28px; background: linear-gradient(145deg, #001F3F 0%, #08284D 55%, #0E3666 100%); text-align: center;">
+              
+              <!-- Logo Container with crisp styling & fallback -->
+              <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                <tr>
+                  <td align="center" style="background-color: #FFFFFF; width: 72px; height: 72px; border-radius: 16px; border: 2px solid rgba(255, 255, 255, 0.25); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); vertical-align: middle; text-align: center;">
+                    <a href="https://boulotman.com" target="_blank" style="text-decoration: none; display: block; line-height: 0;">
+                      <img src="https://boulotman.com/boulotman-logo.png" alt="BoulotMan" width="58" height="58" style="display: block; margin: 0 auto; border: 0; max-width: 100%; height: auto;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Brand Name Text -->
+              <div style="margin-top: 14px;">
+                <a href="https://boulotman.com" target="_blank" style="text-decoration: none;">
+                  <span style="color: #FFFFFF; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    Boulot<span style="color: #FF4500;">Man</span>
+                  </span>
+                </a>
+              </div>
+
+              <!-- Subtitle / Tagline -->
+              <p style="margin: 6px 0 0 0; color: #94A3B8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                {heading_subtitle}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body Content Area -->
+          <tr>
+            <td style="padding: 36px 36px 30px 36px; background-color: #FFFFFF; color: #1E293B;">
+              {body_content}
+            </td>
+          </tr>
+
+          <!-- Official Footer Area -->
+          <tr>
+            <td style="background-color: #F8FAFC; padding: 24px 32px; border-top: 1px solid #E2E8F0; text-align: center;">
+              
+              <!-- Quick Links -->
+              <p style="margin: 0 0 10px 0; font-size: 13px;">
+                <a href="https://boulotman.com" target="_blank" style="color: #FF4500; text-decoration: none; font-weight: 700;">boulotman.com</a>
+                <span style="color: #CBD5E1; margin: 0 10px;">&bull;</span>
+                <a href="mailto:support@boulotman.com" style="color: #64748B; text-decoration: none; font-weight: 600;">support@boulotman.com</a>
+                <span style="color: #CBD5E1; margin: 0 10px;">&bull;</span>
+                <a href="https://boulotman.com/safety" target="_blank" style="color: #64748B; text-decoration: none; font-weight: 600;">Trust &amp; Safety</a>
+              </p>
+
+              <!-- Copyright & Security Note -->
+              <p style="margin: 0 0 4px 0; font-size: 11px; color: #94A3B8; line-height: 1.5;">
+                &copy; 2026 <strong>BoulotMan Platform</strong>. All rights reserved.
+              </p>
+              <p style="margin: 0; font-size: 10px; color: #94A3B8; line-height: 1.4;">
+                This is an official automated security message from BoulotMan. Never share your password or OTP with anyone.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+
 def send_otp_email(to_email, code, purpose='verification', user_name=None):
     """
-    Send a 6-digit OTP code to the given email address.
+    Send a 6-digit OTP code to the given email address with high-grade BoulotMan branding and dedicated styling for Password Reset.
     """
     greeting = f"Hello {user_name}," if user_name else "Hello,"
+    
+    is_password_reset = (purpose == 'password_reset')
+    
     purpose_label = {
         'login': 'Login Verification',
         'registration': 'Account Registration',
@@ -66,71 +173,97 @@ def send_otp_email(to_email, code, purpose='verification', user_name=None):
         'verification': 'Identity Verification',
     }.get(purpose, 'Verification')
 
-    subject = f"Your BoulotMan {purpose_label} Code: {code}"
+    if is_password_reset:
+        subject = f"🔐 Your BoulotMan Password Reset Code: {code}"
+        badge_text = "🔒 PASSWORD RESET REQUEST"
+        badge_bg = "#FEF2F2"
+        badge_border = "#FECACA"
+        badge_color = "#DC2626"
+        instruction_text = (
+            "We received a request to reset the password for your <strong>BoulotMan</strong> account.<br>"
+            "Please use the 6-digit verification code below to set your new password:"
+        )
+        preheader_text = f"Your Password Reset Code is {code} (expires in 15 minutes)"
+        warning_note = (
+            "If you did not request a password reset, you can safely ignore this email. "
+            "Your password will remain unchanged, and your account is completely secure."
+        )
+    else:
+        subject = f"Your BoulotMan {purpose_label} Code: {code}"
+        badge_text = f"🔐 {purpose_label.upper()}"
+        badge_bg = "#FFF3EB"
+        badge_border = "#FFE4D6"
+        badge_color = "#FF4500"
+        instruction_text = f"Use the following 6-digit verification code to complete your <strong>{purpose_label}</strong>:"
+        preheader_text = f"Your verification code is {code} (expires in 15 minutes)"
+        warning_note = (
+            "If you did not request this verification code, please ignore this email. "
+            "Someone may have typed your email address by mistake."
+        )
 
     plain_message = f"""{greeting}
 
-Your BoulotMan verification code for {purpose_label} is: {code}
+{subject}
 
-This code will expire in 10 minutes. For security reasons, please do not share this code with anyone.
+Verification Code: {code}
+
+This code will expire in 15 minutes.
+For your security, never share this code with anyone. BoulotMan staff will never ask for your verification code.
 
 Best regards,
-The BoulotMan Team
+The BoulotMan Security Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>{subject}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Secure Technical Services & Verified Work</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 24px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">{greeting}</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 24px 0;">
-                Use the following 6-digit verification code to complete your <strong>{purpose_label}</strong>:
-              </p>
-              
-              <div style="background-color: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 24px;">
-                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0284c7; font-family: monospace;">{code}</span>
-              </div>
-              
-              <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin: 0 0 12px 0;">
-                ⏱️ This code will expire in <strong>10 minutes</strong>.
-              </p>
-              <p style="font-size: 12px; line-height: 1.5; color: #94a3b8; margin: 0;">
-                🔒 If you did not request this verification, you can safely ignore this email. Someone may have typed your address by mistake.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved.<br>
-                <a href="https://boulotman.com" style="color: #0284c7; text-decoration: none;">boulotman.com</a> &bull; 
-                <a href="mailto:support@boulotman.com" style="color: #0284c7; text-decoration: none;">support@boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-"""
+    body_content = f"""
+      <p style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 16px 0;">{greeting}</p>
+      
+      <!-- Security / Purpose Badge -->
+      <div style="margin: 0 0 20px 0;">
+        <span style="display: inline-block; background-color: {badge_bg}; border: 1px solid {badge_border}; color: {badge_color}; font-size: 11px; font-weight: 800; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.8px;">
+          {badge_text}
+        </span>
+      </div>
+
+      <!-- Action Message -->
+      <p style="font-size: 14px; line-height: 1.7; color: #334155; margin: 0 0 24px 0;">
+        {instruction_text}
+      </p>
+
+      <!-- Prominent High-Contrast OTP Box -->
+      <div style="background: linear-gradient(145deg, #001F3F 0%, #0A2D52 100%); border-radius: 14px; padding: 26px 16px; text-align: center; margin: 0 0 24px 0; box-shadow: 0 6px 18px rgba(0, 31, 63, 0.15);">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: #94A3B8; margin-bottom: 10px;">
+          YOUR 6-DIGIT VERIFICATION CODE
+        </div>
+        <div style="font-size: 42px; font-weight: 900; letter-spacing: 10px; color: #FF4500; font-family: 'SF Pro Display', -apple-system, 'Segoe UI', Consolas, 'Courier New', monospace; line-height: 1.1; padding-left: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">
+          {code}
+        </div>
+      </div>
+
+      <!-- Expiry Notice Box -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; margin-bottom: 24px;">
+        <tr>
+          <td style="padding: 12px 16px; font-size: 13px; color: #92400E; font-weight: 600; line-height: 1.5;">
+            ⏱️ <strong>Time Sensitive:</strong> This code will expire in <strong>15 minutes</strong>.
+          </td>
+        </tr>
+      </table>
+
+      <!-- Security Notice Footer -->
+      <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px; margin: 0;">
+        <p style="font-size: 12px; line-height: 1.6; color: #64748B; margin: 0;">
+          🛡️ <strong>Security Tip:</strong> {warning_note}
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="BoulotMan Security" if is_password_reset else f"BoulotMan {purpose_label}",
+        heading_subtitle="Verified Work & Technical Services",
+        body_content=body_content,
+        preheader=preheader_text
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -163,56 +296,42 @@ The BoulotMan Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Welcome to BoulotMan</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BoulotMan!</h1>
-              <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Secure Technical Services & Verified Work</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                Thank you for creating an account on <strong>BoulotMan</strong>. We connect clients, verified technicians, and companies with guaranteed escrow payments and milestone management.
-              </p>
-              
-              <div style="text-align: center; margin: 32px 0;">
-                <a href="https://boulotman.com/login" style="background-color: #0284c7; color: #ffffff; padding: 12px 28px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block;">
-                  Go to Dashboard &rarr;
-                </a>
-              </div>
-              
-              <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin: 0;">
-                Need help getting started? Check our Help Center or contact our support team at <a href="mailto:support@boulotman.com" style="color: #0284c7;">support@boulotman.com</a>.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved.<br>
-                <a href="https://boulotman.com" style="color: #0284c7; text-decoration: none;">boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-"""
+    body_content = f"""
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 16px 0;">Hello <strong>{name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        Welcome to <strong>BoulotMan</strong>! We connect clients, verified technicians, and companies with guaranteed escrow payments, milestone tracking, and verified workmanship.
+      </p>
+
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #001F3F;">What you can do with BoulotMan:</p>
+        <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.8;">
+          <li>Post or discover technical service contracts across Africa</li>
+          <li>Work securely with Milestone-based Escrow payments</li>
+          <li>Real-time chat and proposal negotiations</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="https://boulotman.com/login" target="_blank" style="background: linear-gradient(135deg, #FF4500 0%, #E03D00 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);">
+          Go to Dashboard &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #94A3B8; margin: 0;">
+          Need assistance? Our support team is ready to help at <a href="mailto:support@boulotman.com" style="color: #FF4500; text-decoration: none; font-weight: 600;">support@boulotman.com</a>.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="Welcome to BoulotMan!",
+        heading_subtitle="Your Verified Services & Escrow Platform",
+        body_content=body_content,
+        preheader=f"Welcome to BoulotMan, {name}! Start exploring verified technical services."
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -249,63 +368,48 @@ The BoulotMan Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>{subject}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #38bdf8; font-size: 13px; font-weight: 600;">Verified {role_label} Status Approved</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <div style="text-align: center; margin-bottom: 24px;">
-                <div style="display: inline-block; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50px; padding: 6px 18px; color: #059669; font-size: 13px; font-weight: 700;">
-                  &#10004; Account Officially Verified
-                </div>
-              </div>
+    body_content = f"""
+      <div style="text-align: center; margin-bottom: 22px;">
+        <div style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 50px; padding: 6px 20px; color: #059669; font-size: 13px; font-weight: 700;">
+          &#10004; Account Officially Verified
+        </div>
+      </div>
 
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                Great news! Our administrative review team has verified your credentials and approved your account. Your profile now proudly displays the official <strong>Verified Badge</strong>.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{dashboard_url}" style="background-color: #059669; color: #ffffff; padding: 12px 28px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block;">
-                  Access Verified Dashboard &rarr;
-                </a>
-              </div>
-              
-              <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin: 0;">
-                Ready to take on new projects and build relationships with clients across Africa? If you need anything, our support team is available at <a href="mailto:support@boulotman.com" style="color: #0284c7;">support@boulotman.com</a>.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved.<br>
-                <a href="https://boulotman.com" style="color: #0284c7; text-decoration: none;">boulotman.com</a> &bull;
-                <a href="mailto:support@boulotman.com" style="color: #0284c7; text-decoration: none;">support@boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
- </body>
-</html>
-"""
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        Great news! Our administrative review team has verified your identity and approved your <strong>{role_label}</strong> account. Your profile now proudly displays the official <strong>Verified Badge</strong>.
+      </p>
+
+      <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 18px 20px; margin: 0 0 24px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #166534;">Unlocked Verified Features:</p>
+        <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #15803D; line-height: 1.8;">
+          <li>Verified Trust Badge displayed on your public profile</li>
+          <li>Full bidding access on high-value client projects</li>
+          <li>Direct Milestone Escrow payouts</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{dashboard_url}" target="_blank" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+          Access Verified Dashboard &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #94A3B8; margin: 0;">
+          Ready to take on new projects? If you have questions, our team is always here at <a href="mailto:support@boulotman.com" style="color: #FF4500; text-decoration: none; font-weight: 600;">support@boulotman.com</a>.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="Account Verified!",
+        heading_subtitle=f"Verified {role_label} Status Approved",
+        body_content=body_content,
+        preheader=f"Congratulations {name}, your BoulotMan account is verified!"
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -352,52 +456,38 @@ The BoulotMan Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>{subject}</title></head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #38bdf8; font-size: 13px;">New Task Proposal Alert</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{client_name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                You received a new proposal for your task: <strong>"{task_title}"</strong>.
-              </p>
+    body_content = f"""
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{client_name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        You received a new proposal for your task: <strong>"{task_title}"</strong>.
+      </p>
 
-              <div style="background-color: #f1f5f9; border-left: 4px solid #0284c7; border-radius: 4px; padding: 16px 20px; margin-bottom: 24px;">
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #1e293b;"><strong>Provider:</strong> {tech_name}</p>
-                <p style="margin: 0; font-size: 14px; color: #1e293b;"><strong>Proposed Amount:</strong> {bid_amount}</p>
-              </div>
+      <div style="background-color: #F8FAFC; border-left: 4px solid #FF4500; border-radius: 4px; padding: 16px 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; color: #001F3F;"><strong>Provider:</strong> {tech_name}</p>
+        <p style="margin: 0; font-size: 14px; color: #001F3F;"><strong>Proposed Amount:</strong> <span style="font-weight: 700; color: #FF4500;">{bid_amount}</span></p>
+      </div>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{review_url}" style="background-color: #0284c7; color: #ffffff; padding: 12px 28px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block;">
-                  Review & Award Proposal &rarr;
-                </a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved. &bull; <a href="https://boulotman.com" style="color: #0284c7;">boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>"""
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{review_url}" target="_blank" style="background: linear-gradient(135deg, #FF4500 0%, #E03D00 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);">
+          Review & Award Proposal &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #94A3B8; margin: 0;">
+          All payments on BoulotMan are protected with secure escrow. Funds are only released when you approve milestone completion.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="New Proposal Received",
+        heading_subtitle=f'Task: "{task_title}"',
+        body_content=body_content,
+        preheader=f"{tech_name} submitted a new proposal for your task: {task_title}"
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -436,51 +526,39 @@ The BoulotMan Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>{subject}</title></head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #10b981; font-size: 13px; font-weight: 600;">&#10004; Contract Awarded</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{tech_name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                Fantastic news! The client has accepted your proposal for <strong>"{task_title}"</strong>. The contract is officially awarded to you.
-              </p>
+    body_content = f"""
+      <div style="text-align: center; margin-bottom: 22px;">
+        <div style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 50px; padding: 6px 20px; color: #059669; font-size: 13px; font-weight: 700;">
+          &#10004; Contract Awarded to You!
+        </div>
+      </div>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{project_url}" style="background-color: #10b981; color: #ffffff; padding: 12px 28px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-block;">
-                  Open Project Workspace &rarr;
-                </a>
-              </div>
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{tech_name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        Fantastic news! The client has officially accepted your proposal for <strong>"{task_title}"</strong>.
+      </p>
 
-              <p style="font-size: 12px; line-height: 1.5; color: #64748b; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 12px; margin: 0;">
-                <strong>Escrow Reminder:</strong> All payments are secured in BoulotMan Escrow. Make sure the client deposits milestone funds before commencing work.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved. &bull; <a href="https://boulotman.com" style="color: #0284c7;">boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>"""
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{project_url}" target="_blank" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+          Open Project Workspace &rarr;
+        </a>
+      </div>
+
+      <div style="background: #FFFBEB; border: 1px solid #FEF3C7; border-radius: 8px; padding: 14px 16px; margin: 20px 0 0 0;">
+        <p style="font-size: 12px; line-height: 1.6; color: #92400E; margin: 0;">
+          <strong>Escrow Protection:</strong> All payments are secured in BoulotMan Escrow. Make sure the client deposits milestone funds before commencing work.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="Contract Awarded!",
+        heading_subtitle=f'Task: "{task_title}"',
+        body_content=body_content,
+        preheader=f"Congratulations {tech_name}, your proposal for {task_title} was accepted!"
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -527,56 +605,44 @@ The BoulotMan Billing Team
 https://boulotman.com
 """
 
-    html_message = f"""<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>{subject}</title></head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #38bdf8; font-size: 13px;">Official Payment & Escrow Receipt</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 24px 0;">
-                Your recent payment activity has been securely processed.
-              </p>
+    ms_row = f'<tr><td style="padding: 8px 0; color: #64748B;">Milestone</td><td align="right" style="font-weight: 500; color: #0F172A;">{milestone_title}</td></tr>' if milestone_title else ''
 
-              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-                <table width="100%" style="font-size: 14px; color: #334155;">
-                  <tr><td style="padding: 6px 0; color: #64748b;">Status</td><td align="right" style="font-weight: 600; color: #059669;">&#10004; {action_label}</td></tr>
-                  <tr><td style="padding: 6px 0; color: #64748b;">Amount</td><td align="right" style="font-size: 18px; font-weight: 700; color: #0f172a;">{amount} {currency}</td></tr>
-                  <tr><td style="padding: 6px 0; color: #64748b;">Project</td><td align="right" style="font-weight: 500;">{task_title}</td></tr>
-                  {f'<tr><td style="padding: 6px 0; color: #64748b;">Milestone</td><td align="right" style="font-weight: 500;">{milestone_title}</td></tr>' if milestone_title else ''}
-                </table>
-              </div>
+    body_content = f"""
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        Your recent payment activity has been securely processed by BoulotMan Escrow.
+      </p>
 
-              <div style="text-align: center; margin: 24px 0;">
-                <a href="https://boulotman.com/dashboard" style="background-color: #0f172a; color: #ffffff; padding: 12px 28px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block;">
-                  View Wallet Statement &rarr;
-                </a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved. &bull; <a href="mailto:billing@boulotman.com" style="color: #0284c7;">billing@boulotman.com</a>
-              </p>
-            </td>
-          </tr>
+      <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+        <table width="100%" style="font-size: 14px; color: #334155; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #E2E8F0;"><td style="padding: 8px 0; color: #64748B;">Status</td><td align="right" style="font-weight: 700; color: #059669;">&#10004; {action_label}</td></tr>
+          <tr style="border-bottom: 1px solid #E2E8F0;"><td style="padding: 8px 0; color: #64748B;">Amount</td><td align="right" style="font-size: 18px; font-weight: 800; color: #FF4500;">{amount} {currency}</td></tr>
+          <tr style="border-bottom: 1px solid #E2E8F0;"><td style="padding: 8px 0; color: #64748B;">Project</td><td align="right" style="font-weight: 500; color: #0F172A;">{task_title}</td></tr>
+          {ms_row}
         </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>"""
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="https://boulotman.com/dashboard" target="_blank" style="background: linear-gradient(135deg, #001F3F 0%, #001224 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block;">
+          View Wallet Statement &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #94A3B8; margin: 0;">
+          Questions about this transaction? Reach our billing department at <a href="mailto:billing@boulotman.com" style="color: #FF4500; text-decoration: none; font-weight: 600;">billing@boulotman.com</a>.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="Official Payment Receipt",
+        heading_subtitle=action_label,
+        body_content=body_content,
+        preheader=f"BoulotMan Payment Receipt: {amount} {currency} - {action_label}"
+    )
+
     return send_platform_email(
         subject=subject,
         message=plain_message,
@@ -633,50 +699,31 @@ https://boulotman.com
 support@boulotman.com
 """
 
-    ack_html = f"""<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>{ack_subject}</title></head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 10px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;">
-          <tr>
-            <td style="padding: 32px 36px; background-color: #0f172a; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">BoulotMan</h1>
-              <p style="margin: 4px 0 0 0; color: #38bdf8; font-size: 13px;">Customer Support Ticket Received</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 36px 36px 28px 36px;">
-              <p style="font-size: 16px; color: #1e293b; margin: 0 0 16px 0;">Hello <strong>{name}</strong>,</p>
-              <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                Thank you for contacting BoulotMan. We have received your inquiry regarding <strong>"{topic}"</strong> and assigned it to our support team.
-              </p>
+    ack_body = f"""
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+        Thank you for reaching out to <strong>BoulotMan Support</strong>. We have received your inquiry regarding <strong>"{topic}"</strong> and assigned it ticket priority.
+      </p>
 
-              <div style="background-color: #f8fafc; border-left: 4px solid #0284c7; padding: 16px 20px; margin-bottom: 24px; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748b;"><strong>Inquiry Topic:</strong> {topic}</p>
-                <p style="margin: 0; font-size: 13px; color: #334155; line-height: 1.5;"><em>"{message}"</em></p>
-              </div>
+      <div style="background-color: #F8FAFC; border-left: 4px solid #001F3F; padding: 16px 20px; margin-bottom: 24px; border-radius: 4px;">
+        <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748B;"><strong>Inquiry Topic:</strong> {topic}</p>
+        <p style="margin: 0; font-size: 13px; color: #334155; line-height: 1.5;"><em>"{message}"</em></p>
+      </div>
 
-              <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin: 0;">
-                A representative will review your inquiry and follow up directly to this email address. Typical response time is under 2 hours.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color: #f8fafc; padding: 20px 36px; border-top: 1px solid #e2e8f0; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                &copy; 2026 BoulotMan. All rights reserved. &bull; <a href="mailto:support@boulotman.com" style="color: #0284c7;">support@boulotman.com</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>"""
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #64748B; margin: 0;">
+          A customer care specialist will review your inquiry and follow up directly to this email address. Average response time is under 2 hours.
+        </p>
+      </div>
+    """
+
+    ack_html = build_branded_email_html(
+        heading_title="Support Request Received",
+        heading_subtitle="We are on it!",
+        body_content=ack_body,
+        preheader=f"We received your support request regarding: {topic}"
+    )
 
     return send_platform_email(
         subject=ack_subject,
@@ -686,3 +733,4 @@ support@boulotman.com
         sender_type='support',
         fail_silently=True
     )
+
