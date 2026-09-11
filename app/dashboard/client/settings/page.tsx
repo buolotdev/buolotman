@@ -156,6 +156,92 @@ export default function ClientSettingsPage() {
     }
   };
 
+  // Password State
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordForm.new_password) {
+      toast.error("Error", "Please enter a new password");
+      return;
+    }
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error(
+        lang === "fr" ? "Erreur" : "Error",
+        lang === "fr" ? "Les mots de passe ne correspondent pas" : "New passwords do not match"
+      );
+      return;
+    }
+    if (passwordForm.new_password.length < 6) {
+      toast.error(
+        lang === "fr" ? "Erreur" : "Error",
+        lang === "fr" ? "Le mot de passe doit contenir au moins 6 caractères" : "Password must be at least 6 characters"
+      );
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      await api.changePassword({
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      });
+      toast.success(
+        lang === "fr" ? "Succès" : "Success",
+        lang === "fr" ? "Mot de passe modifié avec succès" : "Password changed successfully"
+      );
+      setPasswordForm({ current_password: "", new_password: "", confirm_password: "" });
+    } catch (err: any) {
+      toast.error(
+        lang === "fr" ? "Erreur" : "Error",
+        err?.message || "Failed to change password. Please check your current password."
+      );
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Payment Preferences State
+  const [paymentMethod, setPaymentMethod] = useState("B-Pay Wallet");
+  const [savingPaymentPref, setSavingPaymentPref] = useState(false);
+
+  useEffect(() => {
+    const savedMethod = localStorage.getItem("client_preferred_payment_method");
+    if (savedMethod) {
+      setPaymentMethod(savedMethod);
+    }
+  }, []);
+
+  const handleSavePaymentPreference = async () => {
+    setSavingPaymentPref(true);
+    try {
+      localStorage.setItem("client_preferred_payment_method", paymentMethod);
+      try {
+        await api.updateMe({ preferred_payment_method: paymentMethod });
+      } catch (_) {}
+      toast.success(
+        lang === "fr" ? "Préférence Enregistrée" : "Preference Saved",
+        lang === "fr"
+          ? `Mode de paiement défini sur ${paymentMethod}`
+          : `Payment method set to ${paymentMethod}`
+      );
+    } catch (e: any) {
+      toast.error("Error", e?.message || "Failed to save payment preference");
+    } finally {
+      setSavingPaymentPref(false);
+    }
+  };
+
+  // Notification Preferences State
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [smsNotifs, setSmsNotifs] = useState(false);
+  const [inAppNotifs, setInAppNotifs] = useState(true);
+
   // Payments & Balance
   const [paymentsModalOpen, setPaymentsModalOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -288,21 +374,49 @@ export default function ClientSettingsPage() {
                     <input className={styles.formInput} value={form.country} onChange={(e) => setForm({...form, country: e.target.value})} />
                   </div>
 
-                  <h4 style={{ marginTop: '32px', marginBottom: '16px', fontSize: '15px', fontWeight: 600, color: '#334155' }}>{t.changePassword}</h4>
+                  <button type="submit" className={styles.btnPrimary} disabled={savingSettings} style={{ marginTop: '8px' }}>
+                    {savingSettings ? t.saving : t.saveChanges}
+                  </button>
+                </form>
+
+                {/* Change Password */}
+                <form className={styles.settingsCard} onSubmit={handlePasswordChange}>
+                  <h3>{t.changePassword}</h3>
                   <div className={styles.formGroup}>
-                    <input type="password" placeholder={t.currentPasswordPlaceholder} className={styles.formInput} />
+                    <label>{t.currentPasswordPlaceholder}</label>
+                    <input
+                      type="password"
+                      placeholder={t.currentPasswordPlaceholder}
+                      className={styles.formInput}
+                      value={passwordForm.current_password}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+                    />
                   </div>
                   <div className={styles.twoCol}>
                     <div className={styles.formGroup}>
-                      <input type="password" placeholder={t.newPasswordPlaceholder} className={styles.formInput} />
+                      <label>{t.newPasswordPlaceholder}</label>
+                      <input
+                        type="password"
+                        placeholder={t.newPasswordPlaceholder}
+                        className={styles.formInput}
+                        value={passwordForm.new_password}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                      />
                     </div>
                     <div className={styles.formGroup}>
-                      <input type="password" placeholder={t.confirmPasswordPlaceholder} className={styles.formInput} />
+                      <label>{t.confirmPasswordPlaceholder}</label>
+                      <input
+                        type="password"
+                        placeholder={t.confirmPasswordPlaceholder}
+                        className={styles.formInput}
+                        value={passwordForm.confirm_password}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
+                      />
                     </div>
                   </div>
 
-                  <button type="submit" className={styles.btnPrimary} disabled={savingSettings}>
-                    {savingSettings ? t.saving : t.saveChanges}
+                  <button type="submit" className={styles.btnPrimary} disabled={savingPassword} style={{ marginTop: '8px' }}>
+                    {savingPassword ? t.saving : t.saveChanges}
                   </button>
                 </form>
 
@@ -311,16 +425,33 @@ export default function ClientSettingsPage() {
                   <h3>{t.paymentPrefs}</h3>
                   <div className={styles.formGroup}>
                     <label>{t.preferredMethod}</label>
-                    <select className={styles.formSelect}>
-                      <option>B-Pay Wallet</option>
-                      <option>Mobile Money</option>
-                      <option>Credit / Debit Card</option>
-                      <option>Bank Account</option>
+                    <select
+                      className={styles.formSelect}
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    >
+                      <option value="B-Pay Wallet">B-Pay Wallet</option>
+                      <option value="Mobile Money">Mobile Money</option>
+                      <option value="Credit / Debit Card">Credit / Debit Card</option>
+                      <option value="Bank Account">Bank Account</option>
                     </select>
                   </div>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className={styles.btnPrimary}>{t.savePref}</button>
-                    <button className={styles.btnOutline} onClick={() => setPaymentsModalOpen(true)}>{t.managePayments}</button>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                    <button
+                      type="button"
+                      className={styles.btnPrimary}
+                      onClick={handleSavePaymentPreference}
+                      disabled={savingPaymentPref}
+                    >
+                      {savingPaymentPref ? (lang === "fr" ? "Enregistrement..." : "Saving...") : t.savePref}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.btnOutline}
+                      onClick={() => setPaymentsModalOpen(true)}
+                    >
+                      {t.managePayments}
+                    </button>
                   </div>
                 </div>
 
@@ -329,15 +460,39 @@ export default function ClientSettingsPage() {
                   <h3>{t.notifPrefs}</h3>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>{t.emailNotifs}</span>
-                    <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                    <input
+                      type="checkbox"
+                      checked={emailNotifs}
+                      onChange={(e) => {
+                        setEmailNotifs(e.target.checked);
+                        toast.success("Notification Preference", `Email notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>{t.smsNotifs}</span>
-                    <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                    <input
+                      type="checkbox"
+                      checked={smsNotifs}
+                      onChange={(e) => {
+                        setSmsNotifs(e.target.checked);
+                        toast.success("Notification Preference", `SMS notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
                   </div>
                   <div className={styles.toggleRow}>
                     <span className={styles.toggleLabel}>{t.inAppNotifs}</span>
-                    <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                    <input
+                      type="checkbox"
+                      checked={inAppNotifs}
+                      onChange={(e) => {
+                        setInAppNotifs(e.target.checked);
+                        toast.success("Notification Preference", `In-app notifications ${e.target.checked ? "enabled" : "disabled"}`);
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
                   </div>
                 </div>
 
