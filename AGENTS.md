@@ -25,9 +25,19 @@ This version has breaking changes — APIs, conventions, and file structure may 
      This automatically packages `backend/` into `Desktop/aws-eb-final.zip` (excluding git, venv, pycache, and sqlite database).
   2. In AWS Elastic Beanstalk Console, click **"Upload and Deploy"** and upload `aws-eb-final.zip`.
 
-## 3. Communication & User Preferences
+## 3. Mobile Developer Files - Safe Merge Protocol (STRICT RULE)
+- **Problem:** Mobile developer frequently sends backend files (e.g. `views.py`, `models.py`, `asgi.py`, `consumers.py`) that may lack website logic (categories, custom company endpoints, email templates, trust badges).
+- **Rule:** **NEVER directly overwrite or blindly replace existing backend files** with mobile developer files.
+- **Workflow:**
+  1. Inspect the incoming mobile developer files side-by-side with existing code.
+  2. Extract and merge ONLY the new mobile app endpoints, serializers, or WebSocket consumers.
+  3. Ensure all website endpoints (`categories`, `email_service`, `company`, `wallet`, `search`, `tasks`) remain 100% intact and functional.
+  4. Always test/verify before generating `aws-eb-final.zip` and pushing to Git.
+
+## 4. Communication & User Preferences
 - **Language:** Communicate primarily in simple Roman Urdu / Urdu.
 - **Design Guidelines:**
   - Corporate / Company profile avatars must be circular (`border-radius: 50%`).
   - Trust badges (RCCM, IFU, Insurance, Capability) must NEVER be hardcoded; only display when verified in backend.
   - Services/team fallback texts must not hardcode static categories.
+  - Categories must always have self-healing seeder on backend and client-side safe fallbacks.
