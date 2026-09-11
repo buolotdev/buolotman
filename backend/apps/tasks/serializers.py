@@ -157,7 +157,67 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         ).exists()
 
 
+class FlexibleCategoryField(serializers.Field):
+    """
+    Ultra-robust category field that gracefully handles:
+    - Integer / string primary keys (e.g. 12, "12")
+    - Category slugs (e.g. "electrical-power-engineering")
+    - Full Category names (e.g. "Engineering & Technology Services")
+    - Null / Empty / Fallback
+    """
+    def to_internal_value(self, data):
+        if not data:
+            return None
+
+        from apps.tasks.views import ensure_default_categories
+        try:
+            ensure_default_categories()
+        except Exception:
+            pass
+
+        if isinstance(data, Category):
+            return data
+
+        val_str = str(data).strip()
+        if not val_str or val_str.lower() in ('null', 'none', 'undefined', '—'):
+            return None
+
+        # 1. Try numeric primary key
+        if val_str.isdigit():
+            cat = Category.objects.filter(id=int(val_str)).first()
+            if cat:
+                return cat
+
+        # 2. Try slug or exact name (case-insensitive)
+        cat = Category.objects.filter(slug__iexact=val_str).first()
+        if cat:
+            return cat
+
+        cat = Category.objects.filter(name__iexact=val_str).first()
+        if cat:
+            return cat
+
+        # 3. Try partial name match
+        cat = Category.objects.filter(name__icontains=val_str).first()
+        if cat:
+            return cat
+
+        # 4. Auto-create or fallback to first active category
+        cat_slug = slugify(val_str) or "general-service"
+        cat, _ = Category.objects.get_or_create(
+            slug=cat_slug,
+            defaults={"name": val_str, "is_active": True}
+        )
+        return cat
+
+    def to_representation(self, value):
+        if not value:
+            return None
+        return getattr(value, 'id', None)
+
+
 class TaskCreateSerializer(serializers.ModelSerializer):
+    category = FlexibleCategoryField(required=False, allow_null=True)
     skills = serializers.ListField(child=serializers.CharField(), required=False, allow_empty=True)
 
     class Meta:
