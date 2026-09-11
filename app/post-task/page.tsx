@@ -284,16 +284,33 @@ function PostTaskForm() {
     setAuthState("authed");
   }, [router]);
 
-  const categories = useMemo(
-    () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      toArray(categoriesData ?? []).map((c: any) => ({
+  const FALLBACK_CATEGORIES = [
+    { id: 1, name: "Electrical & Power Engineering", slug: "electrical-power-engineering" },
+    { id: 2, name: "Plumbing & Water Systems", slug: "plumbing-water-systems" },
+    { id: 3, name: "Engineering & Technology Services", slug: "engineering-technology-services" },
+    { id: 4, name: "Construction, Masonry & Carpentry", slug: "construction-masonry-carpentry" },
+    { id: 5, name: "HVAC & Refrigeration", slug: "hvac-refrigeration" },
+    { id: 6, name: "IT Infrastructure & Networking", slug: "it-infrastructure-networking" },
+    { id: 7, name: "Cybersecurity Services", slug: "cybersecurity-services" },
+    { id: 8, name: "Automotive & Heavy Machinery", slug: "automotive-heavy-machinery" },
+    { id: 9, name: "Renewable Energy & Solar", slug: "renewable-energy-solar" },
+    { id: 10, name: "CCTV & Security Systems", slug: "cctv-security-systems" },
+    { id: 11, name: "Health & Beauty Technicians", slug: "health-beauty-technicians" },
+    { id: 12, name: "Education & Learning", slug: "education-learning" },
+    { id: 13, name: "Other Technical & Labor Services", slug: "other-technical-labor-services" },
+  ];
+
+  const categories = useMemo(() => {
+    const list = toArray(categoriesData ?? []);
+    if (list.length > 0) {
+      return list.map((c: any) => ({
         name: c.name || c.title || c.slug,
         slug: c.slug || (c.name || "").toString().toLowerCase(),
         id: c.id,
-      })),
-    [categoriesData]
-  );
+      }));
+    }
+    return FALLBACK_CATEGORIES;
+  }, [categoriesData]);
 
   // Auto-detect location on mount
   useEffect(() => {

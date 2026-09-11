@@ -17,13 +17,265 @@ from .serializers import (
 )
 
 
-from django.utils.text import slugify
+DEFAULT_CATEGORIES_TREE = [
+    {
+        "category": "Engineering & Technology Services",
+        "icon": "https://img.icons8.com/fluency/96/source-code.png",
+        "skills": [
+            "Web application development",
+            "Mobile application development (Android / iOS)",
+            "Backend systems & API development",
+            "DevOps & cloud deployment",
+            "Database design & optimization",
+            "ERP & CRM system implementation",
+            "Software maintenance & upgrades",
+            "UI/UX design engineering",
+            "QA testing & automation",
+            "Legacy system modernization"
+        ]
+    },
+    {
+        "category": "Electrical & Power Engineering",
+        "icon": "https://img.icons8.com/fluency/96/electricity.png",
+        "skills": [
+            "Residential & commercial wiring",
+            "Solar inverter & battery installation",
+            "Circuit breaker & panel installation",
+            "Generator maintenance & repair",
+            "Industrial electrical troubleshooting",
+            "Power surge protection",
+            "Lighting & LED design",
+            "High-voltage transformer maintenance",
+            "Appliance repair & diagnostics",
+            "Energy audit & load balancing"
+        ]
+    },
+    {
+        "category": "Plumbing & Water Systems",
+        "icon": "https://img.icons8.com/fluency/96/plumbing.png",
+        "skills": [
+            "Pipe leak repair & diagnostic",
+            "Water heater installation & repair",
+            "Drain cleaning & unclogging",
+            "Borehole drilling & pump setup",
+            "Water filtration & treatment",
+            "Bathroom & kitchen fixtures",
+            "Septic tank installation & pumping",
+            "Sewer line inspection & repair",
+            "Irrigation system installation",
+            "Gas pipe installation & safety check"
+        ]
+    },
+    {
+        "category": "Construction, Masonry & Carpentry",
+        "icon": "https://img.icons8.com/fluency/96/hammer.png",
+        "skills": [
+            "Masonry & bricklaying",
+            "Custom carpentry & woodwork",
+            "Roofing installation & leak repair",
+            "Tile & marble flooring",
+            "Painting & wall decorating",
+            "Plastering & drywall finishing",
+            "Welding & metal fabrication",
+            "Paving & landscape construction",
+            "Door & window framing",
+            "Architectural drafting & remodeling"
+        ]
+    },
+    {
+        "category": "IT Infrastructure & Networking",
+        "icon": "https://img.icons8.com/fluency/96/network.png",
+        "skills": [
+            "Network setup & configuration",
+            "Server administration & OS config",
+            "Cloud infrastructure design",
+            "Hardware installation & repair",
+            "System backup & data recovery",
+            "IT support & troubleshooting",
+            "Virtualization & VM management",
+            "Local Area Network (LAN) optimization",
+            "Wide Area Network (WAN) routing",
+            "Active Directory setup"
+        ]
+    },
+    {
+        "category": "Cybersecurity Services",
+        "icon": "https://img.icons8.com/fluency/96/security-checked.png",
+        "skills": [
+            "Penetration testing & ethical hacking",
+            "Security auditing & risk analysis",
+            "Incident response & forensics",
+            "Compliance consulting (GDPR/HIPAA)",
+            "Vulnerability assessment",
+            "Data encryption & cryptography",
+            "Identity & Access Management (IAM)",
+            "Endpoint security protection",
+            "Firewall & IDS/IPS setup",
+            "Malware analysis & removal"
+        ]
+    },
+    {
+        "category": "HVAC & Refrigeration",
+        "icon": "https://img.icons8.com/fluency/96/air-conditioner.png",
+        "skills": [
+            "Air conditioner installation",
+            "AC gas refilling & leak repair",
+            "Commercial refrigeration setup",
+            "Cold room maintenance",
+            "Duct cleaning & airflow balancing",
+            "Thermostat installation & calibration",
+            "Chiller system overhaul",
+            "Heat pump installation & service",
+            "Ventilation & exhaust fan setup",
+            "Preventative HVAC maintenance"
+        ]
+    },
+    {
+        "category": "Automotive & Heavy Machinery",
+        "icon": "https://img.icons8.com/fluency/96/car.png",
+        "skills": [
+            "Engine diagnostics & overhaul",
+            "Auto electrical & wiring repair",
+            "Brake & suspension repair",
+            "Transmission repair & servicing",
+            "Diesel generator & pump repair",
+            "Heavy equipment hydraulics",
+            "Air conditioning & coolant recharge",
+            "Bodywork & spray painting",
+            "Tire balancing & wheel alignment",
+            "Fleet preventive maintenance"
+        ]
+    },
+    {
+        "category": "Renewable Energy & Solar",
+        "icon": "https://img.icons8.com/fluency/96/solar-panel.png",
+        "skills": [
+            "Solar panel system planning",
+            "Wind turbine engineering",
+            "Smart grid design & implementation",
+            "Energy audits & efficiency",
+            "Battery storage solutions",
+            "Utility mapping & surveying",
+            "Hydroelectric systems analysis",
+            "Geothermal system design",
+            "Biomass energy consulting",
+            "EV charging station installation"
+        ]
+    },
+    {
+        "category": "CCTV & Security Systems",
+        "icon": "https://img.icons8.com/fluency/96/security-camera.png",
+        "skills": [
+            "CCTV camera installation & NVR config",
+            "Electric fence installation",
+            "Biometric access control systems",
+            "Burglar & fire alarm setup",
+            "Automatic gate motor installation",
+            "Intercom & video doorbell setup",
+            "Motion detector installation",
+            "Smart home automation",
+            "Perimeter security beam setup",
+            "Security system maintenance & repair"
+        ]
+    },
+    {
+        "category": "Health & Beauty Technicians",
+        "icon": "https://img.icons8.com/fluency/96/spa-flower.png",
+        "skills": [
+            "Massage therapy & physical relaxation",
+            "Hair styling, cutting & coloring",
+            "Nail care (Manicure/Pedicure)",
+            "Makeup artistry for events",
+            "Skincare treatments & facials",
+            "Laser hair removal & dermatology",
+            "Personal training & fitness instruction",
+            "Nutrition planning & consulting",
+            "Acupuncture & holistic therapy",
+            "Barbering & men's grooming"
+        ]
+    },
+    {
+        "category": "Education & Learning",
+        "icon": "https://img.icons8.com/fluency/96/graduation-cap.png",
+        "skills": [
+            "Math & Science tutoring",
+            "Language instruction (English, French, etc.)",
+            "Music & Instrument lessons",
+            "Standardized test preparation",
+            "Coding & Computer Science instruction",
+            "Special education & learning support",
+            "Business & Finance tutoring",
+            "Art & Design instruction",
+            "Life coaching & mentoring",
+            "Curriculum development"
+        ]
+    },
+    {
+        "category": "Other Technical & Labor Services",
+        "icon": "https://img.icons8.com/fluency/96/services.png",
+        "skills": [
+            "General Labor Task",
+            "Specialized Technical Labor",
+            "Consultation Services",
+            "Delivery & Courier Services",
+            "Custom Project Request",
+            "Event Planning & Management",
+            "Photography & Videography",
+            "Legal & Paralegal Services",
+            "Accounting & Tax Services",
+            "Virtual Assistant Services"
+        ]
+    }
+]
+
+
+def ensure_default_categories():
+    """Ensure standard categories exist in database; auto-seeds if empty."""
+    if Category.objects.filter(is_active=True, parent=None).exists():
+        return
+    for idx, item in enumerate(DEFAULT_CATEGORIES_TREE):
+        cat_name = item["category"]
+        cat_slug = slugify(cat_name)
+        if Category.objects.filter(slug=cat_slug).exists():
+            cat_slug = f"{cat_slug}-{idx}"
+        cat, _ = Category.objects.get_or_create(
+            slug=cat_slug,
+            defaults={
+                "name": cat_name,
+                "icon": item.get("icon", ""),
+                "order": idx,
+                "is_active": True
+            }
+        )
+        for s_idx, skill_name in enumerate(item.get("skills", [])):
+            skill_slug = slugify(f"{cat_name}-{skill_name}")
+            sub_slug = slugify(f"sub-{cat_name}-{skill_name}")
+            Category.objects.get_or_create(
+                slug=sub_slug,
+                defaults={
+                    "name": skill_name,
+                    "parent": cat,
+                    "order": s_idx,
+                    "is_active": True
+                }
+            )
+            Skill.objects.get_or_create(
+                slug=skill_slug,
+                defaults={
+                    "name": skill_name,
+                    "category": cat
+                }
+            )
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def category_list(request):
     if request.method == 'GET':
         categories = Category.objects.filter(is_active=True, parent=None)
+        if not categories.exists():
+            ensure_default_categories()
+            categories = Category.objects.filter(is_active=True, parent=None)
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
     
