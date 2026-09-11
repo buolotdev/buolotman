@@ -19,67 +19,19 @@ from .serializers import (
 
 DEFAULT_CATEGORIES_TREE = [
     {
-        "category": "Engineering & Technology Services",
+        "category": "Software & Digital Engineering",
         "icon": "https://img.icons8.com/fluency/96/source-code.png",
         "skills": [
             "Web application development",
             "Mobile application development (Android / iOS)",
             "Backend systems & API development",
-            "DevOps & cloud deployment",
-            "Database design & optimization",
-            "ERP & CRM system implementation",
-            "Software maintenance & upgrades",
             "UI/UX design engineering",
             "QA testing & automation",
+            "E-commerce platform development",
+            "WordPress & CMS development",
+            "Database design & optimization",
+            "Product prototyping & MVP development",
             "Legacy system modernization"
-        ]
-    },
-    {
-        "category": "Electrical & Power Engineering",
-        "icon": "https://img.icons8.com/fluency/96/electricity.png",
-        "skills": [
-            "Residential & commercial wiring",
-            "Solar inverter & battery installation",
-            "Circuit breaker & panel installation",
-            "Generator maintenance & repair",
-            "Industrial electrical troubleshooting",
-            "Power surge protection",
-            "Lighting & LED design",
-            "High-voltage transformer maintenance",
-            "Appliance repair & diagnostics",
-            "Energy audit & load balancing"
-        ]
-    },
-    {
-        "category": "Plumbing & Water Systems",
-        "icon": "https://img.icons8.com/fluency/96/plumbing.png",
-        "skills": [
-            "Pipe leak repair & diagnostic",
-            "Water heater installation & repair",
-            "Drain cleaning & unclogging",
-            "Borehole drilling & pump setup",
-            "Water filtration & treatment",
-            "Bathroom & kitchen fixtures",
-            "Septic tank installation & pumping",
-            "Sewer line inspection & repair",
-            "Irrigation system installation",
-            "Gas pipe installation & safety check"
-        ]
-    },
-    {
-        "category": "Construction, Masonry & Carpentry",
-        "icon": "https://img.icons8.com/fluency/96/hammer.png",
-        "skills": [
-            "Masonry & bricklaying",
-            "Custom carpentry & woodwork",
-            "Roofing installation & leak repair",
-            "Tile & marble flooring",
-            "Painting & wall decorating",
-            "Plastering & drywall finishing",
-            "Welding & metal fabrication",
-            "Paving & landscape construction",
-            "Door & window framing",
-            "Architectural drafting & remodeling"
         ]
     },
     {
@@ -88,19 +40,19 @@ DEFAULT_CATEGORIES_TREE = [
         "skills": [
             "Network setup & configuration",
             "Server administration & OS config",
-            "Cloud infrastructure design",
             "Hardware installation & repair",
             "System backup & data recovery",
             "IT support & troubleshooting",
             "Virtualization & VM management",
             "Local Area Network (LAN) optimization",
             "Wide Area Network (WAN) routing",
-            "Active Directory setup"
+            "Active Directory setup",
+            "Structured cabling"
         ]
     },
     {
         "category": "Cybersecurity Services",
-        "icon": "https://img.icons8.com/fluency/96/security-checked.png",
+        "icon": "https://img.icons8.com/fluency/96/cyber-security.png",
         "skills": [
             "Penetration testing & ethical hacking",
             "Security auditing & risk analysis",
@@ -115,24 +67,88 @@ DEFAULT_CATEGORIES_TREE = [
         ]
     },
     {
-        "category": "HVAC & Refrigeration",
-        "icon": "https://img.icons8.com/fluency/96/air-conditioner.png",
+        "category": "Cloud & Systems Engineering",
+        "icon": "https://img.icons8.com/fluency/96/cloud.png",
         "skills": [
-            "Air conditioner installation",
-            "AC gas refilling & leak repair",
-            "Commercial refrigeration setup",
-            "Cold room maintenance",
-            "Duct cleaning & airflow balancing",
-            "Thermostat installation & calibration",
-            "Chiller system overhaul",
-            "Heat pump installation & service",
-            "Ventilation & exhaust fan setup",
-            "Preventative HVAC maintenance"
+            "AWS & Cloud architecture",
+            "DevOps & CI/CD pipelines",
+            "Docker & Kubernetes orchestration",
+            "Database clustering & replication",
+            "High availability systems",
+            "Cloud migration & optimization",
+            "Monitoring & logging (Prometheus/ELK)",
+            "Terraform & Infrastructure as Code",
+            "Disaster recovery planning",
+            "Microservices architecture"
         ]
     },
     {
-        "category": "Automotive & Heavy Machinery",
-        "icon": "https://img.icons8.com/fluency/96/car.png",
+        "category": "Electrical & Electronics Engineering",
+        "icon": "https://img.icons8.com/fluency/96/electrical.png",
+        "skills": [
+            "Residential & commercial wiring",
+            "Circuit breaker & panel installation",
+            "Generator maintenance & repair",
+            "Industrial electrical troubleshooting",
+            "Power surge protection",
+            "Lighting & LED design",
+            "High-voltage transformer maintenance",
+            "Appliance repair & diagnostics",
+            "Energy audit & load balancing",
+            "Electronic board & PCB repair"
+        ]
+    },
+    {
+        "category": "Civil, Construction & Architecture",
+        "icon": "https://img.icons8.com/fluency/96/engineering.png",
+        "skills": [
+            "Masonry & bricklaying",
+            "Custom carpentry & woodwork",
+            "Roofing installation & leak repair",
+            "Tile & marble flooring",
+            "Painting & wall decorating",
+            "Plastering & drywall finishing",
+            "Welding & metal fabrication",
+            "Paving & landscape construction",
+            "Architectural drafting & remodeling",
+            "Structural engineering inspection"
+        ]
+    },
+    {
+        "category": "Mechanical & Industrial Engineering",
+        "icon": "https://img.icons8.com/fluency/96/gears.png",
+        "skills": [
+            "HVAC & air conditioner installation",
+            "Commercial refrigeration setup",
+            "Industrial machinery maintenance",
+            "Plumbing networks & pump setup",
+            "Hydraulic system diagnostics",
+            "Pneumatic systems servicing",
+            "Boiler & heating maintenance",
+            "Conveyor belt maintenance",
+            "Cold room repair",
+            "CNC machining & metal turning"
+        ]
+    },
+    {
+        "category": "Renewable Energy & Utilities",
+        "icon": "https://img.icons8.com/fluency/96/solar-panel.png",
+        "skills": [
+            "Solar panel system planning",
+            "Solar inverter & battery installation",
+            "Wind turbine engineering",
+            "Smart grid design & implementation",
+            "Energy audits & efficiency",
+            "Battery storage solutions",
+            "Utility mapping & surveying",
+            "Hydroelectric systems analysis",
+            "Geothermal system design",
+            "EV charging station installation"
+        ]
+    },
+    {
+        "category": "Automotive & Heavy Equipment",
+        "icon": "https://img.icons8.com/fluency/96/car-service.png",
         "skills": [
             "Engine diagnostics & overhaul",
             "Auto electrical & wiring repair",
@@ -147,24 +163,8 @@ DEFAULT_CATEGORIES_TREE = [
         ]
     },
     {
-        "category": "Renewable Energy & Solar",
-        "icon": "https://img.icons8.com/fluency/96/solar-panel.png",
-        "skills": [
-            "Solar panel system planning",
-            "Wind turbine engineering",
-            "Smart grid design & implementation",
-            "Energy audits & efficiency",
-            "Battery storage solutions",
-            "Utility mapping & surveying",
-            "Hydroelectric systems analysis",
-            "Geothermal system design",
-            "Biomass energy consulting",
-            "EV charging station installation"
-        ]
-    },
-    {
-        "category": "CCTV & Security Systems",
-        "icon": "https://img.icons8.com/fluency/96/security-camera.png",
+        "category": "Telecom, Broadcast & Security Systems",
+        "icon": "https://img.icons8.com/fluency/96/radio-tower.png",
         "skills": [
             "CCTV camera installation & NVR config",
             "Electric fence installation",
@@ -172,15 +172,63 @@ DEFAULT_CATEGORIES_TREE = [
             "Burglar & fire alarm setup",
             "Automatic gate motor installation",
             "Intercom & video doorbell setup",
-            "Motion detector installation",
+            "Fiber optics splicing & cabling",
+            "Radio communication & antennas",
             "Smart home automation",
-            "Perimeter security beam setup",
             "Security system maintenance & repair"
         ]
     },
     {
-        "category": "Health & Beauty Technicians",
-        "icon": "https://img.icons8.com/fluency/96/spa-flower.png",
+        "category": "Handyman & Home Maintenance",
+        "icon": "https://img.icons8.com/fluency/96/maintenance.png",
+        "skills": [
+            "General home repairs",
+            "Furniture assembly & repair",
+            "Door lock & hardware installation",
+            "Curtain rod & blind mounting",
+            "Minor plumbing & tap fixes",
+            "Minor electrical & switch replacement",
+            "Pressure washing & surface cleaning",
+            "Drywall patching & touch-up painting",
+            "Appliance installation",
+            "Gutter cleaning & repair"
+        ]
+    },
+    {
+        "category": "Cleaning, Outdoor & Environmental Services",
+        "icon": "https://img.icons8.com/fluency/96/broom.png",
+        "skills": [
+            "Deep house & office cleaning",
+            "Post-construction cleaning",
+            "Fumigation & pest control",
+            "Lawn mowing & garden landscaping",
+            "Septic tank draining & sanitation",
+            "Water tank cleaning & disinfection",
+            "Carpet & upholstery steam cleaning",
+            "Window & glass facade cleaning",
+            "Waste disposal & recycling management",
+            "Tree trimming & pool maintenance"
+        ]
+    },
+    {
+        "category": "Transport, Logistics & Support Services",
+        "icon": "https://img.icons8.com/fluency/96/delivery.png",
+        "skills": [
+            "Goods delivery & dispatch",
+            "Relocation & house moving services",
+            "Heavy cargo trucking",
+            "Courier & parcel logistics",
+            "Fleet management & tracking",
+            "Warehouse loading & inventory",
+            "Cold-chain transport",
+            "Event transport logistics",
+            "Vehicle rental with driver",
+            "Airport pickup & protocol transport"
+        ]
+    },
+    {
+        "category": "Health, Beauty & Personal Care",
+        "icon": "https://img.icons8.com/fluency/96/spa.png",
         "skills": [
             "Massage therapy & physical relaxation",
             "Hair styling, cutting & coloring",
@@ -195,35 +243,19 @@ DEFAULT_CATEGORIES_TREE = [
         ]
     },
     {
-        "category": "Education & Learning",
-        "icon": "https://img.icons8.com/fluency/96/graduation-cap.png",
+        "category": "Education, Language & Document Services",
+        "icon": "https://img.icons8.com/fluency/96/student-center.png",
         "skills": [
             "Math & Science tutoring",
             "Language instruction (English, French, etc.)",
             "Music & Instrument lessons",
             "Standardized test preparation",
             "Coding & Computer Science instruction",
-            "Special education & learning support",
+            "Translation & interpretation",
+            "Document drafting & formatting",
             "Business & Finance tutoring",
-            "Art & Design instruction",
             "Life coaching & mentoring",
             "Curriculum development"
-        ]
-    },
-    {
-        "category": "Other Technical & Labor Services",
-        "icon": "https://img.icons8.com/fluency/96/services.png",
-        "skills": [
-            "General Labor Task",
-            "Specialized Technical Labor",
-            "Consultation Services",
-            "Delivery & Courier Services",
-            "Custom Project Request",
-            "Event Planning & Management",
-            "Photography & Videography",
-            "Legal & Paralegal Services",
-            "Accounting & Tax Services",
-            "Virtual Assistant Services"
         ]
     }
 ]
