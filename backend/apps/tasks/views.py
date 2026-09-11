@@ -273,44 +273,55 @@ def ensure_default_categories():
 
     # 2. Ensure each master category exists
     for idx, item in enumerate(DEFAULT_CATEGORIES_TREE):
-        cat_name = item["category"]
-        cat_slug = slugify(cat_name)
-        cat, _ = Category.objects.get_or_create(
-            slug=cat_slug,
-            defaults={
-                "name": cat_name,
-                "icon": item.get("icon", ""),
-                "order": idx,
-                "is_active": True
-            }
-        )
-        # Ensure it has right name and active
-        if not cat.is_active or cat.name != cat_name:
-            cat.name = cat_name
-            cat.is_active = True
-            cat.order = idx
-            cat.icon = item.get("icon", cat.icon)
-            cat.save(update_fields=['name', 'is_active', 'order', 'icon'])
-
-        for s_idx, skill_name in enumerate(item.get("skills", [])):
-            skill_slug = slugify(f"{cat_name}-{skill_name}")
-            sub_slug = slugify(f"sub-{cat_name}-{skill_name}")
-            Category.objects.get_or_create(
-                slug=sub_slug,
+        try:
+            cat_name = item["category"]
+            cat_slug = slugify(cat_name)[:45]
+            cat_icon = (item.get("icon") or "")[:45]
+            cat, _ = Category.objects.get_or_create(
+                slug=cat_slug,
                 defaults={
-                    "name": skill_name,
-                    "parent": cat,
-                    "order": s_idx,
+                    "name": cat_name,
+                    "icon": cat_icon,
+                    "order": idx + 1,
                     "is_active": True
                 }
             )
-            Skill.objects.get_or_create(
-                slug=skill_slug,
-                defaults={
-                    "name": skill_name,
-                    "category": cat
-                }
-            )
+            # Ensure it has right name and active
+            if not cat.is_active or cat.name != cat_name:
+                cat.name = cat_name
+                cat.is_active = True
+                cat.order = idx + 1
+                cat.icon = cat_icon
+                cat.save(update_fields=['name', 'is_active', 'order', 'icon'])
+
+            for s_idx, skill_name in enumerate(item.get("skills", [])):
+                try:
+                    sub_slug = slugify(f"{cat_slug[:18]}-{skill_name}")[:45]
+                    Category.objects.get_or_create(
+                        slug=sub_slug,
+                        defaults={
+                            "name": skill_name,
+                            "parent": cat,
+                            "order": s_idx + 1,
+                            "is_active": True
+                        }
+                    )
+                except Exception:
+                    pass
+
+                try:
+                    skill_slug = slugify(f"{cat_slug[:18]}-{skill_name}")[:45]
+                    Skill.objects.get_or_create(
+                        slug=skill_slug,
+                        defaults={
+                            "name": skill_name,
+                            "category": cat
+                        }
+                    )
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
 
 @api_view(['GET', 'POST'])
