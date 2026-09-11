@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./careers.module.css";
 
 interface JobPosition {
@@ -181,14 +182,26 @@ export default function CareersPage() {
     ? JOBS_DATA 
     : JOBS_DATA.filter(j => j.department === selectedDept);
 
-  const handleApply = (e: React.FormEvent) => {
+  const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setSelectedJob(null);
-      setFormData({ name: "", email: "", phone: "", linkedin: "", message: "" });
-    }, 2500);
+    try {
+      await api.submitInquiry({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company_name: selectedJob?.title || "Career Application",
+        inquiry_type: "career",
+        details: `Job Position: ${selectedJob?.title || 'Open Application'}\nDepartment: ${selectedJob?.department || 'N/A'}\nLinkedIn / Portfolio: ${formData.linkedin || 'N/A'}\n\nCandidate Cover Letter / Note:\n${formData.message || 'No additional note provided'}`
+      });
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setSelectedJob(null);
+        setFormData({ name: "", email: "", phone: "", linkedin: "", message: "" });
+      }, 3000);
+    } catch (err) {
+      alert("Failed to submit job application. Please check your network and try again.");
+    }
   };
 
   return (

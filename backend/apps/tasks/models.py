@@ -208,6 +208,10 @@ class ServiceInquiry(models.Model):
     INQUIRY_TYPE_CHOICES = (
         ('concierge', 'Concierge Service'),
         ('enterprise', 'Enterprise & Contractors'),
+        ('partnership', 'Strategic Partnerships'),
+        ('career', 'Career & Job Application'),
+        ('investor', 'Investor Relations & Deck'),
+        ('subcontracting', 'Subcontracting Proposal'),
         ('general', 'General Inquiry'),
     )
     STATUS_CHOICES = (
@@ -220,7 +224,7 @@ class ServiceInquiry(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=50, blank=True)
     company_name = models.CharField(max_length=255, blank=True)
-    inquiry_type = models.CharField(max_length=20, choices=INQUIRY_TYPE_CHOICES, default='general')
+    inquiry_type = models.CharField(max_length=50, choices=INQUIRY_TYPE_CHOICES, default='general')
     details = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -232,6 +236,7 @@ class ServiceInquiry(models.Model):
 
     def __str__(self):
         return f"{self.get_inquiry_type_display()} from {self.name}"
+
 
 class Milestone(models.Model):
     STATUS_CHOICES = (
@@ -251,6 +256,7 @@ class Milestone(models.Model):
 
     def __str__(self):
         return f'{self.title} for Task {self.task_id}'
+
 
 class TaskReview(models.Model):
     STATUS_CHOICES = (

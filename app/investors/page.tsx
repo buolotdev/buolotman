@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./investors.module.css";
 
 const translations: Record<string, Record<string, any>> = {
@@ -125,14 +126,25 @@ export default function InvestorsPage() {
 
   const t = translations[lang] || translations["en"];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setShowModal(false);
-      setFormData({ name: "", organization: "", email: "", type: "Venture Capital / PE", notes: "" });
-    }, 2500);
+    try {
+      await api.submitInquiry({
+        name: formData.name,
+        email: formData.email,
+        company_name: formData.organization,
+        inquiry_type: "investor",
+        details: `Investor / Firm: ${formData.organization}\nInvestor Category: ${formData.type}\n\nInvestment Focus & Inquiries:\n${formData.notes || "Investor Deck & Information Memorandum Request"}`
+      });
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setShowModal(false);
+        setFormData({ name: "", organization: "", email: "", type: "Venture Capital / PE", notes: "" });
+      }, 3000);
+    } catch (err) {
+      alert("Failed to submit investor request. Please try again.");
+    }
   };
 
   return (

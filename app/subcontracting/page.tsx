@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./subcontracting.module.css";
 
 interface Opportunity {
@@ -215,22 +216,34 @@ export default function SubcontractingPage() {
     setDetailsModalOpen(true);
   };
 
-  const handleApplySubmit = (e: React.FormEvent) => {
+  const handleApplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApplySubmitted(true);
-    setTimeout(() => {
-      setApplyModalOpen(false);
-      setApplyForm({
-        companyName: "",
-        contactName: "",
-        email: "",
-        phone: "",
-        experience: "",
-        teamSize: "",
-        proposal: "",
-        quote: ""
+    try {
+      await api.submitInquiry({
+        name: applyForm.contactName,
+        email: applyForm.email,
+        phone: applyForm.phone,
+        company_name: applyForm.companyName,
+        inquiry_type: "subcontracting",
+        details: `Subcontract Package: ${selectedOpp?.title || "General Subcontracting RFP"}\nTarget Client/Issuer: ${selectedOpp?.companyName || "N/A"}\nLocation: ${selectedOpp?.location || "N/A"}\nPackage Budget: ${selectedOpp?.value || "N/A"}\n\nVendor Team Size: ${applyForm.teamSize}\nTrack Record: ${applyForm.experience}\nProposed Quotation: ${applyForm.quote}\n\nProposal Summary / Capability Statement:\n${applyForm.proposal}`
       });
-    }, 2000);
+      setApplySubmitted(true);
+      setTimeout(() => {
+        setApplyModalOpen(false);
+        setApplyForm({
+          companyName: "",
+          contactName: "",
+          email: "",
+          phone: "",
+          experience: "",
+          teamSize: "",
+          proposal: "",
+          quote: ""
+        });
+      }, 2500);
+    } catch (err) {
+      alert("Failed to submit subcontracting application. Please try again.");
+    }
   };
 
   return (

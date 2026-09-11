@@ -425,48 +425,142 @@ def submit_inquiry(request):
         try:
             from utils.email_service import build_branded_email_html, send_platform_email
 
-            # 1. Confirmation email to the client
-            user_html = build_branded_email_html(
-                heading_title="Project Review Request Received",
-                heading_subtitle="BoulotMan Project Execution & Contractors",
-                body_content=f"""
+            inquiry_type = inquiry.inquiry_type or 'general'
+            display_type = inquiry.get_inquiry_type_display() or 'Inquiry'
+
+            if inquiry_type == 'partnership':
+                ref_code = f"PARTNER-{inquiry.id:04d}"
+                client_subject = f"Partnership Proposal Received: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "Partnership Proposal Received"
+                client_sub = "BoulotMan Strategic Ecosystem Alliances"
+                client_msg = f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for submitting your partnership proposal to the <strong>Boulot Man Ecosystem</strong>.</p>
+                <p>Our Strategic Alliances and Business Development leadership team is reviewing your track, institution capabilities, and collaboration scope.</p>
+                <p>An alliance representative will reach out to you directly to arrange an introductory briefing and exploration session.</p>
+                """
+                team_recipients = ["partnership@boulotman.com", "business@boulotman.com"]
+                team_subject = f"[NEW PARTNERSHIP PROPOSAL] {inquiry.company_name or inquiry.name} [Ref #{ref_code}]"
+                team_heading = "New Strategic Partnership Proposal"
+                sender_email_type = "partnership"
+
+            elif inquiry_type == 'career':
+                ref_code = f"CAREER-{inquiry.id:04d}"
+                client_subject = f"Application Received: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "Job Application Received"
+                client_sub = "BoulotMan People, Culture & Talent"
+                client_msg = f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for applying to join the <strong>Boulot Man</strong> team!</p>
+                <p>Our People & Talent Acquisition team has received your application details and is currently reviewing your profile against our open positions.</p>
+                <p>If your background aligns with our immediate technical and operational needs, we will reach out to schedule an initial interview.</p>
+                """
+                team_recipients = ["career@boulotman.com", "hr@boulotman.com"]
+                team_subject = f"[JOB APPLICATION] {inquiry.name} [Ref #{ref_code}]"
+                team_heading = "New Candidate Job Application"
+                sender_email_type = "career"
+
+            elif inquiry_type == 'investor':
+                ref_code = f"INV-{inquiry.id:04d}"
+                client_subject = f"Investor Request Received: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "Investor Inquiry & Deck Request"
+                client_sub = "BoulotMan Investor Relations & Capital Formation"
+                client_msg = f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for your interest in <strong>Boulot Man</strong> and our pan-African workforce infrastructure.</p>
+                <p>Our Investor Relations (IR) team has received your request and is preparing our confidential investor memorandum, market traction metrics, and executive deck.</p>
+                <p>Our leadership office will connect with your firm shortly.</p>
+                """
+                team_recipients = ["investors@boulotman.com", "ir@boulotman.com"]
+                team_subject = f"[INVESTOR INQUIRY] {inquiry.company_name or inquiry.name} [Ref #{ref_code}]"
+                team_heading = "New Investor Inquiry / Deck Request"
+                sender_email_type = "investors"
+
+            elif inquiry_type == 'subcontracting':
+                ref_code = f"SUBCON-{inquiry.id:04d}"
+                client_subject = f"Subcontracting Proposal Received: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "Subcontracting Bid Submitted"
+                client_sub = "BoulotMan Subcontracting & Enterprise Procurement"
+                client_msg = f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for submitting your subcontracting bid / capability statement to <strong>Boulot Man</strong>.</p>
+                <p>Our engineering procurement board is assessing your proposal, company credentials, capacity, and pricing structure.</p>
+                <p>We will contact your designated point of contact regarding the qualification status.</p>
+                """
+                team_recipients = ["companies@boulotman.com", "subcontract@boulotman.com"]
+                team_subject = f"[SUBCONTRACTING BID] {inquiry.company_name or inquiry.name} [Ref #{ref_code}]"
+                team_heading = "New Subcontracting RFP Proposal"
+                sender_email_type = "companies"
+
+            elif inquiry_type == 'concierge':
+                ref_code = f"CONCIERGE-{inquiry.id:04d}"
+                client_subject = f"VIP Concierge Request Received: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "VIP Concierge Request Received"
+                client_sub = "BoulotMan White-Glove VIP Support"
+                client_msg = f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for reaching out to <strong>Boulot Man Concierge</strong>.</p>
+                <p>A senior concierge manager is reviewing your custom requirements and will personally coordinate your request.</p>
+                """
+                team_recipients = ["concierge@boulotman.com", "support@boulotman.com"]
+                team_subject = f"[VIP CONCIERGE REQUEST] {inquiry.name} [Ref #{ref_code}]"
+                team_heading = "New VIP Concierge Request"
+                sender_email_type = "support"
+
+            else:  # enterprise / general
+                ref_code = f"PRJ-REV-{inquiry.id:04d}"
+                client_subject = f"We've Received Your Project Request: {inquiry.name} [Ref #{ref_code}]"
+                client_title = "Project Review Request Received"
+                client_sub = "BoulotMan Project Execution & Contractors"
+                client_msg = f"""
                 <p>Hello <strong>{inquiry.name}</strong>,</p>
                 <p>Thank you for submitting your project request to <strong>Boulot Man Contractors</strong>.</p>
                 <p>Our engineering and project management team is reviewing your specifications, workforce requirements, and timeline.</p>
                 <p>A dedicated project coordinator will reach out to you shortly via email or phone to discuss the execution structure and next steps.</p>
-                """,
+                """
+                team_recipients = ["quote@boulotman.com", "companies@boulotman.com"]
+                team_subject = f"[NEW PROJECT REVIEW] {inquiry.name} - {inquiry.company_name or 'Project Request'} [Ref #{ref_code}]"
+                team_heading = "New Project Review Request"
+                sender_email_type = "quote"
+
+            # 1. Send confirmation to client/applicant
+            user_html = build_branded_email_html(
+                heading_title=client_title,
+                heading_subtitle=client_sub,
+                body_content=client_msg,
                 highlight_boxes=[{
-                    "label": "Project Reference",
-                    "value": f"PRJ-REV-{inquiry.id:04d}",
+                    "label": "Reference ID",
+                    "value": ref_code,
                     "accent_color": "#FF4500"
                 }],
                 cta_button={
-                    "text": "Explore Contractors & Services",
-                    "url": "https://boulotman.com/contractors"
+                    "text": "Visit Boulot Man",
+                    "url": "https://boulotman.com"
                 }
             )
             send_platform_email(
-                subject=f"We've Received Your Project Request: {inquiry.name} [Ref #PRJ-REV-{inquiry.id:04d}]",
-                message=f"Hello {inquiry.name},\n\nWe have received your project request. Our engineering team is currently reviewing the specifications.",
+                subject=client_subject,
+                message=f"Hello {inquiry.name},\n\nWe have received your submission. Our team is currently reviewing your request.",
                 recipient_list=[inquiry.email],
                 html_message=user_html,
                 sender_type="no_reply",
                 fail_silently=True
             )
 
-            # 2. Notification to the BoulotMan Operations team (quote@ / companies@)
+            # 2. Send notification to BoulotMan departmental inboxes
             team_html = build_branded_email_html(
-                heading_title="New Project Review Request",
-                heading_subtitle="BoulotMan Contractors Hub Alert",
+                heading_title=team_heading,
+                heading_subtitle=f"Department Alert: {display_type}",
                 body_content=f"""
-                <p>A new project execution review has been submitted on <strong>Boulot Man Contractors</strong>:</p>
-                <p><strong>Client Name:</strong> {inquiry.name}<br/>
+                <p>A new <strong>{display_type}</strong> has been submitted on <strong>Boulot Man</strong>:</p>
+                <p><strong>Name:</strong> {inquiry.name}<br/>
                 <strong>Email:</strong> <a href="mailto:{inquiry.email}">{inquiry.email}</a><br/>
                 <strong>Phone:</strong> {inquiry.phone or 'N/A'}<br/>
-                <strong>Client / Company:</strong> {inquiry.company_name or 'N/A'}<br/>
-                <strong>Inquiry Type:</strong> {inquiry.get_inquiry_type_display()}</p>
+                <strong>Organization / Company:</strong> {inquiry.company_name or 'N/A'}<br/>
+                <strong>Inquiry Type:</strong> {display_type}<br/>
+                <strong>Reference Code:</strong> {ref_code}</p>
                 <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;"/>
-                <p><strong>Project Details & Scope:</strong></p>
+                <p><strong>Details & Message:</strong></p>
                 <pre style="background:#f8fafc;padding:14px;border-radius:8px;white-space:pre-wrap;font-family:sans-serif;font-size:13px;color:#1e293b;border:1px solid #e2e8f0;">{inquiry.details}</pre>
                 """,
                 cta_button={
@@ -475,11 +569,11 @@ def submit_inquiry(request):
                 }
             )
             send_platform_email(
-                subject=f"[NEW PROJECT REVIEW] {inquiry.name} - {inquiry.company_name or 'Project Request'}",
-                message=f"New inquiry from {inquiry.name} ({inquiry.email}):\n\n{inquiry.details}",
-                recipient_list=["quote@boulotman.com", "companies@boulotman.com"],
+                subject=team_subject,
+                message=f"New submission from {inquiry.name} ({inquiry.email}):\n\n{inquiry.details}",
+                recipient_list=team_recipients,
                 html_message=team_html,
-                sender_type="contact",
+                sender_type=sender_email_type,
                 fail_silently=True
             )
         except Exception:

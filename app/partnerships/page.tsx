@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useToast } from "@/app/components/Toast";
+import { api } from "@/app/lib/api";
 import styles from "./partnerships.module.css";
 
 const translations: Record<string, Record<string, any>> = {
@@ -307,7 +308,7 @@ export default function PartnershipsPage() {
     setModalOpen(true);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.orgName.trim() || !form.email.trim() || !form.contactName.trim()) {
       toast.warning(t.toastWarningTitle, t.toastWarningMsg);
@@ -315,8 +316,15 @@ export default function PartnershipsPage() {
     }
 
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await api.submitInquiry({
+        name: form.contactName,
+        email: form.email,
+        phone: form.phone,
+        company_name: form.orgName,
+        inquiry_type: "partnership",
+        details: `Partnership Track: ${form.track}\nCountry / Region: ${form.country}\n\nCollaboration Scope:\n${form.details || "No additional details provided."}`
+      });
       setModalOpen(false);
       toast.success(
         t.toastSuccessTitle,
@@ -331,7 +339,11 @@ export default function PartnershipsPage() {
         track: "Enterprise & Corporate Solutions",
         details: "",
       });
-    }, 800);
+    } catch (err) {
+      toast.error("Submission Error", "Failed to submit proposal. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
