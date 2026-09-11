@@ -387,7 +387,72 @@ def skill_list(request):
 def submit_inquiry(request):
     serializer = ServiceInquirySerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        inquiry = serializer.save()
+
+        # Send automated branded emails to client and team
+        try:
+            from utils.email_service import build_branded_email_html, send_platform_email
+
+            # 1. Confirmation email to the client
+            user_html = build_branded_email_html(
+                heading_title="Project Review Request Received",
+                heading_subtitle="BoulotMan Project Execution & Contractors",
+                body_content=f"""
+                <p>Hello <strong>{inquiry.name}</strong>,</p>
+                <p>Thank you for submitting your project request to <strong>Boulot Man Contractors</strong>.</p>
+                <p>Our engineering and project management team is reviewing your specifications, workforce requirements, and timeline.</p>
+                <p>A dedicated project coordinator will reach out to you shortly via email or phone to discuss the execution structure and next steps.</p>
+                """,
+                highlight_boxes=[{
+                    "label": "Project Reference",
+                    "value": f"PRJ-REV-{inquiry.id:04d}",
+                    "accent_color": "#FF4500"
+                }],
+                cta_button={
+                    "text": "Explore Contractors & Services",
+                    "url": "https://boulotman.com/contractors"
+                }
+            )
+            send_platform_email(
+                subject=f"We've Received Your Project Request: {inquiry.name} [Ref #PRJ-REV-{inquiry.id:04d}]",
+                message=f"Hello {inquiry.name},\n\nWe have received your project request. Our engineering team is currently reviewing the specifications.",
+                recipient_list=[inquiry.email],
+                html_message=user_html,
+                sender_type="no_reply",
+                fail_silently=True
+            )
+
+            # 2. Notification to the BoulotMan Operations team (quote@ / companies@)
+            team_html = build_branded_email_html(
+                heading_title="New Project Review Request",
+                heading_subtitle="BoulotMan Contractors Hub Alert",
+                body_content=f"""
+                <p>A new project execution review has been submitted on <strong>Boulot Man Contractors</strong>:</p>
+                <p><strong>Client Name:</strong> {inquiry.name}<br/>
+                <strong>Email:</strong> <a href="mailto:{inquiry.email}">{inquiry.email}</a><br/>
+                <strong>Phone:</strong> {inquiry.phone or 'N/A'}<br/>
+                <strong>Client / Company:</strong> {inquiry.company_name or 'N/A'}<br/>
+                <strong>Inquiry Type:</strong> {inquiry.get_inquiry_type_display()}</p>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;"/>
+                <p><strong>Project Details & Scope:</strong></p>
+                <pre style="background:#f8fafc;padding:14px;border-radius:8px;white-space:pre-wrap;font-family:sans-serif;font-size:13px;color:#1e293b;border:1px solid #e2e8f0;">{inquiry.details}</pre>
+                """,
+                cta_button={
+                    "text": "Open Admin Dashboard",
+                    "url": "https://boulotman.com/dashboard/admin"
+                }
+            )
+            send_platform_email(
+                subject=f"[NEW PROJECT REVIEW] {inquiry.name} - {inquiry.company_name or 'Project Request'}",
+                message=f"New inquiry from {inquiry.name} ({inquiry.email}):\n\n{inquiry.details}",
+                recipient_list=["quote@boulotman.com", "companies@boulotman.com"],
+                html_message=team_html,
+                sender_type="contact",
+                fail_silently=True
+            )
+        except Exception:
+            pass
+
         return Response({"message": "Inquiry submitted successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

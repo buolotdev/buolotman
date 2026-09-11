@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./contractors.module.css";
 
 const SERVICES_CAPABILITIES = [
@@ -138,10 +139,28 @@ export default function ContractorsPage() {
     description: ""
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await api.submitInquiry({
+        name: formData.clientName,
+        email: formData.email,
+        phone: formData.phone,
+        company_name: `${formData.clientType} - ${formData.projectTitle}`.trim(),
+        inquiry_type: 'enterprise',
+        details: `Country: ${formData.country}\nCity: ${formData.city}\nCategory: ${formData.category}\nBudget: ${formData.budget}\nProject Title: ${formData.projectTitle}\n\nProject Scope & Description:\n${formData.description}`
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to submit project request. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -484,7 +503,13 @@ export default function ContractorsPage() {
               {submitted && (
                 <div className={styles.successMsg}>
                   <span>✓</span>
-                  <span>Your project request has been submitted to Boulot Man Contractors for initial review. We will contact you shortly.</span>
+                  <span>Your project request has been submitted to Boulot Man Contractors for initial review. We will contact you shortly via email/phone.</span>
+                </div>
+              )}
+
+              {submitError && (
+                <div style={{ background: "#fef2f2", border: "1px solid #f87171", color: "#991b1b", padding: "12px 16px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px" }}>
+                  ⚠ {submitError}
                 </div>
               )}
 
@@ -636,8 +661,8 @@ export default function ContractorsPage() {
                 </div>
               </div>
 
-              <button type="submit" className={styles.submitBtn}>
-                Submit Project for Review
+              <button type="submit" className={styles.submitBtn} disabled={submitting || submitted}>
+                {submitting ? "Submitting Request..." : submitted ? "✔ Request Submitted" : "Submit Project for Review"}
               </button>
             </form>
           </div>
