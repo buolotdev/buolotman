@@ -251,27 +251,68 @@ export function mergeWithMasterCategories(apiCategories: any[] | null | undefine
   subcategories?: any[];
   skills?: string[];
 }> {
-  if (!apiCategories || !Array.isArray(apiCategories) || apiCategories.length === 0) {
-    return MASTER_CATEGORIES.map(c => ({
-      id: c.id,
-      name: c.name,
-      slug: c.slug,
-      icon: c.icon,
-      skills: c.skills,
-      subcategories: c.skills.map((s, idx) => ({ id: `${c.id}-${idx}`, name: s, slug: s.toLowerCase().replace(/[^a-z0-9]+/g, '-') }))
-    }));
+  // 1. Build a master map starting with all 13 master categories
+  const categoriesMap = new Map<string, {
+    id: number | string;
+    name: string;
+    slug: string;
+    icon: string;
+    skills: string[];
+    subcategories: any[];
+  }>();
+
+  for (const master of MASTER_CATEGORIES) {
+    categoriesMap.set(master.slug, {
+      id: master.id,
+      name: master.name,
+      slug: master.slug,
+      icon: master.icon,
+      skills: master.skills,
+      subcategories: master.skills.map((s, idx) => ({
+        id: `${master.id}-${idx}`,
+        name: s,
+        slug: s.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      }))
+    });
   }
 
-  return apiCategories.map((c, idx) => {
-    const slug = (c.slug || c.name || "").toString().toLowerCase();
-    const matched = MASTER_CATEGORIES.find(m => m.slug === slug || m.name.toLowerCase() === (c.name || "").toLowerCase());
-    return {
-      id: c.id ?? (matched ? matched.id : idx + 1),
-      name: c.name || c.title || slug,
-      slug: c.slug || (matched ? matched.slug : slug),
-      icon: c.icon || (matched ? matched.icon : ""),
-      subcategories: c.subcategories || (matched ? matched.skills.map((s, sIdx) => ({ id: `${matched.id}-${sIdx}`, name: s })) : []),
-      skills: matched ? matched.skills : []
-    };
-  });
+  // 2. If API categories exist, clean & merge them
+  if (Array.isArray(apiCategories) && apiCategories.length > 0) {
+    for (const apiCat of apiCategories) {
+      const rawName = String(apiCat.name || apiCat.title || "").trim();
+      const rawSlug = String(apiCat.slug || rawName).trim().toLowerCase();
+
+      // Skip invalid / purely numeric categories like "12"
+      if (!rawName || /^\d+$/.test(rawName) || rawName.length < 3) {
+        continue;
+      }
+
+      // Check if it matches an existing master category
+      const matched = MASTER_CATEGORIES.find(
+        m => m.slug === rawSlug || m.name.toLowerCase() === rawName.toLowerCase()
+      );
+
+      if (matched) {
+        const existing = categoriesMap.get(matched.slug)!;
+        existing.id = apiCat.id ?? existing.id;
+        if (apiCat.icon) existing.icon = apiCat.icon;
+        if (Array.isArray(apiCat.subcategories) && apiCat.subcategories.length > 0) {
+          existing.subcategories = apiCat.subcategories;
+        }
+      } else {
+        // Additional custom category from backend
+        categoriesMap.set(rawSlug, {
+          id: apiCat.id ?? rawSlug,
+          name: rawName,
+          slug: rawSlug,
+          icon: apiCat.icon || "https://img.icons8.com/fluency/96/services.png",
+          skills: Array.isArray(apiCat.skills) ? apiCat.skills : [],
+          subcategories: Array.isArray(apiCat.subcategories) ? apiCat.subcategories : []
+        });
+      }
+    }
+  }
+
+  return Array.from(categoriesMap.values());
 }
+

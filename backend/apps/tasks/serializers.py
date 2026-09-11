@@ -202,13 +202,23 @@ class FlexibleCategoryField(serializers.Field):
         if cat:
             return cat
 
-        # 4. Auto-create or fallback to first active category
-        cat_slug = slugify(val_str) or "general-service"
-        cat, _ = Category.objects.get_or_create(
-            slug=cat_slug,
-            defaults={"name": val_str, "is_active": True}
-        )
-        return cat
+        # 4. Fallback to existing active category if numeric
+        if val_str.isdigit():
+            fallback = Category.objects.filter(is_active=True, parent=None).first()
+            if fallback:
+                return fallback
+
+        # 5. Auto-create only for meaningful text names (min 3 letters)
+        clean_name = val_str.strip()
+        if len(clean_name) >= 3 and not clean_name.isdigit():
+            cat_slug = slugify(clean_name) or "general-service"
+            cat, _ = Category.objects.get_or_create(
+                slug=cat_slug,
+                defaults={"name": clean_name, "is_active": True}
+            )
+            return cat
+
+        return Category.objects.filter(is_active=True, parent=None).first()
 
     def to_representation(self, value):
         if not value:

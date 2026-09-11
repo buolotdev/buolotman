@@ -230,14 +230,17 @@ DEFAULT_CATEGORIES_TREE = [
 
 
 def ensure_default_categories():
-    """Ensure standard categories exist in database; auto-seeds if empty."""
-    if Category.objects.filter(is_active=True, parent=None).exists():
-        return
+    """Ensure standard 13 master categories exist in database and purge numeric artifacts."""
+    try:
+        # 1. Purge/Deactivate any numeric dummy category records (e.g. "12")
+        Category.objects.filter(Q(name__regex=r'^\d+$') | Q(slug__regex=r'^\d+$')).delete()
+    except Exception:
+        pass
+
+    # 2. Ensure each master category exists
     for idx, item in enumerate(DEFAULT_CATEGORIES_TREE):
         cat_name = item["category"]
         cat_slug = slugify(cat_name)
-        if Category.objects.filter(slug=cat_slug).exists():
-            cat_slug = f"{cat_slug}-{idx}"
         cat, _ = Category.objects.get_or_create(
             slug=cat_slug,
             defaults={
@@ -247,6 +250,14 @@ def ensure_default_categories():
                 "is_active": True
             }
         )
+        # Ensure it has right name and active
+        if not cat.is_active or cat.name != cat_name:
+            cat.name = cat_name
+            cat.is_active = True
+            cat.order = idx
+            cat.icon = item.get("icon", cat.icon)
+            cat.save(update_fields=['name', 'is_active', 'order', 'icon'])
+
         for s_idx, skill_name in enumerate(item.get("skills", [])):
             skill_slug = slugify(f"{cat_name}-{skill_name}")
             sub_slug = slugify(f"sub-{cat_name}-{skill_name}")
@@ -272,10 +283,12 @@ def ensure_default_categories():
 @permission_classes([AllowAny])
 def category_list(request):
     if request.method == 'GET':
-        categories = Category.objects.filter(is_active=True, parent=None)
-        if not categories.exists():
-            ensure_default_categories()
-            categories = Category.objects.filter(is_active=True, parent=None)
+        ensure_default_categories()
+        categories = (
+            Category.objects.filter(is_active=True, parent=None)
+            .exclude(name__regex=r'^\d+$')
+            .order_by('order', 'id')
+        )
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
     
