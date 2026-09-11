@@ -217,15 +217,36 @@ def register_company(request):
 
 KNOWN_PROFILE_FIELDS = {
     # User / Basic fields (snake_case & camelCase)
-    'username', 'handle',
+    'username', 'handle', 'email',
     'first_name', 'firstName', 'last_name', 'lastName', 'phone', 'phoneNumber', 'phone_number',
     'avatar_url', 'avatarUrl', 'avatar', 'banner_url', 'bannerUrl', 'banner',
+    'cover_url', 'coverUrl', 'cover',
     'language_preference', 'languagePreference', 'language',
-    'country', 'city', 'address',
+    'preferred_currency', 'preferredCurrency', 'preferred_language', 'preferredLanguage',
+    'country', 'city', 'address', 'location', 'state', 'postal_code', 'zip_code', 'neighborhood',
     'date_of_birth', 'dateOfBirth', 'dob',
     'education_level', 'educationLevel', 'education',
     'expertise_level', 'expertiseLevel', 'expertise',
     'role',
+
+    # Client Profile & Business details
+    'client_type', 'clientType',
+    'business_name', 'businessName',
+    'business_logo', 'businessLogo',
+    'business_email', 'businessEmail',
+    'business_phone', 'businessPhone',
+    'industry',
+    'tax_registration_no', 'taxRegistrationNo',
+    'representative_name', 'representativeName',
+    'representative_role', 'representativeRole',
+    'website_url', 'websiteUrl',
+    'business_profile', 'businessProfile',
+    'saved_addresses', 'savedAddresses',
+    'privacy_display_format', 'privacyDisplayFormat',
+    'photo_visibility', 'photoVisibility',
+    'allow_direct_offers', 'allowDirectOffers',
+    'email_notifications', 'emailNotifications',
+    'sms_notifications', 'smsNotifications',
 
     # Emergency Contact
     'emergency_contact_name', 'emergencyContactName', 'emergency_name', 'emergencyName',
@@ -234,6 +255,7 @@ KNOWN_PROFILE_FIELDS = {
     # Profile / Bio / Trade
     'bio', 'about', 'headline', 'title', 'primary_occupation', 'primaryOccupation',
     'experience_years', 'experienceYears', 'experience',
+    'company_name', 'companyName',
 
     # Pricing fields
     'hourly_rate', 'hourlyRate',
@@ -254,14 +276,14 @@ KNOWN_PROFILE_FIELDS = {
     # Payout
     'payout', 'payout_info', 'payoutInfo',
 
-    # KYC
+    # KYC & Verification
     'kyc', 'kyc_info', 'kycInfo', 'kyc_status', 'kycStatus',
-    'id_type', 'idType', 'id_number', 'idNumber',
-    'id_card_front', 'idCardFront', 'id_card_back', 'idCardBack',
+    'id_type', 'idType', 'id_number', 'idNumber', 'id_expiry', 'idExpiry',
+    'id_card_front', 'idCardFront', 'id_card_back', 'idCardBack', 'id_doc_url', 'idDocUrl',
     'background_check_status', 'backgroundCheckStatus',
 
     # Nested profile objects
-    'technician_profile', 'technicianProfile', 'profile'
+    'technician_profile', 'technicianProfile', 'client_profile', 'clientProfile', 'company_profile', 'companyProfile', 'profile'
 }
 
 
@@ -507,7 +529,7 @@ def me(request):
             user_update_data['country'] = str(country)
 
         city = get_field('city')
-        address = get_field('address')
+        address = get_field('address', 'location')
         if address is not None:
             user_update_data['address'] = str(address)
         elif city is not None:
