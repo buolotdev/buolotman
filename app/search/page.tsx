@@ -470,7 +470,14 @@ export default function SearchPage() {
                   type="button"
                   className={`${styles.optionItem} ${activeType === option.value ? styles.optionItemActive : ""}`}
                   aria-pressed={activeType === option.value}
-                  onClick={() => setActiveType(option.value)}
+                  onClick={() => {
+                    setActiveType(option.value);
+                    if (option.value === "technician" || option.value === "company") {
+                      setActiveTab(option.value);
+                    } else if (option.value === "any" && (activeTab === "technician" || activeTab === "company")) {
+                      setActiveTab("all");
+                    }
+                  }}
                 >
                   <span className={styles.radioCircle} aria-hidden="true" />
                   <span className={styles.optionLabel}>{option.label}</span>
@@ -522,7 +529,14 @@ export default function SearchPage() {
                   role="tab"
                   aria-selected={activeTab === tab.value}
                   className={`${styles.tab} ${activeTab === tab.value ? styles.tabActive : ""}`}
-                  onClick={() => setActiveTab(tab.value)}
+                  onClick={() => {
+                    setActiveTab(tab.value);
+                    if (tab.value === "technician" || tab.value === "company") {
+                      setActiveType(tab.value);
+                    } else {
+                      setActiveType("any");
+                    }
+                  }}
                 >
                   {tab.label} (
                   {activeTab === tab.value ? filteredByTab.length : results.filter((r) => tab.value === "all" ? true : r.type === tab.value).length}

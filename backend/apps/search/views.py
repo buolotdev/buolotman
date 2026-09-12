@@ -40,11 +40,31 @@ def search(request):
     include_technicians = tab in ('all', 'technician', 'technicians', 'professionals') and professional_type in ('all', 'technician', 'technicians', 'professionals')
     include_companies = tab in ('all', 'company', 'companies', 'professionals') and professional_type in ('all', 'company', 'companies', 'professionals')
 
+    category_raw = (request.query_params.get('category') or '').strip()
+    category_slug = category_raw.lower()
+    category_name = category_raw.replace('-', ' ').replace('_', ' ').strip()
+    cat_keywords = [w for w in category_name.replace('&', ' ').split() if len(w) > 2 and w.lower() not in ('and', 'the', 'for', 'services', 'service')]
+
     tasks = Task.objects.select_related('client', 'category').prefetch_related('skills').filter(status='open')
     if query:
         tasks = tasks.filter(Q(title__icontains=query) | Q(description__icontains=query) | Q(location__icontains=query) | Q(city__icontains=query))
-    if category:
-        tasks = tasks.filter(Q(category__slug__iexact=category) | Q(category__name__icontains=category))
+    if category_raw and category_slug != 'any':
+        task_cat_q = (
+            Q(category__slug__iexact=category_slug)
+            | Q(category__name__icontains=category_name)
+            | Q(title__icontains=category_name)
+            | Q(description__icontains=category_name)
+            | Q(skills__name__icontains=category_name)
+            | Q(skills__slug__icontains=category_slug)
+        )
+        for kw in cat_keywords:
+            task_cat_q |= (
+                Q(category__name__icontains=kw)
+                | Q(title__icontains=kw)
+                | Q(description__icontains=kw)
+                | Q(skills__name__icontains=kw)
+            )
+        tasks = tasks.filter(task_cat_q).distinct()
     if location:
         tasks = tasks.filter(Q(location__icontains=location) | Q(city__icontains=location))
     if budget_min is not None:
@@ -58,15 +78,33 @@ def search(request):
     else:
         tasks = tasks.order_by('-created_at')
 
-    users = User.objects.filter(is_active=True, role='TECHNICIAN', is_verified=True).select_related('technician_profile').prefetch_related('technician_profile__skills')
+    users = User.objects.filter(is_active=True, role='TECHNICIAN', is_verified=True).select_related('technician_profile').prefetch_related('technician_profile__skills', 'technician_services', 'technician_services__category')
     if query:
         users = users.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query) | Q(email__icontains=query))
     if location:
         users = users.filter(Q(country__icontains=location) | Q(technician_profile__languages__icontains=location))
     if min_rating is not None:
         users = users.filter(technician_profile__average_rating__gte=min_rating)
-    if category:
-        users = users.filter(Q(technician_services__category__slug__iexact=category) | Q(technician_services__category__name__icontains=category)).distinct()
+    if category_raw and category_slug != 'any':
+        user_cat_q = (
+            Q(technician_services__category__slug__iexact=category_slug)
+            | Q(technician_services__category__name__icontains=category_name)
+            | Q(technician_services__title__icontains=category_name)
+            | Q(technician_services__description__icontains=category_name)
+            | Q(technician_profile__skills__name__icontains=category_name)
+            | Q(technician_profile__skills__slug__icontains=category_slug)
+            | Q(technician_profile__bio__icontains=category_name)
+        )
+        for kw in cat_keywords:
+            user_cat_q |= (
+                Q(technician_services__category__name__icontains=kw)
+                | Q(technician_services__title__icontains=kw)
+                | Q(technician_services__description__icontains=kw)
+                | Q(technician_profile__skills__name__icontains=kw)
+                | Q(technician_profile__skills__slug__icontains=kw)
+                | Q(technician_profile__bio__icontains=kw)
+            )
+        users = users.filter(user_cat_q).distinct()
 
     companies = CompanyProfile.objects.filter(is_verified=True).select_related('user').prefetch_related('services', 'reviews').order_by('-created_at')
     if query:
@@ -75,8 +113,25 @@ def search(request):
         companies = companies.filter(Q(headquarters__icontains=location) | Q(user__country__icontains=location))
     if min_rating is not None:
         companies = companies.filter(average_rating__gte=min_rating)
-    if category:
-        companies = companies.filter(Q(services__title__icontains=category) | Q(services__description__icontains=category)).distinct()
+    if category_raw and category_slug != 'any':
+        comp_cat_q = (
+            Q(company_name__icontains=category_name)
+            | Q(about__icontains=category_name)
+            | Q(services__title__icontains=category_name)
+            | Q(services__description__icontains=category_name)
+            | Q(services__category__slug__iexact=category_slug)
+            | Q(services__category__name__icontains=category_name)
+            | Q(services_offered__icontains=category_name)
+            | Q(services_offered__icontains=category_slug)
+        )
+        for kw in cat_keywords:
+            comp_cat_q |= (
+                Q(company_name__icontains=kw)
+                | Q(about__icontains=kw)
+                | Q(services__title__icontains=kw)
+                | Q(services_offered__icontains=kw)
+            )
+        companies = companies.filter(comp_cat_q).distinct()
 
     services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True, technician__is_verified=True)
 
@@ -90,8 +145,20 @@ def search(request):
             | Q(technician__last_name__icontains=query)
             | Q(technician__username__icontains=query)
         )
-    if category:
-        services = services.filter(Q(category__slug__iexact=category) | Q(category__name__icontains=category))
+    if category_raw and category_slug != 'any':
+        srv_cat_q = (
+            Q(category__slug__iexact=category_slug)
+            | Q(category__name__icontains=category_name)
+            | Q(title__icontains=category_name)
+            | Q(description__icontains=category_name)
+        )
+        for kw in cat_keywords:
+            srv_cat_q |= (
+                Q(category__name__icontains=kw)
+                | Q(title__icontains=kw)
+                | Q(description__icontains=kw)
+            )
+        services = services.filter(srv_cat_q).distinct()
     if location:
         services = services.filter(Q(coverage_area__icontains=location) | Q(technician__country__icontains=location))
     if min_rating is not None:
@@ -161,7 +228,7 @@ def search(request):
                     'services': tech_services,
                     'profile': base,
                 })
-    if include_companies and tab in ('all', 'companies', 'professionals'):
+    if include_companies and tab in ('all', 'company', 'companies', 'professionals'):
         for company in companies[:25]:
             results.append({
                 'id': company.user.id,
