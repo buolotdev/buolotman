@@ -1,32 +1,30 @@
 const API_BASE = "/api";
+const BACKEND_DOMAIN = "http://boulotman-api-env.eba-exncce63.eu-north-1.elasticbeanstalk.com";
 
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return "";
   
   if (url.startsWith("data:") || url.startsWith("blob:")) return url;
 
-  // Extract /media/ path if present so Next.js rewrites proxy it over HTTPS
-  if (url.includes("/media/")) {
-    const mediaIndex = url.indexOf("/media/");
-    return url.substring(mediaIndex);
-  }
-
-  // If pointing to external third-party (e.g. Unsplash, Supabase, Google Avatars)
+  // If already a full URL (Supabase, Unsplash, Google, ElasticBeanstalk, etc.)
   if (url.startsWith("https://") || url.startsWith("http://")) {
-    if (url.includes("elasticbeanstalk.com") || url.includes("localhost:8000")) {
-      const slashIndex = url.indexOf("/", 8);
-      if (slashIndex !== -1) {
-        return url.substring(slashIndex);
-      }
-    }
     return url;
   }
-  
+
+  // If relative /media/ path from backend storage
+  if (url.startsWith("/media/")) {
+    return `${BACKEND_DOMAIN}${url}`;
+  }
+  if (url.includes("/media/")) {
+    const idx = url.indexOf("/media/");
+    return `${BACKEND_DOMAIN}${url.substring(idx)}`;
+  }
+
   if (url.startsWith("/")) {
     return url;
   }
   
-  return `/${url}`;
+  return `${BACKEND_DOMAIN}/media/${url}`;
 }
 
 function getToken(): string | null {

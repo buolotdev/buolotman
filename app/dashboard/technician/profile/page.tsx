@@ -179,7 +179,7 @@ function getDocVisualInfo(doc: TechDocument) {
   };
 }
 
-function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: number; onClick?: () => void }) {
+function DocThumbnail({ doc, size = 48, fullWidth = false, onClick }: { doc: TechDocument; size?: number; fullWidth?: boolean; onClick?: () => void }) {
   const [imgFailed, setImgFailed] = useState(false);
   const info = getDocVisualInfo(doc);
   const src = doc.preview_url || doc.file_url;
@@ -188,9 +188,9 @@ function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: n
     <div
       onClick={onClick}
       style={{
-        width: size,
-        height: size,
-        borderRadius: 12,
+        width: fullWidth ? "100%" : size,
+        height: fullWidth ? "100%" : size,
+        borderRadius: fullWidth ? 0 : 12,
         overflow: "hidden",
         flexShrink: 0,
         display: "flex",
@@ -200,8 +200,8 @@ function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: n
         color: info.color,
         position: "relative",
         cursor: onClick ? "pointer" : "default",
-        boxShadow: "0 2px 8px rgba(0,31,63,0.06)",
-        border: "1px solid rgba(0,0,0,0.06)",
+        boxShadow: fullWidth ? "none" : "0 2px 8px rgba(0,31,63,0.06)",
+        border: fullWidth ? "none" : "1px solid rgba(0,0,0,0.06)",
       }}
     >
       {src && !imgFailed ? (
@@ -212,7 +212,7 @@ function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: n
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       ) : (
-        <iconify-icon icon={info.icon} style={{ fontSize: size * 0.48, color: info.color }} />
+        <iconify-icon icon={info.icon} style={{ fontSize: fullWidth ? 44 : size * 0.48, color: info.color }} />
       )}
     </div>
   );
@@ -1432,7 +1432,7 @@ export default function TechnicianProfilePage() {
                   <div className={`${styles.docUploadCard} ${frontIdDoc ? styles.docUploadCardFilled : ""}`}>
                     {frontIdDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(frontIdDoc)} title="Click to view enlarged">
-                        <DocThumbnail doc={frontIdDoc} size={84} />
+                        <DocThumbnail doc={frontIdDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
@@ -1480,7 +1480,7 @@ export default function TechnicianProfilePage() {
                   <div className={`${styles.docUploadCard} ${backIdDoc ? styles.docUploadCardFilled : ""}`}>
                     {backIdDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(backIdDoc)} title="Click to view enlarged">
-                        <DocThumbnail doc={backIdDoc} size={84} />
+                        <DocThumbnail doc={backIdDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
@@ -1528,7 +1528,7 @@ export default function TechnicianProfilePage() {
                   <div className={`${styles.docUploadCard} ${certDoc ? styles.docUploadCardFilled : ""}`}>
                     {certDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(certDoc)} title="Click to view enlarged">
-                        <DocThumbnail doc={certDoc} size={84} />
+                        <DocThumbnail doc={certDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
@@ -1576,7 +1576,7 @@ export default function TechnicianProfilePage() {
                   <div className={`${styles.docUploadCard} ${selfieDoc ? styles.docUploadCardFilled : ""}`}>
                     {selfieDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(selfieDoc)} title="Click to view enlarged">
-                        <DocThumbnail doc={selfieDoc} size={84} />
+                        <DocThumbnail doc={selfieDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
