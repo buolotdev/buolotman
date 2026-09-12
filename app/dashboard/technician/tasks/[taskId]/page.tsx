@@ -33,6 +33,8 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
   const [messaging, setMessaging] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [activeLightboxImage, setActiveLightboxImage] = useState<{ url: string; name: string; isImage?: boolean } | null>(null);
+  const [lightboxError, setLightboxError] = useState(false);
 
   const toggleSaved = () => {
     const nextSaved = !saved;
@@ -232,11 +234,12 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                         const fileName = attachment.file_name || `Attachment #${idx + 1}`;
                         const isImage = attachment.content_type?.includes("image") || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
                         return (
-                          <a
+                          <div
                             key={idx}
-                            href={fileUrl}
-                            target="_blank"
-                            rel="noreferrer"
+                            onClick={() => {
+                              setLightboxError(false);
+                              setActiveLightboxImage({ url: fileUrl, name: fileName, isImage: Boolean(isImage) });
+                            }}
                             style={{
                               display: "flex",
                               alignItems: "center",
@@ -245,7 +248,7 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                               borderRadius: 14,
                               border: "1.5px solid #e2e8f0",
                               backgroundColor: "#f8fafc",
-                              textDecoration: "none",
+                              cursor: "pointer",
                               transition: "all 0.2s ease",
                               boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
                               overflow: "hidden"
@@ -282,11 +285,11 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                               <strong style={{ display: "block", fontSize: 13, color: "#001f3f", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                 {fileName}
                               </strong>
-                              <span style={{ fontSize: 11.5, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                                <iconify-icon icon="lucide:external-link" style={{ fontSize: 11 }} /> View Attachment
+                              <span style={{ fontSize: 11.5, color: "#ff4500", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                <iconify-icon icon="lucide:maximize-2" style={{ fontSize: 11 }} /> Preview Attachment
                               </span>
                             </div>
-                          </a>
+                          </div>
                         );
                       })}
                     </div>
@@ -510,6 +513,57 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal for Attachment Previews */}
+      {activeLightboxImage && (
+        <div className={styles.lightboxOverlay} onClick={() => setActiveLightboxImage(null)}>
+          <div className={styles.lightboxDialog} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className={styles.lightboxCloseBtn}
+              onClick={() => setActiveLightboxImage(null)}
+              aria-label="Close Preview"
+            >
+              <iconify-icon icon="lucide:x" />
+            </button>
+            <div className={styles.lightboxImgContainer}>
+              {activeLightboxImage.isImage && !lightboxError ? (
+                <img
+                  src={activeLightboxImage.url}
+                  alt={activeLightboxImage.name}
+                  className={styles.lightboxImg}
+                  onError={() => setLightboxError(true)}
+                />
+              ) : (
+                <div className={styles.lightboxErrorState}>
+                  <iconify-icon icon={lightboxError ? "lucide:image-off" : "lucide:file-text"} style={{ fontSize: 54, color: lightboxError ? "#f87171" : "#38bdf8" }} />
+                  <p>{lightboxError ? "File Unavailable on Server" : activeLightboxImage.name}</p>
+                  <span>
+                    {lightboxError
+                      ? "This file was uploaded prior to persistent cloud storage configuration and was purged during a previous server deployment. All new task uploads are permanently preserved."
+                      : "Document or file attachment ready for download."}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className={styles.lightboxFooter}>
+              <span>{activeLightboxImage.name}</span>
+              {!lightboxError && (
+                <a
+                  href={activeLightboxImage.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  download={activeLightboxImage.name}
+                  className={styles.lightboxDownloadBtn}
+                >
+                  <iconify-icon icon="lucide:download" />
+                  <span>Open / Download</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
