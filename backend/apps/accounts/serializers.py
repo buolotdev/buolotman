@@ -290,6 +290,12 @@ class UserPublicSerializer(serializers.ModelSerializer):
                 return first_srv.category.name
         return obj.expertise_level or obj.education_level or ""
 
+    def get_response_time(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        if tech and getattr(tech, "response_time", None):
+            return tech.response_time
+        return "Within 1 hour"
+
     def get_city(self, obj):
         tech = getattr(obj, "technician_profile", None)
         if tech and isinstance(tech.languages, dict) and tech.languages.get('city'):
