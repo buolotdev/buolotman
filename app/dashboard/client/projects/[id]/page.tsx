@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
 import { cleanDescription, extractDirectInvitation } from "@/app/lib/format";
@@ -297,17 +297,22 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
   // Combine server attachments and local uploads
   const allFiles = useMemo(() => {
-    const serverFiles = (task?.attachments || []).map((att: any, idx: number) => ({
-      id: att.id,
-      name: att.file_name || "Attached File",
-      type: att.file_type || (att.file_name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? "image/jpeg" : (att.file_name?.endsWith(".pdf") ? "application/pdf" : "file")),
-      size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : "Attached",
-      url: att.file_url,
-      isServer: true,
-      key: `server-${att.id || idx}-${att.file_name}`,
-    }));
+    const serverFiles = (task?.attachments || []).map((att: any, idx: number) => {
+      const rawUrl = att.file_url || att.file || att.url;
+      const resolvedUrl = rawUrl ? getImageUrl(rawUrl) : "";
+      return {
+        id: att.id,
+        name: att.file_name || (typeof rawUrl === "string" ? rawUrl.split("/").pop() : "Attached File"),
+        type: att.file_type || (att.file_name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? "image/jpeg" : (att.file_name?.endsWith(".pdf") ? "application/pdf" : "file")),
+        size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : "Attached",
+        url: resolvedUrl,
+        isServer: true,
+        key: `server-${att.id || idx}-${att.file_name || rawUrl}`,
+      };
+    });
     const local = localUploadedFiles.map((file, idx) => ({
       ...file,
+      url: file.url ? getImageUrl(file.url) : "",
       id: undefined,
       isServer: false,
       key: `local-${idx}-${file.name}`,
@@ -425,17 +430,29 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
       const derivedType = isPdf ? "application/pdf" : (isImg ? "image/jpeg" : (file.type || "file"));
 
       try {
-        const res = await api.uploadServiceMedia(file);
-        const fileUrl = res.file_url || localBlobUrl;
+        let uploadedUrl = localBlobUrl;
+        if (taskId) {
+          const res = await api.uploadTaskAttachment(Number(taskId), file);
+          if (res?.file_url || res?.file) {
+            uploadedUrl = getImageUrl(res.file_url || res.file);
+          }
+          refetchTask();
+        } else {
+          const res = await api.uploadServiceMedia(file);
+          if (res?.file_url) {
+            uploadedUrl = getImageUrl(res.file_url);
+          }
+        }
         setLocalUploadedFiles(prev => [
           ...prev,
           { 
             name: file.name, 
             type: derivedType, 
             size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`, 
-            url: fileUrl 
+            url: uploadedUrl 
           }
         ]);
+        toast.success("File Uploaded", `"${file.name}" attached to project workspace.`);
       } catch (err) {
         setLocalUploadedFiles(prev => [
           ...prev,
@@ -446,6 +463,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
             url: localBlobUrl 
           }
         ]);
+        toast.success("File Attached", `"${file.name}" attached locally.`);
       }
     }
     e.target.value = "";
@@ -761,18 +779,23 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                     <div className={styles.filesGrid}>
                       {allFiles.map((file, i) => (
                         <div key={i} className={styles.fileItem}>
-                          <div className={styles.fileIcon} style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div className={styles.fileIcon} style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", width: "42px", height: "42px", borderRadius: "10px", background: "#f1f5f9" }}>
                             {file.url && (file.type?.startsWith("image/") || file.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
                               <img
-                                src={file.url}
+                                src={getImageUrl(file.url)}
                                 alt={file.name}
-                                style={{ width: "38px", height: "38px", objectFit: "cover", borderRadius: "8px" }}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
                                 onError={(e) => {
                                   e.currentTarget.style.display = "none";
+                                  if (e.currentTarget.parentElement) {
+                                    const fallback = document.createElement("span");
+                                    fallback.innerHTML = `<iconify-icon icon="lucide:image" style="font-size: 20px; color: #ff4500;"></iconify-icon>`;
+                                    e.currentTarget.parentElement.appendChild(fallback);
+                                  }
                                 }}
                               />
                             ) : (
-                              <iconify-icon icon={file.type?.includes("pdf") || file.name?.endsWith(".pdf") ? "lucide:file-text" : "lucide:image"} />
+                              <iconify-icon icon={file.type?.includes("pdf") || file.name?.endsWith(".pdf") ? "lucide:file-text" : "lucide:file"} style={{ fontSize: 22, color: "#64748b" }} />
                             )}
                           </div>
                           <div className={styles.fileDetails}>
@@ -1133,15 +1156,16 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               {(previewMedia.type?.startsWith("image/") || previewMedia.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
                 previewMedia.url ? (
                   <img
-                    src={previewMedia.url}
+                    src={getImageUrl(previewMedia.url)}
                     alt={previewMedia.name}
                     style={{
                       maxWidth: "100%",
-                      maxHeight: "60vh",
+                      maxHeight: "65vh",
                       objectFit: "contain",
                       borderRadius: "10px",
                       display: "block",
-                      margin: "0 auto"
+                      margin: "0 auto",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.3)"
                     }}
                     onError={(e) => {
                       const target = e.currentTarget;
@@ -1151,7 +1175,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                         const fallback = document.createElement("div");
                         fallback.style.textAlign = "center";
                         fallback.style.color = "#fff";
-                        fallback.innerHTML = `<iconify-icon icon="lucide:image" style="font-size: 54px; color: #ff4500;"></iconify-icon><p style="margin-top: 10px;">${previewMedia.name}</p>`;
+                        fallback.style.padding = "20px";
+                        fallback.innerHTML = `<iconify-icon icon="lucide:image" style="font-size: 54px; color: #ff4500;"></iconify-icon><p style="margin-top: 10px; font-weight: 700;">${previewMedia.name}</p><a href="${getImageUrl(previewMedia.url)}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; font-size: 13px;">Direct File Link</a>`;
                         parent.appendChild(fallback);
                       }
                     }}
@@ -1166,7 +1191,7 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                 previewMedia.url ? (
                   <div style={{ width: "100%", textAlign: "center" }}>
                     <iframe
-                      src={previewMedia.url}
+                      src={getImageUrl(previewMedia.url)}
                       style={{ width: "100%", height: "450px", border: "none", borderRadius: "10px", background: "#fff" }}
                       title={previewMedia.name}
                     />
