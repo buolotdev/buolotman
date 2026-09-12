@@ -431,7 +431,7 @@ def admin_dashboard_stats(request):
             'id': t.id,
             'title': t.title,
             'client_name': f"{t.client.first_name} {t.client.last_name}" if t.client else 'Unknown',
-            'technician_name': f"{t.technician.first_name} {t.technician.last_name}" if t.technician else 'Pending',
+            'technician_name': f"{t.assigned_to.first_name} {t.assigned_to.last_name}" if t.assigned_to else 'Pending',
             'progress': 'Pending',  # Mock progress for now
             'status': t.status
         }
@@ -495,13 +495,13 @@ def admin_projects_monitoring(request):
         milestone_title = milestone.title if milestone else 'No Active Milestone'
         m_status = milestone.status if milestone else 'None'
         
-        executor_type = t.technician.role.lower() if t.technician and hasattr(t.technician, 'role') else 'tech'
+        executor_type = t.assigned_to.role.lower() if t.assigned_to and hasattr(t.assigned_to, 'role') else 'tech'
         
         projects_data.append({
             'id': t.id,
             'project': t.title,
             'client': f"{t.client.first_name} {t.client.last_name}" if t.client else 'Unknown',
-            'executor': f"{t.technician.first_name} {t.technician.last_name}" if t.technician else 'Unassigned',
+            'executor': f"{t.assigned_to.first_name} {t.assigned_to.last_name}" if t.assigned_to else 'Unassigned',
             'type': executor_type,
             'progress': 50, # Mock progress 
             'milestone': milestone_title,
