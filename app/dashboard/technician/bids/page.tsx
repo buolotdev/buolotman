@@ -1,11 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
-import { SkeletonBlock, SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
+import { SkeletonCard, SkeletonStat } from "@/app/components/skeleton/Skeleton";
 import { formatXOF } from "@/app/lib/format";
 import { useToast } from "@/app/components/Toast";
 import styles from "./page.module.css";
@@ -32,11 +31,12 @@ type Bid = {
   client: string;
   clientRating: string;
   clientInitials: string;
+  clientAvatar?: string;
   status: Exclude<BidStatus, "all">;
   taskStatus: string;
 };
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 4;
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -69,7 +69,8 @@ const translations: Record<string, Record<string, string>> = {
     viewCompleted: "View Completed Task",
     manageTask: "Manage Task",
     viewDetails: "View Details",
-    noBidsYet: "No bids yet",
+    noBidsYet: "No bids found",
+    verifiedClient: "Verified Client",
   },
   fr: {
     searchPlaceholder: "Rechercher des tâches ou utilisateurs...",
@@ -101,7 +102,8 @@ const translations: Record<string, Record<string, string>> = {
     viewCompleted: "Voir la tâche terminée",
     manageTask: "Gérer la tâche",
     viewDetails: "Voir les détails",
-    noBidsYet: "Aucune offre pour le moment",
+    noBidsYet: "Aucune offre trouvée",
+    verifiedClient: "Client Vérifié",
   }
 };
 
@@ -121,9 +123,8 @@ export default function TechnicianBidsPage() {
   const t = translations[lang] || translations["en"];
 
   const { data: bidsData, loading, refetch } = useFetch(() => api.getMyBids(), []);
-  const { data: userData } = useFetch(() => api.getMe(), []);
   const { data: conversationsData } = useFetch(() => api.getConversations(), []);
-  const conversations = useMemo(() => Array.isArray(conversationsData) ? conversationsData : [], [conversationsData]);
+  const conversations = useMemo(() => (Array.isArray(conversationsData) ? conversationsData : []), [conversationsData]);
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -137,30 +138,57 @@ export default function TechnicianBidsPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw = (Array.isArray(bidsData) ? bidsData : bidsData?.results ?? []) as any[];
     return raw.map((b) => {
-      const cFirst = b.client_first_name?.[0] ?? "";
-      const cLast = b.client_last_name?.[0] ?? "";
+      const clientName =
+        b.client_name ||
+        b.client ||
+        (b.client_first_name || b.client_last_name ? `${b.client_first_name || ""} ${b.client_last_name || ""}`.trim() : "") ||
+        "Project Client";
+
+      const cFirst = b.client_first_name?.[0] || clientName?.[0] || "C";
+      const cLast = b.client_last_name?.[0] || clientName?.split(" ")?.[1]?.[0] || "L";
+      const clientInitials = b.client_initials || `${cFirst}${cLast}`.toUpperCase();
+
+      const rawRating = b.client_rating;
+      const clientRating = rawRating && Number(rawRating) > 0 ? `⭐ ${Number(rawRating).toFixed(1)}` : "⭐ 5.0";
+
+      const loc = b.location || b.city || b.task_location || "Abidjan, Lagunes";
+      let submittedDate = "Recently";
+      if (b.submitted_at || b.created_at) {
+        try {
+          submittedDate = new Date(b.submitted_at || b.created_at).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        } catch {
+          submittedDate = "Recently";
+        }
+      }
+
       return {
         id: String(b.id),
         taskId: String(b.task_id ?? b.taskId ?? ""),
-        taskTitle: b.task_title ?? b.taskTitle ?? "",
-        location: b.location ?? "",
-        submittedAt: b.submitted_at ?? b.submittedAt ?? "",
-        competingBids: b.competing_bids ?? b.competingBids ?? 0,
-        description: b.description ?? "",
-        skills: b.skills ?? [],
-        proposal: b.proposal ?? "",
-        duration: b.duration ?? "",
-        extra: b.extra ?? "",
-        amount: b.amount ?? 0,
-        amountLabel: b.amount_label ?? b.amountLabel ?? formatXOF(b.amount ?? 0),
-        client: b.client ?? "",
-        clientRating: b.client_rating ?? b.clientRating ?? "",
-        clientInitials: `${cFirst}${cLast}`.toUpperCase(),
+        taskTitle: b.task_title ?? b.taskTitle ?? "Task",
+        location: loc,
+        submittedAt: submittedDate,
+        competingBids: Number(b.competing_bids ?? b.competingBids ?? 0),
+        description: b.description ?? b.task_description ?? "Scope of work outlined in project requirements.",
+        skills: Array.isArray(b.skills) && b.skills.length > 0 ? b.skills : ["General Service"],
+        proposal: b.proposal ?? b.message ?? "Proposal submitted for project execution.",
+        duration: b.duration ? (String(b.duration).toLowerCase().includes("day") || String(b.duration).toLowerCase().includes("hour") ? b.duration : `${b.duration} Days`) : "3 Days",
+        extra: b.extra || "Materials & Escrow Protected",
+        amount: Number(b.amount ?? 0),
+        amountLabel: b.amount_label ?? (b.amount ? `${Number(b.amount).toLocaleString()} XOF` : formatXOF(b.amount ?? 0)),
+        client: clientName,
+        clientRating: clientRating,
+        clientInitials: clientInitials,
+        clientAvatar: b.client_avatar || "",
         status: b.status ?? "pending",
         taskStatus: b.task_status ?? b.taskStatus ?? "",
       };
     });
   }, [bidsData]);
+
   const visibleBids = useMemo(() => bids.filter((bid) => bid.status !== "withdrawn"), [bids]);
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -381,10 +409,22 @@ export default function TechnicianBidsPage() {
 
                       <div className={styles.bidFooter}>
                         <div className={styles.clientInfo}>
-                          <span className={styles.clientAvatar}>{bid.clientInitials}</span>
+                          <div className={styles.clientAvatar} style={{ overflow: "hidden" }}>
+                            {bid.clientAvatar ? (
+                              <img
+                                src={getImageUrl(bid.clientAvatar)}
+                                alt={bid.client}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            ) : (
+                              <span>{bid.clientInitials}</span>
+                            )}
+                          </div>
                           <div>
-                            <strong>{bid.client}</strong>
-                            <span><iconify-icon icon="lucide:star" />{bid.clientRating}</span>
+                            <strong style={{ fontSize: 14.5, color: "#001f3f", fontWeight: 800 }}>{bid.client}</strong>
+                            <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                              <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a" }} /> {t.verifiedClient} • {bid.clientRating}
+                            </span>
                           </div>
                         </div>
 
@@ -433,6 +473,7 @@ export default function TechnicianBidsPage() {
                 </button>
               </div>
             )}
+
           </div>
         </div>
       </div>

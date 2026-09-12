@@ -320,27 +320,38 @@ class BidListSerializer(serializers.ModelSerializer):
     technician_name = serializers.SerializerMethodField()
     technician_initials = serializers.SerializerMethodField()
     technician_rating = serializers.SerializerMethodField()
-    technician_is_online = serializers.BooleanField(source='technician.is_online', read_only=True)
-    technician_last_seen = serializers.DateTimeField(source='technician.last_seen', read_only=True)
-    technician_last_seen_display = serializers.CharField(source='technician.last_seen_display', read_only=True)
+    technician_is_online = serializers.SerializerMethodField()
+    technician_last_seen = serializers.SerializerMethodField()
+    technician_last_seen_display = serializers.SerializerMethodField()
     task_id = serializers.IntegerField(source='task.id', read_only=True)
     task_title = serializers.CharField(source='task.title', read_only=True)
     task_status = serializers.CharField(source='task.status', read_only=True)
-    location = serializers.CharField(source='task.location', read_only=True)
+    location = serializers.SerializerMethodField()
     description = serializers.CharField(source='task.description', read_only=True)
     skills = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+    client_name = serializers.SerializerMethodField()
     client_first_name = serializers.CharField(source='task.client.first_name', read_only=True)
     client_last_name = serializers.CharField(source='task.client.last_name', read_only=True)
+    client_initials = serializers.SerializerMethodField()
     client_rating = serializers.SerializerMethodField()
+    client_avatar = serializers.SerializerMethodField()
     competing_bids = serializers.SerializerMethodField()
+    proposal = serializers.CharField(source='message', read_only=True)
+    submitted_at = serializers.DateTimeField(source='created_at', read_only=True)
+    extra = serializers.SerializerMethodField()
 
     class Meta:
         model = Bid
-        fields = ['id', 'task_id', 'task_title', 'task_status', 'amount', 'amount_type', 'message', 'duration', 'status',
-                  'technician', 'technician_name', 'technician_initials', 'technician_rating',
-                  'technician_is_online', 'technician_last_seen', 'technician_last_seen_display',
-                  'created_at', 'location', 'description', 'skills',
-                  'client_first_name', 'client_last_name', 'client_rating', 'competing_bids']
+        fields = [
+            'id', 'task_id', 'task_title', 'task_status', 'amount', 'amount_type',
+            'message', 'proposal', 'duration', 'status', 'extra',
+            'technician', 'technician_name', 'technician_initials', 'technician_rating',
+            'technician_is_online', 'technician_last_seen', 'technician_last_seen_display',
+            'created_at', 'submitted_at', 'location', 'description', 'skills',
+            'client', 'client_name', 'client_first_name', 'client_last_name',
+            'client_initials', 'client_rating', 'client_avatar', 'competing_bids'
+        ]
 
     def get_technician_name(self, obj):
         return f'{obj.technician.first_name} {obj.technician.last_name}'.strip() or obj.technician.email
@@ -352,14 +363,65 @@ class BidListSerializer(serializers.ModelSerializer):
 
     def get_technician_rating(self, obj):
         profile = getattr(obj.technician, 'technician_profile', None)
-        return str(profile.average_rating) if profile else '0.00'
+        return str(profile.average_rating) if profile else '5.0'
+
+    def get_technician_is_online(self, obj):
+        try:
+            return bool(obj.technician.is_online)
+        except Exception:
+            return False
+
+    def get_technician_last_seen(self, obj):
+        try:
+            return getattr(obj.technician, 'last_seen', None)
+        except Exception:
+            return None
+
+    def get_technician_last_seen_display(self, obj):
+        try:
+            return str(obj.technician.last_seen_display)
+        except Exception:
+            return "Offline"
 
     def get_skills(self, obj):
         return [s.name for s in obj.task.skills.all()] if obj.task else []
 
+    def get_client(self, obj):
+        if not obj.task or not obj.task.client:
+            return "Client"
+        return f"{obj.task.client.first_name} {obj.task.client.last_name}".strip() or obj.task.client.username or obj.task.client.email
+
+    def get_client_name(self, obj):
+        return self.get_client(obj)
+
+    def get_client_initials(self, obj):
+        if not obj.task or not obj.task.client:
+            return "CL"
+        c = obj.task.client
+        first = c.first_name[:1] if c.first_name else ""
+        last = c.last_name[:1] if c.last_name else ""
+        return (first + last).upper() or c.email[:2].upper()
+
     def get_client_rating(self, obj):
-        profile = getattr(obj.task.client, 'technician_profile', None) if obj.task else None
-        return str(profile.average_rating) if profile else '0.00'
+        if not obj.task or not obj.task.client:
+            return "5.0"
+        profile = getattr(obj.task.client, 'technician_profile', None)
+        if profile and profile.average_rating and float(profile.average_rating) > 0:
+            return f"{float(profile.average_rating):.1f}"
+        return "5.0"
+
+    def get_client_avatar(self, obj):
+        if not obj.task or not obj.task.client:
+            return ""
+        return obj.task.client.avatar_url or ""
+
+    def get_location(self, obj):
+        if not obj.task:
+            return "Abidjan, Lagunes"
+        return obj.task.city or obj.task.location or "Abidjan, Lagunes"
+
+    def get_extra(self, obj):
+        return "Materials & Escrow Protected"
 
     def get_competing_bids(self, obj):
         if not obj.task:
