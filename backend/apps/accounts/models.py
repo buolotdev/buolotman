@@ -38,36 +38,44 @@ class User(AbstractUser):
 
     @property
     def is_online(self):
-        if not self.last_seen:
+        try:
+            ls = getattr(self, 'last_seen', None)
+            if not ls:
+                return False
+            from django.utils import timezone
+            from datetime import timedelta
+            return (timezone.now() - ls) < timedelta(minutes=5)
+        except Exception:
             return False
-        from django.utils import timezone
-        from datetime import timedelta
-        return (timezone.now() - self.last_seen) < timedelta(minutes=5)
 
     @property
     def last_seen_display(self):
-        if not self.last_seen:
+        try:
+            ls = getattr(self, 'last_seen', None)
+            if not ls:
+                return "Offline"
+            if self.is_online:
+                return "Online"
+            from django.utils import timezone
+            now = timezone.now()
+            diff = now - ls
+            seconds = int(diff.total_seconds())
+            if seconds < 60:
+                return "Just now"
+            minutes = seconds // 60
+            if minutes < 60:
+                return f"Active {minutes}m ago"
+            hours = minutes // 60
+            if hours < 24:
+                return f"Active {hours}h ago"
+            days = hours // 24
+            if days == 1:
+                return "Active yesterday"
+            if days < 7:
+                return f"Active {days}d ago"
+            return ls.strftime("%b %d, %Y")
+        except Exception:
             return "Offline"
-        if self.is_online:
-            return "Online"
-        from django.utils import timezone
-        now = timezone.now()
-        diff = now - self.last_seen
-        seconds = int(diff.total_seconds())
-        if seconds < 60:
-            return "Just now"
-        minutes = seconds // 60
-        if minutes < 60:
-            return f"Active {minutes}m ago"
-        hours = minutes // 60
-        if hours < 24:
-            return f"Active {hours}h ago"
-        days = hours // 24
-        if days == 1:
-            return "Active yesterday"
-        if days < 7:
-            return f"Active {days}d ago"
-        return self.last_seen.strftime("%b %d, %Y")
 
 
 class TechnicianProfile(models.Model):

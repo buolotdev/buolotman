@@ -133,81 +133,99 @@ def upload_message_attachment(request, conversation_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_conversation(request):
-    participant_id = request.data.get('participant_id')
-    task_id = request.data.get('task_id')
-    participant_name = request.data.get('participant_name')
-    context_type = str(request.data.get('context_type', '')).strip().lower()
-    context_id = request.data.get('context_id')
-    if context_type not in ('', 'quote', 'project', 'task'):
-        return Response({'error': 'Invalid conversation context.'}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        context_id = int(context_id) if context_id is not None else None
-    except (TypeError, ValueError):
-        return Response({'error': 'context_id must be numeric.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    from django.contrib.auth import get_user_model
-    from django.db.models import Q
-    User = get_user_model()
-    participant = None
-
-    if participant_id:
+        raw_participant_id = request.data.get('participant_id') or request.data.get('client_id') or request.data.get('id')
+        task_id = request.data.get('task_id')
+        participant_name = request.data.get('participant_name')
+        context_type = str(request.data.get('context_type', '')).strip().lower()
+        context_id = request.data.get('context_id')
+        if context_type not in ('', 'quote', 'project', 'task'):
+            return Response({'error': 'Invalid conversation context.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            participant = User.objects.get(id=participant_id)
-        except (User.DoesNotExist, ValueError):
-            pass
+            context_id = int(context_id) if context_id is not None else None
+        except (TypeError, ValueError):
+            return Response({'error': 'context_id must be numeric.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not participant and task_id:
+        from django.contrib.auth import get_user_model
+        from django.db.models import Q
+        User = get_user_model()
+        participant = None
+
+        if raw_participant_id:
+            try:
+                participant = User.objects.get(id=int(raw_participant_id))
+            except (User.DoesNotExist, ValueError, TypeError):
+                pass
+
+        if not participant and task_id:
+            try:
+                from apps.tasks.models import Task
+                t_obj = Task.objects.get(id=task_id)
+                if request.user == t_obj.client:
+                    participant = t_obj.assigned_to
+                elif request.user == t_obj.assigned_to:
+                    participant = t_obj.client
+                else:
+                    # Visitor/Technician contacting task owner
+                    participant = t_obj.client
+            except Exception:
+                pass
+
+        if not participant and participant_name:
+            participant = User.objects.filter(
+                Q(username__icontains=participant_name) |
+                Q(first_name__icontains=participant_name) |
+                Q(last_name__icontains=participant_name)
+            ).exclude(id=request.user.id).first()
+
+        if not participant:
+            if task_id:
+                existing = Conversation.objects.filter(participants=request.user, task_id=task_id).first()
+                if existing:
+                    return Response(ConversationDetailSerializer(existing).data)
+            return Response({"error": "Participant or valid task could not be resolved"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check existing conversation
+        existing = Conversation.objects.filter(participants=request.user)
+        if participant != request.user:
+            existing = existing.filter(participants=participant)
+        if task_id:
+            existing = existing.filter(task_id=task_id)
+        elif context_type and context_id:
+            existing = existing.filter(context_type=context_type, context_id=context_id)
+        conversation = existing.first()
+
+        if conversation:
+            return Response(ConversationDetailSerializer(conversation).data)
+
+        conversation = Conversation.objects.create(
+            task_id=task_id,
+            context_type=context_type,
+            context_id=context_id,
+        )
+        if participant == request.user:
+            conversation.participants.add(request.user)
+        else:
+            conversation.participants.add(request.user, participant)
+
         try:
-            from apps.tasks.models import Task
-            task = Task.objects.get(id=task_id)
-            if request.user == task.client:
-                participant = task.assigned_to
-            elif request.user == task.assigned_to:
-                participant = task.client
+            create_audit_log(
+                actor=request.user,
+                action="conversation_created",
+                entity_type="conversation",
+                entity_id=conversation.id,
+                summary="Conversation created",
+                metadata={"participant_id": getattr(participant, "id", None), "task_id": task_id},
+                ip_address=request.META.get("REMOTE_ADDR"),
+            )
         except Exception:
             pass
 
-    if not participant and participant_name:
-        participant = User.objects.filter(
-            Q(username__icontains=participant_name) |
-            Q(first_name__icontains=participant_name) |
-            Q(last_name__icontains=participant_name)
-        ).exclude(id=request.user.id).first()
-
-    if not participant:
-        if task_id:
-            existing = Conversation.objects.filter(participants=request.user, task_id=task_id).first()
-            if existing:
-                return Response(ConversationDetailSerializer(existing).data)
-        return Response({"error": "Participant or valid task could not be resolved"}, status=status.HTTP_400_BAD_REQUEST)
-
-    existing = Conversation.objects.filter(participants=request.user).filter(participants=participant)
-    if task_id:
-        existing = existing.filter(task_id=task_id)
-    elif context_type and context_id:
-        existing = existing.filter(context_type=context_type, context_id=context_id)
-    conversation = existing.first()
-
-    if conversation:
-        return Response(ConversationDetailSerializer(conversation).data)
-
-    conversation = Conversation.objects.create(
-        task_id=task_id,
-        context_type=context_type,
-        context_id=context_id,
-    )
-    conversation.participants.add(request.user, participant)
-    create_audit_log(
-        actor=request.user,
-        action="conversation_created",
-        entity_type="conversation",
-        entity_id=conversation.id,
-        summary="Conversation created",
-        metadata={"participant_id": participant.id, "task_id": task_id},
-        ip_address=request.META.get("REMOTE_ADDR"),
-    )
-    return Response(ConversationDetailSerializer(conversation).data, status=status.HTTP_201_CREATED)
-
+        return Response(ConversationDetailSerializer(conversation).data, status=status.HTTP_201_CREATED)
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['PATCH'])
@@ -223,6 +241,7 @@ def mark_read(request, conversation_id):
 
     updated = conversation.messages.filter(read_at__isnull=True).exclude(sender=request.user).update(read_at=timezone.now())
     return Response({"marked_read": updated})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

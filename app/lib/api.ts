@@ -367,7 +367,15 @@ export const api = {
     });
   },
   createConversation: (data: { participant_id?: number; task_id?: number; participant_name?: string } | number, taskId?: number) => {
-    const payload = typeof data === "number" ? { participant_id: data, task_id: taskId } : data;
+    let payload: Record<string, any> = {};
+    if (typeof data === "number") {
+      payload = { participant_id: data, task_id: taskId };
+    } else if (typeof data === "object" && data !== null) {
+      payload = { ...data };
+      if (taskId && !payload.task_id) {
+        payload.task_id = taskId;
+      }
+    }
     return request<any>("/conversations/create/", {
       method: "POST",
       body: JSON.stringify(payload),

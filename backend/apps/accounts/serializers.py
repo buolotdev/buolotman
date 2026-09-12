@@ -69,9 +69,9 @@ class UserMeSerializer(serializers.ModelSerializer):
     banner_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     date_of_birth = serializers.DateField(required=False, allow_null=True)
     city = serializers.SerializerMethodField()
-    is_online = serializers.BooleanField(read_only=True)
-    last_seen = serializers.DateTimeField(read_only=True)
-    last_seen_display = serializers.CharField(read_only=True)
+    is_online = serializers.SerializerMethodField()
+    last_seen = serializers.SerializerMethodField()
+    last_seen_display = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -82,10 +82,28 @@ class UserMeSerializer(serializers.ModelSerializer):
             'address', 'education_level', 'expertise_level', 'created_at',
             'last_seen', 'is_online', 'last_seen_display'
         ]
-        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'created_at', 'last_seen', 'is_online', 'last_seen_display']
+        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'created_at']
 
     def get_city(self, obj):
         return obj.address or ""
+
+    def get_is_online(self, obj):
+        try:
+            return bool(obj.is_online)
+        except Exception:
+            return False
+
+    def get_last_seen(self, obj):
+        try:
+            return getattr(obj, 'last_seen', None)
+        except Exception:
+            return None
+
+    def get_last_seen_display(self, obj):
+        try:
+            return str(obj.last_seen_display)
+        except Exception:
+            return "Offline"
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
@@ -109,9 +127,9 @@ class UserPublicSerializer(serializers.ModelSerializer):
     response_time = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
     country = serializers.SerializerMethodField()
-    is_online = serializers.BooleanField(read_only=True)
-    last_seen = serializers.DateTimeField(read_only=True)
-    last_seen_display = serializers.CharField(read_only=True)
+    is_online = serializers.SerializerMethodField()
+    last_seen = serializers.SerializerMethodField()
+    last_seen_display = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -124,6 +142,24 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'average_rating', 'completed_jobs', 'review_count', 'response_time',
             'services', 'technician_profile', 'is_online', 'last_seen', 'last_seen_display'
         ]
+
+    def get_is_online(self, obj):
+        try:
+            return bool(obj.is_online)
+        except Exception:
+            return False
+
+    def get_last_seen(self, obj):
+        try:
+            return getattr(obj, 'last_seen', None)
+        except Exception:
+            return None
+
+    def get_last_seen_display(self, obj):
+        try:
+            return str(obj.last_seen_display)
+        except Exception:
+            return "Offline"
 
     def get_services(self, obj):
         if getattr(obj, "role", None) != "TECHNICIAN":

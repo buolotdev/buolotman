@@ -383,14 +383,22 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                   <button
                     type="button"
                     className={styles.secondaryButton}
-                    disabled={messaging || !task.client}
+                    disabled={messaging || (!task.client && !task.id)}
                     style={{ marginBottom: 10 }}
                     onClick={async () => {
-                      if (!task.client) return;
                       setMessaging(true);
                       try {
-                        const convo = await api.createConversation(task.client, task.id);
-                        router.push(`/dashboard/technician/messages?c=${convo.id}`);
+                        const clientId = typeof task.client === "object" ? (task.client?.id || task.client?.user_id) : task.client;
+                        const convo = await api.createConversation({
+                          participant_id: clientId ? Number(clientId) : undefined,
+                          task_id: Number(task.id),
+                          participant_name: task.client_name || undefined,
+                        });
+                        if (convo && convo.id) {
+                          router.push(`/dashboard/technician/messages?c=${convo.id}`);
+                        } else {
+                          router.push("/dashboard/technician/messages");
+                        }
                       } catch (err: any) {
                         toast.error("Could not start conversation", err?.message || "Please try again.");
                       } finally {
