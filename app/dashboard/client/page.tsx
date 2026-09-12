@@ -275,7 +275,14 @@ export default function ClientDashboardPage() {
               </div>
               <div className={styles.welcomeActions}>
                 <Link href="/post-task" className={styles.primaryButton}><iconify-icon icon="lucide:plus" /> {t.postTask}</Link>
-                <Link href="/search?tab=technician" className={styles.secondaryButton}>{t.browseTechnicians}</Link>
+                <Link href="/search?tab=technician" className={styles.secondaryButton}>
+                  <iconify-icon icon="lucide:wrench" style={{ marginRight: 6 }} />
+                  {t.browseTechnicians}
+                </Link>
+                <Link href="/companies" className={styles.secondaryButton}>
+                  <iconify-icon icon="lucide:building-2" style={{ marginRight: 6 }} />
+                  {lang === "fr" ? "Trouver des Entreprises" : "Browse Companies"}
+                </Link>
                 <Link 
                   href="/dashboard/client/projects" 
                   style={{
@@ -295,8 +302,8 @@ export default function ClientDashboardPage() {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <iconify-icon icon="lucide:user-check" style={{ color: '#38bdf8', fontSize: '18px' }} />
-                  {t.directHiresProjects}
+                  <iconify-icon icon="lucide:briefcase" style={{ color: '#38bdf8', fontSize: '18px' }} />
+                  {lang === "fr" ? "Mes Projets & Contrats" : "My Projects & Contracts"}
                   {activeTasks > 0 && (
                     <span style={{ background: '#ff4500', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '999px', fontWeight: 800 }}>
                       {activeTasks}
