@@ -44,6 +44,13 @@ const translations: Record<string, Record<string, string>> = {
     progressLabel: "Progress",
     chatWith: "Chat with",
     openWorkspace: "Open Project Workspace →",
+    marketplaceBadge: "Marketplace Task (Open for Bids)",
+    awaitingBidsEscrow: "📢 Open for Proposals",
+    awaitingProposalsName: "Awaiting Proposals",
+    noSpecialistAssigned: "No Specialist Assigned Yet",
+    proposalsStatus: "Marketplace Status",
+    reviewProposals: "Review Proposals & Details →",
+    biddingProgress: "Bidding Phase (0%)",
   },
   fr: {
     searchHeader: "Rechercher des projets, artisans...",
@@ -78,6 +85,13 @@ const translations: Record<string, Record<string, string>> = {
     progressLabel: "Progression",
     chatWith: "Discuter avec",
     openWorkspace: "Ouvrir l'Espace Projet →",
+    marketplaceBadge: "Mission Ouverte aux Offres",
+    awaitingBidsEscrow: "📢 En attente des offres des artisans",
+    awaitingProposalsName: "En attente des offres d'artisans",
+    noSpecialistAssigned: "Aucun artisan assigné pour l'instant",
+    proposalsStatus: "Statut de l'Appel d'Offres",
+    reviewProposals: "Voir les Offres & Détails →",
+    biddingProgress: "Phase d'offres (0%)",
   }
 };
 
@@ -151,26 +165,20 @@ export default function ClientProjectsPage() {
         if (match) specialistId = Number(match[1]);
       }
 
-      // Hardcoded fallback for existing test hires
-      if (!specialistName) {
-        if (t.title?.toLowerCase().includes("abc")) specialistName = "MM TECHNICIAN";
-        else if (t.title?.toLowerCase().includes("auto work") || t.title?.toLowerCase().includes("need hh")) specialistName = "nayyam";
-        else if (t.title?.toLowerCase().includes("aaaaaa")) specialistName = "Ali Ahmad";
-      }
-
-      const isDirect = Boolean(specialistName || specialistId || t.isDirect || t.skills?.some((s: any) => String(s).includes("direct_invite")) || isCompany);
+      const hasDirectInvite = Boolean(specialistId || t.isDirect || t.skills?.some((s: any) => String(s).includes("direct_invite")) || isCompany);
+      const isDirect = Boolean(hasDirectInvite && (specialistName || specialistId || isCompany));
       const totalBudget = Number(t.budget_max || t.budget || t.budget_min || 0);
 
       list.push({
         id: t.id || t.taskId,
         title: t.title,
-        specialistName: specialistName || (isCompany ? "Enterprise Company" : "Assigned Specialist"),
+        specialistName: specialistName || (isCompany ? "Enterprise Company" : isDirect ? "Assigned Specialist" : null),
         specialistId,
         isCompany,
         isDirect,
         isAccepted,
         isCompleted,
-        status: isCompleted ? "completed" : (isAccepted ? "in_progress" : "pending_acceptance"),
+        status: isCompleted ? "completed" : (isAccepted ? "in_progress" : (isDirect ? "pending_acceptance" : "open")),
         budget: totalBudget,
         location: t.location || t.city || "Remote",
         created_at: t.created_at || Date.now(),
@@ -345,7 +353,8 @@ export default function ClientProjectsPage() {
             ) : (
               <div className={styles.projectList}>
                 {filteredProjects.map((project: any) => {
-                  const techInitials = project.specialistName.slice(0, 2).toUpperCase();
+                  const isMarketplaceOpen = !project.isDirect && !project.specialistId && project.status === "open";
+                  const techInitials = (project.specialistName || "MP").slice(0, 2).toUpperCase();
 
                   return (
                     <div key={project.id} className={styles.projectCard}>
@@ -361,7 +370,11 @@ export default function ClientProjectsPage() {
                               <span className={styles.badgeDirect}>
                                 <iconify-icon icon="lucide:user-check" /> {t.directHire}
                               </span>
-                            ) : null}
+                            ) : (
+                              <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <iconify-icon icon="lucide:radio" /> {t.marketplaceBadge}
+                              </span>
+                            )}
 
                             {project.isCompleted ? (
                               <span className={styles.badgeCompleted}>
@@ -371,7 +384,7 @@ export default function ClientProjectsPage() {
                               <span className={styles.badgeAccepted}>
                                 <iconify-icon icon="lucide:check-circle" /> {t.acceptedBadge}
                               </span>
-                            ) : (
+                            ) : isMarketplaceOpen ? null : (
                               <span className={styles.badgePending}>
                                 <iconify-icon icon="lucide:clock" /> {t.pendingBadge}
                               </span>
@@ -402,23 +415,23 @@ export default function ClientProjectsPage() {
                       <div className={styles.projectGrid}>
                         {/* SPECIALIST CARD */}
                         <div className={styles.specialistCard}>
-                          <div className={styles.specialistAvatar}>
-                            {techInitials}
+                          <div className={styles.specialistAvatar} style={{ background: isMarketplaceOpen ? "#f1f5f9" : undefined, color: isMarketplaceOpen ? "#64748b" : undefined }}>
+                            {isMarketplaceOpen ? <iconify-icon icon="lucide:users" /> : techInitials}
                           </div>
                           <div className={styles.specialistInfo}>
                             <span className={styles.specialistRole}>{t.assignedPro}</span>
-                            <span className={styles.specialistName}>{project.specialistName}</span>
+                            <span className={styles.specialistName}>{project.specialistName || t.awaitingProposalsName}</span>
                           </div>
                         </div>
 
                         {/* ESCROW STATUS */}
                         <div className={styles.escrowBox}>
                           <span className={styles.escrowLabel}>
-                            <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} />
-                            {t.escrowProtection}
+                            <iconify-icon icon={isMarketplaceOpen ? "lucide:radio" : "lucide:shield-check"} style={{ color: isMarketplaceOpen ? "#d97706" : "#16a34a" }} />
+                            {isMarketplaceOpen ? t.proposalsStatus : t.escrowProtection}
                           </span>
                           <span className={styles.escrowAmount}>
-                            {project.isAccepted ? t.vaultProtected : t.awaitingAcceptance}
+                            {isMarketplaceOpen ? t.awaitingBidsEscrow : project.isAccepted ? t.vaultProtected : t.awaitingAcceptance}
                           </span>
                         </div>
 
@@ -426,14 +439,14 @@ export default function ClientProjectsPage() {
                         <div className={styles.progressCol}>
                           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
                             <span>{t.progressLabel}</span>
-                            <span>{project.isCompleted ? "100%" : project.isAccepted ? "50%" : "20%"}</span>
+                            <span>{project.isCompleted ? "100%" : project.isAccepted ? "50%" : isMarketplaceOpen ? "0%" : "20%"}</span>
                           </div>
                           <div className={styles.progressBarBg}>
                             <div 
                               className={styles.progressBarFill} 
                               style={{ 
-                                width: project.isCompleted ? "100%" : project.isAccepted ? "50%" : "20%",
-                                background: project.isCompleted ? "#4338ca" : project.isAccepted ? "#16a34a" : "#f59e0b"
+                                width: project.isCompleted ? "100%" : project.isAccepted ? "50%" : isMarketplaceOpen ? "0%" : "20%",
+                                background: project.isCompleted ? "#4338ca" : project.isAccepted ? "#16a34a" : isMarketplaceOpen ? "#94a3b8" : "#f59e0b"
                               }}
                             />
                           </div>
@@ -442,20 +455,35 @@ export default function ClientProjectsPage() {
 
                       {/* ACTIONS */}
                       <div className={styles.projectActions}>
-                        <Link 
-                          href={`/dashboard/client/messages?name=${encodeURIComponent(project.specialistName)}&task=${project.id}&specialist=${project.specialistId || ""}`}
-                          className={styles.btnOutline}
-                        >
-                          <iconify-icon icon="lucide:message-square" />
-                          {t.chatWith} {project.specialistName}
-                        </Link>
+                        {isMarketplaceOpen ? (
+                          <Link 
+                            href={`/dashboard/client/tasks/${project.id}`}
+                            className={styles.btnPrimary}
+                            style={{ width: "100%", justifyContent: "center" }}
+                          >
+                            <iconify-icon icon="lucide:file-text" />
+                            {t.reviewProposals}
+                          </Link>
+                        ) : (
+                          <>
+                            {project.specialistName && (
+                              <Link 
+                                href={`/dashboard/client/messages?name=${encodeURIComponent(project.specialistName)}&task=${project.id}&specialist=${project.specialistId || ""}`}
+                                className={styles.btnOutline}
+                              >
+                                <iconify-icon icon="lucide:message-square" />
+                                {t.chatWith} {project.specialistName}
+                              </Link>
+                            )}
 
-                        <Link 
-                          href={`/dashboard/client/projects/${project.id}`}
-                          className={styles.btnPrimary}
-                        >
-                          {t.openWorkspace}
-                        </Link>
+                            <Link 
+                              href={`/dashboard/client/projects/${project.id}`}
+                              className={styles.btnPrimary}
+                            >
+                              {t.openWorkspace}
+                            </Link>
+                          </>
+                        )}
                       </div>
                     </div>
                   );

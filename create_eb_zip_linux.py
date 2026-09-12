@@ -21,6 +21,10 @@ def zip_backend():
 
                 
     print(f"Created {zip_path}")
+    final_zip_path = r"c:\Users\User-PC\Desktop\buolotman-main\buolotman-main\aws-eb-final.zip"
+    import shutil
+    shutil.copyfile(zip_path, final_zip_path)
+    print(f"Synced {final_zip_path}")
 
 if __name__ == "__main__":
     zip_backend()
