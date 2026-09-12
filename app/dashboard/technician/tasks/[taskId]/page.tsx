@@ -32,6 +32,7 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
   });
   const [messaging, setMessaging] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   const toggleSaved = () => {
     const nextSaved = !saved;
@@ -411,11 +412,12 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                       flexShrink: 0,
                       border: "2px solid #e2e8f0"
                     }}>
-                      {task.client_avatar ? (
+                      {task.client_avatar && !avatarError ? (
                         <img 
                           src={getImageUrl(task.client_avatar)} 
                           alt="Client Avatar" 
                           style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                          onError={() => setAvatarError(true)}
                         />
                       ) : (
                         <span>
