@@ -78,7 +78,7 @@ def search(request):
     else:
         tasks = tasks.order_by('-created_at')
 
-    users = User.objects.filter(is_active=True, role='TECHNICIAN', is_verified=True).select_related('technician_profile').prefetch_related('technician_profile__skills', 'technician_services', 'technician_services__category')
+    users = User.objects.filter(is_active=True, role__iexact='TECHNICIAN').select_related('technician_profile').prefetch_related('technician_profile__skills', 'technician_services', 'technician_services__category', 'portfolio_items')
     if query:
         users = users.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query) | Q(email__icontains=query))
     if location:
@@ -94,6 +94,8 @@ def search(request):
             | Q(technician_profile__skills__name__icontains=category_name)
             | Q(technician_profile__skills__slug__icontains=category_slug)
             | Q(technician_profile__bio__icontains=category_name)
+            | Q(portfolio_items__category__icontains=category_name)
+            | Q(portfolio_items__title__icontains=category_name)
         )
         for kw in cat_keywords:
             user_cat_q |= (
@@ -103,10 +105,11 @@ def search(request):
                 | Q(technician_profile__skills__name__icontains=kw)
                 | Q(technician_profile__skills__slug__icontains=kw)
                 | Q(technician_profile__bio__icontains=kw)
+                | Q(portfolio_items__category__icontains=kw)
             )
         users = users.filter(user_cat_q).distinct()
 
-    companies = CompanyProfile.objects.filter(is_verified=True).select_related('user').prefetch_related('services', 'reviews').order_by('-created_at')
+    companies = CompanyProfile.objects.filter(user__is_active=True).select_related('user').prefetch_related('services', 'reviews').order_by('-created_at')
     if query:
         companies = companies.filter(Q(company_name__icontains=query) | Q(about__icontains=query) | Q(headquarters__icontains=query))
     if location:
@@ -134,7 +137,7 @@ def search(request):
             )
         companies = companies.filter(comp_cat_q).distinct()
 
-    services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True, technician__is_verified=True)
+    services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True, technician__is_active=True)
 
     if query:
         services = services.filter(
