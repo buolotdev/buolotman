@@ -3,29 +3,30 @@ const API_BASE = "/api";
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return "";
   
-  if (url.startsWith("data:")) return url;
-  
-  const backendBase = process.env.NEXT_PUBLIC_API_URL || "http://BoulotMan-API-env.eba-exncce63.eu-north-1.elasticbeanstalk.com";
-  const cleanBackend = backendBase.replace(/\/+$/, "");
+  if (url.startsWith("data:") || url.startsWith("blob:")) return url;
 
-  if (url.startsWith("http://localhost:8000")) {
-    return url.replace("http://localhost:8000", cleanBackend);
+  // Extract /media/ path if present so Next.js rewrites proxy it over HTTPS
+  if (url.includes("/media/")) {
+    const mediaIndex = url.indexOf("/media/");
+    return url.substring(mediaIndex);
   }
 
+  // If pointing to external third-party (e.g. Unsplash, Supabase, Google Avatars)
   if (url.startsWith("https://") || url.startsWith("http://")) {
+    if (url.includes("elasticbeanstalk.com") || url.includes("localhost:8000")) {
+      const slashIndex = url.indexOf("/", 8);
+      if (slashIndex !== -1) {
+        return url.substring(slashIndex);
+      }
+    }
     return url;
   }
   
-  if (url.startsWith("/media/")) {
-    return `${cleanBackend}${url}`;
+  if (url.startsWith("/")) {
+    return url;
   }
   
-  if (url.includes("/media/")) {
-    const mediaIndex = url.indexOf("/media/");
-    return `${cleanBackend}${url.substring(mediaIndex)}`;
-  }
-  
-  return url;
+  return `/${url}`;
 }
 
 function getToken(): string | null {

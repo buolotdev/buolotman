@@ -272,17 +272,17 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                 )}
 
                 {/* REQUIRED SKILLS */}
-                {task.skills_required && task.skills_required.length > 0 && (
+                {((task.skills_list && task.skills_list.length > 0) || (task.skills_required && task.skills_required.length > 0) || (task.skills && task.skills.length > 0)) && (
                   <section className={styles.detailCard}>
                     <h2 style={{ fontSize: 20, fontWeight: 800, color: "#001f3f", margin: "0 0 16px" }}>
                       <iconify-icon icon="lucide:wrench" style={{ color: "#001f3f", marginRight: 8 }} />
                       Required Trade Skills
                     </h2>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {task.skills_required.map((tag: string) => (
-                        <span key={tag} className={styles.tag} style={{ background: "#f1f5f9", color: "#001f3f", fontWeight: 700, padding: "8px 14px", borderRadius: 10 }}>
+                      {(task.skills_list && task.skills_list.length > 0 ? task.skills_list : (task.skills_required || task.skills || [])).map((tag: any) => (
+                        <span key={String(tag)} className={styles.tag} style={{ background: "#f1f5f9", color: "#001f3f", fontWeight: 700, padding: "8px 14px", borderRadius: 10 }}>
                           <iconify-icon icon="lucide:check" style={{ color: "#16a34a", marginRight: 6 }} />
-                          {tag}
+                          {typeof tag === "object" ? tag.name : (isNaN(Number(tag)) ? tag : `Skill #${tag}`)}
                         </span>
                       ))}
                     </div>
