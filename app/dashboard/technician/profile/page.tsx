@@ -136,6 +136,147 @@ const profileTranslations: Record<string, Record<string, string>> = {
   }
 };
 
+function getDocVisualInfo(doc: TechDocument) {
+  const t = (doc.title || "").toLowerCase();
+  const dt = doc.document_type;
+  if (dt === "certificate" || t.includes("license") || t.includes("trade") || t.includes("cert") || t.includes("diploma")) {
+    return {
+      icon: "lucide:award",
+      tag: "TRADE CERTIFICATE",
+      bg: "linear-gradient(135deg, #fef3c7, #fde68a)",
+      color: "#b45309",
+      accent: "#d97706",
+      badgeBg: "rgba(245, 158, 11, 0.12)",
+    };
+  }
+  if (dt === "selfie" || t.includes("selfie") || t.includes("portrait") || t.includes("live photo")) {
+    return {
+      icon: "lucide:user-check",
+      tag: "LIVE SELFIE CHECK",
+      bg: "linear-gradient(135deg, #dcfce7, #bbf7d0)",
+      color: "#15803d",
+      accent: "#16a34a",
+      badgeBg: "rgba(22, 163, 74, 0.12)",
+    };
+  }
+  if (t.includes("back")) {
+    return {
+      icon: "lucide:flip-horizontal",
+      tag: "NATIONAL ID (BACK)",
+      bg: "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+      color: "#4338ca",
+      accent: "#4f46e5",
+      badgeBg: "rgba(99, 102, 241, 0.12)",
+    };
+  }
+  return {
+    icon: "lucide:id-card",
+    tag: "NATIONAL ID (FRONT)",
+    bg: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+    color: "#1d4ed8",
+    accent: "#2563eb",
+    badgeBg: "rgba(37, 99, 235, 0.12)",
+  };
+}
+
+function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: number; onClick?: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const info = getDocVisualInfo(doc);
+  const src = doc.preview_url || doc.file_url;
+  const isImageCandidate = Boolean(src && !imgFailed && (src.startsWith("data:image") || src.startsWith("blob:") || src.includes(".jpg") || src.includes(".png") || src.includes(".jpeg") || src.includes(".webp")));
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 12,
+        overflow: "hidden",
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: info.bg,
+        color: info.color,
+        position: "relative",
+        cursor: onClick ? "pointer" : "default",
+        boxShadow: "0 2px 8px rgba(0,31,63,0.06)",
+        border: "1px solid rgba(0,0,0,0.06)",
+      }}
+    >
+      {isImageCandidate ? (
+        <img
+          src={getImageUrl(src)}
+          alt={doc.title}
+          onError={() => setImgFailed(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      ) : (
+        <iconify-icon icon={info.icon} style={{ fontSize: size * 0.48, color: info.color }} />
+      )}
+    </div>
+  );
+}
+
+function DocModalPreviewContent({ doc }: { doc: TechDocument }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const info = getDocVisualInfo(doc);
+  const src = doc.preview_url || doc.file_url;
+  const isImageCandidate = Boolean(src && !imgFailed && (src.startsWith("data:image") || src.startsWith("blob:") || src.includes(".jpg") || src.includes(".png") || src.includes(".jpeg") || src.includes(".webp")));
+
+  if (isImageCandidate) {
+    return (
+      <div style={{ textAlign: "center", position: "relative", width: "100%", maxHeight: 480, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <img
+          src={getImageUrl(src)}
+          alt={doc.title}
+          onError={() => setImgFailed(true)}
+          style={{ maxWidth: "100%", maxHeight: "460px", objectFit: "contain", borderRadius: 12, boxShadow: "0 10px 30px rgba(0,0,0,0.4)" }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "36px 24px", textAlign: "center", color: "#ffffff", maxWidth: 480, margin: "0 auto" }}>
+      <div
+        style={{
+          width: 80,
+          height: 80,
+          borderRadius: 22,
+          margin: "0 auto 18px",
+          background: info.bg,
+          color: info.color,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+        }}
+      >
+        <iconify-icon icon={info.icon} style={{ fontSize: 42, color: info.color }} />
+      </div>
+
+      <span style={{ display: "inline-block", padding: "4px 14px", borderRadius: 999, background: info.badgeBg, color: info.accent, fontSize: 11.5, fontWeight: 800, letterSpacing: "0.06em", marginBottom: 12, border: "1px solid rgba(255,255,255,0.12)" }}>
+        {info.tag}
+      </span>
+
+      <h3 style={{ margin: "0 0 10px", fontSize: 19, fontWeight: 800, color: "#ffffff" }}>
+        {doc.title}
+      </h3>
+
+      <p style={{ margin: "0 0 20px", fontSize: 13.5, color: "#94a3b8", lineHeight: 1.6 }}>
+        Encrypted verification document stored securely in Boulot Man Trust & Compliance Vault.
+      </p>
+
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 18px", borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", fontSize: 12.5, color: "#e2e8f0" }}>
+        <iconify-icon icon="lucide:lock" style={{ color: "#16a34a" }} />
+        <span>AES-256 Encrypted • Verified Confidential</span>
+      </div>
+    </div>
+  );
+}
+
 export default function TechnicianProfilePage() {
   const toast = useToast();
   const dialog = useDialog();
@@ -851,18 +992,7 @@ export default function TechnicianProfilePage() {
                   </div>
 
                   <div style={{ padding: 20, textAlign: "center", background: "#0f172a", minHeight: 320, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {previewModalDoc.preview_url || previewModalDoc.file_url ? (
-                      <img
-                        src={getImageUrl(previewModalDoc.preview_url || previewModalDoc.file_url)}
-                        alt={previewModalDoc.title}
-                        style={{ maxWidth: "100%", maxHeight: "480px", objectFit: "contain", borderRadius: 12 }}
-                      />
-                    ) : (
-                      <div style={{ color: "#ffffff", padding: 40 }}>
-                        <iconify-icon icon="lucide:file-text" style={{ fontSize: 48, marginBottom: 10, color: "#38bdf8" }} />
-                        <p style={{ margin: 0 }}>Document file stored in secure vault.</p>
-                      </div>
-                    )}
+                    <DocModalPreviewContent doc={previewModalDoc} />
                   </div>
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 24px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
@@ -1273,10 +1403,10 @@ export default function TechnicianProfilePage() {
                   
                   {/* SLOT 1: NATIONAL ID (FRONT SIDE) */}
                   <div className={`${styles.docUploadCard} ${frontIdDoc ? styles.docUploadCardFilled : ""}`}>
-                    {frontIdDoc?.preview_url || frontIdDoc?.file_url ? (
+                    {frontIdDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(frontIdDoc)} title="Click to view enlarged">
-                        <img src={getImageUrl(frontIdDoc.preview_url || frontIdDoc.file_url)} alt="Front ID Preview" />
-                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                        <DocThumbnail doc={frontIdDoc} size={84} />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
                       </div>
@@ -1321,10 +1451,10 @@ export default function TechnicianProfilePage() {
 
                   {/* SLOT 2: NATIONAL ID (BACK SIDE) */}
                   <div className={`${styles.docUploadCard} ${backIdDoc ? styles.docUploadCardFilled : ""}`}>
-                    {backIdDoc?.preview_url || backIdDoc?.file_url ? (
+                    {backIdDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(backIdDoc)} title="Click to view enlarged">
-                        <img src={getImageUrl(backIdDoc.preview_url || backIdDoc.file_url)} alt="Back ID Preview" />
-                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                        <DocThumbnail doc={backIdDoc} size={84} />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
                       </div>
@@ -1369,10 +1499,10 @@ export default function TechnicianProfilePage() {
 
                   {/* SLOT 3: TRADE LICENSE & CERTIFICATES */}
                   <div className={`${styles.docUploadCard} ${certDoc ? styles.docUploadCardFilled : ""}`}>
-                    {certDoc?.preview_url || certDoc?.file_url ? (
+                    {certDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(certDoc)} title="Click to view enlarged">
-                        <img src={getImageUrl(certDoc.preview_url || certDoc.file_url)} alt="Cert Preview" />
-                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                        <DocThumbnail doc={certDoc} size={84} />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
                       </div>
@@ -1417,10 +1547,10 @@ export default function TechnicianProfilePage() {
 
                   {/* SLOT 4: LIVE IDENTITY SELFIE */}
                   <div className={`${styles.docUploadCard} ${selfieDoc ? styles.docUploadCardFilled : ""}`}>
-                    {selfieDoc?.preview_url || selfieDoc?.file_url ? (
+                    {selfieDoc ? (
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(selfieDoc)} title="Click to view enlarged">
-                        <img src={getImageUrl(selfieDoc.preview_url || selfieDoc.file_url)} alt="Selfie Preview" />
-                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, fontSize: 10, fontWeight: 700 }}>
+                        <DocThumbnail doc={selfieDoc} size={84} />
+                        <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
                           <iconify-icon icon="lucide:maximize-2" /> View
                         </span>
                       </div>
@@ -1486,13 +1616,7 @@ export default function TechnicianProfilePage() {
                     <div className={styles.documentList}>
                       {allDocuments.map((doc) => (
                         <div key={doc.id} className={styles.documentItem}>
-                          <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", background: "#e2e8f0", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {doc.preview_url || doc.file_url ? (
-                              <img src={getImageUrl(doc.preview_url || doc.file_url)} alt={doc.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            ) : (
-                              <iconify-icon icon="lucide:file-check" style={{ fontSize: 24, color: "#001f3f" }} />
-                            )}
-                          </div>
+                          <DocThumbnail doc={doc} size={48} onClick={() => setPreviewModalDoc(doc)} />
 
                           <div className={styles.docInfo}>
                             <strong>{doc.title}</strong>
