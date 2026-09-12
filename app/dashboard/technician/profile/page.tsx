@@ -183,7 +183,6 @@ function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: n
   const [imgFailed, setImgFailed] = useState(false);
   const info = getDocVisualInfo(doc);
   const src = doc.preview_url || doc.file_url;
-  const isImageCandidate = Boolean(src && !imgFailed && (src.startsWith("data:image") || src.startsWith("blob:") || src.includes(".jpg") || src.includes(".png") || src.includes(".jpeg") || src.includes(".webp")));
 
   return (
     <div
@@ -205,7 +204,7 @@ function DocThumbnail({ doc, size = 48, onClick }: { doc: TechDocument; size?: n
         border: "1px solid rgba(0,0,0,0.06)",
       }}
     >
-      {isImageCandidate ? (
+      {src && !imgFailed ? (
         <img
           src={getImageUrl(src)}
           alt={doc.title}
@@ -223,9 +222,8 @@ function DocModalPreviewContent({ doc }: { doc: TechDocument }) {
   const [imgFailed, setImgFailed] = useState(false);
   const info = getDocVisualInfo(doc);
   const src = doc.preview_url || doc.file_url;
-  const isImageCandidate = Boolean(src && !imgFailed && (src.startsWith("data:image") || src.startsWith("blob:") || src.includes(".jpg") || src.includes(".png") || src.includes(".jpeg") || src.includes(".webp")));
 
-  if (isImageCandidate) {
+  if (src && !imgFailed) {
     return (
       <div style={{ textAlign: "center", position: "relative", width: "100%", maxHeight: 480, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <img
@@ -543,18 +541,33 @@ export default function TechnicianProfilePage() {
       ? rawDocuments.map((d: any) => ({
           id: d.id,
           title: d.title || "Verification Document",
-          document_type: d.document_type === "certificate" ? "certificate" : "identity",
+          document_type: d.document_type === "certificate" ? "certificate" : d.document_type === "selfie" ? "selfie" : "identity",
           file_url: d.file_url || "",
           preview_url: d.file_url ? getImageUrl(d.file_url) : undefined,
-          status: d.status || "verified",
-          uploaded_at: d.created_at ? new Date(d.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Verified",
+          status: d.is_verified ? "verified" : (d.status || "under_review"),
+          uploaded_at: d.created_at ? new Date(d.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Recent",
           file_name: d.file_name || d.title,
         }))
       : [];
 
     const map = new Map<string, TechDocument>();
-    localDocs.forEach(d => map.set(d.title.toLowerCase(), d));
+    // First place backend docs
     backendDocs.forEach(d => map.set(d.title.toLowerCase(), d));
+    // Then merge local docs on top so the latest uploaded/replaced preview takes precedence!
+    localDocs.forEach(d => {
+      const existing = map.get(d.title.toLowerCase());
+      if (existing) {
+        map.set(d.title.toLowerCase(), {
+          ...existing,
+          ...d,
+          id: existing.id || d.id,
+          preview_url: d.preview_url || existing.preview_url,
+          file_url: d.file_url || existing.file_url,
+        });
+      } else {
+        map.set(d.title.toLowerCase(), d);
+      }
+    });
     return Array.from(map.values());
   }, [rawDocuments, localDocs]);
 
@@ -873,8 +886,12 @@ export default function TechnicianProfilePage() {
         console.warn("Backend document record create note:", backendErr);
       }
 
-      // Filter out existing doc for same slot title
-      const filtered = localDocs.filter(d => !d.title.toLowerCase().includes(slotKey) && String(d.id) !== String(newDoc.id));
+      // Update localDocs by replacing any matching slot doc
+      const filtered = localDocs.filter(d => 
+        !d.title.toLowerCase().includes(slotKey) && 
+        d.title.toLowerCase() !== slotTitle.toLowerCase() && 
+        String(d.id) !== String(newDoc.id)
+      );
       const updated = [newDoc, ...filtered];
       setLocalDocs(updated);
       localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
@@ -891,20 +908,30 @@ export default function TechnicianProfilePage() {
 
   const handleDeleteDoc = async (id: string | number, title: string) => {
     if (!await dialog.confirm({ title: "Delete Document", message: `Delete "${title}"?` })) return;
-    try {
-      if (typeof id === "number") {
-        await api.deleteTechnicianDocument(id);
-      }
-    } catch {}
+    
+    // Resolve numeric ID
+    let numericId: number | null = typeof id === "number" ? id : !isNaN(Number(id)) ? Number(id) : null;
+    if (!numericId && Array.isArray(rawDocuments)) {
+      const match = rawDocuments.find((d: any) => d.title?.toLowerCase() === title.toLowerCase() || String(d.id) === String(id));
+      if (match && match.id) numericId = Number(match.id);
+    }
 
-    const updated = localDocs.filter(d => String(d.id) !== String(id) && d.title !== title);
+    if (numericId) {
+      try {
+        await api.deleteTechnicianDocument(numericId);
+      } catch (err) {
+        console.warn("Delete document server note:", err);
+      }
+    }
+
+    const updated = localDocs.filter(d => String(d.id) !== String(id) && d.title.toLowerCase() !== title.toLowerCase());
     setLocalDocs(updated);
     localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
     if (userData?.id) {
       localStorage.setItem(`boulotman_technician_documents_${userData.id}`, JSON.stringify(updated));
     }
     try { await mutateDocuments(); } catch {}
-    toast.info("Document Deleted", "Document removed.");
+    toast.info("Document Deleted", `"${title}" has been removed.`);
   };
 
   // Slot Docs

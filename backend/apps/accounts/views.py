@@ -1234,6 +1234,29 @@ def technician_documents(request):
         serializer = TechnicianDocumentSerializer(items, many=True)
         return Response(serializer.data)
 
+    title = (request.data.get('title') or '').strip()
+    doc_type = request.data.get('document_type') or 'id'
+    file_url = request.data.get('file_url') or ''
+
+    if title:
+        existing = TechnicianDocument.objects.filter(user=request.user, title__iexact=title).first()
+        if existing:
+            if file_url:
+                existing.file_url = file_url
+            existing.document_type = doc_type
+            existing.is_verified = False
+            existing.save()
+            create_audit_log(
+                actor=request.user,
+                action="technician_document_replaced",
+                entity_type="technician_document",
+                entity_id=existing.id,
+                summary=existing.title,
+                metadata={"document_type": existing.document_type},
+                ip_address=request.META.get("REMOTE_ADDR"),
+            )
+            return Response(TechnicianDocumentSerializer(existing).data, status=status.HTTP_200_OK)
+
     serializer = TechnicianDocumentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
