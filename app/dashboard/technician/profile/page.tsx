@@ -206,6 +206,7 @@ export default function TechnicianProfilePage() {
   const [headline, setHeadline] = useState("");
   const [bio, setBio] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
+  const [primaryOccupation, setPrimaryOccupation] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
   const [country, setCountry] = useState("");
