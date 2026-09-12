@@ -395,9 +395,9 @@ export const api = {
   // Company
   listCompanies: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return request<any[]>(`/company/${qs}`);
+    return request<any[]>(`/company/${qs}`, { public: true });
   },
-  getCompanyById: (id: number) => request<any>(`/company/${id}/`),
+  getCompanyById: (id: number) => request<any>(`/company/${id}/`, { public: true }),
   getCompanyProfile: () => request<any>("/company/profile/"),
   updateCompanyProfile: (data: Record<string, any>) =>
     request<any>("/company/profile/", { method: "PATCH", body: JSON.stringify(data) }),
