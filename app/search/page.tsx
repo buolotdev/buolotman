@@ -238,10 +238,14 @@ export default function SearchPage() {
       if (urlParams.has("q")) setQuery(urlParams.get("q") || "");
       if (urlParams.has("location")) setLocation(urlParams.get("location") || "");
       if (urlParams.has("category")) setActiveCategory(urlParams.get("category") || "any");
-      if (urlParams.has("type")) {
-        const t = urlParams.get("type") || "any";
-        setActiveType(t);
-        if (t === "company" || t === "technician") setActiveTab(t);
+
+      const tabParam = urlParams.get("tab") || urlParams.get("type");
+      if (tabParam) {
+        const clean = tabParam.toLowerCase().replace(/s$/, ""); // 'technicians' -> 'technician', 'companies' -> 'company'
+        if (clean === "technician" || clean === "company" || clean === "service") {
+          setActiveTab(clean);
+          setActiveType(clean);
+        }
       }
     }
   }, []);
@@ -254,12 +258,13 @@ export default function SearchPage() {
     }
     if (activeCategory && activeCategory !== "any") params.category = activeCategory;
     if (activeType && activeType !== "any") params.type = activeType;
+    if (activeTab && activeTab !== "all") params.tab = activeTab;
     if (activeRating) params.min_rating = activeRating;
     if (sortBy) params.sort = sortBy;
     if (budgetMin) params.budget_min = budgetMin;
     if (budgetMax) params.budget_max = budgetMax;
     return params;
-  }, [query, location, activeCategory, activeType, activeRating, sortBy, budgetMin, budgetMax]);
+  }, [query, location, activeCategory, activeType, activeTab, activeRating, sortBy, budgetMin, budgetMax]);
 
   useEffect(() => {
     let cancelled = false;
@@ -271,7 +276,9 @@ export default function SearchPage() {
         if (cancelled) return;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
-        const mapped: SearchResult[] = raw.map((item) => {
+        const mapped: SearchResult[] = raw
+          .filter((item) => item.type !== "task")
+          .map((item) => {
           const rawImg = item.image || item.logo_url || item.cover_url || item.avatar_url || item.avatar;
           return {
             id: item.id,

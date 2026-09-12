@@ -35,10 +35,10 @@ def search(request):
     min_rating = _parse_decimal(request.query_params.get('rating') or request.query_params.get('min_rating'))
     budget_min = _parse_decimal(request.query_params.get('budgetMin') or request.query_params.get('budget_min'))
     budget_max = _parse_decimal(request.query_params.get('budgetMax') or request.query_params.get('budget_max'))
-    include_tasks = tab in ('all', 'tasks')
+    include_tasks = tab in ('tasks',)
     include_services = tab in ('all', 'services')
-    include_technicians = professional_type in ('all', 'technician', 'professionals')
-    include_companies = professional_type in ('all', 'company', 'companies', 'professionals')
+    include_technicians = tab in ('all', 'technician', 'technicians', 'professionals') and professional_type in ('all', 'technician', 'technicians', 'professionals')
+    include_companies = tab in ('all', 'company', 'companies', 'professionals') and professional_type in ('all', 'company', 'companies', 'professionals')
 
     tasks = Task.objects.select_related('client', 'category').prefetch_related('skills').filter(status='open')
     if query:
