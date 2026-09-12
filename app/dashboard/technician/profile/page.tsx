@@ -206,11 +206,10 @@ export default function TechnicianProfilePage() {
   const [headline, setHeadline] = useState("");
   const [bio, setBio] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
-  const [primaryOccupation, setPrimaryOccupation] = useState("");
-  const [expertiseLevel, setExpertiseLevel] = useState("Intermediate");
+  const [expertiseLevel, setExpertiseLevel] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
-  const [country, setCountry] = useState("Benin");
-  const [city, setCity] = useState("Cotonou");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [skills, setSkills] = useState<string[]>([]);

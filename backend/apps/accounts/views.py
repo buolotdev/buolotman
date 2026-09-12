@@ -876,6 +876,14 @@ def user_public_profile(request, user_id):
         data['average_rating'] = str(profile.average_rating)
         data['availability_status'] = profile.availability_status
         data['response_time'] = profile.response_time or 'Within 2 hours'
+        meta = profile.languages if isinstance(profile.languages, dict) else {}
+        data['experience_years'] = meta.get('experience_years') or ""
+        data['headline'] = meta.get('headline') or (f"Certified {user.education_level or user.expertise_level}" if user.education_level or user.expertise_level else "Professional Specialist")
+        data['city'] = meta.get('city') or user.address or ""
+        data['country'] = user.country or ""
+        data['education_level'] = user.education_level or ""
+        data['expertise_level'] = user.expertise_level or ""
+        data['primary_occupation'] = meta.get('primary_occupation') or ""
 
         if profile.portfolio and isinstance(profile.portfolio, list) and len(profile.portfolio) > 0:
             data['portfolio'] = profile.portfolio

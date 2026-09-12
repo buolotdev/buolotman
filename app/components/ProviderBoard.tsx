@@ -203,7 +203,9 @@ export default function ProviderBoard() {
             {paginatedProviders.map((pro: any) => {
               const fullName = pro.first_name ? `${pro.first_name} ${pro.last_name || ""}`.trim() : (pro.username || "Technician");
               const proRating = pro.average_rating ? Number(pro.average_rating).toFixed(1) : "5.0";
-              const proLocation = [pro.city, pro.country || pro.location || "Rwanda"].filter(Boolean).join(", ");
+              const proLocation = [pro.city, pro.country].filter(Boolean).join(", ") || pro.location || pro.address || "Global";
+              const proRole = pro.headline || pro.title || pro.category || (pro.expertise_level ? `Specialist (${pro.expertise_level})` : t.verifiedRole);
+              const proBio = pro.bio || (pro.headline ? `${pro.headline} - Ready to assist clients with verified expertise.` : t.defaultBio);
               const hireUrl = `/post-task?specialist_id=${pro.id}&specialist_name=${encodeURIComponent(fullName)}`;
               const profileUrl = `/profile/${pro.id}`;
 
@@ -233,7 +235,7 @@ export default function ProviderBoard() {
                           size="sm"
                         />
                       </div>
-                      <div className={styles.role}>{pro.title || pro.category || t.verifiedRole}</div>
+                      <div className={styles.role}>{proRole}</div>
                     </div>
                   </div>
                   
@@ -248,7 +250,7 @@ export default function ProviderBoard() {
                   </div>
                   
                   <div className={styles.description}>
-                    {pro.bio || t.defaultBio}
+                    {proBio}
                   </div>
                   
                   <div className={styles.actions}>

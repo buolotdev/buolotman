@@ -79,6 +79,11 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     assigned_to_verified = serializers.SerializerMethodField()
     milestones = serializers.SerializerMethodField()
     escrow_amount = serializers.SerializerMethodField()
+    client_avatar = serializers.SerializerMethodField()
+    client_tasks_count = serializers.SerializerMethodField()
+    client_member_since = serializers.SerializerMethodField()
+    client_is_verified = serializers.SerializerMethodField()
+    client_bio = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -88,9 +93,35 @@ class TaskDetailSerializer(serializers.ModelSerializer):
                   'category', 'category_name', 'skills', 'skills_list',
                   'views_count', 'bids_count', 'assigned_to',
                   'assigned_to_name', 'assigned_to_rating', 'assigned_to_jobs', 'assigned_to_verified',
-                  'client', 'client_name', 'client_initials',
+                  'client', 'client_name', 'client_initials', 'client_avatar',
+                  'client_tasks_count', 'client_member_since', 'client_is_verified', 'client_bio',
                   'attachments', 'bids', 'questions', 'has_escrow', 'milestones', 'escrow_amount',
                   'created_at', 'updated_at', 'published_at']
+
+    def get_client_avatar(self, obj):
+        if not obj.client:
+            return ""
+        return obj.client.avatar_url or ""
+
+    def get_client_tasks_count(self, obj):
+        if not obj.client:
+            return 1
+        return Task.objects.filter(client=obj.client).count()
+
+    def get_client_member_since(self, obj):
+        if not obj.client or not getattr(obj.client, 'created_at', None):
+            return 2026
+        return obj.client.created_at.year
+
+    def get_client_is_verified(self, obj):
+        if not obj.client:
+            return False
+        return bool(getattr(obj.client, 'is_verified', False))
+
+    def get_client_bio(self, obj):
+        if not obj.client:
+            return ""
+        return getattr(obj.client, "bio", "") or getattr(obj.client, "about", "") or ""
 
     def get_client_name(self, obj):
         return f'{obj.client.first_name} {obj.client.last_name}'.strip() or obj.client.email

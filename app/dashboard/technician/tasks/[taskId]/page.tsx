@@ -389,8 +389,8 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                     <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#001f3f" }}>
                       About the Client
                     </h2>
-                    <span style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0", padding: "3px 8px", borderRadius: 999, fontSize: 11, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                      <iconify-icon icon="lucide:shield-check" /> Verified Client ✓
+                    <span style={{ background: task.client_is_verified ? "#f0fdf4" : "#f8fafc", color: task.client_is_verified ? "#16a34a" : "#475569", border: `1px solid ${task.client_is_verified ? "#bbf7d0" : "#cbd5e1"}`, padding: "3px 8px", borderRadius: 999, fontSize: 11, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                      <iconify-icon icon={task.client_is_verified ? "lucide:shield-check" : "lucide:user-check"} /> {task.client_is_verified ? "Verified Client ✓" : "Registered Client"}
                     </span>
                   </div>
 
@@ -411,9 +411,9 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                       flexShrink: 0,
                       border: "2px solid #e2e8f0"
                     }}>
-                      {task.client_avatar || (task as any).client_details?.avatar_url ? (
+                      {task.client_avatar ? (
                         <img 
-                          src={getImageUrl(task.client_avatar || (task as any).client_details?.avatar_url)} 
+                          src={getImageUrl(task.client_avatar)} 
                           alt="Client Avatar" 
                           style={{ width: "100%", height: "100%", objectFit: "cover" }} 
                         />
@@ -430,13 +430,13 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                       </h3>
 
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-                        <span style={{ fontSize: 12, color: "#ff4500", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                          ⭐ 4.9 <span style={{ color: "#64748b", fontWeight: 500 }}>(12 Reviews)</span>
+                        <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                          <iconify-icon icon="lucide:check-circle" /> <span>Direct Project Client</span>
                         </span>
                       </div>
 
                       <span style={{ fontSize: 11.5, color: "#64748b", display: "block", marginTop: 2 }}>
-                        🏠 {(task as any).client_type || "Individual / Household"} • Member since 2026
+                        🏠 Individual Client • Member since {task.client_member_since || 2026}
                       </span>
                     </div>
                   </div>
@@ -444,9 +444,9 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                   {/* Client Bio / Notes Box */}
                   <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: 12, marginBottom: 16, fontSize: 12.5, color: "#475569", lineHeight: 1.5 }}>
                     <strong style={{ display: "block", color: "#001f3f", fontSize: 12, marginBottom: 3 }}>
-                      <iconify-icon icon="lucide:user" style={{ marginRight: 4, color: "#ff4500" }} /> Client Notes:
+                      <iconify-icon icon="lucide:user" style={{ marginRight: 4, color: "#ff4500" }} /> Client Overview:
                     </strong>
-                    {(task as any).client_bio || "Verified client on Boulot Man seeking quality workmanship, prompt communication, and professional execution."}
+                    {task.client_bio || `Client on Boulot Man seeking qualified specialist for "${task.title}".`}
                   </div>
 
                   {/* Trust Indicators */}
@@ -469,14 +469,16 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                       <span style={{ color: "#64748b", display: "inline-flex", alignItems: "center", gap: 6 }}>
                         <iconify-icon icon="lucide:briefcase" style={{ color: "#001f3f" }} /> Task History
                       </span>
-                      <strong style={{ color: "#001f3f" }}>5 Tasks Posted (100% Hired)</strong>
+                      <strong style={{ color: "#001f3f" }}>
+                        {task.client_tasks_count ? `${task.client_tasks_count} Task${task.client_tasks_count > 1 ? 's' : ''} Posted` : '1 Task Posted'}
+                      </strong>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12.5 }}>
                       <span style={{ color: "#64748b", display: "inline-flex", alignItems: "center", gap: 6 }}>
                         <iconify-icon icon="lucide:zap" style={{ color: "#f59e0b" }} /> Response Rate
                       </span>
-                      <strong style={{ color: "#001f3f" }}>Fast (&lt; 15 mins)</strong>
+                      <strong style={{ color: "#001f3f" }}>Active on Platform</strong>
                     </div>
                   </div>
                 </section>

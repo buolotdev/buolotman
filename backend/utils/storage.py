@@ -57,7 +57,7 @@ def _local_upload(file_obj, prefix: str) -> dict:
     original_name = getattr(file_obj, "name", "upload.bin")
     key = generate_object_key(prefix, original_name)
 
-    media_root = Path(settings.BASE_DIR) / "media"
+    media_root = Path(settings.MEDIA_ROOT)
     dest_path = media_root / key
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 

@@ -17,9 +17,15 @@ def zip_backend():
                 rel_path = os.path.relpath(file_path, backend_dir)
                 # FORCE FORWARD SLASHES FOR LINUX
                 linux_path = rel_path.replace("\\", "/")
-                zipf.write(file_path, linux_path)
-
-                
+                zinfo = zipfile.ZipInfo(linux_path)
+                zinfo.compress_type = zipfile.ZIP_DEFLATED
+                if linux_path.endswith('.sh') or 'hooks' in linux_path:
+                    zinfo.external_attr = 0o755 << 16  # rwxr-xr-x
+                else:
+                    zinfo.external_attr = 0o644 << 16  # rw-r--r--
+                with open(file_path, 'rb') as f:
+                    zipf.writestr(zinfo, f.read())
+                    
     print(f"Created {zip_path}")
     final_zip_path = r"c:\Users\User-PC\Desktop\buolotman-main\buolotman-main\aws-eb-final.zip"
     import shutil

@@ -393,11 +393,11 @@ export default function PublicProfilePage() {
 
   // Individual Specialist Attributes
   const techDisplayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Specialist";
-  const techCategory = profile?.category || profile?.primary_occupation || profile?.trade_category || "General Technical";
-  const techHeadline = profile?.headline || profile?.technician_profile?.headline || `Certified ${techCategory} Specialist`;
+  const techCategory = profile?.category || profile?.primary_occupation || profile?.trade_category || "";
+  const techHeadline = profile?.headline || profile?.technician_profile?.headline || (techCategory ? `Certified ${techCategory}` : "Professional Specialist");
   const techCity = profile?.city || profile?.technician_profile?.city || profile?.address || "";
   const techCountry = profile?.country || profile?.technician_profile?.country || "";
-  const techLocation = techCity && techCountry ? `${techCity}, ${techCountry}` : (techCity || techCountry || "");
+  const techLocation = [techCity, techCountry].filter(Boolean).join(", ") || "Location on request";
 
   // Initials
   const initials = isCompany
@@ -486,11 +486,12 @@ export default function PublicProfilePage() {
   const dailyRateDisplay = profile?.daily_rate || profile?.technician_profile?.daily_rate || localPricing.dailyRate || (rawTools && typeof rawTools === "object" && rawTools.pricing?.daily_rate);
   const inspectionFeeDisplay = profile?.inspection_fee || profile?.technician_profile?.inspection_fee || localPricing.inspectionFee || (rawTools && typeof rawTools === "object" && rawTools.pricing?.inspection_fee);
 
-  const expertiseLevel = profile?.expertise_level || profile?.technician_profile?.expertise_level || "Verified Specialist";
-  const educationLevel = profile?.education_level || profile?.technician_profile?.education_level || "Professional Certification";
-  const experienceYears = profile?.experience_years || profile?.technician_profile?.experience_years 
-    ? `${profile?.experience_years || profile?.technician_profile?.experience_years} ${t.years}` 
-    : `10+ ${t.years}`;
+  const expertiseLevel = profile?.expertise_level || profile?.technician_profile?.expertise_level || "Not specified";
+  const educationLevel = profile?.education_level || profile?.technician_profile?.education_level || "Not specified";
+  const rawExpYears = profile?.experience_years || profile?.technician_profile?.experience_years;
+  const experienceYears = rawExpYears 
+    ? (String(rawExpYears).includes(t.years) ? String(rawExpYears) : `${rawExpYears} ${t.years}`) 
+    : "Not specified";
 
   // Dynamic Legal Compliance Evaluation (Strictly Real Verification & Documents)
   const docs: any[] = useMemo(() => {

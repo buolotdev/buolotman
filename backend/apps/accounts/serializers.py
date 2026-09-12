@@ -100,11 +100,15 @@ class UserPublicSerializer(serializers.ModelSerializer):
     hourly_rate = serializers.SerializerMethodField()
     daily_rate = serializers.SerializerMethodField()
     inspection_fee = serializers.SerializerMethodField()
+    starting_price = serializers.SerializerMethodField()
+    experience_years = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     completed_jobs = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
     response_time = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
     is_online = serializers.BooleanField(read_only=True)
     last_seen = serializers.DateTimeField(read_only=True)
     last_seen_display = serializers.CharField(read_only=True)
@@ -115,8 +119,8 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'username', 'role',
             'avatar_url', 'banner_url', 'is_verified', 'country', 'city',
             'date_of_birth', 'address', 'education_level', 'expertise_level',
-            'bio', 'about', 'headline', 'skills', 'tools', 'portfolio',
-            'hourly_rate', 'daily_rate', 'inspection_fee',
+            'experience_years', 'category', 'bio', 'about', 'headline', 'skills', 'tools', 'portfolio',
+            'hourly_rate', 'daily_rate', 'inspection_fee', 'starting_price',
             'average_rating', 'completed_jobs', 'review_count', 'response_time',
             'services', 'technician_profile', 'is_online', 'last_seen', 'last_seen_display'
         ]
@@ -222,12 +226,42 @@ class UserPublicSerializer(serializers.ModelSerializer):
     def get_review_count(self, obj):
         return 0
 
-    def get_response_time(self, obj):
+    def get_starting_price(self, obj):
         tech = getattr(obj, "technician_profile", None)
-        return (tech.response_time if tech else '') or 'Within 24 hours'
+        if tech:
+            if isinstance(tech.languages, dict) and tech.languages.get('pricing', {}).get('starting_price'):
+                return tech.languages['pricing']['starting_price']
+            if isinstance(tech.languages, dict) and tech.languages.get('starting_price'):
+                return tech.languages['starting_price']
+            if tech.hourly_rate:
+                return f"{int(tech.hourly_rate):,} XOF"
+        return ""
+
+    def get_experience_years(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        if tech and isinstance(tech.languages, dict):
+            return tech.languages.get('experience_years') or ""
+        return ""
+
+    def get_category(self, obj):
+        tech = getattr(obj, "technician_profile", None)
+        if tech and isinstance(tech.languages, dict) and tech.languages.get('primary_occupation'):
+            return tech.languages.get('primary_occupation')
+        services = getattr(obj, "technician_services", None)
+        if services and services.filter(is_active=True).exists():
+            first_srv = services.filter(is_active=True).first()
+            if first_srv.category:
+                return first_srv.category.name
+        return obj.expertise_level or obj.education_level or ""
 
     def get_city(self, obj):
-        return obj.address or ''
+        tech = getattr(obj, "technician_profile", None)
+        if tech and isinstance(tech.languages, dict) and tech.languages.get('city'):
+            return tech.languages.get('city')
+        return obj.address or ""
+
+    def get_country(self, obj):
+        return obj.country or ""
 
 
 import re
