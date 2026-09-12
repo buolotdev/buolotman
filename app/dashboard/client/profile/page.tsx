@@ -391,7 +391,6 @@ export default function ClientProfilePage() {
         const res = await api.uploadAvatar(croppedFile);
         const url = res.avatar_url || res.url || res.file_url;
         setAvatarUrl(url);
-        await api.updateMe({ avatar: url });
         await refetchUser();
         toast.show("success", "Avatar updated successfully");
       } catch (err: any) {
@@ -405,7 +404,6 @@ export default function ClientProfilePage() {
         const res = await api.uploadBanner(croppedFile);
         const url = res.banner_url || res.url || res.file_url;
         setCoverUrl(url);
-        await api.updateMe({ banner: url, cover_image: url });
         await refetchUser();
         toast.show("success", "Cover photo updated successfully");
       } catch (err: any) {
