@@ -226,48 +226,69 @@ export default function TechnicianTaskDetailPage({ params }: { params: Promise<{
                       Attachments & Site Photographs ({task.attachments.length})
                     </h2>
 
-                    <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                      {task.attachments.map((attachment: any, idx: number) => (
-                        <a
-                          key={idx}
-                          href={getImageUrl(attachment.file_url)}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            width: 120,
-                            height: 120,
-                            borderRadius: 14,
-                            overflow: "hidden",
-                            border: "1.5px solid #e2e8f0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "#f8fafc",
-                            textDecoration: "none",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.04)"
-                          }}
-                        >
-                          {attachment.content_type?.includes("image") || attachment.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                            <img
-                              src={getImageUrl(attachment.file_url)}
-                              alt={attachment.file_name}
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = 'none';
-                                const parent = (e.target as HTMLElement).parentElement;
-                                if (parent) {
-                                  parent.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;padding:8px;text-align:center;color:#64748b;font-size:11px"><iconify-icon icon="lucide:image" style="font-size:24px;margin-bottom:4px;color:#94a3b8"></iconify-icon><span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${attachment.file_name || 'Image'}</span></div>`;
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#64748b", fontSize: "12px", padding: 8, textAlign: "center" }}>
-                              <iconify-icon icon="lucide:file-text" style={{ fontSize: 28, marginBottom: 4, color: "#001f3f" }} />
-                              <span style={{ maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{attachment.file_name}</span>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+                      {task.attachments.map((attachment: any, idx: number) => {
+                        const fileUrl = getImageUrl(attachment.file_url);
+                        const fileName = attachment.file_name || `Attachment #${idx + 1}`;
+                        const isImage = attachment.content_type?.includes("image") || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        return (
+                          <a
+                            key={idx}
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 12,
+                              padding: "12px 14px",
+                              borderRadius: 14,
+                              border: "1.5px solid #e2e8f0",
+                              backgroundColor: "#f8fafc",
+                              textDecoration: "none",
+                              transition: "all 0.2s ease",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                              overflow: "hidden"
+                            }}
+                          >
+                            <div style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 10,
+                              background: isImage ? "rgba(255, 69, 0, 0.1)" : "rgba(14, 165, 233, 0.1)",
+                              color: isImage ? "#ff4500" : "#0284c7",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              overflow: "hidden"
+                            }}>
+                              {isImage ? (
+                                <img
+                                  src={fileUrl}
+                                  alt={fileName}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                    const p = (e.target as HTMLElement).parentElement;
+                                    if (p) p.innerHTML = '<iconify-icon icon="lucide:image" style="font-size: 22px; color: #ff4500;"></iconify-icon>';
+                                  }}
+                                />
+                              ) : (
+                                <iconify-icon icon="lucide:file-text" style={{ fontSize: 22 }} />
+                              )}
                             </div>
-                          )}
-                        </a>
-                      ))}
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <strong style={{ display: "block", fontSize: 13, color: "#001f3f", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {fileName}
+                              </strong>
+                              <span style={{ fontSize: 11.5, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                <iconify-icon icon="lucide:external-link" style={{ fontSize: 11 }} /> View Attachment
+                              </span>
+                            </div>
+                          </a>
+                        );
+                      })}
                     </div>
                   </section>
                 )}
