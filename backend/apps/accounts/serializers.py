@@ -65,6 +65,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserMeSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    banner_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     date_of_birth = serializers.DateField(required=False, allow_null=True)
     city = serializers.SerializerMethodField()
     is_online = serializers.BooleanField(read_only=True)
