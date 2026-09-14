@@ -595,7 +595,7 @@ export default function Footer() {
                 <Link href="/dashboard/technician/profile">{t("myProfile")}</Link>
               </li>
               <li>
-                <Link href="/contractors">{t("contracts")}</Link>
+                <Link href="/contracts">{t("contracts")}</Link>
               </li>
               <li>
                 <Link href="/upgrade">{t("upgradePlan")}</Link>
