@@ -8,59 +8,6 @@ const INVALID_TERMS = [
   "specialist", "test", "demo", "asdf", "qwerty", "null", "undefined", "none"
 ];
 
-const PRESET_PROFESSIONS = [
-  {
-    role: "Certified Electrician",
-    category: "Electrical & Electronics Engineering",
-    bio: "Residential & commercial electrical installations, repairs, and safety inspections."
-  },
-  {
-    role: "UI/UX Designer",
-    category: "Software & Digital Engineering",
-    bio: "Product design, UX research, and interface systems for web & mobile apps."
-  },
-  {
-    role: "Plumbing Technician",
-    category: "Handyman & Home Maintenance",
-    bio: "Leak repairs, bathroom installations, drainage systems & maintenance."
-  },
-  {
-    role: "CCTV & Security Engineer",
-    category: "Telecom, Broadcast & Security Systems",
-    bio: "CCTV, access control, alarm systems & smart surveillance solutions."
-  },
-  {
-    role: "Backend Engineer",
-    category: "Software & Digital Engineering",
-    bio: "APIs, databases, system optimization, and scalable backend solutions."
-  },
-  {
-    role: "Hair Stylist",
-    category: "Health, Beauty & Personal Care",
-    bio: "Professional hair styling, grooming, and beauty services at your location."
-  },
-  {
-    role: "Phone Repair Technician",
-    category: "Electrical & Electronics Engineering",
-    bio: "Screen replacement, battery repair, and smartphone diagnostics."
-  },
-  {
-    role: "Cleaning Specialist",
-    category: "Cleaning, Outdoor & Environmental Services",
-    bio: "Home, office, and post-construction professional cleaning services."
-  },
-  {
-    role: "Auto Mechanic",
-    category: "Automotive & Heavy Equipment",
-    bio: "Engine diagnostics, brake service, mechanical repairs, and routine maintenance."
-  },
-  {
-    role: "Solar PV Specialist",
-    category: "Renewable Energy & Utilities",
-    bio: "Solar panel installation, battery storage, and clean energy solutions."
-  }
-];
-
 export function isGarbageText(str: string): boolean {
   if (!str || typeof str !== "string") return true;
   const clean = str.trim().toLowerCase();
@@ -70,7 +17,7 @@ export function isGarbageText(str: string): boolean {
   // Check if contains non-alphanumeric junk or long repeated characters (e.g. "aaaaaaa")
   if (/(.)\1{4,}/.test(clean)) return true;
 
-  // Check vowel to consonant ratio for random gibberish (e.g. "YUGFJIYHKJ", "hushbluhtr")
+  // Check vowel to consonant ratio for random gibberish (e.g. "YUGFJIYHKJ", "hushbluhtr", "BBRIYQEGBKJBUIGJAAAAAAAAAAAAA")
   const letters = clean.replace(/[^a-z]/g, "");
   if (letters.length >= 6) {
     const vowels = (letters.match(/[aeiou]/g) || []).length;
@@ -95,8 +42,8 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     return lang === "fr" ? "Entreprise Agréée" : "Registered Enterprise";
   }
 
-  // 1. Check services offered (e.g. "IT ENGINEER", "Plumbing Repair", "Certified Electrician")
-  const services = item.services || item.profile?.services || [];
+  // 1. PRIORITY: Check services offered posted by technician in their profile (e.g. "IT ENGINEER", "Plumbing Repair", "Certified Electrician")
+  const services = item.services || item.profile?.services || item.technician_profile?.services || [];
   if (Array.isArray(services) && services.length > 0 && services[0]?.title) {
     const srvTitle = services[0].title.trim();
     if (!isGarbageText(srvTitle)) {
@@ -108,7 +55,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
   }
 
   // 2. Check skills list (e.g. ["Plumber"], ["Electrician"], ["Welder"])
-  const skills = item.skills || item.profile?.skills || [];
+  const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
   if (Array.isArray(skills) && skills.length > 0) {
     const validSkill = skills.find((s: string) => !isGarbageText(s));
     if (validSkill) {
@@ -128,10 +75,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     return formatCategoryToProfession(cat.trim(), lang);
   }
 
-  // 5. Preset fallback based on item id or name to guarantee a clean, authentic professional role (like the mockup)
-  const seed = (typeof item.id === "number" ? item.id : 0) + (item.name ? item.name.length : (item.username ? item.username.length : 1));
-  const preset = PRESET_PROFESSIONS[seed % PRESET_PROFESSIONS.length];
-  return preset.role;
+  return lang === "fr" ? "Spécialiste Technique" : "Technical Specialist";
 }
 
 export function formatSkillToProfession(skill: string, lang: string = "en"): string {
@@ -151,7 +95,7 @@ export function formatSkillToProfession(skill: string, lang: string = "en"): str
   if (s.includes("hvac") || s.includes("air cond") || s.includes("climat")) return lang === "fr" ? "Technicien CVC & Climatisation" : "HVAC Specialist";
   if (s.includes("soft") || s.includes("web") || s.includes("develop")) return lang === "fr" ? "Ingénieur Logiciel" : "Software Engineer";
   if (s.includes("backend")) return lang === "fr" ? "Ingénieur Backend" : "Backend Engineer";
-  if (s.includes("network") || s.includes("it ") || s.includes("system")) return lang === "fr" ? "Ingénieur Réseaux & IT" : "IT & Network Engineer";
+  if (s.includes("network") || s.includes("it ") || s.includes("system") || s.includes("engineer")) return lang === "fr" ? "Ingénieur Réseaux & IT" : "IT & Network Engineer";
   if (s.includes("handy")) return lang === "fr" ? "Artisan Polyvalent" : "Handyman Specialist";
 
   return skill.charAt(0).toUpperCase() + skill.slice(1);
@@ -160,7 +104,7 @@ export function formatSkillToProfession(skill: string, lang: string = "en"): str
 export function formatCategoryToProfession(category: string, lang: string = "en"): string {
   const c = category.toLowerCase();
   if (c.includes("handyman") || c.includes("home maintenance")) {
-    return lang === "fr" ? "Technicien en Plomberie & Bricolage" : "Plumbing & Maintenance Pro";
+    return lang === "fr" ? "Technicien en Plomberie & Maintenance" : "Plumbing & Maintenance Pro";
   }
   if (c.includes("software") || c.includes("digital engineering")) {
     return lang === "fr" ? "Ingénieur Logiciel & Digital" : "Software & Digital Engineer";
@@ -203,20 +147,18 @@ export function resolveServiceCategoryTag(item: any, lang: string = "en"): strin
   if (item.category_name && !isGarbageText(item.category_name)) return item.category_name;
 
   const profession = (resolveProfessionTitle(item, lang) || "").toLowerCase();
+  const services = (item.services || []).map((s: any) => s.title || "").join(" ").toLowerCase();
   const skills = (item.skills || []).join(" ").toLowerCase();
-  const allText = `${profession} ${skills}`;
+  const allText = `${profession} ${services} ${skills}`;
 
+  if (allText.includes("it ") || allText.includes("engineer") || allText.includes("network") || allText.includes("cyber") || allText.includes("software") || allText.includes("backend") || allText.includes("web")) {
+    return lang === "fr" ? "Ingénierie Logicielle & IT" : "Software & Digital Engineering";
+  }
   if (allText.includes("handyman") || allText.includes("plumb") || allText.includes("home")) {
     return lang === "fr" ? "Services de Bricolage & Plomberie" : "Handyman & Plumbing Services";
   }
   if (allText.includes("cctv") || allText.includes("secur") || allText.includes("telecom")) {
     return lang === "fr" ? "Télécoms & Systèmes de Sécurité" : "Telecom & Security Systems";
-  }
-  if (allText.includes("engineer") || allText.includes("software") || allText.includes("backend") || allText.includes("ui") || allText.includes("ux")) {
-    return lang === "fr" ? "Ingénierie Logicielle & Numérique" : "Software & Digital Engineering";
-  }
-  if (allText.includes("it") || allText.includes("network") || allText.includes("cyber")) {
-    return lang === "fr" ? "Services IT & Réseaux" : "IT Infrastructure & Networking";
   }
   if (allText.includes("clean")) {
     return lang === "fr" ? "Services de Nettoyage & Entretien" : "Cleaning & Environmental Services";
@@ -239,6 +181,13 @@ export function resolveServiceCategoryTag(item: any, lang: string = "en"): strin
 }
 
 export function resolveProfessionalBio(item: any, lang: string = "en"): string {
+  // 1. If service has description, use it
+  const services = item.services || item.profile?.services || [];
+  if (Array.isArray(services) && services.length > 0 && services[0]?.description && !isGarbageText(services[0].description)) {
+    return services[0].description;
+  }
+
+  // 2. If user has authentic bio
   if (item.bio && !isGarbageText(item.bio)) {
     return item.bio;
   }
@@ -246,12 +195,48 @@ export function resolveProfessionalBio(item: any, lang: string = "en"): string {
     return item.description;
   }
 
-  const role = resolveProfessionTitle(item, lang).toLowerCase();
-  const match = PRESET_PROFESSIONS.find(p => role.includes(p.role.toLowerCase()) || p.role.toLowerCase().includes(role));
-  if (match) {
-    return match.bio;
+  // 3. Match description strictly to their actual profession / service discipline
+  const role = (resolveProfessionTitle(item, lang) || "").toLowerCase();
+  const servicesText = services.map((s: any) => s.title || "").join(" ").toLowerCase();
+  const allText = `${role} ${servicesText}`;
+
+  if (allText.includes("it") || allText.includes("software") || allText.includes("backend") || allText.includes("web") || allText.includes("network")) {
+    return lang === "fr"
+      ? "Expertise en systèmes IT, développement logiciel, bases de données et maintenance réseaux."
+      : "Expertise in IT systems, software development, database optimization, and network solutions.";
+  }
+  if (allText.includes("plumb")) {
+    return lang === "fr"
+      ? "Réparations de fuites, installations sanitaires, canalisations et maintenance plomberie."
+      : "Leak repairs, bathroom installations, drainage systems, and plumbing maintenance.";
+  }
+  if (allText.includes("electr") || allText.includes("wiring")) {
+    return lang === "fr"
+      ? "Installations électriques résidentielles et commerciales, dépannages et mises aux normes."
+      : "Residential & commercial electrical installations, repairs, wiring, and safety inspections.";
+  }
+  if (allText.includes("cctv") || allText.includes("secur")) {
+    return lang === "fr"
+      ? "Vidéosurveillance CCTV, contrôle d'accès, systèmes d'alarme et sécurité connectée."
+      : "CCTV, access control, alarm systems, and smart surveillance security solutions.";
+  }
+  if (allText.includes("auto") || allText.includes("mechanic")) {
+    return lang === "fr"
+      ? "Diagnostics moteur, freins, révisions mécaniques et maintenance automobile complète."
+      : "Engine diagnostics, brake service, mechanical repairs, and automotive maintenance.";
+  }
+  if (allText.includes("clean")) {
+    return lang === "fr"
+      ? "Nettoyage professionnel de bureaux, résidences, et entretien des locaux."
+      : "Home, office, and post-construction professional cleaning & maintenance services.";
+  }
+  if (allText.includes("hair") || allText.includes("beauty")) {
+    return lang === "fr"
+      ? "Services professionnels de coiffure, soins et esthétique sur rendez-vous."
+      : "Professional hair styling, grooming, and personal care services at your location.";
   }
 
-  const seed = (typeof item.id === "number" ? item.id : 0) + (item.name ? item.name.length : (item.username ? item.username.length : 1));
-  return PRESET_PROFESSIONS[seed % PRESET_PROFESSIONS.length].bio;
+  return lang === "fr"
+    ? "Professionnel certifié disponible pour interventions rapides et missions techniques."
+    : "Certified technical professional available for dispatch, task delivery, and projects.";
 }

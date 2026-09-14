@@ -45,7 +45,7 @@ const navItems = [
   { key: "saved", icon: "lucide:bookmark", href: "/dashboard/client/saved" },
   { key: "support", icon: "lucide:help-circle", href: "/dashboard/client/support" },
   { key: "settings", icon: "lucide:settings", href: "/dashboard/client/settings" },
-  { key: "providers", icon: "lucide:users", href: "/service-providers" },
+  { key: "providers", icon: "lucide:users", href: "/search?tab=technician" },
 ];
 
 export default function ClientSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
