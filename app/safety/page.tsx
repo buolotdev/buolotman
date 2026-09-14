@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./safety.module.css";
 
 const CORE_PRACTICES = [
@@ -94,7 +95,7 @@ export default function SafetyCenterPage() {
   });
   const [reportSubmitted, setReportSubmitted] = useState(false);
 
-  const handleSubmitReport = (e: React.FormEvent) => {
+  const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const newReport = {
@@ -115,6 +116,22 @@ export default function SafetyCenterPage() {
         const existing = JSON.parse(localStorage.getItem("boulotman_safety_reports") || "[]");
         localStorage.setItem("boulotman_safety_reports", JSON.stringify([newReport, ...existing]));
       }
+
+      // Sync with backend dispute and support tables
+      const safetyBody = `Reporter: ${reportForm.name} (${reportForm.role}) | Email: ${reportForm.email}\nReported Target: ${reportForm.username || "N/A"} | Ref: ${reportForm.reference || "N/A"}\nConcern Type: ${reportForm.issueType}\nContact Preference: ${reportForm.contactMethod}\n\nDetails:\n${reportForm.description}`;
+
+      await Promise.allSettled([
+        api.createSupportTicket({
+          subject: `[Safety Concern] ${reportForm.issueType} - ${reportForm.username || reportForm.name}`,
+          body: safetyBody
+        }),
+        api.createDispute({
+          reason: `Safety Violation: ${reportForm.issueType}`,
+          description: safetyBody,
+          against_name: reportForm.username || ""
+        })
+      ]);
+
       setReportSubmitted(true);
       setReportForm({
         name: "",

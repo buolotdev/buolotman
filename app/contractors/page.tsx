@@ -172,15 +172,23 @@ export default function ContractorsPage() {
       }
     }
 
+    const detailsBody = `Name: ${formData.clientName}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nClient Type: ${formData.clientType}\nLocation: ${formData.city}, ${formData.country}\nCategory: ${formData.category}\nBudget: ${formData.budget}\nProject Title: ${formData.projectTitle}\n\nProject Scope & Description:\n${formData.description}`;
+
     try {
-      await api.submitInquiry({
-        name: formData.clientName,
-        email: formData.email,
-        phone: formData.phone,
-        company_name: `${formData.clientType} - ${formData.projectTitle}`.trim(),
-        inquiry_type: 'enterprise',
-        details: `Country: ${formData.country}\nCity: ${formData.city}\nCategory: ${formData.category}\nBudget: ${formData.budget}\nProject Title: ${formData.projectTitle}\n\nProject Scope & Description:\n${formData.description}`
-      });
+      await Promise.allSettled([
+        api.submitInquiry({
+          name: formData.clientName,
+          email: formData.email,
+          phone: formData.phone,
+          company_name: `${formData.clientType} - ${formData.projectTitle}`.trim(),
+          inquiry_type: 'enterprise',
+          details: detailsBody
+        }),
+        api.createSupportTicket({
+          subject: `[Contractor Project] ${formData.projectTitle || formData.category || "Project Review"}`,
+          body: detailsBody
+        })
+      ]);
       setSubmitted(true);
     } catch (err: any) {
       // Even if network or backend API fails, user submission is securely preserved
