@@ -289,30 +289,6 @@ export default function DashboardHeader({
       </div>
 
       <div className={styles.topbarActions}>
-        {/* Back to Home Button */}
-        <Link
-          href="/"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "6px 13px",
-            background: "#ffffff",
-            color: "#001f3f",
-            borderRadius: 999,
-            fontSize: "0.78rem",
-            fontWeight: 700,
-            textDecoration: "none",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 1px 3px rgba(0,31,63,0.04)",
-            transition: "all 0.2s ease",
-          }}
-          title={lang === "fr" ? "Retour à l'accueil" : "Back to Home"}
-        >
-          <iconify-icon icon="lucide:arrow-left" style={{ fontSize: 13, color: "#ff4500" }} />
-          <iconify-icon icon="lucide:home" style={{ fontSize: 14, color: "#001f3f" }} />
-          <span>{lang === "fr" ? "Accueil" : "Home"}</span>
-        </Link>
         {/* Subscription Tier Badge */}
         {(userRole === "TECHNICIAN" || userRole === "COMPANY" || userRole === "CLIENT") && (
           <Link

@@ -51,40 +51,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        <div style={{ padding: "0 14px 12px" }}>
-          <Link
-            href="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "7px 12px",
-              borderRadius: "8px",
-              background: "rgba(255, 255, 255, 0.08)",
-              color: "#cbd5e1",
-              fontSize: "12px",
-              fontWeight: 600,
-              textDecoration: "none",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
-              transition: "all 0.2s ease",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = "rgba(255, 69, 0, 0.2)";
-              e.currentTarget.style.color = "#ffffff";
-              e.currentTarget.style.borderColor = "rgba(255, 69, 0, 0.4)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-              e.currentTarget.style.color = "#cbd5e1";
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
-            }}
-          >
-            <iconify-icon icon="lucide:arrow-left" style={{ fontSize: "14px", color: "#ff4500" }} />
-            <iconify-icon icon="lucide:home" style={{ fontSize: "14px" }} />
-            <span>Back to Home Page</span>
-          </Link>
-        </div>
-
         <nav className={styles.navMenu}>
           {navItems.map((item) => {
             const isActive = item.match(pathname || "");
@@ -120,7 +86,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div className={styles.sidebarFooter}>
+        <div className={styles.sidebarFooter} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <Link
+            href="/"
+            className={styles.navItem}
+            style={{ textDecoration: "none", color: "#cbd5e1" }}
+          >
+            <iconify-icon icon="lucide:arrow-left" style={{ color: "#ff4500" }} />
+            <span>Back to Home</span>
+          </Link>
           <LogoutButton className={styles.logoutBtn} />
         </div>
       </aside>
