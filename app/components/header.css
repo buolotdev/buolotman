@@ -786,14 +786,12 @@ body {
 }
 
 @media(max-width:992px) {
-
-  #bmMegaRoot .bmNavLeft,
-  #bmMegaRoot .bmNavRight {
-    display: none;
+  #bmMegaRoot .bmHdr {
+    display: block !important;
   }
 
   #bmMegaRoot .bmHamburger {
-    display: flex;
+    display: none !important;
   }
 }
 
