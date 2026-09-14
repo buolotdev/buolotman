@@ -199,32 +199,38 @@ function Header() {
           );
 
           const avatarHtml = (avatarUrl && avatarUrl.trim() !== '')
-            ? `<div style="position:relative; width:36px; height:36px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#001F3F; display:flex; align-items:center; justify-content:center;">
+            ? `<div style="position:relative; width:26px; height:26px; border-radius:50%; overflow:hidden; flex-shrink:0; background:#001F3F; display:flex; align-items:center; justify-content:center;">
                  <img src="${avatarUrl}" alt="User" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
-                 <div style="display:none; width:100%; height:100%; color:#fff; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px; background:#001F3F;">${initials}</div>
+                 <div style="display:none; width:100%; height:100%; color:#fff; align-items:center; justify-content:center; font-weight:700; font-size:11px; letter-spacing:0.5px; background:#001F3F;">${initials}</div>
                </div>`
-            : `<div style="width:36px; height:36px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; letter-spacing:1px; flex-shrink:0;">${initials}</div>`;
+            : `<div style="width:26px; height:26px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; letter-spacing:0.5px; flex-shrink:0;">${initials}</div>`;
 
           const profileBtnHtml = `
-            <a href="${dashboardUrl}" style="display:flex; align-items:center; gap:10px; text-decoration:none; padding: 5px 14px 5px 6px; border-radius: 30px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
+            <a href="${dashboardUrl}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding: 3px 12px 3px 4px; border-radius: 20px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; height: 32px; box-sizing: border-box;">
               ${avatarHtml}
-              <div style="display:flex; flex-direction:column; line-height:1.2; padding-right:4px;">
+              <div style="display:flex; flex-direction:column; line-height:1.15; padding-right:2px;">
                 <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="color:#0f172a; font-weight:700; font-size:13.5px; white-space:nowrap;">${name}</span>
-                  ${isVerified ? `<iconify-icon icon="lucide:badge-check" style="font-size:15px; color:#16a34a;"></iconify-icon>` : ''}
+                  <span style="color:#0f172a; font-weight:700; font-size:12px; white-space:nowrap; max-width:130px; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                  ${isVerified ? `<iconify-icon icon="lucide:badge-check" style="font-size:13px; color:#16a34a; flex-shrink:0;"></iconify-icon>` : ''}
                 </div>
-                <span style="color:#64748b; font-size:10.5px; text-transform:uppercase; font-weight:700; letter-spacing:0.04em;">${role || 'User'}</span>
+                <span style="color:#64748b; font-size:9.5px; text-transform:uppercase; font-weight:700; letter-spacing:0.04em;">${role || 'User'}</span>
               </div>
             </a>
           `;
 
-          // Update Desktop Nav
+          // Update Top Nav Bar (after Language dropdown)
+          const topUserContainer = document.getElementById("bmTopUserContainer");
+          if (topUserContainer) {
+            topUserContainer.innerHTML = profileBtnHtml;
+          }
+
+          // Clean Desktop Main Nav (remove login/signup buttons when authenticated)
           const mainNav = document.querySelector(".bm-main-nav");
           if (mainNav) {
             const loginBtn = mainNav.querySelector('a[href="/login"]');
             const signupBtn = mainNav.querySelector('a[href="/signup"]');
             
-            if (loginBtn) loginBtn.outerHTML = profileBtnHtml;
+            if (loginBtn) loginBtn.remove();
             if (signupBtn) signupBtn.remove();
           }
 
@@ -1211,6 +1217,8 @@ function Header() {
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/fr.png"> Français</div>
         </div>
       </div>
+      <!-- USER PROFILE BADGE -->
+      <div id="bmTopUserContainer" style="display:inline-flex; align-items:center;"></div>
     </div>
   </div>
 </div>
