@@ -423,6 +423,158 @@ https://boulotman.com
     )
 
 
+def send_admin_new_user_approval_email(user):
+    """
+    Send an official notification email to admin@boulotman.com when a new user registers and awaits approval/verification.
+    """
+    from datetime import datetime
+    
+    name = (f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}").strip() or user.username or user.email.split('@')[0]
+    email = user.email or "N/A"
+    role = str(getattr(user, 'role', 'CLIENT')).upper()
+    role_label = 'Technician / Freelancer' if role == 'TECHNICIAN' else ('Company' if role == 'COMPANY' else 'Client')
+    
+    phone = getattr(user, 'phone', '') or getattr(user, 'phone_number', '') or 'N/A'
+    country = getattr(user, 'country', '') or 'N/A'
+    city = getattr(user, 'city', '') or ''
+    location = f"{city}, {country}" if city and country != 'N/A' else country
+    reg_time = datetime.utcnow().strftime("%b %d, %Y - %H:%M UTC")
+
+    admin_portal_url = "https://admin.boulotman.com/dashboard/admin/verification" if role in ['TECHNICIAN', 'COMPANY'] else "https://admin.boulotman.com/dashboard/admin/users"
+    subject = f"🔔 New {role_label} Registration & Approval Request: {name}"
+
+    plain_message = f"""Hello Administrator,
+
+A new user has just registered on the BoulotMan Platform and submitted their account for administrative review and approval.
+
+User Details:
+----------------------------------------
+Full Name: {name}
+Email: {email}
+Account Role: {role_label}
+Phone: {phone}
+Location: {location}
+Registered At: {reg_time}
+Status: Pending Review / Approval
+
+Review and manage this account in the Admin Portal:
+{admin_portal_url}
+
+Best regards,
+BoulotMan Platform Automated Dispatch
+https://admin.boulotman.com
+"""
+
+    badge_bg = "#FFF1EB"
+    badge_border = "#FFD8CC"
+    badge_color = "#FF4500"
+
+    body_content = f"""
+      <p style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 14px 0;">Hello Administrator,</p>
+      
+      <!-- Notice Badge -->
+      <div style="margin: 0 0 18px 0;">
+        <span style="display: inline-block; background-color: {badge_bg}; border: 1px solid {badge_border}; color: {badge_color}; font-size: 11px; font-weight: 800; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase;">
+          🔔 New User Approval Request
+        </span>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0 0 22px 0;">
+        A new user has successfully registered on the <strong>BoulotMan Platform</strong> and requires administrative oversight and verification.
+      </p>
+
+      <!-- User Information Box -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; margin-bottom: 24px; border-collapse: separate; overflow: hidden;">
+        <tr>
+          <td colspan="2" style="background-color: #001F3F; padding: 12px 18px; color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;">
+            📋 Registration Details Snapshot
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0; width: 38%;">
+            Full Name
+          </td>
+          <td style="padding: 12px 18px; font-size: 13.5px; color: #0F172A; font-weight: 700; border-bottom: 1px solid #E2E8F0;">
+            {name}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            Email Address
+          </td>
+          <td style="padding: 12px 18px; font-size: 13.5px; color: #0F172A; font-weight: 700; border-bottom: 1px solid #E2E8F0;">
+            <a href="mailto:{email}" style="color: #FF4500; text-decoration: none;">{email}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            Account Type
+          </td>
+          <td style="padding: 12px 18px; font-size: 13px; border-bottom: 1px solid #E2E8F0;">
+            <span style="display: inline-block; background: #001F3F; color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 6px; letter-spacing: 0.5px;">
+              {role_label.upper()}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            Phone Number
+          </td>
+          <td style="padding: 12px 18px; font-size: 13px; color: #334155; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            {phone}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            Location
+          </td>
+          <td style="padding: 12px 18px; font-size: 13px; color: #334155; font-weight: 600; border-bottom: 1px solid #E2E8F0;">
+            {location}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600;">
+            Submission Time
+          </td>
+          <td style="padding: 12px 18px; font-size: 13px; color: #334155; font-weight: 600;">
+            {reg_time}
+          </td>
+        </tr>
+      </table>
+
+      <!-- Action Button -->
+      <div style="text-align: center; margin: 28px 0 20px 0;">
+        <a href="{admin_portal_url}" target="_blank" style="background: linear-gradient(135deg, #FF4500 0%, #E03D00 100%); color: #ffffff; padding: 14px 34px; border-radius: 10px; font-size: 14.5px; font-weight: 800; text-decoration: none; display: inline-block; box-shadow: 0 4px 14px rgba(255, 69, 0, 0.35); letter-spacing: 0.3px;">
+          Review in Admin Command Center &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 16px; text-align: center;">
+        <p style="font-size: 12px; line-height: 1.5; color: #94A3B8; margin: 0;">
+          Direct Access: <a href="{admin_portal_url}" style="color: #001F3F; font-weight: 600; text-decoration: underline;">{admin_portal_url}</a>
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="BoulotMan Admin Governance",
+        heading_subtitle="New Registration & Approval Alert",
+        body_content=body_content,
+        preheader=f"New {role_label} registration: {name} ({email}) submitted for approval."
+    )
+
+    admin_email = getattr(settings, 'ADMIN_NOTIFICATION_EMAIL', 'admin@boulotman.com')
+
+    return send_platform_email(
+        subject=subject,
+        message=plain_message,
+        recipient_list=[admin_email],
+        html_message=html_message,
+        sender_type='admin',
+        fail_silently=True
+    )
+
+
 def send_new_proposal_email(task, bid, client_user=None):
     """
     Notify client when a technician submits a proposal on their task.

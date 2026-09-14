@@ -28,8 +28,9 @@ def generate_unique_username(email):
 
 def _send_google_signup_notifications(user):
     try:
-        from utils.email_service import send_welcome_email
+        from utils.email_service import send_welcome_email, send_admin_new_user_approval_email
         send_welcome_email(user)
+        send_admin_new_user_approval_email(user)
     except Exception:
         pass
 

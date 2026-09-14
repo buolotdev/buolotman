@@ -156,10 +156,11 @@ def register_client(request):
             ip_address=request.META.get("REMOTE_ADDR"),
         )
         try:
-            from utils.email_service import send_welcome_email
+            from utils.email_service import send_welcome_email, send_admin_new_user_approval_email
             send_welcome_email(user)
+            send_admin_new_user_approval_email(user)
         except Exception as e:
-            logger.warning("Could not send welcome email to %s: %s", user.email, e)
+            logger.warning("Could not send registration/admin emails for %s: %s", user.email, e)
         return Response({"message": "Client registered successfully."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -181,10 +182,11 @@ def register_technician(request):
             ip_address=request.META.get("REMOTE_ADDR"),
         )
         try:
-            from utils.email_service import send_welcome_email
+            from utils.email_service import send_welcome_email, send_admin_new_user_approval_email
             send_welcome_email(user)
+            send_admin_new_user_approval_email(user)
         except Exception as e:
-            logger.warning("Could not send welcome email to %s: %s", user.email, e)
+            logger.warning("Could not send registration/admin emails for %s: %s", user.email, e)
         return Response({"message": "Technician registered successfully. Awaiting verification."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -206,10 +208,11 @@ def register_company(request):
             ip_address=request.META.get("REMOTE_ADDR"),
         )
         try:
-            from utils.email_service import send_welcome_email
+            from utils.email_service import send_welcome_email, send_admin_new_user_approval_email
             send_welcome_email(user)
+            send_admin_new_user_approval_email(user)
         except Exception as e:
-            logger.warning("Could not send welcome email to %s: %s", user.email, e)
+            logger.warning("Could not send registration/admin emails for %s: %s", user.email, e)
         return Response({"message": "Company registered successfully. Awaiting verification."}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
