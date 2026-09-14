@@ -617,11 +617,13 @@ export default function TechnicianProfilePage() {
     setCropData(null);
 
     if (type === 'avatar') {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setAvatarUrl(localPreview);
       setAvatarUploading(true);
       try {
         const result = await api.uploadAvatar(croppedFile);
-        const url = result.avatar_url || result.url || result.file_url;
-        setAvatarUrl(url);
+        const url = result.avatar_url || result.url || result.file_url || result.avatar || result.image;
+        if (url) setAvatarUrl(url);
         toast.success("Photo Updated", "Your profile photo has been updated.");
       } catch (err: any) {
         toast.error("Upload failed", err?.message || "Please try again.");
@@ -629,11 +631,13 @@ export default function TechnicianProfilePage() {
         setAvatarUploading(false);
       }
     } else {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setBannerUrl(localPreview);
       setBannerUploading(true);
       try {
         const result = await api.uploadBanner(croppedFile);
-        const url = result.banner_url || result.url || result.file_url;
-        setBannerUrl(url);
+        const url = result.banner_url || result.url || result.file_url || result.banner || result.cover_image;
+        if (url) setBannerUrl(url);
         toast.success("Banner Updated", "Your profile cover banner has been updated.");
       } catch (err: any) {
         toast.error("Upload failed", err?.message || "Please try again.");
@@ -813,6 +817,9 @@ export default function TechnicianProfilePage() {
     const updated = [newPort, ...portfolioList];
     setPortfolioList(updated);
     localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(updated));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_portfolio_${userData.id}`, JSON.stringify(updated));
+    }
     setNewProjTitle("");
     setNewProjDesc("");
     setNewProjLocation("");
@@ -832,6 +839,9 @@ export default function TechnicianProfilePage() {
     const updated = portfolioList.filter(p => p.id !== id);
     setPortfolioList(updated);
     localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(updated));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_portfolio_${userData.id}`, JSON.stringify(updated));
+    }
     toast.info("Project Removed", "Portfolio project deleted.");
 
     // Auto-sync with backend
@@ -1070,12 +1080,13 @@ export default function TechnicianProfilePage() {
                     style={{ cursor: "pointer", position: "relative" }}
                   >
                     {avatarUrl || userData?.avatar_url ? (
-                      <Image
+                      <img
                         src={getImageUrl(avatarUrl || userData?.avatar_url)}
                         alt="Profile photo"
-                        fill
-                        unoptimized
-                        style={{ objectFit: "cover", borderRadius: "50%" }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
+                        onError={(e) => {
+                          console.warn("Avatar image failed to load:", avatarUrl || userData?.avatar_url);
+                        }}
                       />
                     ) : (
                       userInitials

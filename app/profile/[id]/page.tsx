@@ -308,7 +308,7 @@ export default function PublicProfilePage() {
             try { pricingParsed = JSON.parse(rawPricing); } catch {}
           }
 
-          if (baseUser?.role !== "COMPANY" && (rawCustom || rawPricing)) {
+          if (baseUser?.role !== "COMPANY") {
             let c: any = {};
             if (rawCustom) {
               try { c = JSON.parse(rawCustom); } catch {}
@@ -331,8 +331,8 @@ export default function PublicProfilePage() {
               daily_rate: pricingParsed.dailyRate || c.dailyRate || baseUser?.daily_rate || baseUser?.technician_profile?.daily_rate,
               inspection_fee: pricingParsed.inspectionFee || c.inspectionFee || baseUser?.inspection_fee || baseUser?.technician_profile?.inspection_fee,
               starting_price: pricingParsed.startingPrice || c.startingPrice || baseUser?.starting_price || baseUser?.technician_profile?.starting_price,
-              skills: (rawSkills ? JSON.parse(rawSkills) : baseUser?.skills) || [],
-              portfolio: (rawPort ? JSON.parse(rawPort) : baseUser?.portfolio) || [],
+              skills: (rawSkills ? JSON.parse(rawSkills) : (baseUser?.skills || baseUser?.technician_profile?.skills)) || [],
+              portfolio: (rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || baseUser?.technician_profile?.portfolio || baseUser?.projects)) || [],
               tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
             };
           }
@@ -440,8 +440,22 @@ export default function PublicProfilePage() {
   const portfolioList: any[] = useMemo(() => {
     if (Array.isArray(profile?.projects) && profile.projects.length > 0) return profile.projects;
     if (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0) return profile.portfolio;
+    if (Array.isArray(profile?.technician_profile?.portfolio) && profile.technician_profile.portfolio.length > 0) return profile.technician_profile.portfolio;
+    if (Array.isArray(profile?.portfolio_items) && profile.portfolio_items.length > 0) return profile.portfolio_items;
+    if (typeof window !== "undefined") {
+      try {
+        const rawPort = (validId ? localStorage.getItem(`boulotman_technician_portfolio_${validId}`) : null)
+          || (profile?.id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.id}`) : null)
+          || (profile?.user_id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.user_id}`) : null)
+          || localStorage.getItem("boulotman_technician_portfolio");
+        if (rawPort) {
+          const parsed = JSON.parse(rawPort);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
     return [];
-  }, [profile]);
+  }, [profile, validId]);
 
   const teamList: any[] = useMemo(() => {
     if (Array.isArray(profile?.team) && profile.team.length > 0) return profile.team;
