@@ -200,6 +200,7 @@
   display: inline-block;
 }
 .activeStatus { background: #e6f4ea; color: #1e8e3e; }
+.draftStatus { background: #fef3c7; color: #b45309; }
 .inactiveStatus { background: #fdecea; color: #c0392b; }
 
 /* ================= RESPONSIVE ================= */

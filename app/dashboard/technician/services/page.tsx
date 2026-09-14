@@ -247,13 +247,6 @@ export default function TechnicianServicesPage() {
   };
 
   const handleNewServiceClick = () => {
-    if (!isVerified) {
-      toast.warning(
-        lang === "fr" ? "En attente de vérification" : "Wait for Verification",
-        lang === "fr" ? "Veuillez patienter pendant la validation de votre profil par l'administrateur. Une fois approuvé, vous pourrez publier des services." : "Please wait for verification. Your account is currently under review by admin. Once approved, you can create new services."
-      );
-      return;
-    }
     router.push("/dashboard/technician/services/new");
   };
 

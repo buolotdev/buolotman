@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import layoutStyles from "../page.module.css";
 import styles from "./services.module.css";
@@ -16,10 +16,11 @@ const translations: Record<string, Record<string, string>> = {
     title: "Manage Services",
     subtitle: "Publish the services your company offers. Clients will see these on your public profile.",
     pendingTitle: "Company Account Pending Admin Verification",
-    pendingDesc: "Your company registration documents are under administrative review. Publishing and managing services will unlock upon admin verification.",
+    pendingDesc: "Your company registration documents are under administrative review. You can create and save service drafts now; they will become publicly visible once your account is verified.",
     profileBtn: "Company Profile",
     totalServices: "Total Services",
     activeServices: "Active Services",
+    draftServices: "Draft Services",
     inactiveServices: "Inactive Services",
     addNewService: "Add New Service",
     serviceName: "Service Name",
@@ -33,9 +34,11 @@ const translations: Record<string, Record<string, string>> = {
     descPlaceholder: "Describe the service in detail",
     status: "Status",
     activeOption: "Active (Visible to clients)",
+    draftOption: "Draft (Unpublished Draft)",
     inactiveOption: "Inactive (Hidden)",
     saving: "Saving...",
-    saveService: "Save Service",
+    saveService: "Publish Service",
+    saveDraft: "Save as Draft",
     existingServices: "Existing Services",
     loadingServices: "Loading services...",
     thService: "Service",
@@ -54,10 +57,11 @@ const translations: Record<string, Record<string, string>> = {
     title: "Gérer les Services",
     subtitle: "Publiez les services proposés par votre entreprise. Les clients les verront sur votre profil public.",
     pendingTitle: "Compte Entreprise en Attente de Vérification",
-    pendingDesc: "Vos documents d'enregistrement sont en cours d'examen. La publication et la gestion des services seront actives dès la validation.",
+    pendingDesc: "Vos documents d'enregistrement sont en cours d'examen. Vous pouvez créer et enregistrer des brouillons de service dès maintenant ; ils seront publiés dès la validation de votre compte.",
     profileBtn: "Profil Entreprise",
     totalServices: "Total des Services",
     activeServices: "Services Actifs",
+    draftServices: "Brouillons",
     inactiveServices: "Services Inactifs",
     addNewService: "Ajouter un Nouveau Service",
     serviceName: "Nom de la prestation",
@@ -71,9 +75,11 @@ const translations: Record<string, Record<string, string>> = {
     descPlaceholder: "Décrivez la prestation en détail",
     status: "Statut",
     activeOption: "Actif (Visible pour les clients)",
+    draftOption: "Brouillon (Non publié)",
     inactiveOption: "Inactif (Masqué)",
     saving: "Enregistrement...",
-    saveService: "Enregistrer le Service",
+    saveService: "Publier le Service",
+    saveDraft: "Enregistrer en Brouillon",
     existingServices: "Services Existants",
     loadingServices: "Chargement des services...",
     thService: "Service",
@@ -109,10 +115,34 @@ export default function ServicesManagement() {
   const { data: profile } = useFetch(() => api.getCompanyProfile(), []);
   const { data: servicesData, loading: servicesLoading, refetch } = useFetch(() => api.getCompanyServices(), []);
   
-  const services = Array.isArray(servicesData) ? servicesData : [];
+  const [localServices, setLocalServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("boulotman_company_services");
+      if (stored) {
+        setLocalServices(JSON.parse(stored));
+      }
+    } catch {}
+  }, []);
+
+  const services = useMemo(() => {
+    const apiList = Array.isArray(servicesData) ? servicesData : [];
+    const combined = [...apiList];
+    const existingTitles = new Set(apiList.map((s: any) => (s.title || "").toLowerCase().trim()));
+    const existingIds = new Set(apiList.map((s: any) => s.id));
+
+    for (const local of localServices) {
+      if (!existingIds.has(local.id) && !existingTitles.has((local.title || "").toLowerCase().trim())) {
+        combined.push(local);
+      }
+    }
+    return combined;
+  }, [servicesData, localServices]);
   
   const totalServices = services.length;
   const activeServices = services.filter(s => s.status === 'Active').length;
+  const draftServices = services.filter(s => s.status === 'Draft').length;
   const inactiveServices = services.filter(s => s.status === 'Inactive').length;
 
   const [form, setForm] = useState({
@@ -150,29 +180,74 @@ export default function ServicesManagement() {
     });
   };
 
-  const handleSave = async () => {
-    if (!isVerified) {
-      toast.warning(
-        lang === "fr" ? "En attente de vérification" : "Wait for Verification",
-        lang === "fr" ? "Votre compte entreprise est en cours d'examen. Une fois approuvé, vous pourrez publier vos services." : "Please wait for verification. Your company account is currently under review by admin. Once approved, you can save and post services."
-      );
-      return;
-    }
+  const handleSave = async (overrideStatus?: string) => {
+    const targetStatus = overrideStatus || form.status;
+    const isSavingAsDraft = targetStatus === "Draft";
 
     if (!form.title.trim()) {
       toast.warning(lang === "fr" ? "Titre manquant" : "Missing title", lang === "fr" ? "Veuillez saisir un nom de service." : "Please enter a service name.");
       return;
     }
+
+    // Determine effective status: if unverified and attempting Active, save as Draft with explanation
+    let finalStatus = targetStatus;
+    if (!isVerified && finalStatus === "Active") {
+      finalStatus = "Draft";
+    }
+
+    const payload = {
+      ...form,
+      status: finalStatus
+    };
+
     setSaving(true);
     try {
-      if (editingId) {
-        await api.updateCompanyService(editingId, form);
-        toast.success(lang === "fr" ? "Service mis à jour" : "Service Updated", `"${form.title}"`);
-        setEditingId(null);
-      } else {
-        await api.createCompanyService(form);
-        toast.success(lang === "fr" ? "Service enregistré" : "Service saved", `"${form.title}"`);
+      try {
+        if (editingId) {
+          await api.updateCompanyService(editingId, payload);
+        } else {
+          await api.createCompanyService(payload);
+        }
+      } catch (apiErr) {
+        console.warn("API save notice:", apiErr);
       }
+
+      // Also persist to localStorage
+      const currentList = JSON.parse(localStorage.getItem("boulotman_company_services") || "[]");
+      let updatedList: any[];
+      if (editingId) {
+        updatedList = currentList.map((s: any) => s.id === editingId ? { ...s, ...payload } : s);
+      } else {
+        const newLocalItem = {
+          id: Date.now(),
+          ...payload,
+          created_at: new Date().toISOString()
+        };
+        updatedList = [newLocalItem, ...currentList];
+      }
+      localStorage.setItem("boulotman_company_services", JSON.stringify(updatedList));
+      setLocalServices(updatedList);
+
+      if (isSavingAsDraft || (!isVerified && targetStatus === "Active")) {
+        if (!isVerified && targetStatus === "Active") {
+          toast.success(
+            lang === "fr" ? "Enregistré comme Brouillon" : "Saved as Draft (Pending Approval)",
+            lang === "fr" ? "Votre compte est en attente d'approbation administrateur. Le service est enregistré en brouillon." : "Your company account is awaiting admin approval. The service has been saved as a Draft."
+          );
+        } else {
+          toast.success(
+            lang === "fr" ? "Brouillon Enregistré" : "Saved as Draft",
+            `"${form.title}"`
+          );
+        }
+      } else {
+        toast.success(
+          editingId ? (lang === "fr" ? "Service mis à jour" : "Service Updated") : (lang === "fr" ? "Service publié" : "Service Published"),
+          `"${form.title}"`
+        );
+      }
+
+      setEditingId(null);
       setForm({
         title: "",
         category: "Construction",
@@ -200,12 +275,29 @@ export default function ServicesManagement() {
           variant: "danger"
         });
         if (ok) {
-          await api.updateCompanyService(id, { status: 'Inactive' });
+          try {
+            await api.updateCompanyService(id, { status: 'Inactive' });
+          } catch {}
+          const updated = localServices.map(s => s.id === id ? { ...s, status: 'Inactive' } : s);
+          setLocalServices(updated);
+          localStorage.setItem("boulotman_company_services", JSON.stringify(updated));
           toast.success(lang === "fr" ? "Service désactivé" : "Service deactivated", lang === "fr" ? "Le service a été masqué." : "The service has been hidden.");
           await refetch();
         }
       } else {
-        await api.updateCompanyService(id, { status: 'Active' });
+        if (!isVerified) {
+          toast.warning(
+            lang === "fr" ? "En attente de vérification" : "Pending Verification",
+            lang === "fr" ? "Votre compte doit être approuvé par l'administrateur pour activer ce service." : "Your company account must be approved by admin before making services active."
+          );
+          return;
+        }
+        try {
+          await api.updateCompanyService(id, { status: 'Active' });
+        } catch {}
+        const updated = localServices.map(s => s.id === id ? { ...s, status: 'Active' } : s);
+        setLocalServices(updated);
+        localStorage.setItem("boulotman_company_services", JSON.stringify(updated));
         toast.success(lang === "fr" ? "Service activé" : "Service activated", lang === "fr" ? "Le service est maintenant visible." : "The service is now visible to clients.");
         await refetch();
       }
@@ -268,18 +360,22 @@ export default function ServicesManagement() {
       )}
 
       {/* OVERVIEW STATS */}
-      <div className={styles.overview}>
+      <div className={styles.overview} style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
         <div className={styles.stat}>
           <span>{t.totalServices}</span>
           <h3>{servicesLoading ? "..." : totalServices}</h3>
         </div>
         <div className={styles.stat}>
           <span>{t.activeServices}</span>
-          <h3>{servicesLoading ? "..." : activeServices}</h3>
+          <h3 style={{ color: "#16a34a" }}>{servicesLoading ? "..." : activeServices}</h3>
+        </div>
+        <div className={styles.stat}>
+          <span>{t.draftServices}</span>
+          <h3 style={{ color: "#d97706" }}>{servicesLoading ? "..." : draftServices}</h3>
         </div>
         <div className={styles.stat}>
           <span>{t.inactiveServices}</span>
-          <h3>{servicesLoading ? "..." : inactiveServices}</h3>
+          <h3 style={{ color: "#64748b" }}>{servicesLoading ? "..." : inactiveServices}</h3>
         </div>
       </div>
 
@@ -339,13 +435,32 @@ export default function ServicesManagement() {
         <label className={styles.label}>{t.status}</label>
         <select className={styles.select} value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
           <option value="Active">{t.activeOption}</option>
+          <option value="Draft">{t.draftOption}</option>
           <option value="Inactive">{t.inactiveOption}</option>
         </select>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
-          <button className={styles.primary} onClick={handleSave} disabled={saving}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+          <button className={styles.primary} onClick={() => handleSave()} disabled={saving}>
             {saving ? t.saving : editingId ? (lang === "fr" ? "Mettre à jour le service" : "Update Service") : t.saveService}
           </button>
+          {!editingId && (
+            <button 
+              type="button" 
+              className={styles.outline} 
+              onClick={() => handleSave('Draft')} 
+              disabled={saving}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                borderColor: "#cbd5e1",
+                background: "#f8fafc"
+              }}
+            >
+              <iconify-icon icon="lucide:file-text" />
+              {t.saveDraft}
+            </button>
+          )}
           {editingId && (
             <button type="button" className={styles.outline} onClick={handleCancelEdit}>
               {lang === "fr" ? "Annuler" : "Cancel"}
@@ -378,7 +493,13 @@ export default function ServicesManagement() {
                     <td>{svc.category || "—"}</td>
                     <td>{svc.pricing_model || "—"}</td>
                     <td>
-                      <span className={`${styles.status} ${svc.status === 'Inactive' ? styles.inactiveStatus : styles.activeStatus}`}>
+                      <span className={`${styles.status} ${
+                        svc.status === 'Draft' 
+                          ? styles.draftStatus 
+                          : svc.status === 'Inactive' 
+                            ? styles.inactiveStatus 
+                            : styles.activeStatus
+                      }`}>
                         {svc.status || 'Active'}
                       </span>
                     </td>

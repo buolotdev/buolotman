@@ -535,8 +535,12 @@ export default function TechnicianPostServicePage() {
 
   const handlePreviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await handleDirectPublish("active");
+  };
+
+  const handleDirectPublish = async (publishStatus: "active" | "draft" = "active") => {
     if (!title.trim()) {
-      toast.error("Title Required", "Please enter a title for your service.");
+      toast.error("Title Required", "Please enter a service title.");
       return;
     }
     if (selectedTags.size === 0) {
@@ -550,6 +554,9 @@ export default function TechnicianPostServicePage() {
       const matchedCategory = CATEGORY_DATA.find(c => c.id === activeCategory);
       const categoryTitle = matchedCategory?.title || Array.from(selectedTags)[0];
 
+      const isLive = publishStatus === "active" && isVerified;
+      const statusValue = publishStatus === "draft" ? "draft" : (isVerified ? "active" : "pending_verification");
+
       const serviceData = {
         title: title.trim(),
         service_type: mode.toLowerCase() === "remote" ? "remote" : "onsite",
@@ -558,11 +565,12 @@ export default function TechnicianPostServicePage() {
         pricing_min: hourlyRate ? Number(hourlyRate) : (dailyRate ? Number(dailyRate) : 0),
         pricing_max: dailyRate ? Number(dailyRate) : (hourlyRate ? Number(hourlyRate) : null),
         description: description.trim(),
-        is_active: true,
+        is_active: isLive,
         media: [],
         tags: Array.from(selectedTags),
         category_name: categoryTitle,
         category_title: categoryTitle,
+        status: statusValue,
       };
 
       try {
@@ -577,14 +585,20 @@ export default function TechnicianPostServicePage() {
         id: Date.now(),
         ...serviceData,
         created_at: new Date().toISOString(),
-        status: "active",
+        status: statusValue,
       };
       localStorage.setItem("boulotman_technician_services", JSON.stringify([newService, ...currentServices]));
 
-      toast.success("Service Published", "Your new service listing is now live and visible to clients!");
+      if (publishStatus === "draft") {
+        toast.success("Saved as Draft", "Your service draft is saved safely. You can edit and publish it whenever you are ready!");
+      } else if (!isVerified) {
+        toast.success("Service Saved (Pending Approval)", "Your service draft is saved and will go live once your account is verified by Admin.");
+      } else {
+        toast.success("Service Published", "Your new service listing is now live and visible to clients!");
+      }
       router.push("/dashboard/technician/services");
     } catch (err: any) {
-      toast.error("Failed to publish service", err?.message || "Please check your network and try again.");
+      toast.error("Failed to save service", err?.message || "Please check your network and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -792,13 +806,39 @@ export default function TechnicianPostServicePage() {
                     />
                   </div>
 
-                  <button 
-                    type="submit" 
-                    className={styles.submitBtn} 
-                    disabled={submitting}
-                  >
-                    {submitting ? "Publishing Service..." : "Publish Service Listing"}
-                  </button>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", marginTop: "16px" }}>
+                    <button 
+                      type="submit" 
+                      className={styles.submitBtn} 
+                      disabled={submitting}
+                      style={{ flex: 1, minWidth: "200px" }}
+                    >
+                      <iconify-icon icon="lucide:send" style={{ marginRight: 6 }} />
+                      {submitting ? "Processing..." : "Publish Service Listing"}
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => handleDirectPublish("draft")}
+                      disabled={submitting}
+                      style={{
+                        background: "#ffffff",
+                        color: "#001f3f",
+                        border: "1.5px solid #cbd5e1",
+                        padding: "13px 24px",
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px"
+                      }}
+                    >
+                      <iconify-icon icon="lucide:file-text" />
+                      Save as Draft
+                    </button>
+                  </div>
                 </form>
               </div>
 
