@@ -206,6 +206,8 @@ export default function ClientProfilePage() {
   const [cropData, setCropData] = useState<{ src: string; type: "avatar" | "cover" | "business_logo" | "id_doc" } | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; title: string } | null>(null);
+  const isInitialSyncedRef = useRef(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -274,9 +276,10 @@ export default function ClientProfilePage() {
     }
   }, []);
 
-  // Sync user data to form
+  // Sync user data to form once without resetting user's ongoing input
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && !isInitialSyncedRef.current) {
+      isInitialSyncedRef.current = true;
       if (user.first_name) setFirstName(user.first_name);
       if (user.last_name) setLastName(user.last_name);
       if (user.username) setUsername(user.username);
@@ -670,6 +673,70 @@ export default function ClientProfilePage() {
         />
 
         <div className={styles.content}>
+          {/* FULL IMAGE LIGHTBOX MODAL */}
+          {lightboxImg && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0, 15, 30, 0.9)",
+                backdropFilter: "blur(10px)",
+                zIndex: 999999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 20
+              }}
+              onClick={() => setLightboxImg(null)}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  maxWidth: "90vw",
+                  maxHeight: "90vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center"
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: 12, color: "#ffffff" }}>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{lightboxImg.title}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxImg(null)}
+                    style={{
+                      background: "rgba(255,255,255,0.2)",
+                      border: "none",
+                      color: "#ffffff",
+                      borderRadius: "50%",
+                      width: 36,
+                      height: 36,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <iconify-icon icon="lucide:x" style={{ fontSize: 20 }} />
+                  </button>
+                </div>
+                <img
+                  src={lightboxImg.src}
+                  alt={lightboxImg.title}
+                  style={{
+                    maxWidth: "85vw",
+                    maxHeight: "80vh",
+                    objectFit: "contain",
+                    borderRadius: 16,
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                    background: "#000"
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* ==================== HERO SECTION & REPUTATION CARD ==================== */}
           <div className={styles.heroCard}>
             <div
@@ -682,8 +749,14 @@ export default function ClientProfilePage() {
                 backgroundPosition: "center",
                 cursor: "pointer",
               }}
-              onClick={() => coverInputRef.current?.click()}
-              title="Click to update cover image"
+              onClick={() => {
+                if (coverUrl) {
+                  setLightboxImg({ src: getImageUrl(coverUrl), title: `${displayName}'s Cover Photo` });
+                } else {
+                  coverInputRef.current?.click();
+                }
+              }}
+              title={coverUrl ? "Click to view full cover" : "Click to update cover image"}
             >
               <input
                 ref={coverInputRef}
@@ -693,13 +766,21 @@ export default function ClientProfilePage() {
                 onChange={(e) => handleImageFileChange(e, "cover")}
               />
               <div className={styles.bannerOverlay}>
-                <span className={styles.bannerUploadHint}>
+                <button
+                  type="button"
+                  className={styles.bannerUploadHint}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    coverInputRef.current?.click();
+                  }}
+                  style={{ border: "none", background: "transparent", cursor: "pointer", color: "inherit", padding: 0 }}
+                >
                   <iconify-icon
                     icon={uploadingCover ? "lucide:loader-2" : "lucide:camera"}
                     className={uploadingCover ? styles.spinIcon : ""}
                   />
                   {uploadingCover ? t.uploading : t.changeCover}
-                </span>
+                </button>
               </div>
             </div>
 
@@ -707,9 +788,15 @@ export default function ClientProfilePage() {
               <div className={styles.identityBlock}>
                 <div
                   className={styles.avatarLarge}
-                  onClick={() => avatarInputRef.current?.click()}
-                  style={{ cursor: "pointer" }}
-                  title="Click to change profile picture"
+                  onClick={() => {
+                    if (avatarUrl) {
+                      setLightboxImg({ src: getImageUrl(avatarUrl), title: `${displayName}'s Profile Photo` });
+                    } else {
+                      avatarInputRef.current?.click();
+                    }
+                  }}
+                  style={{ cursor: "pointer", position: "relative" }}
+                  title={avatarUrl ? "Click to view full photo" : "Click camera to upload"}
                 >
                   <input
                     ref={avatarInputRef}
@@ -730,12 +817,42 @@ export default function ClientProfilePage() {
                   ) : (
                     <span>{initials}</span>
                   )}
-                  <div className={styles.avatarUploadHint}>
-                    <iconify-icon
-                      icon={uploadingAvatar ? "lucide:loader-2" : "lucide:camera"}
-                      className={uploadingAvatar ? styles.spinIcon : ""}
-                    />
-                  </div>
+                  
+                  {/* Small Camera Button Badge for Upload */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      avatarInputRef.current?.click();
+                    }}
+                    title="Upload profile photo"
+                    style={{
+                      position: "absolute",
+                      bottom: 4,
+                      right: 4,
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background: "#ff4500",
+                      color: "#ffffff",
+                      border: "2.5px solid #ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
+                      zIndex: 6,
+                      transition: "transform 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    {uploadingAvatar ? (
+                      <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} style={{ fontSize: 16 }} />
+                    ) : (
+                      <iconify-icon icon="lucide:camera" style={{ fontSize: 16 }} />
+                    )}
+                  </button>
                 </div>
 
                 <div className={styles.primaryInfo}>

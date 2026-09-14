@@ -303,6 +303,7 @@ export default function TechnicianProfilePage() {
   const [cropData, setCropData] = useState<{ src: string; type: 'avatar' | 'banner' } | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; title: string } | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
@@ -1011,6 +1012,70 @@ export default function TechnicianProfilePage() {
               />
             )}
 
+            {/* FULL IMAGE LIGHTBOX MODAL */}
+            {lightboxImg && (
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(0, 15, 30, 0.9)",
+                  backdropFilter: "blur(10px)",
+                  zIndex: 999999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20
+                }}
+                onClick={() => setLightboxImg(null)}
+              >
+                <div
+                  style={{
+                    position: "relative",
+                    maxWidth: "90vw",
+                    maxHeight: "90vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: 12, color: "#ffffff" }}>
+                    <span style={{ fontSize: 15, fontWeight: 700 }}>{lightboxImg.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImg(null)}
+                      style={{
+                        background: "rgba(255,255,255,0.2)",
+                        border: "none",
+                        color: "#ffffff",
+                        borderRadius: "50%",
+                        width: 36,
+                        height: 36,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <iconify-icon icon="lucide:x" style={{ fontSize: 20 }} />
+                    </button>
+                  </div>
+                  <img
+                    src={lightboxImg.src}
+                    alt={lightboxImg.title}
+                    style={{
+                      maxWidth: "85vw",
+                      maxHeight: "80vh",
+                      objectFit: "contain",
+                      borderRadius: 16,
+                      boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                      background: "#000"
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* FULL DOCUMENT PREVIEW MODAL */}
             {previewModalDoc && (
               <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.85)", backdropFilter: "blur(8px)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
@@ -1046,8 +1111,15 @@ export default function TechnicianProfilePage() {
             <section className={styles.heroCard}>
               <div
                 className={styles.cover}
-                onClick={() => bannerInputRef.current?.click()}
-                title="Click to change banner"
+                onClick={() => {
+                  const currentCover = bannerUrl || userData?.banner_url;
+                  if (currentCover) {
+                    setLightboxImg({ src: getImageUrl(currentCover), title: `${userName}'s Cover Banner` });
+                  } else {
+                    bannerInputRef.current?.click();
+                  }
+                }}
+                title={bannerUrl || userData?.banner_url ? "Click to view full banner" : "Click to add cover photo"}
                 style={{
                   cursor: "pointer",
                   position: "relative",
@@ -1060,13 +1132,21 @@ export default function TechnicianProfilePage() {
               >
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 100%)", borderRadius: "inherit" }} />
                 <div className={styles.bannerOverlay}>
-                  <div className={styles.bannerUploadHint}>
+                  <button
+                    type="button"
+                    className={styles.bannerUploadHint}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      bannerInputRef.current?.click();
+                    }}
+                    style={{ border: "none", cursor: "pointer", outline: "none" }}
+                  >
                     {bannerUploading ? (
                       <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> {t.uploading}</>
                     ) : (
                       <><iconify-icon icon="lucide:camera" /> {(bannerUrl || userData?.banner_url) ? t.changeCover : t.addCover}</>
                     )}
-                  </div>
+                  </button>
                 </div>
                 <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => onFileSelect(e, 'banner')} />
               </div>
@@ -1075,8 +1155,15 @@ export default function TechnicianProfilePage() {
                 <div className={styles.identityBlock}>
                   <div
                     className={styles.avatarLarge}
-                    onClick={() => avatarInputRef.current?.click()}
-                    title="Click to change profile picture"
+                    onClick={() => {
+                      const currentAvatar = avatarUrl || userData?.avatar_url;
+                      if (currentAvatar) {
+                        setLightboxImg({ src: getImageUrl(currentAvatar), title: `${userName}'s Profile Photo` });
+                      } else {
+                        avatarInputRef.current?.click();
+                      }
+                    }}
+                    title={avatarUrl || userData?.avatar_url ? "Click to view full photo" : "Click camera to upload"}
                     style={{ cursor: "pointer", position: "relative" }}
                   >
                     {avatarUrl || userData?.avatar_url ? (
@@ -1091,9 +1178,42 @@ export default function TechnicianProfilePage() {
                     ) : (
                       userInitials
                     )}
-                    <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", opacity: avatarUploading ? 1 : 0, transition: "opacity 0.2s", fontSize: 14, color: "#fff" }}>
-                      {avatarUploading ? "..." : <iconify-icon icon="lucide:camera" />}
-                    </div>
+                    
+                    {/* Small Camera Button Badge for Upload */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        avatarInputRef.current?.click();
+                      }}
+                      title="Upload new photo"
+                      style={{
+                        position: "absolute",
+                        bottom: 4,
+                        right: 4,
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        background: "#ff4500",
+                        color: "#ffffff",
+                        border: "2.5px solid #ffffff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
+                        zIndex: 6,
+                        transition: "transform 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                    >
+                      {avatarUploading ? (
+                        <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} style={{ fontSize: 16 }} />
+                      ) : (
+                        <iconify-icon icon="lucide:camera" style={{ fontSize: 16 }} />
+                      )}
+                    </button>
                     <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => onFileSelect(e, 'avatar')} />
                   </div>
 

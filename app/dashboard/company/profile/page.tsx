@@ -469,6 +469,8 @@ export default function CompanyProfilePage() {
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; title: string } | null>(null);
+  const isInitialSyncedRef = useRef(false);
 
   // Add Service Form State
   const [showAddService, setShowAddService] = useState(false);
@@ -487,9 +489,10 @@ export default function CompanyProfilePage() {
   const [newProjectTimeline, setNewProjectTimeline] = useState("");
   const [addingProject, setAddingProject] = useState(false);
 
-  // Sync profile data to form
+  // Sync profile data to form once without resetting user's ongoing input
   useEffect(() => {
-    if (profile && !profileLoading) {
+    if (profile && !profileLoading && !isInitialSyncedRef.current) {
+      isInitialSyncedRef.current = true;
       setForm({
         company_name: profile.company_name || user?.company_name || "",
         trading_name: profile.trading_name || profile.company_name || user?.company_name || "",
@@ -577,13 +580,14 @@ export default function CompanyProfilePage() {
     setCropData(null);
 
     if (type === "logo") {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setLogoUrl(localPreview);
       setUploadingLogo(true);
       try {
         const res = await api.uploadAvatar(croppedFile);
-        const url = res.avatar_url || res.url || res.file_url;
-        setLogoUrl(url);
-        await api.updateCompanyProfile({ logo_url: url });
-        await refetchProfile();
+        const url = res.avatar_url || res.url || res.file_url || res.avatar || res.image;
+        if (url) setLogoUrl(url);
+        await api.updateCompanyProfile({ logo_url: url || localPreview });
         toast.success("Logo Updated", "Company logo has been updated successfully.");
       } catch (err: any) {
         toast.error("Upload Failed", err?.message || "Could not upload company logo.");
@@ -591,13 +595,14 @@ export default function CompanyProfilePage() {
         setUploadingLogo(false);
       }
     } else {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setCoverUrl(localPreview);
       setUploadingCover(true);
       try {
         const res = await api.uploadBanner(croppedFile);
-        const url = res.banner_url || res.url || res.file_url;
-        setCoverUrl(url);
-        await api.updateCompanyProfile({ cover_url: url });
-        await refetchProfile();
+        const url = res.banner_url || res.url || res.file_url || res.banner || res.cover_image;
+        if (url) setCoverUrl(url);
+        await api.updateCompanyProfile({ cover_url: url || localPreview });
         toast.success("Banner Updated", "Company cover banner has been updated.");
       } catch (err: any) {
         toast.error("Upload Failed", err?.message || "Could not upload banner.");
@@ -895,12 +900,83 @@ export default function CompanyProfilePage() {
         />
       )}
 
+      {/* FULL IMAGE LIGHTBOX MODAL */}
+      {lightboxImg && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 15, 30, 0.9)",
+            backdropFilter: "blur(10px)",
+            zIndex: 999999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20
+          }}
+          onClick={() => setLightboxImg(null)}
+        >
+          <div
+            style={{
+              position: "relative",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: 12, color: "#ffffff" }}>
+              <span style={{ fontSize: 15, fontWeight: 700 }}>{lightboxImg.title}</span>
+              <button
+                type="button"
+                onClick={() => setLightboxImg(null)}
+                style={{
+                  background: "rgba(255,255,255,0.2)",
+                  border: "none",
+                  color: "#ffffff",
+                  borderRadius: "50%",
+                  width: 36,
+                  height: 36,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer"
+                }}
+              >
+                <iconify-icon icon="lucide:x" style={{ fontSize: 20 }} />
+              </button>
+            </div>
+            <img
+              src={lightboxImg.src}
+              alt={lightboxImg.title}
+              style={{
+                maxWidth: "85vw",
+                maxHeight: "80vh",
+                objectFit: "contain",
+                borderRadius: 16,
+                boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                background: "#000"
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* ==================== 1. TOP HERO BANNER ==================== */}
       <section className={styles.heroCard}>
         <div
           className={styles.cover}
-          onClick={() => coverInputRef.current?.click()}
-          title="Click to change banner"
+          onClick={() => {
+            const currentCover = coverUrl || profile?.cover_url;
+            if (currentCover) {
+              setLightboxImg({ src: getImageUrl(currentCover), title: `${companyName}'s Cover Banner` });
+            } else {
+              coverInputRef.current?.click();
+            }
+          }}
+          title={(coverUrl || profile?.cover_url) ? "Click to view full banner" : "Click to add cover photo"}
           style={{
             cursor: "pointer",
             backgroundImage: (coverUrl || profile?.cover_url)
@@ -947,34 +1023,66 @@ export default function CompanyProfilePage() {
           <div className={styles.identityBlock}>
             <div
               className={styles.avatarLarge}
-              onClick={() => logoInputRef.current?.click()}
-              title="Click to change company logo"
-              style={{ cursor: "pointer" }}
+              onClick={() => {
+                const currentLogo = logoUrl || profile?.logo_url;
+                if (currentLogo) {
+                  setLightboxImg({ src: getImageUrl(currentLogo), title: `${companyName}'s Company Logo` });
+                } else {
+                  logoInputRef.current?.click();
+                }
+              }}
+              title={logoUrl || profile?.logo_url ? "Click to view full logo" : "Click camera to upload logo"}
+              style={{ cursor: "pointer", position: "relative" }}
             >
               {logoUrl || profile?.logo_url ? (
-                <Image
+                <img
                   src={getImageUrl(logoUrl || profile?.logo_url)}
                   alt="Company Logo"
-                  fill
-                  unoptimized
-                  style={{ objectFit: "cover" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
                 />
               ) : (
                 initials
               )}
-              <div style={{
-                position: "absolute", inset: 0,
-                background: "rgba(0,0,0,0.45)", display: "flex",
-                alignItems: "center", justifyContent: "center",
-                opacity: uploadingLogo ? 1 : 0, transition: "opacity 0.2s",
-                fontSize: 16, color: "#fff",
-              }}>
-                {uploadingLogo ? "..." : <iconify-icon icon="lucide:camera" />}
-              </div>
+
+              {/* Small Camera Button Badge for Upload */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logoInputRef.current?.click();
+                }}
+                title="Upload company logo"
+                style={{
+                  position: "absolute",
+                  bottom: 4,
+                  right: 4,
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background: "#ff4500",
+                  color: "#ffffff",
+                  border: "2.5px solid #ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
+                  zIndex: 6,
+                  transition: "transform 0.15s ease",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+              >
+                {uploadingLogo ? (
+                  <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} style={{ fontSize: 16 }} />
+                ) : (
+                  <iconify-icon icon="lucide:camera" style={{ fontSize: 16 }} />
+                )}
+              </button>
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,image/*"
                 style={{ display: "none" }}
                 onChange={(e) => onFileSelect(e, "logo")}
               />
