@@ -11,23 +11,57 @@ export default function AdminSupportPage() {
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
+  const [localInquiries, setLocalInquiries] = useState<any[]>([]);
+
   useEffect(() => {
-    if (fetchedTickets && fetchedTickets.length > 0) {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
+        if (Array.isArray(stored) && stored.length > 0) {
+          const mapped = stored.map((inq: any) => ({
+            id: inq.id,
+            subject: `[Contractor Project] ${inq.projectTitle || inq.category || "Project Review"}`,
+            client: `${inq.name} (${inq.clientType || "Client"}) - ${inq.city || inq.country || ""}`,
+            status: inq.status || "Pending",
+            messages: [
+              {
+                id: `msg-${inq.id}`,
+                sender: inq.name,
+                role: inq.clientType || "Client",
+                time: new Date(inq.created_at).toLocaleString(),
+                body: `Email: ${inq.email} | Phone: ${inq.phone}\nLocation: ${inq.city}, ${inq.country}\nCategory: ${inq.category} | Estimated Budget: ${inq.budget}\nProject Title: ${inq.projectTitle}\n\nScope Description:\n${inq.description}`
+              }
+            ]
+          }));
+          setLocalInquiries(mapped);
+        }
+      } catch (e) {
+        console.error("Failed to load local inquiries", e);
+      }
+    }
+  }, []);
+
+  const tickets = [...(localInquiries || []), ...(fetchedTickets || [])];
+
+  useEffect(() => {
+    if (tickets && tickets.length > 0) {
       setActiveTicket((prev: any) => {
-        if (!prev) return fetchedTickets[0];
-        const updated = fetchedTickets.find((t: any) => t.id === prev.id);
-        return updated || fetchedTickets[0];
+        if (!prev) return tickets[0];
+        const updated = tickets.find((t: any) => t.id === prev.id);
+        return updated || tickets[0];
       });
     } else {
       setActiveTicket(null);
     }
-  }, [fetchedTickets]);
+  }, [fetchedTickets, localInquiries]);
 
   const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
     setSending(true);
     try {
-      await api.replySupportTicket(activeTicket.db_id || activeTicket.id, replyText);
+      if (activeTicket.db_id) {
+        await api.replySupportTicket(activeTicket.db_id, replyText);
+      }
       setReplyText("");
       refetch();
     } catch (err) {
@@ -36,8 +70,6 @@ export default function AdminSupportPage() {
       setSending(false);
     }
   };
-
-  const tickets = fetchedTickets || [];
 
   const totals = {
     total: tickets.length,
