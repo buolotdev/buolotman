@@ -11,7 +11,7 @@ import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
 import { mergeWithMasterCategories } from "../lib/categories";
-import { resolveProfessionTitle, resolveServiceCategoryTag } from "../lib/professionUtils";
+import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio } from "../lib/professionUtils";
 
 function CardMedia({ result }: { result: SearchResult }) {
   const [hasError, setHasError] = useState(false);
@@ -288,7 +288,7 @@ export default function SearchPage() {
             type: item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician"),
             name: item.name || item.full_name || item.company_name || "",
             role: role,
-            description: item.description || item.bio,
+            description: resolveProfessionalBio(item, lang),
             image: rawImg ? getImageUrl(rawImg) : "",
             category: category,
             rating: item.rating ?? item.average_rating,
