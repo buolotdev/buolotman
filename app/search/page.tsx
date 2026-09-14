@@ -279,7 +279,17 @@ export default function SearchPage() {
         const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
         const mapped: SearchResult[] = raw
           .filter((item) => item.type !== "task")
-          .filter((item) => item.is_active !== false && item.is_approved !== false && item.status !== "suspended" && item.status !== "pending_approval")
+          .filter((item) => {
+            const isApproved = Boolean(
+              item.is_verified === true ||
+              item.verified === true ||
+              item.is_approved === true ||
+              item.user?.is_verified === true ||
+              item.company_profile?.is_verified === true ||
+              item.technician_profile?.is_verified === true
+            );
+            return isApproved && item.is_active !== false && item.status !== "suspended";
+          })
           .map((item) => {
           const rawImg = item.image || item.logo_url || item.cover_url || item.avatar_url || item.avatar;
           const role = resolveProfessionTitle(item, lang);
