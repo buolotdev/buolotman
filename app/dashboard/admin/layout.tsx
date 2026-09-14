@@ -31,6 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: user, loading: userLoading } = useFetch(() => api.getMe(), []);
   const { data: statsData } = useFetch(() => api.getAdminDashboardStats(), []);
 
+  // If on admin login page, bypass layout shell
+  if (pathname === "/dashboard/admin/login") {
+    return <>{children}</>;
+  }
+
   const pendingVerifications = statsData?.metrics?.pending_validations || 0;
   const userName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username || "" : "";
   const userInitials = user ? `${(user.first_name || "")[0] || ""}${(user.last_name || "")[0] || ""}`.toUpperCase() : "";

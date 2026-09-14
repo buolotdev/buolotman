@@ -29,6 +29,7 @@ export function middleware(request: NextRequest) {
 
     // Admin direct routes mapping (e.g. admin.boulotman.com/users -> /dashboard/admin/users)
     const adminRoutes = [
+      "login",
       "users",
       "tasks",
       "verification",
@@ -53,8 +54,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Allow login / signup on admin subdomain if needed
-    if (pathname === "/login" || pathname === "/signup") {
+    // Allow signup on admin subdomain if needed
+    if (pathname === "/signup") {
       return NextResponse.next();
     }
   }
