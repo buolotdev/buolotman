@@ -386,11 +386,13 @@ export default function ClientProfilePage() {
     setCropData(null);
 
     if (type === "avatar") {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setAvatarUrl(localPreview);
       setUploadingAvatar(true);
       try {
         const res = await api.uploadAvatar(croppedFile);
-        const url = res.avatar_url || res.url || res.file_url;
-        setAvatarUrl(url);
+        const url = res.avatar_url || res.url || res.file_url || res.avatar || res.image;
+        if (url) setAvatarUrl(url);
         await refetchUser();
         toast.show("success", "Avatar updated successfully");
       } catch (err: any) {
@@ -399,11 +401,13 @@ export default function ClientProfilePage() {
         setUploadingAvatar(false);
       }
     } else if (type === "cover") {
+      const localPreview = URL.createObjectURL(croppedFile);
+      setCoverUrl(localPreview);
       setUploadingCover(true);
       try {
         const res = await api.uploadBanner(croppedFile);
-        const url = res.banner_url || res.url || res.file_url;
-        setCoverUrl(url);
+        const url = res.banner_url || res.url || res.file_url || res.banner || res.cover_image || res.cover_url;
+        if (url) setCoverUrl(url);
         await refetchUser();
         toast.show("success", "Cover photo updated successfully");
       } catch (err: any) {
@@ -672,7 +676,7 @@ export default function ClientProfilePage() {
               className={styles.cover}
               style={{
                 backgroundImage: coverUrl
-                  ? `url(${getImageUrl(coverUrl)})`
+                  ? `url("${getImageUrl(coverUrl)}")`
                   : "linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%)",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -715,13 +719,13 @@ export default function ClientProfilePage() {
                     onChange={(e) => handleImageFileChange(e, "avatar")}
                   />
                   {avatarUrl ? (
-                    <Image
+                    <img
                       src={getImageUrl(avatarUrl)}
                       alt={displayName}
-                      width={120}
-                      height={120}
                       className={styles.avatarImg}
-                      unoptimized
+                      onError={(e) => {
+                        console.warn("Avatar image error:", avatarUrl);
+                      }}
                     />
                   ) : (
                     <span>{initials}</span>

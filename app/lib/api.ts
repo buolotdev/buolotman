@@ -1,30 +1,41 @@
 const API_BASE = "/api";
-const BACKEND_DOMAIN = "http://boulotman-api-env.eba-exncce63.eu-north-1.elasticbeanstalk.com";
 
 export function getImageUrl(url: string | null | undefined): string {
   if (!url) return "";
   
-  if (url.startsWith("data:") || url.startsWith("blob:")) return url;
+  const trimmed = url.trim();
+  if (!trimmed) return "";
 
-  // If already a full URL (Supabase, Unsplash, Google, ElasticBeanstalk, etc.)
-  if (url.startsWith("https://") || url.startsWith("http://")) {
-    return url;
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) return trimmed;
+
+  // If it's a backend /media/ path or full URL pointing to media
+  if (trimmed.includes("/media/")) {
+    const idx = trimmed.indexOf("/media/");
+    return trimmed.substring(idx);
   }
 
-  // If relative /media/ path from backend storage
-  if (url.startsWith("/media/")) {
-    return `${BACKEND_DOMAIN}${url}`;
-  }
-  if (url.includes("/media/")) {
-    const idx = url.indexOf("/media/");
-    return `${BACKEND_DOMAIN}${url.substring(idx)}`;
+  // If already an external full HTTPS URL (Supabase, Unsplash, Google, Pravatar, etc.)
+  if (trimmed.startsWith("https://")) {
+    return trimmed;
   }
 
-  if (url.startsWith("/")) {
-    return url;
+  // If insecure HTTP URL pointing to backend
+  if (trimmed.startsWith("http://")) {
+    if (trimmed.includes("elasticbeanstalk.com") || trimmed.includes("onrender.com") || trimmed.includes("localhost")) {
+      const slashIdx = trimmed.indexOf("/", 8);
+      if (slashIdx !== -1) {
+        return trimmed.substring(slashIdx);
+      }
+    }
+    // Upgrade other HTTP domains to HTTPS
+    return trimmed.replace(/^http:\/\//i, "https://");
+  }
+
+  if (trimmed.startsWith("/")) {
+    return trimmed;
   }
   
-  return `${BACKEND_DOMAIN}/media/${url}`;
+  return `/media/${trimmed}`;
 }
 
 function getToken(): string | null {
