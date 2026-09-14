@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
                   id="admin-email"
                   type="text"
                   className={styles.input}
-                  placeholder="admin@boulotman.com"
+                  placeholder=""
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
