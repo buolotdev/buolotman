@@ -1150,7 +1150,7 @@ function Header() {
         </div>
       </div>
       <div class="bmMegaGroup" data-menu-group="help">
-        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:#ffffff;">${lang === 'fr' ? "Centre d'aide" : 'Help Center'}</a>
+        <a href="/help-center" class="bmNavItem" data-menu="help" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" style="text-decoration:none; color:#0f172a;">${lang === 'fr' ? "Centre d'aide" : 'Help Center'}</a>
         <div class="bmMega" id="bmMegaHelp">
           <div class="bmSimple">
             <div class="bmSimpleCard">
@@ -1726,7 +1726,7 @@ function Header() {
       <a href="/find-tasks">${lang === 'fr' ? 'Trouver des tâches' : 'Find Tasks'}</a>
       
       <div class="service-provider-dropdown">
-        <a href="/service-providers" class="bmDropBtn" style="color: #ffffff; text-decoration: none; font-weight: 500; font-size: 15px;">${lang === 'fr' ? 'Prestataires' : 'Service Providers'} <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
+        <a href="/service-providers" class="bmDropBtn" style="color: #0f172a; text-decoration: none; font-weight: 500; font-size: 15px;">${lang === 'fr' ? 'Prestataires' : 'Service Providers'} <iconify-icon icon="lucide:chevron-down" style="font-size: 12px; margin-left:4px;"></iconify-icon></a>
         <div class="bmDropMenu">
           <a class="bmDropItem" href="/service-providers/technicians" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">${lang === 'fr' ? 'Trouver des techniciens' : 'Find Technicians'}</a>
           <a class="bmDropItem" href="/search?type=company" style="display:block; padding: 10px 20px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 500;">${lang === 'fr' ? 'Trouver des entreprises' : 'Find Companies'}</a>
