@@ -210,17 +210,71 @@ export default function DashboardHeader({
       const category = (notif.category || "").toLowerCase();
 
       if (notif.link) {
-        if (notif.link.startsWith("/dashboard/messages")) {
+        let link = String(notif.link).trim();
+
+        // Handle legacy or backend admin notification URLs
+        if (link.startsWith("/admin/") || link.includes("/admin/")) {
+          if (link.includes("/users") || link.includes("/user")) {
+            if (title.includes("review") || title.includes("verification") || body.includes("verification") || body.includes("review")) {
+              router.push("/dashboard/admin/verification");
+            } else {
+              router.push("/dashboard/admin/users");
+            }
+            return;
+          } else if (link.includes("/verification")) {
+            router.push("/dashboard/admin/verification");
+            return;
+          } else if (link.includes("/disputes") || link.includes("/dispute")) {
+            router.push("/dashboard/admin/disputes");
+            return;
+          } else if (link.includes("/tasks") || link.includes("/task") || link.includes("/projects")) {
+            router.push("/dashboard/admin/tasks");
+            return;
+          } else if (link.includes("/payments") || link.includes("/payment")) {
+            router.push("/dashboard/admin/payments");
+            return;
+          } else if (link.includes("/reviews")) {
+            router.push("/dashboard/admin/reviews");
+            return;
+          } else if (link.includes("/support")) {
+            router.push("/dashboard/admin/support");
+            return;
+          } else if (link.includes("/messages")) {
+            router.push("/dashboard/admin/messages");
+            return;
+          } else {
+            router.push("/dashboard/admin");
+            return;
+          }
+        }
+
+        if (link.startsWith("/dashboard/messages")) {
           if (role === "technician") router.push("/dashboard/technician/messages");
           else if (role === "company") router.push("/dashboard/company/messages");
+          else if (role === "admin") router.push("/dashboard/admin/messages");
           else router.push("/dashboard/client/messages");
         } else {
-          router.push(notif.link);
+          router.push(link);
         }
         return;
       }
 
       // Smart routing if no explicit link
+      if (role === "admin") {
+        if (title.includes("verification") || body.includes("verification") || title.includes("review") || body.includes("review")) {
+          router.push("/dashboard/admin/verification");
+        } else if (category === "dispute" || title.includes("dispute")) {
+          router.push("/dashboard/admin/disputes");
+        } else if (category === "payment" || title.includes("payment")) {
+          router.push("/dashboard/admin/payments");
+        } else if (category === "message" || title.includes("message")) {
+          router.push("/dashboard/admin/messages");
+        } else {
+          router.push("/dashboard/admin/users");
+        }
+        return;
+      }
+
       if (category === "message" || title.includes("message") || body.includes("message")) {
         if (role === "technician") router.push("/dashboard/technician/messages");
         else if (role === "company") router.push("/dashboard/company/messages");

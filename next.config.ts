@@ -54,6 +54,55 @@ const nextConfig: NextConfig = {
       { source: '/media/:path*', destination: `${backendUrl}/media/:path*` },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/admin/users/:path*',
+        destination: '/dashboard/admin/users/',
+        permanent: false,
+      },
+      {
+        source: '/admin/verification/:path*',
+        destination: '/dashboard/admin/verification/',
+        permanent: false,
+      },
+      {
+        source: '/admin/disputes/:path*',
+        destination: '/dashboard/admin/disputes/',
+        permanent: false,
+      },
+      {
+        source: '/admin/tasks/:path*',
+        destination: '/dashboard/admin/tasks/',
+        permanent: false,
+      },
+      {
+        source: '/admin/payments/:path*',
+        destination: '/dashboard/admin/payments/',
+        permanent: false,
+      },
+      {
+        source: '/admin/settings/:path*',
+        destination: '/dashboard/admin/settings/',
+        permanent: false,
+      },
+      {
+        source: '/admin/support/:path*',
+        destination: '/dashboard/admin/support/',
+        permanent: false,
+      },
+      {
+        source: '/admin/messages/:path*',
+        destination: '/dashboard/admin/messages/',
+        permanent: false,
+      },
+      {
+        source: '/admin/',
+        destination: '/dashboard/admin/',
+        permanent: false,
+      },
+    ];
+  },
   trailingSlash: true,
   output: 'standalone',
 };
