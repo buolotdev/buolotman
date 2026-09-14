@@ -9,6 +9,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { toArray } from "@/app/lib/dataShape";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock, SkeletonStat, SkeletonCard } from "@/app/components/skeleton/Skeleton";
+import PendingApprovalAlert from "@/app/components/PendingApprovalAlert";
 import styles from "./page.module.css";
 
 const companyTranslations: Record<string, Record<string, any>> = {
@@ -179,6 +180,7 @@ export default function CompanyDashboard() {
   return (
     <>
       <div className={styles.content}>
+        <PendingApprovalAlert user={user} role="company" />
         
         {/* NEW WELCOME BANNER (Matches Client Portal) */}
         <section className={styles.welcomeSection}>
@@ -272,8 +274,8 @@ export default function CompanyDashboard() {
                     <iconify-icon icon="lucide:shield-check" /> {t.verifiedEnterprise}
                   </span>
                 ) : (
-                  <span style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <iconify-icon icon="lucide:award" /> {t.capabilityVerified}
+                  <span style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en attente" : "Pending Verification"}
                   </span>
                 )}
                 <span style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -296,12 +298,12 @@ export default function CompanyDashboard() {
               <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 16, color: '#16a34a' }} />
               <span>{t.tier1}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#166534', fontWeight: 700 }}>
-              <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 16, color: '#16a34a' }} />
-              <span>{t.tier2}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#166534' : '#b45309', fontWeight: 700 }}>
+              <iconify-icon icon={isVerified ? "lucide:check-circle-2" : "lucide:clock"} style={{ fontSize: 16, color: isVerified ? '#16a34a' : '#f59e0b' }} />
+              <span>{isVerified ? t.tier2 : (lang === "fr" ? "2. Vérification (En attente)" : "2. Business Verification (Pending)")}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#0284c7', fontWeight: 800 }}>
-              <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: '#0284c7' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#0284c7' : '#64748b', fontWeight: 800 }}>
+              <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: isVerified ? '#0284c7' : '#94a3b8' }} />
               <span>{t.tier3}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#166534' : '#64748b', fontWeight: 700 }}>

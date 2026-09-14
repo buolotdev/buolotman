@@ -12,6 +12,7 @@ import styles from "./page.module.css";
 import TechnicianSidebar from "@/app/components/TechnicianSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ProfileCompletionModal from "@/app/components/ProfileCompletionModal";
+import PendingApprovalAlert from "@/app/components/PendingApprovalAlert";
 
 const dashboardTranslations: Record<string, Record<string, any>> = {
   en: {
@@ -218,6 +219,7 @@ export default function TechnicianDashboardPage() {
           />
 
           <div className={styles.content}>
+            <PendingApprovalAlert user={user} role="technician" />
             <ProfileCompletionModal user={user} onUpdate={() => refetchUser()} />
             <div className={styles.heroCard}>
               <div className={styles.heroCopy}>

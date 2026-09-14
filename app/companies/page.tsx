@@ -76,7 +76,10 @@ export default function CompaniesPage() {
   const rawCompanies = Array.isArray(companiesData) ? companiesData : ((companiesData as any)?.results || []);
 
   const filteredCompanies = useMemo(() => {
-    let list = rawCompanies;
+    let list = rawCompanies.filter((c: any) => {
+      const isApproved = c.is_verified === true || c.user?.is_verified === true || c.is_approved === true || c.user?.is_approved === true;
+      return isApproved && c.status !== "suspended" && c.user?.is_active !== false;
+    });
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();

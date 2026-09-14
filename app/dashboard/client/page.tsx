@@ -11,6 +11,7 @@ import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton"
 import styles from "./page.module.css";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
+import PendingApprovalAlert from "@/app/components/PendingApprovalAlert";
 
 const clientTranslations: Record<string, Record<string, any>> = {
   en: {
@@ -259,6 +260,7 @@ export default function ClientDashboardPage() {
           />
 
           <div className={styles.content}>
+            <PendingApprovalAlert user={user} role="client" />
             <section className={styles.welcomeSection}>
               <div className={styles.welcomeContent}>
                 <p className={styles.eyebrow}>{t.dashboardOverview}</p>
