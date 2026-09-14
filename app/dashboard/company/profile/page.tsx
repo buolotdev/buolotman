@@ -469,7 +469,7 @@ export default function CompanyProfilePage() {
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const [lightboxImg, setLightboxImg] = useState<{ src: string; title: string } | null>(null);
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; title: string; type?: 'avatar' | 'banner' } | null>(null);
   const isInitialSyncedRef = useRef(false);
 
   // Add Service Form State
@@ -906,60 +906,152 @@ export default function CompanyProfilePage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0, 15, 30, 0.9)",
-            backdropFilter: "blur(10px)",
+            background: "rgba(0, 15, 30, 0.88)",
+            backdropFilter: "blur(12px)",
             zIndex: 999999,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: 20
+            padding: "20px",
           }}
           onClick={() => setLightboxImg(null)}
         >
           <div
             style={{
               position: "relative",
-              maxWidth: "90vw",
-              maxHeight: "90vh",
+              width: lightboxImg.type === 'banner' ? "min(920px, 94vw)" : "min(500px, 90vw)",
+              maxWidth: "100%",
+              background: "#0b1523",
+              borderRadius: 20,
+              boxShadow: "0 25px 60px rgba(0,0,0,0.65)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              alignItems: "center"
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", marginBottom: 12, color: "#ffffff" }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{lightboxImg.title}</span>
+            {/* Modal Header */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "16px 20px",
+              background: "rgba(255,255,255,0.04)",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              color: "#ffffff",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <iconify-icon
+                  icon={lightboxImg.type === 'banner' ? "lucide:image" : "lucide:building-2"}
+                  style={{ fontSize: 18, color: "#ff4500" }}
+                />
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#ffffff" }}>{lightboxImg.title}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setLightboxImg(null)}
                 style={{
-                  background: "rgba(255,255,255,0.2)",
+                  background: "rgba(255,255,255,0.1)",
                   border: "none",
                   color: "#ffffff",
                   borderRadius: "50%",
-                  width: 36,
-                  height: 36,
+                  width: 34,
+                  height: 34,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.25)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
               >
-                <iconify-icon icon="lucide:x" style={{ fontSize: 20 }} />
+                <iconify-icon icon="lucide:x" style={{ fontSize: 18 }} />
               </button>
             </div>
-            <img
-              src={lightboxImg.src}
-              alt={lightboxImg.title}
-              style={{
-                maxWidth: "85vw",
-                maxHeight: "80vh",
-                objectFit: "contain",
-                borderRadius: 16,
-                boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-                background: "#000"
-              }}
-            />
+
+            {/* Image Display */}
+            <div style={{
+              padding: lightboxImg.type === 'banner' ? "16px" : "24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#060c14",
+              minHeight: lightboxImg.type === 'banner' ? 240 : 320,
+              maxHeight: "68vh",
+              overflow: "hidden",
+            }}>
+              <img
+                src={lightboxImg.src}
+                alt={lightboxImg.title}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "64vh",
+                  objectFit: "contain",
+                  borderRadius: lightboxImg.type === 'avatar' ? 16 : 12,
+                  display: "block",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.45)",
+                }}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "14px 20px",
+              background: "rgba(255,255,255,0.03)",
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const isBanner = lightboxImg.type === 'banner';
+                  setLightboxImg(null);
+                  if (isBanner) {
+                    coverInputRef.current?.click();
+                  } else {
+                    logoInputRef.current?.click();
+                  }
+                }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 16px",
+                  borderRadius: 10,
+                  background: "#ff4500",
+                  color: "#ffffff",
+                  border: "none",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                <iconify-icon icon="lucide:camera" style={{ fontSize: 15 }} />
+                {lightboxImg.type === 'banner' ? t.changeCover : "Change Logo"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLightboxImg(null)}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.12)",
+                  color: "#ffffff",
+                  border: "none",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -971,7 +1063,7 @@ export default function CompanyProfilePage() {
           onClick={() => {
             const currentCover = coverUrl || profile?.cover_url;
             if (currentCover) {
-              setLightboxImg({ src: getImageUrl(currentCover), title: `${companyName}'s Cover Banner` });
+              setLightboxImg({ src: getImageUrl(currentCover), title: `${companyName}'s Cover Banner`, type: 'banner' });
             } else {
               coverInputRef.current?.click();
             }
@@ -1021,57 +1113,40 @@ export default function CompanyProfilePage() {
 
         <div className={styles.heroBody}>
           <div className={styles.identityBlock}>
-            <div
-              className={styles.avatarLarge}
-              onClick={() => {
-                const currentLogo = logoUrl || profile?.logo_url;
-                if (currentLogo) {
-                  setLightboxImg({ src: getImageUrl(currentLogo), title: `${companyName}'s Company Logo` });
-                } else {
-                  logoInputRef.current?.click();
-                }
-              }}
-              title={logoUrl || profile?.logo_url ? "Click to view full logo" : "Click camera to upload logo"}
-              style={{ cursor: "pointer", position: "relative" }}
-            >
-              {logoUrl || profile?.logo_url ? (
-                <img
-                  src={getImageUrl(logoUrl || profile?.logo_url)}
-                  alt="Company Logo"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
-                />
-              ) : (
-                initials
-              )}
+            <div className={styles.avatarWrapper}>
+              <div
+                className={styles.avatarLarge}
+                onClick={() => {
+                  const currentLogo = logoUrl || profile?.logo_url;
+                  if (currentLogo) {
+                    setLightboxImg({ src: getImageUrl(currentLogo), title: `${companyName}'s Company Logo`, type: 'avatar' });
+                  } else {
+                    logoInputRef.current?.click();
+                  }
+                }}
+                title={logoUrl || profile?.logo_url ? "Click to view full logo" : "Click camera to upload logo"}
+              >
+                {logoUrl || profile?.logo_url ? (
+                  <img
+                    src={getImageUrl(logoUrl || profile?.logo_url)}
+                    alt="Company Logo"
+                    className={styles.avatarImg}
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
 
-              {/* Small Camera Button Badge for Upload */}
+              {/* Sleek Floating Camera Button Badge for Upload */}
               <button
                 type="button"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   logoInputRef.current?.click();
                 }}
                 title="Upload company logo"
-                style={{
-                  position: "absolute",
-                  bottom: 4,
-                  right: 4,
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  background: "#ff4500",
-                  color: "#ffffff",
-                  border: "2.5px solid #ffffff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
-                  zIndex: 6,
-                  transition: "transform 0.15s ease",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
-                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                className={styles.avatarCameraBadge}
               >
                 {uploadingLogo ? (
                   <iconify-icon icon="lucide:loader-2" className={styles.spinIcon} style={{ fontSize: 16 }} />
