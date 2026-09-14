@@ -11,6 +11,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import { mergeWithMasterCategories } from "@/app/lib/categories";
+import { resolveProfessionTitle } from "@/app/lib/professionUtils";
 
 export default function TechniciansPage() {
   const [selectedTech, setSelectedTech] = useState<any>(null);
@@ -30,15 +31,17 @@ export default function TechniciansPage() {
       <Header />
 
       <div className={styles.headerArea}>
-        <h1 className={styles.headerTitle}>Find Technicians</h1>
+        <h1 className={styles.headerTitle}>Find Technicians & Specialists</h1>
         <p className={styles.headerSubtitle}>Discover top-rated professionals near you for all your maintenance and construction needs.</p>
       </div>
 
       <div className={styles.searchContainer}>
         <input 
           type="text" 
-          placeholder="Find technicians around you - fix it & build it" 
+          placeholder="Find electricians, plumbers, engineers around you..." 
           className={styles.searchInput} 
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
         />
         <select 
           className={styles.searchSelect}
@@ -67,42 +70,63 @@ export default function TechniciansPage() {
           <p style={{ textAlign: "center", padding: "40px 0", color: "#666" }}>No technicians found.</p>
         ) : (
           <div className={styles.grid}>
-            {technicians.map((tech: any) => (
-              <div key={tech.id} className={styles.card}>
-                <div className={styles.cardImageWrapper}>
-                  <img src={tech.avatar_url || `https://i.pravatar.cc/300?img=${(tech.id % 70) + 1}`} alt={tech.first_name || tech.username} className={styles.cardImage} />
-                  <OnlineStatusBadge
-                    isOnline={tech.is_online}
-                    lastSeenDisplay={tech.last_seen_display}
-                    showText={false}
-                    size="sm"
-                    style={{ position: "absolute", bottom: 2, right: 2 }}
-                  />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-                  <h3 className={styles.cardTitle}>{tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : (tech.username || "Unknown Technician")}</h3>
-                  <OnlineStatusBadge
-                    isOnline={tech.is_online}
-                    lastSeenDisplay={tech.last_seen_display}
-                    size="sm"
-                  />
-                </div>
-                <p className={styles.cardCategory}>{tech.category || "Professional"}</p>
-                <div className={styles.cardMeta}>
-                  <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "4.8"}</span> • {tech.location || tech.country || "Kigali, Rwanda"}
-                </div>
-                <div className={styles.cardActions}>
-                  <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>
-                  <Link 
-                    href={`/post-task?specialist_id=${tech.id}&specialist_name=${encodeURIComponent(tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : tech.username || "Technician")}`} 
-                    className={styles.btnPrimary}
-                  >
-                    Hire Technician
-                  </Link>
-                </div>
+            {technicians
+              .filter((tech: any) => {
+                if (searchKeyword.trim()) {
+                  const q = searchKeyword.toLowerCase();
+                  const name = `${tech.first_name || ""} ${tech.last_name || ""} ${tech.username || ""}`.toLowerCase();
+                  const role = resolveProfessionTitle(tech).toLowerCase();
+                  const skills = (tech.skills || []).join(" ").toLowerCase();
+                  if (!name.includes(q) && !role.includes(q) && !skills.includes(q)) return false;
+                }
+                if (selectedCategory !== "all") {
+                  const cat = selectedCategory.toLowerCase();
+                  const proCat = (tech.category || "").toLowerCase();
+                  const role = resolveProfessionTitle(tech).toLowerCase();
+                  if (!proCat.includes(cat) && !role.includes(cat)) return false;
+                }
+                return true;
+              })
+              .map((tech: any) => {
+                const profession = resolveProfessionTitle(tech);
+                const fullName = tech.first_name ? `${tech.first_name} ${tech.last_name || ""}`.trim() : (tech.username || "Specialist");
+                return (
+                  <div key={tech.id} className={styles.card}>
+                    <div className={styles.cardImageWrapper}>
+                      <img src={tech.avatar_url || `https://i.pravatar.cc/300?img=${(tech.id % 70) + 1}`} alt={fullName} className={styles.cardImage} />
+                      <OnlineStatusBadge
+                        isOnline={tech.is_online}
+                        lastSeenDisplay={tech.last_seen_display}
+                        showText={false}
+                        size="sm"
+                        style={{ position: "absolute", bottom: 2, right: 2 }}
+                      />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+                      <h3 className={styles.cardTitle}>{fullName}</h3>
+                      <OnlineStatusBadge
+                        isOnline={tech.is_online}
+                        lastSeenDisplay={tech.last_seen_display}
+                        size="sm"
+                      />
+                    </div>
+                    <p className={styles.cardCategory}>{profession}</p>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "5.0"}</span> • {tech.location || tech.country || "Cameroon"}
+                    </div>
+                    <div className={styles.cardActions}>
+                      <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>
+                      <Link 
+                        href={`/post-task?specialist_id=${tech.id}&specialist_name=${encodeURIComponent(fullName)}`} 
+                        className={styles.btnPrimary}
+                      >
+                        Hire {profession}
+                      </Link>
+                    </div>
 
-              </div>
-            ))}
+                  </div>
+                );
+              })}
           </div>
         )}
 

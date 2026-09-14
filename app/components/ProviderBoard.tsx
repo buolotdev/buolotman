@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import { mergeWithMasterCategories } from "@/app/lib/categories";
+import { resolveProfessionTitle } from "@/app/lib/professionUtils";
 
 const translations: Record<string, Record<string, any>> = {
   en: {
@@ -201,10 +202,10 @@ export default function ProviderBoard() {
         ) : (
           <div className={styles.grid}>
             {paginatedProviders.map((pro: any) => {
-              const fullName = pro.first_name ? `${pro.first_name} ${pro.last_name || ""}`.trim() : (pro.username || "Technician");
+              const fullName = pro.first_name ? `${pro.first_name} ${pro.last_name || ""}`.trim() : (pro.username || "Specialist");
               const proRating = pro.average_rating ? Number(pro.average_rating).toFixed(1) : "5.0";
-              const proLocation = [pro.city, pro.country].filter(Boolean).join(", ") || pro.location || pro.address || "Global";
-              const proRole = pro.headline || pro.title || pro.category || (pro.expertise_level ? `Specialist (${pro.expertise_level})` : t.verifiedRole);
+              const proLocation = [pro.city, pro.country].filter(Boolean).join(", ") || pro.location || pro.address || "Cameroon";
+              const proRole = resolveProfessionTitle(pro, lang);
               const proBio = pro.bio || (pro.headline ? `${pro.headline} - Ready to assist clients with verified expertise.` : t.defaultBio);
               const hireUrl = `/post-task?specialist_id=${pro.id}&specialist_name=${encodeURIComponent(fullName)}`;
               const profileUrl = `/profile/${pro.id}`;

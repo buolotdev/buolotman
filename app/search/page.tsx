@@ -11,6 +11,7 @@ import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
 import { mergeWithMasterCategories } from "../lib/categories";
+import { resolveProfessionTitle, resolveServiceCategoryTag } from "../lib/professionUtils";
 
 function CardMedia({ result }: { result: SearchResult }) {
   const [hasError, setHasError] = useState(false);
@@ -280,17 +281,19 @@ export default function SearchPage() {
           .filter((item) => item.type !== "task")
           .map((item) => {
           const rawImg = item.image || item.logo_url || item.cover_url || item.avatar_url || item.avatar;
+          const role = resolveProfessionTitle(item, lang);
+          const category = resolveServiceCategoryTag({ ...item, role }, lang);
           return {
             id: item.id,
             type: item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician"),
             name: item.name || item.full_name || item.company_name || "",
-            role: item.role || item.specialty || item.title,
+            role: role,
             description: item.description || item.bio,
             image: rawImg ? getImageUrl(rawImg) : "",
-            category: item.category || item.category_name,
+            category: category,
             rating: item.rating ?? item.average_rating,
             reviews: item.reviews_count ?? item.reviews,
-            location: item.location || item.city,
+            location: item.location || item.city || item.address || item.country || "",
             price: item.price ?? item.hourly_rate ?? item.starting_price,
             priceLabel: item.price_label,
             verified: item.verified ?? item.is_verified,
@@ -312,7 +315,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [searchParams, lang]);
 
   const categories = mergeWithMasterCategories(categoriesData).map((c) => ({
     label: c.name,
@@ -320,9 +323,41 @@ export default function SearchPage() {
   }));
 
   const filteredByTab = useMemo(() => {
-    if (activeTab === "all") return results;
-    return results.filter((r) => r.type === activeTab);
-  }, [results, activeTab]);
+    let list = results;
+    if (activeTab !== "all") {
+      list = list.filter((r) => r.type === activeTab);
+    }
+
+    // Client-side category matching fallback
+    if (activeCategory && activeCategory !== "any") {
+      const catSlug = activeCategory.toLowerCase();
+      const catQuery = catSlug.replace(/[-_]/g, " ");
+      list = list.filter((r) => {
+        const catStr = (r.category || "").toLowerCase();
+        const roleStr = (r.role || "").toLowerCase();
+        const skillsStr = (r.skills || []).join(" ").toLowerCase();
+        const servicesStr = (r.services || []).map((s: any) => s.title || "").join(" ").toLowerCase();
+        const descStr = (r.description || "").toLowerCase();
+        const full = `${catStr} ${roleStr} ${skillsStr} ${servicesStr} ${descStr}`;
+        
+        // Exact slug or word match
+        if (full.includes(catSlug) || full.includes(catQuery)) return true;
+        const keywords = catQuery.split(" ").filter((w: string) => w.length > 2);
+        return keywords.some((kw: string) => full.includes(kw));
+      });
+    }
+
+    // Client-side location matching fallback
+    if (location && !["global", "all locations", "any", "toutes les localisations"].includes(location.toLowerCase().trim())) {
+      const locQuery = location.toLowerCase().trim();
+      list = list.filter((r) => {
+        const rLoc = (r.location || "").toLowerCase();
+        return rLoc.includes(locQuery) || locQuery.includes(rLoc);
+      });
+    }
+
+    return list;
+  }, [results, activeTab, activeCategory, location]);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -350,21 +385,37 @@ export default function SearchPage() {
             <span className={styles.iconWrap} aria-hidden="true">
               <iconify-icon icon="lucide:map-pin" />
             </span>
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                aria-label="Location"
-                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none' }}
-              >
-                <option value="Global">Global</option>
-                <option value="Nigeria">Nigeria</option>
-                <option value="Rwanda">Rwanda</option>
-                <option value="Kenya">Kenya</option>
-                <option value="Ghana">Ghana</option>
-                <option value="South Africa">South Africa</option>
-                <option value="Ivory Coast">Ivory Coast</option>
-                <option value="Cameroon">Cameroon</option>
-              </select>
+            <input
+              list="search-locations-list"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="City, region, or Global"
+              aria-label="Location"
+              style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none' }}
+            />
+            <datalist id="search-locations-list">
+              <option value="Global" />
+              <option value="Bonamoussadi, Douala" />
+              <option value="Douala, Cameroon" />
+              <option value="Yaoundé, Cameroon" />
+              <option value="Cameroon" />
+              <option value="Kigali, Rwanda" />
+              <option value="Rwanda" />
+              <option value="Lagos, Nigeria" />
+              <option value="Abuja, Nigeria" />
+              <option value="Nigeria" />
+              <option value="Nairobi, Kenya" />
+              <option value="Kenya" />
+              <option value="Accra, Ghana" />
+              <option value="Ghana" />
+              <option value="Abidjan, Ivory Coast" />
+              <option value="Ivory Coast" />
+              <option value="Johannesburg, South Africa" />
+              <option value="Cape Town, South Africa" />
+              <option value="South Africa" />
+              <option value="Benin" />
+            </datalist>
           </label>
           <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
             {t.btnSearch}
