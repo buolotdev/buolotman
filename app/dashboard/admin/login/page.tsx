@@ -59,45 +59,38 @@ export default function AdminLoginPage() {
 
   return (
     <div className={styles.container}>
-      {/* Background Decor */}
-      <div className={styles.gridBackground} />
-      <div className={styles.orbTop} />
-      <div className={styles.orbBottom} />
+      <div className={styles.cardWrapper}>
+        <div className={styles.header}>
+          <Link href="/" className={styles.logoWrap} title="Boulot Man Home">
+            {/* Official Boulot Man Logo */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/boulotman-logo.png"
+              alt="Boulot Man"
+              className={styles.logoImg}
+            />
+          </Link>
 
-      {/* Admin Login Card */}
-      <div className={styles.loginCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.brandRow}>
-            <Link href="/" className={styles.brandLogo}>
-              <span className={styles.brandText}>
-                Boulot<span className={styles.brandAccent}>Man</span>
-              </span>
-            </Link>
-            <span className={styles.adminTag}>
-              <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#ff4500", marginRight: 5 }} />
-              Admin Portal
-            </span>
-          </div>
-
-          <div className={styles.shieldIconWrap}>
-            <iconify-icon icon="lucide:shield-check" />
+          <div className={styles.badgeRow}>
+            <span className={styles.badgeDot} />
+            <span>Admin Portal</span>
           </div>
 
           <h1 className={styles.title}>Welcome Admin</h1>
           <p className={styles.subtitle}>
-            Boulot Man Administrative Governance & Command Center. Authorized personnel access only.
+            Boulot Man administrative command & management center. Authorized personnel access only.
           </p>
         </div>
 
         {error && (
-          <div className={styles.errorAlert}>
-            <iconify-icon icon="lucide:alert-octagon" style={{ fontSize: 18, flexShrink: 0 }} />
+          <div className={styles.errorBox}>
+            <iconify-icon icon="lucide:alert-circle" style={{ fontSize: 18, flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.inputGroup}>
+          <div className={styles.inputField}>
             <label className={styles.label} htmlFor="admin-email">
               <span>Admin Email / Username</span>
             </label>
@@ -116,7 +109,7 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <div className={styles.inputGroup}>
+          <div className={styles.inputField}>
             <label className={styles.label} htmlFor="admin-pass">
               <span>Password</span>
             </label>
@@ -134,9 +127,10 @@ export default function AdminLoginPage() {
               />
               <button
                 type="button"
-                className={styles.togglePassBtn}
+                className={styles.eyeButton}
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 <iconify-icon icon={showPassword ? "lucide:eye-off" : "lucide:eye"} />
               </button>
@@ -151,14 +145,17 @@ export default function AdminLoginPage() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <span>Remember this session</span>
+              <span>Remember session</span>
             </label>
-            <span style={{ fontSize: 12, color: "#64748b" }}>256-bit SSL</span>
+            <span className={styles.securityNote}>
+              <iconify-icon icon="lucide:shield-check" style={{ color: "#10b981", fontSize: 14 }} />
+              256-bit SSL
+            </span>
           </div>
 
           <button
             type="submit"
-            className={styles.submitBtn}
+            className={styles.submitButton}
             disabled={loading}
           >
             {loading ? (
@@ -168,20 +165,23 @@ export default function AdminLoginPage() {
               </>
             ) : (
               <>
-                <span>Enter Command Center</span>
+                <span>Access Command Center</span>
                 <iconify-icon icon="lucide:arrow-right" style={{ fontSize: 18 }} />
               </>
             )}
           </button>
         </form>
 
-        <div className={styles.quickHint}>
+        <div className={styles.footerHint}>
           <span>Official Admin Email:</span>
           <code>admin@boulotman.com</code>
         </div>
 
-        <div className={styles.cardFooter}>
-          <Link href="/">← Back to Main Marketplace</Link>
+        <div className={styles.backHome}>
+          <Link href="/" className={styles.backLink}>
+            <iconify-icon icon="lucide:arrow-left" style={{ fontSize: 14 }} />
+            <span>Back to Boulot Man Marketplace</span>
+          </Link>
         </div>
       </div>
     </div>
