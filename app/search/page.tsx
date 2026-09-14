@@ -279,6 +279,7 @@ export default function SearchPage() {
         const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
         const mapped: SearchResult[] = raw
           .filter((item) => item.type !== "task")
+          .filter((item) => item.is_active !== false && item.is_approved !== false && item.status !== "suspended" && item.status !== "pending_approval")
           .map((item) => {
           const rawImg = item.image || item.logo_url || item.cover_url || item.avatar_url || item.avatar;
           const role = resolveProfessionTitle(item, lang);
