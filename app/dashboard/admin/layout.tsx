@@ -32,7 +32,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: statsData } = useFetch(() => api.getAdminDashboardStats(), []);
 
   // If on admin login page, bypass layout shell
-  if (pathname === "/dashboard/admin/login") {
+  const isLoginPage = Boolean(
+    pathname === "/dashboard/admin/login" ||
+    pathname === "/dashboard/admin/login/" ||
+    pathname?.includes("/admin/login") ||
+    pathname?.includes("/login") ||
+    pathname?.endsWith("/login") ||
+    pathname?.endsWith("/login/")
+  );
+
+  if (isLoginPage) {
     return <>{children}</>;
   }
 

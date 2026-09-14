@@ -57,9 +57,22 @@ function clearSession() {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [checking, setChecking] = useState(true);
+
+  const isLoginRoute = Boolean(
+    pathname?.includes("/admin/login") ||
+    pathname?.includes("/login") ||
+    pathname?.endsWith("/login") ||
+    pathname?.endsWith("/login/")
+  );
+
+  const [checking, setChecking] = useState(!isLoginRoute);
 
   useEffect(() => {
+    if (isLoginRoute) {
+      setChecking(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function guard() {

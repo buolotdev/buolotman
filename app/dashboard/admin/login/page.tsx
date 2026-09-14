@@ -15,22 +15,6 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If already logged in as Admin, redirect straight to Admin Dashboard
-  useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-    if (token) {
-      api.getMe()
-        .then((me) => {
-          if (me?.role?.toUpperCase() === "ADMIN" || me?.is_staff || me?.is_superuser) {
-            router.replace("/dashboard/admin");
-          }
-        })
-        .catch(() => {
-          // Token expired, allow logging in
-        });
-    }
-  }, [router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
