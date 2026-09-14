@@ -35,7 +35,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Masonry", "Bricklaying", "Concrete Works", "Foundations", "Roofing",
       "Plastering", "Tiling", "Renovation", "Ceilings", "Site Works"
     ],
-    linkUrl: "/categories/construction-building",
+    linkUrl: "/categories/civil-construction-and-architecture",
     linkText: "Find Construction Professionals",
     providerLabel: "Professionals & Companies"
   },
@@ -53,7 +53,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Generator Installation", "Inverters", "Fault Repairs", "Earthing",
       "Maintenance", "Power Systems"
     ],
-    linkUrl: "/categories/electrical-power",
+    linkUrl: "/categories/electrical-and-electronics-engineering",
     linkText: "Find Electricians",
     providerLabel: "Professionals & Companies"
   },
@@ -71,7 +71,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Kitchen Plumbing", "Water Tanks", "Pumps", "Drainage",
       "Borehole Systems", "Water Networks"
     ],
-    linkUrl: "/categories/plumbing-water-systems",
+    linkUrl: "/categories/mechanical-and-industrial-engineering",
     linkText: "Find Plumbers",
     providerLabel: "Professionals & Companies"
   },
@@ -88,7 +88,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Furniture Making", "Doors", "Wardrobes", "Kitchen Cabinets",
       "Custom Woodwork", "Joinery", "Repairs", "Interior Woodwork"
     ],
-    linkUrl: "/categories/carpentry-woodwork",
+    linkUrl: "/categories/handyman-and-home-maintenance",
     linkText: "Find Carpenters",
     providerLabel: "Professionals & Companies"
   },
@@ -105,7 +105,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Steel Fabrication", "Gates", "Railings", "Metal Doors",
       "Window Grilles", "Structural Welding", "Repairs", "Custom Metalwork"
     ],
-    linkUrl: "/categories/welding-metal-fabrication",
+    linkUrl: "/categories/civil-construction-and-architecture",
     linkText: "Find Welders",
     providerLabel: "Professionals & Companies"
   },
@@ -122,7 +122,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Interior Painting", "Exterior Painting", "Waterproofing", "Surface Prep",
       "Wall Finishes", "Decorative Coatings", "Commercial Painting", "Touch-ups"
     ],
-    linkUrl: "/categories/painting-finishing",
+    linkUrl: "/categories/civil-construction-and-architecture",
     linkText: "Find Painters",
     providerLabel: "Professionals & Companies"
   },
@@ -139,7 +139,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "AC Installation", "AC Repair", "Gas Refill", "Maintenance",
       "Cold Rooms", "Commercial Refrigeration", "Chillers", "Ducting"
     ],
-    linkUrl: "/categories/ac-refrigeration-hvac",
+    linkUrl: "/categories/mechanical-and-industrial-engineering",
     linkText: "Find AC Technicians",
     providerLabel: "Professionals & Companies"
   },
@@ -156,7 +156,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Solar Panel Setup", "Inverter Installation", "Lithium Battery Banks",
       "Hybrid Solar", "Off-Grid Systems", "Energy Audits", "Solar Maintenance"
     ],
-    linkUrl: "/categories/solar-renewable-energy",
+    linkUrl: "/categories/renewable-energy-and-utilities",
     linkText: "Find Solar Engineers",
     providerLabel: "Professionals & Companies"
   },
@@ -173,7 +173,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Web Applications", "Mobile Apps (iOS/Android)", "Backend APIs",
       "Database Architecture", "UI/UX Design", "E-commerce", "QA Testing", "Cloud Integrations"
     ],
-    linkUrl: "/categories/software-engineering",
+    linkUrl: "/categories/software-and-digital-engineering",
     linkText: "Find Software Engineers",
     providerLabel: "Professionals & Companies"
   },
@@ -190,7 +190,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Structured Cabling", "Office LAN/WAN", "Router & Switch Config",
       "Server Setup", "Enterprise Wi-Fi", "Hardware Repair", "Remote IT Support"
     ],
-    linkUrl: "/categories/it-networking",
+    linkUrl: "/categories/it-infrastructure-and-networking",
     linkText: "Find IT Specialists",
     providerLabel: "Professionals & Companies"
   },
@@ -207,7 +207,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Vulnerability Scans", "Penetration Testing", "Firewall Configuration",
       "SOC Monitoring", "GDPR/ISO Compliance", "Malware Incident Response"
     ],
-    linkUrl: "/categories/cybersecurity",
+    linkUrl: "/categories/cybersecurity-services",
     linkText: "Find Security Experts",
     providerLabel: "Professionals & Companies"
   },
@@ -224,7 +224,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Deep Housekeeping", "Office Janitorial", "Post-Construction Clean",
       "Fumigation & Pest Control", "Upholstery Steam Cleaning", "Lawn Care"
     ],
-    linkUrl: "/categories/cleaning-environmental",
+    linkUrl: "/categories/cleaning-outdoor-and-environmental-services",
     linkText: "Find Cleaning Providers",
     providerLabel: "Professionals & Companies"
   },
@@ -241,7 +241,7 @@ const MASTER_CATEGORIES_DATA: CategoryItem[] = [
       "Engine Diagnostics", "Auto Electrical", "Brakes & Suspension",
       "Fleet Maintenance", "Heavy Machinery", "Bodywork & Paint"
     ],
-    linkUrl: "/categories/automotive-heavy",
+    linkUrl: "/categories/automotive-and-heavy-equipment",
     linkText: "Find Auto Mechanics",
     providerLabel: "Professionals & Companies"
   },
@@ -528,26 +528,26 @@ export default function ServiceCategoriesPage() {
             </div>
 
             <div className="bm-categories-how-grid">
-              <div className="bm-categories-how-card">
+              <a href="#all-categories" style={{ textDecoration: "none", color: "inherit" }} className="bm-categories-how-card">
                 <strong>01</strong>
                 <h3>Select a Category</h3>
                 <p>Find the trade, engineering domain, or personal service that matches your requirement.</p>
-              </div>
-              <div className="bm-categories-how-card">
+              </a>
+              <Link href="/post-task" style={{ textDecoration: "none", color: "inherit" }} className="bm-categories-how-card">
                 <strong>02</strong>
                 <h3>Post or Search</h3>
                 <p>Post a task for quotes or browse verified profiles and companies directly.</p>
-              </div>
-              <div className="bm-categories-how-card">
+              </Link>
+              <Link href="/service-providers/technicians" style={{ textDecoration: "none", color: "inherit" }} className="bm-categories-how-card">
                 <strong>03</strong>
                 <h3>Hire with Confidence</h3>
                 <p>Review background checks, ratings, previous work portfolio, and pricing models.</p>
-              </div>
-              <div className="bm-categories-how-card">
+              </Link>
+              <Link href="/payments-and-escrow" style={{ textDecoration: "none", color: "inherit" }} className="bm-categories-how-card">
                 <strong>04</strong>
                 <h3>Secure Escrow</h3>
                 <p>Funds are held securely and only released when you inspect and approve milestones.</p>
-              </div>
+              </Link>
             </div>
           </div>
         </section>

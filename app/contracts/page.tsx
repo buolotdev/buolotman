@@ -11,46 +11,55 @@ const CATEGORIES = [
     title: "Nannies & Childcare",
     desc: "Live-in or live-out nannies, after-school caregivers, night nannies and family support professionals.",
     image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=nanny",
   },
   {
     title: "Caregivers & Home Support",
     desc: "Elderly companions, personal care assistants, recovery support and qualified home-care professionals.",
     image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=caregiver",
   },
   {
     title: "Private Chefs & Cooks",
     desc: "Family cooks, private chefs, meal-preparation professionals and dietary-specialist cooks.",
     image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=chef",
   },
   {
     title: "Tutors & Instructors",
     desc: "Academic tutors, language teachers, music instructors, ICT tutors and exam-preparation professionals.",
     image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=tutor",
   },
   {
     title: "Household Support",
     desc: "Housekeepers, domestic assistants, laundry professionals, home organizers and household supervisors.",
     image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=housekeeper",
   },
   {
     title: "Drivers & Chauffeurs",
     desc: "Private drivers, family drivers, school drivers, executive drivers and personal chauffeurs.",
     image: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=driver",
   },
   {
     title: "Property & Estate Support",
     desc: "Property caretakers, groundskeepers, gardeners, pool technicians and estate attendants.",
     image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=caretaker",
   },
   {
     title: "Technical Professionals",
     desc: "Electricians, plumbers, AC technicians, generator technicians, solar installers and maintenance specialists.",
     image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians",
   },
   {
     title: "Personal & Administrative Support",
     desc: "Personal assistants, private secretaries, household administrators and property coordinators.",
     image: "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=900&q=80",
+    linkUrl: "/service-providers/technicians?q=assistant",
   },
 ];
 
@@ -123,7 +132,7 @@ export default function ProfessionalContractsPage() {
 
               <div className="bmpcHeroActions">
                 <a href="#find-professional" className="bmpcBtn bmpcBtnPrimary">Find a Professional</a>
-                <a href="#post-contract" className="bmpcBtn bmpcBtnSecondary">Post a Contract</a>
+                <Link href="/post-task" className="bmpcBtn bmpcBtnSecondary">Post a Contract</Link>
               </div>
 
               <div className="bmpcHeroMeta">
@@ -199,16 +208,18 @@ export default function ProfessionalContractsPage() {
 
             <div className="bmpcCategoryGrid">
               {CATEGORIES.map((cat, idx) => (
-                <article key={idx} className="bmpcCategoryCard">
-                  <div
-                    className="bmpcCategoryCardImage"
-                    style={{ backgroundImage: `url("${cat.image}")` }}
-                  />
-                  <div className="bmpcCategoryCardBody">
-                    <h3>{cat.title}</h3>
-                    <p>{cat.desc}</p>
-                  </div>
-                </article>
+                <Link key={idx} href={cat.linkUrl} style={{ textDecoration: "none", color: "inherit" }}>
+                  <article className="bmpcCategoryCard">
+                    <div
+                      className="bmpcCategoryCardImage"
+                      style={{ backgroundImage: `url("${cat.image}")` }}
+                    />
+                    <div className="bmpcCategoryCardBody">
+                      <h3>{cat.title}</h3>
+                      <p>{cat.desc}</p>
+                    </div>
+                  </article>
+                </Link>
               ))}
             </div>
           </div>
