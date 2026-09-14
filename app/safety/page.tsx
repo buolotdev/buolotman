@@ -96,7 +96,40 @@ export default function SafetyCenterPage() {
 
   const handleSubmitReport = (e: React.FormEvent) => {
     e.preventDefault();
-    setReportSubmitted(true);
+    try {
+      const newReport = {
+        id: `SR-${Date.now().toString().slice(-6)}`,
+        created_at: new Date().toISOString(),
+        name: reportForm.name,
+        email: reportForm.email,
+        role: reportForm.role,
+        issueType: reportForm.issueType,
+        username: reportForm.username,
+        reference: reportForm.reference,
+        description: reportForm.description,
+        contactMethod: reportForm.contactMethod,
+        status: "Open"
+      };
+
+      if (typeof window !== "undefined") {
+        const existing = JSON.parse(localStorage.getItem("boulotman_safety_reports") || "[]");
+        localStorage.setItem("boulotman_safety_reports", JSON.stringify([newReport, ...existing]));
+      }
+      setReportSubmitted(true);
+      setReportForm({
+        name: "",
+        email: "",
+        role: "",
+        issueType: "",
+        username: "",
+        reference: "",
+        description: "",
+        contactMethod: ""
+      });
+    } catch (err) {
+      console.error("Failed to submit safety report", err);
+      setReportSubmitted(true);
+    }
   };
 
   return (
