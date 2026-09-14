@@ -313,6 +313,8 @@ export const api = {
     request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify(data), public: true } as any),
   submitContact: (data: Record<string, string>) =>
     request<any>("/tasks/inquiry/", { method: "POST", body: JSON.stringify({ ...data, inquiry_type: 'general' }), public: true } as any),
+  getInquiries: () =>
+    request<any[]>("/tasks/inquiry/"),
 
   // Wallet & Subscriptions (CamPay Mobile Money)
   getWallet: () => request<any>("/wallet/"),

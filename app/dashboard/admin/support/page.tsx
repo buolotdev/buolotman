@@ -6,42 +6,79 @@ import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 
 export default function AdminSupportPage() {
-  const { data: fetchedTickets, loading, refetch } = useFetch(() => api.getAdminSupportTickets(), []);
+  const [allTickets, setAllTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
-  const [localInquiries, setLocalInquiries] = useState<any[]>([]);
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const [supportRes, inquiryRes] = await Promise.allSettled([
+        api.getAdminSupportTickets(),
+        api.getInquiries()
+      ]);
+
+      const supportTickets = supportRes.status === "fulfilled" && Array.isArray(supportRes.value) ? supportRes.value : [];
+      const inquiries = inquiryRes.status === "fulfilled" && Array.isArray(inquiryRes.value) ? inquiryRes.value : [];
+
+      const mappedInquiries = inquiries.map((inq: any) => ({
+        id: `INQ-${inq.id || inq.pk}`,
+        db_id: inq.id,
+        subject: `[${(inq.inquiry_type || "General").toUpperCase()} Inquiry] ${inq.company_name || inq.name}`,
+        client: `${inq.name || "Client"} (${inq.email || ""})`,
+        status: inq.status || "Pending",
+        messages: [
+          {
+            id: `msg-inq-${inq.id}`,
+            sender: inq.name || "Inquiry Lead",
+            role: inq.inquiry_type || "Client",
+            time: inq.created_at ? new Date(inq.created_at).toLocaleString() : "Recent",
+            body: `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\n\nDetails:\n${inq.details || inq.message || "No additional details provided."}`
+          }
+        ]
+      }));
+
+      // Merge local inquiries if any
+      let localInqs: any[] = [];
+      if (typeof window !== "undefined") {
+        try {
+          const stored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
+          if (Array.isArray(stored)) {
+            localInqs = stored.map((inq: any) => ({
+              id: inq.id,
+              subject: `[Contractor Project] ${inq.projectTitle || inq.category || "Project Review"}`,
+              client: `${inq.name} (${inq.clientType || "Client"}) - ${inq.city || inq.country || ""}`,
+              status: inq.status || "Pending",
+              messages: [
+                {
+                  id: `msg-${inq.id}`,
+                  sender: inq.name,
+                  role: inq.clientType || "Client",
+                  time: inq.created_at ? new Date(inq.created_at).toLocaleString() : "Recent",
+                  body: `Email: ${inq.email} | Phone: ${inq.phone}\nLocation: ${inq.city}, ${inq.country}\nCategory: ${inq.category} | Estimated Budget: ${inq.budget}\nProject Title: ${inq.projectTitle}\n\nScope Description:\n${inq.description}`
+                }
+              ]
+            }));
+          }
+        } catch {}
+      }
+
+      const combined = [...localInqs, ...mappedInquiries, ...supportTickets];
+      setAllTickets(combined);
+    } catch (err) {
+      console.error("Failed to load tickets", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
-        if (Array.isArray(stored) && stored.length > 0) {
-          const mapped = stored.map((inq: any) => ({
-            id: inq.id,
-            subject: `[Contractor Project] ${inq.projectTitle || inq.category || "Project Review"}`,
-            client: `${inq.name} (${inq.clientType || "Client"}) - ${inq.city || inq.country || ""}`,
-            status: inq.status || "Pending",
-            messages: [
-              {
-                id: `msg-${inq.id}`,
-                sender: inq.name,
-                role: inq.clientType || "Client",
-                time: new Date(inq.created_at).toLocaleString(),
-                body: `Email: ${inq.email} | Phone: ${inq.phone}\nLocation: ${inq.city}, ${inq.country}\nCategory: ${inq.category} | Estimated Budget: ${inq.budget}\nProject Title: ${inq.projectTitle}\n\nScope Description:\n${inq.description}`
-              }
-            ]
-          }));
-          setLocalInquiries(mapped);
-        }
-      } catch (e) {
-        console.error("Failed to load local inquiries", e);
-      }
-    }
+    fetchAll();
   }, []);
 
-  const tickets = [...(localInquiries || []), ...(fetchedTickets || [])];
+  const tickets = allTickets;
 
   useEffect(() => {
     if (tickets && tickets.length > 0) {
@@ -53,7 +90,7 @@ export default function AdminSupportPage() {
     } else {
       setActiveTicket(null);
     }
-  }, [fetchedTickets, localInquiries]);
+  }, [allTickets]);
 
   const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
@@ -63,7 +100,7 @@ export default function AdminSupportPage() {
         await api.replySupportTicket(activeTicket.db_id, replyText);
       }
       setReplyText("");
-      refetch();
+      fetchAll();
     } catch (err) {
       alert("Failed to send reply");
     } finally {
