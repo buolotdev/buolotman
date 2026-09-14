@@ -36,14 +36,14 @@ body {
 .bm-main-header-inner {
   max-width: 1500px;
   margin: auto;
-  padding: 14px 24px;
+  padding: 6px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .bm-main-logo img {
-  height: 84px;
+  height: 48px;
   cursor: pointer;
   transition: transform 0.2s;
 }
@@ -54,13 +54,13 @@ body {
 /* NAV */
 .bm-main-nav {
   display: flex;
-  gap: 22px;
+  gap: 18px;
   align-items: center;
 }
 
 .bm-main-nav a {
   text-decoration: none;
-  font-size: .85rem;
+  font-size: .84rem;
   font-weight: 500;
   color: #0f172a;
   transition: all 0.2s ease;
@@ -71,8 +71,8 @@ body {
 }
 
 .bm-main-btn {
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 7px 15px;
+  border-radius: 7px;
   font-size: .8rem;
   text-decoration: none;
   transition: all 0.3s ease;
@@ -420,7 +420,7 @@ body {
 #bmMegaRoot .bmHdrInner {
   max-width: 1500px;
   margin: auto;
-  padding: 12px 20px;
+  padding: 5px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -429,14 +429,15 @@ body {
 /* ================= NAV ================= */
 #bmMegaRoot .bmNavLeft {
   display: flex;
-  gap: 28px;
+  gap: 24px;
 }
 
 #bmMegaRoot .bmNavItem {
   display: inline-flex;
   align-items: center;
-  padding: 6px 0;
+  padding: 3px 0;
   font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
   color: #0f172a;
 }
@@ -458,7 +459,7 @@ body {
 /* ================= RIGHT ================= */
 #bmMegaRoot .bmNavRight {
   display: flex;
-  gap: 14px;
+  gap: 10px;
 }
 
 /* ================= DROPDOWNS ================= */
@@ -470,14 +471,14 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   background: #f8fafc;
   color: #0f172a;
   cursor: pointer;
   font-weight: 500;
-  font-size: 13.5px;
+  font-size: 12.5px;
 }
 
 #bmMegaRoot .bmDropBtn:hover {
