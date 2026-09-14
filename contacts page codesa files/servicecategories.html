@@ -1,0 +1,4110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Boulot Man | Service Categories</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        :root {
+            --bm-blue: #001F3F;
+            --bm-blue-dark: #00152b;
+            --bm-blue-soft: #0b3c6f;
+
+            --bm-orange: #FF4500;
+            --bm-orange-dark: #e84000;
+
+            --bm-white: #ffffff;
+
+            --bm-bg: #f5f7fa;
+            --bm-card: #ffffff;
+
+            --bm-text: #172033;
+            --bm-muted: #667085;
+
+            --bm-border: #e3e7ec;
+            --bm-border-dark: #d6dce4;
+
+            --bm-green: #16825d;
+
+            --bm-shadow:
+                0 12px 32px rgba(0, 31, 63, 0.07);
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+
+        body {
+            background: var(--bm-bg);
+
+            color: var(--bm-text);
+
+            font-family:
+                "Inter",
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            font-size: 16px;
+
+            line-height: 1.55;
+
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+
+        a {
+            color: inherit;
+        }
+
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+
+        .bm-categories-page {
+            width: 100%;
+        }
+
+
+        .bm-categories-container {
+            width: min(
+                1380px,
+                calc(100% - 48px)
+            );
+
+            margin: 0 auto;
+        }
+
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .bm-categories-hero {
+            position: relative;
+
+            overflow: hidden;
+
+            padding: 76px 0 70px;
+
+            background:
+                radial-gradient(
+                    circle at 83% 15%,
+                    rgba(255, 69, 0, 0.18),
+                    transparent 29%
+                ),
+                linear-gradient(
+                    135deg,
+                    #00152b 0%,
+                    #001F3F 50%,
+                    #073865 100%
+                );
+
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-hero::after {
+            content: "";
+
+            position: absolute;
+
+            right: -150px;
+            bottom: -215px;
+
+            width: 500px;
+            height: 500px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.07);
+        }
+
+
+        .bm-categories-hero-grid {
+            position: relative;
+
+            z-index: 2;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.1fr)
+                minmax(370px, 0.9fr);
+
+            gap: 64px;
+
+            align-items: center;
+        }
+
+
+        .bm-categories-eyebrow {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            margin-bottom: 17px;
+
+            color: #ffd4c5;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.08em;
+
+            text-transform: uppercase;
+        }
+
+
+        .bm-categories-eyebrow::before {
+            content: "";
+
+            width: 29px;
+            height: 2px;
+
+            border-radius: 50px;
+
+            background: var(--bm-orange);
+        }
+
+
+        .bm-categories-hero h1 {
+            max-width: 820px;
+
+            margin: 0;
+
+            color: var(--bm-white);
+
+            font-size: clamp(
+                40px,
+                5vw,
+                62px
+            );
+
+            line-height: 1.07;
+
+            font-weight: 700;
+
+            letter-spacing: -0.04em;
+        }
+
+
+        .bm-categories-hero-copy {
+            max-width: 800px;
+
+            margin: 23px 0 0;
+
+            color: #d0dbe6;
+
+            font-size: 18px;
+
+            line-height: 1.72;
+        }
+
+
+        .bm-categories-hero-actions {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+
+            margin-top: 30px;
+        }
+
+
+        .bm-categories-btn {
+            min-height: 48px;
+
+            padding: 0 20px;
+
+            border: 1px solid transparent;
+
+            border-radius: 8px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            cursor: pointer;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            transition:
+                transform 0.18s ease,
+                background 0.18s ease,
+                border-color 0.18s ease,
+                box-shadow 0.18s ease;
+        }
+
+
+        .bm-categories-btn:hover {
+            transform: translateY(-2px);
+        }
+
+
+        .bm-categories-btn-primary {
+            background: var(--bm-orange);
+
+            border-color: var(--bm-orange);
+
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-btn-primary:hover {
+            background: var(--bm-orange-dark);
+
+            border-color: var(--bm-orange-dark);
+
+            box-shadow:
+                0 10px 26px
+                rgba(255, 69, 0, 0.26);
+        }
+
+
+        .bm-categories-btn-secondary {
+            background:
+                rgba(255, 255, 255, 0.06);
+
+            border-color:
+                rgba(255, 255, 255, 0.19);
+
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-btn-secondary:hover {
+            background:
+                rgba(255, 255, 255, 0.10);
+
+            border-color:
+                rgba(255, 255, 255, 0.30);
+        }
+
+
+        /* =====================================================
+           HERO SEARCH
+        ===================================================== */
+
+        .bm-categories-search-card {
+            padding: 28px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.14);
+
+            border-radius: 15px;
+
+            background:
+                rgba(255, 255, 255, 0.07);
+
+            box-shadow:
+                0 24px 54px
+                rgba(0, 0, 0, 0.20);
+
+            backdrop-filter: blur(8px);
+        }
+
+
+        .bm-categories-search-card h2 {
+            margin: 0;
+
+            font-size: 20px;
+
+            line-height: 1.35;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-search-card p {
+            margin: 8px 0 20px;
+
+            color: #d2dde7;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+
+        .bm-categories-search-wrap {
+            position: relative;
+        }
+
+
+        .bm-categories-search-wrap input {
+            width: 100%;
+            height: 50px;
+
+            padding:
+                0 48px
+                0 15px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+
+            border-radius: 8px;
+
+            outline: none;
+
+            background: var(--bm-white);
+
+            color: var(--bm-text);
+
+            font-size: 14px;
+        }
+
+
+        .bm-categories-search-wrap input:focus {
+            border-color: var(--bm-orange);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(255, 69, 0, 0.10);
+        }
+
+
+        .bm-categories-search-icon {
+            position: absolute;
+
+            right: 15px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: var(--bm-blue);
+
+            font-size: 18px;
+
+            pointer-events: none;
+        }
+
+
+        .bm-categories-popular {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            margin-top: 15px;
+        }
+
+
+        .bm-categories-popular button {
+            padding: 7px 10px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+
+            border-radius: 999px;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            color: #d7e1ea;
+
+            cursor: pointer;
+
+            font-size: 11px;
+
+            font-weight: 500;
+        }
+
+
+        .bm-categories-popular button:hover {
+            border-color:
+                rgba(255, 255, 255, 0.28);
+
+            background:
+                rgba(255, 255, 255, 0.09);
+        }
+
+
+        /* =====================================================
+           VALUE STRIP
+        ===================================================== */
+
+        .bm-categories-strip {
+            position: relative;
+
+            z-index: 4;
+
+            margin-top: -28px;
+        }
+
+
+        .bm-categories-strip-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 13px;
+
+            background: var(--bm-white);
+
+            box-shadow: var(--bm-shadow);
+        }
+
+
+        .bm-categories-strip-item {
+            padding: 24px;
+
+            border-right:
+                1px solid
+                var(--bm-border);
+        }
+
+
+        .bm-categories-strip-item:last-child {
+            border-right: 0;
+        }
+
+
+        .bm-categories-strip-item strong {
+            display: block;
+
+            margin-bottom: 4px;
+
+            color: var(--bm-blue);
+
+            font-size: 18px;
+
+            line-height: 1.3;
+
+            font-weight: 700;
+        }
+
+
+        .bm-categories-strip-item span {
+            color: var(--bm-muted);
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           SECTION COMMON
+        ===================================================== */
+
+        .bm-categories-section {
+            padding: 74px 0;
+        }
+
+
+        .bm-categories-section-soft {
+            background: #f0f3f7;
+        }
+
+
+        .bm-categories-section-dark {
+            background: var(--bm-blue);
+
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-section-head {
+            display: flex;
+
+            align-items: flex-end;
+
+            justify-content: space-between;
+
+            gap: 30px;
+
+            margin-bottom: 34px;
+        }
+
+
+        .bm-categories-head-copy {
+            max-width: 810px;
+        }
+
+
+        .bm-categories-kicker {
+            margin-bottom: 8px;
+
+            color: var(--bm-orange);
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.07em;
+
+            text-transform: uppercase;
+        }
+
+
+        .bm-categories-title {
+            margin: 0;
+
+            color: var(--bm-blue);
+
+            font-size: 32px;
+
+            line-height: 1.18;
+
+            font-weight: 700;
+
+            letter-spacing: -0.025em;
+        }
+
+
+        .bm-categories-section-dark
+        .bm-categories-title {
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-copy {
+            margin: 11px 0 0;
+
+            color: var(--bm-muted);
+
+            font-size: 15px;
+
+            line-height: 1.72;
+        }
+
+
+        .bm-categories-section-dark
+        .bm-categories-copy {
+            color: #c9d7e4;
+        }
+
+
+        /* =====================================================
+           FILTERS
+        ===================================================== */
+
+        .bm-categories-filter-card {
+            padding: 20px;
+
+            margin-bottom: 27px;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 12px;
+
+            background: var(--bm-white);
+
+            box-shadow:
+                0 8px 22px
+                rgba(0, 31, 63, 0.04);
+        }
+
+
+        .bm-categories-filter-grid {
+            display: grid;
+
+            grid-template-columns:
+                minmax(250px, 1.7fr)
+                minmax(200px, 0.8fr)
+                minmax(200px, 0.8fr)
+                auto;
+
+            gap: 11px;
+
+            align-items: end;
+        }
+
+
+        .bm-categories-field {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+        }
+
+
+        .bm-categories-field label {
+            color: var(--bm-blue);
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-field input,
+        .bm-categories-field select {
+            width: 100%;
+
+            height: 44px;
+
+            padding: 0 12px;
+
+            border:
+                1px solid
+                var(--bm-border-dark);
+
+            border-radius: 7px;
+
+            outline: none;
+
+            background: var(--bm-white);
+
+            color: var(--bm-text);
+
+            font-size: 13px;
+        }
+
+
+        .bm-categories-field input:focus,
+        .bm-categories-field select:focus {
+            border-color: var(--bm-orange);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(255, 69, 0, 0.08);
+        }
+
+
+        .bm-categories-filter-btn {
+            height: 44px;
+
+            padding: 0 19px;
+
+            border: 0;
+
+            border-radius: 7px;
+
+            background: var(--bm-blue);
+
+            color: var(--bm-white);
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-filter-btn:hover {
+            background: var(--bm-blue-soft);
+        }
+
+
+        /* =====================================================
+           CATEGORY GRID
+        ===================================================== */
+
+        .bm-category-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 20px;
+        }
+
+
+        .bm-category-card {
+            display: flex;
+
+            flex-direction: column;
+
+            min-height: 100%;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 13px;
+
+            background: var(--bm-white);
+
+            box-shadow:
+                0 8px 25px
+                rgba(0, 31, 63, 0.045);
+
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.18s ease,
+                border-color 0.18s ease;
+        }
+
+
+        .bm-category-card:hover {
+            transform: translateY(-3px);
+
+            border-color: #d4dbe4;
+
+            box-shadow:
+                0 14px 34px
+                rgba(0, 31, 63, 0.08);
+        }
+
+
+        .bm-category-card-main {
+            flex: 1;
+
+            padding: 26px;
+        }
+
+
+        .bm-category-card-top {
+            display: flex;
+
+            align-items: flex-start;
+
+            justify-content: space-between;
+
+            gap: 16px;
+        }
+
+
+        .bm-category-icon {
+            width: 48px;
+            height: 48px;
+
+            flex: 0 0 auto;
+
+            border-radius: 11px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #fff0eb;
+
+            color: var(--bm-orange);
+
+            font-size: 15px;
+
+            font-weight: 700;
+        }
+
+
+        .bm-category-badge {
+            padding: 6px 9px;
+
+            border-radius: 999px;
+
+            background: #eaf7f1;
+
+            color: var(--bm-green);
+
+            font-size: 10px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-category-card h3 {
+            margin: 20px 0 8px;
+
+            color: var(--bm-blue);
+
+            font-size: 20px;
+
+            line-height: 1.35;
+
+            font-weight: 700;
+        }
+
+
+        .bm-category-card p {
+            margin: 0;
+
+            color: var(--bm-muted);
+
+            font-size: 13px;
+
+            line-height: 1.68;
+        }
+
+
+        .bm-category-services {
+            margin: 19px 0 0;
+
+            padding: 0;
+
+            list-style: none;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 9px 14px;
+        }
+
+
+        .bm-category-services li {
+            position: relative;
+
+            padding-left: 17px;
+
+            color: var(--bm-text);
+
+            font-size: 11px;
+
+            line-height: 1.45;
+        }
+
+
+        .bm-category-services li::before {
+            content: "•";
+
+            position: absolute;
+
+            left: 2px;
+            top: -1px;
+
+            color: var(--bm-orange);
+
+            font-size: 17px;
+
+            line-height: 1;
+        }
+
+
+        .bm-category-card-footer {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 14px;
+
+            padding: 15px 26px;
+
+            border-top:
+                1px solid
+                var(--bm-border);
+
+            background: #fbfcfd;
+        }
+
+
+        .bm-category-card-footer a {
+            color: var(--bm-orange);
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-category-card-footer a:hover {
+            text-decoration: underline;
+        }
+
+
+        .bm-category-card-footer span {
+            color: var(--bm-muted);
+
+            font-size: 10px;
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+        .bm-categories-empty {
+            display: none;
+
+            padding: 30px;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 12px;
+
+            background: var(--bm-white);
+
+            text-align: center;
+        }
+
+
+        .bm-categories-empty h3 {
+            margin: 0;
+
+            color: var(--bm-blue);
+
+            font-size: 18px;
+        }
+
+
+        .bm-categories-empty p {
+            margin: 8px 0 0;
+
+            color: var(--bm-muted);
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           HOW TO HIRE
+        ===================================================== */
+
+        .bm-categories-how-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
+        .bm-categories-how-card {
+            padding: 25px;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 12px;
+
+            background: var(--bm-white);
+        }
+
+
+        .bm-categories-how-number {
+            width: 40px;
+            height: 40px;
+
+            margin-bottom: 17px;
+
+            border-radius: 9px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: var(--bm-blue);
+
+            color: var(--bm-white);
+
+            font-size: 14px;
+
+            font-weight: 700;
+        }
+
+
+        .bm-categories-how-card h3 {
+            margin: 0 0 8px;
+
+            color: var(--bm-blue);
+
+            font-size: 17px;
+
+            line-height: 1.4;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-how-card p {
+            margin: 0;
+
+            color: var(--bm-muted);
+
+            font-size: 12px;
+
+            line-height: 1.65;
+        }
+
+
+        /* =====================================================
+           SERVICE PATHS
+        ===================================================== */
+
+        .bm-categories-path-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
+        .bm-categories-path-card {
+            min-height: 215px;
+
+            padding: 25px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.12);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 255, 255, 0.055);
+        }
+
+
+        .bm-categories-path-card span {
+            display: inline-block;
+
+            margin-bottom: 15px;
+
+            color: var(--bm-orange);
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.06em;
+
+            text-transform: uppercase;
+        }
+
+
+        .bm-categories-path-card h3 {
+            margin: 0 0 9px;
+
+            color: var(--bm-white);
+
+            font-size: 18px;
+
+            line-height: 1.4;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-path-card p {
+            margin: 0;
+
+            color: #c8d6e2;
+
+            font-size: 13px;
+
+            line-height: 1.65;
+        }
+
+
+        .bm-categories-path-card a {
+            display: inline-flex;
+
+            margin-top: 17px;
+
+            color: #ffb398;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-path-card a:hover {
+            color: var(--bm-white);
+        }
+
+
+        /* =====================================================
+           PROVIDERS
+        ===================================================== */
+
+        .bm-categories-provider-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 20px;
+        }
+
+
+        .bm-categories-provider-card {
+            padding: 27px;
+
+            border:
+                1px solid
+                var(--bm-border);
+
+            border-radius: 12px;
+
+            background: var(--bm-white);
+        }
+
+
+        .bm-categories-provider-icon {
+            width: 45px;
+            height: 45px;
+
+            margin-bottom: 17px;
+
+            border-radius: 10px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #fff0eb;
+
+            color: var(--bm-orange);
+
+            font-size: 15px;
+
+            font-weight: 700;
+        }
+
+
+        .bm-categories-provider-card h3 {
+            margin: 0 0 9px;
+
+            color: var(--bm-blue);
+
+            font-size: 18px;
+
+            font-weight: 600;
+        }
+
+
+        .bm-categories-provider-card p {
+            margin: 0;
+
+            color: var(--bm-muted);
+
+            font-size: 13px;
+
+            line-height: 1.68;
+        }
+
+
+        /* =====================================================
+           FINAL CTA
+        ===================================================== */
+
+        .bm-categories-final {
+            padding: 70px 0;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #00152b 0%,
+                    #001F3F 64%,
+                    #073b6d 100%
+                );
+
+            color: var(--bm-white);
+        }
+
+
+        .bm-categories-final-card {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 42px;
+        }
+
+
+        .bm-categories-final-copy {
+            max-width: 800px;
+        }
+
+
+        .bm-categories-final-copy h2 {
+            margin: 0;
+
+            font-size: 31px;
+
+            line-height: 1.24;
+
+            font-weight: 700;
+
+            letter-spacing: -0.02em;
+        }
+
+
+        .bm-categories-final-copy p {
+            margin: 12px 0 0;
+
+            color: #cad7e2;
+
+            font-size: 15px;
+
+            line-height: 1.7;
+        }
+
+
+        .bm-categories-final-actions {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1120px) {
+
+            .bm-categories-hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .bm-categories-search-card {
+                max-width: 720px;
+            }
+
+
+            .bm-category-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+
+            .bm-categories-how-grid,
+            .bm-categories-path-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+
+            .bm-categories-provider-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+
+        @media (max-width: 820px) {
+
+            .bm-categories-container {
+                width: calc(100% - 32px);
+            }
+
+
+            .bm-categories-hero {
+                padding: 60px 0 58px;
+            }
+
+
+            .bm-categories-hero h1 {
+                font-size: 43px;
+            }
+
+
+            .bm-categories-hero-copy {
+                font-size: 16px;
+            }
+
+
+            .bm-categories-strip-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+
+            .bm-categories-strip-item:nth-child(2) {
+                border-right: 0;
+            }
+
+
+            .bm-categories-strip-item:nth-child(-n + 2) {
+                border-bottom:
+                    1px solid
+                    var(--bm-border);
+            }
+
+
+            .bm-categories-filter-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+
+            .bm-categories-provider-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .bm-categories-final-card {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+        }
+
+
+        @media (max-width: 620px) {
+
+            .bm-categories-container {
+                width: calc(100% - 24px);
+            }
+
+
+            .bm-categories-hero {
+                padding: 49px 0 47px;
+            }
+
+
+            .bm-categories-hero h1 {
+                font-size: 35px;
+            }
+
+
+            .bm-categories-hero-actions {
+                flex-direction: column;
+            }
+
+
+            .bm-categories-btn {
+                width: 100%;
+            }
+
+
+            .bm-categories-strip {
+                margin-top: -18px;
+            }
+
+
+            .bm-categories-strip-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .bm-categories-strip-item {
+                border-right: 0;
+
+                border-bottom:
+                    1px solid
+                    var(--bm-border);
+            }
+
+
+            .bm-categories-strip-item:last-child {
+                border-bottom: 0;
+            }
+
+
+            .bm-categories-section {
+                padding: 55px 0;
+            }
+
+
+            .bm-categories-title {
+                font-size: 27px;
+            }
+
+
+            .bm-categories-filter-grid,
+            .bm-category-grid,
+            .bm-categories-how-grid,
+            .bm-categories-path-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .bm-category-services {
+                grid-template-columns: 1fr;
+            }
+
+
+            .bm-categories-final {
+                padding: 56px 0;
+            }
+
+
+            .bm-categories-final-copy h2 {
+                font-size: 28px;
+            }
+
+
+            .bm-categories-final-actions {
+                width: 100%;
+
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<main class="bm-categories-page">
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="bm-categories-hero">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-hero-grid">
+
+
+                <div>
+
+                    <div class="bm-categories-eyebrow">
+                        Boulot Man Service Marketplace
+                    </div>
+
+                    <h1>
+                        Find the Right Service for Any Job or Project
+                    </h1>
+
+                    <p class="bm-categories-hero-copy">
+                        Browse Boulot Man service categories to find verified
+                        technicians, engineers, professionals and companies
+                        for everyday work, skilled services, repairs,
+                        construction and larger technical projects.
+                    </p>
+
+                    <div class="bm-categories-hero-actions">
+
+                        <a
+                            href="#all-categories"
+                            class="bm-categories-btn bm-categories-btn-primary"
+                        >
+                            Browse Categories
+                        </a>
+
+                        <a
+                            href="/post-a-task.html"
+                            class="bm-categories-btn bm-categories-btn-secondary"
+                        >
+                            Post a Task
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <aside class="bm-categories-search-card">
+
+                    <h2>
+                        What service do you need?
+                    </h2>
+
+                    <p>
+                        Search by trade, profession, service or type of work.
+                    </p>
+
+
+                    <div class="bm-categories-search-wrap">
+
+                        <input
+                            type="search"
+                            id="bmCategoryHeroSearch"
+                            placeholder="e.g. plumber, electrician, web developer..."
+                            autocomplete="off"
+                        >
+
+                        <span class="bm-categories-search-icon">
+                            ⌕
+                        </span>
+
+                    </div>
+
+
+                    <div class="bm-categories-popular">
+
+                        <button
+                            type="button"
+                            data-category-search="plumbing"
+                        >
+                            Plumbing
+                        </button>
+
+                        <button
+                            type="button"
+                            data-category-search="electrical"
+                        >
+                            Electrical
+                        </button>
+
+                        <button
+                            type="button"
+                            data-category-search="construction"
+                        >
+                            Construction
+                        </button>
+
+                        <button
+                            type="button"
+                            data-category-search="cleaning"
+                        >
+                            Cleaning
+                        </button>
+
+                        <button
+                            type="button"
+                            data-category-search="technology"
+                        >
+                            IT &amp; Technology
+                        </button>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         VALUE STRIP
+    ====================================================== -->
+
+    <section class="bm-categories-strip">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-strip-grid">
+
+
+                <div class="bm-categories-strip-item">
+
+                    <strong>
+                        Everyday Services
+                    </strong>
+
+                    <span>
+                        Repairs, maintenance, cleaning and household support.
+                    </span>
+
+                </div>
+
+
+                <div class="bm-categories-strip-item">
+
+                    <strong>
+                        Skilled Trades
+                    </strong>
+
+                    <span>
+                        Qualified technicians and specialist service providers.
+                    </span>
+
+                </div>
+
+
+                <div class="bm-categories-strip-item">
+
+                    <strong>
+                        Professional Services
+                    </strong>
+
+                    <span>
+                        Engineering, technology, design and business expertise.
+                    </span>
+
+                </div>
+
+
+                <div class="bm-categories-strip-item">
+
+                    <strong>
+                        Larger Projects
+                    </strong>
+
+                    <span>
+                        Companies, project teams and enterprise execution.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ALL CATEGORIES
+    ====================================================== -->
+
+    <section
+        class="bm-categories-section"
+        id="all-categories"
+    >
+
+        <div class="bm-categories-container">
+
+
+            <div class="bm-categories-section-head">
+
+                <div class="bm-categories-head-copy">
+
+                    <div class="bm-categories-kicker">
+                        All service categories
+                    </div>
+
+                    <h2 class="bm-categories-title">
+                        Explore Services Across the Boulot Man Network
+                    </h2>
+
+                    <p class="bm-categories-copy">
+                        Search the category that best matches your work.
+                        Individual tasks can be handled by professionals,
+                        while larger requirements can be matched with
+                        companies or structured project teams.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- FILTERS -->
+
+            <div class="bm-categories-filter-card">
+
+                <div class="bm-categories-filter-grid">
+
+
+                    <div class="bm-categories-field">
+
+                        <label for="bmCategorySearch">
+                            Search services
+                        </label>
+
+                        <input
+                            type="search"
+                            id="bmCategorySearch"
+                            placeholder="Search category or service..."
+                        >
+
+                    </div>
+
+
+                    <div class="bm-categories-field">
+
+                        <label for="bmCategoryType">
+                            Service Type
+                        </label>
+
+                        <select id="bmCategoryType">
+
+                            <option value="">
+                                All types
+                            </option>
+
+                            <option value="home">
+                                Home &amp; Property
+                            </option>
+
+                            <option value="technical">
+                                Technical Trades
+                            </option>
+
+                            <option value="professional">
+                                Professional
+                            </option>
+
+                            <option value="business">
+                                Business &amp; Commercial
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="bm-categories-field">
+
+                        <label for="bmCategoryProvider">
+                            Provider Type
+                        </label>
+
+                        <select id="bmCategoryProvider">
+
+                            <option value="">
+                                All providers
+                            </option>
+
+                            <option value="professional">
+                                Professionals
+                            </option>
+
+                            <option value="company">
+                                Companies
+                            </option>
+
+                            <option value="both">
+                                Professionals &amp; Companies
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="bm-categories-filter-btn"
+                        id="bmCategoryFilterButton"
+                    >
+                        Search
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="bm-category-grid"
+                id="bmCategoryGrid"
+            >
+
+
+                <!-- =================================================
+                     CONSTRUCTION
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        construction building masonry bricklayer
+                        mason concrete foundation roofing renovation
+                        tiling plastering ceiling site work
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                01
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Popular
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Construction &amp; Building
+                        </h3>
+
+                        <p>
+                            Find skilled construction professionals and
+                            companies for building, renovation, structural
+                            works and property development.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Masonry</li>
+                            <li>Bricklaying</li>
+                            <li>Concrete Works</li>
+                            <li>Foundations</li>
+                            <li>Roofing</li>
+                            <li>Plastering</li>
+                            <li>Tiling</li>
+                            <li>Renovation</li>
+                            <li>Ceilings</li>
+                            <li>Site Works</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=construction">
+                            Find Construction Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     ELECTRICAL
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        electrical electrician wiring power
+                        installation lighting generator inverter
+                        distribution board maintenance
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                02
+                            </div>
+
+                            <span class="bm-category-badge">
+                                High Demand
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Electrical &amp; Power
+                        </h3>
+
+                        <p>
+                            Electrical installation, troubleshooting, power
+                            systems, maintenance and technical electrical
+                            services.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>House Wiring</li>
+                            <li>Commercial Wiring</li>
+                            <li>Lighting</li>
+                            <li>Distribution Boards</li>
+                            <li>Generator Installation</li>
+                            <li>Inverters</li>
+                            <li>Fault Repairs</li>
+                            <li>Earthing</li>
+                            <li>Maintenance</li>
+                            <li>Power Systems</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=electrical">
+                            Find Electricians
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     PLUMBING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        plumbing plumber water pipes drainage
+                        pump tank toilet sink leak borehole
+                        bathroom
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                03
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Popular
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Plumbing &amp; Water Systems
+                        </h3>
+
+                        <p>
+                            Connect with plumbers and water-system specialists
+                            for installations, repairs and larger water
+                            infrastructure work.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Pipe Installation</li>
+                            <li>Leak Repairs</li>
+                            <li>Bathrooms</li>
+                            <li>Toilets</li>
+                            <li>Kitchen Plumbing</li>
+                            <li>Water Tanks</li>
+                            <li>Pumps</li>
+                            <li>Drainage</li>
+                            <li>Borehole Systems</li>
+                            <li>Water Networks</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=plumbing">
+                            Find Plumbers
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     CARPENTRY
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        carpenter carpentry wood furniture
+                        doors cabinets wardrobes kitchen
+                        woodworking joinery
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                04
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Skilled Trade
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Carpentry &amp; Woodwork
+                        </h3>
+
+                        <p>
+                            Hire carpenters and woodworking specialists for
+                            furniture, doors, cabinets, fittings and custom
+                            wood projects.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Furniture Making</li>
+                            <li>Doors</li>
+                            <li>Wardrobes</li>
+                            <li>Kitchen Cabinets</li>
+                            <li>Custom Woodwork</li>
+                            <li>Joinery</li>
+                            <li>Repairs</li>
+                            <li>Interior Woodwork</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=carpentry">
+                            Find Carpenters
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     WELDING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        welding welder metal steel fabrication
+                        gate railing windows structure
+                        metalwork
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                05
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Skilled Trade
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Welding &amp; Metal Fabrication
+                        </h3>
+
+                        <p>
+                            Find welders and fabrication companies for metal
+                            structures, gates, railings, repairs and custom
+                            steel work.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Steel Fabrication</li>
+                            <li>Gates</li>
+                            <li>Railings</li>
+                            <li>Metal Doors</li>
+                            <li>Window Frames</li>
+                            <li>Structural Welding</li>
+                            <li>Repairs</li>
+                            <li>Custom Metalwork</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=welding">
+                            Find Welders
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     PAINTING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="home"
+                    data-provider="both"
+                    data-search="
+                        painting painter decoration wall
+                        finishing paint interior exterior
+                        texture wallpaper
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                06
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Home &amp; Property
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Painting &amp; Decoration
+                        </h3>
+
+                        <p>
+                            Interior and exterior painting, decorative
+                            finishing and wall-treatment services for homes
+                            and commercial spaces.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Interior Painting</li>
+                            <li>Exterior Painting</li>
+                            <li>Wall Preparation</li>
+                            <li>Decorative Finishes</li>
+                            <li>Texture Paint</li>
+                            <li>Wallpaper</li>
+                            <li>Commercial Painting</li>
+                            <li>Repainting</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=painting">
+                            Find Painters
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     CLEANING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="home"
+                    data-provider="both"
+                    data-search="
+                        cleaning cleaner house office
+                        commercial deep clean post construction
+                        janitorial housekeeping
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                07
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Everyday Service
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Cleaning Services
+                        </h3>
+
+                        <p>
+                            Find cleaning professionals and companies for
+                            homes, offices, commercial properties and
+                            post-construction cleaning.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Home Cleaning</li>
+                            <li>Office Cleaning</li>
+                            <li>Deep Cleaning</li>
+                            <li>Post-Construction</li>
+                            <li>Commercial Cleaning</li>
+                            <li>Move-In Cleaning</li>
+                            <li>Janitorial Services</li>
+                            <li>Housekeeping</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=cleaning">
+                            Find Cleaners
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     HVAC
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        air conditioning ac hvac refrigeration
+                        cooling installation repair maintenance
+                        ventilation
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                08
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Technical
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Air Conditioning &amp; Refrigeration
+                        </h3>
+
+                        <p>
+                            AC and refrigeration technicians for installation,
+                            servicing, maintenance and commercial cooling
+                            systems.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>AC Installation</li>
+                            <li>AC Repairs</li>
+                            <li>Servicing</li>
+                            <li>Refrigeration</li>
+                            <li>Cold Rooms</li>
+                            <li>Ventilation</li>
+                            <li>Commercial HVAC</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=hvac">
+                            Find HVAC Technicians
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     SOLAR
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        solar renewable energy panels inverter
+                        batteries pv installation power
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                09
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Energy
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Solar &amp; Renewable Energy
+                        </h3>
+
+                        <p>
+                            Solar professionals and companies for residential,
+                            commercial and off-grid energy systems.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Solar Panels</li>
+                            <li>PV Installation</li>
+                            <li>Inverters</li>
+                            <li>Battery Storage</li>
+                            <li>Solar Backup</li>
+                            <li>Energy Audits</li>
+                            <li>Commercial Solar</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=solar">
+                            Find Solar Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     AUTOMOTIVE
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        automotive mechanic car vehicle
+                        motorcycle bike repair diagnostics
+                        engine brakes electrical
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                10
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Mobility
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Automotive &amp; Mechanical
+                        </h3>
+
+                        <p>
+                            Mechanics and automotive specialists for vehicle,
+                            motorcycle and equipment maintenance and repairs.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Vehicle Repairs</li>
+                            <li>Engine Work</li>
+                            <li>Diagnostics</li>
+                            <li>Brakes</li>
+                            <li>Auto Electrical</li>
+                            <li>Motorcycles</li>
+                            <li>Preventive Maintenance</li>
+                            <li>Equipment Repairs</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=automotive">
+                            Find Mechanics
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     IT
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="professional"
+                    data-provider="both"
+                    data-search="
+                        technology it software web developer
+                        mobile application networking computer
+                        cybersecurity api cloud
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                11
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Digital
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            IT, Software &amp; Technology
+                        </h3>
+
+                        <p>
+                            Technology professionals and companies for
+                            software, web, mobile, networking and digital
+                            infrastructure projects.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Web Development</li>
+                            <li>Mobile Apps</li>
+                            <li>Software Development</li>
+                            <li>Networking</li>
+                            <li>Computer Support</li>
+                            <li>Cloud Services</li>
+                            <li>APIs</li>
+                            <li>Cybersecurity</li>
+                            <li>Database Systems</li>
+                            <li>IT Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=technology">
+                            Find Technology Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     SECURITY
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        cctv security camera alarm access control
+                        surveillance installation intercom
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                12
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Security
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            CCTV &amp; Security Systems
+                        </h3>
+
+                        <p>
+                            Installation and maintenance of surveillance,
+                            access control and property security systems.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>CCTV Installation</li>
+                            <li>Security Cameras</li>
+                            <li>Access Control</li>
+                            <li>Alarm Systems</li>
+                            <li>Intercoms</li>
+                            <li>Monitoring Systems</li>
+                            <li>Repairs</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=security">
+                            Find Security Technicians
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     ELECTRONICS
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="professional"
+                    data-search="
+                        electronics appliance repair television
+                        tv refrigerator washing machine
+                        microwave technician
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                13
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Repairs
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Electronics &amp; Appliance Repair
+                        </h3>
+
+                        <p>
+                            Technicians for home and commercial electronics,
+                            appliances and equipment troubleshooting.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>TV Repairs</li>
+                            <li>Refrigerators</li>
+                            <li>Washing Machines</li>
+                            <li>Microwaves</li>
+                            <li>Small Appliances</li>
+                            <li>Electronics Repair</li>
+                            <li>Diagnostics</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=electronics">
+                            Find Repair Technicians
+                        </a>
+
+                        <span>
+                            Professionals
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     INTERIOR
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="professional"
+                    data-provider="both"
+                    data-search="
+                        interior design decorator decoration
+                        furniture space planning finishing
+                        design
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                14
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Design
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Interior Design &amp; Finishing
+                        </h3>
+
+                        <p>
+                            Interior professionals and companies for space
+                            planning, finishing, furnishing and decorative
+                            project execution.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Interior Design</li>
+                            <li>Space Planning</li>
+                            <li>Wall Decoration</li>
+                            <li>Furniture Selection</li>
+                            <li>Ceiling Design</li>
+                            <li>Finishing</li>
+                            <li>Commercial Interiors</li>
+                            <li>Home Interiors</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=interior-design">
+                            Find Interior Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     ENGINEERING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="professional"
+                    data-provider="both"
+                    data-search="
+                        engineering engineer civil mechanical
+                        electrical structural architecture
+                        design technical consultant
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                15
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Professional
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Engineering &amp; Technical Consulting
+                        </h3>
+
+                        <p>
+                            Find engineers and technical consultants for
+                            design, assessment, supervision and professional
+                            project support.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Civil Engineering</li>
+                            <li>Structural Engineering</li>
+                            <li>Electrical Engineering</li>
+                            <li>Mechanical Engineering</li>
+                            <li>Technical Design</li>
+                            <li>Project Supervision</li>
+                            <li>Site Assessment</li>
+                            <li>Consulting</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=engineering">
+                            Find Engineers
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     CHILDCARE
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="home"
+                    data-provider="professional"
+                    data-search="
+                        childcare babysitter nanny child care
+                        family home support
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                16
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Home Service
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Childcare &amp; Home Support
+                        </h3>
+
+                        <p>
+                            Find suitable home-support professionals for
+                            childcare and selected household assistance
+                            services.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Babysitting</li>
+                            <li>Nanny Services</li>
+                            <li>Childcare Support</li>
+                            <li>Home Assistance</li>
+                            <li>Short-Term Support</li>
+                            <li>Recurring Support</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=childcare">
+                            Find Home Support
+                        </a>
+
+                        <span>
+                            Professionals
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     MOVING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="home"
+                    data-provider="both"
+                    data-search="
+                        moving transport relocation delivery
+                        movers furniture transport logistics
+                        packing
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                17
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Logistics
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Moving, Delivery &amp; Logistics
+                        </h3>
+
+                        <p>
+                            Local moving, transport and delivery support for
+                            homes, businesses, equipment and materials.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Home Moving</li>
+                            <li>Office Moving</li>
+                            <li>Furniture Transport</li>
+                            <li>Equipment Delivery</li>
+                            <li>Material Transport</li>
+                            <li>Packing Support</li>
+                            <li>Local Logistics</li>
+                            <li>Relocation</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=logistics">
+                            Find Logistics Providers
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     LANDSCAPING
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="home"
+                    data-provider="both"
+                    data-search="
+                        landscaping gardening gardener lawn
+                        yard garden outdoor property
+                        maintenance
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                18
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Property
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Landscaping &amp; Outdoor Work
+                        </h3>
+
+                        <p>
+                            Garden maintenance, outdoor improvement and
+                            landscaping services for residential and
+                            commercial property.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Gardening</li>
+                            <li>Lawn Maintenance</li>
+                            <li>Landscaping</li>
+                            <li>Tree Trimming</li>
+                            <li>Outdoor Cleaning</li>
+                            <li>Garden Installation</li>
+                            <li>Property Grounds</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=landscaping">
+                            Find Landscaping Providers
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     TELECOM
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="technical"
+                    data-provider="both"
+                    data-search="
+                        telecom telecommunications fiber
+                        networking internet wifi tower
+                        connectivity cabling
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                19
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Infrastructure
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Telecom &amp; Connectivity
+                        </h3>
+
+                        <p>
+                            Technical providers for network cabling,
+                            connectivity, fiber and communication
+                            infrastructure.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Fiber Installation</li>
+                            <li>Network Cabling</li>
+                            <li>Wi-Fi Networks</li>
+                            <li>Internet Setup</li>
+                            <li>Telecom Equipment</li>
+                            <li>Connectivity</li>
+                            <li>Technical Support</li>
+                            <li>Maintenance</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=telecom">
+                            Find Telecom Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     FACILITY
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="business"
+                    data-provider="both"
+                    data-search="
+                        facility facilities management
+                        maintenance building maintenance
+                        corporate office commercial service
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                20
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Commercial
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Facilities &amp; Property Maintenance
+                        </h3>
+
+                        <p>
+                            Recurring technical support and coordinated
+                            maintenance for businesses, facilities and
+                            commercial properties.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Facility Maintenance</li>
+                            <li>Preventive Maintenance</li>
+                            <li>Building Repairs</li>
+                            <li>Technical Support</li>
+                            <li>Office Maintenance</li>
+                            <li>Commercial Property</li>
+                            <li>Multi-Trade Support</li>
+                            <li>Service Contracts</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/companies.html?category=facilities">
+                            Find Facility Companies
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     BUSINESS SERVICES
+                ================================================== -->
+
+                <article
+                    class="bm-category-card"
+                    data-type="business"
+                    data-provider="both"
+                    data-search="
+                        business services office support
+                        graphic design digital marketing
+                        branding printing admin
+                    "
+                >
+
+                    <div class="bm-category-card-main">
+
+                        <div class="bm-category-card-top">
+
+                            <div class="bm-category-icon">
+                                21
+                            </div>
+
+                            <span class="bm-category-badge">
+                                Business
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            Business &amp; Creative Services
+                        </h3>
+
+                        <p>
+                            Find professionals for practical business,
+                            branding, design and commercial support services.
+                        </p>
+
+
+                        <ul class="bm-category-services">
+
+                            <li>Graphic Design</li>
+                            <li>Branding</li>
+                            <li>Printing</li>
+                            <li>Digital Marketing</li>
+                            <li>Content Support</li>
+                            <li>Office Services</li>
+                            <li>Business Support</li>
+                            <li>Creative Work</li>
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="bm-category-card-footer">
+
+                        <a href="/technicians.html?category=business-services">
+                            Find Business Professionals
+                        </a>
+
+                        <span>
+                            Professionals &amp; Companies
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+
+            <div
+                class="bm-categories-empty"
+                id="bmCategoriesEmpty"
+            >
+
+                <h3>
+                    No matching service category
+                </h3>
+
+                <p>
+                    Try another service name or remove one of your filters.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HOW TO USE CATEGORIES
+    ====================================================== -->
+
+    <section class="bm-categories-section bm-categories-section-soft">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-section-head">
+
+                <div class="bm-categories-head-copy">
+
+                    <div class="bm-categories-kicker">
+                        Finding the right provider
+                    </div>
+
+                    <h2 class="bm-categories-title">
+                        From Service Category to the Right Professional
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="bm-categories-how-grid">
+
+
+                <article class="bm-categories-how-card">
+
+                    <div class="bm-categories-how-number">
+                        1
+                    </div>
+
+                    <h3>
+                        Choose a Category
+                    </h3>
+
+                    <p>
+                        Start with the service category that most closely
+                        describes the work you need completed.
+                    </p>
+
+                </article>
+
+
+                <article class="bm-categories-how-card">
+
+                    <div class="bm-categories-how-number">
+                        2
+                    </div>
+
+                    <h3>
+                        Add Your Location
+                    </h3>
+
+                    <p>
+                        Use your city or project location to find providers
+                        who can realistically serve your area.
+                    </p>
+
+                </article>
+
+
+                <article class="bm-categories-how-card">
+
+                    <div class="bm-categories-how-number">
+                        3
+                    </div>
+
+                    <h3>
+                        Compare Providers
+                    </h3>
+
+                    <p>
+                        Review verification, experience, services, ratings,
+                        location and previous work before hiring.
+                    </p>
+
+                </article>
+
+
+                <article class="bm-categories-how-card">
+
+                    <div class="bm-categories-how-number">
+                        4
+                    </div>
+
+                    <h3>
+                        Hire or Post the Work
+                    </h3>
+
+                    <p>
+                        Send a direct request, post a task or create a larger
+                        project depending on the work required.
+                    </p>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DIFFERENT HIRING PATHS
+    ====================================================== -->
+
+    <section class="bm-categories-section bm-categories-section-dark">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-section-head">
+
+                <div class="bm-categories-head-copy">
+
+                    <div class="bm-categories-kicker">
+                        Choose the right hiring path
+                    </div>
+
+                    <h2 class="bm-categories-title">
+                        One Service Marketplace, Different Ways to Get Work Done
+                    </h2>
+
+                    <p class="bm-categories-copy">
+                        The size and complexity of your requirement determines
+                        the best Boulot Man service to use.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="bm-categories-path-grid">
+
+
+                <article class="bm-categories-path-card">
+
+                    <span>
+                        Individual Service
+                    </span>
+
+                    <h3>
+                        Hire a Professional
+                    </h3>
+
+                    <p>
+                        Best for repairs, installations, maintenance and other
+                        work that can be completed by an individual technician
+                        or professional.
+                    </p>
+
+                    <a href="/technicians.html">
+                        Find Professionals →
+                    </a>
+
+                </article>
+
+
+                <article class="bm-categories-path-card">
+
+                    <span>
+                        Open Marketplace
+                    </span>
+
+                    <h3>
+                        Post a Task
+                    </h3>
+
+                    <p>
+                        Describe what you need and allow suitable professionals
+                        to respond with availability, offers or bids.
+                    </p>
+
+                    <a href="/post-a-task.html">
+                        Post a Task →
+                    </a>
+
+                </article>
+
+
+                <article class="bm-categories-path-card">
+
+                    <span>
+                        Larger Assignment
+                    </span>
+
+                    <h3>
+                        Hire a Company
+                    </h3>
+
+                    <p>
+                        Use verified companies when the work requires broader
+                        capacity, a business entity, specialist equipment or
+                        a larger team.
+                    </p>
+
+                    <a href="/companies.html">
+                        Find Companies →
+                    </a>
+
+                </article>
+
+
+                <article class="bm-categories-path-card">
+
+                    <span>
+                        Complex Project
+                    </span>
+
+                    <h3>
+                        Structured Project Execution
+                    </h3>
+
+                    <p>
+                        Use Boulot Man Contractors or Enterprise Projects when
+                        several trades, companies or project-management
+                        capabilities are required.
+                    </p>
+
+                    <a href="/contractors.html">
+                        Explore Boulot Man Contractors →
+                    </a>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROVIDER TYPES
+    ====================================================== -->
+
+    <section class="bm-categories-section">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-section-head">
+
+                <div class="bm-categories-head-copy">
+
+                    <div class="bm-categories-kicker">
+                        Service providers
+                    </div>
+
+                    <h2 class="bm-categories-title">
+                        Different Providers for Different Levels of Work
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="bm-categories-provider-grid">
+
+
+                <article class="bm-categories-provider-card">
+
+                    <div class="bm-categories-provider-icon">
+                        01
+                    </div>
+
+                    <h3>
+                        Technicians &amp; Skilled Professionals
+                    </h3>
+
+                    <p>
+                        Suitable for everyday repairs, installations,
+                        maintenance, skilled trade work and individual service
+                        assignments.
+                    </p>
+
+                </article>
+
+
+                <article class="bm-categories-provider-card">
+
+                    <div class="bm-categories-provider-icon">
+                        02
+                    </div>
+
+                    <h3>
+                        Engineers &amp; Specialists
+                    </h3>
+
+                    <p>
+                        Suitable for technical design, consulting,
+                        supervision, specialized work and higher-skill project
+                        requirements.
+                    </p>
+
+                </article>
+
+
+                <article class="bm-categories-provider-card">
+
+                    <div class="bm-categories-provider-icon">
+                        03
+                    </div>
+
+                    <h3>
+                        Verified Companies
+                    </h3>
+
+                    <p>
+                        Suitable for larger projects, commercial contracts,
+                        subcontracting, recurring services and assignments
+                        requiring broader capacity.
+                    </p>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FINAL CTA
+    ====================================================== -->
+
+    <section class="bm-categories-final">
+
+        <div class="bm-categories-container">
+
+            <div class="bm-categories-final-card">
+
+
+                <div class="bm-categories-final-copy">
+
+                    <h2>
+                        Can't Find the Exact Service You Need?
+                    </h2>
+
+                    <p>
+                        Post the work and describe what needs to be done.
+                        Boulot Man can help connect the request with relevant
+                        professionals or companies based on the service and
+                        location.
+                    </p>
+
+                </div>
+
+
+                <div class="bm-categories-final-actions">
+
+                    <a
+                        href="/post-a-task.html"
+                        class="bm-categories-btn bm-categories-btn-primary"
+                    >
+                        Post a Task
+                    </a>
+
+                    <a
+                        href="/technicians.html"
+                        class="bm-categories-btn bm-categories-btn-secondary"
+                    >
+                        Find Professionals
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<script>
+
+    (function () {
+
+        "use strict";
+
+
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
+
+        const heroSearch =
+            document.getElementById(
+                "bmCategoryHeroSearch"
+            );
+
+
+        const searchInput =
+            document.getElementById(
+                "bmCategorySearch"
+            );
+
+
+        const typeSelect =
+            document.getElementById(
+                "bmCategoryType"
+            );
+
+
+        const providerSelect =
+            document.getElementById(
+                "bmCategoryProvider"
+            );
+
+
+        const filterButton =
+            document.getElementById(
+                "bmCategoryFilterButton"
+            );
+
+
+        const cards =
+            Array.from(
+                document.querySelectorAll(
+                    ".bm-category-card"
+                )
+            );
+
+
+        const emptyState =
+            document.getElementById(
+                "bmCategoriesEmpty"
+            );
+
+
+        const popularButtons =
+            document.querySelectorAll(
+                "[data-category-search]"
+            );
+
+
+        /* =====================================================
+           NORMALIZE TEXT
+        ===================================================== */
+
+        function normalizeText(
+            value
+        ) {
+
+            return String(value || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(
+                    /[\u0300-\u036f]/g,
+                    ""
+                )
+                .trim();
+
+        }
+
+
+        /* =====================================================
+           FILTER
+        ===================================================== */
+
+        function filterCategories() {
+
+            const search =
+                normalizeText(
+                    searchInput.value
+                );
+
+
+            const type =
+                typeSelect.value;
+
+
+            const provider =
+                providerSelect.value;
+
+
+            let visibleCount =
+                0;
+
+
+            cards.forEach(
+                function (card) {
+
+                    const searchData =
+                        normalizeText(
+                            card.dataset.search
+                        );
+
+
+                    const cardType =
+                        card.dataset.type || "";
+
+
+                    const cardProvider =
+                        card.dataset.provider || "";
+
+
+                    const searchMatch =
+                        !search ||
+                        searchData.includes(
+                            search
+                        );
+
+
+                    const typeMatch =
+                        !type ||
+                        cardType === type;
+
+
+                    let providerMatch =
+                        true;
+
+
+                    if (
+                        provider ===
+                        "professional"
+                    ) {
+
+                        providerMatch =
+                            cardProvider ===
+                                "professional" ||
+                            cardProvider ===
+                                "both";
+
+                    }
+
+
+                    if (
+                        provider ===
+                        "company"
+                    ) {
+
+                        providerMatch =
+                            cardProvider ===
+                                "company" ||
+                            cardProvider ===
+                                "both";
+
+                    }
+
+
+                    if (
+                        provider ===
+                        "both"
+                    ) {
+
+                        providerMatch =
+                            cardProvider ===
+                            "both";
+
+                    }
+
+
+                    const visible =
+                        searchMatch &&
+                        typeMatch &&
+                        providerMatch;
+
+
+                    card.style.display =
+                        visible
+                            ? ""
+                            : "none";
+
+
+                    if (visible) {
+
+                        visibleCount++;
+
+                    }
+
+                }
+            );
+
+
+            emptyState.style.display =
+                visibleCount === 0
+                    ? "block"
+                    : "none";
+
+        }
+
+
+        /* =====================================================
+           FILTER EVENTS
+        ===================================================== */
+
+        filterButton.addEventListener(
+            "click",
+            filterCategories
+        );
+
+
+        searchInput.addEventListener(
+            "input",
+            filterCategories
+        );
+
+
+        typeSelect.addEventListener(
+            "change",
+            filterCategories
+        );
+
+
+        providerSelect.addEventListener(
+            "change",
+            filterCategories
+        );
+
+
+        searchInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    filterCategories();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           HERO SEARCH
+        ===================================================== */
+
+        function searchFromHero(
+            value
+        ) {
+
+            searchInput.value =
+                value;
+
+
+            filterCategories();
+
+
+            document
+                .getElementById(
+                    "all-categories"
+                )
+                .scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+        }
+
+
+        heroSearch.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    searchFromHero(
+                        heroSearch.value
+                    );
+
+                }
+
+            }
+        );
+
+
+        popularButtons.forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const value =
+                            this.dataset.categorySearch ||
+                            "";
+
+
+                        heroSearch.value =
+                            value;
+
+
+                        searchFromHero(
+                            value
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    })();
+
+</script>
+
+
+</body>
+</html>

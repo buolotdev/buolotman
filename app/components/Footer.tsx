@@ -639,7 +639,7 @@ export default function Footer() {
                 <Link href="/safety">{t("safetyCenter")}</Link>
               </li>
               <li>
-                <Link href="/search">{t("serviceCategories")}</Link>
+                <Link href="/service-categories">{t("serviceCategories")}</Link>
               </li>
               <li>
                 <Link href="/locations">{t("locations")}</Link>
