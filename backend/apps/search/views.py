@@ -214,6 +214,16 @@ def search(request):
                 skills_list = [skill.name for skill in profile.skills.all()] if profile else []
                 all_skills = skills_list if skills_list else service_titles
                 category_name = tech_services[0].get('category') if (tech_services and tech_services[0].get('category')) else ''
+                
+                tech_city = (user.city or '').strip()
+                tech_country = (user.country or '').strip()
+                if tech_city and tech_country and tech_city.lower() != tech_country.lower():
+                    clean_tech_loc = f"{tech_city}, {tech_country}"
+                else:
+                    clean_tech_loc = tech_city or tech_country or ''
+
+                tech_cover = (user.banner_url or getattr(profile, 'banner_url', '') or getattr(user, 'cover_image', '') or '').strip()
+
                 results.append({
                     'id': user.id,
                     'type': 'technician',
@@ -221,10 +231,14 @@ def search(request):
                     'role': 'Technician',
                     'description': profile.bio if profile else '',
                     'image': user.avatar_url,
+                    'cover_image': tech_cover,
+                    'banner_url': tech_cover,
+                    'city': tech_city,
+                    'country': tech_country,
                     'category': category_name,
                     'rating': float(profile.average_rating) if profile else None,
                     'reviews': profile.completed_jobs if profile else 0,
-                    'location': user.country or '',
+                    'location': clean_tech_loc,
                     'price': float(profile.hourly_rate) if profile and profile.hourly_rate is not None else None,
                     'priceLabel': 'hourly rate',
                     'verified': bool(user.is_verified or (profile and profile.is_verified)),
@@ -234,6 +248,27 @@ def search(request):
                 })
     if include_companies and tab in ('all', 'company', 'companies', 'professionals'):
         for company in companies[:25]:
+            comp_city = (company.city or getattr(company.user, 'city', '') or '').strip()
+            comp_country = (company.country or getattr(company.user, 'country', '') or '').strip()
+            
+            if comp_city and comp_country and comp_city.lower() != comp_country.lower():
+                clean_comp_loc = f"{comp_city}, {comp_country}"
+            elif comp_city or comp_country:
+                clean_comp_loc = comp_city or comp_country
+            else:
+                # If only headquarters is provided, strip street address details if present
+                hq = (company.headquarters or '').strip()
+                if ',' in hq:
+                    parts = [p.strip(' []()#') for p in hq.split(',') if p.strip(' []()#')]
+                    clean_parts = [p for p in parts if not any(p.lower().startswith(prefix) for prefix in ('rue ', 'ave ', 'avenue ', 'bd ', 'boulevard ', 'bloc ', 'lot ', 'plot ', 'villa ', 'no ', 'apt ', 'street ', 'road ', 'rd '))]
+                    clean_comp_loc = ', '.join(clean_parts[-2:]) if clean_parts else (comp_country or 'West Africa')
+                elif any(hq.lower().startswith(prefix) for prefix in ('rue ', 'ave ', 'avenue ', 'bd ', 'boulevard ', 'bloc ', 'lot ', 'plot ', 'villa ', 'no ', 'apt ', 'street ', 'road ', 'rd ')):
+                    clean_comp_loc = comp_country or 'West Africa'
+                else:
+                    clean_comp_loc = hq or 'West Africa'
+
+            comp_cover = (company.cover_url or getattr(company.user, 'banner_url', '') or '').strip()
+
             results.append({
                 'id': company.user.id,
                 'type': 'company',
@@ -241,10 +276,15 @@ def search(request):
                 'role': 'Company',
                 'description': company.about,
                 'image': company.logo_url or company.user.avatar_url,
+                'cover_image': comp_cover,
+                'cover_url': comp_cover,
+                'banner_url': comp_cover,
+                'city': comp_city,
+                'country': comp_country,
                 'category': '',
                 'rating': float(company.average_rating),
                 'reviews': company.review_count,
-                'location': company.headquarters or company.user.country or '',
+                'location': clean_comp_loc,
                 'price': None,
                 'priceLabel': 'company profile',
                 'verified': bool(company.is_verified or company.user.is_verified),

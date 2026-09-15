@@ -11,7 +11,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonBlock, SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
 import { mergeWithMasterCategories } from "@/app/lib/categories";
-import { resolveProfessionTitle } from "@/app/lib/professionUtils";
+import { resolveProfessionTitle, resolveCleanLocation } from "@/app/lib/professionUtils";
 
 export default function TechniciansPage() {
   const [selectedTech, setSelectedTech] = useState<any>(null);
@@ -112,7 +112,7 @@ export default function TechniciansPage() {
                     </div>
                     <p className={styles.cardCategory}>{profession}</p>
                     <div className={styles.cardMeta}>
-                      <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "5.0"}</span> • {tech.location || tech.country || "Cameroon"}
+                      <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "5.0"}</span> • {resolveCleanLocation(tech)}
                     </div>
                     <div className={styles.cardActions}>
                       <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>

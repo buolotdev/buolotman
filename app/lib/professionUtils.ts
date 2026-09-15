@@ -240,3 +240,93 @@ export function resolveProfessionalBio(item: any, lang: string = "en"): string {
     ? "Professionnel certifié disponible pour interventions rapides et missions techniques."
     : "Certified technical professional available for dispatch, task delivery, and projects.";
 }
+
+export function isStreetAddress(str: string): boolean {
+  if (!str || typeof str !== "string") return false;
+  const s = str.trim().toLowerCase();
+  return (
+    s.startsWith("rue ") ||
+    s.startsWith("ave ") ||
+    s.startsWith("avenue ") ||
+    s.startsWith("bd ") ||
+    s.startsWith("boulevard ") ||
+    s.startsWith("bloc ") ||
+    s.startsWith("block ") ||
+    s.startsWith("lot ") ||
+    s.startsWith("plot ") ||
+    s.startsWith("door ") ||
+    s.startsWith("villa ") ||
+    s.startsWith("no ") ||
+    s.startsWith("no.") ||
+    s.startsWith("apt ") ||
+    s.startsWith("appt ") ||
+    s.startsWith("street ") ||
+    s.startsWith("st. ") ||
+    s.startsWith("road ") ||
+    s.startsWith("rd ") ||
+    s.startsWith("carré ") ||
+    s.startsWith("carre ") ||
+    s.startsWith("zone ") ||
+    /^\d+\s+[a-z]/i.test(s)
+  );
+}
+
+function cleanPlaceString(name: string): string {
+  if (!name) return "";
+  return name.replace(/[\]\[\(\)\{\}#]/g, "").trim();
+}
+
+export function resolveCleanLocation(item: any): string {
+  if (!item) return "West Africa";
+
+  // 1. Check explicit city and country
+  const city = cleanPlaceString((item.city || item.user?.city || item.company_profile?.city || "").toString());
+  const country = cleanPlaceString((item.country || item.user?.country || item.company_profile?.country || "").toString());
+
+  if (city && !isStreetAddress(city) && !isGarbageText(city)) {
+    if (country && country.toLowerCase() !== city.toLowerCase() && !isGarbageText(country)) {
+      return `${city}, ${country}`;
+    }
+    return city;
+  }
+
+  // 2. Extract from raw address/headquarters/location string
+  const rawLoc = (
+    item.location ||
+    item.coverage_area ||
+    item.headquarters ||
+    item.address ||
+    item.user?.address ||
+    country ||
+    ""
+  ).toString().trim();
+
+  if (!rawLoc) {
+    return country && !isGarbageText(country) ? country : "West Africa";
+  }
+
+  // If rawLoc contains commas (e.g., "Rue IPPB, Bloc L-64, Cotonou, Benin")
+  if (rawLoc.includes(",")) {
+    const parts = rawLoc
+      .split(",")
+      .map((p: string) => cleanPlaceString(p))
+      .filter((p: string) => p.length > 1 && !isStreetAddress(p) && !/^[\d\s\-_]+$/.test(p) && !isGarbageText(p));
+
+    if (parts.length > 0) {
+      return parts.slice(-2).join(", ");
+    }
+  }
+
+  // If single string is a street address (e.g. "Rue IPPB, Bloc L-64, ]")
+  if (isStreetAddress(rawLoc)) {
+    return country && !isGarbageText(country) ? country : "West Africa";
+  }
+
+  const cleaned = cleanPlaceString(rawLoc);
+  if (isGarbageText(cleaned)) {
+    return country && !isGarbageText(country) ? country : "West Africa";
+  }
+
+  return cleaned || (country && !isGarbageText(country) ? country : "West Africa");
+}
+

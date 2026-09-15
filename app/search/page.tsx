@@ -11,10 +11,11 @@ import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
 import { mergeWithMasterCategories } from "../lib/categories";
-import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio } from "../lib/professionUtils";
+import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio, resolveCleanLocation } from "../lib/professionUtils";
 
 function CardMedia({ result }: { result: SearchResult }) {
-  const [hasError, setHasError] = useState(false);
+  const [hasAvatarError, setHasAvatarError] = useState(false);
+  const [hasCoverError, setHasCoverError] = useState(false);
   const initials = (result.name || "B")
     .split(" ")
     .map((w) => w[0])
@@ -23,10 +24,22 @@ function CardMedia({ result }: { result: SearchResult }) {
     .join("")
     .toUpperCase();
 
+  const showCover = Boolean(result.cover_image && !hasCoverError);
+
   return (
     <div className={styles.cardHeaderArea}>
       <div className={styles.cardCoverBanner}>
-        {result.type === "company" ? (
+        {showCover ? (
+          <>
+            <img
+              src={result.cover_image}
+              alt=""
+              className={styles.coverImg}
+              onError={() => setHasCoverError(true)}
+            />
+            <div className={styles.coverOverlay} />
+          </>
+        ) : result.type === "company" ? (
           <div className={styles.bannerCompanyPattern} />
         ) : (
           <div className={styles.bannerTechPattern} />
@@ -35,12 +48,12 @@ function CardMedia({ result }: { result: SearchResult }) {
 
       <div className={styles.avatarBadgeWrapper}>
         <div className={styles.avatarBadge}>
-          {result.image && !hasError ? (
+          {result.image && !hasAvatarError ? (
             <img
               src={result.image}
               alt={result.name}
               className={styles.avatarImg}
-              onError={() => setHasError(true)}
+              onError={() => setHasAvatarError(true)}
             />
           ) : (
             <div
@@ -141,6 +154,7 @@ type SearchResult = {
   role?: string;
   description?: string;
   image?: string;
+  cover_image?: string;
   category?: string;
   rating?: number;
   reviews?: number;
@@ -291,9 +305,11 @@ export default function SearchPage() {
             return isApproved && item.is_active !== false && item.status !== "suspended";
           })
           .map((item) => {
-          const rawImg = item.image || item.logo_url || item.cover_url || item.avatar_url || item.avatar;
+          const rawImg = item.avatar_url || item.avatar || item.logo_url || item.image || item.company_profile?.logo || item.technician_profile?.avatar;
+          const rawCover = item.cover_image || item.cover_url || item.banner_url || item.banner || item.cover || item.company_profile?.cover_url || item.company_profile?.banner_url || item.company_profile?.cover_image || item.technician_profile?.banner_url || item.user?.banner_url;
           const role = resolveProfessionTitle(item, lang);
           const category = resolveServiceCategoryTag({ ...item, role }, lang);
+          const cleanLoc = resolveCleanLocation(item);
           return {
             id: item.id,
             type: item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician"),
@@ -301,10 +317,11 @@ export default function SearchPage() {
             role: role,
             description: resolveProfessionalBio(item, lang),
             image: rawImg ? getImageUrl(rawImg) : "",
+            cover_image: rawCover ? getImageUrl(rawCover) : "",
             category: category,
             rating: item.rating ?? item.average_rating,
             reviews: item.reviews_count ?? item.reviews,
-            location: item.location || item.city || item.address || item.country || "",
+            location: cleanLoc,
             price: item.price ?? item.hourly_rate ?? item.starting_price,
             priceLabel: item.price_label,
             verified: item.verified ?? item.is_verified,

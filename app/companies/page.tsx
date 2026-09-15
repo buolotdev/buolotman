@@ -10,6 +10,7 @@ import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { SkeletonCard } from "@/app/components/skeleton/Skeleton";
 import { mergeWithMasterCategories } from "@/app/lib/categories";
+import { resolveCleanLocation } from "@/app/lib/professionUtils";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -196,6 +197,7 @@ export default function CompaniesPage() {
               const profileId = company.user?.id || company.id;
               const companyName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || "Corporate Enterprise";
               const logoUrl = company.logo_url || company.user?.avatar_url;
+              const coverUrl = company.cover_url || company.banner_url || company.user?.banner_url || company.cover_image;
               const initials = companyName
                 .split(" ")
                 .map((w: string) => w[0])
@@ -206,11 +208,16 @@ export default function CompaniesPage() {
 
               const rating = parseFloat(company.average_rating) || 5.0;
               const reviews = company.review_count ?? company.reviews_count ?? 0;
-              const location = company.headquarters || company.user?.country || "West Africa";
+              const location = resolveCleanLocation(company);
 
               return (
                 <article key={company.id} className={styles.card}>
-                  <div className={styles.cardBanner} />
+                  <div className={styles.cardBanner}>
+                    {coverUrl && (
+                      <img src={getImageUrl(coverUrl)} alt="" className={styles.bannerImg} />
+                    )}
+                    <div className={styles.bannerOverlay} />
+                  </div>
 
                   <div className={styles.cardAvatarWrapper}>
                     <div className={styles.avatarBox}>
