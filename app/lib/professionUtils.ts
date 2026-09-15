@@ -15,13 +15,16 @@ export function isGarbageText(str: string): boolean {
   if (INVALID_TERMS.includes(clean)) return true;
 
   // Check if contains non-alphanumeric junk or long repeated characters (e.g. "aaaaaaa")
-  if (/(.)\1{4,}/.test(clean)) return true;
+  if (/(.)\1{3,}/.test(clean)) return true;
 
-  // Check vowel to consonant ratio for random gibberish (e.g. "YUGFJIYHKJ", "hushbluhtr", "BBRIYQEGBKJBUIGJAAAAAAAAAAAAA")
+  // Check consonant clusters (4 or more consecutive consonants is almost always gibberish like ebhjwevg, htrpsx)
+  if (/[bcdfghjklmnpqrstvwxyz]{4,}/i.test(clean)) return true;
+
+  // Check vowel to consonant ratio for random gibberish
   const letters = clean.replace(/[^a-z]/g, "");
-  if (letters.length >= 6) {
+  if (letters.length >= 4) {
     const vowels = (letters.match(/[aeiou]/g) || []).length;
-    if (vowels === 0 || vowels / letters.length < 0.12 || vowels / letters.length > 0.85) {
+    if (vowels === 0 || vowels / letters.length < 0.15 || vowels / letters.length > 0.85) {
       return true;
     }
   }
@@ -279,10 +282,20 @@ function cleanPlaceString(name: string): string {
 export function resolveCleanLocation(item: any): string {
   if (!item) return "West Africa";
 
-  // 1. Check explicit city and country
-  const city = cleanPlaceString((item.city || item.user?.city || item.company_profile?.city || "").toString());
-  const country = cleanPlaceString((item.country || item.user?.country || item.company_profile?.country || "").toString());
+  // 1. Check explicit neighborhood and city (e.g., "Bonamoussadi, Douala" or "Haie Vive, Cotonou")
+  const neighborhood = cleanPlaceString(
+    (item.neighborhood || item.user?.neighborhood || item.company_profile?.neighborhood || item.technician_profile?.neighborhood || "").toString()
+  );
+  const city = cleanPlaceString((item.city || item.user?.city || item.company_profile?.city || item.technician_profile?.city || "").toString());
+  const country = cleanPlaceString((item.country || item.user?.country || item.company_profile?.country || item.technician_profile?.country || "").toString());
 
+  if (neighborhood && !isStreetAddress(neighborhood) && !isGarbageText(neighborhood)) {
+    if (city && !isStreetAddress(city) && !isGarbageText(city) && neighborhood.toLowerCase() !== city.toLowerCase()) {
+      return `${neighborhood}, ${city}`;
+    }
+  }
+
+  // 2. If city is present
   if (city && !isStreetAddress(city) && !isGarbageText(city)) {
     if (country && country.toLowerCase() !== city.toLowerCase() && !isGarbageText(country)) {
       return `${city}, ${country}`;
@@ -290,7 +303,7 @@ export function resolveCleanLocation(item: any): string {
     return city;
   }
 
-  // 2. Extract from raw address/headquarters/location string
+  // 3. Extract from raw address/headquarters/location string
   const rawLoc = (
     item.location ||
     item.coverage_area ||
@@ -305,19 +318,24 @@ export function resolveCleanLocation(item: any): string {
     return country && !isGarbageText(country) ? country : "West Africa";
   }
 
-  // If rawLoc contains commas (e.g., "Rue IPPB, Bloc L-64, Cotonou, Benin")
+  // If rawLoc contains commas (e.g., "Rue IPPB, Haie Vive, Cotonou, Benin" or "Bonamoussadi, Douala")
   if (rawLoc.includes(",")) {
     const parts = rawLoc
       .split(",")
       .map((p: string) => cleanPlaceString(p))
       .filter((p: string) => p.length > 1 && !isStreetAddress(p) && !/^[\d\s\-_]+$/.test(p) && !isGarbageText(p));
 
-    if (parts.length > 0) {
-      return parts.slice(-2).join(", ");
+    if (parts.length >= 3) {
+      // e.g. [Haie Vive, Cotonou, Benin] -> "Haie Vive, Cotonou" (Neighborhood, City)
+      return `${parts[0]}, ${parts[1]}`;
+    } else if (parts.length === 2) {
+      return `${parts[0]}, ${parts[1]}`;
+    } else if (parts.length === 1) {
+      return parts[0];
     }
   }
 
-  // If single string is a street address (e.g. "Rue IPPB, Bloc L-64, ]")
+  // If single string is a street address (e.g. "Rue IPPB, Bloc L-64")
   if (isStreetAddress(rawLoc)) {
     return country && !isGarbageText(country) ? country : "West Africa";
   }

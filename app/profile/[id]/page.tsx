@@ -93,6 +93,17 @@ const translations: Record<string, Record<string, string>> = {
     hireProBtn: "Hire Pro & Fund Escrow",
     years: "Years",
     hoursPerDay: "Hours",
+    projectModalTitle: "Project Case Study & Scope",
+    clientAuthority: "Client / Contracting Authority",
+    projectBudget: "Contract Value / Budget",
+    projectDuration: "Execution Timeline",
+    projectLocation: "Project Location",
+    liveDemoBtn: "Visit Live Project / Demo ↗",
+    scopeOfWorks: "Scope of Works & Technical Overview",
+    projectGallery: "Site Photos & Deliverable Gallery",
+    techAndTags: "Key Technologies & Deliverables",
+    closeModal: "Close",
+    expandToView: "Click to view case study & gallery",
   },
   fr: {
     backToDirectory: "Retour à l'Annuaire & Recherche",
@@ -175,8 +186,43 @@ const translations: Record<string, Record<string, string>> = {
     hireProBtn: "Engager & Sécuriser les Fonds",
     years: "ans",
     hoursPerDay: "heures",
+    projectModalTitle: "Étude de Cas & Réalisation",
+    clientAuthority: "Client / Maître d'Ouvrage",
+    projectBudget: "Montant du Contrat / Budget",
+    projectDuration: "Délai d'Exécution",
+    projectLocation: "Localisation du Projet",
+    liveDemoBtn: "Visiter le Projet / Démo en Direct ↗",
+    scopeOfWorks: "Étendue des Travaux & Spécifications Techniques",
+    projectGallery: "Galerie Photos du Chantier / Réalisation",
+    techAndTags: "Technologies Clés & Livrables",
+    closeModal: "Fermer",
+    expandToView: "Cliquer pour voir l'étude de cas et la galerie",
   }
 };
+
+function getProjectImages(item: any): string[] {
+  if (!item) return [];
+  const imgs: string[] = [];
+  if (Array.isArray(item.images)) {
+    item.images.forEach((img: any) => {
+      if (typeof img === "string" && img.trim()) imgs.push(img.trim());
+      else if (img?.url) imgs.push(img.url);
+      else if (img?.image_url) imgs.push(img.image_url);
+    });
+  }
+  if (Array.isArray(item.photos)) {
+    item.photos.forEach((img: any) => {
+      if (typeof img === "string" && img.trim()) imgs.push(img.trim());
+      else if (img?.url) imgs.push(img.url);
+      else if (img?.image_url) imgs.push(img.image_url);
+    });
+  }
+  const single = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url || item.cover_image || item.cover_url;
+  if (single && typeof single === "string" && !imgs.includes(single)) {
+    imgs.unshift(single);
+  }
+  return imgs;
+}
 
 export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
@@ -188,6 +234,8 @@ export default function PublicProfilePage() {
 
   const [lang, setLang] = useState("en");
   const [imageError, setImageError] = useState(false);
+  const [selectedProjectModal, setSelectedProjectModal] = useState<any | null>(null);
+  const [activeModalImageIndex, setActiveModalImageIndex] = useState<number>(0);
 
   useEffect(() => {
     const updateLang = () => {
@@ -484,23 +532,40 @@ export default function PublicProfilePage() {
   }, [profile, industry]);
 
   const portfolioList: any[] = useMemo(() => {
-    if (Array.isArray(profile?.projects) && profile.projects.length > 0) return profile.projects;
-    if (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0) return profile.portfolio;
-    if (Array.isArray(profile?.technician_profile?.portfolio) && profile.technician_profile.portfolio.length > 0) return profile.technician_profile.portfolio;
-    if (Array.isArray(profile?.portfolio_items) && profile.portfolio_items.length > 0) return profile.portfolio_items;
+    let list: any[] = [];
+    if (Array.isArray(profile?.projects) && profile.projects.length > 0) list = [...profile.projects];
+    else if (Array.isArray(profile?.portfolio) && profile.portfolio.length > 0) list = [...profile.portfolio];
+    else if (Array.isArray(profile?.technician_profile?.portfolio) && profile.technician_profile.portfolio.length > 0) list = [...profile.technician_profile.portfolio];
+    else if (Array.isArray(profile?.portfolio_items) && profile.portfolio_items.length > 0) list = [...profile.portfolio_items];
+
     if (typeof window !== "undefined") {
       try {
-        const rawPort = (validId ? localStorage.getItem(`boulotman_technician_portfolio_${validId}`) : null)
+        const rawPort = (validId ? localStorage.getItem(`boulotman_company_projects_${validId}`) : null)
+          || (profile?.id ? localStorage.getItem(`boulotman_company_projects_${profile.id}`) : null)
+          || (profile?.user_id ? localStorage.getItem(`boulotman_company_projects_${profile.user_id}`) : null)
+          || (validId ? localStorage.getItem(`boulotman_technician_portfolio_${validId}`) : null)
           || (profile?.id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.id}`) : null)
           || (profile?.user_id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.user_id}`) : null)
+          || localStorage.getItem("boulotman_company_projects")
           || localStorage.getItem("boulotman_technician_portfolio");
+
         if (rawPort) {
           const parsed = JSON.parse(rawPort);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const existingTitles = new Set(list.map((p) => (p.title || "").toLowerCase().trim()));
+            for (const item of parsed) {
+              const tKey = (item.title || "").toLowerCase().trim();
+              if (tKey && !existingTitles.has(tKey)) {
+                list.push(item);
+                existingTitles.add(tKey);
+              }
+            }
+            if (list.length === 0) list = parsed;
+          }
         }
       } catch {}
     }
-    return [];
+    return list;
   }, [profile, validId]);
 
   const teamList: any[] = useMemo(() => {
@@ -914,25 +979,40 @@ export default function PublicProfilePage() {
                   ) : (
                     <div className={styles.portfolioGrid}>
                       {portfolioList.map((item: any, idx: number) => {
-                        const img = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url;
+                        const images = getProjectImages(item);
+                        const coverImg = images[0] || null;
                         const budgetVal = item.budget || item.project_value || (item.budget_xof ? `${item.budget_xof} XOF` : "");
                         const compDate = item.completionDate || item.completion_date || item.completed_date || item.timeline || "Completed";
                         const clientName = item.client || item.client_name || "Enterprise Partner";
 
                         return (
-                          <div key={item.id || item.title || idx} className={styles.portfolioCard}>
+                          <div 
+                            key={item.id || item.title || idx} 
+                            className={styles.portfolioCard}
+                            onClick={() => {
+                              setSelectedProjectModal(item);
+                              setActiveModalImageIndex(0);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            title={t.expandToView || "Click to view case study & gallery"}
+                          >
                             <div className={styles.portfolioVisual}>
-                              {img ? (
-                                <img src={getImageUrl(img)} alt={item.title || "Project photo"} />
+                              {coverImg ? (
+                                <img src={getImageUrl(coverImg)} alt={item.title || "Project photo"} />
                               ) : (
                                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
                                   <iconify-icon icon="lucide:building" style={{ fontSize: 36 }} />
                                   <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Delivered Project</span>
                                 </div>
                               )}
+                              <div className={styles.portfolioExpandOverlay}>
+                                <iconify-icon icon="lucide:maximize-2" />
+                                <span>{t.expandToView || "View Details"}</span>
+                              </div>
                               {budgetVal && (
                                 <span className={styles.portfolioBudgetBadge}>
-                                  {budgetVal}
+                                  {typeof budgetVal === "number" ? `${budgetVal.toLocaleString()} XOF` : budgetVal}
                                 </span>
                               )}
                             </div>
@@ -1344,24 +1424,39 @@ export default function PublicProfilePage() {
                   ) : (
                     <div className={styles.portfolioGrid}>
                       {portfolioList.map((item: any, idx: number) => {
-                        const img = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url;
+                        const images = getProjectImages(item);
+                        const coverImg = images[0] || null;
                         const budgetVal = item.budget || item.project_value || (item.budget_xof ? `${item.budget_xof} XOF` : "");
                         const compDate = item.completionDate || item.completion_date || item.completed_date || item.timeline || "Completed";
 
                         return (
-                          <div key={item.id || item.title || idx} className={styles.portfolioCard}>
+                          <div 
+                            key={item.id || item.title || idx} 
+                            className={styles.portfolioCard}
+                            onClick={() => {
+                              setSelectedProjectModal(item);
+                              setActiveModalImageIndex(0);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            title={t.expandToView || "Click to view case study & gallery"}
+                          >
                             <div className={styles.portfolioVisual}>
-                              {img ? (
-                                <img src={getImageUrl(img)} alt={item.title || "Project photo"} />
+                              {coverImg ? (
+                                <img src={getImageUrl(coverImg)} alt={item.title || "Project photo"} />
                               ) : (
                                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
                                   <iconify-icon icon="lucide:hard-hat" style={{ fontSize: 36 }} />
                                   <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified Job</span>
                                 </div>
                               )}
+                              <div className={styles.portfolioExpandOverlay}>
+                                <iconify-icon icon="lucide:maximize-2" />
+                                <span>{t.expandToView || "View Details"}</span>
+                              </div>
                               {budgetVal && (
                                 <span className={styles.portfolioBudgetBadge}>
-                                  {budgetVal}
+                                  {typeof budgetVal === "number" ? `${budgetVal.toLocaleString()} XOF` : budgetVal}
                                 </span>
                               )}
                             </div>
@@ -1370,7 +1465,7 @@ export default function PublicProfilePage() {
                               <h4 className={styles.portfolioTitle}>{item.title}</h4>
                               {item.description && <p className={styles.portfolioDesc}>{item.description}</p>}
                               <div className={styles.portfolioFooter}>
-                                <span>📍 {techLocation}</span>
+                                <span>📍 {item.location || techLocation}</span>
                                 <span>⏳ {compDate}</span>
                               </div>
                             </div>
@@ -1538,6 +1633,204 @@ export default function PublicProfilePage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Project Case Study & Gallery Modal */}
+        {selectedProjectModal && (
+          <div 
+            className={styles.modalBackdrop} 
+            onClick={() => setSelectedProjectModal(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div 
+              className={styles.projectModalContainer} 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.modalHeader}>
+                <div className={styles.modalHeaderLeft}>
+                  <span className={styles.modalCategoryBadge}>
+                    {selectedProjectModal.category || (isCompany ? industry : techCategory) || "Case Study"}
+                  </span>
+                  <span className={styles.modalStatusBadge}>
+                    <iconify-icon icon="lucide:check-circle" />
+                    {selectedProjectModal.status === "completed" || !selectedProjectModal.status ? "100% Delivered" : selectedProjectModal.status}
+                  </span>
+                </div>
+                <button 
+                  type="button" 
+                  className={styles.modalCloseBtn} 
+                  onClick={() => setSelectedProjectModal(null)}
+                  aria-label={t.closeModal || "Close"}
+                >
+                  <iconify-icon icon="lucide:x" />
+                </button>
+              </div>
+
+              <div className={styles.modalBody}>
+                <h3 className={styles.modalTitle}>{selectedProjectModal.title}</h3>
+
+                {/* Visual / Gallery Lightbox Section */}
+                {(() => {
+                  const imgs = getProjectImages(selectedProjectModal);
+                  const currentImg = imgs[activeModalImageIndex] || imgs[0];
+                  return (
+                    <div className={styles.modalVisualSection}>
+                      <div className={styles.modalHeroVisual}>
+                        {currentImg ? (
+                          <img 
+                            src={getImageUrl(currentImg)} 
+                            alt={selectedProjectModal.title} 
+                            className={styles.modalHeroImg} 
+                          />
+                        ) : (
+                          <div className={styles.modalVisualFallback}>
+                            <iconify-icon icon={isCompany ? "lucide:building-2" : "lucide:hard-hat"} style={{ fontSize: 48 }} />
+                            <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase" }}>Delivered Project Case Study</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {imgs.length > 1 && (
+                        <div className={styles.modalThumbnailStrip}>
+                          {imgs.map((imgUrl, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              className={`${styles.modalThumbBtn} ${activeModalImageIndex === i ? styles.modalThumbBtnActive : ""}`}
+                              onClick={() => setActiveModalImageIndex(i)}
+                            >
+                              <img src={getImageUrl(imgUrl)} alt="" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Metrics Grid */}
+                <div className={styles.modalMetaGrid}>
+                  {(selectedProjectModal.client || selectedProjectModal.client_name) && (
+                    <div className={styles.modalMetaCard}>
+                      <div className={styles.modalMetaIcon}>
+                        <iconify-icon icon="lucide:landmark" />
+                      </div>
+                      <div className={styles.modalMetaInfo}>
+                        <span className={styles.modalMetaLabel}>{t.clientAuthority || "Client"}</span>
+                        <span className={styles.modalMetaVal} title={selectedProjectModal.client || selectedProjectModal.client_name}>
+                          {selectedProjectModal.client || selectedProjectModal.client_name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {(selectedProjectModal.budget || selectedProjectModal.project_value || selectedProjectModal.budget_xof) && (
+                    <div className={styles.modalMetaCard}>
+                      <div className={styles.modalMetaIcon} style={{ color: "#16a34a" }}>
+                        <iconify-icon icon="lucide:banknote" />
+                      </div>
+                      <div className={styles.modalMetaInfo}>
+                        <span className={styles.modalMetaLabel}>{t.projectBudget || "Budget"}</span>
+                        <span className={styles.modalMetaVal} style={{ color: "#16a34a" }}>
+                          {typeof selectedProjectModal.budget === "number"
+                            ? `${selectedProjectModal.budget.toLocaleString()} XOF`
+                            : selectedProjectModal.budget || selectedProjectModal.project_value || `${selectedProjectModal.budget_xof} XOF`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {(selectedProjectModal.timeline || selectedProjectModal.completionDate || selectedProjectModal.completion_date || selectedProjectModal.year) && (
+                    <div className={styles.modalMetaCard}>
+                      <div className={styles.modalMetaIcon} style={{ color: "#0284c7" }}>
+                        <iconify-icon icon="lucide:calendar" />
+                      </div>
+                      <div className={styles.modalMetaInfo}>
+                        <span className={styles.modalMetaLabel}>{t.projectDuration || "Timeline"}</span>
+                        <span className={styles.modalMetaVal}>
+                          {[
+                            selectedProjectModal.timeline,
+                            selectedProjectModal.completionDate || selectedProjectModal.completion_date || selectedProjectModal.year ? `(${selectedProjectModal.completionDate || selectedProjectModal.completion_date || selectedProjectModal.year})` : ""
+                          ].filter(Boolean).join(" ") || "Completed"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {(selectedProjectModal.location || techLocation) && (
+                    <div className={styles.modalMetaCard}>
+                      <div className={styles.modalMetaIcon} style={{ color: "#ea580c" }}>
+                        <iconify-icon icon="lucide:map-pin" />
+                      </div>
+                      <div className={styles.modalMetaInfo}>
+                        <span className={styles.modalMetaLabel}>{t.projectLocation || "Location"}</span>
+                        <span className={styles.modalMetaVal} title={selectedProjectModal.location || techLocation}>
+                          {selectedProjectModal.location || techLocation}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Live Project / Demo Link Banner */}
+                {(selectedProjectModal.url || selectedProjectModal.project_url || selectedProjectModal.live_url || selectedProjectModal.link) && (
+                  <div className={styles.modalLiveUrlBanner}>
+                    <div className={styles.modalLiveUrlText}>
+                      <span className={styles.modalLiveUrlTitle}>🌐 Live Deployment & Interactive System</span>
+                      <span className={styles.modalLiveUrlSubtitle}>
+                        {selectedProjectModal.url || selectedProjectModal.project_url || selectedProjectModal.live_url || selectedProjectModal.link}
+                      </span>
+                    </div>
+                    <a
+                      href={
+                        (selectedProjectModal.url || selectedProjectModal.project_url || selectedProjectModal.live_url || selectedProjectModal.link).startsWith("http")
+                          ? (selectedProjectModal.url || selectedProjectModal.project_url || selectedProjectModal.live_url || selectedProjectModal.link)
+                          : `https://${selectedProjectModal.url || selectedProjectModal.project_url || selectedProjectModal.live_url || selectedProjectModal.link}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.modalLiveUrlBtn}
+                    >
+                      <iconify-icon icon="lucide:external-link" />
+                      {t.liveDemoBtn || "Visit Live Demo ↗"}
+                    </a>
+                  </div>
+                )}
+
+                {/* Scope of Works & Description */}
+                {selectedProjectModal.description && (
+                  <div className={styles.modalSectionBlock}>
+                    <h4 className={styles.modalSectionHeading}>
+                      <iconify-icon icon="lucide:file-text" style={{ color: "#ff4500" }} />
+                      {t.scopeOfWorks || "Scope of Works & Technical Overview"}
+                    </h4>
+                    <div className={styles.modalDescContent}>
+                      {selectedProjectModal.description}
+                    </div>
+                  </div>
+                )}
+
+                {/* Deliverables / Tags */}
+                {Array.isArray(selectedProjectModal.tags) && selectedProjectModal.tags.length > 0 && (
+                  <div className={styles.modalSectionBlock}>
+                    <h4 className={styles.modalSectionHeading}>
+                      <iconify-icon icon="lucide:cpu" style={{ color: "#0284c7" }} />
+                      {t.techAndTags || "Key Technologies & Deliverables"}
+                    </h4>
+                    <div className={styles.modalTagChips}>
+                      {selectedProjectModal.tags.map((tag: string, idx: number) => (
+                        <span key={idx} className={styles.modalTagChip}>
+                          <iconify-icon icon="lucide:check" style={{ color: "#16a34a" }} />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </main>
       

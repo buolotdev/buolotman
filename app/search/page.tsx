@@ -272,14 +272,12 @@ export default function SearchPage() {
       params.location = location;
     }
     if (activeCategory && activeCategory !== "any") params.category = activeCategory;
-    if (activeType && activeType !== "any") params.type = activeType;
-    if (activeTab && activeTab !== "all") params.tab = activeTab;
     if (activeRating) params.min_rating = activeRating;
     if (sortBy) params.sort = sortBy;
     if (budgetMin) params.budget_min = budgetMin;
     if (budgetMax) params.budget_max = budgetMax;
     return params;
-  }, [query, location, activeCategory, activeType, activeTab, activeRating, sortBy, budgetMin, budgetMax]);
+  }, [query, location, activeCategory, activeRating, sortBy, budgetMin, budgetMax]);
 
   useEffect(() => {
     let cancelled = false;
@@ -350,11 +348,8 @@ export default function SearchPage() {
     slug: (c.slug || c.name || "").toString().toLowerCase(),
   }));
 
-  const filteredByTab = useMemo(() => {
+  const baseFilteredResults = useMemo(() => {
     let list = results;
-    if (activeTab !== "all") {
-      list = list.filter((r) => r.type === activeTab);
-    }
 
     // Client-side category matching fallback
     if (activeCategory && activeCategory !== "any") {
@@ -385,7 +380,21 @@ export default function SearchPage() {
     }
 
     return list;
-  }, [results, activeTab, activeCategory, location]);
+  }, [results, activeCategory, location]);
+
+  const tabCounts = useMemo(() => {
+    return {
+      all: baseFilteredResults.length,
+      service: baseFilteredResults.filter((r) => r.type === "service").length,
+      technician: baseFilteredResults.filter((r) => r.type === "technician").length,
+      company: baseFilteredResults.filter((r) => r.type === "company").length,
+    };
+  }, [baseFilteredResults]);
+
+  const filteredByTab = useMemo(() => {
+    if (activeTab === "all") return baseFilteredResults;
+    return baseFilteredResults.filter((r) => r.type === activeTab);
+  }, [baseFilteredResults, activeTab]);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -601,27 +610,28 @@ export default function SearchPage() {
         <section className={styles.resultsArea}>
           <div className={styles.resultsTopBar}>
             <div className={styles.tabs} role="tablist" aria-label="Result categories">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab.value}
-                  className={`${styles.tab} ${activeTab === tab.value ? styles.tabActive : ""}`}
-                  onClick={() => {
-                    setActiveTab(tab.value);
-                    if (tab.value === "technician" || tab.value === "company") {
-                      setActiveType(tab.value);
-                    } else {
-                      setActiveType("any");
-                    }
-                  }}
-                >
-                  {tab.label} (
-                  {activeTab === tab.value ? filteredByTab.length : results.filter((r) => tab.value === "all" ? true : r.type === tab.value).length}
-                  )
-                </button>
-              ))}
+              {tabs.map((tab) => {
+                const count = tabCounts[tab.value as keyof typeof tabCounts] ?? 0;
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.value}
+                    className={`${styles.tab} ${activeTab === tab.value ? styles.tabActive : ""}`}
+                    onClick={() => {
+                      setActiveTab(tab.value);
+                      if (tab.value === "technician" || tab.value === "company") {
+                        setActiveType(tab.value);
+                      } else {
+                        setActiveType("any");
+                      }
+                    }}
+                  >
+                    {tab.label} ({count})
+                  </button>
+                );
+              })}
             </div>
 
             <label className={styles.sortBy}>
