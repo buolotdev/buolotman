@@ -8,18 +8,12 @@ export function getImageUrl(url: string | null | undefined): string {
 
   if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) return trimmed;
 
-  // If it's a backend /media/ path or full URL pointing to media
-  if (trimmed.includes("/media/")) {
-    const idx = trimmed.indexOf("/media/");
-    return trimmed.substring(idx);
-  }
-
-  // If already an external full HTTPS URL (Supabase, Unsplash, Google, Pravatar, etc.)
+  // If already an external full HTTPS URL (Supabase, S3, Unsplash, Google, Pravatar, etc.)
   if (trimmed.startsWith("https://")) {
     return trimmed;
   }
 
-  // If insecure HTTP URL pointing to backend
+  // If insecure HTTP URL pointing to backend or external
   if (trimmed.startsWith("http://")) {
     if (trimmed.includes("elasticbeanstalk.com") || trimmed.includes("onrender.com") || trimmed.includes("localhost")) {
       const slashIdx = trimmed.indexOf("/", 8);
@@ -29,6 +23,12 @@ export function getImageUrl(url: string | null | undefined): string {
     }
     // Upgrade other HTTP domains to HTTPS
     return trimmed.replace(/^http:\/\//i, "https://");
+  }
+
+  // If it's a backend /media/ path
+  if (trimmed.includes("/media/")) {
+    const idx = trimmed.indexOf("/media/");
+    return trimmed.substring(idx);
   }
 
   if (trimmed.startsWith("/")) {

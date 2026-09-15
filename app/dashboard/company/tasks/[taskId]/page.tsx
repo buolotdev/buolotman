@@ -125,6 +125,7 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
 
   const [messaging, setMessaging] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<{ url: string; name: string; isImage?: boolean } | null>(null);
+  const [lightboxError, setLightboxError] = useState(false);
 
   // Proposal modal state
   const [showProposalModal, setShowProposalModal] = useState(false);
@@ -384,13 +385,16 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
                 {task.attachments.map((attachment: any, idx: number) => {
-                  const fileUrl = getImageUrl(attachment.file_url);
-                  const fileName = attachment.file_name || `Attachment #${idx + 1}`;
-                  const isImage = attachment.content_type?.includes("image") || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                  const fileUrl = getImageUrl(attachment.file_url || attachment.file || attachment.url);
+                  const fileName = attachment.file_name || attachment.name || `Attachment #${idx + 1}`;
+                  const isImage = attachment.content_type?.includes("image") || attachment.file_type === "image" || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
                   return (
                     <div
                       key={idx}
-                      onClick={() => setActiveLightboxImage({ url: fileUrl, name: fileName, isImage: Boolean(isImage) })}
+                      onClick={() => {
+                        setLightboxError(false);
+                        setActiveLightboxImage({ url: fileUrl, name: fileName, isImage: Boolean(isImage) });
+                      }}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -414,14 +418,26 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
-                        overflow: "hidden"
+                        overflow: "hidden",
+                        position: "relative"
                       }}>
                         {isImage ? (
-                          <img
-                            src={fileUrl}
-                            alt={fileName}
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
+                          <>
+                            <img
+                              src={fileUrl}
+                              alt=""
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              onError={(e) => {
+                                const target = e.target as HTMLElement;
+                                target.style.display = "none";
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = "flex";
+                              }}
+                            />
+                            <div style={{ display: "none", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", background: "rgba(255, 69, 0, 0.1)" }}>
+                              <iconify-icon icon="lucide:image" style={{ fontSize: 22, color: "#ff4500" }} />
+                            </div>
+                          </>
                         ) : (
                           <iconify-icon icon="lucide:file-text" style={{ fontSize: 22 }} />
                         )}
@@ -703,24 +719,30 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
             >
               <iconify-icon icon="lucide:x" />
             </button>
-            {activeLightboxImage.isImage ? (
+            {activeLightboxImage.isImage && !lightboxError ? (
               <img
                 src={activeLightboxImage.url}
                 alt={activeLightboxImage.name}
                 style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
+                onError={() => setLightboxError(true)}
               />
             ) : (
               <div style={{ padding: 40, color: "#fff", textAlign: "center" }}>
-                <iconify-icon icon="lucide:file-text" style={{ fontSize: 60, color: "#38bdf8", display: "inline-block", marginBottom: 12 }} />
+                <iconify-icon icon={activeLightboxImage.isImage ? "lucide:image-off" : "lucide:file-text"} style={{ fontSize: 60, color: "#38bdf8", display: "inline-block", marginBottom: 12 }} />
                 <p style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{activeLightboxImage.name}</p>
-                <a
-                  href={activeLightboxImage.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-block", marginTop: 14, color: "#ff8c42", fontWeight: 700, textDecoration: "underline" }}
-                >
-                  Open in New Tab ↗
-                </a>
+                {activeLightboxImage.isImage && lightboxError && (
+                  <p style={{ margin: "6px 0 0", fontSize: 13, color: "#94a3b8" }}>Image preview could not be loaded from remote storage.</p>
+                )}
+                {activeLightboxImage.url && (
+                  <a
+                    href={activeLightboxImage.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: "inline-block", marginTop: 14, color: "#ff8c42", fontWeight: 700, textDecoration: "underline" }}
+                  >
+                    Open in New Tab ↗
+                  </a>
+                )}
               </div>
             )}
           </div>
