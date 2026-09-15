@@ -861,82 +861,35 @@ export default function Home() {
 
           <div className="bm-enterprise-grid">
             {companiesLoading ? (
-              <div style={{ padding: "40px", color: "#94a3b8", textAlign: "center", gridColumn: "1 / -1" }}>
-                <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
-                <p style={{ marginTop: 10, fontWeight: 600 }}>{t.companiesLoading}</p>
-              </div>
+              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
             ) : companiesData && companiesData.length > 0 ? (
               companiesData.slice(0, 3).map((company: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(company.id) || (company.user_id && String(meData.id) === String(company.user_id)) || meData.username === company.username));
-                const compName = company.company_name || company.name || "Registered Enterprise";
-                const logoUrl = getImageUrl(company.logo) || `https://ui-avatars.com/api/?name=${encodeURIComponent(compName)}&background=001f3f&color=fff&bold=true&size=128`;
-                const locationText = [company.city, company.country].filter(Boolean).join(", ") || "Multiple Locations";
-                
-                const rawRating = Number(company.average_rating || 0);
-                const ratingDisplay = rawRating > 0 ? rawRating.toFixed(1) : "4.9";
-
-                let compDesc = (company.description || "").trim();
-                if (!compDesc || compDesc.length < 10) {
-                  compDesc = t.entDescFallback || "Comprehensive commercial engineering, facility maintenance, and industrial technical solutions.";
-                }
-
                 return (
                   <div className="bm-enterprise-card" key={company.id}>
-                    {/* TOP BADGE */}
-                    <div className="bm-ftx-card-top-bar">
-                      <span className="bm-ftx-badge-verified" style={{ background: "rgba(2, 132, 199, 0.08)", color: "#0284c7", borderColor: "rgba(2, 132, 199, 0.2)" }}>
-                        <iconify-icon icon="lucide:building-2" /> Registered Firm
-                      </span>
-                      <span className="bm-ftx-badge-status" style={{ background: "rgba(255, 69, 0, 0.08)", color: "#ff4500" }}>
-                        <iconify-icon icon="lucide:folder-check" /> {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}
-                      </span>
-                    </div>
-
-                    {/* PROFILE INFO */}
                     <div className="bm-enterprise-profile">
-                      <div className="bm-ftx-avatar-wrap">
-                        <img className="bm-enterprise-avatar" src={logoUrl} alt={compName} />
-                        <span className="bm-ftx-avatar-check" style={{ background: "#0284c7" }} title="Registered Enterprise">
-                          <iconify-icon icon="lucide:check" />
-                        </span>
-                      </div>
-                      <div className="bm-ftx-info">
-                        <h3 className="bm-enterprise-name" title={compName}>{compName}</h3>
+                      <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || 'C')}&background=random`} alt={company.company_name} />
+                      <div>
+                        <div className="bm-enterprise-name">{company.company_name}</div>
                         <div className="bm-enterprise-role">{t.entRoleComp}</div>
                       </div>
                     </div>
-
-                    {/* RATING & LOCATION */}
-                    <div className="bm-ftx-rating-row">
-                      <div className="bm-ftx-stars-wrap">
-                        <iconify-icon icon="lucide:star" className="bm-star-icon" />
-                        <strong className="bm-star-score">{ratingDisplay}</strong>
-                        <span className="bm-star-count">(Corporate Verified)</span>
-                      </div>
-                      <div className="bm-ftx-location" title={locationText}>
-                        <iconify-icon icon="lucide:map-pin" />
-                        <span>{locationText}</span>
-                      </div>
+                    <div className="bm-enterprise-rating">
+                      <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
                     </div>
-
-                    {/* DESCRIPTION */}
-                    <p className="bm-enterprise-description">{compDesc}</p>
-
-                    {/* ACTIONS */}
+                    <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
+                    <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {company.description || t.entDescFallback}
+                    </div>
                     <div className="bm-enterprise-actions">
-                      <Link href={`/profile/${company.id}?type=company`} className="bm-enterprise-btn bm-enterprise-btn-view">
-                        <iconify-icon icon="lucide:building" />
-                        <span>{t.entBtnView}</span>
-                      </Link>
+                      <Link href={`/profile/${company.id}?type=company`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
                       {isSelf ? (
                         <Link href="/dashboard/company/profile" className="bm-enterprise-btn bm-enterprise-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
-                          <iconify-icon icon="lucide:edit-3" />
-                          <span>Edit Profile</span>
+                          Edit Profile
                         </Link>
                       ) : (
                         <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">
-                          <iconify-icon icon="lucide:file-text" />
-                          <span>{t.entBtnHire}</span>
+                          {t.entBtnHire}
                         </Link>
                       )}
                     </div>
@@ -944,7 +897,7 @@ export default function Home() {
                 );
               })
             ) : (
-              <div style={{ padding: "40px", color: "#94a3b8", textAlign: "center", gridColumn: "1 / -1" }}>{t.companiesNoTasks}</div>
+              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesNoTasks}</div>
             )}
           </div>
           <div style={{ textAlign: "center", marginTop: "40px" }}>
