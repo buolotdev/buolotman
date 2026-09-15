@@ -43,24 +43,34 @@ const translations: Record<string, Record<string, string>> = {
     selectCategoryFirst: "👈 Click 'Category' on the left first",
     country: "Country (auto-detected)",
     city: "City (auto-detected)",
-    pricingStructure: "Pricing Structure",
-    contractBased: "Contract-based",
-    projectBased: "Project-based",
-    hourlyDaily: "Hourly / Daily",
-    negotiable: "Negotiable",
-    estimatedBudget: "Estimated Budget (XOF)",
-    deadline: "Deadline",
-    projectDescription: "Project Description",
-    descPlaceholder: "Provide detailed requirements for this project...",
-    previewProject: "Preview Project",
-    projectPreview: "Project Preview",
+    pricingStructure: "Pricing & Budget Structure",
+    customerPrefBudget: "Customer's Preference / Quote by Scope (Flexible)",
+    startingAtFixed: "Starting at Fixed Rate (XOF)",
+    contractBased: "Contract-based / Turnkey",
+    projectBased: "Project-based / Milestones",
+    hourlyDaily: "Hourly / Daily Rate",
+    negotiable: "Negotiable / PM Determined",
+    estimatedBudget: "Base Budget / Starting Price (XOF)",
+    budgetOptionalHint: "Optional: Determined by project manager or scope agreement.",
+    serviceTimeline: "Service Timeline & Delivery Schedule",
+    customerPrefTimeline: "Customer's Preference / Flexible Timeline (Default)",
+    scopeAgreedTimeline: "Determined by Project Scope & Agreement",
+    ongoingServiceTimeline: "Ongoing Service / Continuous Retainer",
+    immediateTimeline: "Immediate / Urgent Mobilization",
+    specificDateTimeline: "Specific Target Completion Date",
+    deadline: "Target Completion Date",
+    projectDescription: "Service / Project Description",
+    descPlaceholder: "Provide detailed scope, capabilities, and execution standards for this service...",
+    previewProject: "Preview Service Offering",
+    projectPreview: "Service Preview",
     company: "Company",
     serviceMode: "Service Mode",
+    timelineLabel: "Timeline / Schedule",
     pricing: "Pricing",
     categories: "Categories",
     editDetails: "Edit Details",
     saveDraft: "Save Draft",
-    publishProject: "Publish Project",
+    publishProject: "Publish Service",
     publishing: "Publishing...",
     toastWaitTitle: "Wait for Verification",
     toastWaitDesc: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services."
@@ -83,24 +93,34 @@ const translations: Record<string, Record<string, string>> = {
     selectCategoryFirst: "👈 Choisissez d'abord la catégorie à gauche",
     country: "Pays (détecté automatiquement)",
     city: "Ville (détectée automatiquement)",
-    pricingStructure: "Structure tarifaire",
-    contractBased: "Sur contrat",
-    projectBased: "Par projet",
-    hourlyDaily: "Horaire / Journalier",
-    negotiable: "Négociable",
-    estimatedBudget: "Budget estimatif (XOF)",
-    deadline: "Date limite / Échéance",
-    projectDescription: "Description détaillée",
-    descPlaceholder: "Fournissez les spécifications et détails pour cette prestation...",
+    pricingStructure: "Structure Tarifaire & Budget",
+    customerPrefBudget: "Au choix du client / Devis selon l'envergure (Flexible)",
+    startingAtFixed: "À partir d'un tarif fixe (XOF)",
+    contractBased: "Sur contrat / Clé en main",
+    projectBased: "Par projet / Par jalons",
+    hourlyDaily: "Tarif horaire / journalier",
+    negotiable: "Négociable / Déterminé par le chef de projet",
+    estimatedBudget: "Budget estimatif de départ (XOF)",
+    budgetOptionalHint: "Facultatif : Défini par le chef de projet selon l'envergure.",
+    serviceTimeline: "Délai de Réalisation & Calendrier",
+    customerPrefTimeline: "Au choix du client / Calendrier flexible (Par défaut)",
+    scopeAgreedTimeline: "Défini selon le cahier des charges et l'accord",
+    ongoingServiceTimeline: "Prestation continue / Contrat cadre",
+    immediateTimeline: "Intervention immédiate / Mobilisation urgente",
+    specificDateTimeline: "Date cible d'achèvement spécifique",
+    deadline: "Date cible d'achèvement",
+    projectDescription: "Description détaillée de la prestation",
+    descPlaceholder: "Fournissez les spécifications, le périmètre et les standards d'exécution...",
     previewProject: "Aperçu de la prestation",
     projectPreview: "Aperçu de la prestation",
     company: "Entreprise",
     serviceMode: "Mode d'intervention",
+    timelineLabel: "Délai & Planning",
     pricing: "Tarification",
     categories: "Catégories",
     editDetails: "Modifier",
     saveDraft: "Enregistrer brouillon",
-    publishProject: "Publier l'Offre",
+    publishProject: "Publier la Prestation",
     publishing: "Publication en cours...",
     toastWaitTitle: "Vérification en attente",
     toastWaitDesc: "Veuillez patienter pendant l'examen de votre compte entreprise par l'administration. Dès validation, vous pourrez publier vos prestations."
@@ -185,10 +205,11 @@ export default function CreateCompanyProjectPage() {
     category: "",
     subcategory: "",
     budget: "",
-    budget_mode: "Contract-based",
+    budget_mode: "Customer's Preference / Quote by Scope",
     service_type: "onsite",
     country: "",
     city: "",
+    timeline_mode: "Customer's Preference / Flexible Timeline",
     deadline: "",
     description: "",
   });
@@ -196,6 +217,15 @@ export default function CreateCompanyProjectPage() {
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: companyProfile } = useFetch(() => api.getCompanyProfile(), []);
   const isVerified = Boolean(user?.is_verified || companyProfile?.is_verified || user?.company_profile?.is_verified);
+
+  useEffect(() => {
+    if (companyProfile?.company_name || user?.company_name) {
+      setForm(prev => ({
+        ...prev,
+        companyName: prev.companyName || companyProfile?.company_name || user?.company_name || ""
+      }));
+    }
+  }, [companyProfile, user]);
 
   const { data: categoriesData } = useFetch(
     () => api.getCategories().catch(() => []),
@@ -266,11 +296,19 @@ export default function CreateCompanyProjectPage() {
     try {
       const finalTitle = form.companyName ? `${form.companyName} - ${form.title}` : form.title;
 
+      const finalTimeline = form.timeline_mode === "Specific Target Completion Date" && form.deadline
+        ? `Target Date: ${form.deadline}`
+        : form.timeline_mode;
+
+      const finalPricing = form.budget
+        ? `${form.budget_mode} - ${Number(form.budget).toLocaleString()} XOF`
+        : form.budget_mode;
+
       const payload = {
         title: finalTitle,
         client_name: form.companyName || "New Client",
         budget: form.budget ? parseFloat(form.budget) : null,
-        timeline: form.deadline ? `Deadline: ${form.deadline}` : "",
+        timeline: finalTimeline,
         location: form.country ? `${form.city ? form.city + ', ' : ''}${form.country}` : "Online",
         status: "active",
         progress: 0,
@@ -290,7 +328,7 @@ export default function CreateCompanyProjectPage() {
         await api.createCompanyService({
           title: form.title,
           category: form.category || form.subcategory || "General",
-          pricing_model: form.budget ? `${form.budget} XOF (${form.budget_mode})` : form.budget_mode,
+          pricing_model: finalPricing,
           status: "Active",
           description: form.description || form.title,
         });
@@ -450,6 +488,7 @@ export default function CreateCompanyProjectPage() {
             </div>
           </div>
 
+          {/* Pricing & Budget Structure */}
           <div className={styles.grid2}>
             <div className={styles.fieldGroup}>
               <label className={styles.label}>{t.pricingStructure}</label>
@@ -459,10 +498,12 @@ export default function CreateCompanyProjectPage() {
                 onChange={e => setForm({...form, budget_mode: e.target.value})}
                 required
               >
-                <option value="Contract-based">{t.contractBased}</option>
-                <option value="Project-based">{t.projectBased}</option>
-                <option value="Hourly / Daily">{t.hourlyDaily}</option>
-                <option value="Negotiable">{t.negotiable}</option>
+                <option value="Customer's Preference / Quote by Scope">{t.customerPrefBudget}</option>
+                <option value="Starting at Fixed Rate">{t.startingAtFixed}</option>
+                <option value="Contract-based / Turnkey">{t.contractBased}</option>
+                <option value="Project-based / Milestones">{t.projectBased}</option>
+                <option value="Hourly / Daily Rate">{t.hourlyDaily}</option>
+                <option value="Negotiable / PM Determined">{t.negotiable}</option>
               </select>
             </div>
             <div className={styles.fieldGroup}>
@@ -470,23 +511,54 @@ export default function CreateCompanyProjectPage() {
               <input 
                 type="number" 
                 className={styles.input} 
-                placeholder="e.g., 500000"
+                placeholder="e.g., 500000 (Optional)"
                 value={form.budget}
                 onChange={e => setForm({...form, budget: e.target.value})}
-                required
               />
+              <small style={{ color: "#64748b", fontSize: "11.5px", marginTop: "4px" }}>
+                {t.budgetOptionalHint}
+              </small>
             </div>
           </div>
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>{t.deadline}</label>
-            <input 
-              type="date" 
-              className={styles.input} 
-              value={form.deadline}
-              onChange={e => setForm({...form, deadline: e.target.value})}
-              required
-            />
+          {/* Flexible Service Timeline & Delivery Schedule */}
+          <div className={styles.grid2}>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>{t.serviceTimeline}</label>
+              <select 
+                className={styles.select}
+                value={form.timeline_mode}
+                onChange={e => setForm({...form, timeline_mode: e.target.value})}
+                required
+              >
+                <option value="Customer's Preference / Flexible Timeline">{t.customerPrefTimeline}</option>
+                <option value="Determined by Project Scope & Agreement">{t.scopeAgreedTimeline}</option>
+                <option value="Ongoing Service / Continuous Retainer">{t.ongoingServiceTimeline}</option>
+                <option value="Immediate / Urgent Mobilization">{t.immediateTimeline}</option>
+                <option value="Specific Target Completion Date">{t.specificDateTimeline}</option>
+              </select>
+            </div>
+
+            {form.timeline_mode === "Specific Target Completion Date" ? (
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>{t.deadline}</label>
+                <input 
+                  type="date" 
+                  className={styles.input} 
+                  value={form.deadline}
+                  onChange={e => setForm({...form, deadline: e.target.value})}
+                  required
+                />
+              </div>
+            ) : (
+              <div className={styles.fieldGroup} style={{ justifyContent: "center" }}>
+                <label className={styles.label}>{t.timelineLabel}</label>
+                <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1", color: "#001f3f", fontSize: 13, fontWeight: 600 }}>
+                  <iconify-icon icon="lucide:calendar-clock" style={{ verticalAlign: "middle", marginRight: 6, color: "#ff4500" }} />
+                  {form.timeline_mode}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={styles.fieldGroup}>
@@ -516,8 +588,8 @@ export default function CreateCompanyProjectPage() {
               <div><strong>{t.serviceMode}</strong><p style={{ textTransform: 'capitalize' }}>{form.service_type}</p></div>
               <div><strong>{t.country}</strong><p>{form.country || "Not specified"}</p></div>
               <div><strong>{t.city}</strong><p>{form.city || "Not specified"}</p></div>
-              <div><strong>{t.pricing}</strong><p>{form.budget_mode} {form.budget ? `- ${form.budget} XOF` : ""}</p></div>
-              <div><strong>{t.deadline}</strong><p>{form.deadline || "No deadline"}</p></div>
+              <div><strong>{t.pricing}</strong><p>{form.budget_mode} {form.budget ? `- ${Number(form.budget).toLocaleString()} XOF` : ""}</p></div>
+              <div><strong>{t.timelineLabel}</strong><p>{form.timeline_mode === "Specific Target Completion Date" ? (form.deadline ? `Target: ${form.deadline}` : "Specific Date") : form.timeline_mode}</p></div>
             </div>
             <div className={styles.previewFull}>
               <strong>{t.categories}</strong>

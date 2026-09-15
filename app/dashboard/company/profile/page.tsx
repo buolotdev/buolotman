@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
 import { useFetch } from "@/app/lib/useFetch";
 import { api, getImageUrl } from "@/app/lib/api";
@@ -33,6 +34,8 @@ const translations: Record<string, Record<string, string>> = {
     viewPublicProfile: "View Public Profile",
     saveChanges: "Save & Continue",
     saveAndContinue: "Save & Continue",
+    saveAndCompleteLater: "Save & Complete Later",
+    saveAndCompleteProfile: "Save and Complete Profile",
     prevStep: "Previous Step",
     teamModalSub: "Highlight technical leadership and qualified site personnel.",
     saveSuccessNext: "Step saved! Proceeding to next section.",
@@ -168,6 +171,8 @@ const translations: Record<string, Record<string, string>> = {
     viewPublicProfile: "Voir le profil public",
     saveChanges: "Enregistrer & Continuer",
     saveAndContinue: "Enregistrer & Continuer",
+    saveAndCompleteLater: "Enregistrer & Compléter plus tard",
+    saveAndCompleteProfile: "Enregistrer et Finaliser le Profil",
     prevStep: "Étape précédente",
     teamModalSub: "Mettez en avant vos ingénieurs et cadres techniques qualifiés.",
     saveSuccessNext: "Étape enregistrée ! Passage à l'étape suivante.",
@@ -345,6 +350,7 @@ const DEFAULT_CAPABILITIES = {
 };
 
 export default function CompanyProfilePage() {
+  const router = useRouter();
   const toast = useToast();
   const dialog = useDialog();
 
@@ -562,6 +568,39 @@ export default function CompanyProfilePage() {
     return [];
   }, [projectsData, profile]);
 
+  // Calculate Real-time Profile Completeness Percentage (0 - 100%)
+  const profileCompleteness = useMemo(() => {
+    let score = 0;
+
+    // 1. Basic Company Information (25 pts)
+    if (form.company_name?.trim()) score += 5;
+    if (form.industry?.trim()) score += 5;
+    if (form.about?.trim()) score += 5;
+    if (form.primary_contact_name?.trim()) score += 5;
+    if (form.primary_phone?.trim() || form.primary_email?.trim() || form.city?.trim()) score += 5;
+
+    // 2. Visual Branding (20 pts)
+    if (logoUrl || profile?.logo_url) score += 10;
+    if (coverUrl || profile?.cover_url) score += 10;
+
+    // 3. Services Catalog (15 pts)
+    if (services.length > 0 || (form.services_offered && form.services_offered.length > 0)) score += 15;
+
+    // 4. Past Projects & Portfolio Showcase (15 pts)
+    if (projects.length > 0) score += 15;
+
+    // 5. Key Personnel & Leadership (10 pts)
+    if (teamMembers.length > 0) score += 10;
+
+    // 6. Operational Capabilities & Fleet (10 pts)
+    if (capabilities.equipment?.length > 0 || capabilities.permanentWorkforce || capabilities.maxProjectBudget) score += 10;
+
+    // 7. Insurance, Banking or Legal Docs (5 pts)
+    if (insuranceProvider?.trim() || insurancePolicyNo?.trim() || bankName?.trim() || documents.length > 0) score += 5;
+
+    return Math.min(100, Math.max(0, score));
+  }, [form, logoUrl, coverUrl, profile, services, projects, teamMembers, capabilities, insuranceProvider, insurancePolicyNo, bankName, documents]);
+
   // Image Upload Handlers
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "cover") => {
     const file = e.target.files?.[0];
@@ -613,7 +652,7 @@ export default function CompanyProfilePage() {
   };
 
   // Save All Profile Details
-  const handleSaveProfile = async (advanceToNext: boolean = true) => {
+  const handleSaveProfile = async (advanceToNext: boolean = true, forceReturnToDashboard: boolean = false) => {
     setSaving(true);
     try {
       const cleanU = username.trim().replace(/^@/, "");
@@ -656,6 +695,32 @@ export default function CompanyProfilePage() {
       await refetchUser();
 
       const currentIdx = TAB_ORDER.indexOf(activeTab);
+      const isLastTab = activeTab === "insurance" || currentIdx === TAB_ORDER.length - 1;
+
+      // When finishing on last tab or explicitly choosing to save and complete/finish:
+      if (isLastTab || forceReturnToDashboard) {
+        if (profileCompleteness >= 100) {
+          toast.success(
+            lang === "fr" ? "Profil Complété ! 🎉" : "Profile Completed! 🎉",
+            lang === "fr"
+              ? "Votre profil a été complété ! Tous les détails de l'entreprise sont configurés."
+              : "Your profile has been completed! All enterprise details are fully set up."
+          );
+        } else {
+          toast.info(
+            lang === "fr" ? `Profil Enregistré (${profileCompleteness}%)` : `Profile Saved (${profileCompleteness}%)`,
+            lang === "fr"
+              ? `Profil enregistré à ${profileCompleteness}%. Vous pouvez enregistrer et compléter les détails restants plus tard.`
+              : `Profile saved at ${profileCompleteness}% completion. You can save and complete the remaining details later.`
+          );
+        }
+
+        setTimeout(() => {
+          router.push("/dashboard/company");
+        }, 1200);
+        return;
+      }
+
       if (advanceToNext && currentIdx < TAB_ORDER.length - 1) {
         const nextTab = TAB_ORDER[currentIdx + 1];
         setActiveTab(nextTab);
@@ -1178,6 +1243,24 @@ export default function CompanyProfilePage() {
                 )}
                 <span style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                   <iconify-icon icon="lucide:shield-check" /> {t.insured}
+                </span>
+                <span
+                  style={{
+                    background: profileCompleteness >= 100 ? "rgba(22, 163, 74, 0.15)" : "rgba(234, 88, 12, 0.12)",
+                    color: profileCompleteness >= 100 ? "#16a34a" : "#ea580c",
+                    padding: "4px 12px",
+                    borderRadius: "999px",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    border: profileCompleteness >= 100 ? "1px solid #bbf7d0" : "1px solid #fed7aa",
+                  }}
+                  title="Real-time profile completeness level"
+                >
+                  <iconify-icon icon={profileCompleteness >= 100 ? "lucide:check-circle-2" : "lucide:pie-chart"} />
+                  {profileCompleteness}% {lang === "fr" ? "Complété" : "Complete"}
                 </span>
               </div>
               <div className={styles.metaList}>
@@ -2242,12 +2325,25 @@ export default function CompanyProfilePage() {
       )}
 
       {/* ==================== BOTTOM SAVE ACTION & STEP PROGRESSION ==================== */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginTop: 10, flexWrap: "wrap" }}>
-        <Link href="/dashboard/company" className={styles.outlineButton}>
-          <iconify-icon icon="lucide:arrow-left" /> {t.backToDashboard}
-        </Link>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginTop: 18, flexWrap: "wrap", borderTop: "1px solid #e2e8f0", paddingTop: 20 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <Link href="/dashboard/company" className={styles.outlineButton}>
+            <iconify-icon icon="lucide:arrow-left" /> {t.backToDashboard}
+          </Link>
+          {activeTab !== "insurance" && (
+            <button
+              type="button"
+              className={styles.outlineButton}
+              onClick={() => handleSaveProfile(false, true)}
+              disabled={saving}
+              title="Save current progress and return to dashboard"
+            >
+              <iconify-icon icon="lucide:bookmark" /> {t.saveAndCompleteLater}
+            </button>
+          )}
+        </div>
 
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           {activeTab !== "overview" && (
             <button
               type="button"
@@ -2275,13 +2371,13 @@ export default function CompanyProfilePage() {
             style={{ minHeight: 48, padding: "0 28px", fontSize: 15 }}
           >
             <iconify-icon
-              icon={saving ? "lucide:loader" : activeTab === "insurance" ? "lucide:check" : "lucide:arrow-right"}
+              icon={saving ? "lucide:loader" : activeTab === "insurance" ? "lucide:check-circle-2" : "lucide:arrow-right"}
               className={saving ? styles.spinIcon : ""}
             />
             {saving
               ? t.saving
               : activeTab === "insurance"
-              ? t.saveEnterpriseProfile
+              ? (lang === "fr" ? "Enregistrer et Finaliser le Profil" : "Save and Complete Profile")
               : t.saveAndContinue}
           </button>
         </div>
