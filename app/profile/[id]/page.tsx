@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useFetch } from "@/app/lib/useFetch";
 import { api, getImageUrl } from "@/app/lib/api";
 import Header from "@/app/components/Header";
@@ -180,9 +180,11 @@ const translations: Record<string, Record<string, string>> = {
 
 export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const rawParam = params?.id ? decodeURIComponent(params.id).trim() : "";
   const validIdentifier = rawParam || null;
   const numericId = /^\d+$/.test(rawParam) ? Number(rawParam) : null;
+  const isCompanyQuery = searchParams?.get("type") === "company";
 
   const [lang, setLang] = useState("en");
   const [imageError, setImageError] = useState(false);
@@ -204,13 +206,52 @@ export default function PublicProfilePage() {
 
       let baseUser: any = null;
 
-      // 1. Try direct user profile (supports numeric ID or username / @username)
-      try {
-        const userRes = await api.getUserProfile(validIdentifier);
-        if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
-          baseUser = userRes;
-        }
-      } catch {}
+      // 0. If explicitly marked as company or browsing company directory
+      if (isCompanyQuery && numericId) {
+        try {
+          const compRes = await api.getCompanyById(numericId);
+          if (compRes && compRes.id) {
+            baseUser = {
+              ...compRes,
+              role: "COMPANY",
+              company_name: compRes.company_name || "Enterprise Contractor",
+              trading_name: compRes.trading_name || compRes.company_name,
+              company_type: compRes.company_type,
+              year_founded: compRes.year_founded,
+              industry: compRes.industry,
+              subject_title: compRes.subject_title,
+              about: compRes.about || compRes.description,
+              website: compRes.website,
+              headquarters: compRes.headquarters || compRes.city,
+              employee_count: compRes.employee_count || compRes.company_size,
+              working_hours: compRes.working_hours || compRes.business_hours,
+              preferred_language: compRes.preferred_language,
+              logo_url: compRes.logo || compRes.logo_url || "",
+              avatar_url: compRes.logo || compRes.logo_url || compRes.avatar_url || "",
+              banner_url: compRes.cover_url || compRes.banner_url || compRes.cover_image,
+              is_verified: compRes.is_verified ?? false,
+              average_rating: compRes.average_rating,
+              review_count: compRes.review_count ?? 0,
+              completed_tasks: compRes.completed_tasks ?? 0,
+              services: compRes.services || [],
+              projects: compRes.projects || compRes.portfolio || [],
+              team: compRes.team_members || compRes.team || [],
+              verification_documents: compRes.verification_documents || [],
+              registration_number: compRes.registration_number || "",
+            };
+          }
+        } catch {}
+      }
+
+      // 1. Try direct user profile (supports numeric ID or username / @username) if not already loaded
+      if (!baseUser) {
+        try {
+          const userRes = await api.getUserProfile(validIdentifier);
+          if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
+            baseUser = userRes;
+          }
+        } catch {}
+      }
 
       // 2. If user is a COMPANY, enrich with company profile data if available
       if (baseUser && (baseUser.role === "COMPANY" || baseUser.company_profile)) {

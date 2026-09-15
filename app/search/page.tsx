@@ -755,7 +755,7 @@ export default function SearchPage() {
 
                   <div className={styles.resultActions}>
                     <Link
-                      href={`/profile/${result.id}`}
+                      href={result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`}
                       className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
                       {t.viewProfile}

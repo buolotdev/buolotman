@@ -814,7 +814,7 @@ export default function Home() {
                       {company.description || t.entDescFallback}
                     </div>
                     <div className="bm-enterprise-actions">
-                      <Link href={`/profile/${company.user_id || company.id}`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
+                      <Link href={`/profile/${company.id}?type=company`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
                       {isSelf ? (
                         <Link href="/dashboard/company/profile" className="bm-enterprise-btn bm-enterprise-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
                           Edit Profile

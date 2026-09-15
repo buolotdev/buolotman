@@ -194,7 +194,8 @@ export default function CompaniesPage() {
         ) : (
           <div className={styles.grid}>
             {filteredCompanies.map((company: any) => {
-              const profileId = company.user?.id || company.id;
+              const profileId = company.id;
+              const companyProfileUrl = `/profile/${profileId}?type=company`;
               const companyName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || "Corporate Enterprise";
               const logoUrl = company.logo_url || company.user?.avatar_url;
               const coverUrl = company.cover_url || company.banner_url || company.user?.banner_url || company.cover_image;
@@ -235,7 +236,7 @@ export default function CompaniesPage() {
                   </div>
 
                   <div className={styles.cardBody}>
-                    <Link href={`/profile/${profileId}`} className={styles.companyName}>
+                    <Link href={companyProfileUrl} className={styles.companyName}>
                       {companyName}
                     </Link>
 
@@ -283,7 +284,7 @@ export default function CompaniesPage() {
                     </div>
 
                     <div className={styles.cardActions}>
-                      <Link href={`/profile/${profileId}`} className={styles.btnView}>
+                      <Link href={companyProfileUrl} className={styles.btnView}>
                         {t.viewProfile}
                       </Link>
 
