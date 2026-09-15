@@ -1058,101 +1058,101 @@ body {
 /* ================= CARD ================= */
 .bm-ftx-card {
   background: #ffffff;
-  border: 1px solid #e6ebf2;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 26px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  transition: all .25s ease;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 31, 63, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bm-ftx-card:hover {
-  box-shadow: 0 14px 34px rgba(0, 0, 0, .08);
-  transform: translateY(-4px);
+  box-shadow: 0 16px 38px rgba(0, 31, 63, 0.1);
+  transform: translateY(-5px);
+  border-color: #cbd5e1;
 }
 
 /* ================= PROFILE ================= */
 .bm-ftx-profile {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .bm-ftx-avatar {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
   object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 31, 63, 0.08);
 }
 
 .bm-ftx-name {
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #001F3F;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 2px 0;
 }
 
 .bm-ftx-role {
-  font-size: .9rem;
-  color: #6b7a90;
-}
-
-/* ================= RATING ================= */
-.bm-ftx-rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: .9rem;
-  margin-bottom: 10px;
-}
-
-.bm-ftx-stars {
-  color: #FFB703;
+  font-size: 0.85rem;
   font-weight: 700;
-}
-
-/* ================= META ================= */
-.bm-ftx-meta {
-  font-size: .85rem;
-  color: #6b7a90;
-  margin-bottom: 14px;
-}
-
-/* ================= DESCRIPTION ================= */
-.bm-ftx-description {
-  font-size: .95rem;
-  color: #44536a;
-  line-height: 1.55;
-  margin-bottom: 22px;
+  color: #ff4500;
 }
 
 /* ================= ACTIONS ================= */
 .bm-ftx-actions {
   margin-top: auto;
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bm-ftx-btn {
   flex: 1;
-  padding: 12px;
-  font-size: .85rem;
-  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 12px;
   text-decoration: none;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
   cursor: pointer;
-  font-weight: 500;
+  box-sizing: border-box;
 }
 
 .bm-ftx-btn-view {
-  border: 1px solid #e6ebf2;
-  color: #001F3F;
+  border: 1px solid #cbd5e1;
+  color: #001f3f;
   background: #ffffff;
 }
 
+.bm-ftx-btn-view:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #001f3f;
+  transform: translateY(-1px);
+}
+
 .bm-ftx-btn-hire {
-  background: #FF4500;
+  background: linear-gradient(135deg, #ff4500 0%, #ff6b33 100%);
   color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
+}
+
+.bm-ftx-btn-hire:hover {
+  background: linear-gradient(135deg, #e03e00 0%, #ff5722 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 69, 0, 0.35);
 }
 
 \n

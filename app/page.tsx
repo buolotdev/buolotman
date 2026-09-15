@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import { api } from "./lib/api";
+import { api, getImageUrl } from "./lib/api";
 import { useFetch } from "./lib/useFetch";
 import { formatTimeAgo, formatDateTime } from "./lib/format";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
@@ -738,35 +738,103 @@ export default function Home() {
 
           <div className="bm-ftx-grid">
             {prosLoading ? (
-              <div style={{ padding: "20px", color: "#64748b" }}>{t.prosLoading}</div>
+              <div style={{ padding: "40px", color: "#64748b", textAlign: "center", gridColumn: "1 / -1" }}>
+                <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
+                <p style={{ marginTop: 10, fontWeight: 600 }}>{t.prosLoading}</p>
+              </div>
             ) : prosData && prosData.length > 0 ? (
               prosData.slice(0, 3).map((pro: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
+                const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
+                const avatarUrl = getImageUrl(pro.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
+                const locationText = [pro.neighborhood, pro.city, pro.country].filter(Boolean).join(", ") || pro.city || pro.country || "Remote Available";
+                
+                // Smart rating calculation
+                const rawRating = Number(pro.average_rating || pro.rating || 0);
+                const reviewCount = Number(pro.reviews_count || pro.total_reviews || 0);
+                const ratingDisplay = rawRating > 0 ? rawRating.toFixed(1) : "5.0";
+                const isNew = rawRating === 0 && reviewCount === 0;
+
+                // Professional fallback for description
+                let bioText = (pro.bio || pro.description || "").trim();
+                if (!bioText || bioText.length < 8 || /^[a-z0-9_]{6,}$/i.test(bioText)) {
+                  bioText = "Certified and vetted technical professional specialized in reliable on-demand repairs, maintenance, and precision installations.";
+                }
+
+                // Skills chips
+                const skillsList = Array.isArray(pro.skills) && pro.skills.length > 0 
+                  ? pro.skills.slice(0, 3) 
+                  : [pro.title || "Technical Expert", "Maintenance"];
+
                 return (
                   <div className="bm-ftx-card" key={pro.id}>
+                    {/* TOP BADGES */}
+                    <div className="bm-ftx-card-top-bar">
+                      <span className="bm-ftx-badge-verified">
+                        <iconify-icon icon="lucide:shield-check" /> Verified Pro
+                      </span>
+                      <span className="bm-ftx-badge-status">
+                        <span className="bm-ftx-pulse-dot" /> {t.ftxMeta}
+                      </span>
+                    </div>
+
+                    {/* PROFILE INFO */}
                     <div className="bm-ftx-profile">
-                      <img className="bm-ftx-avatar" src={pro.avatar || `https://ui-avatars.com/api/?name=${pro.first_name || 'U'}&background=random`} alt={pro.first_name} />
-                      <div>
-                        <div className="bm-ftx-name">{pro.first_name} {pro.last_name}</div>
+                      <div className="bm-ftx-avatar-wrap">
+                        <img className="bm-ftx-avatar" src={avatarUrl} alt={fullName} />
+                        <span className="bm-ftx-avatar-check" title="Verified Identity & Skills">
+                          <iconify-icon icon="lucide:check" />
+                        </span>
+                      </div>
+                      <div className="bm-ftx-info">
+                        <h3 className="bm-ftx-name" title={fullName}>{fullName}</h3>
                         <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
                       </div>
                     </div>
-                    <div className="bm-ftx-rating">
-                      <span className="bm-ftx-stars">★★★★★</span><span>({pro.average_rating || "4.9"})</span>
+
+                    {/* RATING & LOCATION ROW */}
+                    <div className="bm-ftx-rating-row">
+                      <div className="bm-ftx-stars-wrap">
+                        <iconify-icon icon="lucide:star" className="bm-star-icon" />
+                        <strong className="bm-star-score">{ratingDisplay}</strong>
+                        <span className="bm-star-count">{isNew ? "(New Pro)" : `(${reviewCount || 1} review${reviewCount === 1 ? '' : 's'})`}</span>
+                      </div>
+                      <div className="bm-ftx-location" title={locationText}>
+                        <iconify-icon icon="lucide:map-pin" />
+                        <span>{locationText}</span>
+                      </div>
                     </div>
-                    <div className="bm-ftx-meta">📍 {pro.city || pro.country || "Remote"} • {t.ftxMeta}</div>
-                    <div className="bm-ftx-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {pro.bio || "Professional technical services and support."}
+
+                    {/* DESCRIPTION */}
+                    <p className="bm-ftx-description">{bioText}</p>
+
+                    {/* SKILLS ROW */}
+                    <div className="bm-ftx-skills-row">
+                      {skillsList.map((sk: any, i: number) => {
+                        const skName = typeof sk === 'string' ? sk : sk?.name || 'Skill';
+                        return (
+                          <span className="bm-ftx-skill-tag" key={i}>
+                            {skName}
+                          </span>
+                        );
+                      })}
                     </div>
+
+                    {/* ACTIONS */}
                     <div className="bm-ftx-actions">
-                      <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">{t.ftxBtnView}</Link>
+                      <Link href={`/profile/${pro.id}`} className="bm-ftx-btn bm-ftx-btn-view">
+                        <iconify-icon icon="lucide:user" />
+                        <span>{t.ftxBtnView}</span>
+                      </Link>
                       {isSelf ? (
                         <Link href="/dashboard/technician/profile" className="bm-ftx-btn bm-ftx-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
-                          Edit Profile
+                          <iconify-icon icon="lucide:edit-3" />
+                          <span>Edit Profile</span>
                         </Link>
                       ) : (
                         <Link href={isLoggedIn ? `/post-task?invite=${pro.id}` : "/login"} className="bm-ftx-btn bm-ftx-btn-hire">
-                          {t.ftxBtnHire}
+                          <iconify-icon icon="lucide:briefcase" />
+                          <span>{t.ftxBtnHire}</span>
                         </Link>
                       )}
                     </div>
@@ -774,7 +842,7 @@ export default function Home() {
                 );
               })
             ) : (
-               <div style={{ padding: "20px", color: "#64748b" }}>{t.prosNoTasks}</div>
+               <div style={{ padding: "40px", color: "#64748b", textAlign: "center", gridColumn: "1 / -1" }}>{t.prosNoTasks}</div>
             )}
           </div>
 
@@ -793,35 +861,82 @@ export default function Home() {
 
           <div className="bm-enterprise-grid">
             {companiesLoading ? (
-              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
+              <div style={{ padding: "40px", color: "#94a3b8", textAlign: "center", gridColumn: "1 / -1" }}>
+                <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
+                <p style={{ marginTop: 10, fontWeight: 600 }}>{t.companiesLoading}</p>
+              </div>
             ) : companiesData && companiesData.length > 0 ? (
               companiesData.slice(0, 3).map((company: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(company.id) || (company.user_id && String(meData.id) === String(company.user_id)) || meData.username === company.username));
+                const compName = company.company_name || company.name || "Registered Enterprise";
+                const logoUrl = getImageUrl(company.logo) || `https://ui-avatars.com/api/?name=${encodeURIComponent(compName)}&background=001f3f&color=fff&bold=true&size=128`;
+                const locationText = [company.city, company.country].filter(Boolean).join(", ") || "Multiple Locations";
+                
+                const rawRating = Number(company.average_rating || 0);
+                const ratingDisplay = rawRating > 0 ? rawRating.toFixed(1) : "4.9";
+
+                let compDesc = (company.description || "").trim();
+                if (!compDesc || compDesc.length < 10) {
+                  compDesc = t.entDescFallback || "Comprehensive commercial engineering, facility maintenance, and industrial technical solutions.";
+                }
+
                 return (
                   <div className="bm-enterprise-card" key={company.id}>
+                    {/* TOP BADGE */}
+                    <div className="bm-ftx-card-top-bar">
+                      <span className="bm-ftx-badge-verified" style={{ background: "rgba(2, 132, 199, 0.08)", color: "#0284c7", borderColor: "rgba(2, 132, 199, 0.2)" }}>
+                        <iconify-icon icon="lucide:building-2" /> Registered Firm
+                      </span>
+                      <span className="bm-ftx-badge-status" style={{ background: "rgba(255, 69, 0, 0.08)", color: "#ff4500" }}>
+                        <iconify-icon icon="lucide:folder-check" /> {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}
+                      </span>
+                    </div>
+
+                    {/* PROFILE INFO */}
                     <div className="bm-enterprise-profile">
-                      <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${company.company_name || 'C'}&background=random`} alt={company.company_name} />
-                      <div>
-                        <div className="bm-enterprise-name">{company.company_name}</div>
+                      <div className="bm-ftx-avatar-wrap">
+                        <img className="bm-enterprise-avatar" src={logoUrl} alt={compName} />
+                        <span className="bm-ftx-avatar-check" style={{ background: "#0284c7" }} title="Registered Enterprise">
+                          <iconify-icon icon="lucide:check" />
+                        </span>
+                      </div>
+                      <div className="bm-ftx-info">
+                        <h3 className="bm-enterprise-name" title={compName}>{compName}</h3>
                         <div className="bm-enterprise-role">{t.entRoleComp}</div>
                       </div>
                     </div>
-                    <div className="bm-enterprise-rating">
-                      <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
+
+                    {/* RATING & LOCATION */}
+                    <div className="bm-ftx-rating-row">
+                      <div className="bm-ftx-stars-wrap">
+                        <iconify-icon icon="lucide:star" className="bm-star-icon" />
+                        <strong className="bm-star-score">{ratingDisplay}</strong>
+                        <span className="bm-star-count">(Corporate Verified)</span>
+                      </div>
+                      <div className="bm-ftx-location" title={locationText}>
+                        <iconify-icon icon="lucide:map-pin" />
+                        <span>{locationText}</span>
+                      </div>
                     </div>
-                    <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
-                    <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {company.description || t.entDescFallback}
-                    </div>
+
+                    {/* DESCRIPTION */}
+                    <p className="bm-enterprise-description">{compDesc}</p>
+
+                    {/* ACTIONS */}
                     <div className="bm-enterprise-actions">
-                      <Link href={`/profile/${company.id}?type=company`} className="bm-enterprise-btn bm-enterprise-btn-view">{t.entBtnView}</Link>
+                      <Link href={`/profile/${company.id}?type=company`} className="bm-enterprise-btn bm-enterprise-btn-view">
+                        <iconify-icon icon="lucide:building" />
+                        <span>{t.entBtnView}</span>
+                      </Link>
                       {isSelf ? (
                         <Link href="/dashboard/company/profile" className="bm-enterprise-btn bm-enterprise-btn-hire" style={{ background: "#001f3f", borderColor: "#001f3f" }}>
-                          Edit Profile
+                          <iconify-icon icon="lucide:edit-3" />
+                          <span>Edit Profile</span>
                         </Link>
                       ) : (
                         <Link href={isLoggedIn ? `/post-task?invite_company=${company.id}` : "/login"} className="bm-enterprise-btn bm-enterprise-btn-hire">
-                          {t.entBtnHire}
+                          <iconify-icon icon="lucide:file-text" />
+                          <span>{t.entBtnHire}</span>
                         </Link>
                       )}
                     </div>
@@ -829,7 +944,7 @@ export default function Home() {
                 );
               })
             ) : (
-              <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesNoTasks}</div>
+              <div style={{ padding: "40px", color: "#94a3b8", textAlign: "center", gridColumn: "1 / -1" }}>{t.companiesNoTasks}</div>
             )}
           </div>
           <div style={{ textAlign: "center", marginTop: "40px" }}>

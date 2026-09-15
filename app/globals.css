@@ -4318,99 +4318,349 @@ body {
   grid-template-columns:repeat(3,1fr);
   gap:32px;
 }
-.bm-ftx-card{
-  background:#ffffff;
-  border:1px solid #e6ebf2;
-  border-radius:20px;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  transition:all .25s ease;
+/* ================= ULTRA-PROFESSIONAL PROFILE CARDS ================= */
+.bm-ftx-card,
+.bm-enterprise-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 31, 63, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.bm-ftx-card:hover{
-  box-shadow:0 14px 34px rgba(0,0,0,.08);
-  transform:translateY(-4px);
+
+.bm-ftx-card::before,
+.bm-enterprise-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff4500, #001f3f);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
-.bm-ftx-profile{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  margin-bottom:16px;
+
+.bm-enterprise-card::before {
+  background: linear-gradient(90deg, #0284c7, #001f3f);
 }
-.bm-ftx-avatar{
-  width:68px;
-  height:68px;
-  border-radius:50%;
-  object-fit:cover;
+
+.bm-ftx-card:hover,
+.bm-enterprise-card:hover {
+  box-shadow: 0 16px 38px rgba(0, 31, 63, 0.1);
+  transform: translateY(-5px);
+  border-color: #cbd5e1;
 }
-.bm-ftx-name{
-  font-size:1.05rem;
-  font-weight:600;
-  color:#001F3F;
+
+.bm-ftx-card:hover::before,
+.bm-enterprise-card:hover::before {
+  opacity: 1;
 }
-.bm-ftx-role{
-  font-size:.9rem;
-  color:#6b7a90;
+
+/* Card Top Bar with Badges */
+.bm-ftx-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
-.bm-ftx-rating{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:.9rem;
-  margin-bottom:10px;
+
+.bm-ftx-badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(22, 163, 74, 0.08);
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
-.bm-ftx-stars{
-  color:#FFB703;
-  font-weight:700;
+
+.bm-ftx-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0284c7;
+  background: rgba(14, 165, 233, 0.08);
+  padding: 4px 10px;
+  border-radius: 999px;
 }
-.bm-ftx-meta{
-  font-size:.85rem;
-  color:#6b7a90;
-  margin-bottom:10px;
+
+.bm-ftx-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
+  animation: pulseDot 2s infinite;
 }
-.bm-ftx-description{
-  font-size:.95rem;
-  color:#44536a;
-  line-height:1.55;
-  margin-bottom:14px;
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
 }
-.bm-ftx-actions{
-  margin-top:auto;
-  display:flex;
-  gap:12px;
+
+/* Profile Info Header */
+.bm-ftx-profile,
+.bm-enterprise-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
 }
-.bm-ftx-btn{
-  flex:1;
-  padding:12px;
-  font-size:.85rem;
-  border-radius:10px;
-  text-decoration:none;
-  text-align:center;
-  cursor:pointer;
-  font-weight:500;
+
+.bm-ftx-avatar-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
 }
-.bm-ftx-btn-view{
-  border:1px solid #e6ebf2;
-  color:#001F3F;
-  background:#ffffff;
+
+.bm-ftx-avatar,
+.bm-enterprise-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 31, 63, 0.08);
+  background: #f1f5f9;
 }
-.bm-ftx-btn-hire{
-  background:#FF4500;
-  color:#ffffff;
+
+.bm-ftx-avatar-check {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
-.bm-ftx-footer{
-  margin-top:70px;
-  margin-bottom:50px;
-  text-align:right;
+
+.bm-ftx-info {
+  flex: 1;
+  min-width: 0;
 }
-.bm-ftx-footer a{
-  font-size:1.05rem;
-  color:#001F3F;
-  text-decoration:none;
-  font-weight:500;
+
+.bm-ftx-name,
+.bm-enterprise-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 2px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.bm-ftx-footer a:hover{
-  color:#FF4500;
+
+.bm-ftx-role,
+.bm-enterprise-role {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ff4500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bm-enterprise-role {
+  color: #0284c7;
+}
+
+/* Smart Rating & Location */
+.bm-ftx-rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+}
+
+.bm-ftx-stars-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bm-star-icon {
+  color: #f59e0b;
+  font-size: 15px;
+}
+
+.bm-star-score {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.bm-star-count {
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.bm-ftx-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 12px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Description */
+.bm-ftx-description,
+.bm-enterprise-description {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0 0 14px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 40px;
+}
+
+/* Skill Tags */
+.bm-ftx-skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+  min-height: 28px;
+}
+
+.bm-ftx-skill-tag {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.bm-ftx-skill-tag:hover {
+  background: #e2e8f0;
+  color: #001f3f;
+}
+
+/* Actions */
+.bm-ftx-actions,
+.bm-enterprise-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.bm-ftx-btn,
+.bm-enterprise-btn {
+  flex: 1;
+  padding: 11px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.bm-ftx-btn-view,
+.bm-enterprise-btn-view {
+  border: 1px solid #cbd5e1;
+  color: #001f3f;
+  background: #ffffff;
+}
+
+.bm-ftx-btn-view:hover,
+.bm-enterprise-btn-view:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #001f3f;
+  transform: translateY(-1px);
+}
+
+.bm-ftx-btn-hire {
+  background: linear-gradient(135deg, #ff4500 0%, #ff6b33 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
+}
+
+.bm-ftx-btn-hire:hover {
+  background: linear-gradient(135deg, #e03e00 0%, #ff5722 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 69, 0, 0.35);
+}
+
+.bm-enterprise-btn-hire {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+.bm-enterprise-btn-hire:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+}
+
+.bm-ftx-footer {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: right;
+}
+
+.bm-ftx-footer a {
+  font-size: 1.05rem;
+  color: #001f3f;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.bm-ftx-footer a:hover {
+  color: #ff4500;
+  transform: translateX(4px);
 }
 @media(max-width:1200px){
   .bm-ftx-grid{grid-template-columns:repeat(3,1fr)}
