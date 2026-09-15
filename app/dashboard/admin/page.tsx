@@ -136,20 +136,36 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {activeProjects.map((project: any) => (
-                  <tr key={project.id}>
-                    <td><strong>{project.title}</strong></td>
-                    <td>{project.client_name}</td>
-                    <td>{project.technician_name}</td>
-                    <td>{project.progress}</td>
-                    <td>
-                      <span className={`${styles.status} ${project.status === 'open' || project.status === 'in_progress' ? styles.statusActive : styles.statusPending}`}>
-                        {project.status}
-                      </span>
-                    </td>
-                    <td><button className={styles.btnTable}>Open Workspace</button></td>
-                  </tr>
-                ))}
+                {activeProjects.map((project: any) => {
+                  const workspaceUrl = project.status === "open"
+                    ? `/dashboard/client/tasks/${project.id}`
+                    : `/dashboard/client/projects/${project.id}`;
+
+                  return (
+                    <tr key={project.id}>
+                      <td>
+                        <div>
+                          <strong>{project.title}</strong>
+                          {project.id && <small style={{ display: 'block', color: '#64748b', fontSize: '11px', marginTop: '2px' }}>ID: #{project.id}</small>}
+                        </div>
+                      </td>
+                      <td>{project.client_name}</td>
+                      <td>{project.technician_name}</td>
+                      <td>{project.progress}</td>
+                      <td>
+                        <span className={`${styles.status} ${project.status === 'open' || project.status === 'in_progress' ? styles.statusActive : styles.statusPending}`}>
+                          {project.status}
+                        </span>
+                      </td>
+                      <td>
+                        <Link href={workspaceUrl} className={styles.btnTable}>
+                          <iconify-icon icon="lucide:external-link" />
+                          <span>Open Workspace</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

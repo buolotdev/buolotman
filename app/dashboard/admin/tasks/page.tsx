@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { api } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import styles from "./admin-tasks.module.css";
@@ -206,7 +207,16 @@ export default function AdminTasksPage() {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: "flex", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Link
+                          href={p.status?.toLowerCase().includes("open") ? `/dashboard/client/tasks/${p.id}` : `/dashboard/client/projects/${p.id}`}
+                          className={styles.btnSecondary}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Open Project Workspace"
+                        >
+                          <iconify-icon icon="lucide:external-link" /> Workspace
+                        </Link>
                         <button className={styles.btnPrimary} onClick={() => openReleaseModal(p.id)}>
                           <iconify-icon icon="lucide:check" /> Release
                         </button>

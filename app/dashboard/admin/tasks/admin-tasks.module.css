@@ -307,6 +307,27 @@
   box-shadow: 0 4px 12px rgba(255, 69, 0, 0.35);
 }
 
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #001f3f;
+  color: #ffffff;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  margin-right: 6px;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: #ff4500;
+  color: #ffffff;
+}
+
 .btnWarning {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
