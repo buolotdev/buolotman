@@ -113,6 +113,7 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
   const [actionError, setActionError] = useState<string | null>(null);
   const [messagingId, setMessagingId] = useState<number | null>(null);
   const [activeLightboxImage, setActiveLightboxImage] = useState<{ url: string; name: string } | null>(null);
+  const [lightboxError, setLightboxError] = useState(false);
   const [lang, setLang] = useState("en");
   const router = useRouter();
   const toast = useToast();
@@ -382,7 +383,10 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                               {isImage ? (
                                 <div
                                   className={styles.attachmentThumbWrap}
-                                  onClick={() => setActiveLightboxImage({ url: resolvedUrl, name: attachment.file_name || `Attachment #${idx + 1}` })}
+                                  onClick={() => {
+                                    setLightboxError(false);
+                                    setActiveLightboxImage({ url: resolvedUrl, name: attachment.file_name || `Attachment #${idx + 1}` });
+                                  }}
                                   title={t.clickToEnlarge}
                                 >
                                   <img
@@ -675,19 +679,7 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                   </div>
 
                   <div className={styles.widgetActions}>
-                    {hasAcceptedBid ? (
-                      <Link href={`/dashboard/client/tasks/${task.id}/proposals`} className={styles.primaryActionButton}>
-                        <iconify-icon icon="lucide:check-circle" />
-                        {t.viewAccepted}
-                      </Link>
-                    ) : visibleBids.length > 0 ? (
-                      <Link href={`/dashboard/client/tasks/${task.id}/proposals`} className={styles.primaryActionButton}>
-                        <iconify-icon icon="lucide:users" />
-                        {t.reviewProposals}
-                      </Link>
-                    ) : null}
-
-                    {task.status === "in_progress" && (
+                    {task.status === "in_progress" ? (
                       <button
                         type="button"
                         className={styles.primaryActionButton}
@@ -697,7 +689,12 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                         <iconify-icon icon="lucide:check" />
                         {acting === "complete" ? t.completing : t.markComplete}
                       </button>
-                    )}
+                    ) : (task.status === "open" || task.status === "draft") && visibleBids.length > 0 ? (
+                      <Link href={`/dashboard/client/tasks/${task.id}/proposals`} className={styles.primaryActionButton}>
+                        <iconify-icon icon="lucide:users" />
+                        {t.reviewProposals}
+                      </Link>
+                    ) : null}
 
                     {task.status === "completed" && task.has_escrow && (
                       <button
@@ -811,24 +808,37 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                 <iconify-icon icon="lucide:x" />
               </button>
               <div className={styles.lightboxImgContainer}>
-                <img
-                  src={activeLightboxImage.url}
-                  alt={activeLightboxImage.name}
-                  className={styles.lightboxImg}
-                />
+                {!lightboxError ? (
+                  <img
+                    src={activeLightboxImage.url}
+                    alt={activeLightboxImage.name}
+                    className={styles.lightboxImg}
+                    onError={() => setLightboxError(true)}
+                  />
+                ) : (
+                  <div className={styles.lightboxErrorState}>
+                    <iconify-icon icon="lucide:image-off" style={{ fontSize: 52, color: "#f87171" }} />
+                    <p>File Unavailable on Server</p>
+                    <span>
+                      This attachment was uploaded prior to persistent cloud storage configuration and was purged during a previous deployment. All new task uploads are permanently preserved.
+                    </span>
+                  </div>
+                )}
               </div>
               <div className={styles.lightboxFooter}>
                 <span>{activeLightboxImage.name}</span>
-                <a
-                  href={activeLightboxImage.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  download={activeLightboxImage.name}
-                  className={styles.lightboxDownloadBtn}
-                >
-                  <iconify-icon icon="lucide:download" />
-                  <span>Download Full Quality</span>
-                </a>
+                {!lightboxError && (
+                  <a
+                    href={activeLightboxImage.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    download={activeLightboxImage.name}
+                    className={styles.lightboxDownloadBtn}
+                  >
+                    <iconify-icon icon="lucide:download" />
+                    <span>Download Full Quality</span>
+                  </a>
+                )}
               </div>
             </div>
           </div>

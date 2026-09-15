@@ -10,7 +10,14 @@ export function getImageUrl(url: string | null | undefined): string {
 
   const safeEncode = (val: string) => {
     try {
-      return encodeURI(decodeURI(val));
+      const decoded = decodeURI(val);
+      return decoded
+        .split("/")
+        .map((seg, idx) => {
+          if (idx <= 2 && (seg === "https:" || seg === "http:" || seg === "")) return seg;
+          return encodeURIComponent(seg);
+        })
+        .join("/");
     } catch {
       return encodeURI(val);
     }
