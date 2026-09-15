@@ -172,7 +172,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
   // Modal State
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [previewMedia, setPreviewMedia] = useState<{ name: string; type: string; size?: string; url?: string } | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<{ name: string; type: string; size?: string; url?: string; fallbackUrl?: string } | null>(null);
+  const [previewMediaError, setPreviewMediaError] = useState(false);
 
   // Fetch real task & user data
   const { data: user } = useFetch(() => api.getMe(), []);
@@ -297,15 +298,25 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
 
   // Combine server attachments and local uploads
   const allFiles = useMemo(() => {
+    let localCache: any[] = [];
+    if (typeof window !== "undefined" && taskId) {
+      try {
+        const stored = localStorage.getItem(`boulotman_task_attachments_${taskId}`);
+        if (stored) localCache = JSON.parse(stored);
+      } catch {}
+    }
+
     const serverFiles = (task?.attachments || []).map((att: any, idx: number) => {
       const rawUrl = att.file_url || att.file || att.url;
-      const resolvedUrl = rawUrl ? getImageUrl(rawUrl) : "";
+      const cached = localCache.find((c: any) => c.name === att.file_name);
+      const resolvedUrl = rawUrl ? getImageUrl(rawUrl) : (cached?.base64 || "");
       return {
         id: att.id,
         name: att.file_name || (typeof rawUrl === "string" ? rawUrl.split("/").pop() : "Attached File"),
         type: att.file_type || (att.file_name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i) ? "image/jpeg" : (att.file_name?.endsWith(".pdf") ? "application/pdf" : "file")),
-        size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : "Attached",
+        size: att.file_size ? `${(att.file_size / (1024 * 1024)).toFixed(2)} MB` : (cached?.size ? `${(cached.size / (1024 * 1024)).toFixed(2)} MB` : "Attached"),
         url: resolvedUrl,
+        fallbackUrl: cached?.base64 || "",
         isServer: true,
         key: `server-${att.id || idx}-${att.file_name || rawUrl}`,
       };
@@ -313,12 +324,13 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
     const local = localUploadedFiles.map((file, idx) => ({
       ...file,
       url: file.url ? getImageUrl(file.url) : "",
+      fallbackUrl: file.url || "",
       id: undefined,
       isServer: false,
       key: `local-${idx}-${file.name}`,
     }));
     return [...serverFiles, ...local].filter(f => !deletedFileKeys.includes(f.key) && !deletedFileKeys.includes(f.name));
-  }, [task?.attachments, localUploadedFiles, deletedFileKeys]);
+  }, [task?.attachments, localUploadedFiles, deletedFileKeys, taskId]);
 
   const handleDeleteFile = async (file: any) => {
     setDeletedFileKeys(prev => [...prev, file.key, file.name]);
@@ -433,8 +445,8 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
         let uploadedUrl = localBlobUrl;
         if (taskId) {
           const res = await api.uploadTaskAttachment(Number(taskId), file);
-          if (res?.file_url || res?.file) {
-            uploadedUrl = getImageUrl(res.file_url || res.file);
+          if (res?.file_url) {
+            uploadedUrl = getImageUrl(res.file_url);
           }
           refetchTask();
         } else {
@@ -782,10 +794,14 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                           <div className={styles.fileIcon} style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", width: "42px", height: "42px", borderRadius: "10px", background: "#f1f5f9" }}>
                             {file.url && (file.type?.startsWith("image/") || file.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
                               <img
-                                src={getImageUrl(file.url)}
+                                src={file.url}
                                 alt={file.name}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
                                 onError={(e) => {
+                                  if (file.fallbackUrl && e.currentTarget.src !== file.fallbackUrl) {
+                                    e.currentTarget.src = file.fallbackUrl;
+                                    return;
+                                  }
                                   e.currentTarget.style.display = "none";
                                   if (e.currentTarget.parentElement) {
                                     const fallback = document.createElement("span");
@@ -806,7 +822,10 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                             <button
                               type="button"
                               className={styles.fileIconBtn}
-                              onClick={() => setPreviewMedia(file)}
+                              onClick={() => {
+                                setPreviewMediaError(false);
+                                setPreviewMedia(file);
+                              }}
                               title="Preview File"
                             >
                               <iconify-icon icon="lucide:eye" />
@@ -1154,9 +1173,9 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
               overflow: "hidden"
             }}>
               {(previewMedia.type?.startsWith("image/") || previewMedia.name?.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) ? (
-                previewMedia.url ? (
+                previewMedia.url && !previewMediaError ? (
                   <img
-                    src={getImageUrl(previewMedia.url)}
+                    src={previewMedia.url}
                     alt={previewMedia.name}
                     style={{
                       maxWidth: "100%",
@@ -1168,32 +1187,47 @@ export default function ProjectWorkspacePage({ params }: { params: Promise<{ id:
                       boxShadow: "0 8px 24px rgba(0,0,0,0.3)"
                     }}
                     onError={(e) => {
-                      const target = e.currentTarget;
-                      target.style.display = "none";
-                      const parent = target.parentElement;
-                      if (parent) {
-                        const fallback = document.createElement("div");
-                        fallback.style.textAlign = "center";
-                        fallback.style.color = "#fff";
-                        fallback.style.padding = "20px";
-                        fallback.innerHTML = `<iconify-icon icon="lucide:image" style="font-size: 54px; color: #ff4500;"></iconify-icon><p style="margin-top: 10px; font-weight: 700;">${previewMedia.name}</p><a href="${getImageUrl(previewMedia.url)}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; font-size: 13px;">Direct File Link</a>`;
-                        parent.appendChild(fallback);
+                      if (previewMedia.fallbackUrl && e.currentTarget.src !== previewMedia.fallbackUrl) {
+                        e.currentTarget.src = previewMedia.fallbackUrl;
+                        return;
                       }
+                      if (taskId && typeof window !== "undefined") {
+                        try {
+                          const stored = localStorage.getItem(`boulotman_task_attachments_${taskId}`);
+                          if (stored) {
+                            const cached = JSON.parse(stored);
+                            const match = cached.find((c: any) => c.name === previewMedia.name && c.base64);
+                            if (match && e.currentTarget.src !== match.base64) {
+                              e.currentTarget.src = match.base64;
+                              return;
+                            }
+                          }
+                        } catch {}
+                      }
+                      setPreviewMediaError(true);
                     }}
                   />
                 ) : (
-                  <div style={{ textAlign: "center", color: "#fff" }}>
-                    <iconify-icon icon="lucide:image" style={{ fontSize: "54px", color: "#ff4500" }} />
-                    <p style={{ margin: "10px 0 0 0" }}>{previewMedia.name}</p>
+                  <div style={{ textAlign: "center", color: "#fff", padding: "32px 20px" }}>
+                    <iconify-icon icon="lucide:image-off" style={{ fontSize: "52px", color: "#f87171", display: "block", margin: "0 auto 12px" }} />
+                    <p style={{ margin: "0 0 6px 0", fontWeight: 700, fontSize: "16px", color: "#ffffff" }}>{previewMedia.name}</p>
+                    <span style={{ fontSize: "13px", color: "#94a3b8", display: "block", maxWidth: "380px", margin: "0 auto", lineHeight: 1.5 }}>
+                      {previewMediaError
+                        ? (lang === "fr" 
+                            ? "Ce fichier a été téléversé lors d'une session précédente et n'est plus disponible sur le serveur. Les nouveaux fichiers restent stockés de manière permanente."
+                            : "This file was uploaded prior to persistent cloud storage and is unavailable on the server. All new uploads are permanently preserved.")
+                        : previewMedia.name}
+                    </span>
                   </div>
                 )
               ) : (previewMedia.type?.includes("pdf") || previewMedia.name?.endsWith(".pdf")) ? (
-                previewMedia.url ? (
+                previewMedia.url && !previewMediaError ? (
                   <div style={{ width: "100%", textAlign: "center" }}>
                     <iframe
-                      src={getImageUrl(previewMedia.url)}
+                      src={previewMedia.url}
                       style={{ width: "100%", height: "450px", border: "none", borderRadius: "10px", background: "#fff" }}
                       title={previewMedia.name}
+                      onError={() => setPreviewMediaError(true)}
                     />
                   </div>
                 ) : (

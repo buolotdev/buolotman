@@ -236,6 +236,29 @@ export const api = {
     });
   },
 
+  uploadTaskAttachment: (taskId: number | string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return fetch(`${API_BASE}/uploads/task/${taskId}/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+      },
+      body: form,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+        throw new Error(err.detail || err.error || JSON.stringify(err));
+      }
+      return res.json() as Promise<{
+        id: number;
+        file_url: string;
+        file_name: string;
+        size: number;
+      }>;
+    });
+  },
+
   // User
 
   getMe: () => request<any>("/auth/me/"),
@@ -260,14 +283,6 @@ export const api = {
   },
   createTask: (data: Record<string, any>) =>
     request<any>("/tasks/create/", { method: "POST", body: JSON.stringify(data) }),
-  uploadTaskAttachment: (taskId: number, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return request<any>(`/uploads/task/${taskId}/`, {
-      method: "POST",
-      body: formData,
-    });
-  },
   getTask: (id: number) => request<any>(`/tasks/${id}/`),
   updateTask: (id: number, data: Record<string, any>) =>
     request<any>(`/tasks/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),

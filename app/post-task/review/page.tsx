@@ -200,6 +200,18 @@ export default function TaskReviewPage() {
 
 
       if (res && res.id && files.length > 0) {
+        if (typeof window !== "undefined") {
+          try {
+            const fileBackup = files.map((f: any) => ({
+              name: f.name,
+              size: f.size,
+              type: f.type,
+              base64: f.base64 || (f instanceof File ? undefined : f.url)
+            }));
+            window.localStorage.setItem(`boulotman_task_attachments_${res.id}`, JSON.stringify(fileBackup));
+          } catch {}
+        }
+
         await Promise.all(
           files.map((file) => {
             const fileObj = file instanceof File ? file : dataURLtoFile(file.base64, file.name);

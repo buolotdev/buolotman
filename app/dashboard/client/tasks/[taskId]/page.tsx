@@ -375,7 +375,19 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
 
                       <div className={styles.attachmentGrid}>
                         {task.attachments.map((attachment: any, idx: number) => {
-                          const resolvedUrl = getImageUrl(attachment.file_url);
+                          let fallbackSrc = "";
+                          if (typeof window !== "undefined" && taskId) {
+                            try {
+                              const stored = localStorage.getItem(`boulotman_task_attachments_${taskId}`);
+                              if (stored) {
+                                const cached = JSON.parse(stored);
+                                const match = cached.find((c: any) => c.name === attachment.file_name && c.base64);
+                                if (match) fallbackSrc = match.base64;
+                              }
+                            } catch {}
+                          }
+
+                          const resolvedUrl = attachment.file_url ? getImageUrl(attachment.file_url) : fallbackSrc;
                           const isImage = attachment.content_type?.includes("image") || attachment.file_name?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
 
                           return (
@@ -385,7 +397,7 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                                   className={styles.attachmentThumbWrap}
                                   onClick={() => {
                                     setLightboxError(false);
-                                    setActiveLightboxImage({ url: resolvedUrl, name: attachment.file_name || `Attachment #${idx + 1}` });
+                                    setActiveLightboxImage({ url: resolvedUrl || fallbackSrc, name: attachment.file_name || `Attachment #${idx + 1}` });
                                   }}
                                   title={t.clickToEnlarge}
                                 >
@@ -394,6 +406,10 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                                     alt={attachment.file_name || "Attachment"}
                                     className={styles.attachmentThumbImg}
                                     onError={(e) => {
+                                      if (fallbackSrc && e.currentTarget.src !== fallbackSrc) {
+                                        e.currentTarget.src = fallbackSrc;
+                                        return;
+                                      }
                                       const target = e.target as HTMLElement;
                                       target.style.display = "none";
                                       const fallback = target.nextElementSibling as HTMLElement;
@@ -420,7 +436,7 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                                 </span>
                                 <div className={styles.attachmentActions}>
                                   <a
-                                    href={resolvedUrl}
+                                    href={resolvedUrl || fallbackSrc}
                                     target="_blank"
                                     rel="noreferrer"
                                     className={styles.attachmentLinkBtn}
@@ -813,7 +829,22 @@ export default function TaskDetailsPage({ params }: { params: Promise<{ taskId: 
                     src={activeLightboxImage.url}
                     alt={activeLightboxImage.name}
                     className={styles.lightboxImg}
-                    onError={() => setLightboxError(true)}
+                    onError={(e) => {
+                      if (taskId && typeof window !== "undefined") {
+                        try {
+                          const stored = localStorage.getItem(`boulotman_task_attachments_${taskId}`);
+                          if (stored) {
+                            const cached = JSON.parse(stored);
+                            const match = cached.find((c: any) => c.name === activeLightboxImage.name && c.base64);
+                            if (match && e.currentTarget.src !== match.base64) {
+                              e.currentTarget.src = match.base64;
+                              return;
+                            }
+                          }
+                        } catch {}
+                      }
+                      setLightboxError(true);
+                    }}
                   />
                 ) : (
                   <div className={styles.lightboxErrorState}>
