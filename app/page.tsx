@@ -263,12 +263,17 @@ export default function Home() {
 
   useEffect(() => {
     api.getPlatformStats().then(data => {
+      const reg = Number(data?.registered_users) || 0;
+      const tech = Number(data?.verified_technicians) || 0;
+      const comp = Number(data?.verified_companies) || 0;
+      const task = Number(data?.tasks_posted_monthly) || 0;
+
       setStats({
-        registered_users: Number(data.registered_users) || 0,
-        verified_technicians: Number(data.verified_technicians) || 0,
-        verified_companies: Number(data.verified_companies) || 0,
-        tasks_posted_monthly: Number(data.tasks_posted_monthly) || 0,
-        successful_completion: Number(data.successful_completion) || 100
+        registered_users: reg >= 50000 ? reg - 50000 : reg,
+        verified_technicians: tech >= 12000 ? tech - 12000 : tech,
+        verified_companies: comp >= 3500 ? comp - 3500 : comp,
+        tasks_posted_monthly: task >= 8000 ? task - 8000 : task,
+        successful_completion: Number(data?.successful_completion) || 98
       });
     }).catch(() => {});
   }, []);
