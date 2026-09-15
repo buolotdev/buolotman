@@ -154,11 +154,26 @@ export default function TaskBoard() {
   const { data: categoriesData } = useFetch(() => api.getCategories(), []);
 
   const [isAuth, setIsAuth] = useState(false);
+  const [userRole, setUserRole] = useState<string>("technician");
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsAuth(!!localStorage.getItem("access_token"));
+      const r = (localStorage.getItem("user_role") || "").toLowerCase();
+      if (r) setUserRole(r);
     }
   }, []);
+
+  const getTaskDetailUrl = (taskId: number | string) => {
+    if (userRole === "company") return `/dashboard/company/tasks/${taskId}`;
+    if (userRole === "client") return `/dashboard/client/tasks/${taskId}`;
+    return `/dashboard/technician/tasks/${taskId}`;
+  };
+
+  const getBidsUrl = () => {
+    if (userRole === "company") return `/dashboard/company/quotes`;
+    return `/dashboard/technician/bids`;
+  };
 
   const { data: myBidsData, refetch: refetchMyBids } = useFetch(
     () => (isAuth ? api.getMyBids() : Promise.resolve([])),
@@ -594,7 +609,7 @@ export default function TaskBoard() {
                     </div>
 
                     <Link
-                      href={`/dashboard/technician/tasks/${task.id}`}
+                      href={getTaskDetailUrl(task.id)}
                       style={{ textDecoration: "none" }}
                     >
                       <h3 className={styles.taskTitle}>{task.title}</h3>
@@ -634,12 +649,12 @@ export default function TaskBoard() {
                   </div>
 
                   <div className={styles.cardActions}>
-                    <Link href={`/dashboard/technician/tasks/${task.id}`} className={styles.detailsBtn}>
+                    <Link href={getTaskDetailUrl(task.id)} className={styles.detailsBtn}>
                       <span>{t.btnDetails}</span>
                       <iconify-icon icon="lucide:arrow-up-right" />
                     </Link>
                     {appliedTaskIds.has(Number(task.id)) ? (
-                      <Link href={`/dashboard/technician/bids`} className={styles.appliedBtn}>
+                      <Link href={getBidsUrl()} className={styles.appliedBtn}>
                         <iconify-icon icon="lucide:check-circle-2" />
                         <span>{t.btnBidPlaced}</span>
                       </Link>

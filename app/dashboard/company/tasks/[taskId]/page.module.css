@@ -1,0 +1,367 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px;
+  background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 180px);
+}
+
+/* ==================== SIGNATURE BLUE HERO BANNER ==================== */
+.taskHeroBanner {
+  background: linear-gradient(135deg, #001f3f 0%, #1e3a8a 100%);
+  border-radius: 24px;
+  padding: 36px 40px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.taskHeroBanner::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 4px;
+  transition: color 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.backLink:hover {
+  color: #ff8c42;
+}
+
+.heroCategoryRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.heroCategoryPill {
+  background: rgba(255, 69, 0, 0.2);
+  border: 1px solid rgba(255, 69, 0, 0.4);
+  color: #ff8c42;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heroStatusPill {
+  background: rgba(22, 163, 74, 0.2);
+  border: 1px solid rgba(22, 163, 74, 0.4);
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heroUrgentPill {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.heroMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+.heroMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==================== DETAIL CARDS ==================== */
+.detailCard,
+.sideCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 31, 63, 0.04);
+}
+
+.detailCard {
+  padding: 32px;
+}
+
+.sideCard {
+  padding: 24px;
+}
+
+.cardTitle {
+  font-size: 19px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* ==================== LOGISTICS GRID ==================== */
+.logisticsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.logisticsItem {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logisticsIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.tag {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #001f3f;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ==================== SIDEBAR ACTIONS & BUDGET ==================== */
+.budgetBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.budgetBlock small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.budgetBlock strong {
+  color: #001f3f;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.primaryButton,
+.secondaryButton,
+.outlineButton {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.primaryButton {
+  border: 0;
+  background: #ff4500;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(255, 69, 0, 0.2);
+}
+
+.primaryButton:hover {
+  background: #e03e00;
+  transform: translateY(-1px);
+}
+
+.secondaryButton {
+  border: 1.5px solid #001f3f;
+  background: #001f3f;
+  color: #ffffff;
+}
+
+.secondaryButton:hover {
+  background: #0a2d59;
+}
+
+.outlineButton {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.outlineButton:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* ==================== PROPOSAL MODAL ==================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 28px;
+  position: relative;
+  animation: modalEnter 0.2s ease-out;
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.closeModalBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f1f5f9;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.closeModalBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modalInput,
+.modalTextarea,
+.modalSelect {
+  width: 100%;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  color: #0f172a;
+  background: #f8fafc;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modalInput:focus,
+.modalTextarea:focus,
+.modalSelect:focus {
+  outline: none;
+  border-color: #ff4500;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+}
+
+@media (max-width: 900px) {
+  .content {
+    padding: 16px;
+  }
+  .taskHeroBanner {
+    padding: 24px;
+  }
+  .heroTitle {
+    font-size: 26px;
+  }
+}
