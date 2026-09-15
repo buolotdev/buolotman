@@ -1920,87 +1920,11 @@ export default function CompanyProfilePage() {
         <section className={styles.card}>
           <div className={styles.cardHeader}>
             <h3><iconify-icon icon="lucide:layers" /> {t.servicesCatalogTitle}</h3>
-            <button
-              type="button"
-              className={styles.primaryButton}
-              style={{ minHeight: 38, padding: "0 16px", fontSize: 13 }}
-              onClick={() => setShowAddService(!showAddService)}
-            >
-              <iconify-icon icon={showAddService ? "lucide:x" : "lucide:plus"} />
-              {showAddService ? t.cancel : t.addNewService}
-            </button>
           </div>
 
           <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
             {t.servicesDesc}
           </p>
-
-          {/* Add Service Box */}
-          {showAddService && (
-            <div className={styles.addItemBox}>
-              <div className={styles.addItemHeader}>{t.addServiceBoxTitle}</div>
-              <div className={styles.twoCol}>
-                <div>
-                  <label className={styles.label}>{t.serviceTitle}</label>
-                  <input
-                    className={styles.input}
-                    placeholder="e.g. Commercial Building Construction & Finishing"
-                    value={newServiceTitle}
-                    onChange={(e) => setNewServiceTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className={styles.label}>{t.serviceCategory}</label>
-                  <select
-                    className={styles.select}
-                    value={newServiceCategory}
-                    onChange={(e) => setNewServiceCategory(e.target.value)}
-                  >
-                    {availableCategories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.twoCol}>
-                <div>
-                  <label className={styles.label}>{t.pricingModel}</label>
-                  <select
-                    className={styles.select}
-                    value={newServicePricing}
-                    onChange={(e) => setNewServicePricing(e.target.value)}
-                  >
-                    <option value="Request Quote">Request Quote (Enterprise Tender)</option>
-                    <option value="Fixed Quote">Fixed Project Price</option>
-                    <option value="Daily Rate">Daily Rate</option>
-                    <option value="Consultation Fee">Initial Consultation Fee</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={styles.label}>{t.shortScopeDesc}</label>
-                  <input
-                    className={styles.input}
-                    placeholder="Brief description of work scope, supervision and standards"
-                    value={newServiceDesc}
-                    onChange={(e) => setNewServiceDesc(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.addActions}>
-                <button type="button" className={styles.addBtn} onClick={handleCreateService} disabled={addingService}>
-                  <iconify-icon icon={addingService ? "lucide:loader" : "lucide:check"} />
-                  {addingService ? t.saving : t.confirmAddService}
-                </button>
-                <button type="button" className={styles.outlineButton} style={{ minHeight: 38, padding: "0 16px" }} onClick={() => setShowAddService(false)}>
-                  {t.cancel}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Services Grid */}
           <div className={styles.servicesGrid}>

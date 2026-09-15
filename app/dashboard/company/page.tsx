@@ -234,20 +234,6 @@ export default function CompanyDashboard() {
             >
               <iconify-icon icon="lucide:plus" /> {t.postService}
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (!isVerified) {
-                  toast.warning(t.toastWaitTitle, t.toastWaitDescManage);
-                  return;
-                }
-                router.push("/dashboard/company/services");
-              }}
-              className={styles.secondaryButton}
-              style={{ border: "none", cursor: "pointer" }}
-            >
-              {t.manageServices}
-            </button>
             <button 
               type="button"
               onClick={() => router.push("/dashboard/company/tasks")}

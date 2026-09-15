@@ -1,193 +1,163 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./new.module.css";
-import DashboardHeader from "@/app/components/DashboardHeader";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import { useToast } from "@/app/components/Toast";
+import { formatXOF } from "@/app/lib/format";
 
-
-const COUNTRIES = [
-  "Rwanda", 
-  "Kenya", 
-  "Nigeria", 
-  "Ghana", 
-  "South Africa", 
-  "Ivory Coast", 
-  "Cameroon", 
-  "Benin",
-  "Togo",
-  "Senegal",
-  "Global"
+const CATEGORIES = [
+  "IT, Software, Web & Telecommunications",
+  "Civil, Construction & Architecture",
+  "Electrical, Solar & Renewable Utilities",
+  "Plumbing, Piping & Water Infrastructure",
+  "HVAC & Industrial Cold Storage",
+  "Heavy Machinery, Earthmoving & Fleet Logistics",
+  "Security, CCTV & Fire Automation Systems",
+  "Corporate Infrastructure & Consulting",
 ];
 
 const translations: Record<string, Record<string, string>> = {
   en: {
-    heroTitle: "Add a Project / Portfolio Showcase",
-    heroSubtitle: "Showcase completed contracts and projects in your company portfolio",
-    verificationNoticeTitle: "Company Verification Notice",
-    verificationNoticeDesc: "Your enterprise company profile is currently pending Admin verification. Once verified, your published services and projects will be visible in public search and client directories.",
-    companyName: "Company Name",
-    serviceTitle: "Project / Contract Title",
-    serviceDeliveryMode: "Execution Mode",
-    onsite: "On-site",
-    remote: "Remote",
-    hybrid: "Hybrid",
-    category: "Category",
-    selectCategory: "👉 Click here to select Category",
-    subcategory: "Subcategory",
-    selectSubcategory: "Select Subcategory",
-    selectCategoryFirst: "👈 Click 'Category' on the left first",
-    country: "Country (auto-detected)",
-    city: "City (auto-detected)",
-    pricingStructure: "Pricing & Budget Structure",
-    customerPrefBudget: "Customer's Preference / Quote by Scope (Flexible)",
-    startingAtFixed: "Starting at Fixed Rate (XOF)",
-    contractBased: "Contract-based / Turnkey",
-    projectBased: "Project-based / Milestones",
-    hourlyDaily: "Hourly / Daily Rate",
-    negotiable: "Negotiable / PM Determined",
-    estimatedBudget: "Contract Value / Budget (XOF)",
-    budgetOptionalHint: "Optional: Determined by project manager or scope agreement.",
-    serviceTimeline: "Project Timeline & Completion Schedule",
-    customerPrefTimeline: "Customer's Preference / Flexible Timeline (Default)",
-    scopeAgreedTimeline: "Determined by Project Scope & Agreement",
-    ongoingServiceTimeline: "Ongoing Service / Continuous Retainer",
-    immediateTimeline: "Immediate / Urgent Mobilization",
-    specificDateTimeline: "Specific Target Completion Date",
-    deadline: "Target Completion Date",
-    projectDescription: "Project Description & Scope Details",
-    descPlaceholder: "Provide detailed scope, achievements, and execution standards for this project...",
-    previewProject: "Preview Project Showcase",
-    projectPreview: "Project Preview",
-    company: "Company",
-    serviceMode: "Execution Mode",
-    timelineLabel: "Timeline / Schedule",
-    pricing: "Pricing / Value",
-    categories: "Categories",
-    editDetails: "Edit Details",
-    saveDraft: "Save Draft",
-    publishProject: "Add to Portfolio Projects",
-    publishing: "Publishing...",
-    toastWaitTitle: "Wait for Verification",
-    toastWaitDesc: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can publish projects and services."
+    backToProjects: "← Back to Projects & Gallery",
+    heroBadge: "Enterprise Portfolio Showcase",
+    heroTitle: "Add Project / Portfolio Showcase",
+    heroSubtitle: "Document completed engineering projects, IT deployments, infrastructure works, and contracts to showcase on your public company profile.",
+    
+    // Section 1
+    sec1Title: "1. Project Overview & Client Information",
+    sec1Sub: "Core identification and contracting client details",
+    projectTitle: "Project / Contract Title *",
+    projectTitlePlaceholder: "e.g. 5-Storey Commercial Complex or Enterprise Cloud Migration & ERP Suite",
+    category: "Industry Sector / Category *",
+    selectCategory: "Select industry sector",
+    clientName: "Client / Contracting Authority *",
+    clientNamePlaceholder: "e.g. Banque Atlantique, Ministry of Infrastructure, or Corporate Client",
+    location: "Project Location / City *",
+    locationPlaceholder: "e.g. Cotonou, Benin or Cloud / AWS / Remote",
+    
+    // Section 2 (Live URL)
+    sec2Title: "2. Digital & IT Project Link (Optional)",
+    sec2Sub: "For IT, software, web, apps, and digital solutions",
+    projectUrl: "Live Project / Demo Website URL",
+    projectUrlPlaceholder: "https://example.com or https://app.clientdomain.com",
+    projectUrlHint: "For IT, software, web platforms, and digital projects, provide a live link so prospective clients can explore or test the live deployment.",
+    
+    // Section 3
+    sec3Title: "3. Contract Metrics, Budget & Timeline",
+    sec3Sub: "Contract value, delivery schedule, and completion metrics",
+    contractBudget: "Contract Value / Total Budget (XOF) *",
+    budgetPlaceholder: "e.g. 45,000,000",
+    budgetHint: "Enter numeric amount in XOF (CFA Franc).",
+    timeline: "Execution Timeline / Duration *",
+    timelinePlaceholder: "e.g. 4 Months (Jan 2025 - Apr 2025)",
+    projectStatus: "Project Status *",
+    statusCompleted: "Completed (100% Delivered)",
+    statusActive: "In Progress / Active Retainer",
+    statusPending: "Pending Mobilization",
+    completionYear: "Completion Year",
+    yearPlaceholder: "e.g. 2025",
+
+    // Section 4
+    sec4Title: "4. Scope of Works & Technical Highlights",
+    sec4Sub: "Detailed specifications, achievements, and technical methodologies",
+    description: "Detailed Scope of Works & Achievements *",
+    descPlaceholder: "Describe the scope of work executed, engineering standards met, challenges overcome, workforce mobilized, and client satisfaction...",
+    highlightsLabel: "Key Technologies, Equipment & Deliverables (Tags)",
+    highlightPlaceholder: "e.g. React, Fiber Optic, 500kW Inverter, Concrete Foundations...",
+    addTagBtn: "Add",
+
+    // Section 5
+    sec5Title: "5. Project Site Photos & Media Gallery",
+    sec5Sub: "Upload photos, site images, architectural drawings or screenshots",
+    dropzoneText: "Click to upload project photos or drag and drop",
+    dropzoneSub: "Supports JPG, PNG, WebP (Max 10MB per image)",
+
+    // Section 6
+    sec6Title: "Live Showcase Card Preview",
+    sec6Sub: "Real-time preview of how this project will appear on your public enterprise profile",
+    visitLiveLink: "Visit Live Project / Demo ↗",
+    publishedBy: "Executed by",
+
+    // Actions
+    cancel: "Cancel",
+    publishBtn: "Publish Project Showcase",
+    publishing: "Publishing Showcase...",
+    successTitle: "Project Published",
+    successDesc: "Your project has been successfully added to your company showcase.",
   },
   fr: {
+    backToProjects: "← Retour aux Projets & Réalisations",
+    heroBadge: "Vitrine du Portfolio Entreprise",
     heroTitle: "Ajouter un Projet / Réalisation",
-    heroSubtitle: "Mettez en avant vos chantiers achevés et réalisations dans votre portfolio d'entreprise",
-    verificationNoticeTitle: "Avis de Vérification Entreprise",
-    verificationNoticeDesc: "Votre profil d'entreprise est actuellement en cours de vérification par l'administration. Dès validation, vos services et projets seront visibles sur l'annuaire public.",
-    companyName: "Nom de l'entreprise",
-    serviceTitle: "Titre du Projet / Contrat",
-    serviceDeliveryMode: "Mode d'Exécution",
-    onsite: "Sur site",
-    remote: "À distance",
-    hybrid: "Hybride",
-    category: "Catégorie",
-    selectCategory: "👉 Cliquez ici pour choisir la catégorie",
-    subcategory: "Sous-catégorie",
-    selectSubcategory: "Sélectionner la sous-catégorie",
-    selectCategoryFirst: "👈 Choisissez d'abord la catégorie à gauche",
-    country: "Pays (détecté automatiquement)",
-    city: "Ville (détectée automatiquement)",
-    pricingStructure: "Structure Tarifaire & Budget",
-    customerPrefBudget: "Au choix du client / Devis selon l'envergure (Flexible)",
-    startingAtFixed: "À partir d'un tarif fixe (XOF)",
-    contractBased: "Sur contrat / Clé en main",
-    projectBased: "Par projet / Par jalons",
-    hourlyDaily: "Tarif horaire / journalier",
-    negotiable: "Négociable / Déterminé par le chef de projet",
-    estimatedBudget: "Montant du Contrat / Budget (XOF)",
-    budgetOptionalHint: "Facultatif : Défini par le chef de projet selon l'envergure.",
-    serviceTimeline: "Délai de Réalisation & Calendrier",
-    customerPrefTimeline: "Au choix du client / Calendrier flexible (Par défaut)",
-    scopeAgreedTimeline: "Défini selon le cahier des charges et l'accord",
-    ongoingServiceTimeline: "Prestation continue / Contrat cadre",
-    immediateTimeline: "Intervention immédiate / Mobilisation urgente",
-    specificDateTimeline: "Date cible d'achèvement spécifique",
-    deadline: "Date cible d'achèvement",
-    projectDescription: "Description et détails du projet",
-    descPlaceholder: "Fournissez les spécifications, le périmètre et les réalisations du chantier...",
-    previewProject: "Aperçu de la réalisation",
-    projectPreview: "Aperçu de la réalisation",
-    company: "Entreprise",
-    serviceMode: "Mode d'intervention",
-    timelineLabel: "Délai & Planning",
-    pricing: "Tarification / Valeur",
-    categories: "Catégories",
-    editDetails: "Modifier",
-    saveDraft: "Enregistrer brouillon",
-    publishProject: "Ajouter au Portfolio",
+    heroSubtitle: "Valorisez vos chantiers achevés, déploiements IT, infrastructures et contrats exécutés sur votre profil public d'entreprise.",
+    
+    sec1Title: "1. Aperçu du Projet & Client",
+    sec1Sub: "Informations d'identification et détails de l'autorité contractante",
+    projectTitle: "Titre du Projet / Contrat *",
+    projectTitlePlaceholder: "ex : Complexe Immobilier Commercial R+5 ou Migration Cloud & ERP d'Entreprise",
+    category: "Secteur d'Activité / Métier *",
+    selectCategory: "Sélectionnez le secteur d'activité",
+    clientName: "Client / Maître d'Ouvrage *",
+    clientNamePlaceholder: "ex : Banque Atlantique, Ministère des Travaux Publics ou Client Privé",
+    location: "Localisation / Ville du Projet *",
+    locationPlaceholder: "ex : Cotonou, Bénin ou Cloud / Distanciel",
+    
+    sec2Title: "2. Lien du Projet Digital & IT (Facultatif)",
+    sec2Sub: "Pour les solutions logicielles, sites web, plateformes et projets IT",
+    projectUrl: "URL du Projet / Site / Démo en Direct",
+    projectUrlPlaceholder: "https://exemple.com ou https://app.domaineclient.com",
+    projectUrlHint: "Pour les projets informatiques et digitaux, renseignez l'URL pour permettre aux futurs clients de tester la plateforme en direct.",
+    
+    sec3Title: "3. Budget, Métriques & Calendrier",
+    sec3Sub: "Montant du contrat, délais d'exécution et calendrier",
+    contractBudget: "Montant du Contrat / Budget Total (XOF) *",
+    budgetPlaceholder: "ex : 45 000 000",
+    budgetHint: "Montant numérique en Franc CFA (XOF).",
+    timeline: "Délai d'Exécution / Durée *",
+    timelinePlaceholder: "ex : 4 Mois (Janvier 2025 - Avril 2025)",
+    projectStatus: "Statut du Projet *",
+    statusCompleted: "Terminé (100% Livré)",
+    statusActive: "En Cours d'Exécution",
+    statusPending: "En Attente de Démarrage",
+    completionYear: "Année d'Achèvement",
+    yearPlaceholder: "ex : 2025",
+
+    sec4Title: "4. Périmètre d'Intervention & Spécifications",
+    sec4Sub: "Spécifications techniques, réalisations et méthodologie",
+    description: "Cahier des Charges Exécuté & Réalisations *",
+    descPlaceholder: "Détaillez le travail accompli, les normes respectées, les défis surmontés, la main-d'œuvre mobilisée et l'impact client...",
+    highlightsLabel: "Technologies, Équipements & Mots-clés",
+    highlightPlaceholder: "ex : React, Fibre Optique, Onduleur 500kW, Béton Armé...",
+    addTagBtn: "Ajouter",
+
+    sec5Title: "5. Photos du Chantier & Galerie Média",
+    sec5Sub: "Téléchargez des photos de réalisations, captures ou plans de chantier",
+    dropzoneText: "Cliquez pour téléverser des photos ou glissez-déposez vos images",
+    dropzoneSub: "Formats acceptés : JPG, PNG, WebP (Max 10 Mo)",
+
+    sec6Title: "Aperçu de la Fiche Réalisation",
+    sec6Sub: "Aperçu en direct tel qu'il apparaîtra sur votre profil d'entreprise public",
+    visitLiveLink: "Visiter le Projet / Démo en Direct ↗",
+    publishedBy: "Exécuté par",
+
+    cancel: "Annuler",
+    publishBtn: "Publier la Réalisation",
     publishing: "Publication en cours...",
-    toastWaitTitle: "Vérification en attente",
-    toastWaitDesc: "Veuillez patienter pendant l'examen de votre compte entreprise par l'administration. Dès validation, vous pourrez publier vos prestations."
+    successTitle: "Projet Publié",
+    successDesc: "Votre réalisation a été ajoutée avec succès à votre vitrine d'entreprise.",
   }
 };
 
-const DEFAULT_CATEGORIES: { id: string; name: string; skills: string[] }[] = [
-  {
-    id: "civil-building-construction",
-    name: "Civil & Building Construction",
-    skills: ["Masonry & Bricklaying", "Concrete & Foundations", "Structural Framework", "Roofing & Waterproofing", "Demolition & Excavation", "Flooring & Tiling", "Plastering & Painting"]
-  },
-  {
-    id: "electrical-solar-engineering",
-    name: "Electrical & Solar Engineering",
-    skills: ["Solar PV Installation & Inverters", "Building Electrical Wiring", "Industrial Switchgear & Panels", "Backup Generators & UPS", "Lighting Systems", "High Voltage Installations"]
-  },
-  {
-    id: "plumbing-water-systems",
-    name: "Plumbing, Piping & Water Systems",
-    skills: ["Water Distribution Piping", "Drainage & Sewerage Systems", "Water Pumps & Tanks", "Borehole & Wells", "Sanitary Fixture Installation", "Pipe Welding & Fitting"]
-  },
-  {
-    id: "it-networking-security",
-    name: "IT, Networking & Telecommunications",
-    skills: ["Structured Cabling & Fiber Optic", "CCTV & Surveillance Cameras", "Server & Cloud Administration", "Access Control & Alarms", "Firewall & Cybersecurity", "PBX & VoIP Phone Systems"]
-  },
-  {
-    id: "hvac-cooling-systems",
-    name: "HVAC & Industrial Cooling",
-    skills: ["Split & Central AC Installation", "Cold Room & Refrigeration", "Ventilation & Ducting", "Chiller Maintenance", "Thermostat & Automation Controls"]
-  },
-  {
-    id: "heavy-equipment-fleet",
-    name: "Heavy Equipment & Fleet Maintenance",
-    skills: ["Excavator & Crane Operation", "Diesel Engine Overhaul", "Hydraulic System Maintenance", "Fleet Diagnostic & Repair", "Machining & Lathe Works"]
-  },
-  {
-    id: "carpentry-metal-fabrication",
-    name: "Carpentry, Joinery & Metal Fabrication",
-    skills: ["Structural Steel & Welding", "Custom Cabinetry & Woodwork", "Aluminum Windows & Doors", "False Ceilings & Partitions", "Roof Trusses & Ironmongery"]
-  },
-  {
-    id: "logistics-haulage-earthworks",
-    name: "Logistics, Haulage & Earthworks",
-    skills: ["Heavy Tipper & Flatbed Haulage", "Site Grading & Compaction", "Crane & Rigging Services", "Material Supply & Procurement", "Warehouse Logistics"]
-  },
-  {
-    id: "facility-cleaning-environment",
-    name: "Facility Management & Environmental Services",
-    skills: ["Industrial & Post-Construction Cleaning", "Fumigation & Pest Control", "Industrial Painting & Epoxies", "Landscape & Grounds Maintenance", "Hazardous Waste Disposal"]
-  },
-  {
-    id: "general-contracting",
-    name: "General Contracting & Turnkey Projects",
-    skills: ["Full Turnkey Project Delivery", "Subcontractor Coordination", "Site Supervision & Safety", "Quantity Surveying & Audits", "Renovation & Remodeling"]
-  }
-];
-
-export default function CreateCompanyProjectPage() {
+export default function AddProjectShowcasePage() {
   const router = useRouter();
   const toast = useToast();
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [lang, setLang] = useState("en");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [lang, setLang] = useState("en");
   useEffect(() => {
     const updateLang = () => {
       setLang(localStorage.getItem("lang") || "en");
@@ -199,427 +169,628 @@ export default function CreateCompanyProjectPage() {
 
   const t = translations[lang] || translations["en"];
 
-  const [form, setForm] = useState({
-    companyName: "",
-    title: "",
-    category: "",
-    subcategory: "",
-    budget: "",
-    budget_mode: "Customer's Preference / Quote by Scope",
-    service_type: "onsite",
-    country: "",
-    city: "",
-    timeline_mode: "Customer's Preference / Flexible Timeline",
-    deadline: "",
-    description: "",
-  });
-
+  // Shared Data
   const { data: user } = useFetch(() => api.getMe(), []);
   const { data: companyProfile } = useFetch(() => api.getCompanyProfile(), []);
-  const isVerified = Boolean(user?.is_verified || companyProfile?.is_verified || user?.company_profile?.is_verified);
 
-  useEffect(() => {
-    if (companyProfile?.company_name || user?.company_name) {
-      setForm(prev => ({
-        ...prev,
-        companyName: prev.companyName || companyProfile?.company_name || user?.company_name || ""
-      }));
+  // Form States
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [clientName, setClientName] = useState("");
+  const [location, setLocation] = useState("");
+  const [projectUrl, setProjectUrl] = useState("");
+  const [budget, setBudget] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [status, setStatus] = useState("completed");
+  const [completionYear, setCompletionYear] = useState(new Date().getFullYear().toString());
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const companyName = companyProfile?.company_name || user?.company_name || "Company Contractor";
+
+  const handleAddTag = () => {
+    const trimmed = tagInput.trim();
+    if (!trimmed) return;
+    if (!tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
     }
-  }, [companyProfile, user]);
-
-  const { data: categoriesData } = useFetch(
-    () => api.getCategories().catch(() => []),
-    []
-  );
-  
-  const { data: subcategoriesData } = useFetch(
-    () => form.category ? api.getSkills(form.category).catch(() => []) : Promise.resolve([]),
-    [form.category]
-  );
-  
-  const categories = (Array.isArray(categoriesData) && categoriesData.length > 0)
-    ? categoriesData
-    : DEFAULT_CATEGORIES.map(c => ({ id: c.name, name: c.name }));
-
-  const subcategories = (() => {
-    if (!form.category) return [];
-    if (Array.isArray(subcategoriesData) && subcategoriesData.length > 0) {
-      return subcategoriesData.map((s: any) => ({ id: s.id || s.name, name: s.name }));
-    }
-    const found = DEFAULT_CATEGORIES.find(
-      c => c.name === form.category || c.id === form.category || c.name.toLowerCase().includes(form.category.toLowerCase())
-    );
-    if (found) {
-      return found.skills.map(skill => ({ id: skill, name: skill }));
-    }
-    return [
-      { id: "General Installation", name: "General Installation" },
-      { id: "Repair & Maintenance", name: "Repair & Maintenance" },
-      { id: "Consultation & Inspection", name: "Consultation & Inspection" },
-      { id: "Turnkey Contracting", name: "Turnkey Contracting" }
-    ];
-  })();
-
-
-  // Auto-detect location
-  useEffect(() => {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        if (data.country_name || data.city) {
-          setForm(prev => ({
-            ...prev,
-            country: data.country_name || "",
-            city: data.city || ""
-          }));
-        }
-      })
-      .catch(err => console.error("Could not fetch location automatically", err));
-  }, []);
-
-  const handlePreview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isVerified) {
-      toast.warning(t.toastWaitTitle, t.toastWaitDesc);
-      return;
-    }
-    setShowPreview(true);
+    setTagInput("");
   };
 
-  const handlePublish = async () => {
-    if (!isVerified) {
-      toast.warning(t.toastWaitTitle, t.toastWaitDesc);
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((t) => t !== tagToRemove));
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const res = await api.uploadPortfolioImage(file);
+          if (res?.image_url) {
+            setGalleryImages((prev) => [...prev, res.image_url]);
+          } else {
+            // Local base64 fallback
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              if (event.target?.result) {
+                setGalleryImages((prev) => [...prev, String(event.target?.result)]);
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        } catch {
+          // Local base64 fallback
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (event.target?.result) {
+              setGalleryImages((prev) => [...prev, String(event.target?.result)]);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+      toast.success("Images Added", `${files.length} photo(s) added to project gallery.`);
+    } catch {
+      toast.error("Upload Failed", "Could not upload image. Please try again.");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setGalleryImages(galleryImages.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) {
+      toast.error("Required", "Please provide a project title.");
       return;
     }
+    if (!clientName.trim()) {
+      toast.error("Required", "Please specify the client or contracting organization.");
+      return;
+    }
+
     setSubmitting(true);
-
     try {
-      const finalTitle = form.companyName ? `${form.companyName} - ${form.title}` : form.title;
+      const numericBudget = budget ? Number(budget.replace(/[^0-9.]/g, "")) : null;
+      
+      // Determine composite location/url label
+      const locationValue = projectUrl.trim() 
+        ? `${location.trim() || "Remote / Cloud"} | ${projectUrl.trim()}`
+        : (location.trim() || "Commercial Site");
 
-      const finalTimeline = form.timeline_mode === "Specific Target Completion Date" && form.deadline
-        ? `Target Date: ${form.deadline}`
-        : form.timeline_mode;
+      const timelineValue = [
+        timeline.trim() || "Completed",
+        completionYear.trim() ? `(${completionYear.trim()})` : "",
+        category ? `• ${category}` : ""
+      ].filter(Boolean).join(" ");
 
-      const finalPricing = form.budget
-        ? `${form.budget_mode} - ${Number(form.budget).toLocaleString()} XOF`
-        : form.budget_mode;
+      // 1. Create in backend
+      const res = await api.createCompanyProject({
+        title: title.trim(),
+        client_name: clientName.trim(),
+        location: locationValue,
+        budget: numericBudget,
+        timeline: timelineValue,
+        status: status,
+        progress: status === "completed" ? 100 : 50,
+      });
 
-      const payload = {
-        title: finalTitle,
-        client_name: form.companyName || "New Client",
-        budget: form.budget ? parseFloat(form.budget) : null,
-        timeline: finalTimeline,
-        location: form.country ? `${form.city ? form.city + ', ' : ''}${form.country}` : "Online",
-        status: "active",
-        progress: 0,
-        milestones_total: 1,
-        milestones_completed: 0,
-        payment_status: "awaiting"
-      };
+      // 2. Sync to local storage for instant public showcase richness
+      if (typeof window !== "undefined") {
+        const fullProjectRecord = {
+          id: res?.id || Date.now(),
+          title: title.trim(),
+          client_name: clientName.trim(),
+          category: category,
+          location: location.trim(),
+          url: projectUrl.trim(),
+          budget: numericBudget,
+          timeline: timeline.trim(),
+          year: completionYear.trim(),
+          status: status,
+          progress: status === "completed" ? 100 : 50,
+          description: description.trim(),
+          tags: tags,
+          images: galleryImages,
+          created_at: new Date().toISOString(),
+        };
 
-      try {
-        await api.createCompanyProject(payload);
-      } catch (projErr) {
-        console.warn("Project API save notice:", projErr);
+        try {
+          const raw = localStorage.getItem("boulotman_company_projects");
+          const list = raw ? JSON.parse(raw) : [];
+          list.unshift(fullProjectRecord);
+          localStorage.setItem("boulotman_company_projects", JSON.stringify(list));
+
+          if (companyProfile?.id) {
+            localStorage.setItem(`boulotman_company_projects_${companyProfile.id}`, JSON.stringify(list));
+          }
+          if (user?.id) {
+            localStorage.setItem(`boulotman_company_projects_${user.id}`, JSON.stringify(list));
+          }
+        } catch {}
       }
 
-      // Also register as a company service offering
-      try {
-        await api.createCompanyService({
-          title: form.title,
-          category: form.category || form.subcategory || "General",
-          pricing_model: finalPricing,
-          status: "Active",
-          description: form.description || form.title,
-        });
-      } catch (servErr) {
-        console.warn("Service API save notice:", servErr);
-      }
-
+      toast.success(t.successTitle, t.successDesc);
       router.push("/dashboard/company/projects");
-    } catch (error: any) {
-      console.error("Failed to create project", error);
-      alert(error?.message || "Error publishing project. Please check your inputs.");
+    } catch (err: any) {
+      toast.error("Failed to publish", err?.message || "Please check your inputs and try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-
   return (
-    <>
-      <div className={styles.container} style={{ marginTop: 32 }}>
-        <div className={styles.hero}>
-          <h1>{t.heroTitle}</h1>
-          <p>{t.heroSubtitle}</p>
+    <div className={styles.mainWrapper}>
+      <div className={styles.container}>
+        {/* TOP HEADER & BREADCRUMBS */}
+        <div className={styles.headerNav}>
+          <Link href="/dashboard/company/projects" className={styles.backLink}>
+            <iconify-icon icon="lucide:arrow-left" style={{ fontSize: 16 }} />
+            {t.backToProjects}
+          </Link>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>
+            {companyName}
+          </span>
         </div>
 
-        {!isVerified && user && (
-          <div style={{ padding: "16px 20px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 16, display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, color: "#d97706", flexShrink: 0 }}>
-              <iconify-icon icon="lucide:shield-alert"></iconify-icon>
-            </div>
-            <div>
-              <strong style={{ color: "#92400e", fontSize: 14, display: "block", marginBottom: 2 }}>{t.verificationNoticeTitle}</strong>
-              <span style={{ color: "#b45309", fontSize: 13 }}>{t.verificationNoticeDesc}</span>
-            </div>
+        {/* HERO BANNER */}
+        <section className={styles.heroCard}>
+          <div className={styles.heroBadge}>
+            <iconify-icon icon="lucide:sparkles" />
+            {t.heroBadge}
           </div>
-        )}
+          <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
+          <p className={styles.heroSubtitle}>{t.heroSubtitle}</p>
+        </section>
 
-        <form className={styles.formCard} onSubmit={handlePreview}>
-
-          <div className={styles.grid2}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.companyName}</label>
-              <input 
-                type="text" 
-                className={styles.input} 
-                value={form.companyName}
-                onChange={e => setForm({...form, companyName: e.target.value})}
-                required
-              />
+        {/* FORM CONTAINER */}
+        <form onSubmit={handleSubmit} className={styles.formLayout}>
+          
+          {/* ==================== 1. PROJECT OVERVIEW ==================== */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon}>
+                <iconify-icon icon="lucide:building-2" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec1Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec1Sub}</p>
+              </div>
             </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.serviceTitle}</label>
-              <input 
-                type="text" 
-                className={styles.input} 
-                value={form.title}
-                onChange={e => setForm({...form, title: e.target.value})}
-                required
-              />
-            </div>
-          </div>
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>{t.serviceDeliveryMode}</label>
-            <div className={styles.pills}>
-              <label>
-                <input 
-                  type="radio" 
-                  name="serviceMode" 
-                  value="onsite" 
-                  checked={form.service_type === "onsite"}
-                  onChange={e => setForm({...form, service_type: e.target.value})}
-                />
-                <span>{t.onsite}</span>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                {t.projectTitle}
               </label>
-              <label>
-                <input 
-                  type="radio" 
-                  name="serviceMode" 
-                  value="remote" 
-                  checked={form.service_type === "remote"}
-                  onChange={e => setForm({...form, service_type: e.target.value})}
-                />
-                <span>{t.remote}</span>
-              </label>
-              <label>
-                <input 
-                  type="radio" 
-                  name="serviceMode" 
-                  value="hybrid" 
-                  checked={form.service_type === "hybrid"}
-                  onChange={e => setForm({...form, service_type: e.target.value})}
-                />
-                <span>{t.hybrid}</span>
-              </label>
-            </div>
-          </div>
-
-          <div className={styles.grid2}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.category}</label>
-              <select 
-                className={styles.select}
-                value={form.category}
-                onChange={e => setForm({...form, category: e.target.value, subcategory: ""})}
-                required
-              >
-                <option value="">{t.selectCategory}</option>
-                {categories.map((cat: any) => (
-                  <option key={cat.id || cat.name} value={cat.name}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.subcategory}</label>
-              <select 
-                className={styles.select}
-                value={form.subcategory}
-                onChange={e => setForm({...form, subcategory: e.target.value})}
-                required
-                disabled={!form.category || subcategories.length === 0}
-              >
-                <option value="">{!form.category ? t.selectCategoryFirst : t.selectSubcategory}</option>
-                {subcategories.map((sub: any) => (
-                  <option key={sub.id || sub.name} value={sub.name}>{sub.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.grid2}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.country}</label>
-              <select 
-                className={styles.select} 
-                value={form.country}
-                onChange={e => setForm({...form, country: e.target.value})}
-                required
-              >
-                <option value="">{lang === "fr" ? "Sélectionner le Pays" : "Select Country"}</option>
-                {COUNTRIES.map(country => (
-                  <option key={country} value={country}>{country}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.city}</label>
-              <input 
-                type="text" 
-                className={styles.input} 
-                value={form.city}
-                onChange={e => setForm({...form, city: e.target.value})}
-                placeholder={lang === "fr" ? "Ville" : "City"}
+              <input
+                className={styles.input}
+                placeholder={t.projectTitlePlaceholder}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
-          </div>
 
-          {/* Pricing & Budget Structure */}
-          <div className={styles.grid2}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.pricingStructure}</label>
-              <select 
-                className={styles.select}
-                value={form.budget_mode}
-                onChange={e => setForm({...form, budget_mode: e.target.value})}
-                required
-              >
-                <option value="Customer's Preference / Quote by Scope">{t.customerPrefBudget}</option>
-                <option value="Starting at Fixed Rate">{t.startingAtFixed}</option>
-                <option value="Contract-based / Turnkey">{t.contractBased}</option>
-                <option value="Project-based / Milestones">{t.projectBased}</option>
-                <option value="Hourly / Daily Rate">{t.hourlyDaily}</option>
-                <option value="Negotiable / PM Determined">{t.negotiable}</option>
-              </select>
-            </div>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.estimatedBudget}</label>
-              <input 
-                type="number" 
-                className={styles.input} 
-                placeholder="e.g., 500000 (Optional)"
-                value={form.budget}
-                onChange={e => setForm({...form, budget: e.target.value})}
-              />
-              <small style={{ color: "#64748b", fontSize: "11.5px", marginTop: "4px" }}>
-                {t.budgetOptionalHint}
-              </small>
-            </div>
-          </div>
-
-          {/* Flexible Service Timeline & Delivery Schedule */}
-          <div className={styles.grid2}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>{t.serviceTimeline}</label>
-              <select 
-                className={styles.select}
-                value={form.timeline_mode}
-                onChange={e => setForm({...form, timeline_mode: e.target.value})}
-                required
-              >
-                <option value="Customer's Preference / Flexible Timeline">{t.customerPrefTimeline}</option>
-                <option value="Determined by Project Scope & Agreement">{t.scopeAgreedTimeline}</option>
-                <option value="Ongoing Service / Continuous Retainer">{t.ongoingServiceTimeline}</option>
-                <option value="Immediate / Urgent Mobilization">{t.immediateTimeline}</option>
-                <option value="Specific Target Completion Date">{t.specificDateTimeline}</option>
-              </select>
-            </div>
-
-            {form.timeline_mode === "Specific Target Completion Date" ? (
+            <div className={styles.grid2}>
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>{t.deadline}</label>
-                <input 
-                  type="date" 
-                  className={styles.input} 
-                  value={form.deadline}
-                  onChange={e => setForm({...form, deadline: e.target.value})}
+                <label className={styles.label}>
+                  {t.category}
+                </label>
+                <select
+                  className={styles.select}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>
+                  {t.clientName}
+                </label>
+                <input
+                  className={styles.input}
+                  placeholder={t.clientNamePlaceholder}
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
                   required
                 />
               </div>
-            ) : (
-              <div className={styles.fieldGroup} style={{ justifyContent: "center" }}>
-                <label className={styles.label}>{t.timelineLabel}</label>
-                <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1", color: "#001f3f", fontSize: 13, fontWeight: 600 }}>
-                  <iconify-icon icon="lucide:calendar-clock" style={{ verticalAlign: "middle", marginRight: 6, color: "#ff4500" }} />
-                  {form.timeline_mode}
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                {t.location}
+              </label>
+              <div className={styles.inputWrapper}>
+                <iconify-icon icon="lucide:map-pin" className={styles.inputIcon} />
+                <input
+                  className={`${styles.input} ${styles.inputWithIcon}`}
+                  placeholder={t.locationPlaceholder}
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ==================== 2. DIGITAL & IT LIVE URL ==================== */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon} style={{ background: "rgba(14, 165, 233, 0.1)", color: "#0284c7" }}>
+                <iconify-icon icon="lucide:globe" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec2Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec2Sub}</p>
+              </div>
+            </div>
+
+            <div className={styles.urlNotice}>
+              <iconify-icon icon="lucide:info" style={{ fontSize: 20, flexShrink: 0 }} />
+              <span>{t.projectUrlHint}</span>
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                <iconify-icon icon="lucide:external-link" style={{ color: "#0284c7" }} />
+                {t.projectUrl}
+              </label>
+              <div className={styles.inputWrapper}>
+                <iconify-icon icon="lucide:link-2" className={styles.inputIcon} />
+                <input
+                  type="url"
+                  className={`${styles.input} ${styles.inputWithIcon}`}
+                  placeholder={t.projectUrlPlaceholder}
+                  value={projectUrl}
+                  onChange={(e) => setProjectUrl(e.target.value)}
+                />
+              </div>
+              <span className={styles.fieldHint}>
+                e.g. https://banque-atlantique-app.com, https://cloud.org, or live staging URL
+              </span>
+            </div>
+          </div>
+
+          {/* ==================== 3. CONTRACT BUDGET & TIMELINE ==================== */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon} style={{ background: "rgba(22, 163, 74, 0.1)", color: "#16a34a" }}>
+                <iconify-icon icon="lucide:coins" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec3Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec3Sub}</p>
+              </div>
+            </div>
+
+            <div className={styles.grid2}>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>
+                  {t.contractBudget}
+                </label>
+                <div className={styles.inputWrapper}>
+                  <iconify-icon icon="lucide:receipt" className={styles.inputIcon} />
+                  <input
+                    className={`${styles.input} ${styles.inputWithIcon}`}
+                    placeholder={t.budgetPlaceholder}
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                    required
+                  />
                 </div>
+                <span className={styles.fieldHint}>{t.budgetHint}</span>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>
+                  {t.timeline}
+                </label>
+                <div className={styles.inputWrapper}>
+                  <iconify-icon icon="lucide:calendar" className={styles.inputIcon} />
+                  <input
+                    className={`${styles.input} ${styles.inputWithIcon}`}
+                    placeholder={t.timelinePlaceholder}
+                    value={timeline}
+                    onChange={(e) => setTimeline(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.grid2}>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>
+                  {t.projectStatus}
+                </label>
+                <select
+                  className={styles.select}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="completed">{t.statusCompleted}</option>
+                  <option value="active">{t.statusActive}</option>
+                  <option value="pending">{t.statusPending}</option>
+                </select>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>
+                  {t.completionYear}
+                </label>
+                <input
+                  type="number"
+                  className={styles.input}
+                  placeholder={t.yearPlaceholder}
+                  value={completionYear}
+                  onChange={(e) => setCompletionYear(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ==================== 4. SCOPE OF WORKS & HIGHLIGHTS ==================== */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon} style={{ background: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6" }}>
+                <iconify-icon icon="lucide:file-text" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec4Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec4Sub}</p>
+              </div>
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                {t.description}
+              </label>
+              <textarea
+                className={styles.textarea}
+                placeholder={t.descPlaceholder}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                {t.highlightsLabel}
+              </label>
+              <div style={{ display: "flex", gap: 10 }}>
+                <input
+                  className={styles.input}
+                  placeholder={t.highlightPlaceholder}
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddTag}
+                  className={styles.cancelBtn}
+                  style={{ minWidth: 90, justifyContent: "center" }}
+                >
+                  <iconify-icon icon="lucide:plus" /> {t.addTagBtn}
+                </button>
+              </div>
+
+              {tags.length > 0 && (
+                <div className={styles.tagContainer}>
+                  {tags.map((tag) => (
+                    <span key={tag} className={styles.tagChip}>
+                      <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a", fontSize: 14 }} />
+                      {tag}
+                      <button
+                        type="button"
+                        className={styles.tagRemoveBtn}
+                        onClick={() => handleRemoveTag(tag)}
+                        title="Remove tag"
+                      >
+                        <iconify-icon icon="lucide:x" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ==================== 5. PROJECT GALLERY & MEDIA ==================== */}
+          <div className={styles.formSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon} style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>
+                <iconify-icon icon="lucide:image" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec5Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec5Sub}</p>
+              </div>
+            </div>
+
+            <div
+              className={styles.uploadDropzone}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className={styles.uploadIconWrap}>
+                {uploadingImage ? (
+                  <iconify-icon icon="lucide:loader" className={styles.spinIcon} />
+                ) : (
+                  <iconify-icon icon="lucide:upload-cloud" />
+                )}
+              </div>
+              <div>
+                <strong style={{ display: "block", fontSize: 14.5, color: "#001f3f", marginBottom: 4 }}>
+                  {uploadingImage ? "Uploading..." : t.dropzoneText}
+                </strong>
+                <span style={{ fontSize: 12.5, color: "#64748b" }}>{t.dropzoneSub}</span>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp,image/*"
+                style={{ display: "none" }}
+                onChange={handleImageSelect}
+              />
+            </div>
+
+            {galleryImages.length > 0 && (
+              <div className={styles.galleryGrid}>
+                {galleryImages.map((imgUrl, idx) => (
+                  <div key={idx} className={styles.galleryItem}>
+                    <img
+                      src={getImageUrl(imgUrl)}
+                      alt={`Project Media #${idx + 1}`}
+                      className={styles.galleryImg}
+                    />
+                    <button
+                      type="button"
+                      className={styles.galleryRemoveBtn}
+                      onClick={() => handleRemoveImage(idx)}
+                      title="Remove image"
+                    >
+                      <iconify-icon icon="lucide:trash-2" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.label}>{t.projectDescription}</label>
-            <textarea 
-              className={styles.textarea} 
-              placeholder={t.descPlaceholder}
-              value={form.description}
-              onChange={e => setForm({...form, description: e.target.value})}
-              required
-            />
+          {/* ==================== 6. LIVE SHOWCASE CARD PREVIEW ==================== */}
+          <div className={styles.previewSection}>
+            <div className={styles.sectionHeader} style={{ marginBottom: 18 }}>
+              <div className={styles.sectionIcon} style={{ background: "rgba(255, 69, 0, 0.1)", color: "#ff4500" }}>
+                <iconify-icon icon="lucide:eye" />
+              </div>
+              <div>
+                <h3 className={styles.sectionTitle}>{t.sec6Title}</h3>
+                <p className={styles.sectionSubtitle}>{t.sec6Sub}</p>
+              </div>
+            </div>
+
+            <div className={styles.previewCard}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
+                <div>
+                  <span style={{ display: "inline-block", background: "rgba(255, 69, 0, 0.1)", color: "#ff4500", fontSize: 11.5, fontWeight: 800, padding: "4px 10px", borderRadius: 999, textTransform: "uppercase", marginBottom: 8 }}>
+                    {category}
+                  </span>
+                  <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>
+                    {title || "Project Title Showcase"}
+                  </h3>
+                  <small style={{ color: "#64748b", fontSize: 13, display: "block", marginTop: 4 }}>
+                    {t.publishedBy} <strong>{companyName}</strong> • {clientName || "Corporate Client"}
+                  </small>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ background: "#dcfce7", color: "#16a34a", padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <iconify-icon icon="lucide:check-circle-2" /> {status === "completed" ? "Completed ✓" : "Active"}
+                  </span>
+                  {budget && (
+                    <span style={{ background: "#f1f5f9", color: "#001f3f", padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 800 }}>
+                      💰 {Number(budget.replace(/[^0-9.]/g, "")).toLocaleString()} XOF
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 18, color: "#64748b", fontSize: 13, flexWrap: "wrap" }}>
+                <span><iconify-icon icon="lucide:map-pin" style={{ color: "#ff4500", marginRight: 4 }} /> {location || "Site Location"}</span>
+                <span><iconify-icon icon="lucide:calendar" style={{ color: "#0284c7", marginRight: 4 }} /> {timeline || "Timeline"} ({completionYear})</span>
+              </div>
+
+              {description && (
+                <p style={{ margin: 0, fontSize: 14, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                  {description}
+                </p>
+              )}
+
+              {/* LIVE URL BADGE BUTTON IN PREVIEW */}
+              {projectUrl && (
+                <div>
+                  <a
+                    href={projectUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      background: "#0284c7",
+                      color: "#ffffff",
+                      padding: "8px 16px",
+                      borderRadius: 10,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      textDecoration: "none",
+                    }}
+                  >
+                    <iconify-icon icon="lucide:globe" /> {t.visitLiveLink}
+                  </a>
+                </div>
+              )}
+
+              {tags.length > 0 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                  {tags.map((tag) => (
+                    <span key={tag} style={{ background: "#f8fafc", color: "#475569", border: "1px solid #e2e8f0", fontSize: 11.5, fontWeight: 700, padding: "4px 8px", borderRadius: 6 }}>
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <button type="submit" className={styles.submitBtn}>
-            <iconify-icon icon="lucide:eye" /> {t.previewProject}
-          </button>
+          {/* ==================== ACTION BAR ==================== */}
+          <div className={styles.actionBar}>
+            <Link href="/dashboard/company/projects" className={styles.cancelBtn}>
+              {t.cancel}
+            </Link>
+            <button
+              type="submit"
+              className={styles.publishBtn}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <><iconify-icon icon="lucide:loader" className={styles.spinIcon} /> {t.publishing}</>
+              ) : (
+                <><iconify-icon icon="lucide:check-circle-2" /> {t.publishBtn}</>
+              )}
+            </button>
+          </div>
+
         </form>
       </div>
-
-      {showPreview && (
-        <div className={styles.previewOverlay}>
-          <div className={styles.previewBox}>
-            <h2>{t.projectPreview}</h2>
-            <div className={styles.previewGrid}>
-              <div><strong>{t.company}</strong><p>{form.companyName}</p></div>
-              <div><strong>{t.serviceTitle}</strong><p>{form.title}</p></div>
-              <div><strong>{t.serviceMode}</strong><p style={{ textTransform: 'capitalize' }}>{form.service_type}</p></div>
-              <div><strong>{t.country}</strong><p>{form.country || "Not specified"}</p></div>
-              <div><strong>{t.city}</strong><p>{form.city || "Not specified"}</p></div>
-              <div><strong>{t.pricing}</strong><p>{form.budget_mode} {form.budget ? `- ${Number(form.budget).toLocaleString()} XOF` : ""}</p></div>
-              <div><strong>{t.timelineLabel}</strong><p>{form.timeline_mode === "Specific Target Completion Date" ? (form.deadline ? `Target: ${form.deadline}` : "Specific Date") : form.timeline_mode}</p></div>
-            </div>
-            <div className={styles.previewFull}>
-              <strong>{t.categories}</strong>
-              <p>
-                {categories.find((c: any) => String(c.id) === form.category)?.name || "None"} 
-                {form.subcategory ? " > " + subcategories.find((s: any) => String(s.id) === form.subcategory)?.name : ""}
-              </p>
-            </div>
-            <div className={styles.previewFull}>
-              <strong>{t.projectDescription}</strong>
-              <p style={{ whiteSpace: "pre-wrap" }}>{form.description}</p>
-            </div>
-            
-            <div className={styles.previewActions}>
-              <button className={styles.secondaryBtn} onClick={() => setShowPreview(false)}>
-                {t.editDetails}
-              </button>
-              <button className={styles.secondaryBtn} onClick={() => {
-                alert(lang === "fr" ? "Brouillon enregistré localement." : "Draft saved locally.");
-                setShowPreview(false);
-              }}>
-                {t.saveDraft}
-              </button>
-              <button className={styles.submitBtn} onClick={handlePublish} disabled={submitting}>
-                <iconify-icon icon="lucide:send" /> {submitting ? t.publishing : t.publishProject}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

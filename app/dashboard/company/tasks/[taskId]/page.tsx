@@ -385,9 +385,10 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
                 {task.attachments.map((attachment: any, idx: number) => {
-                  const fileUrl = getImageUrl(attachment.file_url || attachment.file || attachment.url);
+                  const rawUrl = attachment.file_url || attachment.file || attachment.url || "";
+                  const fileUrl = getImageUrl(rawUrl);
                   const fileName = attachment.file_name || attachment.name || `Attachment #${idx + 1}`;
-                  const isImage = attachment.content_type?.includes("image") || attachment.file_type === "image" || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                  const isImage = attachment.content_type?.includes("image") || attachment.file_type === "image" || fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i);
                   return (
                     <div
                       key={idx}
@@ -405,7 +406,8 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                         backgroundColor: "#f8fafc",
                         cursor: "pointer",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                        overflow: "hidden"
+                        overflow: "hidden",
+                        transition: "all 0.2s ease"
                       }}
                     >
                       <div style={{
@@ -421,11 +423,11 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                         overflow: "hidden",
                         position: "relative"
                       }}>
-                        {isImage ? (
+                        {isImage && fileUrl ? (
                           <>
                             <img
                               src={fileUrl}
-                              alt=""
+                              alt={fileName}
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               onError={(e) => {
                                 const target = e.target as HTMLElement;
@@ -439,7 +441,7 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                             </div>
                           </>
                         ) : (
-                          <iconify-icon icon="lucide:file-text" style={{ fontSize: 22 }} />
+                          <iconify-icon icon={isImage ? "lucide:image" : "lucide:file-text"} style={{ fontSize: 22 }} />
                         )}
                       </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
@@ -681,20 +683,23 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
         <div
           className={styles.modalOverlay}
           onClick={() => setActiveLightboxImage(null)}
-          style={{ zIndex: 10000 }}
+          style={{ zIndex: 10000, padding: 16 }}
         >
           <div
             style={{
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-              background: "#000",
-              borderRadius: 16,
+              maxWidth: "92vw",
+              maxHeight: "92vh",
+              background: "#0f172a",
+              borderRadius: 20,
               overflow: "hidden",
               position: "relative",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center"
+              justifyContent: "center",
+              padding: activeLightboxImage.isImage && !lightboxError ? "16px" : "32px 24px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+              border: "1px solid rgba(255, 255, 255, 0.12)"
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -704,7 +709,7 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                 position: "absolute",
                 top: 14,
                 right: 14,
-                background: "rgba(0,0,0,0.6)",
+                background: "rgba(255,255,255,0.15)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "50%",
@@ -714,33 +719,79 @@ export default function CompanyTaskDetailPage({ params }: { params: Promise<{ ta
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                fontSize: 20
+                fontSize: 20,
+                zIndex: 20,
+                transition: "background 0.2s ease"
               }}
+              title="Close Preview"
             >
               <iconify-icon icon="lucide:x" />
             </button>
             {activeLightboxImage.isImage && !lightboxError ? (
-              <img
-                src={activeLightboxImage.url}
-                alt={activeLightboxImage.name}
-                style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
-                onError={() => setLightboxError(true)}
-              />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, maxWidth: "100%", maxHeight: "100%" }}>
+                <img
+                  src={activeLightboxImage.url}
+                  alt={activeLightboxImage.name}
+                  style={{ maxWidth: "86vw", maxHeight: "76vh", objectFit: "contain", borderRadius: 12 }}
+                  onError={() => setLightboxError(true)}
+                />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0 8px", gap: 16, color: "#fff", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: "#e2e8f0" }}>{activeLightboxImage.name}</span>
+                  {activeLightboxImage.url && (
+                    <a
+                      href={activeLightboxImage.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={activeLightboxImage.name}
+                      style={{ color: "#ff8c42", fontSize: 13, fontWeight: 700, textDecoration: "underline", display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
+                      <iconify-icon icon="lucide:external-link" /> Open in New Tab ↗
+                    </a>
+                  )}
+                </div>
+              </div>
             ) : (
-              <div style={{ padding: 40, color: "#fff", textAlign: "center" }}>
-                <iconify-icon icon={activeLightboxImage.isImage ? "lucide:image-off" : "lucide:file-text"} style={{ fontSize: 60, color: "#38bdf8", display: "inline-block", marginBottom: 12 }} />
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{activeLightboxImage.name}</p>
-                {activeLightboxImage.isImage && lightboxError && (
-                  <p style={{ margin: "6px 0 0", fontSize: 13, color: "#94a3b8" }}>Image preview could not be loaded from remote storage.</p>
-                )}
+              <div style={{ padding: "16px 12px", color: "#fff", textAlign: "center", maxWidth: 400 }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  background: "rgba(56, 189, 248, 0.15)",
+                  color: "#38bdf8",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  fontSize: 32
+                }}>
+                  <iconify-icon icon={activeLightboxImage.isImage ? "lucide:image" : "lucide:file-text"} />
+                </div>
+                <h4 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "#ffffff", wordBreak: "break-word" }}>{activeLightboxImage.name}</h4>
+                <p style={{ margin: "0 0 20px", fontSize: 13, color: "#94a3b8", lineHeight: 1.5 }}>
+                  {activeLightboxImage.isImage
+                    ? "Image attachment stored in cloud storage."
+                    : "File attachment ready for preview or download."}
+                </p>
                 {activeLightboxImage.url && (
                   <a
                     href={activeLightboxImage.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ display: "inline-block", marginTop: 14, color: "#ff8c42", fontWeight: 700, textDecoration: "underline" }}
+                    download={activeLightboxImage.name}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "10px 22px",
+                      background: "#ff4500",
+                      color: "#fff",
+                      borderRadius: 10,
+                      fontWeight: 700,
+                      fontSize: 13.5,
+                      textDecoration: "none"
+                    }}
                   >
-                    Open in New Tab ↗
+                    <iconify-icon icon="lucide:external-link" /> Open in New Tab ↗
                   </a>
                 )}
               </div>

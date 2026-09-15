@@ -420,7 +420,26 @@ export default function CompanyProjects() {
                         {project.location && (
                           <div className={styles.metaItemBox}>
                             <span className={styles.metaLabel}>{t.location}</span>
-                            <div className={styles.metaValueRich}>{project.location}</div>
+                            <div className={styles.metaValueRich}>
+                              {project.location.includes("http") ? (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                  <span>{project.location.split("|")[0]?.trim()}</span>
+                                  {project.location.includes("http") && (
+                                    <a
+                                      href={project.location.match(/https?:\/\/[^\s]+/)?.[0]}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ color: "#ff4500", fontWeight: 700, fontSize: 12.5, textDecoration: "underline", display: "inline-flex", alignItems: "center", gap: 4 }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <iconify-icon icon="lucide:external-link" /> Live Demo / Site ↗
+                                    </a>
+                                  )}
+                                </div>
+                              ) : (
+                                project.location
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
