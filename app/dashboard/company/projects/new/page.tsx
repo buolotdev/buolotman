@@ -320,6 +320,12 @@ export default function AddProjectShowcasePage() {
           if (user?.id) {
             localStorage.setItem(`boulotman_company_projects_${user.id}`, JSON.stringify(list));
           }
+          if (galleryImages.length > 0) {
+            if (res?.id) {
+              localStorage.setItem(`boulotman_project_images_${res.id}`, JSON.stringify(galleryImages));
+            }
+            localStorage.setItem(`boulotman_project_images_${title.trim().toLowerCase()}`, JSON.stringify(galleryImages));
+          }
         } catch {}
       }
 

@@ -203,24 +203,57 @@ const translations: Record<string, Record<string, string>> = {
 function getProjectImages(item: any): string[] {
   if (!item) return [];
   const imgs: string[] = [];
-  if (Array.isArray(item.images)) {
-    item.images.forEach((img: any) => {
-      if (typeof img === "string" && img.trim()) imgs.push(img.trim());
-      else if (img?.url) imgs.push(img.url);
-      else if (img?.image_url) imgs.push(img.image_url);
-    });
+
+  const addImg = (val: any) => {
+    if (!val) return;
+    if (typeof val === "string" && val.trim().length > 4) {
+      const clean = val.trim();
+      if (!imgs.includes(clean)) imgs.push(clean);
+    } else if (typeof val === "object" && val !== null) {
+      const u = val.url || val.image_url || val.photo_url || val.file_url || val.image || val.src || val.path;
+      if (u && typeof u === "string" && u.trim().length > 4 && !imgs.includes(u.trim())) {
+        imgs.push(u.trim());
+      }
+    }
+  };
+
+  if (Array.isArray(item.images)) item.images.forEach(addImg);
+  if (Array.isArray(item.photos)) item.photos.forEach(addImg);
+  if (Array.isArray(item.gallery)) item.gallery.forEach(addImg);
+  if (Array.isArray(item.media)) item.media.forEach(addImg);
+
+  addImg(item.photoUrl);
+  addImg(item.photo_url);
+  addImg(item.image_url);
+  addImg(item.image);
+  addImg(item.file_url);
+  addImg(item.cover_image);
+  addImg(item.cover_url);
+  addImg(item.banner_url);
+
+  // Check localStorage for direct image keys if in browser
+  if (typeof window !== "undefined") {
+    try {
+      if (item.id) {
+        const byId = localStorage.getItem(`boulotman_project_images_${item.id}`);
+        if (byId) {
+          const p = JSON.parse(byId);
+          if (Array.isArray(p)) p.forEach(addImg);
+          else addImg(p);
+        }
+      }
+      const tKey = (item.title || "").toLowerCase().trim();
+      if (tKey) {
+        const byTitle = localStorage.getItem(`boulotman_project_images_${tKey}`);
+        if (byTitle) {
+          const p = JSON.parse(byTitle);
+          if (Array.isArray(p)) p.forEach(addImg);
+          else addImg(p);
+        }
+      }
+    } catch {}
   }
-  if (Array.isArray(item.photos)) {
-    item.photos.forEach((img: any) => {
-      if (typeof img === "string" && img.trim()) imgs.push(img.trim());
-      else if (img?.url) imgs.push(img.url);
-      else if (img?.image_url) imgs.push(img.image_url);
-    });
-  }
-  const single = item.photoUrl || item.photo_url || item.image_url || item.image || item.file_url || item.cover_image || item.cover_url;
-  if (single && typeof single === "string" && !imgs.includes(single)) {
-    imgs.unshift(single);
-  }
+
   return imgs;
 }
 
@@ -540,27 +573,81 @@ export default function PublicProfilePage() {
 
     if (typeof window !== "undefined") {
       try {
-        const rawPort = (validId ? localStorage.getItem(`boulotman_company_projects_${validId}`) : null)
-          || (profile?.id ? localStorage.getItem(`boulotman_company_projects_${profile.id}`) : null)
-          || (profile?.user_id ? localStorage.getItem(`boulotman_company_projects_${profile.user_id}`) : null)
-          || (validId ? localStorage.getItem(`boulotman_technician_portfolio_${validId}`) : null)
-          || (profile?.id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.id}`) : null)
-          || (profile?.user_id ? localStorage.getItem(`boulotman_technician_portfolio_${profile.user_id}`) : null)
-          || localStorage.getItem("boulotman_company_projects")
-          || localStorage.getItem("boulotman_technician_portfolio");
+        const allLocalKeys = [
+          validId ? `boulotman_company_projects_${validId}` : null,
+          profile?.id ? `boulotman_company_projects_${profile.id}` : null,
+          profile?.user_id ? `boulotman_company_projects_${profile.user_id}` : null,
+          "boulotman_company_projects",
+          "boulotman_company_profile_projects",
+          validId ? `boulotman_technician_portfolio_${validId}` : null,
+          profile?.id ? `boulotman_technician_portfolio_${profile.id}` : null,
+          profile?.user_id ? `boulotman_technician_portfolio_${profile.user_id}` : null,
+          "boulotman_technician_portfolio",
+          "boulotman_portfolio_items",
+        ].filter(Boolean) as string[];
 
-        if (rawPort) {
-          const parsed = JSON.parse(rawPort);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingTitles = new Set(list.map((p) => (p.title || "").toLowerCase().trim()));
-            for (const item of parsed) {
-              const tKey = (item.title || "").toLowerCase().trim();
-              if (tKey && !existingTitles.has(tKey)) {
-                list.push(item);
-                existingTitles.add(tKey);
+        const allLocalItems: any[] = [];
+        for (const key of allLocalKeys) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                allLocalItems.push(...parsed);
+              } else if (parsed && typeof parsed === "object") {
+                allLocalItems.push(parsed);
               }
             }
-            if (list.length === 0) list = parsed;
+          } catch {}
+        }
+
+        if (allLocalItems.length > 0) {
+          // If list is empty, take allLocalItems
+          if (list.length === 0) {
+            list = allLocalItems;
+          } else {
+            // Merge rich data (images, description, tags, url) into existing items
+            list = list.map((existing) => {
+              const itemTitle = (existing.title || "").toLowerCase().trim();
+              const itemId = existing.id ? String(existing.id) : null;
+
+              const localMatch = allLocalItems.find((loc) => {
+                if (itemId && loc.id && String(loc.id) === itemId) return true;
+                const locTitle = (loc.title || "").toLowerCase().trim();
+                return locTitle && (locTitle === itemTitle || locTitle.includes(itemTitle) || itemTitle.includes(locTitle));
+              });
+
+              if (localMatch) {
+                const localImgs = getProjectImages(localMatch);
+                const existingImgs = getProjectImages(existing);
+                const mergedImgs = [...new Set([...localImgs, ...existingImgs])];
+
+                return {
+                  ...localMatch,
+                  ...existing,
+                  images: mergedImgs.length > 0 ? mergedImgs : (existing.images || localMatch.images),
+                  photos: mergedImgs.length > 0 ? mergedImgs : (existing.photos || localMatch.photos),
+                  photoUrl: mergedImgs[0] || existing.photoUrl || localMatch.photoUrl || existing.photo_url || localMatch.photo_url,
+                  description: existing.description || localMatch.description || "",
+                  tags: (Array.isArray(existing.tags) && existing.tags.length > 0) ? existing.tags : (localMatch.tags || []),
+                  url: existing.url || localMatch.url || existing.project_url || localMatch.project_url || "",
+                  location: existing.location || localMatch.location || "",
+                };
+              }
+              return existing;
+            });
+
+            // Add any purely local items not present in list
+            for (const loc of allLocalItems) {
+              const locTitle = (loc.title || "").toLowerCase().trim();
+              const exists = list.some((ex) => {
+                const exTitle = (ex.title || "").toLowerCase().trim();
+                return (loc.id && ex.id && String(loc.id) === String(ex.id)) || (locTitle && exTitle === locTitle);
+              });
+              if (!exists && loc.title) {
+                list.push(loc);
+              }
+            }
           }
         }
       } catch {}
