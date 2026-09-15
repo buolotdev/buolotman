@@ -254,21 +254,21 @@ export default function Home() {
 
   
   const [stats, setStats] = useState({
-    registered_users: 50000,
-    verified_technicians: 12000,
-    verified_companies: 3500,
-    tasks_posted_monthly: 8000,
-    successful_completion: 95
+    registered_users: 0,
+    verified_technicians: 0,
+    verified_companies: 0,
+    tasks_posted_monthly: 0,
+    successful_completion: 0
   });
 
   useEffect(() => {
     api.getPlatformStats().then(data => {
       setStats({
-        registered_users: data.registered_users ?? 50000,
-        verified_technicians: data.verified_technicians ?? 12000,
-        verified_companies: data.verified_companies ?? 3500,
-        tasks_posted_monthly: data.tasks_posted_monthly ?? 8000,
-        successful_completion: data.successful_completion ?? 95
+        registered_users: Number(data.registered_users) || 0,
+        verified_technicians: Number(data.verified_technicians) || 0,
+        verified_companies: Number(data.verified_companies) || 0,
+        tasks_posted_monthly: Number(data.tasks_posted_monthly) || 0,
+        successful_completion: Number(data.successful_completion) || 100
       });
     }).catch(() => {});
   }, []);
@@ -281,6 +281,7 @@ export default function Home() {
   const [searchLocation, setSearchLocation] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isLivePaused, setIsLivePaused] = useState(false);
   const [liveTaskIndex, setLiveTaskIndex] = useState(0);
 
   // Auto pre-populate search location with detected user city/country
@@ -316,11 +317,14 @@ export default function Home() {
     []
   );
 
+
+
   useEffect(() => {
     setIsLoggedIn(Boolean(localStorage.getItem("access_token")));
   }, []);
 
   useEffect(() => {
+    if (isLivePaused) return;
     const interval = setInterval(() => {
       setLiveTaskIndex((prev) => {
         const raw = Array.isArray((liveTasksData as any)?.results)
@@ -332,9 +336,9 @@ export default function Home() {
         if (count <= 1) return 0;
         return (prev + 1) % count;
       });
-    }, 4000);
+    }, 3500);
     return () => clearInterval(interval);
-  }, [liveTasksData]);
+  }, [liveTasksData, isLivePaused]);
 
   /* ── Intersection Observer for scroll animations ── */
   useEffect(() => {
@@ -523,6 +527,16 @@ export default function Home() {
       : [];
   const liveTasks = filterByLocation(rawLiveTasks);
 
+  const handleNextLiveTask = () => {
+    if (liveTasks.length <= 1) return;
+    setLiveTaskIndex((prev) => (prev + 1) % liveTasks.length);
+  };
+
+  const handlePrevLiveTask = () => {
+    if (liveTasks.length <= 1) return;
+    setLiveTaskIndex((prev) => (prev - 1 + liveTasks.length) % liveTasks.length);
+  };
+
   const firstName = meData?.first_name || meData?.firstName || "";
   const greeting = firstName ? `Welcome back, ${firstName}` : "";
 
@@ -605,12 +619,45 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="bm-main-live-box">
-            <h4>{t.liveTasksTitle}</h4>
+          <div
+            className="bm-main-live-box"
+            onMouseEnter={() => setIsLivePaused(true)}
+            onMouseLeave={() => setIsLivePaused(false)}
+          >
+            <div className="bm-main-live-head">
+              <h4 className="bm-main-live-title">
+                <span className="bm-live-dot" />
+                {t.liveTasksTitle}
+              </h4>
+              {liveTasks.length > 1 && (
+                <div className="bm-live-controls">
+                  <span className="bm-live-count">{liveTaskIndex + 1} / {liveTasks.length}</span>
+                  <button
+                    type="button"
+                    className="bm-live-nav-btn"
+                    onClick={handlePrevLiveTask}
+                    aria-label="Previous Task"
+                    title="Previous Task"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="bm-live-nav-btn"
+                    onClick={handleNextLiveTask}
+                    aria-label="Next Task"
+                    title="Next Task"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="bm-main-task-window">
               <div
                 className="bm-main-task-track"
-                style={{ transform: `translateY(-${liveTaskIndex * 85}px)` }}
+                style={{ transform: `translateY(-${liveTaskIndex * 73}px)` }}
               >
                 {liveTasks.length > 0 ? (
                   liveTasks.map((task: any, i: number) => (
@@ -618,7 +665,7 @@ export default function Home() {
                       <div className="bm-main-task-top">
                         <div className="bm-main-task-user">
                           <img src={`https://ui-avatars.com/api/?name=${task.client?.first_name || 'U'}&background=random`} alt="User" />
-                          <div className="bm-main-task-title">{task.title}</div>
+                          <div className="bm-main-task-title" title={task.title}>{task.title}</div>
                         </div>
                         <a href="#" onClick={(e) => handleApplyClick(e, task.id)} className="bm-main-task-apply" style={{ textDecoration: 'none' }}>{lang === 'fr' ? 'Postuler' : 'Apply'}</a>
                       </div>
