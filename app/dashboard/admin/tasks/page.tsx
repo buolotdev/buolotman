@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { api } from "@/app/lib/api";
+import { api, getImageUrl } from "@/app/lib/api";
 import { useFetch } from "@/app/lib/useFetch";
 import styles from "./admin-tasks.module.css";
 
@@ -16,6 +16,13 @@ export default function AdminTasksPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [releaseSuccess, setReleaseSuccess] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Workspace Inspector Modal
+  const [workspaceTaskId, setWorkspaceTaskId] = useState<number | null>(null);
+  const { data: workspaceTask, loading: workspaceTaskLoading } = useFetch(
+    () => workspaceTaskId ? api.getTask(workspaceTaskId) : Promise.resolve(null),
+    [workspaceTaskId]
+  );
 
   const stats = data?.stats || { active_projects: 0, awaiting_validation: 0, on_hold: 0, completed: 0 };
   const projects = data?.projects || [];
@@ -208,15 +215,15 @@ export default function AdminTasksPage() {
                     </td>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <Link
-                          href={p.status?.toLowerCase().includes("open") ? `/dashboard/client/tasks/${p.id}` : `/dashboard/client/projects/${p.id}`}
+                        <button
+                          type="button"
                           className={styles.btnSecondary}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Open Project Workspace"
+                          onClick={() => setWorkspaceTaskId(p.id)}
+                          title="Open Project Workspace Inspector"
+                          style={{ border: "none" }}
                         >
                           <iconify-icon icon="lucide:external-link" /> Workspace
-                        </Link>
+                        </button>
                         <button className={styles.btnPrimary} onClick={() => openReleaseModal(p.id)}>
                           <iconify-icon icon="lucide:check" /> Release
                         </button>
@@ -232,6 +239,147 @@ export default function AdminTasksPage() {
           )}
         </div>
       </div>
+
+      {/* WORKSPACE INSPECTOR MODAL */}
+      {workspaceTaskId !== null && (
+        <div className={styles.modal} onClick={() => setWorkspaceTaskId(null)}>
+          <div className={styles.modalContent} style={{ maxWidth: 740, maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.closeBtn} onClick={() => setWorkspaceTaskId(null)}>
+              <iconify-icon icon="lucide:x" />
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "#001f3f", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+                <iconify-icon icon="lucide:briefcase" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 19, color: "#001f3f", fontWeight: 800 }}>
+                  {workspaceTask?.title || `Project Workspace #${workspaceTaskId}`}
+                </h3>
+                <p style={{ margin: "2px 0 0", fontSize: 13, color: "#64748b" }}>
+                  Task ID #{workspaceTaskId} &bull; Admin Oversight & Milestones
+                </p>
+              </div>
+            </div>
+
+            {workspaceTaskLoading ? (
+              <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+                <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
+                <p style={{ marginTop: 10, fontWeight: 600 }}>Loading project workspace data...</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* Details Grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div style={{ background: "#f8fafc", padding: 14, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>Client & Pro</div>
+                    <div style={{ fontSize: 13.5, color: "#001f3f", fontWeight: 700 }}>
+                      Client: {workspaceTask?.client?.full_name || workspaceTask?.client_name || "Client"}
+                    </div>
+                    <div style={{ fontSize: 13, color: "#475569", marginTop: 4 }}>
+                      Technician: {workspaceTask?.assigned_to?.full_name || "Pending / Not Assigned"}
+                    </div>
+                  </div>
+
+                  <div style={{ background: "#f8fafc", padding: 14, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>Financials & Status</div>
+                    <div style={{ fontSize: 14, color: "#16a34a", fontWeight: 800 }}>
+                      Budget: {workspaceTask?.budget ? `${Number(workspaceTask.budget).toLocaleString()} XAF` : "Negotiable"}
+                    </div>
+                    <div style={{ fontSize: 13, color: "#001f3f", marginTop: 4, textTransform: "capitalize" }}>
+                      Status: <strong style={{ color: "#ff4500" }}>{workspaceTask?.status || "open"}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scope */}
+                <div style={{ background: "#f8fafc", padding: 14, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>Project Scope</div>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                    {workspaceTask?.description || "No specific details provided."}
+                  </p>
+                </div>
+
+                {/* Attachments */}
+                {workspaceTask?.attachments && workspaceTask.attachments.length > 0 && (
+                  <div style={{ background: "#f8fafc", padding: 14, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
+                      Deliverables & Attachments ({workspaceTask.attachments.length})
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10 }}>
+                      {workspaceTask.attachments.map((att: any, idx: number) => {
+                        const fileUrl = getImageUrl(att.file || att.file_url || att.url);
+                        const isImage = fileUrl.match(/\.(jpeg|jpg|gif|png|webp)/i);
+                        return (
+                          <a
+                            key={idx}
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              padding: "8px",
+                              borderRadius: "8px",
+                              background: "#ffffff",
+                              border: "1px solid #cbd5e1",
+                              textAlign: "center",
+                              textDecoration: "none",
+                              color: "#001f3f",
+                              fontSize: "12px",
+                              display: "block"
+                            }}
+                          >
+                            {isImage ? (
+                              <img src={fileUrl} alt="deliverable" style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 4, marginBottom: 4 }} />
+                            ) : (
+                              <iconify-icon icon="lucide:file-text" style={{ fontSize: 28, color: "#0284c7", margin: "10px 0" }} />
+                            )}
+                            <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {att.file_name || `File #${idx + 1}`}
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal Controls */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, paddingTop: 16, borderTop: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      className={styles.btnPrimary}
+                      onClick={() => {
+                        setWorkspaceTaskId(null);
+                        openReleaseModal(workspaceTaskId);
+                      }}
+                    >
+                      <iconify-icon icon="lucide:check" /> Release Escrow
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.btnWarning}
+                      onClick={() => {
+                        setWorkspaceTaskId(null);
+                        openHoldModal(workspaceTaskId);
+                      }}
+                    >
+                      <iconify-icon icon="lucide:pause" /> Put on Hold
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setWorkspaceTaskId(null)}
+                    style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #cbd5e1", background: "#f8fafc", color: "#64748b", fontWeight: 700, cursor: "pointer" }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* RELEASE MODAL */}
       {releaseModalOpen && (
@@ -311,3 +459,4 @@ export default function AdminTasksPage() {
     </div>
   );
 }
+
