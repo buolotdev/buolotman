@@ -10,6 +10,7 @@ const labels: Record<string, Record<string, string>> = {
   en: {
     brandSub: "Company Space",
     dashboard: "Dashboard",
+    tasks: "Browse Client Tasks",
     profile: "Profile Management",
     services: "Services",
     projects: "Projects & Gallery",
@@ -25,6 +26,7 @@ const labels: Record<string, Record<string, string>> = {
   fr: {
     brandSub: "Espace Entreprise",
     dashboard: "Tableau de bord",
+    tasks: "Missions & Tâches Clients",
     profile: "Gestion du profil",
     services: "Services",
     projects: "Projets & Galerie",
@@ -41,11 +43,12 @@ const labels: Record<string, Record<string, string>> = {
 
 const navItems = [
   { key: "dashboard", icon: "lucide:layout-dashboard", href: "/dashboard/company" },
-  { key: "profile", icon: "lucide:user", href: "/dashboard/company/profile" },
+  { key: "tasks", icon: "lucide:clipboard-list", href: "/dashboard/company/tasks" },
+  { key: "quotes", icon: "lucide:file-text", href: "/dashboard/company/quotes" },
   { key: "services", icon: "lucide:layers-3", href: "/dashboard/company/services" },
   { key: "projects", icon: "lucide:briefcase", href: "/dashboard/company/projects" },
-  { key: "quotes", icon: "lucide:file-text", href: "/dashboard/company/quotes" },
   { key: "messages", icon: "lucide:message-square", href: "/dashboard/company/messages" },
+  { key: "profile", icon: "lucide:user", href: "/dashboard/company/profile" },
   { key: "reviews", icon: "lucide:star", href: "/dashboard/company/reviews" },
   { key: "analytics", icon: "lucide:bar-chart-2", href: "/dashboard/company/analytics" },
   { key: "support", icon: "lucide:help-circle", href: "/dashboard/company/support" },

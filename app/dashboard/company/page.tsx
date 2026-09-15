@@ -65,6 +65,12 @@ const companyTranslations: Record<string, Record<string, any>> = {
     stars: "Stars",
     quickActions: "Quick Actions",
     addService: "Add Service",
+    browseClientTasks: "Browse Client Tasks",
+    clientTasksTitle: "Available Tasks from Clients",
+    browseAllTasks: "Browse All Tasks",
+    loadingTasks: "Loading available tasks from clients...",
+    noClientTasks: "No active client tasks at the moment.",
+    viewAndBid: "View & Bid",
     toastWaitTitle: "Wait for Verification",
     toastWaitDescPost: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can post services.",
     toastWaitDescManage: "Please wait for verification. Your company account is currently under review by admin. Once approved, you can manage services.",
@@ -122,6 +128,12 @@ const companyTranslations: Record<string, Record<string, any>> = {
     stars: "Étoiles",
     quickActions: "Actions Rapides",
     addService: "Ajouter un Service",
+    browseClientTasks: "Missions Clients",
+    clientTasksTitle: "Missions Disponibles des Clients",
+    browseAllTasks: "Consulter Toutes les Missions",
+    loadingTasks: "Chargement des missions clients...",
+    noClientTasks: "Aucune mission client disponible pour l'instant.",
+    viewAndBid: "Voir & Postuler",
     toastWaitTitle: "En attente de vérification",
     toastWaitDescPost: "Veuillez patienter pendant la validation de votre entreprise par l'administrateur. Une fois approuvé, vous pourrez publier des services.",
     toastWaitDescManage: "Veuillez patienter pendant la validation de votre entreprise par l'administrateur. Une fois approuvé, vous pourrez gérer vos services.",
@@ -151,6 +163,9 @@ export default function CompanyDashboard() {
   const { data: projectsData, loading: projectsLoading } = useFetch(() => api.getCompanyProjects(), []);
   const { data: conversations, loading: convLoading } = useFetch(() => api.getConversations(), []);
   
+  // Client Tasks for Companies
+  const { data: clientTasksData, loading: clientTasksLoading } = useFetch(() => api.getTasks({ sort: "newest", limit: "6" }), []);
+
   // New features
   const { data: quotesData, loading: quotesLoading } = useFetch(() => api.getCompanyQuotes(), []);
   const { data: activitiesData, loading: activitiesLoading } = useFetch(() => api.getCompanyActivities(), []);
@@ -164,6 +179,11 @@ export default function CompanyDashboard() {
   const services = toArray(servicesData);
   const quotes = toArray(quotesData);
   const activities = toArray(activitiesData);
+  const clientTasks = Array.isArray((clientTasksData as any)?.results)
+    ? (clientTasksData as any).results
+    : Array.isArray(clientTasksData)
+      ? clientTasksData
+      : [];
   
   const activeProjects = projects.filter((p: any) => p.status === "in_progress" || p.status === "active").length;
   const completedProjects = projects.filter((p: any) => p.status === "completed").length;
@@ -225,6 +245,29 @@ export default function CompanyDashboard() {
               style={{ border: "none", cursor: "pointer" }}
             >
               {t.manageServices}
+            </button>
+            <button 
+              type="button"
+              onClick={() => router.push("/dashboard/company/tasks")}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: '#ffffff',
+                minHeight: '44px',
+                padding: '0 18px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}
+            >
+              <iconify-icon icon="lucide:clipboard-list" style={{ color: '#fbbf24', fontSize: '18px' }} />
+              {t.browseClientTasks}
             </button>
             <button 
               type="button"
@@ -350,6 +393,91 @@ export default function CompanyDashboard() {
           {/* LEFT */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0, width: '100%' }}>
             
+            {/* AVAILABLE TASKS FROM CLIENTS WIDGET */}
+            <div className={styles.card} style={{ border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,31,63,0.03)' }}>
+              <div className={styles.cardHeader}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'bm-pulse-red 2s infinite' }}></div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#001f3f' }}>{t.clientTasksTitle}</h3>
+                </div>
+                <Link href="/dashboard/company/tasks" className={styles.linkButton} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {t.browseAllTasks} <iconify-icon icon="lucide:arrow-right" />
+                </Link>
+              </div>
+
+              {clientTasksLoading ? (
+                <div style={{ padding: 20, textAlign: "center", color: "#64748b" }}>{t.loadingTasks}</div>
+              ) : clientTasks.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px 16px' }}>
+                  {clientTasks.slice(0, 4).map((task: any) => (
+                    <div 
+                      key={task.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #edf2f7',
+                        borderRadius: '12px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {task.title}
+                          </h4>
+                          {task.urgency === 'urgent' && (
+                            <span style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '999px', flexShrink: 0 }}>
+                              Urgent
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#64748b', flexWrap: 'wrap' }}>
+                          <span>📍 {task.location || 'Remote'}</span>
+                          <span>•</span>
+                          <span style={{ fontWeight: 700, color: '#16a34a' }}>
+                            💰 {task.budget ? `${Number(task.budget).toLocaleString()} XOF` : task.budget_type === 'fixed' ? 'Fixed' : 'Hourly'}
+                          </span>
+                          {task.bids_count !== undefined && (
+                            <>
+                              <span>•</span>
+                              <span>{task.bids_count} bids</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <Link
+                        href={`/dashboard/company/tasks`}
+                        style={{
+                          background: '#001f3f',
+                          color: '#ffffff',
+                          padding: '7px 14px',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0
+                        }}
+                      >
+                        {t.viewAndBid}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.emptyState}>
+                  <p style={{ margin: 0 }}>{t.noClientTasks}</p>
+                  <Link href="/dashboard/company/tasks" style={{ display: 'inline-block', marginTop: '10px', color: '#ff4500', fontWeight: 700, fontSize: '13px' }}>
+                    {t.browseAllTasks} →
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* PROJECT OVERVIEW */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
