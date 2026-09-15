@@ -212,51 +212,72 @@ export default function PublicProfilePage() {
         }
       } catch {}
 
-      // 2. Try direct company endpoint
-      if (numericId) {
+      // 2. If user is a COMPANY, enrich with company profile data if available
+      if (baseUser && (baseUser.role === "COMPANY" || baseUser.company_profile)) {
+        const compId = baseUser.company_id || baseUser.company_profile?.id;
+        if (compId) {
+          try {
+            const compRes = await api.getCompanyById(compId);
+            if (compRes && compRes.id) {
+              baseUser = {
+                ...baseUser,
+                ...compRes,
+                role: "COMPANY",
+                company_name: compRes.company_name || baseUser.company_name,
+                about: compRes.about || compRes.description || baseUser.about || baseUser.bio,
+                logo_url: compRes.logo || compRes.logo_url || baseUser.logo_url || baseUser.avatar_url,
+                banner_url: compRes.cover_url || compRes.banner_url || compRes.cover_image || baseUser.banner_url,
+                services: compRes.services || baseUser.services || [],
+                projects: compRes.projects || compRes.portfolio || baseUser.projects || [],
+                team: compRes.team_members || compRes.team || baseUser.team || [],
+              };
+            }
+          } catch {}
+        }
+      } else if (!baseUser && numericId) {
+        // 3. If direct user lookup failed, try company direct ID as fallback
         try {
           const compRes = await api.getCompanyById(numericId);
           if (compRes && compRes.id) {
             baseUser = {
-              ...(baseUser || {}),
               ...compRes,
               role: "COMPANY",
-              company_name: compRes.company_name || baseUser?.company_name,
-              trading_name: compRes.trading_name || compRes.company_name || baseUser?.trading_name,
-              company_type: compRes.company_type || baseUser?.company_type,
-              year_founded: compRes.year_founded || baseUser?.year_founded,
-              industry: compRes.industry || baseUser?.industry,
-              subject_title: compRes.subject_title || baseUser?.subject_title,
-              about: compRes.about || compRes.description || baseUser?.about || baseUser?.bio,
-              website: compRes.website || baseUser?.website,
-              headquarters: compRes.headquarters || compRes.city || baseUser?.headquarters,
-              employee_count: compRes.employee_count || compRes.company_size || baseUser?.employee_count,
-              working_hours: compRes.working_hours || compRes.business_hours || baseUser?.working_hours,
-              preferred_language: compRes.preferred_language || baseUser?.preferred_language,
+              company_name: compRes.company_name || "Enterprise Contractor",
+              trading_name: compRes.trading_name || compRes.company_name,
+              company_type: compRes.company_type,
+              year_founded: compRes.year_founded,
+              industry: compRes.industry,
+              subject_title: compRes.subject_title,
+              about: compRes.about || compRes.description,
+              website: compRes.website,
+              headquarters: compRes.headquarters || compRes.city,
+              employee_count: compRes.employee_count || compRes.company_size,
+              working_hours: compRes.working_hours || compRes.business_hours,
+              preferred_language: compRes.preferred_language,
               logo_url: compRes.logo || compRes.logo_url || "",
               avatar_url: compRes.logo || compRes.logo_url || compRes.avatar_url || "",
-              banner_url: compRes.cover_url || compRes.banner_url || compRes.cover_image || baseUser?.banner_url,
-              is_verified: compRes.is_verified ?? baseUser?.is_verified ?? false,
-              average_rating: compRes.average_rating || baseUser?.average_rating,
-              review_count: compRes.review_count ?? baseUser?.review_count ?? 0,
-              completed_tasks: compRes.completed_tasks ?? baseUser?.completed_tasks ?? 0,
-              services: compRes.services || baseUser?.services || [],
-              projects: compRes.projects || compRes.portfolio || baseUser?.projects || [],
-              team: compRes.team_members || compRes.team || baseUser?.team || [],
-              verification_documents: compRes.verification_documents || baseUser?.verification_documents || [],
-              registration_number: compRes.registration_number || baseUser?.registration_number || "",
+              banner_url: compRes.cover_url || compRes.banner_url || compRes.cover_image,
+              is_verified: compRes.is_verified ?? false,
+              average_rating: compRes.average_rating,
+              review_count: compRes.review_count ?? 0,
+              completed_tasks: compRes.completed_tasks ?? 0,
+              services: compRes.services || [],
+              projects: compRes.projects || compRes.portfolio || [],
+              team: compRes.team_members || compRes.team || [],
+              verification_documents: compRes.verification_documents || [],
+              registration_number: compRes.registration_number || "",
             };
           }
         } catch {}
       }
 
-      // 3. Fallback to technician users list
+      // 4. Fallback to technician users list if still not found
       if (!baseUser) {
         try {
           const techList = await api.listUsers({ limit: "100" });
           const techArray = Array.isArray(techList) ? techList : (techList as any)?.results || [];
           const matchTech = techArray.find(
-            (u: any) => u.id === validId || u.user_id === validId
+            (u: any) => String(u.id) === String(validIdentifier) || String(u.user_id) === String(validIdentifier)
           );
           if (matchTech) {
             baseUser = matchTech;
@@ -264,14 +285,11 @@ export default function PublicProfilePage() {
         } catch {}
       }
 
-      // 4. Always read local storage for latest team, capabilities, and customized fields
-      if (typeof window !== "undefined") {
+      // 5. Read local storage ONLY if specifically keyed to this user/company ID
+      if (typeof window !== "undefined" && baseUser) {
         try {
-          const rawTeam = localStorage.getItem(`boulotman_company_team_${validId}`) 
-            || localStorage.getItem("boulotman_company_team")
-            || (baseUser?.id ? localStorage.getItem(`boulotman_company_team_${baseUser.id}`) : null)
-            || (baseUser?.user_id ? localStorage.getItem(`boulotman_company_team_${baseUser.user_id}`) : null);
-
+          const uid = baseUser.id || validIdentifier;
+          const rawTeam = localStorage.getItem(`boulotman_company_team_${uid}`);
           if (rawTeam) {
             try {
               const parsedTeam = JSON.parse(rawTeam);
@@ -281,11 +299,7 @@ export default function PublicProfilePage() {
             } catch {}
           }
 
-          const rawCap = localStorage.getItem(`boulotman_company_capabilities_${validId}`)
-            || localStorage.getItem("boulotman_company_capabilities")
-            || (baseUser?.id ? localStorage.getItem(`boulotman_company_capabilities_${baseUser.id}`) : null)
-            || (baseUser?.user_id ? localStorage.getItem(`boulotman_company_capabilities_${baseUser.user_id}`) : null);
-
+          const rawCap = localStorage.getItem(`boulotman_company_capabilities_${uid}`);
           if (rawCap) {
             try {
               const parsedCap = JSON.parse(rawCap);
@@ -293,48 +307,39 @@ export default function PublicProfilePage() {
             } catch {}
           }
 
-          const rawCustom = (validId ? localStorage.getItem(`boulotman_technician_profile_custom_${validId}`) : null)
-            || localStorage.getItem("boulotman_technician_profile_custom")
-            || (baseUser?.id ? localStorage.getItem(`boulotman_technician_profile_custom_${baseUser.id}`) : null);
-          const rawPricing = (validId ? localStorage.getItem(`boulotman_technician_pricing_${validId}`) : null)
-            || localStorage.getItem("boulotman_technician_pricing")
-            || (baseUser?.id ? localStorage.getItem(`boulotman_technician_pricing_${baseUser.id}`) : null);
-          const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-          const rawTools = localStorage.getItem("boulotman_technician_tools");
-          const rawSkills = localStorage.getItem("boulotman_technician_skills");
+          if (baseUser.role === "TECHNICIAN") {
+            const rawCustom = localStorage.getItem(`boulotman_technician_profile_custom_${uid}`);
+            const rawPricing = localStorage.getItem(`boulotman_technician_pricing_${uid}`);
+            
+            let pricingParsed: any = {};
+            if (rawPricing) {
+              try { pricingParsed = JSON.parse(rawPricing); } catch {}
+            }
 
-          let pricingParsed: any = {};
-          if (rawPricing) {
-            try { pricingParsed = JSON.parse(rawPricing); } catch {}
-          }
-
-          if (baseUser?.role !== "COMPANY") {
             let c: any = {};
             if (rawCustom) {
               try { c = JSON.parse(rawCustom); } catch {}
             }
-            baseUser = {
-              ...(baseUser || {}),
-              id: validId,
-              role: "TECHNICIAN",
-              first_name: c.firstName || baseUser?.first_name,
-              last_name: c.lastName || baseUser?.last_name,
-              headline: c.headline || baseUser?.headline,
-              bio: c.bio || baseUser?.bio,
-              about: c.bio || baseUser?.about,
-              city: c.city || baseUser?.city,
-              country: c.country || baseUser?.country,
-              experience_years: c.experienceYears || baseUser?.experience_years,
-              education_level: c.educationLevel || baseUser?.education_level,
-              expertise_level: c.expertiseLevel || baseUser?.expertise_level,
-              hourly_rate: pricingParsed.hourlyRate || c.hourlyRate || baseUser?.hourly_rate || baseUser?.technician_profile?.hourly_rate,
-              daily_rate: pricingParsed.dailyRate || c.dailyRate || baseUser?.daily_rate || baseUser?.technician_profile?.daily_rate,
-              inspection_fee: pricingParsed.inspectionFee || c.inspectionFee || baseUser?.inspection_fee || baseUser?.technician_profile?.inspection_fee,
-              starting_price: pricingParsed.startingPrice || c.startingPrice || baseUser?.starting_price || baseUser?.technician_profile?.starting_price,
-              skills: (rawSkills ? JSON.parse(rawSkills) : (baseUser?.skills || baseUser?.technician_profile?.skills)) || [],
-              portfolio: (rawPort ? JSON.parse(rawPort) : (baseUser?.portfolio || baseUser?.technician_profile?.portfolio || baseUser?.projects)) || [],
-              tools: (rawTools ? JSON.parse(rawTools) : baseUser?.tools) || [],
-            };
+
+            if (Object.keys(c).length > 0 || Object.keys(pricingParsed).length > 0) {
+              baseUser = {
+                ...baseUser,
+                first_name: c.firstName || baseUser.first_name,
+                last_name: c.lastName || baseUser.last_name,
+                headline: c.headline || baseUser.headline,
+                bio: c.bio || baseUser.bio,
+                about: c.bio || baseUser.about,
+                city: c.city || baseUser.city,
+                country: c.country || baseUser.country,
+                experience_years: c.experienceYears || baseUser.experience_years,
+                education_level: c.educationLevel || baseUser.education_level,
+                expertise_level: c.expertiseLevel || baseUser.expertise_level,
+                hourly_rate: pricingParsed.hourlyRate || c.hourlyRate || baseUser.hourly_rate,
+                daily_rate: pricingParsed.dailyRate || c.dailyRate || baseUser.daily_rate,
+                inspection_fee: pricingParsed.inspectionFee || c.inspectionFee || baseUser.inspection_fee,
+                starting_price: pricingParsed.startingPrice || c.startingPrice || baseUser.starting_price,
+              };
+            }
           }
         } catch {}
       }
@@ -364,7 +369,7 @@ export default function PublicProfilePage() {
     )
   );
 
-  const isCompany = profile?.role === "COMPANY" || Boolean(profile?.company_name && !profile?.first_name);
+  const isCompany = profile?.role?.toString().toUpperCase() === "COMPANY";
 
   // Common media
   const avatarSrc = getImageUrl(
