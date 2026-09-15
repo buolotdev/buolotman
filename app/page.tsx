@@ -746,7 +746,8 @@ export default function Home() {
               prosData.slice(0, 3).map((pro: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
                 const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
-                const avatarUrl = getImageUrl(pro.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
+                const rawAvatar = pro.avatar || pro.avatar_url || pro.profile_photo_url || pro.user?.avatar_url || pro.user?.profile_photo_url;
+                const avatarUrl = rawAvatar ? getImageUrl(rawAvatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
                 const locationText = [pro.neighborhood, pro.city, pro.country].filter(Boolean).join(", ") || pro.city || pro.country || "Remote Available";
                 
                 // Smart rating calculation
@@ -781,7 +782,14 @@ export default function Home() {
                     {/* PROFILE INFO */}
                     <div className="bm-ftx-profile">
                       <div className="bm-ftx-avatar-wrap">
-                        <img className="bm-ftx-avatar" src={avatarUrl} alt={fullName} />
+                        <img 
+                          className="bm-ftx-avatar" 
+                          src={avatarUrl} 
+                          alt={fullName} 
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
+                          }}
+                        />
                         <span className="bm-ftx-avatar-check" title="Verified Identity & Skills">
                           <iconify-icon icon="lucide:check" />
                         </span>
@@ -865,19 +873,31 @@ export default function Home() {
             ) : companiesData && companiesData.length > 0 ? (
               companiesData.slice(0, 3).map((company: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(company.id) || (company.user_id && String(meData.id) === String(company.user_id)) || meData.username === company.username));
+                const compName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || company.name || "Enterprise Company";
+                const rawLogo = company.logo_url || company.logo || company.avatar_url || company.avatar || company.user?.avatar_url || company.user?.logo_url || company.user?.profile_photo_url;
+                const logoUrl = rawLogo ? getImageUrl(rawLogo) : `https://ui-avatars.com/api/?name=${encodeURIComponent(compName)}&background=001f3f&color=fff&bold=true&size=128`;
+                const locationText = [company.city, company.country].filter(Boolean).join(", ") || company.city || company.country || "Multiple Locations";
+                
                 return (
                   <div className="bm-enterprise-card" key={company.id}>
                     <div className="bm-enterprise-profile">
-                      <img className="bm-enterprise-avatar" src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || 'C')}&background=random`} alt={company.company_name} />
+                      <img 
+                        className="bm-enterprise-avatar" 
+                        src={logoUrl} 
+                        alt={compName} 
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(compName)}&background=001f3f&color=fff&bold=true&size=128`;
+                        }}
+                      />
                       <div>
-                        <div className="bm-enterprise-name">{company.company_name}</div>
+                        <div className="bm-enterprise-name">{compName}</div>
                         <div className="bm-enterprise-role">{t.entRoleComp}</div>
                       </div>
                     </div>
                     <div className="bm-enterprise-rating">
-                      <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({company.average_rating || "4.8"})</span>
+                      <span className="bm-enterprise-stars">⭐⭐⭐⭐⭐</span><span>({Number(company.average_rating || 0) > 0 ? Number(company.average_rating).toFixed(2) : "0.00"})</span>
                     </div>
-                    <div className="bm-enterprise-meta">📍 {company.city || company.country || "Multiple Locations"} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
+                    <div className="bm-enterprise-meta">📍 {locationText} • {company.projects_count || 0} {lang === 'fr' ? 'Projets' : 'Projects'}</div>
                     <div className="bm-enterprise-description" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {company.description || t.entDescFallback}
                     </div>
