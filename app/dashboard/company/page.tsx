@@ -64,7 +64,8 @@ const companyTranslations: Record<string, Record<string, any>> = {
     ratingSnapshot: "Rating Snapshot",
     stars: "Stars",
     quickActions: "Quick Actions",
-    addService: "Add Service",
+    addService: "Post a Service",
+    addProject: "Add Portfolio Project",
     browseClientTasks: "Browse Client Tasks",
     clientTasksTitle: "Available Tasks from Clients",
     browseAllTasks: "Browse All Tasks",
@@ -127,7 +128,8 @@ const companyTranslations: Record<string, Record<string, any>> = {
     ratingSnapshot: "Synthèse des Évaluations",
     stars: "Étoiles",
     quickActions: "Actions Rapides",
-    addService: "Ajouter un Service",
+    addService: "Publier un Service",
+    addProject: "Ajouter un Projet Portfolio",
     browseClientTasks: "Missions Clients",
     clientTasksTitle: "Missions Disponibles des Clients",
     browseAllTasks: "Consulter Toutes les Missions",
@@ -225,7 +227,7 @@ export default function CompanyDashboard() {
                   toast.warning(t.toastWaitTitle, t.toastWaitDescPost);
                   return;
                 }
-                router.push("/dashboard/company/projects/new");
+                router.push("/dashboard/company/services");
               }}
               className={styles.primaryButton}
               style={{ border: "none", cursor: "pointer" }}
@@ -690,11 +692,11 @@ export default function CompanyDashboard() {
                 <h3>{t.quickActions}</h3>
               </div>
               <div className={styles.actionGrid}>
-                <Link href="/dashboard/company/projects/new" className={styles.actionBtn}>
-                  <iconify-icon icon="lucide:briefcase" /> {t.postService}
-                </Link>
                 <Link href="/dashboard/company/services" className={styles.actionBtn}>
                   <iconify-icon icon="lucide:layers" /> {t.addService}
+                </Link>
+                <Link href="/dashboard/company/projects/new" className={styles.actionBtn}>
+                  <iconify-icon icon="lucide:folder-plus" /> {t.addProject}
                 </Link>
               </div>
             </div>

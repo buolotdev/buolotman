@@ -34,6 +34,7 @@ const translations: Record<string, Record<string, string>> = {
     updated: "Updated",
     messageClient: "Message Client",
     manageProject: "Manage Project",
+    addProjectBtn: "Add Project Showcase",
   },
   fr: {
     pageTitle: "Projets & Contrats",
@@ -55,6 +56,7 @@ const translations: Record<string, Record<string, string>> = {
     updated: "Mis à jour le",
     messageClient: "Contacter le Client",
     manageProject: "Gérer le Projet",
+    addProjectBtn: "Ajouter une Réalisation",
   }
 };
 
@@ -157,13 +159,33 @@ export default function CompanyProjects() {
 
   return (
         <main className={styles.pageContent}>
-        <div className={styles.pageHeader}>
+        <div className={styles.pageHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 }}>
           <div>
             <h1 className={styles.pageTitle}>{t.pageTitle}</h1>
             <p className={styles.pageSubtitle}>
               {t.pageSubtitle}
             </p>
           </div>
+          <Link
+            href="/dashboard/company/projects/new"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "#ff4500",
+              color: "#ffffff",
+              padding: "10px 20px",
+              borderRadius: "12px",
+              fontWeight: 700,
+              fontSize: "14px",
+              textDecoration: "none",
+              boxShadow: "0 4px 14px rgba(255, 69, 0, 0.25)",
+              transition: "transform 0.15s ease",
+            }}
+          >
+            <iconify-icon icon="lucide:plus" style={{ fontSize: "18px" }} />
+            {t.addProjectBtn}
+          </Link>
         </div>
 
           {projectsLoading ? (
