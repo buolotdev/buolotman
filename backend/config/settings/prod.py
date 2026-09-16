@@ -17,8 +17,16 @@ if not DATABASE_URL:
     if platform.system() == 'Linux':
         import shutil
         import os
-        db_path = Path('/tmp/boulotman.sqlite3')
+        db_dir = Path('/var/app/media')
+        try:
+            db_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+        
+        target_dir = db_dir if db_dir.exists() else BASE_DIR
+        db_path = target_dir / 'db.sqlite3'
         orig_db = BASE_DIR / 'db.sqlite3'
+        
         if not db_path.exists() and orig_db.exists():
             try:
                 shutil.copyfile(orig_db, db_path)

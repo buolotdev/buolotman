@@ -269,10 +269,10 @@ export default function Home() {
       const task = Number(data?.tasks_posted_monthly) || 0;
 
       setStats({
-        registered_users: reg >= 50000 ? reg - 50000 : reg,
-        verified_technicians: tech >= 12000 ? tech - 12000 : tech,
-        verified_companies: comp >= 3500 ? comp - 3500 : comp,
-        tasks_posted_monthly: task >= 8000 ? task - 8000 : task,
+        registered_users: reg || 50000,
+        verified_technicians: tech || 12000,
+        verified_companies: comp || 3500,
+        tasks_posted_monthly: task || 8000,
         successful_completion: Number(data?.successful_completion) || 98
       });
     }).catch(() => {});
@@ -317,7 +317,7 @@ export default function Home() {
     () => api.listCompanies({ limit: "3" }),
     []
   );
-  const { data: liveTasksData, error: liveTasksError } = useFetch(
+  const { data: liveTasksData, loading: liveTasksLoading, error: liveTasksError } = useFetch(
     () => api.getTasks({ sort: "newest", limit: "8" }),
     []
   );
@@ -521,75 +521,9 @@ export default function Home() {
     };
   }).slice(0, 15);
 
-  const fallbackPros = [
-    {
-      id: 1,
-      first_name: "HAZSOLS",
-      last_name: "SOLUTION",
-      title: "Verified Technician",
-      average_rating: "5.0",
-      city: "Kano",
-      country: "Nigeria",
-      bio: "Certified and vetted technical professional specialized in reliable on-demand repairs, maintenance, and precision installations.",
-      skills: ["Technical Expert", "Maintenance"],
-    },
-    {
-      id: 2,
-      first_name: "Misbah",
-      last_name: "M",
-      title: "Verified Technician",
-      average_rating: "5.0",
-      city: "Kano",
-      country: "Nigeria",
-      bio: "Certified and vetted technical professional specialized in electrical engineering, diagnostics, and structured cabling.",
-      skills: ["Electrical", "Diagnostics"],
-    },
-    {
-      id: 3,
-      first_name: "Ayesha",
-      last_name: "Ahmad",
-      title: "Verified Technician",
-      average_rating: "5.0",
-      city: "Kano",
-      country: "Nigeria",
-      bio: "Certified and vetted technical professional specialized in HVAC, plumbing networks, and facility maintenance.",
-      skills: ["HVAC", "Facility Care"],
-    },
-  ];
-
-  const fallbackCompanies = [
-    {
-      id: 9,
-      company_name: "ali ramzan",
-      city: "Multiple Locations",
-      country: "",
-      average_rating: "4.9",
-      projects_count: 1,
-      description: "Comprehensive enterprise and maintenance services with certified engineering teams.",
-    },
-    {
-      id: 10,
-      company_name: "ASD",
-      city: "Multiple Locations",
-      country: "",
-      average_rating: "4.9",
-      projects_count: 0,
-      description: "Comprehensive enterprise and maintenance services with certified engineering teams.",
-    },
-    {
-      id: 11,
-      company_name: "XYZ COMPANY",
-      city: "Kano",
-      country: "Nigeria",
-      average_rating: "4.9",
-      projects_count: 2,
-      description: "Comprehensive commercial engineering, facility maintenance, and industrial technical solutions.",
-    },
-  ];
-
-  const rawPros = ((Array.isArray(prosData) && prosData.length > 0) ? prosData : fallbackPros) as PublicProfessional[];
+  const rawPros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
   const pros = filterByLocation(rawPros);
-  const rawCompanies = ((Array.isArray(companiesData) && companiesData.length > 0) ? companiesData : fallbackCompanies) as PublicCompany[];
+  const rawCompanies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
   const companies = filterByLocation(rawCompanies);
   const rawLiveTasks = (Array.isArray((liveTasksData as any)?.results)
     ? (liveTasksData as any).results
@@ -597,13 +531,7 @@ export default function Home() {
       ? liveTasksData
       : []) as any[];
 
-  const fallbackTasks = [
-    { id: 101, title: "Commercial HVAC Maintenance & Duct Inspection", location: "Global / Remote", budget_type: "fixed", client: { first_name: "Operations" } },
-    { id: 102, title: "Solar Inverter & Battery Bank System Setup", location: "On-Site / Multiple", budget_type: "fixed", client: { first_name: "Enterprise" } },
-    { id: 103, title: "Fiber Optic Network Cabling & Patch Panel Wiring", location: "Metropolitan Site", budget_type: "hourly", client: { first_name: "Tech Team" } },
-  ];
-
-  const liveTasks = filterByLocation(rawLiveTasks.length > 0 ? rawLiveTasks : fallbackTasks);
+  const liveTasks = filterByLocation(rawLiveTasks);
 
   const handleNextLiveTask = () => {
     if (liveTasks.length <= 1) return;
@@ -757,8 +685,11 @@ export default function Home() {
                     </div>
                   ))
                 ) : (
-                  <div style={{ padding: "20px", color: "#64748b" }}>
-                    {liveTasksError ? liveTasksError : liveTasksData ? t.liveTasksNoTasks : t.liveTasksLoading}
+                  <div style={{ padding: "30px 16px", color: "#64748b", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "150px" }}>
+                    <iconify-icon icon="lucide:clipboard-list" style={{ fontSize: 32, color: "#94a3b8", marginBottom: 8 }} />
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: "14px", color: "#475569" }}>
+                      {liveTasksLoading ? t.liveTasksLoading : t.liveTasksNoTasks}
+                    </p>
                   </div>
                 )}
               </div>
