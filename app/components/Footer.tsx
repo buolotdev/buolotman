@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import "./footer.css";
+import { useLocation } from "@/app/context/LocationContext";
 
 interface CountryOption {
   country: string;
@@ -435,7 +436,17 @@ const FOOTER_TRANSLATIONS: Record<string, Record<string, string>> = {
 };
 
 export default function Footer() {
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES_LIST[0]);
+  const { location } = useLocation();
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(() => {
+    return {
+      country: "United States",
+      currency: "USD",
+      symbol: "$",
+      city: "New York",
+      callingCode: "+1",
+      flag: "https://flagcdn.com/w80/us.png",
+    };
+  });
   const [countryOpen, setCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
 
@@ -455,12 +466,35 @@ export default function Footer() {
     }
   };
 
+  // Sync reactive location from LocationContext
+  useEffect(() => {
+    if (location && location.country) {
+      const code = (location.countryCode || "us").toLowerCase();
+      const found = COUNTRIES_LIST.find(
+        (c) => c.country.toLowerCase() === location.country.toLowerCase()
+      );
+      if (found) {
+        setSelectedCountry(found);
+      } else {
+        setSelectedCountry({
+          country: location.country,
+          currency: location.currency || "USD",
+          symbol: location.currencySymbol || "$",
+          city: location.city || location.country,
+          callingCode: "+1",
+          flag: `https://flagcdn.com/w80/${code}.png`,
+        });
+      }
+    }
+  }, [location]);
+
   // Restore saved country & language on mount + event listeners
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedCountry = localStorage.getItem("bmSelectedCountry") || localStorage.getItem("country");
+      const hasManual = localStorage.getItem("user_selected_country") === "true";
+      const savedCountry = localStorage.getItem("country") || localStorage.getItem("bmSelectedCountry");
       const savedCountryCode = (localStorage.getItem("country_code") || "us").toLowerCase();
-      if (savedCountry) {
+      if (savedCountry && hasManual) {
         const found = COUNTRIES_LIST.find(
           (c) => c.country.toLowerCase() === savedCountry.toLowerCase()
         );
