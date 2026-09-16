@@ -15,12 +15,68 @@ interface CountryOption {
 
 const COUNTRIES_LIST: CountryOption[] = [
   {
-    country: "Cameroon",
-    currency: "XAF",
-    symbol: "FCFA",
-    city: "Douala",
-    callingCode: "+237",
-    flag: "https://flagcdn.com/w80/cm.png",
+    country: "United States",
+    currency: "USD",
+    symbol: "$",
+    city: "New York",
+    callingCode: "+1",
+    flag: "https://flagcdn.com/w80/us.png",
+  },
+  {
+    country: "United Kingdom",
+    currency: "GBP",
+    symbol: "£",
+    city: "London",
+    callingCode: "+44",
+    flag: "https://flagcdn.com/w80/gb.png",
+  },
+  {
+    country: "Canada",
+    currency: "CAD",
+    symbol: "$",
+    city: "Toronto",
+    callingCode: "+1",
+    flag: "https://flagcdn.com/w80/ca.png",
+  },
+  {
+    country: "France",
+    currency: "EUR",
+    symbol: "€",
+    city: "Paris",
+    callingCode: "+33",
+    flag: "https://flagcdn.com/w80/fr.png",
+  },
+  {
+    country: "Germany",
+    currency: "EUR",
+    symbol: "€",
+    city: "Berlin",
+    callingCode: "+49",
+    flag: "https://flagcdn.com/w80/de.png",
+  },
+  {
+    country: "Pakistan",
+    currency: "PKR",
+    symbol: "Rs",
+    city: "Islamabad",
+    callingCode: "+92",
+    flag: "https://flagcdn.com/w80/pk.png",
+  },
+  {
+    country: "India",
+    currency: "INR",
+    symbol: "₹",
+    city: "New Delhi",
+    callingCode: "+91",
+    flag: "https://flagcdn.com/w80/in.png",
+  },
+  {
+    country: "United Arab Emirates",
+    currency: "AED",
+    symbol: "AED",
+    city: "Dubai",
+    callingCode: "+971",
+    flag: "https://flagcdn.com/w80/ae.png",
   },
   {
     country: "Rwanda",
@@ -39,12 +95,12 @@ const COUNTRIES_LIST: CountryOption[] = [
     flag: "https://flagcdn.com/w80/ng.png",
   },
   {
-    country: "Ivory Coast",
-    currency: "XOF",
-    symbol: "CFA",
-    city: "Abidjan",
-    callingCode: "+225",
-    flag: "https://flagcdn.com/w80/ci.png",
+    country: "Kenya",
+    currency: "KES",
+    symbol: "KSh",
+    city: "Nairobi",
+    callingCode: "+254",
+    flag: "https://flagcdn.com/w80/ke.png",
   },
   {
     country: "Ghana",
@@ -55,20 +111,52 @@ const COUNTRIES_LIST: CountryOption[] = [
     flag: "https://flagcdn.com/w80/gh.png",
   },
   {
-    country: "Kenya",
-    currency: "KES",
-    symbol: "KSh",
-    city: "Nairobi",
-    callingCode: "+254",
-    flag: "https://flagcdn.com/w80/ke.png",
-  },
-  {
     country: "South Africa",
     currency: "ZAR",
     symbol: "R",
     city: "Johannesburg",
     callingCode: "+27",
     flag: "https://flagcdn.com/w80/za.png",
+  },
+  {
+    country: "Ivory Coast",
+    currency: "XOF",
+    symbol: "CFA",
+    city: "Abidjan",
+    callingCode: "+225",
+    flag: "https://flagcdn.com/w80/ci.png",
+  },
+  {
+    country: "Cameroon",
+    currency: "XAF",
+    symbol: "FCFA",
+    city: "Douala",
+    callingCode: "+237",
+    flag: "https://flagcdn.com/w80/cm.png",
+  },
+  {
+    country: "Uganda",
+    currency: "UGX",
+    symbol: "USh",
+    city: "Kampala",
+    callingCode: "+256",
+    flag: "https://flagcdn.com/w80/ug.png",
+  },
+  {
+    country: "Senegal",
+    currency: "XOF",
+    symbol: "CFA",
+    city: "Dakar",
+    callingCode: "+221",
+    flag: "https://flagcdn.com/w80/sn.png",
+  },
+  {
+    country: "Tanzania",
+    currency: "TZS",
+    symbol: "TSh",
+    city: "Dar es Salaam",
+    callingCode: "+255",
+    flag: "https://flagcdn.com/w80/tz.png",
   },
 ];
 
@@ -371,11 +459,23 @@ export default function Footer() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCountry = localStorage.getItem("bmSelectedCountry") || localStorage.getItem("country");
+      const savedCountryCode = (localStorage.getItem("country_code") || "us").toLowerCase();
       if (savedCountry) {
         const found = COUNTRIES_LIST.find(
           (c) => c.country.toLowerCase() === savedCountry.toLowerCase()
         );
-        if (found) setSelectedCountry(found);
+        if (found) {
+          setSelectedCountry(found);
+        } else {
+          setSelectedCountry({
+            country: savedCountry,
+            currency: "USD",
+            symbol: "$",
+            city: savedCountry,
+            callingCode: "+1",
+            flag: `https://flagcdn.com/w80/${savedCountryCode}.png`,
+          });
+        }
       }
 
       syncLanguageState();
@@ -438,12 +538,14 @@ export default function Footer() {
     if (typeof window !== "undefined") {
       localStorage.setItem("bmSelectedCountry", c.country);
       localStorage.setItem("country", c.country);
+      localStorage.setItem("user_selected_country", "true");
       localStorage.setItem("bmSelectedCurrency", c.currency);
       localStorage.setItem("bmSelectedCurrencySymbol", c.symbol);
       localStorage.setItem("bmSelectedCountryFlag", c.flag);
       document.dispatchEvent(
         new CustomEvent("bmCountryChanged", { detail: c })
       );
+      window.location.reload();
     }
   };
 

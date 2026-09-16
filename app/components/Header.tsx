@@ -7,16 +7,19 @@ import CountrySelector from "./CountrySelector";
 
 function Header() {
   const [lang, setLang] = useState("en");
-  const [country, setCountry] = useState("Rwanda");
+  const [country, setCountry] = useState("United States");
+  const [countryCode, setCountryCode] = useState("us");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setLang(localStorage.getItem("lang") || "en");
-      setCountry(localStorage.getItem("country") || "Rwanda");
+      setCountry(localStorage.getItem("country") || "United States");
+      setCountryCode((localStorage.getItem("country_code") || "us").toLowerCase());
 
-      detectAndSetGeoLanguage().then(({ country: c, lang: l, changed }) => {
-        setCountry(c);
-        setLang(l);
+      detectAndSetGeoLanguage().then(({ country: c, countryCode: cc, lang: l }) => {
+        if (c) setCountry(c);
+        if (cc) setCountryCode(cc.toLowerCase());
+        if (l) setLang(l);
       });
     }
     // ===== MEGA MENU (top strip) =====
@@ -285,17 +288,20 @@ function Header() {
     const dropItem = target.closest('.bmDropItem');
     if (dropItem) {
       const text = (dropItem.textContent || "").trim();
+      const code = (dropItem.getAttribute('data-code') || "").toUpperCase();
+      const countryVal = dropItem.getAttribute('data-country') || text;
       const parentWrap = dropItem.closest('.bmDropWrap');
       if (parentWrap) {
         const allWraps = Array.from(document.querySelectorAll('.bmNavRight .bmDropWrap'));
         const index = allWraps.indexOf(parentWrap);
         if (index === 0) {
-          localStorage.setItem("country", text);
+          localStorage.setItem("country", countryVal);
+          if (code) localStorage.setItem("country_code", code);
           localStorage.setItem("user_selected_country", "true");
           window.location.reload();
         } else if (index === 1) {
-          const code = text === "Français" ? "fr" : "en";
-          localStorage.setItem("lang", code);
+          const langCode = text.includes("Français") ? "fr" : "en";
+          localStorage.setItem("lang", langCode);
           localStorage.setItem("user_selected_lang", "true");
           window.location.reload();
         }
@@ -1187,24 +1193,24 @@ function Header() {
       <!-- COUNTRY -->
       <div class="bmDropWrap">
         <div class="bmDropBtn">
-          <img class="bmFlag" src="${
-            country === 'Kenya' ? 'https://flagcdn.com/w20/ke.png' :
-            country === 'Nigeria' ? 'https://flagcdn.com/w20/ng.png' :
-            country === 'Ghana' ? 'https://flagcdn.com/w20/gh.png' :
-            country === 'South Africa' ? 'https://flagcdn.com/w20/za.png' :
-            country === 'Ivory Coast' ? 'https://flagcdn.com/w20/ci.png' :
-            country === 'Cameroon' ? 'https://flagcdn.com/w20/cm.png' :
-            'https://flagcdn.com/w20/rw.png'
-          }"> ${country}
+          <img class="bmFlag" src="https://flagcdn.com/w20/${countryCode || 'us'}.png" onerror="this.src='https://flagcdn.com/w20/us.png'" alt="${country}"> ${country}
         </div>
-        <div class="bmDropMenu">
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/rw.png"> Rwanda</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ke.png"> Kenya</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ng.png"> Nigeria</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/gh.png"> Ghana</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/za.png"> South Africa</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/ci.png"> Ivory Coast</div>
-          <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/cm.png"> Cameroon</div>
+        <div class="bmDropMenu" style="max-height:280px; overflow-y:auto;">
+          <div class="bmDropItem" data-country="United States" data-code="US"><img class="bmFlag" src="https://flagcdn.com/w20/us.png"> United States</div>
+          <div class="bmDropItem" data-country="United Kingdom" data-code="GB"><img class="bmFlag" src="https://flagcdn.com/w20/gb.png"> United Kingdom</div>
+          <div class="bmDropItem" data-country="Canada" data-code="CA"><img class="bmFlag" src="https://flagcdn.com/w20/ca.png"> Canada</div>
+          <div class="bmDropItem" data-country="France" data-code="FR"><img class="bmFlag" src="https://flagcdn.com/w20/fr.png"> France</div>
+          <div class="bmDropItem" data-country="Germany" data-code="DE"><img class="bmFlag" src="https://flagcdn.com/w20/de.png"> Germany</div>
+          <div class="bmDropItem" data-country="Pakistan" data-code="PK"><img class="bmFlag" src="https://flagcdn.com/w20/pk.png"> Pakistan</div>
+          <div class="bmDropItem" data-country="India" data-code="IN"><img class="bmFlag" src="https://flagcdn.com/w20/in.png"> India</div>
+          <div class="bmDropItem" data-country="United Arab Emirates" data-code="AE"><img class="bmFlag" src="https://flagcdn.com/w20/ae.png"> UAE</div>
+          <div class="bmDropItem" data-country="Rwanda" data-code="RW"><img class="bmFlag" src="https://flagcdn.com/w20/rw.png"> Rwanda</div>
+          <div class="bmDropItem" data-country="Kenya" data-code="KE"><img class="bmFlag" src="https://flagcdn.com/w20/ke.png"> Kenya</div>
+          <div class="bmDropItem" data-country="Nigeria" data-code="NG"><img class="bmFlag" src="https://flagcdn.com/w20/ng.png"> Nigeria</div>
+          <div class="bmDropItem" data-country="Ghana" data-code="GH"><img class="bmFlag" src="https://flagcdn.com/w20/gh.png"> Ghana</div>
+          <div class="bmDropItem" data-country="South Africa" data-code="ZA"><img class="bmFlag" src="https://flagcdn.com/w20/za.png"> South Africa</div>
+          <div class="bmDropItem" data-country="Ivory Coast" data-code="CI"><img class="bmFlag" src="https://flagcdn.com/w20/ci.png"> Ivory Coast</div>
+          <div class="bmDropItem" data-country="Cameroon" data-code="CM"><img class="bmFlag" src="https://flagcdn.com/w20/cm.png"> Cameroon</div>
         </div>
       </div>
       <!-- LANGUAGE -->

@@ -71,7 +71,7 @@ export default function CountrySelector({ variant = "footer" }: CountrySelectorP
         }}
       >
         <img
-          src={`https://flagcdn.com/w40/${(location.countryCode || "rw").toLowerCase()}.png`}
+          src={`https://flagcdn.com/w40/${(location.countryCode || "us").toLowerCase()}.png`}
           alt={location.country}
           style={{
             width: "18px",
