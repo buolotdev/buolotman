@@ -263,17 +263,18 @@ export default function Home() {
 
   useEffect(() => {
     api.getPlatformStats().then(data => {
-      const reg = Number(data?.registered_users) || 0;
-      const tech = Number(data?.verified_technicians) || 0;
-      const comp = Number(data?.verified_companies) || 0;
-      const task = Number(data?.tasks_posted_monthly) || 0;
+      const reg = typeof data?.registered_users === "number" ? data.registered_users : (Number(data?.registered_users) || 0);
+      const tech = typeof data?.verified_technicians === "number" ? data.verified_technicians : (Number(data?.verified_technicians) || 0);
+      const comp = typeof data?.verified_companies === "number" ? data.verified_companies : (Number(data?.verified_companies) || 0);
+      const task = typeof data?.tasks_posted_monthly === "number" ? data.tasks_posted_monthly : (Number(data?.tasks_posted_monthly) || 0);
+      const completion = typeof data?.successful_completion === "number" ? data.successful_completion : (Number(data?.successful_completion) || 0);
 
       setStats({
-        registered_users: reg || 50000,
-        verified_technicians: tech || 12000,
-        verified_companies: comp || 3500,
-        tasks_posted_monthly: task || 8000,
-        successful_completion: Number(data?.successful_completion) || 98
+        registered_users: reg,
+        verified_technicians: tech,
+        verified_companies: comp,
+        tasks_posted_monthly: task,
+        successful_completion: completion
       });
     }).catch(() => {});
   }, []);

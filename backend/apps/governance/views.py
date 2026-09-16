@@ -398,11 +398,9 @@ def platform_stats(request):
     total_completed = Task.objects.filter(status__iexact='COMPLETED').count()
     total_finished = Task.objects.filter(status__in=['COMPLETED', 'completed', 'CANCELLED', 'cancelled']).count()
     
-    successful_completion = 98
+    successful_completion = 100
     if total_finished > 0:
         successful_completion = int((total_completed / total_finished) * 100)
-    elif total_completed > 0:
-        successful_completion = 100
     
     return Response({
         'registered_users': registered_users,
