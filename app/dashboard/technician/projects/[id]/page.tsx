@@ -802,37 +802,77 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
       {quoteModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setQuoteModalOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3>{t.sendProjectQuotation}</h3>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "-8px", marginBottom: "16px" }}>
-              {t.sendProjectQuotationSubtitle}
-            </p>
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={() => setQuoteModalOpen(false)}
+              aria-label="Close"
+            >
+              <iconify-icon icon="lucide:x" />
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                fontSize: 24,
+                boxShadow: "0 6px 16px rgba(37, 99, 235, 0.28)",
+                flexShrink: 0
+              }}>
+                <iconify-icon icon="lucide:calculator" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>
+                  {t.sendProjectQuotation}
+                </h3>
+                <p style={{ margin: "3px 0 0", color: "#64748b", fontSize: 13 }}>
+                  {t.sendProjectQuotationSubtitle}
+                </p>
+              </div>
+            </div>
 
             <form onSubmit={handleSendQuote}>
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+              <div style={{ marginBottom: "18px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#001f3f", marginBottom: "6px" }}>
                   {t.quoteAmount}
                 </label>
-                <input
-                  type="number"
-                  min="1000"
-                  placeholder="e.g. 50000"
-                  className={styles.input}
-                  value={quoteAmount}
-                  onChange={(e) => setQuoteAmount(e.target.value)}
-                  required
-                />
+                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                  <input
+                    type="number"
+                    min="1000"
+                    placeholder="e.g. 50000"
+                    className={styles.input}
+                    style={{ paddingRight: 60, fontWeight: 700, fontSize: 15 }}
+                    value={quoteAmount}
+                    onChange={(e) => setQuoteAmount(e.target.value)}
+                    required
+                  />
+                  <span style={{ position: "absolute", right: 14, color: "#64748b", fontWeight: 700, fontSize: 13, pointerEvents: "none" }}>
+                    XOF
+                  </span>
+                </div>
+                <small style={{ display: "block", color: "#64748b", fontSize: 12, marginTop: 5 }}>
+                  {lang === "fr" ? "Montant total proposé pour l'exécution complète du projet." : "Total proposed contract amount for complete project delivery."}
+                </small>
               </div>
 
               {quoteSuccess ? (
-                <div style={{ background: "#dcfce7", color: "#15803d", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
-                  ✔ {lang === "fr" ? "Devis envoyé au client avec succès !" : "Quotation sent to client successfully!"}
+                <div style={{ background: "#dcfce7", color: "#15803d", padding: "14px", borderRadius: "12px", marginBottom: "16px", fontSize: "14px", fontWeight: "700", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 18 }} />
+                  {lang === "fr" ? "Devis envoyé au client avec succès !" : "Quotation sent to client successfully!"}
                 </div>
               ) : (
-                <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                <div style={{ display: "flex", gap: "10px", marginTop: "24px" }}>
                   <button
                     type="button"
                     className={styles.outlineButton}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minHeight: 46, justifyContent: "center" }}
                     onClick={() => setQuoteModalOpen(false)}
                     disabled={submittingQuote}
                   >
@@ -841,9 +881,10 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                   <button
                     type="submit"
                     className={styles.primaryButton}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1.4, minHeight: 46, justifyContent: "center", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", boxShadow: "0 4px 14px rgba(37, 99, 235, 0.28)" }}
                     disabled={submittingQuote || !quoteAmount}
                   >
+                    <iconify-icon icon={submittingQuote ? "lucide:loader" : "lucide:send"} className={submittingQuote ? styles.spinIcon : ""} />
                     {submittingQuote ? t.sendingQuote : t.sendQuote}
                   </button>
                 </div>
@@ -853,67 +894,163 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* MILESTONE MODAL */}
+      {/* MILESTONE DELIVERABLE MODAL */}
       {isModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3>{t.submitProgressDeliverable}</h3>
-            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "-8px", marginBottom: "16px" }}>
-              {t.submitProgressSubtitle}
-            </p>
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={() => setIsModalOpen(false)}
+              aria-label="Close"
+            >
+              <iconify-icon icon="lucide:x" />
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                fontSize: 24,
+                boxShadow: "0 6px 16px rgba(255, 69, 0, 0.28)",
+                flexShrink: 0
+              }}>
+                <iconify-icon icon="lucide:file-check-2" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>
+                  {t.submitProgressDeliverable}
+                </h3>
+                <p style={{ margin: "3px 0 0", color: "#64748b", fontSize: 13 }}>
+                  {t.submitProgressSubtitle}
+                </p>
+              </div>
+            </div>
 
             <form onSubmit={handleMilestoneSubmit}>
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#001f3f", marginBottom: "6px" }}>
+                  <iconify-icon icon="lucide:trending-up" style={{ color: "#ff4500", marginRight: 6 }} />
                   {t.completionProgress}
                 </label>
                 <select 
                   className={styles.input} 
                   value={completionPercentage} 
                   onChange={(e) => setCompletionPercentage(e.target.value)}
+                  style={{ fontWeight: 600 }}
                 >
-                  <option value="25">{lang === "fr" ? "25% - Évaluation initiale & Préparation" : "25% - Initial Assessment & Prep"}</option>
-                  <option value="50">{lang === "fr" ? "50% - Travaux en cours" : "50% - Work In Progress"}</option>
-                  <option value="75">{lang === "fr" ? "75% - Tests & Finitions" : "75% - Testing & Refinements"}</option>
-                  <option value="100">{lang === "fr" ? "100% - Totalement terminé & Prêt pour validation" : "100% - Fully Finished & Ready for Release"}</option>
+                  <option value="25">🟡 {lang === "fr" ? "25% - Évaluation initiale & Préparation" : "25% - Initial Assessment & Prep"}</option>
+                  <option value="50">🔵 {lang === "fr" ? "50% - Travaux en cours" : "50% - Work In Progress"}</option>
+                  <option value="75">🟣 {lang === "fr" ? "75% - Tests & Finitions" : "75% - Testing & Refinements"}</option>
+                  <option value="100">🟢 {lang === "fr" ? "100% - Totalement terminé & Prêt pour validation" : "100% - Fully Finished & Ready for Release"}</option>
                 </select>
               </div>
 
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                  {t.workSummary}
-                </label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "13px", fontWeight: "700", color: "#001f3f", margin: 0 }}>
+                    <iconify-icon icon="lucide:align-left" style={{ color: "#ff4500", marginRight: 6 }} />
+                    {t.workSummary} *
+                  </label>
+                  <small style={{ color: "#64748b", fontSize: 11.5 }}>
+                    {submissionNotes.length} {lang === "fr" ? "caractères" : "chars"}
+                  </small>
+                </div>
                 <textarea
                   className={styles.textarea}
+                  rows={4}
                   placeholder={t.workSummaryPlaceholder}
                   value={submissionNotes}
                   onChange={(e) => setSubmissionNotes(e.target.value)}
+                  style={{ minHeight: 110 }}
                   required
                 />
               </div>
 
               <div style={{ marginBottom: "20px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#001f3f", marginBottom: "6px" }}>
+                  <iconify-icon icon="lucide:image" style={{ color: "#ff4500", marginRight: 6 }} />
                   {t.uploadProof}
                 </label>
-                <input
-                  type="file"
-                  onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
-                  className={styles.input}
-                  accept="image/*,.pdf,.doc,.docx"
-                />
+
+                {!evidenceFile ? (
+                  <label className={styles.uploadDropzone} style={{ display: "block" }}>
+                    <input
+                      type="file"
+                      style={{ display: "none" }}
+                      onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                      accept="image/*,.pdf,.doc,.docx"
+                    />
+                    <iconify-icon icon="lucide:upload-cloud" style={{ fontSize: 32, color: "#ff4500", marginBottom: 6, display: "inline-block" }} />
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "#001f3f" }}>
+                      {lang === "fr" ? "Cliquez pour ajouter des photos ou rapports PDF" : "Click to select work photos or PDF report"}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 3 }}>
+                      PNG, JPG, PDF, DOC up to 25MB
+                    </div>
+                  </label>
+                ) : (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: "#f0fdf4",
+                    border: "1.5px solid #86efac",
+                    borderRadius: 12,
+                    padding: "10px 14px"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <iconify-icon icon="lucide:file-check" style={{ fontSize: 22, color: "#16a34a", flexShrink: 0 }} />
+                      <div style={{ minWidth: 0 }}>
+                        <strong style={{ display: "block", fontSize: 13, color: "#166534", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {evidenceFile.name}
+                        </strong>
+                        <small style={{ color: "#15803d", fontSize: 11.5 }}>
+                          {(evidenceFile.size / 1024 / 1024).toFixed(2)} MB • {lang === "fr" ? "Prêt à soumettre" : "Ready to submit"}
+                        </small>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEvidenceFile(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#dc2626",
+                        cursor: "pointer",
+                        padding: "4px 8px",
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <iconify-icon icon="lucide:trash-2" />
+                      {lang === "fr" ? "Supprimer" : "Remove"}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {showSuccess && (
-                <div style={{ padding: "10px", background: "#dcfce7", color: "#166534", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", textAlign: "center" }}>
-                  ✔ {lang === "fr" ? "Avancement du jalon soumis pour approbation !" : "Milestone update submitted to Client for approval!"}
+                <div style={{ padding: "12px 14px", background: "#dcfce7", color: "#166534", borderRadius: "12px", marginBottom: "18px", fontSize: "14px", fontWeight: "700", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 18 }} />
+                  {lang === "fr" ? "Avancement du jalon soumis pour approbation !" : "Milestone update submitted to Client for approval!"}
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: 22 }}>
                 <button
                   type="button"
                   className={styles.outlineButton}
+                  style={{ minHeight: 46, padding: "0 20px" }}
                   onClick={() => setIsModalOpen(false)}
                   disabled={submittingDeliverable}
                 >
@@ -922,8 +1059,10 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                 <button
                   type="submit"
                   className={styles.primaryButton}
+                  style={{ minHeight: 46, padding: "0 24px", background: "linear-gradient(135deg, #ff4500, #ff7a1f)", boxShadow: "0 4px 14px rgba(255, 69, 0, 0.28)" }}
                   disabled={submittingDeliverable}
                 >
+                  <iconify-icon icon={submittingDeliverable ? "lucide:loader" : "lucide:send"} className={submittingDeliverable ? styles.spinIcon : ""} />
                   {submittingDeliverable ? t.submitting : t.submitForClientReview}
                 </button>
               </div>
