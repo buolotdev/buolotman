@@ -6,7 +6,22 @@ import { useFetch } from "@/app/lib/useFetch";
 import styles from "./admin-payments.module.css";
 
 export default function AdminPaymentsPage() {
-  const { data: txData, loading: txLoading, refetch: refetchTx } = useFetch(() => api.getAdminTransactions(), []);
+  const { data: txData, loading: txLoading, refetch: refetchTx } = useFetch(async () => {
+    try {
+      const res = await api.getAdminTransactions();
+      if (res && (Array.isArray(res) ? res.length > 0 : (res.results && res.results.length > 0))) {
+        return res;
+      }
+      // If admin endpoint returned empty, attempt general ledger
+      const general = await api.getTransactions();
+      if (general && (Array.isArray(general) ? general.length > 0 : (general.results && general.results.length > 0))) {
+        return general;
+      }
+      return res || general || [];
+    } catch {
+      return api.getTransactions().catch(() => []);
+    }
+  }, []);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
