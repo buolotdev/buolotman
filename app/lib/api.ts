@@ -350,7 +350,7 @@ export const api = {
   getWallet: () => request<any>("/wallet/"),
   withdraw: (data: Record<string, any>) =>
     request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
-  withdrawFunds: (data: { amount: number | string; account_details?: Record<string, any> }) =>
+  withdrawFunds: (data: { amount: number | string; method?: string; account_details?: Record<string, any> }) =>
     request<any>("/wallet/withdraw/", { method: "POST", body: JSON.stringify(data) }),
   depositFunds: (data: { amount: number | string; payment_method?: string }) =>
     request<any>("/wallet/add-funds/", { method: "POST", body: JSON.stringify(data) }),

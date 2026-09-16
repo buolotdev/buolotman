@@ -11,7 +11,8 @@ class WalletAdmin(admin.ModelAdmin):
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('wallet', 'amount', 'type', 'category', 'status', 'created_at')
-    list_filter = ('type', 'category', 'status')
-    search_fields = ('wallet__user__email', 'description')
+    list_display = ('id', 'wallet', 'amount', 'type', 'category', 'status', 'created_at')
+    list_filter = ('type', 'category', 'status', 'created_at')
+    search_fields = ('wallet__user__email', 'wallet__user__first_name', 'wallet__user__last_name', 'description')
     raw_id_fields = ('wallet', 'reference')
+    readonly_fields = ('created_at',)

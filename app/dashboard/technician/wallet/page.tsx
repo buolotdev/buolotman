@@ -134,6 +134,10 @@ export default function TechnicianWalletPage() {
   const [depositSuccess, setDepositSuccess] = useState(false);
 
   const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankSwift, setBankSwift] = useState("");
   const [depositPhone, setDepositPhone] = useState("");
 
   const handleWithdraw = async () => {
@@ -175,9 +179,25 @@ export default function TechnicianWalletPage() {
           description: `Technician Wallet Withdrawal (${amount} XAF)`
         });
       } else {
+        if (!bankName.trim() || !bankAccountNumber.trim()) {
+          setWithdrawError(
+            lang === "fr"
+              ? "Veuillez renseigner le nom de la banque et le numéro de compte / IBAN."
+              : "Please specify bank name and account / IBAN number."
+          );
+          setWithdrawing(false);
+          return;
+        }
         await api.withdrawFunds({
           amount,
-          account_details: { method: withdrawMethod }
+          method: "bank_transfer",
+          account_details: {
+            method: withdrawMethod,
+            bank_name: bankName.trim(),
+            account_holder: bankAccountName.trim() || undefined,
+            account_number_or_iban: bankAccountNumber.trim(),
+            swift_bic: bankSwift.trim() || undefined,
+          }
         });
       }
       setWithdrawSuccess(true);
@@ -188,6 +208,10 @@ export default function TechnicianWalletPage() {
         setWithdrawSuccess(false);
         setWithdrawAmount("");
         setWithdrawPhone("");
+        setBankName("");
+        setBankAccountName("");
+        setBankAccountNumber("");
+        setBankSwift("");
       }, 2000);
     } catch (err: any) {
       setWithdrawError(err.message || "Failed to process withdrawal.");
@@ -452,7 +476,7 @@ export default function TechnicianWalletPage() {
               </select>
             </div>
 
-            {withdrawMethod.includes("Mobile Money") && (
+            {withdrawMethod.includes("Mobile Money") ? (
               <div className={styles.formGroup}>
                 <label>Numéro Mobile Money (Cameroun +237)</label>
                 <input 
@@ -463,6 +487,49 @@ export default function TechnicianWalletPage() {
                   onChange={(e) => setWithdrawPhone(e.target.value)}
                 />
               </div>
+            ) : (
+              <>
+                <div className={styles.formGroup}>
+                  <label>{lang === 'fr' ? 'Nom de la Banque' : 'Bank Name'} *</label>
+                  <input 
+                    type="text" 
+                    className={styles.formInput} 
+                    placeholder={lang === 'fr' ? 'ex: UBA, Afriland, Ecobank, SG...' : 'e.g. UBA, Ecobank, Bank of Africa'} 
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>{lang === 'fr' ? 'Nom du Titulaire du Compte' : 'Account Holder Name'}</label>
+                  <input 
+                    type="text" 
+                    className={styles.formInput} 
+                    placeholder={lang === 'fr' ? 'Nom et prénom sur le compte' : 'Full name on account'} 
+                    value={bankAccountName}
+                    onChange={(e) => setBankAccountName(e.target.value)}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>{lang === 'fr' ? 'Numéro de Compte / IBAN / RIB' : 'Account Number / IBAN'} *</label>
+                  <input 
+                    type="text" 
+                    className={styles.formInput} 
+                    placeholder="CM21 1000 5000 1234 5678 9012 34" 
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>{lang === 'fr' ? 'Code SWIFT / BIC (Optionnel)' : 'SWIFT / BIC Code (Optional)'}</label>
+                  <input 
+                    type="text" 
+                    className={styles.formInput} 
+                    placeholder="ex: AFRIKCMM" 
+                    value={bankSwift}
+                    onChange={(e) => setBankSwift(e.target.value)}
+                  />
+                </div>
+              </>
             )}
 
             {withdrawError && (

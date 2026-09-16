@@ -51,7 +51,12 @@ export default function CompanyWalletPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("Mobile Money");
   const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankSwift, setBankSwift] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
@@ -72,28 +77,53 @@ export default function CompanyWalletPage() {
       setWithdrawError(lang === "fr" ? "Solde disponible insuffisant." : "Insufficient available balance.");
       return;
     }
-    if (!withdrawPhone.trim()) {
-      setWithdrawError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
-      return;
-    }
-    if (amount < 500) {
-      setWithdrawError(
-        lang === "fr"
-          ? "Le montant minimum pour le retrait instantané Mobile Money est de 500 XAF/XOF."
-          : "Minimum amount for instant Mobile Money payout is 500 XAF/XOF."
-      );
-      return;
-    }
 
     setWithdrawing(true);
     try {
-      const cleanPhone = withdrawPhone.replace(/[^0-9]/g, "");
-      const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
-      await api.campayWithdraw({
-        amount,
-        phone_number: formattedPhone,
-        description: `Company Wallet Withdrawal (${amount} XAF)`
-      });
+      if (withdrawMethod === "Mobile Money") {
+        if (!withdrawPhone.trim()) {
+          setWithdrawError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
+          setWithdrawing(false);
+          return;
+        }
+        if (amount < 500) {
+          setWithdrawError(
+            lang === "fr"
+              ? "Le montant minimum pour le retrait instantané Mobile Money est de 500 XAF/XOF. Pour retirer moins, choisissez le virement bancaire."
+              : "Minimum amount for instant Mobile Money payout is 500 XAF/XOF. For smaller amounts, please select Direct Bank Transfer."
+          );
+          setWithdrawing(false);
+          return;
+        }
+        const cleanPhone = withdrawPhone.replace(/[^0-9]/g, "");
+        const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
+        await api.campayWithdraw({
+          amount,
+          phone_number: formattedPhone,
+          description: `Company Wallet Withdrawal (${amount} XAF)`
+        });
+      } else {
+        if (!bankName.trim() || !bankAccountNumber.trim()) {
+          setWithdrawError(
+            lang === "fr"
+              ? "Veuillez renseigner le nom de la banque et le numéro de compte / IBAN."
+              : "Please specify bank name and account / IBAN number."
+          );
+          setWithdrawing(false);
+          return;
+        }
+        await api.withdrawFunds({
+          amount,
+          method: "bank_transfer",
+          account_details: {
+            method: "Direct Bank Wire Transfer",
+            bank_name: bankName.trim(),
+            account_holder: bankAccountName.trim() || undefined,
+            account_number_or_iban: bankAccountNumber.trim(),
+            swift_bic: bankSwift.trim() || undefined,
+          }
+        });
+      }
       setWithdrawSuccess(true);
       await refetchWallet();
       await refetchTx();
@@ -102,6 +132,10 @@ export default function CompanyWalletPage() {
         setWithdrawSuccess(false);
         setWithdrawAmount("");
         setWithdrawPhone("");
+        setBankName("");
+        setBankAccountName("");
+        setBankAccountNumber("");
+        setBankSwift("");
       }, 2000);
     } catch (err: any) {
       setWithdrawError(err.message || "Failed to process withdrawal.");
@@ -220,29 +254,108 @@ export default function CompanyWalletPage() {
                     fontSize: 14
                   }}
                 />
+                {withdrawMethod === "Mobile Money" && (
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                    ℹ️ Min. 500 XAF pour Mobile Money instantané
+                  </span>
+                )}
               </div>
 
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
-                  Mobile Money Phone Number (+237)
+                  Withdrawal Method
                 </label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <span style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: 8, fontWeight: 600, border: "1px solid #cbd5e1" }}>+237</span>
-                  <input
-                    type="tel"
-                    placeholder="67X XX XX XX or 69X XX XX XX"
-                    value={withdrawPhone}
-                    onChange={(e) => setWithdrawPhone(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: "10px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #cbd5e1",
-                      fontSize: 14
-                    }}
-                  />
-                </div>
+                <select
+                  value={withdrawMethod}
+                  onChange={(e) => setWithdrawMethod(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: "1px solid #cbd5e1",
+                    fontSize: 14,
+                    background: "#ffffff"
+                  }}
+                >
+                  <option value="Mobile Money">Mobile Money (Orange / MTN - Cameroun)</option>
+                  <option value="Direct Bank Wire">Virement Bancaire Direct</option>
+                </select>
               </div>
+
+              {withdrawMethod === "Mobile Money" ? (
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                    Mobile Money Phone Number (+237)
+                  </label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <span style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: 8, fontWeight: 600, border: "1px solid #cbd5e1" }}>+237</span>
+                    <input
+                      type="tel"
+                      placeholder="67X XX XX XX or 69X XX XX XX"
+                      value={withdrawPhone}
+                      onChange={(e) => setWithdrawPhone(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: "10px 14px",
+                        borderRadius: 8,
+                        border: "1px solid #cbd5e1",
+                        fontSize: 14
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 4 }}>
+                      Nom de la Banque *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="ex: UBA, Afriland, Ecobank..."
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 14 }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 4 }}>
+                      Titulaire du Compte
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nom et prénom ou raison sociale"
+                      value={bankAccountName}
+                      onChange={(e) => setBankAccountName(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 14 }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 4 }}>
+                      Numéro de Compte / IBAN / RIB *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="CM21 1000 5000 1234 5678 9012 34"
+                      value={bankAccountNumber}
+                      onChange={(e) => setBankAccountNumber(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 14 }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 4 }}>
+                      Code SWIFT / BIC (Optionnel)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="ex: AFRIKCMM"
+                      value={bankSwift}
+                      onChange={(e) => setBankSwift(e.target.value)}
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 14 }}
+                    />
+                  </div>
+                </>
+              )}
 
               {withdrawError && (
                 <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>{withdrawError}</p>
