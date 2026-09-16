@@ -779,8 +779,14 @@ def campay_withdraw_view(request):
     )
 
     if not withdraw_res.get("success"):
+        err_data = withdraw_res.get("error")
+        error_msg = "CamPay payout initiation failed."
+        if isinstance(err_data, dict):
+            error_msg = err_data.get("message") or err_data.get("detail") or err_data.get("error") or "CamPay payout failed. Note: Mobile Money requires min. 500 XAF/XOF and active merchant balance."
+        elif isinstance(err_data, str) and err_data:
+            error_msg = err_data
         return Response(
-            {"error": "CamPay payout initiation failed.", "details": withdraw_res.get("error")},
+            {"error": error_msg, "details": withdraw_res.get("error")},
             status=status.HTTP_400_BAD_REQUEST
         )
 

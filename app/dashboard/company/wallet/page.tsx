@@ -76,6 +76,14 @@ export default function CompanyWalletPage() {
       setWithdrawError(lang === "fr" ? "Veuillez entrer votre numéro Mobile Money." : "Please enter your Mobile Money phone number.");
       return;
     }
+    if (amount < 500) {
+      setWithdrawError(
+        lang === "fr"
+          ? "Le montant minimum pour le retrait instantané Mobile Money est de 500 XAF/XOF."
+          : "Minimum amount for instant Mobile Money payout is 500 XAF/XOF."
+      );
+      return;
+    }
 
     setWithdrawing(true);
     try {

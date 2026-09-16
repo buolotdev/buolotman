@@ -158,6 +158,15 @@ export default function TechnicianWalletPage() {
           setWithdrawing(false);
           return;
         }
+        if (amount < 500) {
+          setWithdrawError(
+            lang === "fr" 
+              ? "Le montant minimum pour le retrait instantané Mobile Money est de 500 XAF/XOF. Pour retirer moins, choisissez le virement bancaire."
+              : "Minimum amount for instant Mobile Money payout is 500 XAF/XOF. For smaller amounts, please select Direct Bank Transfer."
+          );
+          setWithdrawing(false);
+          return;
+        }
         const cleanPhone = withdrawPhone.replace(/[^0-9]/g, "");
         const formattedPhone = cleanPhone.startsWith("237") ? cleanPhone : `237${cleanPhone}`;
         await api.campayWithdraw({
@@ -423,6 +432,11 @@ export default function TechnicianWalletPage() {
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
               />
+              {withdrawMethod.includes("Mobile Money") && (
+                <span style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '6px', display: 'block' }}>
+                  ℹ️ {lang === 'fr' ? 'Montant minimum pour Mobile Money instantané : 500 XOF' : 'Minimum amount for instant Mobile Money : 500 XOF'}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
