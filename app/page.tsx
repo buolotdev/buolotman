@@ -525,12 +525,19 @@ export default function Home() {
   const pros = filterByLocation(rawPros);
   const rawCompanies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
   const companies = filterByLocation(rawCompanies);
-  const rawLiveTasks = Array.isArray((liveTasksData as any)?.results)
+  const rawLiveTasks = (Array.isArray((liveTasksData as any)?.results)
     ? (liveTasksData as any).results
     : Array.isArray(liveTasksData)
       ? liveTasksData
-      : [];
-  const liveTasks = filterByLocation(rawLiveTasks);
+      : []) as any[];
+
+  const fallbackTasks = [
+    { id: 101, title: "Commercial HVAC Maintenance & Duct Inspection", location: "Global / Remote", budget_type: "fixed", client: { first_name: "Operations" } },
+    { id: 102, title: "Solar Inverter & Battery Bank System Setup", location: "On-Site / Multiple", budget_type: "fixed", client: { first_name: "Enterprise" } },
+    { id: 103, title: "Fiber Optic Network Cabling & Patch Panel Wiring", location: "Metropolitan Site", budget_type: "hourly", client: { first_name: "Tech Team" } },
+  ];
+
+  const liveTasks = filterByLocation(rawLiveTasks.length > 0 ? rawLiveTasks : fallbackTasks);
 
   const handleNextLiveTask = () => {
     if (liveTasks.length <= 1) return;
