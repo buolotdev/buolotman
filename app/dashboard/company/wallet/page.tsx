@@ -226,7 +226,9 @@ export default function CompanyWalletPage() {
               background: "#ffffff",
               borderRadius: 16,
               padding: 24,
-              maxWidth: 420,
+              maxWidth: 460,
+              maxHeight: "88vh",
+              overflowY: "auto",
               width: "100%",
               boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)"
             }} onClick={(e) => e.stopPropagation()}>
