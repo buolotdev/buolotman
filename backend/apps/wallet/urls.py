@@ -9,6 +9,7 @@ urlpatterns = [
     path('upgrade-plan/', views.upgrade_subscription_plan, name='upgrade_subscription_plan'),
     path('transactions/', views.transaction_list, name='transaction_list'),
     path('admin/transactions/', views.admin_transaction_list, name='admin_transaction_list'),
+    path('admin/transactions/<int:tx_id>/status/', views.admin_update_transaction_status, name='admin_update_transaction_status'),
     path('release-escrow/<int:task_id>/', views.release_escrow, name='release_escrow'),
 
     # CamPay Mobile Money Integration (Cameroon - MTN & Orange)

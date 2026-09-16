@@ -114,7 +114,8 @@ def transaction_list(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_transaction_list(request):
-    if getattr(request.user, 'role', None) != 'ADMIN':
+    user_role = str(getattr(request.user, 'role', '')).upper()
+    if user_role != 'ADMIN' and not request.user.is_staff and not request.user.is_superuser:
         return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
 
     transactions = Transaction.objects.select_related('wallet__user').all().order_by('-created_at')
@@ -123,24 +124,36 @@ def admin_transaction_list(request):
     if type_filter:
         transactions = transactions.filter(type=type_filter)
 
+    category_filter = request.query_params.get('category')
+    if category_filter:
+        transactions = transactions.filter(category=category_filter)
+
     page = int(request.query_params.get('page', 1))
-    limit = int(request.query_params.get('limit', 50))
+    limit = int(request.query_params.get('limit', 100))
     start = (page - 1) * limit
     end = start + limit
     total = transactions.count()
-    total_in_escrow = sum(w.available_balance for w in Wallet.objects.all()) or 0
-    pending_payouts = Transaction.objects.filter(type='withdrawal', status='pending').count()
+    
+    from django.db.models import Sum, Q
+    total_in_escrow = Wallet.objects.aggregate(Sum('pending_escrow'))['pending_escrow__sum'] or 0
+    pending_payouts = Transaction.objects.filter(
+        Q(category='withdrawal') | Q(type='debit', description__icontains='withdraw'),
+        status='pending'
+    ).count()
 
     data = []
     for tx in transactions[start:end]:
+        user_obj = getattr(tx.wallet, 'user', None) if tx.wallet else None
         data.append({
             'id': tx.id,
             'type': tx.type,
+            'category': tx.category or 'withdrawal',
             'amount': str(tx.amount),
             'status': tx.status,
             'description': tx.description or '',
-            'user_name': tx.wallet.user.get_full_name() or tx.wallet.user.email,
-            'user_email': tx.wallet.user.email,
+            'metadata': tx.metadata or {},
+            'user_name': (user_obj.get_full_name() or user_obj.username or user_obj.email) if user_obj else 'System User',
+            'user_email': user_obj.email if user_obj else '',
             'created_at': tx.created_at,
         })
 
@@ -151,6 +164,32 @@ def admin_transaction_list(request):
         'limit': limit,
         'total_in_escrow': str(total_in_escrow),
         'pending_payouts': pending_payouts,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_update_transaction_status(request, tx_id):
+    user_role = str(getattr(request.user, 'role', '')).upper()
+    if user_role != 'ADMIN' and not request.user.is_staff and not request.user.is_superuser:
+        return Response({"error": "Admin only"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        tx = Transaction.objects.select_related('wallet__user').get(id=tx_id)
+    except Transaction.DoesNotExist:
+        return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    new_status = request.data.get('status', 'completed').lower()
+    if new_status not in ('completed', 'failed', 'cancelled', 'pending'):
+        return Response({"error": "Invalid status specified."}, status=status.HTTP_400_BAD_REQUEST)
+
+    tx.status = new_status
+    tx.save(update_fields=['status'])
+
+    return Response({
+        "success": True,
+        "message": f"Transaction #{tx.id} status updated to {new_status}.",
+        "status": tx.status
     })
 
 

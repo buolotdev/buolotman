@@ -368,6 +368,8 @@ export const api = {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
     return request<any>(`/wallet/admin/transactions/${qs}`);
   },
+  adminUpdateTransactionStatus: (txId: number, status: string) =>
+    request<any>(`/wallet/admin/transactions/${txId}/status/`, { method: "POST", body: JSON.stringify({ status }) }),
   campayCollect: (data: {
     amount: number | string;
     phone_number: string;
