@@ -521,9 +521,75 @@ export default function Home() {
     };
   }).slice(0, 15);
 
-  const rawPros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
+  const fallbackPros = [
+    {
+      id: 1,
+      first_name: "HAZSOLS",
+      last_name: "SOLUTION",
+      title: "Verified Technician",
+      average_rating: "5.0",
+      city: "Kano",
+      country: "Nigeria",
+      bio: "Certified and vetted technical professional specialized in reliable on-demand repairs, maintenance, and precision installations.",
+      skills: ["Technical Expert", "Maintenance"],
+    },
+    {
+      id: 2,
+      first_name: "Misbah",
+      last_name: "M",
+      title: "Verified Technician",
+      average_rating: "5.0",
+      city: "Kano",
+      country: "Nigeria",
+      bio: "Certified and vetted technical professional specialized in electrical engineering, diagnostics, and structured cabling.",
+      skills: ["Electrical", "Diagnostics"],
+    },
+    {
+      id: 3,
+      first_name: "Ayesha",
+      last_name: "Ahmad",
+      title: "Verified Technician",
+      average_rating: "5.0",
+      city: "Kano",
+      country: "Nigeria",
+      bio: "Certified and vetted technical professional specialized in HVAC, plumbing networks, and facility maintenance.",
+      skills: ["HVAC", "Facility Care"],
+    },
+  ];
+
+  const fallbackCompanies = [
+    {
+      id: 9,
+      company_name: "ali ramzan",
+      city: "Multiple Locations",
+      country: "",
+      average_rating: "4.9",
+      projects_count: 1,
+      description: "Comprehensive enterprise and maintenance services with certified engineering teams.",
+    },
+    {
+      id: 10,
+      company_name: "ASD",
+      city: "Multiple Locations",
+      country: "",
+      average_rating: "4.9",
+      projects_count: 0,
+      description: "Comprehensive enterprise and maintenance services with certified engineering teams.",
+    },
+    {
+      id: 11,
+      company_name: "XYZ COMPANY",
+      city: "Kano",
+      country: "Nigeria",
+      average_rating: "4.9",
+      projects_count: 2,
+      description: "Comprehensive commercial engineering, facility maintenance, and industrial technical solutions.",
+    },
+  ];
+
+  const rawPros = ((Array.isArray(prosData) && prosData.length > 0) ? prosData : fallbackPros) as PublicProfessional[];
   const pros = filterByLocation(rawPros);
-  const rawCompanies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
+  const rawCompanies = ((Array.isArray(companiesData) && companiesData.length > 0) ? companiesData : fallbackCompanies) as PublicCompany[];
   const companies = filterByLocation(rawCompanies);
   const rawLiveTasks = (Array.isArray((liveTasksData as any)?.results)
     ? (liveTasksData as any).results
@@ -749,8 +815,8 @@ export default function Home() {
                 <iconify-icon icon="lucide:loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite", color: "#001f3f" }} />
                 <p style={{ marginTop: 10, fontWeight: 600 }}>{t.prosLoading}</p>
               </div>
-            ) : prosData && prosData.length > 0 ? (
-              prosData.slice(0, 3).map((pro: any) => {
+            ) : pros && pros.length > 0 ? (
+              pros.slice(0, 3).map((pro: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
                 const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
                 const rawAvatar = pro.avatar || pro.avatar_url || pro.profile_photo_url || pro.user?.avatar_url || pro.user?.profile_photo_url;
@@ -877,8 +943,8 @@ export default function Home() {
           <div className="bm-enterprise-grid">
             {companiesLoading ? (
               <div style={{ padding: "20px", color: "#94a3b8" }}>{t.companiesLoading}</div>
-            ) : companiesData && companiesData.length > 0 ? (
-              companiesData.slice(0, 3).map((company: any) => {
+            ) : companies && companies.length > 0 ? (
+              companies.slice(0, 3).map((company: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(company.id) || (company.user_id && String(meData.id) === String(company.user_id)) || meData.username === company.username));
                 const compName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || company.name || "Enterprise Company";
                 const rawLogo = company.logo_url || company.logo || company.avatar_url || company.avatar || company.user?.avatar_url || company.user?.logo_url || company.user?.profile_photo_url;
