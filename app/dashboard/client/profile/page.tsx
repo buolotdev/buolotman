@@ -91,7 +91,9 @@ export default function ClientProfilePage() {
 
   useEffect(() => {
     const updateLang = () => {
-      setLang(localStorage.getItem("lang") || "en");
+      const current = localStorage.getItem("lang") || "en";
+      setLang(current);
+      setPreferredLanguage(current);
     };
     updateLang();
     window.addEventListener("languageChange", updateLang);
@@ -199,10 +201,17 @@ export default function ClientProfilePage() {
   // Load Initial Data & Sync Local Storage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Saved Addresses
+      // Saved Addresses - Purge legacy dummy defaults
       const rawAddrs = localStorage.getItem("boulotman_saved_addresses");
       if (rawAddrs) {
-        try { setSavedAddresses(JSON.parse(rawAddrs)); } catch {}
+        try {
+          const parsed = JSON.parse(rawAddrs);
+          const cleanAddrs = Array.isArray(parsed)
+            ? parsed.filter((a: any) => a && a.id !== "addr-1" && a.id !== "addr-2" && !a.address?.includes("Rue 340") && !a.address?.includes("Boulevard de la Marina"))
+            : [];
+          setSavedAddresses(cleanAddrs);
+          localStorage.setItem("boulotman_saved_addresses", JSON.stringify(cleanAddrs));
+        } catch {}
       } else {
         setSavedAddresses([]);
       }
@@ -494,16 +503,19 @@ export default function ClientProfilePage() {
       localStorage.setItem("boulotman_privacy_format", privacyDisplayFormat);
       localStorage.setItem("boulotman_preferred_currency", preferredCurrency);
       localStorage.setItem("boulotman_preferred_language", preferredLanguage);
+      localStorage.setItem("lang", preferredLanguage);
       localStorage.setItem("boulotman_allow_direct_offers", String(allowDirectOffers));
       localStorage.setItem("boulotman_sms_notifications", String(smsNotifications));
+      window.dispatchEvent(new Event("languageChange"));
+      window.dispatchEvent(new Event("currencyChange"));
 
       await api.updateMe({
         language_preference: preferredLanguage,
       });
       await refetchUser();
-      toast.show("success", "Privacy controls & preferences saved successfully ✓");
+      toast.show("success", lang === "fr" ? "Préférences enregistrées avec succès ✓" : "Privacy controls & preferences saved successfully ✓");
     } catch {
-      toast.show("success", "Preferences saved successfully ✓");
+      toast.show("success", lang === "fr" ? "Préférences enregistrées avec succès ✓" : "Preferences saved successfully ✓");
     } finally {
       setSaving(false);
     }
@@ -1440,62 +1452,75 @@ export default function ClientProfilePage() {
 
               {/* Addresses Grid */}
               <div className={styles.addressGrid}>
-                {savedAddresses.map((addr) => (
-                  <div
-                    key={addr.id}
-                    className={`${styles.addressCard} ${addr.isDefault ? styles.addressCardDefault : ""}`}
-                  >
-                    <div>
-                      <div className={styles.addressCardHeader}>
-                        <span className={styles.addressLabelBadge}>
-                          <iconify-icon icon={getCategoryIcon(addr.category)} />
-                          {addr.label}
-                        </span>
-                        {addr.isDefault && (
-                          <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#ff4500", background: "rgba(255,69,0,0.1)", padding: "3px 8px", borderRadius: "6px" }}>
-                            Default
+                {savedAddresses.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "48px 24px", background: "#f8fafc", borderRadius: "16px", border: "1px dashed #cbd5e1", gridColumn: "1 / -1" }}>
+                    <iconify-icon icon="lucide:map-pin" style={{ fontSize: 40, color: "#94a3b8", marginBottom: 12 }} />
+                    <h4 style={{ margin: "0 0 6px", color: "#001f3f", fontSize: "16px", fontWeight: 700 }}>
+                      {lang === "fr" ? "Aucune adresse enregistrée" : "No Saved Locations Yet"}
+                    </h4>
+                    <p style={{ margin: "0 0 16px", color: "#64748b", fontSize: "13.5px" }}>
+                      {lang === "fr" ? "Ajoutez vos adresses de domicile ou de chantier pour faciliter l'intervention des artisans." : "Add your home, office, or job site addresses to easily dispatch tasks."}
+                    </p>
+                    <button type="button" onClick={handleOpenAddAddress} className={styles.primaryBtn} style={{ padding: "8px 18px", fontSize: "13px" }}>
+                      <iconify-icon icon="lucide:plus" /> {lang === "fr" ? "Ajouter une première adresse" : "Add First Location"}
+                    </button>
+                  </div>
+                ) : (
+                  savedAddresses.map((addr) => (
+                    <div
+                      key={addr.id}
+                      className={`${styles.addressCard} ${addr.isDefault ? styles.addressCardDefault : ""}`}
+                    >
+                      <div>
+                        <div className={styles.addressCardHeader}>
+                          <span className={styles.addressLabelBadge}>
+                            <iconify-icon icon={getCategoryIcon(addr.category)} />
+                            {addr.label}
                           </span>
-                        )}
-                      </div>
+                          {addr.isDefault && (
+                            <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#ff4500", background: "rgba(255,69,0,0.1)", padding: "3px 8px", borderRadius: "6px" }}>
+                              Default
+                            </span>
+                          )}
+                        </div>
 
-                      <div style={{ marginTop: 14 }}>
-                        <h4 style={{ margin: "0 0 4px", fontSize: "15px", color: "#001f3f", fontWeight: 800 }}>
-                          {addr.neighborhood ? `${addr.neighborhood}, ` : ""}{addr.city}
-                        </h4>
-                        <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#475569", lineHeight: 1.45 }}>
-                          {addr.address}
-                        </p>
-                        {addr.accessNotes && (
-                          <p style={{ margin: 0, fontSize: "11.5px", color: "#64748b", background: "#f8fafc", padding: "6px 10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                            💡 <em>{addr.accessNotes}</em>
+                        <div style={{ marginTop: 14 }}>
+                          <h4 style={{ margin: "0 0 4px", fontSize: "15px", color: "#001f3f", fontWeight: 800 }}>
+                            {addr.neighborhood ? `${addr.neighborhood}, ` : ""}{addr.city}
+                          </h4>
+                          <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#475569", lineHeight: 1.45 }}>
+                            {addr.address}
                           </p>
-                        )}
+                          {addr.accessNotes && (
+                            <p style={{ margin: 0, fontSize: "11.5px", color: "#64748b", background: "#f8fafc", padding: "6px 10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                              💡 <em>{addr.accessNotes}</em>
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #f1f5f9", paddingTop: 12, marginTop: 12 }}>
-                      {!addr.isDefault ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSetDefaultAddress(addr.id)}
-                          style={{ border: "none", background: "transparent", color: "#0284c7", fontSize: "12px", fontWeight: 700, cursor: "pointer", padding: 0 }}
-                        >
-                          Set as default
-                        </button>
-                      ) : (
-                        <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700 }}>Primary Location</span>
-                      )}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #f1f5f9", paddingTop: 12, marginTop: 12 }}>
+                        {!addr.isDefault ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSetDefaultAddress(addr.id)}
+                            style={{ border: "none", background: "transparent", color: "#0284c7", fontSize: "12px", fontWeight: 700, cursor: "pointer", padding: 0 }}
+                          >
+                            Set as default
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700 }}>Primary Location</span>
+                        )}
 
-                      <div className={styles.addressActions}>
-                        <button
-                          type="button"
-                          className={styles.addressIconBtn}
-                          onClick={() => handleEditAddress(addr)}
-                          title="Edit Address"
-                        >
-                          <iconify-icon icon="lucide:pencil" />
-                        </button>
-                        {savedAddresses.length > 1 && (
+                        <div className={styles.addressActions}>
+                          <button
+                            type="button"
+                            className={styles.addressIconBtn}
+                            onClick={() => handleEditAddress(addr)}
+                            title="Edit Address"
+                          >
+                            <iconify-icon icon="lucide:pencil" />
+                          </button>
                           <button
                             type="button"
                             className={`${styles.addressIconBtn} ${styles.addressIconBtnDanger}`}
@@ -1504,11 +1529,11 @@ export default function ClientProfilePage() {
                           >
                             <iconify-icon icon="lucide:trash-2" />
                           </button>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -1665,7 +1690,12 @@ export default function ClientProfilePage() {
                     className={styles.formSelect}
                     style={{ width: 220 }}
                     value={privacyDisplayFormat}
-                    onChange={(e) => setPrivacyDisplayFormat(e.target.value as any)}
+                    onChange={(e) => {
+                      const val = e.target.value as any;
+                      setPrivacyDisplayFormat(val);
+                      localStorage.setItem("boulotman_privacy_format", val);
+                      toast.show("success", lang === "fr" ? "Format du nom mis à jour ✓" : "Display name format updated ✓");
+                    }}
                   >
                     <option value="initial">
                       {firstName ? `${firstName} ${(lastName || "")[0] ? `${lastName[0].toUpperCase()}.` : ""}`.trim() : "First Name Initial"} (Privacy Mode)
@@ -1684,7 +1714,12 @@ export default function ClientProfilePage() {
                   <input
                     type="checkbox"
                     checked={allowDirectOffers}
-                    onChange={(e) => setAllowDirectOffers(e.target.checked)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setAllowDirectOffers(checked);
+                      localStorage.setItem("boulotman_allow_direct_offers", String(checked));
+                      toast.show("success", checked ? (lang === "fr" ? "Devis directs activés ✓" : "Direct quotes enabled ✓") : (lang === "fr" ? "Devis directs désactivés" : "Direct quotes disabled"));
+                    }}
                     style={{ width: 20, height: 20, accentColor: "#ff4500", cursor: "pointer" }}
                   />
                 </div>
@@ -1697,7 +1732,12 @@ export default function ClientProfilePage() {
                   <input
                     type="checkbox"
                     checked={smsNotifications}
-                    onChange={(e) => setSmsNotifications(e.target.checked)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setSmsNotifications(checked);
+                      localStorage.setItem("boulotman_sms_notifications", String(checked));
+                      toast.show("success", checked ? (lang === "fr" ? "Alertes SMS activées ✓" : "SMS alerts enabled ✓") : (lang === "fr" ? "Alertes SMS désactivées" : "SMS alerts disabled"));
+                    }}
                     style={{ width: 20, height: 20, accentColor: "#ff4500", cursor: "pointer" }}
                   />
                 </div>
@@ -1711,7 +1751,14 @@ export default function ClientProfilePage() {
                     className={styles.formSelect}
                     style={{ width: 160 }}
                     value={preferredCurrency}
-                    onChange={(e) => setPreferredCurrency(e.target.value)}
+                    onChange={(e) => {
+                      const curr = e.target.value;
+                      setPreferredCurrency(curr);
+                      localStorage.setItem("boulotman_preferred_currency", curr);
+                      localStorage.setItem("currency", curr);
+                      window.dispatchEvent(new Event("currencyChange"));
+                      toast.show("success", lang === "fr" ? "Devise mise à jour ✓" : "Currency preference updated ✓");
+                    }}
                   >
                     <option value="XOF">XOF (CFA Franc)</option>
                     <option value="EUR">EUR (€)</option>
@@ -1728,7 +1775,16 @@ export default function ClientProfilePage() {
                     className={styles.formSelect}
                     style={{ width: 160 }}
                     value={preferredLanguage}
-                    onChange={(e) => setPreferredLanguage(e.target.value)}
+                    onChange={(e) => {
+                      const newLang = e.target.value;
+                      setPreferredLanguage(newLang);
+                      setLang(newLang);
+                      localStorage.setItem("lang", newLang);
+                      localStorage.setItem("boulotman_preferred_language", newLang);
+                      window.dispatchEvent(new Event("languageChange"));
+                      api.updateMe({ language_preference: newLang }).catch(() => {});
+                      toast.show("success", newLang === "fr" ? "Langue changée en Français ✓" : "Language changed to English ✓");
+                    }}
                   >
                     <option value="fr">Français (French)</option>
                     <option value="en">English</option>
