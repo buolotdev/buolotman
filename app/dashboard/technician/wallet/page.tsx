@@ -113,9 +113,24 @@ export default function TechnicianWalletPage() {
   
   const transactionsData = Array.isArray(txData) ? txData : (txData as any)?.results || [];
 
-  const availableBalance = parseFloat(walletData?.available_balance) || 0;
+  const computedCredits = transactionsData
+    .filter((tx: any) => tx.type === "credit" && (tx.status?.toLowerCase() === "completed" || tx.status?.toLowerCase() === "success"))
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedCompletedDebits = transactionsData
+    .filter((tx: any) => tx.type === "debit" && (tx.status?.toLowerCase() === "completed" || tx.status?.toLowerCase() === "success"))
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedPendingDebits = transactionsData
+    .filter((tx: any) => tx.type === "debit" && tx.status?.toLowerCase() === "pending")
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedLedgerBalance = computedCredits > 0 ? Math.max(0, computedCredits - computedCompletedDebits - computedPendingDebits) : null;
+
+  const rawAvailable = parseFloat(walletData?.available_balance);
+  const availableBalance = !isNaN(rawAvailable) && computedLedgerBalance !== null ? Math.max(rawAvailable, computedLedgerBalance) : (!isNaN(rawAvailable) ? rawAvailable : 0);
   const pendingEscrow = parseFloat(walletData?.pending_escrow || walletData?.pending_balance) || 0;
-  const totalEarnings = parseFloat(walletData?.total_earnings) || (availableBalance + pendingEscrow);
+  const totalEarnings = parseFloat(walletData?.total_earnings) || (computedCredits > 0 ? computedCredits : (availableBalance + pendingEscrow));
 
   // Withdraw Modal State
   const [modalOpen, setModalOpen] = useState(false);

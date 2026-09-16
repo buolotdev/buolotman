@@ -61,8 +61,23 @@ export default function CompanyWalletPage() {
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
-  const transactions = (txData as any)?.results || [];
-  const availableBalance = parseFloat(wallet?.available_balance) || 0;
+  const transactions = (Array.isArray(txData) ? txData : (txData as any)?.results || []) as any[];
+
+  const computedCredits = transactions
+    .filter((tx: any) => tx.type === "credit" && (tx.status?.toLowerCase() === "completed" || tx.status?.toLowerCase() === "success"))
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedCompletedDebits = transactions
+    .filter((tx: any) => tx.type === "debit" && (tx.status?.toLowerCase() === "completed" || tx.status?.toLowerCase() === "success"))
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedPendingDebits = transactions
+    .filter((tx: any) => tx.type === "debit" && tx.status?.toLowerCase() === "pending")
+    .reduce((sum: number, tx: any) => sum + (parseFloat(tx.amount) || 0), 0);
+
+  const computedLedgerBalance = computedCredits > 0 ? Math.max(0, computedCredits - computedCompletedDebits - computedPendingDebits) : null;
+  const rawAvailable = parseFloat(wallet?.available_balance);
+  const availableBalance = !isNaN(rawAvailable) && computedLedgerBalance !== null ? Math.max(rawAvailable, computedLedgerBalance) : (!isNaN(rawAvailable) ? rawAvailable : 0);
 
   const handleWithdraw = async () => {
     setWithdrawError(null);

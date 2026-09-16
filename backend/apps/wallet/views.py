@@ -14,6 +14,22 @@ from .serializers import WalletSerializer, TransactionSerializer, WithdrawSerial
 @permission_classes([IsAuthenticated])
 def wallet_detail(request):
     wallet, _ = Wallet.objects.get_or_create(user=request.user)
+    
+    # Auto-reconcile balance from transactions so rejected/failed withdrawals automatically restore balance
+    from decimal import Decimal
+    from django.db.models import Sum
+    total_credits = wallet.transactions.filter(type='credit', status='completed').aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+    total_completed_debits = wallet.transactions.filter(type='debit', status='completed').aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+    total_pending_debits = wallet.transactions.filter(type='debit', status='pending').aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+    
+    if total_credits > Decimal('0') or wallet.transactions.exists():
+        expected_avail = max(Decimal('0'), total_credits - total_completed_debits - total_pending_debits)
+        if wallet.available_balance != expected_avail or wallet.total_earnings != total_credits or wallet.total_withdrawn != total_completed_debits:
+            wallet.available_balance = expected_avail
+            wallet.total_earnings = total_credits
+            wallet.total_withdrawn = total_completed_debits
+            wallet.save(update_fields=['available_balance', 'total_earnings', 'total_withdrawn', 'updated_at'])
+
     serializer = WalletSerializer(wallet)
     return Response(serializer.data)
 
