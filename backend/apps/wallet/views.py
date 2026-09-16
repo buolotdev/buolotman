@@ -183,12 +183,40 @@ def admin_update_transaction_status(request, tx_id):
     if new_status not in ('completed', 'failed', 'cancelled', 'pending'):
         return Response({"error": "Invalid status specified."}, status=status.HTTP_400_BAD_REQUEST)
 
-    tx.status = new_status
-    tx.save(update_fields=['status'])
+    with db_transaction.atomic():
+        old_status = tx.status
+        tx.status = new_status
+        tx.save(update_fields=['status'])
+
+        # If a pending withdrawal is rejected/failed, refund the amount back to user's available balance
+        if old_status == 'pending' and new_status in ('failed', 'cancelled') and (tx.category == 'withdrawal' or tx.type == 'debit'):
+            if tx.wallet:
+                from decimal import Decimal
+                tx.wallet.available_balance += tx.amount
+                tx.wallet.total_withdrawn = max(Decimal('0'), tx.wallet.total_withdrawn - tx.amount)
+                tx.wallet.save(update_fields=['available_balance', 'total_withdrawn', 'updated_at'])
+
+                create_audit_log(
+                    actor=request.user,
+                    action="withdrawal_rejected_refunded",
+                    entity_type="wallet",
+                    entity_id=tx.wallet.id,
+                    summary=f"Admin rejected withdrawal #{tx.id}. Refunded {tx.amount} to user balance.",
+                    metadata={"tx_id": tx.id, "amount": str(tx.amount)},
+                    ip_address=request.META.get("REMOTE_ADDR"),
+                )
+                if getattr(tx.wallet, 'user', None):
+                    create_notification(
+                        user=tx.wallet.user,
+                        category="payment",
+                        title="Withdrawal Request Rejected",
+                        body=f"Your withdrawal request for {tx.amount} {tx.wallet.currency} has been rejected. The amount was refunded to your available balance.",
+                        link="/dashboard/technician/wallet",
+                    )
 
     return Response({
         "success": True,
-        "message": f"Transaction #{tx.id} status updated to {new_status}.",
+        "message": f"Transaction #{tx.id} status updated to {new_status}." + (" Funds refunded to wallet balance." if new_status in ('failed', 'cancelled') else ""),
         "status": tx.status
     })
 
