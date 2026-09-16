@@ -307,13 +307,13 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       let detectedLoc: UserLocation | null = null;
 
       try {
-        // Primary ultra-fast Geo-IP service
-        const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+        // A) Primary internal Next.js Geo-IP service (Zero CORS)
+        const res = await fetch("/api/geo", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          if (data && (data.country_code || data.country)) {
-            const code = (data.country_code || data.country || "").toUpperCase();
-            const resolved = resolveCountryInfo(code, data.country_name, data.currency, data.city);
+          if (data && data.country_code) {
+            const code = (data.country_code || "").toUpperCase();
+            const resolved = resolveCountryInfo(code, data.country, data.currency, data.city);
 
             detectedLoc = {
               country: resolved.name,
@@ -329,7 +329,34 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch {
-        // Try secondary fallback
+        // Try fallback
+      }
+
+      if (!detectedLoc) {
+        try {
+          // B) Secondary CORS-free service: ipwho.is
+          const res = await fetch("https://ipwho.is/", { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && data.country_code) {
+              const code = (data.country_code || "").toUpperCase();
+              const resolved = resolveCountryInfo(code, data.country, data.currency?.code, data.city);
+              detectedLoc = {
+                country: resolved.name,
+                countryCode: resolved.code,
+                city: data.city || resolved.defaultCity,
+                flag: resolved.flag,
+                currency: resolved.currency,
+                currencySymbol: resolved.currencySymbol,
+                isAutoDetected: true,
+                latitude: data.latitude,
+                longitude: data.longitude,
+              };
+            }
+          }
+        } catch {
+          // Try fallback
+        }
       }
 
       if (!detectedLoc) {

@@ -116,28 +116,19 @@ export async function detectAndSetGeoLanguage(): Promise<{
   if (!hasManualCountry || !hasManualLang) {
     let lookupSuccess = false;
 
-    // A) Try ipapi.co (detailed IP data with country name + country code + city)
+    // A) Try internal Next.js /api/geo (Zero CORS, checks headers/server IP)
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const res = await fetch("https://ipapi.co/json/", {
-        signal: controller.signal,
-        cache: "no-store",
-      });
-      clearTimeout(timeoutId);
-
+      const res = await fetch("/api/geo", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data && (data.country_code || data.country)) {
-          const code = (data.country_code || data.country || "").toUpperCase();
-          const name = data.country_name || getCountryNameFromCode(code);
-
+        const code = (data.country_code || "").toUpperCase();
+        if (code && code.length === 2) {
+          const name = data.country || getCountryNameFromCode(code);
           if (!hasManualCountry && name) {
             detectedCountry = name;
             detectedCountryCode = code;
             changed = true;
           }
-
           if (!hasManualLang) {
             if (FRANCOPHONE_CODES.includes(code)) {
               detectedLang = "fr";
@@ -154,7 +145,50 @@ export async function detectAndSetGeoLanguage(): Promise<{
         }
       }
     } catch {
-      // Try fallback service
+      // fallback
+    }
+
+    // B) Try CORS-free ipwho.is
+    if (!lookupSuccess) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch("https://ipwho.is/", {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && data.country_code) {
+            const code = (data.country_code || "").toUpperCase();
+            const name = data.country || getCountryNameFromCode(code);
+
+            if (!hasManualCountry && name) {
+              detectedCountry = name;
+              detectedCountryCode = code;
+              changed = true;
+            }
+
+            if (!hasManualLang) {
+              if (FRANCOPHONE_CODES.includes(code)) {
+                detectedLang = "fr";
+                changed = true;
+              } else if (ARABIC_CODES.includes(code)) {
+                detectedLang = "ar";
+                changed = true;
+              } else {
+                detectedLang = "en";
+                changed = true;
+              }
+            }
+            lookupSuccess = true;
+          }
+        }
+      } catch {
+        // fallback
+      }
     }
 
     // B) Secondary fallback: api.country.is
