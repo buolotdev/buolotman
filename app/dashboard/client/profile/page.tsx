@@ -24,28 +24,7 @@ export interface SavedAddress {
   isDefault?: boolean;
 }
 
-const DEFAULT_ADDRESSES: SavedAddress[] = [
-  {
-    id: "addr-1",
-    label: "Primary Residence",
-    category: "home",
-    city: "Cotonou",
-    neighborhood: "Haie Vive",
-    address: "Rue 340, Maison 12",
-    accessNotes: "Ring doorbell at main black gate.",
-    isDefault: true,
-  },
-  {
-    id: "addr-2",
-    label: "Company HQ / Office",
-    category: "office",
-    city: "Cotonou",
-    neighborhood: "Ganhi Commercial Area",
-    address: "Boulevard de la Marina, Immeuble Horizon 3ème étage",
-    accessNotes: "Reception desk on 3rd floor.",
-    isDefault: false,
-  }
-];
+const DEFAULT_ADDRESSES: SavedAddress[] = [];
 
 const clientProfileTranslations: Record<string, Record<string, string>> = {
   en: {
@@ -157,8 +136,8 @@ export default function ClientProfilePage() {
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [country, setCountry] = useState("Benin");
-  const [city, setCity] = useState("Cotonou");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [about, setAbout] = useState("");
   const [preferredCurrency, setPreferredCurrency] = useState("XOF");
@@ -183,7 +162,7 @@ export default function ClientProfilePage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addrLabel, setAddrLabel] = useState("");
   const [addrCategory, setAddrCategory] = useState<SavedAddress["category"]>("home");
-  const [addrCity, setAddrCity] = useState("Cotonou");
+  const [addrCity, setAddrCity] = useState("");
   const [addrNeighborhood, setAddrNeighborhood] = useState("");
   const [addrStreet, setAddrStreet] = useState("");
   const [addrAccessNotes, setAddrAccessNotes] = useState("");
@@ -225,8 +204,7 @@ export default function ClientProfilePage() {
       if (rawAddrs) {
         try { setSavedAddresses(JSON.parse(rawAddrs)); } catch {}
       } else {
-        setSavedAddresses(DEFAULT_ADDRESSES);
-        localStorage.setItem("boulotman_saved_addresses", JSON.stringify(DEFAULT_ADDRESSES));
+        setSavedAddresses([]);
       }
 
       // Client Type
@@ -557,7 +535,7 @@ export default function ClientProfilePage() {
     setEditingAddressId(null);
     setAddrLabel("");
     setAddrCategory("home");
-    setAddrCity(city || "Cotonou");
+    setAddrCity(city || "");
     setAddrNeighborhood("");
     setAddrStreet("");
     setAddrAccessNotes("");
@@ -958,7 +936,7 @@ export default function ClientProfilePage() {
                   </p>
                   <div className={styles.metaRow}>
                     <span className={styles.metaItem}>
-                      <iconify-icon icon="lucide:map-pin" /> {city || "Cotonou"}, {country || "Benin"}
+                      <iconify-icon icon="lucide:map-pin" /> {[city, country].filter(Boolean).join(", ") || (lang === "fr" ? "Emplacement non défini" : "Location not specified")}
                     </span>
                     <span className={styles.metaItem}>
                       <iconify-icon icon="lucide:mail" /> {email}

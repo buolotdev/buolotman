@@ -241,10 +241,12 @@ export default function OtpVerification({
       }
 
       try {
-        await api.updateMe({
-          country: (data as any).country || "Benin",
-          city: (data as any).city || "Cotonou",
-        });
+        const updatePayload: Record<string, any> = {};
+        if ((data as any).country) updatePayload.country = (data as any).country;
+        if ((data as any).city) updatePayload.city = (data as any).city;
+        if (Object.keys(updatePayload).length > 0) {
+          await api.updateMe(updatePayload);
+        }
       } catch {
         // ignore
       }
