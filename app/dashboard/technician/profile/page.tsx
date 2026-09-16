@@ -356,6 +356,7 @@ export default function TechnicianProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Tab 2: Document Verification State (Front ID, Back ID, Trade Cert, Selfie)
   const [localDocs, setLocalDocs] = useState<TechDocument[]>([]);
@@ -649,7 +650,8 @@ export default function TechnicianProfilePage() {
   };
 
   // Save All Profile Details
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = async (isCompleting: boolean | React.MouseEvent = false) => {
+    const isFinal = typeof isCompleting === "boolean" ? isCompleting : false;
     setProfileSaving(true);
     try {
       // 1. Immediately persist custom profile fields locally
@@ -734,6 +736,10 @@ export default function TechnicianProfilePage() {
       } catch (backendErr: any) {
         console.warn("Backend update error:", backendErr);
         toast.success("Profile Saved", "All technician profile details and pricing updated successfully.");
+      }
+
+      if (isFinal || activeTab === "payouts") {
+        setShowSuccessModal(true);
       }
     } catch (err: any) {
       toast.error("Save failed", err?.message || "Please try again.");
@@ -1553,35 +1559,91 @@ export default function TechnicianProfilePage() {
                 />
 
                 {/* Skills Manager */}
-                <div style={{ marginTop: 20 }}>
-                  <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.skillsTitle}</label>
+                <div style={{ marginTop: 22, background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 16, padding: "18px 20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                    <label className={styles.label} style={{ fontSize: 13.5, fontWeight: 800, color: "#001f3f", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <iconify-icon icon="lucide:award" style={{ color: "#2563eb", fontSize: 17 }} />
+                      {t.skillsTitle} ({skills.length})
+                    </label>
+                    <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
+                      Add trade specializations for instant matchmaking
+                    </span>
+                  </div>
+
                   {skills.length === 0 ? (
-                    <p style={{ fontSize: 13, color: "#94a3b8", margin: "4px 0 10px", fontStyle: "italic" }}>
-                      No skills added yet. Type a skill below and click &quot;Add&quot; to list your trade specializations.
+                    <p style={{ fontSize: 13, color: "#94a3b8", margin: "6px 0 14px", fontStyle: "italic" }}>
+                      No skills added yet. Type a skill below and click &quot;Add Skill&quot; to list your trade specializations.
                     </p>
                   ) : (
                     <div className={styles.skillsListEditable}>
                       {skills.map((skill, index) => (
                         <span key={index} className={styles.skillTag}>
-                          {skill}
-                          <button type="button" className={styles.skillAction} onClick={() => handleRemoveSkill(index)}>
+                          <iconify-icon icon="lucide:check-circle-2" style={{ color: "#2563eb", fontSize: 14 }} />
+                          <span>{skill}</span>
+                          <button
+                            type="button"
+                            className={styles.skillAction}
+                            onClick={() => handleRemoveSkill(index)}
+                            title="Remove skill"
+                          >
                             <iconify-icon icon="lucide:x" />
                           </button>
                         </span>
                       ))}
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: 10, maxWidth: 500, marginTop: 10 }}>
-                    <input
-                      className={styles.formInput}
 
-                      style={{ marginBottom: 0 }}
-                      placeholder="Add trade skill (e.g. Solar Inverter Setup, 3-Phase Wiring)"
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#ffffff",
+                    border: "1.5px solid #cbd5e1",
+                    borderRadius: 12,
+                    padding: "4px 6px 4px 14px",
+                    maxWidth: 580,
+                    marginTop: 10,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                  }}>
+                    <iconify-icon icon="lucide:sparkles" style={{ color: "#2563eb", fontSize: 18, marginRight: 8, flexShrink: 0 }} />
+                    <input
+                      type="text"
+                      placeholder="Add trade skill (e.g. Solar Inverter Setup, 3-Phase Wiring, Pipe Welding)"
                       value={newSkill}
                       onChange={(e) => setNewSkill(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSkill(); } }}
+                      style={{
+                        flex: 1,
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        fontSize: 13.5,
+                        color: "#0f172a",
+                        padding: "8px 0",
+                        minWidth: 0
+                      }}
                     />
-                    <button type="button" className={styles.outlineButton} onClick={handleAddSkill}>Add</button>
+                    <button
+                      type="button"
+                      onClick={handleAddSkill}
+                      className={styles.primaryButton}
+                      style={{
+                        padding: "8px 18px",
+                        fontSize: 13,
+                        borderRadius: 10,
+                        background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                        color: "#ffffff",
+                        fontWeight: 700,
+                        border: "none",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)"
+                      }}
+                    >
+                      <iconify-icon icon="lucide:plus" style={{ fontSize: 15 }} />
+                      Add Skill
+                    </button>
                   </div>
                 </div>
               </section>
@@ -2097,27 +2159,100 @@ export default function TechnicianProfilePage() {
                 </div>
 
                 {/* Tools Tag Manager */}
-                <div style={{ marginTop: 18 }}>
-                  <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Specialized Tools & Equipment Available</label>
-                  <div className={styles.toolsGrid}>
-                    {toolsList.map((tool) => (
-                      <span key={tool} className={styles.toolTag}>
-                        <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500" }} />
-                        {tool}
-                        <iconify-icon icon="lucide:x" style={{ cursor: "pointer", marginLeft: 4 }} onClick={() => handleRemoveTool(tool)} />
-                      </span>
-                    ))}
+                <div style={{ marginTop: 22, background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 16, padding: "18px 20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                    <label className={styles.label} style={{ fontSize: 13.5, fontWeight: 800, color: "#001f3f", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                      <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500", fontSize: 17 }} />
+                      Specialized Tools & Diagnostic Equipment ({toolsList.length})
+                    </label>
+                    <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
+                      Highlights your capacity to clients & corporate teams
+                    </span>
                   </div>
-                  <div style={{ display: "flex", gap: 10, maxWidth: 500, marginTop: 12 }}>
+
+                  {toolsList.length === 0 ? (
+                    <p style={{ fontSize: 13, color: "#94a3b8", margin: "6px 0 14px", fontStyle: "italic" }}>
+                      No specialized equipment added yet. Add your diagnostic tools, safety gear, testing devices, or heavy tools below.
+                    </p>
+                  ) : (
+                    <div className={styles.toolsGrid}>
+                      {toolsList.map((tool) => (
+                        <span key={tool} className={styles.toolTag}>
+                          <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500", fontSize: 14 }} />
+                          <span>{tool}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTool(tool)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: "0 0 0 4px",
+                              color: "#c2410c",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              fontSize: 14
+                            }}
+                            title="Remove equipment"
+                          >
+                            <iconify-icon icon="lucide:x" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#ffffff",
+                    border: "1.5px solid #cbd5e1",
+                    borderRadius: 12,
+                    padding: "4px 6px 4px 14px",
+                    maxWidth: 580,
+                    marginTop: 10,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                  }}>
+                    <iconify-icon icon="lucide:plus-circle" style={{ color: "#ff4500", fontSize: 18, marginRight: 8, flexShrink: 0 }} />
                     <input
-                      className={styles.formInput}
-                      style={{ marginBottom: 0 }}
-                      placeholder="Add equipment (e.g. Thermal Camera, Scaffolding, Drill)"
+                      type="text"
+                      placeholder="Add equipment (e.g. Thermal Camera, Scaffolding, Fluke Multimeter, Rotary Hammer)"
                       value={newTool}
                       onChange={(e) => setNewTool(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTool(); } }}
+                      style={{
+                        flex: 1,
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        fontSize: 13.5,
+                        color: "#0f172a",
+                        padding: "8px 0",
+                        minWidth: 0
+                      }}
                     />
-                    <button type="button" className={styles.outlineButton} onClick={handleAddTool}>Add Tool</button>
+                    <button
+                      type="button"
+                      onClick={handleAddTool}
+                      className={styles.primaryButton}
+                      style={{
+                        padding: "8px 18px",
+                        fontSize: 13,
+                        borderRadius: 10,
+                        background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
+                        color: "#ffffff",
+                        fontWeight: 700,
+                        border: "none",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        boxShadow: "0 2px 8px rgba(255, 69, 0, 0.25)"
+                      }}
+                    >
+                      <iconify-icon icon="lucide:plus" style={{ fontSize: 15 }} />
+                      Add Tool
+                    </button>
                   </div>
                 </div>
               </section>
@@ -2229,7 +2364,7 @@ export default function TechnicianProfilePage() {
                   <button
                     type="button"
                     className={styles.primaryButton}
-                    onClick={handleSaveProfile}
+                    onClick={() => handleSaveProfile(true)}
                     disabled={profileSaving}
                     style={{ minHeight: 46, padding: "0 28px", fontSize: 14.5, background: "linear-gradient(135deg, #16a34a, #15803d)" }}
                   >
@@ -2242,6 +2377,195 @@ export default function TechnicianProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* ==================== CONGRATULATIONS PROFILE COMPLETE MODAL ==================== */}
+      {showSuccessModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 15, 30, 0.85)",
+            backdropFilter: "blur(12px)",
+            zIndex: 999999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: 24,
+              width: "100%",
+              maxWidth: 540,
+              padding: "36px 30px",
+              boxShadow: "0 25px 60px rgba(0, 31, 63, 0.35)",
+              position: "relative",
+              textAlign: "center",
+              border: "1px solid #e2e8f0",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              style={{
+                position: "absolute",
+                top: 18,
+                right: 18,
+                border: "none",
+                background: "#f1f5f9",
+                borderRadius: "50%",
+                width: 36,
+                height: 36,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#64748b",
+                transition: "all 0.2s ease",
+              }}
+              title="Close"
+            >
+              <iconify-icon icon="lucide:x" style={{ fontSize: 18 }} />
+            </button>
+
+            {/* Glowing Trophy / Badge Icon */}
+            <div
+              style={{
+                width: 84,
+                height: 84,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                margin: "0 auto 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                boxShadow: "0 12px 30px rgba(16, 185, 129, 0.35)",
+                border: "4px solid #d1fae5",
+              }}
+            >
+              <iconify-icon icon="lucide:award" style={{ fontSize: 44 }} />
+            </div>
+
+            {/* Badge pill */}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#dcfce7", color: "#166534", padding: "4px 14px", borderRadius: 999, fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>
+              <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 14 }} />
+              {lang === "fr" ? "PROFIL ENREGISTRÉ & ACTIF" : "PROFILE COMPLETE & ACTIVE"}
+            </div>
+
+            {/* Title */}
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: "#001f3f", margin: "0 0 10px", lineHeight: 1.25 }}>
+              {lang === "fr" ? "🎉 Félicitations ! Votre Profil est Prêt" : "🎉 Congratulations! Your Profile is Live"}
+            </h2>
+
+            {/* Description */}
+            <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6, margin: "0 0 22px" }}>
+              {lang === "fr"
+                ? "Toutes vos compétences, tarifs personnalisés, outillages et coordonnées de paiement sont enregistrés. Vous êtes désormais éligible pour recevoir des missions et postuler aux offres."
+                : "All your trade credentials, custom rates, equipment, and payout details have been saved. Your profile is now active and ready to receive client hiring requests."}
+            </p>
+
+            {/* Benefit Highlights Box */}
+            <div
+              style={{
+                background: "#f8fafc",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 16,
+                padding: "16px 18px",
+                textAlign: "left",
+                marginBottom: 26,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <iconify-icon icon="lucide:badge-check" style={{ color: "#16a34a", fontSize: 20, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <strong style={{ fontSize: 13.5, color: "#001f3f", display: "block" }}>
+                    {lang === "fr" ? "Visibilité Immédiate sur le Marché" : "Live Marketplace Listing"}
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {lang === "fr" ? "Les clients peuvent découvrir votre profil et vous contacter directement." : "Clients in your operating radius can discover your profile and hire you directly."}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <iconify-icon icon="lucide:shield-check" style={{ color: "#2563eb", fontSize: 20, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <strong style={{ fontSize: 13.5, color: "#001f3f", display: "block" }}>
+                    {lang === "fr" ? "Compte Escrow Sécurisé Configuré" : "Secured Escrow Direct Payouts"}
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {lang === "fr" ? "Paiements automatiques et instantanés dès validation des chantiers." : "Funds released from escrow are transferred directly to your saved payout account."}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <iconify-icon icon="lucide:zap" style={{ color: "#ff4500", fontSize: 20, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <strong style={{ fontSize: 13.5, color: "#001f3f", display: "block" }}>
+                    {lang === "fr" ? "Missions Conciergerie & Grands Projets" : "Direct Concierge & Team Matching"}
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {lang === "fr" ? "Éligible aux affectations directes et chantiers multi-corps d'état." : "Eligible for priority dispatch on corporate contracts and engineering crews."}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Link
+                href="/find-tasks"
+                className={styles.primaryButton}
+                style={{
+                  minHeight: 48,
+                  fontSize: 14.5,
+                  fontWeight: 800,
+                  justifyContent: "center",
+                  background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
+                  boxShadow: "0 6px 18px rgba(255, 69, 0, 0.35)",
+                }}
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <iconify-icon icon="lucide:search" style={{ fontSize: 18 }} />
+                {lang === "fr" ? "Consulter les Missions Disponibles" : "Browse Live Tasks & Bid Now"}
+              </Link>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <Link
+                  href={userData?.id ? `/profile/${userData.id}` : "/dashboard/technician"}
+                  target="_blank"
+                  className={styles.outlineButton}
+                  style={{ minHeight: 44, fontSize: 13.5, justifyContent: "center" }}
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  <iconify-icon icon="lucide:external-link" />
+                  {lang === "fr" ? "Voir Profil Public" : "Preview Public"}
+                </Link>
+
+                <Link
+                  href="/dashboard/technician"
+                  className={styles.outlineButton}
+                  style={{ minHeight: 44, fontSize: 13.5, justifyContent: "center" }}
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  <iconify-icon icon="lucide:layout-dashboard" />
+                  {lang === "fr" ? "Tableau de Bord" : "Go to Dashboard"}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD PORTFOLIO MODAL (ROOT LEVEL - CANNOT BE OVERLAPPED) */}
       {showAddProjectModal && (

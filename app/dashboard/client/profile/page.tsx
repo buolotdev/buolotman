@@ -192,6 +192,7 @@ export default function ClientProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -496,7 +497,7 @@ export default function ClientProfilePage() {
   };
 
   // Save Preferences Profile
-  const handleSavePreferences = async (e?: React.FormEvent) => {
+  const handleSavePreferences = async (e?: React.FormEvent, isCompleting = false) => {
     if (e) e.preventDefault();
     setSaving(true);
     try {
@@ -514,8 +515,14 @@ export default function ClientProfilePage() {
       });
       await refetchUser();
       toast.show("success", lang === "fr" ? "Préférences enregistrées avec succès ✓" : "Privacy controls & preferences saved successfully ✓");
+      if (isCompleting || activeTab === "privacy") {
+        setShowSuccessModal(true);
+      }
     } catch {
       toast.show("success", lang === "fr" ? "Préférences enregistrées avec succès ✓" : "Preferences saved successfully ✓");
+      if (isCompleting || activeTab === "privacy") {
+        setShowSuccessModal(true);
+      }
     } finally {
       setSaving(false);
     }
@@ -1892,7 +1899,7 @@ export default function ClientProfilePage() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleSavePreferences}
+                  onClick={() => handleSavePreferences(undefined, true)}
                   disabled={saving}
                   style={{
                     display: "inline-flex",
@@ -2054,6 +2061,211 @@ export default function ClientProfilePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== CONGRATULATIONS CLIENT PROFILE COMPLETE MODAL ==================== */}
+      {showSuccessModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 15, 30, 0.85)",
+            backdropFilter: "blur(12px)",
+            zIndex: 999999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: 24,
+              width: "100%",
+              maxWidth: 540,
+              padding: "36px 30px",
+              boxShadow: "0 25px 60px rgba(0, 31, 63, 0.35)",
+              position: "relative",
+              textAlign: "center",
+              border: "1px solid #e2e8f0",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              style={{
+                position: "absolute",
+                top: 18,
+                right: 18,
+                border: "none",
+                background: "#f1f5f9",
+                borderRadius: "50%",
+                width: 36,
+                height: 36,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#64748b",
+                transition: "all 0.2s ease",
+              }}
+              title="Close"
+            >
+              <iconify-icon icon="lucide:x" style={{ fontSize: 18 }} />
+            </button>
+
+            {/* Glowing Trophy / Badge Icon */}
+            <div
+              style={{
+                width: 84,
+                height: 84,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                margin: "0 auto 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                boxShadow: "0 12px 30px rgba(16, 185, 129, 0.35)",
+                border: "4px solid #d1fae5",
+              }}
+            >
+              <iconify-icon icon="lucide:check-check" style={{ fontSize: 44 }} />
+            </div>
+
+            {/* Badge pill */}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#dcfce7", color: "#166534", padding: "4px 14px", borderRadius: 999, fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>
+              <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: 14 }} />
+              {lang === "fr" ? "PROFIL CLIENT ENREGISTRÉ" : "CLIENT PROFILE READY"}
+            </div>
+
+            {/* Title */}
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: "#001f3f", margin: "0 0 10px", lineHeight: 1.25 }}>
+              {lang === "fr" ? "🎉 Félicitations ! Votre Profil est Prêt" : "🎉 Congratulations! Your Profile is Complete"}
+            </h2>
+
+            {/* Description */}
+            <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6, margin: "0 0 22px" }}>
+              {lang === "fr"
+                ? "Vos coordonnées, adresses de service, informations de facturation et préférences sont enregistrées avec succès. Vous pouvez maintenant publier des offres et réserver des techniciens qualifiés."
+                : "Your contact details, service locations, and preferences are saved. You are ready to post tasks and book verified specialists on Boulot Man."}
+            </p>
+
+            {/* Highlights Box */}
+            <div
+              style={{
+                background: "#f8fafc",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 16,
+                padding: "16px 18px",
+                textAlign: "left",
+                marginBottom: 26,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <iconify-icon icon="lucide:map-pin" style={{ color: "#ff4500", fontSize: 20, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <strong style={{ fontSize: 13.5, color: "#001f3f", display: "block" }}>
+                    {lang === "fr" ? "Adresses de Service Prêtes" : "Saved Service Locations"}
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {lang === "fr" ? "Sélectionnez facilement vos adresses pour une intervention rapide." : "Instantly dispatch technicians to your verified residential or commercial addresses."}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a", fontSize: 20, flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <strong style={{ fontSize: 13.5, color: "#001f3f", display: "block" }}>
+                    {lang === "fr" ? "Paiements Sécurisés par Escrow" : "Protected Escrow Guarantee"}
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {lang === "fr" ? "Vos fonds sont bloqués et ne sont libérés qu'après satisfaction totale." : "Your payment is held securely in escrow until work is completed to your satisfaction."}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Link
+                href="/post-task"
+                style={{
+                  minHeight: 48,
+                  fontSize: 14.5,
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  borderRadius: 12,
+                  textDecoration: "none",
+                  background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
+                  color: "#ffffff",
+                  boxShadow: "0 6px 18px rgba(255, 69, 0, 0.35)",
+                }}
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <iconify-icon icon="lucide:plus-circle" style={{ fontSize: 18 }} />
+                {lang === "fr" ? "Publier une Mission Immédiate" : "Post a Task Now"}
+              </Link>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <Link
+                  href="/technicians"
+                  style={{
+                    minHeight: 44,
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    borderRadius: 12,
+                    textDecoration: "none",
+                    border: "1.5px solid #cbd5e1",
+                    background: "#ffffff",
+                    color: "#001f3f",
+                  }}
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  <iconify-icon icon="lucide:users" />
+                  {lang === "fr" ? "Trouver un Artisan" : "Find Specialists"}
+                </Link>
+
+                <Link
+                  href="/dashboard/client"
+                  style={{
+                    minHeight: 44,
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    borderRadius: 12,
+                    textDecoration: "none",
+                    border: "1.5px solid #cbd5e1",
+                    background: "#ffffff",
+                    color: "#001f3f",
+                  }}
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  <iconify-icon icon="lucide:layout-dashboard" />
+                  {lang === "fr" ? "Tableau de Bord" : "Go to Dashboard"}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       )}
