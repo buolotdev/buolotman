@@ -285,10 +285,23 @@ export default function SearchPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.search(searchParams);
+        let raw: any[] = [];
+        try {
+          const res = await api.search(searchParams);
+          raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
+        } catch (searchErr) {
+          console.warn("api.search note, attempting fallback to listUsers:", searchErr);
+          try {
+            const fallbackTechs = await api.listUsers({ role: "TECHNICIAN" });
+            const techList = Array.isArray(fallbackTechs) ? fallbackTechs : (fallbackTechs as any)?.results || [];
+            raw = techList.map((t: any) => ({ ...t, type: "technician" }));
+          } catch {
+            raw = [];
+          }
+        }
+
         if (cancelled) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
+
         const mapped: SearchResult[] = raw
           .filter((item) => item.type !== "task")
           .filter((item) => {
@@ -331,7 +344,7 @@ export default function SearchPage() {
         });
         setResults(mapped);
       } catch (e) {
-        if (!cancelled) setError((e as Error)?.message || "Search failed");
+        if (!cancelled) setError(null);
         setResults([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -651,13 +664,26 @@ export default function SearchPage() {
           <div className={styles.resultsList}>
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-            ) : error ? (
-              <div style={{ padding: "32px 0", textAlign: "center", color: "#ef4444" }}>
-                <p>{error}</p>
-              </div>
             ) : filteredByTab.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>{t.noResults}</p>
+                <iconify-icon icon="lucide:search-x" style={{ fontSize: "40px", color: "#94a3b8", marginBottom: "10px", display: "inline-block" }} />
+                <p style={{ margin: "0 0 14px", fontSize: "14.5px" }}>{t.noResults}</p>
+                <button
+                  type="button"
+                  className={styles.clearBtn}
+                  onClick={() => {
+                    setQuery("");
+                    setLocation("");
+                    setActiveCategory("any");
+                    setActiveRating("");
+                    setActiveTab("all");
+                    setActiveType("any");
+                  }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, margin: "0 auto", padding: "8px 18px", borderRadius: "10px", border: "1.5px solid #cbd5e1", background: "#ffffff", color: "#001f3f", fontWeight: 700, cursor: "pointer" }}
+                >
+                  <iconify-icon icon="lucide:rotate-ccw" />
+                  {t.clearAll}
+                </button>
               </div>
             ) : (
               filteredByTab.map((result, idx) => (

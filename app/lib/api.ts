@@ -269,13 +269,13 @@ export const api = {
   getUserProfile: (id: number | string) => request<any>(`/auth/users/${id}/`, { public: true }),
   listUsers: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return request<any[]>(`/auth/users/${qs}`);
+    return request<any[]>(`/auth/users/${qs}`, { public: true } as any);
   },
 
   // Tasks
   getTasks: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return request<any>(`/tasks/${qs}`);
+    return request<any>(`/tasks/${qs}`, { public: true } as any);
   },
   getMyTasks: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
@@ -283,7 +283,7 @@ export const api = {
   },
   createTask: (data: Record<string, any>) =>
     request<any>("/tasks/create/", { method: "POST", body: JSON.stringify(data) }),
-  getTask: (id: number) => request<any>(`/tasks/${id}/`),
+  getTask: (id: number) => request<any>(`/tasks/${id}/`, { public: true } as any),
   updateTask: (id: number, data: Record<string, any>) =>
     request<any>(`/tasks/${id}/`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteTask: (id: number) =>
@@ -326,7 +326,7 @@ export const api = {
     request<any>(`/tasks/${taskId}/questions/`, { method: "POST", body: JSON.stringify(data) }),
 
   // Categories & Skills
-  getCategories: () => request<any[]>("/tasks/categories/"),
+  getCategories: () => request<any[]>("/tasks/categories/", { public: true } as any),
   createCategory: (data: Record<string, any>) =>
     request<any>("/tasks/categories/", { method: "POST", body: JSON.stringify(data) }),
   updateCategory: (id: number, data: Record<string, any>) =>
@@ -335,7 +335,7 @@ export const api = {
     request<void>(`/tasks/categories/${id}/`, { method: "DELETE" }),
   getSkills: (category?: string) => {
     const qs = category ? `?category=${category}` : "";
-    return request<any[]>(`/tasks/skills/${qs}`);
+    return request<any[]>(`/tasks/skills/${qs}`, { public: true } as any);
   },
 
   // Inquiries
@@ -608,7 +608,7 @@ export const api = {
   // Search
   search: (params: Record<string, string>) => {
     const qs = new URLSearchParams(params).toString();
-    return request<any>(`/search/?${qs}`);
+    return request<any>(`/search/?${qs}`, { public: true } as any);
   },
 
   // Uploads
