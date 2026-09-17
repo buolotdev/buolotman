@@ -865,9 +865,20 @@ def campay_withdraw_view(request):
         err_data = withdraw_res.get("error")
         error_msg = "CamPay payout initiation failed."
         if isinstance(err_data, dict):
-            error_msg = err_data.get("message") or err_data.get("detail") or err_data.get("error") or "CamPay payout failed. Note: Mobile Money requires min. 500 XAF/XOF and active merchant balance."
+            raw_msg = str(err_data.get("message") or err_data.get("detail") or err_data.get("error") or "")
+            if "API WITHDRAWALS UNAUTHORIZED" in raw_msg.upper():
+                error_msg = "Les retraits instantanés par API ne sont pas encore activés sur le compte marchand CamPay. Veuillez choisir le Virement Bancaire Direct ou contacter le support CamPay."
+            elif "INSUFFICIENT" in raw_msg.upper() or "BALANCE" in raw_msg.upper():
+                error_msg = "Solde marchand insuffisant sur CamPay pour effectuer ce virement instantané. Veuillez choisir le virement bancaire."
+            elif raw_msg:
+                error_msg = raw_msg
+            else:
+                error_msg = "CamPay payout failed. Note: Mobile Money requires min. 500 XAF/XOF and active merchant balance."
         elif isinstance(err_data, str) and err_data:
-            error_msg = err_data
+            if "API WITHDRAWALS UNAUTHORIZED" in err_data.upper():
+                error_msg = "Les retraits instantanés par API ne sont pas encore activés sur le compte marchand CamPay. Veuillez choisir le Virement Bancaire Direct."
+            else:
+                error_msg = err_data
         return Response(
             {"error": error_msg, "details": withdraw_res.get("error")},
             status=status.HTTP_400_BAD_REQUEST
