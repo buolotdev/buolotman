@@ -742,6 +742,16 @@ def send_payment_escrow_email(user, amount, currency, task_title, milestone_titl
     subject = f"BoulotMan Payment Receipt: {action_label}"
     ms_desc = f" ({milestone_title})" if milestone_title else ""
 
+    user_role = str(getattr(user, 'role', '')).lower().strip()
+    if user_role == 'technician':
+        wallet_url = "https://boulotman.com/dashboard/technician/wallet"
+    elif user_role == 'company':
+        wallet_url = "https://boulotman.com/dashboard/company/wallet"
+    elif user_role == 'admin':
+        wallet_url = "https://admin.boulotman.com/dashboard/admin/payments"
+    else:
+        wallet_url = "https://boulotman.com/dashboard/client"
+
     plain_message = f"""Hello {name},
 
 This email confirms your recent payment activity on BoulotMan.
@@ -753,7 +763,7 @@ Details:
 - Platform Protection: Verified Escrow
 
 View your transaction statement in your wallet:
-https://boulotman.com/dashboard/client/payments
+{wallet_url}
 
 Best regards,
 The BoulotMan Billing Team
@@ -779,7 +789,7 @@ https://boulotman.com
       </div>
 
       <div style="text-align: center; margin: 28px 0;">
-        <a href="https://boulotman.com/dashboard" target="_blank" style="background: linear-gradient(135deg, #001F3F 0%, #001224 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block;">
+        <a href="{wallet_url}" target="_blank" style="background: linear-gradient(135deg, #001F3F 0%, #001224 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block;">
           View Wallet Statement &rarr;
         </a>
       </div>
