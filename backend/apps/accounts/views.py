@@ -839,6 +839,41 @@ def user_public_profile(request, user_id):
     serializer = UserPublicSerializer(user)
     data = serializer.data
 
+    from apps.tasks.models import Task, Bid, TaskReview
+    from django.db.models import Avg, Q
+
+    # Universal dynamic completed tasks calculation for any specialist/company
+    direct_completed_tasks = Task.objects.filter(
+        Q(assigned_to=user) | Q(specialist_id=user.id),
+        status='completed'
+    ).count()
+
+    completed_bids_count = Bid.objects.filter(
+        technician=user,
+        status__in=['accepted', 'completed'],
+        task__status='completed'
+    ).count()
+
+    # Universal dynamic reviews calculation
+    task_reviews_qs = TaskReview.objects.filter(target_user=user).exclude(status='Hidden')
+    real_review_count = task_reviews_qs.count()
+    real_avg_rating = task_reviews_qs.aggregate(Avg('rating'))['rating__avg']
+
+    reviews_list = []
+    for r in task_reviews_qs.order_by('-created_at')[:20]:
+        rev_name = f"{r.reviewer.first_name} {r.reviewer.last_name}".strip() if r.reviewer else "Verified Client"
+        if not rev_name:
+            rev_name = r.reviewer.username if r.reviewer else "Verified Client"
+        reviews_list.append({
+            "id": r.id,
+            "reviewer_name": rev_name,
+            "rating": r.rating,
+            "comment": r.comment or "Job completed with excellence.",
+            "date": r.created_at.strftime('%b %d, %Y'),
+            "task_title": r.task.title if r.task else "Completed Contract",
+            "verified_hire": True,
+        })
+
     if user.role == 'TECHNICIAN':
         from apps.accounts.models import TechnicianProfile, PortfolioItem
         profile, _ = TechnicianProfile.objects.get_or_create(user=user)
@@ -875,8 +910,19 @@ def user_public_profile(request, user_id):
         data['skills'] = [s.name for s in profile.skills.all()]
         data['tools'] = tools_list
         data['languages'] = ['French', 'English']
-        data['completed_jobs'] = profile.completed_jobs
-        data['average_rating'] = str(profile.average_rating)
+
+        total_delivered = max(profile.completed_jobs or 0, direct_completed_tasks, completed_bids_count)
+        data['completed_jobs'] = total_delivered
+        data['completed_tasks'] = total_delivered
+        data['tasks_completed_count'] = total_delivered
+
+        calc_avg = real_avg_rating if real_avg_rating is not None else float(profile.average_rating or 0)
+        calc_cnt = real_review_count if real_review_count > 0 else (profile.review_count or 0)
+
+        data['average_rating'] = str(round(calc_avg, 1)) if calc_avg > 0 else "0.0"
+        data['review_count'] = calc_cnt
+        data['reviews'] = reviews_list
+
         data['availability_status'] = profile.availability_status
         data['response_time'] = profile.response_time or 'Within 2 hours'
         meta = profile.languages if isinstance(profile.languages, dict) else {}
@@ -911,10 +957,35 @@ def user_public_profile(request, user_id):
             data['website'] = company.website
             data['headquarters'] = company.headquarters
             data['business_hours'] = company.business_hours
-            data['average_rating'] = str(company.average_rating)
-            data['review_count'] = company.review_count
+
+            total_delivered = max(company.completed_tasks or 0, direct_completed_tasks, completed_bids_count)
+            data['completed_tasks'] = total_delivered
+            data['completed_jobs'] = total_delivered
+            data['tasks_completed_count'] = total_delivered
+
+            # Also check company specific reviews
+            comp_reviews = getattr(company, 'reviews', None)
+            comp_rev_count = comp_reviews.count() if comp_reviews else 0
+            if comp_rev_count > 0:
+                for cr in comp_reviews.all()[:10]:
+                    reviews_list.append({
+                        "id": cr.id,
+                        "reviewer_name": getattr(cr, 'client_name', 'Verified Client') or "Verified Client",
+                        "rating": cr.rating,
+                        "comment": cr.comment or "Project completed successfully.",
+                        "date": cr.created_at.strftime('%b %d, %Y') if hasattr(cr, 'created_at') else "Recent",
+                        "task_title": "Enterprise Contract",
+                        "verified_hire": True,
+                    })
+
+            calc_avg = real_avg_rating if real_avg_rating is not None else float(company.average_rating or 0)
+            calc_cnt = max(real_review_count, comp_rev_count, company.review_count or 0)
+
+            data['average_rating'] = str(round(calc_avg, 1)) if calc_avg > 0 else "0.0"
+            data['review_count'] = calc_cnt
+            data['reviews'] = reviews_list
+
             data['team_size'] = company.team_size
-            data['completed_tasks'] = company.completed_tasks
             data['response_time'] = company.response_time
 
     return Response(data)

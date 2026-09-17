@@ -104,6 +104,10 @@ const translations: Record<string, Record<string, string>> = {
     techAndTags: "Key Technologies & Deliverables",
     closeModal: "Close",
     expandToView: "Click to view case study & gallery",
+    clientReviewsTitle: "Client Reviews & Verified Feedback",
+    noReviewsYet: "No client reviews published yet",
+    noReviewsYetDesc: "Verified reviews and star ratings appear here once clients complete tasks and release escrow.",
+    verifiedClientHire: "Verified Client Contract",
   },
   fr: {
     backToDirectory: "Retour à l'Annuaire & Recherche",
@@ -197,6 +201,10 @@ const translations: Record<string, Record<string, string>> = {
     techAndTags: "Technologies Clés & Livrables",
     closeModal: "Fermer",
     expandToView: "Cliquer pour voir l'étude de cas et la galerie",
+    clientReviewsTitle: "Avis Clients & Évaluations Vérifiées",
+    noReviewsYet: "Aucun avis client publié pour l'instant",
+    noReviewsYetDesc: "Les avis et notes vérifiés s'afficheront ici dès que les clients auront validé les travaux et libéré le séquestre.",
+    verifiedClientHire: "Marché Client Vérifié",
   }
 };
 
@@ -653,7 +661,13 @@ export default function PublicProfilePage() {
       } catch {}
     }
     return list;
-  }, [profile, validId]);
+  }, [profile, validId, techLocation, techCategory]);
+
+  const clientReviewsList: any[] = useMemo(() => {
+    if (Array.isArray(profile?.reviews) && profile.reviews.length > 0) return profile.reviews;
+    if (Array.isArray(profile?.client_reviews) && profile.client_reviews.length > 0) return profile.client_reviews;
+    return [];
+  }, [profile]);
 
   const teamList: any[] = useMemo(() => {
     if (Array.isArray(profile?.team) && profile.team.length > 0) return profile.team;
@@ -1632,6 +1646,61 @@ export default function PublicProfilePage() {
                       </span>
                     </div>
                   </div>
+                </section>
+
+                {/* 6. Verified Client Reviews & Ratings */}
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>
+                    <iconify-icon icon="lucide:star" style={{ color: "#eab308" }} />
+                    {t.clientReviewsTitle} ({clientReviewsList.length})
+                  </h2>
+
+                  {clientReviewsList.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "28px 20px", background: "#f8fafc", borderRadius: 16, border: "1px dashed #cbd5e1" }}>
+                      <iconify-icon icon="lucide:message-square-dashed" style={{ fontSize: 32, color: "#94a3b8", marginBottom: 8 }} />
+                      <h4 style={{ margin: "0 0 4px", fontSize: 15, color: "#001f3f" }}>{t.noReviewsYet}</h4>
+                      <p style={{ margin: 0, color: "#64748b", fontSize: 13, maxWidth: 440, marginLeft: "auto", marginRight: "auto" }}>
+                        {t.noReviewsYetDesc}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={styles.reviewsList}>
+                      {clientReviewsList.map((rev: any, idx: number) => {
+                        const stars = Math.min(5, Math.max(1, Number(rev.rating) || 5));
+                        const rInitials = (rev.reviewer_name || "CL").slice(0, 2).toUpperCase();
+
+                        return (
+                          <div key={rev.id || idx} className={styles.reviewCard}>
+                            <div className={styles.reviewTop}>
+                              <div className={styles.reviewerInfo}>
+                                <div className={styles.reviewerAvatar}>{rInitials}</div>
+                                <div>
+                                  <h5 className={styles.reviewerName}>{rev.reviewer_name}</h5>
+                                  <span className={styles.reviewDate}>📅 {rev.date || "Recent"}</span>
+                                </div>
+                              </div>
+
+                              <div className={styles.reviewStars}>
+                                {[...Array(stars)].map((_, i) => (
+                                  <iconify-icon key={i} icon="lucide:star" />
+                                ))}
+                                <strong style={{ fontSize: 13, color: "#001f3f", marginLeft: 4 }}>
+                                  {stars}.0
+                                </strong>
+                              </div>
+                            </div>
+
+                            <p className={styles.reviewComment}>{rev.comment}</p>
+
+                            <div className={styles.reviewTaskBadge}>
+                              <iconify-icon icon="lucide:shield-check" />
+                              <span>{rev.task_title || t.verifiedClientHire}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
               </div>
 
