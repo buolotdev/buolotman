@@ -21,6 +21,7 @@ const translations: Record<string, Record<string, string>> = {
     statDirectOffers: "Direct Job Offers",
     statInProgress: "Active / In Progress",
     statPending: "Pending Acceptance",
+    statCompletedProjects: "Completed Projects",
     tabAll: "All Projects",
     tabDirect: "Direct Offers",
     tabBids: "Proposal Bids",
@@ -39,10 +40,13 @@ const translations: Record<string, Record<string, string>> = {
     clientRole: "Client / Employer",
     escrowProtection: "Escrow Protection",
     vaultProtected: "🛡️ Funds Vault Protected",
+    completedEscrow: "🛡️ Payment Released & Completed",
     pendingEscrow: "⏳ Pending Acceptance",
     progressLabel: "Execution Progress",
     msgClient: "Message Client",
     openWorkspace: "Open Workspace & Accept →",
+    openActiveWorkspace: "Open Workspace →",
+    viewCompletedWorkspace: "View Completed Project →",
   },
   fr: {
     searchHeader: "Rechercher des projets et offres directes...",
@@ -54,6 +58,7 @@ const translations: Record<string, Record<string, string>> = {
     statDirectOffers: "Offres Directes d'Emploi",
     statInProgress: "En cours d'Exécution",
     statPending: "En attente d'Acceptation",
+    statCompletedProjects: "Projets Terminés",
     tabAll: "Tous les Projets",
     tabDirect: "Offres Directes",
     tabBids: "Offres Soumises",
@@ -72,10 +77,13 @@ const translations: Record<string, Record<string, string>> = {
     clientRole: "Client / Donneur d'ordre",
     escrowProtection: "Protection Séquestre",
     vaultProtected: "🛡️ Fonds Sécurisés en Coffre",
+    completedEscrow: "🛡️ Paiement Libéré & Terminé",
     pendingEscrow: "⏳ En attente d'acceptation",
     progressLabel: "Progression des travaux",
     msgClient: "Contacter le Client",
     openWorkspace: "Ouvrir l'Espace & Valider →",
+    openActiveWorkspace: "Ouvrir l'Espace →",
+    viewCompletedWorkspace: "Voir le Projet Terminé →",
   }
 };
 
@@ -156,9 +164,9 @@ export default function TechnicianProjectsPage() {
       if (isAssignedId || isSpecialistNameMatch || hasDirectTag || hasDirectSkill || hasDirectContact || isDirectStatus || isGeneralMatch) {
         seenTaskIds.add(tKey);
 
-        const isLocallyAccepted = typeof window !== "undefined" && window.localStorage.getItem(`boulotman_accepted_task_${taskItem.id || taskItem.taskId}`) === "true";
-        const isAccepted = taskItem.status === "in_progress" || isLocallyAccepted;
         const isCompleted = taskItem.status === "completed";
+        const isLocallyAccepted = typeof window !== "undefined" && window.localStorage.getItem(`boulotman_accepted_task_${taskItem.id || taskItem.taskId}`) === "true";
+        const isAccepted = isCompleted || taskItem.status === "in_progress" || isLocallyAccepted;
         const clientName = taskItem.client_name || taskItem.clientName || `Client #${taskItem.client || ""}`.trim() || "Client";
         const totalBudget = Number(taskItem.budget_max || taskItem.budget || taskItem.budget_min || 0);
 
@@ -229,9 +237,11 @@ export default function TechnicianProjectsPage() {
   }, [combinedProjects, activeFilter, searchQuery]);
 
   // Summary Metrics
-  const totalDirectOffers = combinedProjects.filter(p => p.isDirect).length;
-  const inProgressProjects = combinedProjects.filter(p => p.status === "in_progress").length;
-  const pendingOffers = combinedProjects.filter(p => p.status === "pending_acceptance").length;
+  const completedProjectsCount = combinedProjects.filter(p => p.isCompleted).length;
+  const activeDirectOffersCount = combinedProjects.filter(p => p.isDirect && !p.isCompleted).length;
+  const inProgressProjectsCount = combinedProjects.filter(p => p.status === "in_progress" && !p.isCompleted).length;
+  const pendingOffersCount = combinedProjects.filter(p => p.status === "pending_acceptance" && !p.isCompleted).length;
+  const activeBidsCount = combinedProjects.filter(p => !p.isDirect && !p.isCompleted).length;
 
   return (
     <div className={styles.page}>
@@ -274,12 +284,12 @@ export default function TechnicianProjectsPage() {
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: "#dcfce7", color: "#16a34a" }}>
-                  <iconify-icon icon="lucide:user-check" />
+                <div className={styles.statIcon} style={{ background: "#f0fdf4", color: "#16a34a" }}>
+                  <iconify-icon icon="lucide:check-circle-2" />
                 </div>
                 <div>
-                  <div className={styles.statValue}>{totalDirectOffers}</div>
-                  <div className={styles.statLabel}>{t.statDirectOffers}</div>
+                  <div className={styles.statValue}>{completedProjectsCount}</div>
+                  <div className={styles.statLabel}>{t.statCompletedProjects}</div>
                 </div>
               </div>
 
@@ -288,7 +298,7 @@ export default function TechnicianProjectsPage() {
                   <iconify-icon icon="lucide:activity" />
                 </div>
                 <div>
-                  <div className={styles.statValue}>{inProgressProjects}</div>
+                  <div className={styles.statValue}>{inProgressProjectsCount}</div>
                   <div className={styles.statLabel}>{t.statInProgress}</div>
                 </div>
               </div>
@@ -298,7 +308,7 @@ export default function TechnicianProjectsPage() {
                   <iconify-icon icon="lucide:clock" />
                 </div>
                 <div>
-                  <div className={styles.statValue}>{pendingOffers}</div>
+                  <div className={styles.statValue}>{pendingOffersCount}</div>
                   <div className={styles.statLabel}>{t.statPending}</div>
                 </div>
               </div>
@@ -317,19 +327,19 @@ export default function TechnicianProjectsPage() {
                   className={`${styles.filterTab} ${activeFilter === "direct" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("direct")}
                 >
-                  {t.tabDirect} ({totalDirectOffers})
+                  {t.tabDirect} ({activeDirectOffersCount})
                 </button>
                 <button 
                   className={`${styles.filterTab} ${activeFilter === "bids" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("bids")}
                 >
-                  {t.tabBids}
+                  {t.tabBids} ({activeBidsCount})
                 </button>
                 <button 
                   className={`${styles.filterTab} ${activeFilter === "completed" ? styles.filterTabActive : ""}`}
                   onClick={() => setActiveFilter("completed")}
                 >
-                  {t.tabCompleted}
+                  {t.tabCompleted} ({completedProjectsCount})
                 </button>
               </div>
 
@@ -437,7 +447,11 @@ export default function TechnicianProjectsPage() {
                             {t.escrowProtection}
                           </span>
                           <span className={styles.escrowAmount}>
-                            {project.isAccepted ? t.vaultProtected : t.pendingEscrow}
+                            {project.isCompleted 
+                              ? t.completedEscrow 
+                              : project.isAccepted 
+                                ? t.vaultProtected 
+                                : t.pendingEscrow}
                           </span>
                         </div>
 
@@ -473,7 +487,11 @@ export default function TechnicianProjectsPage() {
                           href={`/dashboard/technician/projects/${project.taskId}`}
                           className={styles.btnPrimary}
                         >
-                          {t.openWorkspace}
+                          {project.isCompleted 
+                            ? t.viewCompletedWorkspace 
+                            : project.isAccepted 
+                              ? t.openActiveWorkspace 
+                              : t.openWorkspace}
                         </Link>
                       </div>
                     </div>

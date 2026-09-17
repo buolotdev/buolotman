@@ -19,6 +19,10 @@ const translations: Record<string, Record<string, string>> = {
     directJobTitle: "Direct Job Offer Received from Client",
     projectAcceptedDesc: "This project is active. Client has been notified that you accepted. You can submit milestones and communicate directly.",
     directJobDesc: "Client has directly selected and invited you for this task. Click Accept to confirm the assignment and notify client.",
+    projectCompletedBadge: "Completed & Released",
+    projectCompletedTitle: "Project Completed & Settled 🎉",
+    projectCompletedDesc: "This project is marked as 100% completed and all escrow funds have been released to your balance. You can continue communicating with the client below if needed.",
+    projectSettledAction: "Project Completed & Paid",
     acceptOffer: "Accept Job Offer",
     acceptingOffer: "Accepting Offer...",
     clientNotified: "Client Notified",
@@ -82,6 +86,10 @@ const translations: Record<string, Record<string, string>> = {
     directJobTitle: "Proposition de Mission Reçue du Client",
     projectAcceptedDesc: "Ce projet est actif. Le client a été informé de votre acceptation. Vous pouvez soumettre vos jalons et échanger directement.",
     directJobDesc: "Le client vous a directement sélectionné et invité pour cette mission. Cliquez sur Accepter pour confirmer l'attribution.",
+    projectCompletedBadge: "Terminé & Débloqué",
+    projectCompletedTitle: "Projet Terminé & Réglé 🎉",
+    projectCompletedDesc: "Ce projet est marqué comme 100% terminé et tous les fonds bloqués sous séquestre ont été versés à votre solde. Vous pouvez continuer à échanger avec le client ci-dessous.",
+    projectSettledAction: "Projet Terminé & Rémunéré",
     acceptOffer: "Accepter la Mission",
     acceptingOffer: "Acceptation en cours...",
     clientNotified: "Client Notifié",
@@ -439,7 +447,11 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
 
             {/* DIRECT HIRE ACCEPTANCE BANNER */}
             <div style={{
-              background: isAccepted ? "linear-gradient(135deg, #064e3b 0%, #047857 100%)" : "linear-gradient(135deg, #001f3f 0%, #003366 100%)",
+              background: isCompleted 
+                ? "linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)" 
+                : isAccepted 
+                  ? "linear-gradient(135deg, #064e3b 0%, #047857 100%)" 
+                  : "linear-gradient(135deg, #001f3f 0%, #003366 100%)",
               borderRadius: "16px",
               padding: "22px 24px",
               color: "#fff",
@@ -454,7 +466,7 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
                   <span style={{ 
-                    background: isAccepted ? "#22c55e" : "#ff4500", 
+                    background: isCompleted ? "#818cf8" : isAccepted ? "#22c55e" : "#ff4500", 
                     color: "#fff", 
                     padding: "3px 10px", 
                     borderRadius: "999px", 
@@ -463,23 +475,30 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                     letterSpacing: "0.04em",
                     textTransform: "uppercase"
                   }}>
-                    {isAccepted ? t.offerAcceptedActive : t.directJobInvitation}
+                    {isCompleted ? t.projectCompletedBadge : isAccepted ? t.offerAcceptedActive : t.directJobInvitation}
                   </span>
                   <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)" }}>
                     {t.fromClient} <strong>{clientName}</strong>
                   </span>
                 </div>
                 <h3 style={{ margin: "0 0 4px", fontSize: "19px", fontWeight: 800 }}>
-                  {isAccepted ? t.projectAcceptedTitle : t.directJobTitle}
+                  {isCompleted ? t.projectCompletedTitle : isAccepted ? t.projectAcceptedTitle : t.directJobTitle}
                 </h3>
                 <p style={{ margin: 0, fontSize: "13.5px", color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
-                  {isAccepted
+                  {isCompleted
+                    ? t.projectCompletedDesc
+                    : isAccepted
                     ? t.projectAcceptedDesc
                     : t.directJobDesc}
                 </p>
               </div>
 
-              {!isAccepted ? (
+              {isCompleted ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.15)", padding: "8px 16px", borderRadius: "10px" }}>
+                  <iconify-icon icon="lucide:check-circle" style={{ fontSize: "20px", color: "#86efac" }} />
+                  <span style={{ fontSize: "13.5px", fontWeight: 700 }}>{t.projectSettledAction}</span>
+                </div>
+              ) : !isAccepted ? (
                 <div style={{ display: "flex", gap: "10px" }}>
                   <button
                     type="button"
@@ -760,28 +779,49 @@ export default function TechnicianWorkspacePage({ params }: { params: Promise<{ 
                 <section className={styles.card}>
                   <h3>{t.quickActions}</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    {!isAccepted && (
-                      <button 
-                        className={styles.primaryButton} 
-                        style={{ background: "#22c55e" }}
-                        disabled={accepting}
-                        onClick={handleAcceptOffer}
-                      >
-                        <iconify-icon icon="lucide:check-circle" /> {accepting ? t.acceptingOffer : t.acceptOffer}
-                      </button>
+                    {isCompleted ? (
+                      <div style={{
+                        background: "#f0fdf4",
+                        border: "1px solid #bbf7d0",
+                        borderRadius: "12px",
+                        padding: "14px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        color: "#166534"
+                      }}>
+                        <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: "24px", color: "#16a34a", flexShrink: 0 }} />
+                        <div>
+                          <strong style={{ display: "block", fontSize: "14px" }}>{t.projectSettledAction}</strong>
+                          <span style={{ fontSize: "12.5px", color: "#15803d" }}>All milestones completed & payments released.</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {!isAccepted && (
+                          <button 
+                            className={styles.primaryButton} 
+                            style={{ background: "#22c55e" }}
+                            disabled={accepting}
+                            onClick={handleAcceptOffer}
+                          >
+                            <iconify-icon icon="lucide:check-circle" /> {accepting ? t.acceptingOffer : t.acceptOffer}
+                          </button>
+                        )}
+                        {totalCost === 0 && (
+                          <button
+                            className={styles.primaryButton}
+                            style={{ background: "#FF4500" }}
+                            onClick={() => setQuoteModalOpen(true)}
+                          >
+                            <iconify-icon icon="lucide:file-text" /> {t.submitPriceQuote}
+                          </button>
+                        )}
+                        <button className={styles.primaryButton} onClick={() => setIsModalOpen(true)}>
+                          {t.submitMilestoneUpdate}
+                        </button>
+                      </>
                     )}
-                    {totalCost === 0 && (
-                      <button
-                        className={styles.primaryButton}
-                        style={{ background: "#FF4500" }}
-                        onClick={() => setQuoteModalOpen(true)}
-                      >
-                        <iconify-icon icon="lucide:file-text" /> {t.submitPriceQuote}
-                      </button>
-                    )}
-                    <button className={styles.primaryButton} onClick={() => setIsModalOpen(true)}>
-                      {t.submitMilestoneUpdate}
-                    </button>
                     <Link 
                       href={`/dashboard/technician/messages?client=${clientId}&name=${encodeURIComponent(clientName)}&task=${taskId}`} 
                       className={styles.outlineButton} 
