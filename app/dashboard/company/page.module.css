@@ -216,7 +216,15 @@
   .welcomeTitle { font-size: 24px; }
   .welcomeSubtitle { font-size: 14px; }
   .welcomeActions { width: 100%; flex-direction: column; gap: 10px; }
-  .primaryButton, .secondaryButton { width: 100%; justify-content: center; }
+  .welcomeActions > button,
+  .welcomeActions > a,
+  .primaryButton,
+  .secondaryButton {
+    width: 100% !important;
+    box-sizing: border-box;
+    justify-content: center;
+    text-align: center;
+  }
 
   .accountStatusSection { padding: 18px 14px; border-radius: 18px; }
   .verifiedNotice { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 14px; }

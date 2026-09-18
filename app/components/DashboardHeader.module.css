@@ -523,11 +523,20 @@
     font-size: 12px;
   }
 
-  .notificationDropdown,
+  .dropdown {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .notificationDropdown {
+    width: min(340px, calc(100vw - 24px)) !important;
+    right: -48px !important;
+    left: auto !important;
+  }
+
   .profileDropdown {
-    width: calc(100vw - 24px) !important;
-    max-width: 340px;
-    right: -40px;
+    width: min(260px, calc(100vw - 24px)) !important;
+    right: 0 !important;
+    left: auto !important;
   }
 }
 

@@ -237,6 +237,7 @@ export default function CompanyDashboard() {
             <button 
               type="button"
               onClick={() => router.push("/dashboard/company/tasks")}
+              className={styles.secondaryButton}
               style={{
                 background: 'rgba(255, 255, 255, 0.15)',
                 backdropFilter: 'blur(10px)',
@@ -266,6 +267,7 @@ export default function CompanyDashboard() {
                 }
                 router.push("/dashboard/company/quotes");
               }}
+              className={styles.secondaryButton}
               style={{
                 background: 'rgba(255, 255, 255, 0.15)',
                 backdropFilter: 'blur(10px)',
