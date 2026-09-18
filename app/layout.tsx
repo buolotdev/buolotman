@@ -4,6 +4,7 @@ import SuppressHydrationWarnings from "./components/SuppressHydrationWarnings";
 import IconifyLoader from "./components/IconifyLoader";
 import Providers from "./components/Providers";
 import MaintenanceGuard from "./components/MaintenanceGuard";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -48,6 +49,7 @@ export default function RootLayout({
             {children}
           </MaintenanceGuard>
         </Providers>
+        <CookieConsentBanner />
         <IconifyLoader />
       </body>
     </html>
