@@ -32,7 +32,8 @@ export default function ImageCropperModal({
     if (!croppedAreaPixels) return;
     setIsProcessing(true);
     try {
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, "cropped.jpg");
+      const maxDim = aspectRatio > 2 ? 1600 : 600;
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, "cropped.jpg", maxDim);
       onCropComplete(croppedImage);
     } catch (e) {
       console.error(e);

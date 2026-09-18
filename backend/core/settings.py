@@ -156,3 +156,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://admin.boulotman.com",
     "https://main.d33t34h059zav1.amplifyapp.com",
 ]
+
+# Allow uploads up to 50MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+
