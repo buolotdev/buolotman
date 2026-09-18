@@ -538,6 +538,15 @@ body {
 }
 
 @media(max-width:768px) {
+  .bm-main-header-inner {
+    padding: 8px 16px !important;
+  }
+
+  .bm-main-logo img {
+    height: 48px !important;
+    max-height: 48px !important;
+  }
+
   .bm-main-hero,
   #hero.bm-main-hero {
     padding: 24px 16px 20px !important;
@@ -548,19 +557,27 @@ body {
   }
 
   .bm-main-hero-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 100% !important;
     gap: 24px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
+  .bm-main-hero-grid > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   .bm-main-hero h1 {
-    font-size: clamp(1.45rem, 6vw, 1.9rem) !important;
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem) !important;
     line-height: 1.22 !important;
     margin-bottom: 12px !important;
     word-break: break-word !important;
     overflow-wrap: break-word !important;
+    hyphens: auto !important;
   }
 
   .bm-hero-br {
@@ -573,6 +590,7 @@ body {
     margin-bottom: 16px !important;
     max-width: 100% !important;
     word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   .bm-main-search {
@@ -580,6 +598,7 @@ body {
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
     padding: 10px !important;
     gap: 8px !important;
@@ -592,7 +611,13 @@ body {
   .bm-main-search button {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
+  }
+
+  .bm-main-search-marquee {
+    max-width: calc(100% - 32px) !important;
+    overflow: hidden !important;
   }
 
   .bm-main-search-input {
@@ -603,6 +628,9 @@ body {
   .bm-main-search select {
     padding: 12px 14px !important;
     font-size: 0.85rem !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
   }
 
   .bm-main-search button {
@@ -615,6 +643,8 @@ body {
     flex-direction: column !important;
     gap: 10px !important;
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
@@ -622,6 +652,7 @@ body {
     text-align: center !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
     padding: 12px 16px !important;
     font-size: 0.88rem !important;
@@ -631,17 +662,47 @@ body {
   .bm-main-live-box {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
     height: auto !important;
     max-height: 380px !important;
     padding: 16px !important;
     border-radius: 16px !important;
   }
+
+  .bm-main-task {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bm-main-task-top {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bm-main-task-user {
+    min-width: 0 !important;
+    max-width: calc(100% - 75px) !important;
+  }
+
+  .bm-main-task-title {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .bm-main-task-meta {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
 }
 
 @media(max-width:480px) {
   .bm-main-hero h1 {
-    font-size: 1.45rem !important;
+    font-size: 1.4rem !important;
     line-height: 1.2 !important;
   }
 
