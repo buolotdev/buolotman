@@ -303,7 +303,7 @@ export default function CookieConsentBanner() {
         }
 
         .bm-cookie-link {
-          color: #2563eb;
+          color: #ff4500;
           text-decoration: underline;
           text-underline-offset: 3px;
           font-weight: 600;
@@ -311,7 +311,7 @@ export default function CookieConsentBanner() {
         }
 
         .bm-cookie-link:hover {
-          color: #1d4ed8;
+          color: #e03e00;
         }
 
         .bm-cookie-actions {
@@ -337,27 +337,27 @@ export default function CookieConsentBanner() {
 
         .bm-cookie-btn-customize {
           background: #ffffff;
-          border: 1.5px solid #cbd5e1;
-          color: #2563eb;
+          border: 1.5px solid #001f3f;
+          color: #001f3f;
         }
 
         .bm-cookie-btn-customize:hover {
-          background: #f8fafc;
-          border-color: #94a3b8;
-          color: #1d4ed8;
+          background: #fff8f5;
+          border-color: #ff4500;
+          color: #ff4500;
         }
 
         .bm-cookie-btn-accept {
-          background: #1d4ed8;
-          border: 1.5px solid #1d4ed8;
+          background: #ff4500;
+          border: 1.5px solid #ff4500;
           color: #ffffff;
-          box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+          box-shadow: 0 4px 12px rgba(255, 69, 0, 0.28);
         }
 
         .bm-cookie-btn-accept:hover {
-          background: #1e40af;
-          border-color: #1e40af;
-          box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
+          background: #e03e00;
+          border-color: #e03e00;
+          box-shadow: 0 6px 16px rgba(255, 69, 0, 0.38);
         }
 
         /* CUSTOMIZE MODAL */
@@ -367,7 +367,7 @@ export default function CookieConsentBanner() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(15, 23, 42, 0.55);
+          background: rgba(0, 31, 63, 0.6);
           backdrop-filter: blur(4px);
           z-index: 1000000;
           display: flex;
@@ -384,7 +384,7 @@ export default function CookieConsentBanner() {
           max-height: 90vh;
           overflow-y: auto;
           padding: 24px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 25px 50px -12px rgba(0, 31, 63, 0.3);
           font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           box-sizing: border-box;
           animation: bmCookieModalIn 0.25s ease-out;
@@ -412,7 +412,7 @@ export default function CookieConsentBanner() {
           margin: 0;
           font-size: 18px;
           font-weight: 700;
-          color: #0f172a;
+          color: #001f3f;
         }
 
         .bm-cookie-modal-close {
@@ -427,7 +427,7 @@ export default function CookieConsentBanner() {
 
         .bm-cookie-modal-close:hover {
           background: #f1f5f9;
-          color: #0f172a;
+          color: #001f3f;
         }
 
         .bm-cookie-modal-desc {
@@ -524,7 +524,7 @@ export default function CookieConsentBanner() {
         }
 
         .bm-cookie-switch input:checked + .bm-cookie-slider {
-          background-color: #1d4ed8;
+          background-color: #ff4500;
         }
 
         .bm-cookie-switch input:checked + .bm-cookie-slider:before {
