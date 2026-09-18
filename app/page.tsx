@@ -567,9 +567,9 @@ export default function Home() {
           <div>
             <h1>
               {lang === 'fr' ? (
-                <>Connecter les clients avec des<br /><span>techniciens et ingénieurs vérifiés</span></>
+                <>Connecter les clients avec des<br className="bm-hero-br" /><span>techniciens et ingénieurs vérifiés</span></>
               ) : (
-                <>Connecting clients with<br /><span>verified technicians and engineers</span></>
+                <>Connecting clients with<br className="bm-hero-br" /><span>verified technicians and engineers</span></>
               )}
             </h1>
 
