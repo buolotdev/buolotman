@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import "./footer.css";
 import { useLocation } from "@/app/context/LocationContext";
+import { getCountryCodeFromName } from "@/app/lib/geoDetector";
 
 interface CountryOption {
   country: string;
@@ -570,8 +571,10 @@ export default function Footer() {
     setCountryOpen(false);
     setCountrySearch("");
     if (typeof window !== "undefined") {
+      const code = getCountryCodeFromName(c.country);
       localStorage.setItem("bmSelectedCountry", c.country);
       localStorage.setItem("country", c.country);
+      localStorage.setItem("country_code", code.toLowerCase());
       localStorage.setItem("user_selected_country", "true");
       localStorage.setItem("bmSelectedCurrency", c.currency);
       localStorage.setItem("bmSelectedCurrencySymbol", c.symbol);

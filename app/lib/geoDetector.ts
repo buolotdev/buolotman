@@ -3,6 +3,80 @@
  * Supports automatic universal detection for ALL countries globally with full manual override memory.
  */
 
+export function getCountryCodeFromName(name: string): string {
+  if (!name) return "US";
+  const trimmed = name.trim().toLowerCase();
+  
+  if (/^[a-z]{2}$/i.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+
+  const nameToCode: Record<string, string> = {
+    "united states": "US",
+    "united states of america": "US",
+    "usa": "US",
+    "us": "US",
+    "united kingdom": "GB",
+    "uk": "GB",
+    "great britain": "GB",
+    "england": "GB",
+    "canada": "CA",
+    "australia": "AU",
+    "france": "FR",
+    "germany": "DE",
+    "italy": "IT",
+    "spain": "ES",
+    "pakistan": "PK",
+    "india": "IN",
+    "united arab emirates": "AE",
+    "uae": "AE",
+    "saudi arabia": "SA",
+    "qatar": "QA",
+    "egypt": "EG",
+    "china": "CN",
+    "japan": "JP",
+    "brazil": "BR",
+    "mexico": "MX",
+    "rwanda": "RW",
+    "kenya": "KE",
+    "nigeria": "NG",
+    "ghana": "GH",
+    "south africa": "ZA",
+    "ivory coast": "CI",
+    "côte d'ivoire": "CI",
+    "cote d'ivoire": "CI",
+    "cameroon": "CM",
+    "cameroun": "CM",
+    "uganda": "UG",
+    "senegal": "SN",
+    "sénégal": "SN",
+    "tanzania": "TZ",
+    "dr congo": "CD",
+    "democratic republic of the congo": "CD",
+    "congo": "CG",
+    "ethiopia": "ET",
+    "zambia": "ZM",
+    "zimbabwe": "ZW",
+    "mali": "ML",
+    "burkina faso": "BF",
+    "guinea": "GN",
+    "benin": "BJ",
+    "togo": "TG",
+    "niger": "NE",
+    "gabon": "GA",
+    "belgium": "BE",
+    "madagascar": "MG",
+    "morocco": "MA",
+    "algeria": "DZ",
+    "tunisia": "TN",
+    "kuwait": "KW",
+    "oman": "OM",
+    "bahrain": "BH",
+  };
+
+  return nameToCode[trimmed] || "US";
+}
+
 export function getCountryNameFromCode(code: string): string {
   if (!code || code.length !== 2) return "United States";
   const upper = code.toUpperCase();
@@ -82,9 +156,12 @@ export async function detectAndSetGeoLanguage(): Promise<{
 
   // If user already manually selected both, respect their explicit choice
   if (hasManualCountry && hasManualLang && initialCountry && initialLang) {
+    const finalCode = (initialCountryCode && initialCountryCode.length === 2) 
+      ? initialCountryCode 
+      : getCountryCodeFromName(initialCountry);
     return {
       country: initialCountry,
-      countryCode: initialCountryCode || "US",
+      countryCode: finalCode || "US",
       lang: initialLang,
       changed: false,
     };
@@ -294,8 +371,8 @@ export async function detectAndSetGeoLanguage(): Promise<{
     detectedCountry = "United States";
     detectedCountryCode = "US";
   }
-  if (!detectedCountryCode) {
-    detectedCountryCode = "US";
+  if (!detectedCountryCode || detectedCountryCode.length !== 2) {
+    detectedCountryCode = getCountryCodeFromName(detectedCountry);
   }
   if (!detectedLang) {
     detectedLang = "en";

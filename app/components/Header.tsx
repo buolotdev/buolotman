@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import "./header.css";
-import { detectAndSetGeoLanguage } from "@/app/lib/geoDetector";
+import { detectAndSetGeoLanguage, getCountryCodeFromName } from "@/app/lib/geoDetector";
 import CountrySelector from "./CountrySelector";
 
 function Header() {
@@ -12,13 +12,18 @@ function Header() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const savedCountry = localStorage.getItem("country") || "United States";
+      const savedCode = localStorage.getItem("country_code") || getCountryCodeFromName(savedCountry);
+
       setLang(localStorage.getItem("lang") || "en");
-      setCountry(localStorage.getItem("country") || "United States");
-      setCountryCode((localStorage.getItem("country_code") || "us").toLowerCase());
+      setCountry(savedCountry);
+      setCountryCode(savedCode.toLowerCase());
 
       detectAndSetGeoLanguage().then(({ country: c, countryCode: cc, lang: l }) => {
-        if (c) setCountry(c);
-        if (cc) setCountryCode(cc.toLowerCase());
+        if (c) {
+          setCountry(c);
+          setCountryCode((cc || getCountryCodeFromName(c)).toLowerCase());
+        }
         if (l) setLang(l);
       });
     }
@@ -295,8 +300,9 @@ function Header() {
         const allWraps = Array.from(document.querySelectorAll('.bmNavRight .bmDropWrap'));
         const index = allWraps.indexOf(parentWrap);
         if (index === 0) {
+          const finalCode = (code || getCountryCodeFromName(countryVal)).toLowerCase();
           localStorage.setItem("country", countryVal);
-          if (code) localStorage.setItem("country_code", code);
+          localStorage.setItem("country_code", finalCode);
           localStorage.setItem("user_selected_country", "true");
           window.location.reload();
         } else if (index === 1) {
@@ -1193,7 +1199,7 @@ function Header() {
       <!-- COUNTRY -->
       <div class="bmDropWrap">
         <div class="bmDropBtn">
-          <img class="bmFlag" src="https://flagcdn.com/w20/${countryCode || 'us'}.png" onerror="this.src='https://flagcdn.com/w20/us.png'" alt="${country}"> ${country}
+          <img class="bmFlag" src="https://flagcdn.com/w20/${((country && country.toLowerCase() !== 'united states') ? getCountryCodeFromName(country) : (countryCode || 'US')).toLowerCase()}.png" onerror="this.src='https://flagcdn.com/w20/us.png'" alt="${country}"> ${country}
         </div>
         <div class="bmDropMenu" style="max-height:280px; overflow-y:auto;">
           <div class="bmDropItem" data-country="United States" data-code="US"><img class="bmFlag" src="https://flagcdn.com/w20/us.png"> United States</div>

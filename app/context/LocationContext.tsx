@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
-import { getCountryNameFromCode } from "@/app/lib/geoDetector";
+import { getCountryNameFromCode, getCountryCodeFromName } from "@/app/lib/geoDetector";
 
 export interface CountryInfo {
   code: string;
@@ -193,7 +193,10 @@ export function getFlagEmoji(countryCode: string): string {
 }
 
 export function resolveCountryInfo(code: string, fallbackName?: string, fallbackCurrency?: string, fallbackCity?: string): CountryInfo {
-  const upper = (code || "US").toUpperCase();
+  let upper = (code || "US").toUpperCase();
+  if (upper.length !== 2) {
+    upper = getCountryCodeFromName(code);
+  }
   if (SUPPORTED_COUNTRIES[upper]) {
     return SUPPORTED_COUNTRIES[upper];
   }
