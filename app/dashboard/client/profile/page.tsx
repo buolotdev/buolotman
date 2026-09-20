@@ -10,6 +10,7 @@ import { useToast } from "@/app/components/Toast";
 import ClientSidebar from "@/app/components/ClientSidebar";
 import DashboardHeader from "@/app/components/DashboardHeader";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
+import { PLATFORM_SUPPORTED_COUNTRIES } from "@/app/dashboard/technician/profile/page";
 
 export type ClientType = "household" | "business" | "ngo" | "property_manager" | "other";
 
@@ -1184,14 +1185,23 @@ export default function ClientProfilePage() {
                     <label htmlFor="country">
                       <iconify-icon icon="lucide:globe" /> Primary Country
                     </label>
-                    <input
+                    <select
                       id="country"
-                      type="text"
                       className={styles.formInput}
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      placeholder="e.g. Benin, Togo, Côte d'Ivoire"
-                    />
+                      style={{ cursor: "pointer", fontWeight: 600 }}
+                    >
+                      <option value="" disabled>{lang === "fr" ? "Sélectionnez un pays..." : "Select Country..."}</option>
+                      {country && !PLATFORM_SUPPORTED_COUNTRIES.some(c => c.name.toLowerCase() === country.toLowerCase()) && (
+                        <option value={country}>{country}</option>
+                      )}
+                      {PLATFORM_SUPPORTED_COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.name}>
+                          {c.flag} {c.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className={styles.formGroup}>

@@ -59,6 +59,35 @@ const PLATFORM_TRADE_CATEGORIES = [
   "Architecture, CAD & Quantity Surveying"
 ];
 
+export const PLATFORM_SUPPORTED_COUNTRIES = [
+  { name: "Cameroon", code: "CM", flag: "🇨🇲" },
+  { name: "Rwanda", code: "RW", flag: "🇷🇼" },
+  { name: "Ivory Coast", code: "CI", flag: "🇨🇮" },
+  { name: "Nigeria", code: "NG", flag: "🇳🇬" },
+  { name: "Kenya", code: "KE", flag: "🇰🇪" },
+  { name: "Ghana", code: "GH", flag: "🇬🇭" },
+  { name: "South Africa", code: "ZA", flag: "🇿🇦" },
+  { name: "Benin", code: "BJ", flag: "🇧🇯" },
+  { name: "Togo", code: "TG", flag: "🇹🇬" },
+  { name: "Senegal", code: "SN", flag: "🇸🇳" },
+  { name: "Uganda", code: "UG", flag: "🇺🇬" },
+  { name: "Tanzania", code: "TZ", flag: "🇹🇿" },
+  { name: "DR Congo", code: "CD", flag: "🇨🇩" },
+  { name: "Congo", code: "CG", flag: "🇨🇬" },
+  { name: "Mali", code: "ML", flag: "🇲🇱" },
+  { name: "Burkina Faso", code: "BF", flag: "🇧🇫" },
+  { name: "Guinea", code: "GN", flag: "🇬🇳" },
+  { name: "Gabon", code: "GA", flag: "🇬🇦" },
+  { name: "United States", code: "US", flag: "🇺🇸" },
+  { name: "United Kingdom", code: "GB", flag: "🇬🇧" },
+  { name: "Canada", code: "CA", flag: "🇨🇦" },
+  { name: "France", code: "FR", flag: "🇫🇷" },
+  { name: "Germany", code: "DE", flag: "🇩🇪" },
+  { name: "Pakistan", code: "PK", flag: "🇵🇰" },
+  { name: "India", code: "IN", flag: "🇮🇳" },
+  { name: "United Arab Emirates", code: "AE", flag: "🇦🇪" },
+];
+
 const DEFAULT_TOOLS: string[] = [];
 
 const profileTranslations: Record<string, Record<string, string>> = {
@@ -1596,7 +1625,22 @@ export default function TechnicianProfilePage() {
                   </div>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.country}</label>
-                    <input className={styles.formInput} placeholder="e.g. Benin" value={country} onChange={(e) => setCountry(e.target.value)} />
+                    <select
+                      className={styles.formInput}
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10, background: "#fff", cursor: "pointer", fontWeight: 600 }}
+                    >
+                      <option value="" disabled>{lang === "fr" ? "Sélectionnez un pays..." : "Select Country..."}</option>
+                      {country && !PLATFORM_SUPPORTED_COUNTRIES.some(c => c.name.toLowerCase() === country.toLowerCase()) && (
+                        <option value={country}>{country}</option>
+                      )}
+                      {PLATFORM_SUPPORTED_COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.name}>
+                          {c.flag} {c.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

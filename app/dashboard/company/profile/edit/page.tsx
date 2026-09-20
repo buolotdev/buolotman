@@ -8,6 +8,7 @@ import { useFetch } from "@/app/lib/useFetch";
 import { api } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { SkeletonBlock } from "@/app/components/skeleton/Skeleton";
+import { PLATFORM_SUPPORTED_COUNTRIES } from "@/app/dashboard/technician/profile/page";
 
 const COMPANY_SIZES = ["", "1-10", "11-50", "51-200", "201-500", "500+"];
 
@@ -292,13 +293,22 @@ export default function EditCompanyProfile() {
             <div className={styles.grid}>
               <label className={styles.field}>
                 <span className={styles.label}>Country</span>
-                <input
-                  type="text"
+                <select
                   className={styles.input}
                   value={form.country}
                   onChange={(e) => handleChange("country", e.target.value)}
-                  placeholder="e.g. Rwanda"
-                />
+                  style={{ cursor: "pointer", fontWeight: 600 }}
+                >
+                  <option value="" disabled>Select Country...</option>
+                  {form.country && !PLATFORM_SUPPORTED_COUNTRIES.some(c => c.name.toLowerCase() === form.country.toLowerCase()) && (
+                    <option value={form.country}>{form.country}</option>
+                  )}
+                  {PLATFORM_SUPPORTED_COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.name}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className={styles.field}>
                 <span className={styles.label}>City</span>
