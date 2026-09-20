@@ -158,7 +158,11 @@ export default function TechniciansPage() {
 
               <div className={styles.badges}>
                 <span className={styles.badge}>Expert</span>
-                <span className={styles.badge}>Verified</span>
+                {Boolean(selectedTech.is_verified || selectedTech.technician_profile?.is_verified) ? (
+                  <span className={styles.badge} style={{ background: "rgba(22, 163, 74, 0.15)", color: "#16a34a" }}>Verified ✓</span>
+                ) : (
+                  <span className={styles.badge} style={{ background: "rgba(245, 158, 11, 0.15)", color: "#d97706" }}>Pending Review</span>
+                )}
               </div>
 
               <p className={styles.profileBio}>{selectedTech.bio || "Certified technician with extensive experience delivering quality services across residential and commercial projects."}</p>

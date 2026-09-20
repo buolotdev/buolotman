@@ -1360,8 +1360,8 @@ export default function TechnicianProfilePage() {
                           <span style={{ fontSize: '11.5px', fontWeight: 800 }}>{t.verifiedPro}</span>
                         </span>
                       ) : (
-                        <span style={{ background: "rgba(2,132,199,0.1)", color: "#0284c7", padding: "3px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                          <iconify-icon icon="lucide:shield" /> {t.identityVerified}
+                        <span style={{ background: "rgba(245, 158, 11, 0.1)", color: "#d97706", padding: "3px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                          <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en attente" : "Pending Verification"}
                         </span>
                       )}
                       {availableNow ? (

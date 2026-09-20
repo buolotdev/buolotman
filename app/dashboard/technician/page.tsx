@@ -294,8 +294,8 @@ export default function TechnicianDashboardPage() {
                         <iconify-icon icon="lucide:shield-check" /> {t_dash.approvedPro}
                       </span>
                     ) : (
-                      <span style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <iconify-icon icon="lucide:award" /> {t_dash.professionalVerified}
+                      <span style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en attente" : "Pending Verification"}
                       </span>
                     )}
                     <span style={{ background: '#dcfce7', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

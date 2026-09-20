@@ -774,14 +774,21 @@ export default function Home() {
                   : [pro.title || "Technical Expert", "Maintenance"];
                 const displaySkills = allSkills.slice(0, 2);
                 const remainingCount = allSkills.length - displaySkills.length;
+                const isProVerified = Boolean(pro.is_verified || pro.verified || pro.technician_profile?.is_verified || pro.user?.is_verified);
 
                 return (
                   <div className="bm-ftx-card" key={pro.id}>
                     {/* TOP BADGES */}
                     <div className="bm-ftx-card-top-bar">
-                      <span className="bm-ftx-badge-verified">
-                        <iconify-icon icon="lucide:shield-check" /> Verified Pro
-                      </span>
+                      {isProVerified ? (
+                        <span className="bm-ftx-badge-verified">
+                          <iconify-icon icon="lucide:shield-check" /> Verified Pro
+                        </span>
+                      ) : (
+                        <span style={{ background: "rgba(245, 158, 11, 0.1)", color: "#d97706", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "3px 8px", borderRadius: "999px", fontSize: "10.5px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <iconify-icon icon="lucide:clock-4" /> Pending Review
+                        </span>
+                      )}
                       <span className="bm-ftx-badge-status">
                         <span className="bm-ftx-pulse-dot" /> {t.ftxMeta}
                       </span>
@@ -798,15 +805,18 @@ export default function Home() {
                             (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
                           }}
                         />
-                        <span className="bm-ftx-avatar-check" title="Verified Identity & Skills">
-                          <iconify-icon icon="lucide:check" />
-                        </span>
+                        {isProVerified && (
+                          <span className="bm-ftx-avatar-check" title="Verified Identity & Skills">
+                            <iconify-icon icon="lucide:check" />
+                          </span>
+                        )}
                       </div>
                       <div className="bm-ftx-info">
                         <h3 className="bm-ftx-name" title={fullName}>{fullName}</h3>
                         <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
                       </div>
                     </div>
+
 
                     {/* RATING & LOCATION ROW */}
                     <div className="bm-ftx-rating-row">
