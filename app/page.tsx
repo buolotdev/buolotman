@@ -311,13 +311,14 @@ export default function Home() {
     []
   );
   const { data: prosData, loading: prosLoading } = useFetch(
-    () => api.listUsers({ role: "technician", limit: "6" }),
+    () => api.listUsers({ role: "technician", limit: "10" }),
     []
   );
   const { data: companiesData, loading: companiesLoading } = useFetch(
     () => api.listCompanies({ limit: "3" }),
     []
   );
+
   const { data: liveTasksData, loading: liveTasksLoading, error: liveTasksError } = useFetch(
     () => api.getTasks({ sort: "newest", limit: "8" }),
     []
@@ -748,7 +749,7 @@ export default function Home() {
                 <p style={{ marginTop: 10, fontWeight: 600 }}>{t.prosLoading}</p>
               </div>
             ) : pros && pros.length > 0 ? (
-              pros.slice(0, 3).map((pro: any) => {
+              pros.slice(0, 10).map((pro: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
                 const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
                 const rawAvatar = pro.avatar || pro.avatar_url || pro.profile_photo_url || pro.user?.avatar_url || pro.user?.profile_photo_url;
@@ -767,10 +768,12 @@ export default function Home() {
                   bioText = "Certified and vetted technical professional specialized in reliable on-demand repairs, maintenance, and precision installations.";
                 }
 
-                // Skills chips
-                const skillsList = Array.isArray(pro.skills) && pro.skills.length > 0 
-                  ? pro.skills.slice(0, 3) 
+                // Skills chips (Cleanly capped at 2 for front cards, rest accessible in profile)
+                const allSkills = Array.isArray(pro.skills) && pro.skills.length > 0 
+                  ? pro.skills 
                   : [pro.title || "Technical Expert", "Maintenance"];
+                const displaySkills = allSkills.slice(0, 2);
+                const remainingCount = allSkills.length - displaySkills.length;
 
                 return (
                   <div className="bm-ftx-card" key={pro.id}>
@@ -823,14 +826,19 @@ export default function Home() {
 
                     {/* SKILLS ROW */}
                     <div className="bm-ftx-skills-row">
-                      {skillsList.map((sk: any, i: number) => {
+                      {displaySkills.map((sk: any, i: number) => {
                         const skName = typeof sk === 'string' ? sk : sk?.name || 'Skill';
                         return (
-                          <span className="bm-ftx-skill-tag" key={i}>
+                          <span className="bm-ftx-skill-tag" key={i} title={skName}>
                             {skName}
                           </span>
                         );
                       })}
+                      {remainingCount > 0 && (
+                        <span className="bm-ftx-skill-more" title={`${remainingCount} more skills on full profile`}>
+                          +{remainingCount} more
+                        </span>
+                      )}
                     </div>
 
                     {/* ACTIONS */}
