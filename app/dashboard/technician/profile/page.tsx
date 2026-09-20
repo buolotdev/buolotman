@@ -415,118 +415,163 @@ export default function TechnicianProfilePage() {
     }
   };
 
-  // Load Saved Preferences, Profile Customizations & Documents from localStorage on mount
+  // Clean up any legacy un-scoped cross-user cache on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const rawProfile = localStorage.getItem("boulotman_technician_profile_custom");
-      if (rawProfile) {
-        try {
-          const p = JSON.parse(rawProfile);
-          if (p.firstName !== undefined && p.firstName !== "") setFirstName(p.firstName);
-          if (p.lastName !== undefined && p.lastName !== "") setLastName(p.lastName);
-          if (p.displayName !== undefined && p.displayName !== "") setDisplayName(p.displayName);
-          if (p.headline !== undefined && p.headline !== "") setHeadline(p.headline);
-          if (p.bio !== undefined && p.bio !== "") setBio(p.bio);
-          if (p.city !== undefined && p.city !== "") setCity(p.city);
-          if (p.country !== undefined && p.country !== "") setCountry(p.country);
-          if (p.experienceYears !== undefined && p.experienceYears !== "") setExperienceYears(p.experienceYears);
-          if (p.primaryOccupation !== undefined && p.primaryOccupation !== "") setPrimaryOccupation(p.primaryOccupation);
-          if (p.educationLevel !== undefined && p.educationLevel !== "") setEducationLevel(p.educationLevel);
-          if (p.expertiseLevel !== undefined && p.expertiseLevel !== "") setExpertiseLevel(p.expertiseLevel);
-          if (Array.isArray(p.skills)) setSkills(p.skills);
-        } catch {}
-      }
-
-      const rawSkills = localStorage.getItem("boulotman_technician_skills");
-      if (rawSkills) {
-        try { setSkills(JSON.parse(rawSkills)); } catch {}
-      }
-
-      const rawPort = localStorage.getItem("boulotman_technician_portfolio");
-      if (rawPort) {
-        try {
-          const parsed = JSON.parse(rawPort);
-          if (Array.isArray(parsed)) {
-            const realOnly = parsed.filter((p: any) => p.id !== "port-1" && p.id !== "port-2");
-            setPortfolioList(realOnly);
-          }
-        } catch {}
-      }
-
-      const rawTools = localStorage.getItem("boulotman_technician_tools");
-      if (rawTools) {
-        try {
-          const parsed = JSON.parse(rawTools);
-          if (Array.isArray(parsed)) {
-            const realOnly = parsed.filter((t: string) => !t.includes("Fluke") && !t.includes("Rotary Hammer") && !t.includes("Insulated VDE"));
-            setToolsList(realOnly);
-          }
-        } catch {}
-      }
-
-      const rawAvail = localStorage.getItem("boulotman_technician_available_now");
-      if (rawAvail !== null) setAvailableNow(rawAvail === "true");
-
-      const rawDocs = localStorage.getItem("boulotman_technician_documents");
-      if (rawDocs) { try { setLocalDocs(JSON.parse(rawDocs)); } catch {} }
-
-      const rawPricing = localStorage.getItem("boulotman_technician_pricing");
-      if (rawPricing) {
-        try {
-          const pr = JSON.parse(rawPricing);
-          if (pr.startingPrice) setStartingPrice(pr.startingPrice);
-          if (pr.hourlyRate) setHourlyRate(pr.hourlyRate);
-          if (pr.dailyRate) setDailyRate(pr.dailyRate);
-          if (pr.inspectionFee) setInspectionFee(pr.inspectionFee);
-          if (pr.isNegotiable !== undefined) setIsNegotiable(pr.isNegotiable);
-        } catch {}
-      }
+      const legacyKeys = [
+        "boulotman_technician_profile_custom",
+        "boulotman_technician_skills",
+        "boulotman_technician_portfolio",
+        "boulotman_technician_tools",
+        "boulotman_technician_documents",
+        "boulotman_technician_pricing",
+        "boulotman_technician_available_now"
+      ];
+      legacyKeys.forEach((k) => localStorage.removeItem(k));
     }
   }, []);
 
-  // Sync initial User Data once without ever overwriting user's active/saved edits
+  // Sync User Data directly from backend database for the authenticated technician
   useEffect(() => {
     if (userData && !isInitialSyncedRef.current) {
       isInitialSyncedRef.current = true;
-      const rawProfile = typeof window !== "undefined" ? localStorage.getItem("boulotman_technician_profile_custom") : null;
+      const techProf = (userData as any)?.technician_profile || {};
+
+      // Check user-specific local storage only if it belongs to this exact user ID
+      const userScopedKey = `boulotman_technician_profile_custom_${userData.id}`;
+      const rawProfile = typeof window !== "undefined" ? localStorage.getItem(userScopedKey) : null;
       let savedP: any = {};
       if (rawProfile) {
         try { savedP = JSON.parse(rawProfile); } catch {}
       }
 
-      if (userData.first_name && !savedP.firstName) setFirstName(userData.first_name);
-      if (userData.last_name && !savedP.lastName) setLastName(userData.last_name);
-      if (!savedP.displayName) {
-        setDisplayName(userData.first_name ? `${userData.first_name} ${(userData.last_name || "")[0] || ""}.` : userData.username || "");
-      }
-      if (userData.username) setUsername(userData.username);
-      if (userData.email) setEmail(userData.email);
-      if (userData.phone) setPhone(userData.phone);
+      setFirstName(savedP.firstName !== undefined ? savedP.firstName : (userData.first_name || ""));
+      setLastName(savedP.lastName !== undefined ? savedP.lastName : (userData.last_name || ""));
       
-      const userBio = userData.bio || userData.about || (userData as any).technician_profile?.bio;
-      if (userBio && !savedP.bio) setBio(userBio);
+      const defaultDisplay = userData.first_name 
+        ? `${userData.first_name} ${(userData.last_name || "")[0] || ""}.`.trim() 
+        : (userData.username || "");
+      setDisplayName(savedP.displayName !== undefined ? savedP.displayName : defaultDisplay);
 
-      if (Array.isArray(userData.skills) && userData.skills.length > 0) setSkills(userData.skills);
-      if (userData.date_of_birth) setDateOfBirth(userData.date_of_birth);
-      if (userData.address) setAddress(userData.address);
-      if (userData.education_level && !savedP.educationLevel) setEducationLevel(userData.education_level);
-      if (userData.expertise_level && !savedP.expertiseLevel) setExpertiseLevel(userData.expertise_level);
+      setUsername(userData.username || "");
+      setEmail(userData.email || "");
+      setPhone(userData.phone || "");
 
-      const userCountry = userData.country || (userData as any).technician_profile?.country;
-      if (userCountry && !savedP.country) setCountry(userCountry);
+      const userBio = userData.bio || userData.about || techProf.bio || "";
+      setBio(savedP.bio !== undefined ? savedP.bio : userBio);
 
-      const userCity = userData.city || (userData as any).technician_profile?.city;
-      if (userCity && !savedP.city) setCity(userCity);
+      const userHeadline = savedP.headline !== undefined 
+        ? savedP.headline 
+        : (userData.headline || techProf.headline || "");
+      setHeadline(userHeadline);
+
+      const userTrade = savedP.primaryOccupation !== undefined 
+        ? savedP.primaryOccupation 
+        : (userData.primary_occupation || techProf.occupation || techProf.category || (userData as any).category || "");
+      setPrimaryOccupation(userTrade);
+
+      const userExp = savedP.experienceYears !== undefined 
+        ? savedP.experienceYears 
+        : (userData.experience_years ? String(userData.experience_years) : (techProf.years_of_experience ? String(techProf.years_of_experience) : (techProf.experience_years ? String(techProf.experience_years) : "")));
+      setExperienceYears(userExp);
+
+      const userEdu = savedP.educationLevel !== undefined 
+        ? savedP.educationLevel 
+        : (userData.education_level || techProf.education_level || "");
+      setEducationLevel(userEdu);
+
+      const userExpertise = savedP.expertiseLevel !== undefined 
+        ? savedP.expertiseLevel 
+        : (userData.expertise_level || techProf.expertise_level || "");
+      setExpertiseLevel(userExpertise);
+
+      const userCountry = savedP.country !== undefined 
+        ? savedP.country 
+        : (userData.country || techProf.country || "");
+      setCountry(userCountry);
+
+      const userCity = savedP.city !== undefined 
+        ? savedP.city 
+        : (userData.city || techProf.city || "");
+      setCity(userCity);
+
+      setAddress(userData.address || techProf.address || "");
+      setDateOfBirth(userData.date_of_birth || "");
+
+      // Skills
+      const userSkillsKey = `boulotman_technician_skills_${userData.id}`;
+      const rawSavedSkills = typeof window !== "undefined" ? localStorage.getItem(userSkillsKey) : null;
+      let userSkills: string[] = [];
+      if (rawSavedSkills) {
+        try { userSkills = JSON.parse(rawSavedSkills); } catch {}
+      } else if (Array.isArray(userData.skills) && userData.skills.length > 0) {
+        userSkills = userData.skills;
+      } else if (Array.isArray(techProf.skills) && techProf.skills.length > 0) {
+        userSkills = techProf.skills;
+      }
+      setSkills(userSkills);
+
+      // Portfolio
+      const userPortKey = `boulotman_technician_portfolio_${userData.id}`;
+      const rawSavedPort = typeof window !== "undefined" ? localStorage.getItem(userPortKey) : null;
+      let userPort: PortfolioItem[] = [];
+      if (rawSavedPort) {
+        try { userPort = JSON.parse(rawSavedPort); } catch {}
+      } else if (Array.isArray(userData.portfolio) && userData.portfolio.length > 0) {
+        userPort = userData.portfolio;
+      } else if (Array.isArray(techProf.portfolio) && techProf.portfolio.length > 0) {
+        userPort = techProf.portfolio;
+      }
+      setPortfolioList(userPort);
+
+      // Tools
+      const userToolsKey = `boulotman_technician_tools_${userData.id}`;
+      const rawSavedTools = typeof window !== "undefined" ? localStorage.getItem(userToolsKey) : null;
+      let userTools: string[] = [];
+      if (rawSavedTools) {
+        try { userTools = JSON.parse(rawSavedTools); } catch {}
+      } else if (Array.isArray(userData.tools) && userData.tools.length > 0) {
+        userTools = userData.tools;
+      } else if (Array.isArray(techProf.tools) && techProf.tools.length > 0) {
+        userTools = techProf.tools;
+      }
+      setToolsList(userTools);
+
+      // Pricing
+      const userPricingKey = `boulotman_technician_pricing_${userData.id}`;
+      const rawSavedPricing = typeof window !== "undefined" ? localStorage.getItem(userPricingKey) : null;
+      let savedPr: any = {};
+      if (rawSavedPricing) {
+        try { savedPr = JSON.parse(rawSavedPricing); } catch {}
+      }
+      setStartingPrice(savedPr.startingPrice || userData.starting_price || techProf.starting_price || "");
+      const rawHr = savedPr.hourlyRate || (userData.hourly_rate ? `${userData.hourly_rate} XOF / hr` : (techProf.hourly_rate ? `${techProf.hourly_rate} XOF / hr` : ""));
+      setHourlyRate(rawHr);
+      setDailyRate(savedPr.dailyRate || userData.daily_rate || techProf.daily_rate || "");
+      setInspectionFee(savedPr.inspectionFee || userData.inspection_fee || techProf.inspection_fee || "");
+      setIsNegotiable(savedPr.isNegotiable !== undefined ? savedPr.isNegotiable : (userData.is_negotiable !== undefined ? Boolean(userData.is_negotiable) : (techProf.is_negotiable !== undefined ? Boolean(techProf.is_negotiable) : true)));
+
+      // Availability
+      const userAvailKey = `boulotman_technician_available_now_${userData.id}`;
+      const rawSavedAvail = typeof window !== "undefined" ? localStorage.getItem(userAvailKey) : null;
+      if (rawSavedAvail !== null) {
+        setAvailableNow(rawSavedAvail === "true");
+      } else if (techProf.is_available !== undefined) {
+        setAvailableNow(Boolean(techProf.is_available));
+      }
+
+      // Documents
+      const userDocsKey = `boulotman_technician_documents_${userData.id}`;
+      const rawSavedDocs = typeof window !== "undefined" ? localStorage.getItem(userDocsKey) : null;
+      if (rawSavedDocs) {
+        try { setLocalDocs(JSON.parse(rawSavedDocs)); } catch {}
+      }
 
       if (userData.avatar_url) setAvatarUrl(userData.avatar_url);
       if (userData.banner_url) setBannerUrl(userData.banner_url);
-
-      const techProf = (userData as any)?.technician_profile;
-      if (techProf?.hourly_rate && !savedP.hourlyRate) {
-        setHourlyRate(`${techProf.hourly_rate} XOF / hr`);
-      }
     }
   }, [userData]);
+
 
   const userName = `${firstName} ${lastName}`.trim() || userData?.username || "Specialist";
   const userInitials = useMemo(() => {
@@ -674,22 +719,20 @@ export default function TechnicianProfilePage() {
         inspectionFee,
         isNegotiable,
       };
-      localStorage.setItem("boulotman_technician_profile_custom", JSON.stringify(customProfileData));
-      localStorage.setItem("boulotman_technician_skills", JSON.stringify(skills));
-      localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(portfolioList));
-      localStorage.setItem("boulotman_technician_tools", JSON.stringify(toolsList));
-      localStorage.setItem("boulotman_technician_available_now", String(availableNow));
-      const pricingObj = {
-        startingPrice: startingPrice.trim(),
-        hourlyRate: hourlyRate.trim(),
-        dailyRate: dailyRate.trim(),
-        inspectionFee: inspectionFee.trim(),
-        isNegotiable,
-      };
-      localStorage.setItem("boulotman_technician_pricing", JSON.stringify(pricingObj));
       if (userData?.id) {
-        localStorage.setItem(`boulotman_technician_pricing_${userData.id}`, JSON.stringify(pricingObj));
         localStorage.setItem(`boulotman_technician_profile_custom_${userData.id}`, JSON.stringify(customProfileData));
+        localStorage.setItem(`boulotman_technician_skills_${userData.id}`, JSON.stringify(skills));
+        localStorage.setItem(`boulotman_technician_portfolio_${userData.id}`, JSON.stringify(portfolioList));
+        localStorage.setItem(`boulotman_technician_tools_${userData.id}`, JSON.stringify(toolsList));
+        localStorage.setItem(`boulotman_technician_available_now_${userData.id}`, String(availableNow));
+        const pricingObj = {
+          startingPrice: startingPrice.trim(),
+          hourlyRate: hourlyRate.trim(),
+          dailyRate: dailyRate.trim(),
+          inspectionFee: inspectionFee.trim(),
+          isNegotiable,
+        };
+        localStorage.setItem(`boulotman_technician_pricing_${userData.id}`, JSON.stringify(pricingObj));
       }
 
       // 2. Send clean payload to backend
@@ -751,7 +794,9 @@ export default function TechnicianProfilePage() {
   const handleToggleAvailableNow = () => {
     const next = !availableNow;
     setAvailableNow(next);
-    localStorage.setItem("boulotman_technician_available_now", String(next));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_available_now_${userData.id}`, String(next));
+    }
     toast.info(next ? "Status: Available Now 🟢" : "Status: Busy / Offline ⚪", next ? "Clients can hire you for immediate emergency dispatch." : "You are marked as offline.");
   };
 
@@ -762,7 +807,9 @@ export default function TechnicianProfilePage() {
     if (!skills.includes(val)) {
       const updated = [...skills, val];
       setSkills(updated);
-      localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
+      if (userData?.id) {
+        localStorage.setItem(`boulotman_technician_skills_${userData.id}`, JSON.stringify(updated));
+      }
       api.updateProfile({
         skills: updated,
         technician_profile: { skills: updated }
@@ -774,7 +821,9 @@ export default function TechnicianProfilePage() {
   const handleRemoveSkill = (index: number) => {
     const updated = skills.filter((_, i) => i !== index);
     setSkills(updated);
-    localStorage.setItem("boulotman_technician_skills", JSON.stringify(updated));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_skills_${userData.id}`, JSON.stringify(updated));
+    }
     api.updateProfile({
       skills: updated,
       technician_profile: { skills: updated }
@@ -788,7 +837,9 @@ export default function TechnicianProfilePage() {
     if (!toolsList.includes(val)) {
       const updated = [...toolsList, val];
       setToolsList(updated);
-      localStorage.setItem("boulotman_technician_tools", JSON.stringify(updated));
+      if (userData?.id) {
+        localStorage.setItem(`boulotman_technician_tools_${userData.id}`, JSON.stringify(updated));
+      }
       api.updateProfile({
         tools: updated,
         technician_profile: { tools: updated }
@@ -800,7 +851,9 @@ export default function TechnicianProfilePage() {
   const handleRemoveTool = (tool: string) => {
     const updated = toolsList.filter(t => t !== tool);
     setToolsList(updated);
-    localStorage.setItem("boulotman_technician_tools", JSON.stringify(updated));
+    if (userData?.id) {
+      localStorage.setItem(`boulotman_technician_tools_${userData.id}`, JSON.stringify(updated));
+    }
     api.updateProfile({
       tools: updated,
       technician_profile: { tools: updated }
@@ -823,7 +876,6 @@ export default function TechnicianProfilePage() {
     };
     const updated = [newPort, ...portfolioList];
     setPortfolioList(updated);
-    localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(updated));
     if (userData?.id) {
       localStorage.setItem(`boulotman_technician_portfolio_${userData.id}`, JSON.stringify(updated));
     }
@@ -845,7 +897,6 @@ export default function TechnicianProfilePage() {
   const handleDeletePortfolio = (id: string) => {
     const updated = portfolioList.filter(p => p.id !== id);
     setPortfolioList(updated);
-    localStorage.setItem("boulotman_technician_portfolio", JSON.stringify(updated));
     if (userData?.id) {
       localStorage.setItem(`boulotman_technician_portfolio_${userData.id}`, JSON.stringify(updated));
     }
@@ -911,10 +962,10 @@ export default function TechnicianProfilePage() {
       );
       const updated = [newDoc, ...filtered];
       setLocalDocs(updated);
-      localStorage.setItem("boulotman_technician_documents", JSON.stringify(updated));
       if (userData?.id) {
         localStorage.setItem(`boulotman_technician_documents_${userData.id}`, JSON.stringify(updated));
       }
+
 
       try { await mutateDocuments(); } catch {}
       toast.success("Document Uploaded", `${slotTitle} submitted for review.`);

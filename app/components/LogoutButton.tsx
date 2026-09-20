@@ -25,11 +25,21 @@ export default function LogoutButton({
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_role");
-    localStorage.removeItem("user");
-    localStorage.removeItem("boulotman_user");
+    try {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user");
+      localStorage.removeItem("boulotman_user");
+
+      // Clear any cached profile drafts
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith("boulotman_technician_") || key.startsWith("boulotman_user_") || key.startsWith("boulotman_company_"))) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch {}
     router.replace("/login");
   };
 
