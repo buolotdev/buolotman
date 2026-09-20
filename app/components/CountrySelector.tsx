@@ -300,7 +300,7 @@ export default function CountrySelector({ variant = "footer" }: CountrySelectorP
             }}
           >
             <span>Auto-localizes jobs & pricing</span>
-            <span style={{ color: "#FF4500", fontWeight: 700, letterSpacing: "0.04em" }}>Boulot Man Africa</span>
+            <span style={{ color: "#FF4500", fontWeight: 700, letterSpacing: "0.04em" }}>Boulot Man Global</span>
           </div>
         </div>
       )}

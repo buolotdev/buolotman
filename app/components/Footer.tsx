@@ -919,7 +919,7 @@ export default function Footer() {
 
                   <div className="bmf-country-footer">
                     <span>{t("autoLocalizes")}</span>
-                    <strong>Boulot Man Africa</strong>
+                    <strong>Boulot Man Global</strong>
                   </div>
                 </div>
               </div>
