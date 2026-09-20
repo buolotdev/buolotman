@@ -1657,7 +1657,7 @@ export default function TechnicianProfilePage() {
                 <div style={{ marginTop: 22, background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 16, padding: "18px 20px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
                     <label className={styles.label} style={{ fontSize: 13.5, fontWeight: 800, color: "#001f3f", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-                      <iconify-icon icon="lucide:award" style={{ color: "#2563eb", fontSize: 17 }} />
+                      <iconify-icon icon="lucide:award" style={{ color: "#ff4500", fontSize: 17 }} />
                       {t.skillsTitle} ({skills.length})
                     </label>
                     <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
@@ -1673,7 +1673,7 @@ export default function TechnicianProfilePage() {
                     <div className={styles.skillsListEditable}>
                       {skills.map((skill, index) => (
                         <span key={index} className={styles.skillTag}>
-                          <iconify-icon icon="lucide:check-circle-2" style={{ color: "#2563eb", fontSize: 14 }} />
+                          <iconify-icon icon="lucide:check-circle-2" style={{ color: "#ff4500", fontSize: 14 }} />
                           <span>{skill}</span>
                           <button
                             type="button"
@@ -1699,7 +1699,7 @@ export default function TechnicianProfilePage() {
                     marginTop: 10,
                     boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
                   }}>
-                    <iconify-icon icon="lucide:sparkles" style={{ color: "#2563eb", fontSize: 18, marginRight: 8, flexShrink: 0 }} />
+                    <iconify-icon icon="lucide:sparkles" style={{ color: "#ff4500", fontSize: 18, marginRight: 8, flexShrink: 0 }} />
                     <input
                       type="text"
                       placeholder="Add trade skill (e.g. Solar Inverter Setup, 3-Phase Wiring, Pipe Welding)"
@@ -1725,7 +1725,7 @@ export default function TechnicianProfilePage() {
                         padding: "8px 18px",
                         fontSize: 13,
                         borderRadius: 10,
-                        background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                        background: "linear-gradient(135deg, #ff4500, #ff7a1f)",
                         color: "#ffffff",
                         fontWeight: 700,
                         border: "none",
@@ -1733,7 +1733,7 @@ export default function TechnicianProfilePage() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 6,
-                        boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)"
+                        boxShadow: "0 2px 8px rgba(255, 69, 0, 0.25)"
                       }}
                     >
                       <iconify-icon icon="lucide:plus" style={{ fontSize: 15 }} />
