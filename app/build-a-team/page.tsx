@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { useRouter } from "next/navigation";
+import { api } from "@/app/lib/api";
 import styles from "./build-team.module.css";
 
 const translations: Record<string, Record<string, any>> = {
@@ -70,7 +71,39 @@ const translations: Record<string, Record<string, any>> = {
     ],
     ctaTitle: "Build Your Team Today",
     ctaDesc: "Whether it’s a renovation, installation, or full project, Boulot Man gives you a ready workforce — fast, verified, and managed.",
-    ctaBtn: "Request a Team"
+    ctaBtn: "Request a Team",
+    modalTitle: "Request a Technical Team",
+    modalSub: "Specify your project needs and workforce requirements. Boulot Man will assemble, structure, and dispatch your verified team.",
+    labelName: "Your Full Name *",
+    labelEmail: "Email Address *",
+    labelPhone: "Phone / WhatsApp Number *",
+    labelTeamType: "Primary Trade / Team Type *",
+    labelTeamSize: "Team Size Needed *",
+    labelDuration: "Project Duration *",
+    labelLocation: "Project Location / City *",
+    labelDetails: "Project Scope & Requirements *",
+    placeholderDetails: "Describe project scope, site conditions, required certifications, materials, and any deadlines...",
+    btnSubmit: "Submit Team Request",
+    btnSubmitting: "Submitting Request...",
+    modalSuccess: "Your team request has been submitted successfully! A Boulot Man operations coordinator will contact you shortly to finalize details.",
+    teamOpt1: "Electrical, Power & Solar PV",
+    teamOpt2: "Plumbing, Water Sanitation & Networks",
+    teamOpt3: "Civil Construction, Masonry & Finishing",
+    teamOpt4: "Carpentry, Joinery & Woodwork",
+    teamOpt5: "HVAC, Industrial Cooling & Cold Rooms",
+    teamOpt6: "IT Infrastructure, CCTV & Fiber Optics",
+    teamOpt7: "Welding, Metalwork & Steel Structures",
+    teamOpt8: "Painting, Plastering & Drywall",
+    teamOpt9: "Multi-Disciplinary Project Team",
+    teamOptOther: "Other (Custom Technical Team)",
+    sizeOpt1: "Small Squad (2–4 Technicians)",
+    sizeOpt2: "Standard Crew (5–10 Technicians)",
+    sizeOpt3: "Large Workforce (11–25 Workers)",
+    sizeOpt4: "Major Industrial Team (25+ Workers)",
+    durOpt1: "Immediate Emergency (1–3 Days)",
+    durOpt2: "Short Term Project (1–4 Weeks)",
+    durOpt3: "Medium Term Project (1–3 Months)",
+    durOpt4: "Long-Term / Ongoing Retainer (3+ Months)"
   },
   fr: {
     heroTitle: "Créer une Équipe",
@@ -135,7 +168,39 @@ const translations: Record<string, Record<string, any>> = {
     ],
     ctaTitle: "Constituez Votre Équipe Aujourd'hui",
     ctaDesc: "Rénovation, installation industrielle ou construction : bénéficiez d'une main-d'œuvre prête à intervenir, vérifiée et encadrée.",
-    ctaBtn: "Demander une Équipe"
+    ctaBtn: "Demander une Équipe",
+    modalTitle: "Demander une Équipe Technique",
+    modalSub: "Précisez vos besoins et votre cahier des charges. Boulot Man assemble, structure et déploie votre équipe sur site.",
+    labelName: "Nom et Prénom *",
+    labelEmail: "Adresse E-mail *",
+    labelPhone: "Numéro de Téléphone / WhatsApp *",
+    labelTeamType: "Corps de Métier / Type d'Équipe *",
+    labelTeamSize: "Taille d'Équipe Souhaitée *",
+    labelDuration: "Durée Estimée du Chantier *",
+    labelLocation: "Localisation du Projet / Ville *",
+    labelDetails: "Description du Projet & Exigences *",
+    placeholderDetails: "Décrivez l'envergure du projet, l'état du site, les certifications requises, l'outillage et les délais attendus...",
+    btnSubmit: "Envoyer la Demande d'Équipe",
+    btnSubmitting: "Envoi en cours...",
+    modalSuccess: "Votre demande d'équipe a été soumise avec succès ! Un coordinateur d'opérations Boulot Man vous contactera rapidement.",
+    teamOpt1: "Électricité, Énergie & Solaire PV",
+    teamOpt2: "Plomberie, Sanitaire & Canalisations",
+    teamOpt3: "BTP, Maçonnerie & Gros Œuvre",
+    teamOpt4: "Menuiserie, Bois & Agencement",
+    teamOpt5: "Climatisation, Froid Industriel & CVC",
+    teamOpt6: "Réseaux Informatiques, Fibre & CCTV",
+    teamOpt7: "Soudure, Métallerie & Charpentes",
+    teamOpt8: "Peinture, Finitions & Plâtrerie",
+    teamOpt9: "Équipe Multidisciplinaire de Chantier",
+    teamOptOther: "Autre (Équipe Technique Sur Mesure)",
+    sizeOpt1: "Petite Équipe (2 à 4 Techniciens)",
+    sizeOpt2: "Équipe Standard (5 à 10 Techniciens)",
+    sizeOpt3: "Effectif Important (11 à 25 Ouvriers)",
+    sizeOpt4: "Grand Chantier Industriel (25+ Ouvriers)",
+    durOpt1: "Intervention Urgente (1 à 3 Jours)",
+    durOpt2: "Court Terme (1 à 4 Semaines)",
+    durOpt3: "Moyen Terme (1 à 3 Mois)",
+    durOpt4: "Long Terme / Contrat Continu (3+ Mois)"
   }
 };
 
@@ -143,6 +208,21 @@ export default function BuildATeamPage() {
   const router = useRouter();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [lang, setLang] = useState("en");
+
+  // Request a Team Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    team_type: "Electrical, Power & Solar PV",
+    team_size: "Standard Crew (5–10 Technicians)",
+    duration: "Short Term Project (1–4 Weeks)",
+    location: "",
+    details: "",
+  });
 
   useEffect(() => {
     const updateLang = () => {
@@ -157,6 +237,37 @@ export default function BuildATeamPage() {
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.submitInquiry({
+        ...formData,
+        inquiry_type: "build_a_team",
+        details: `[Build a Team Request]\nTeam Type: ${formData.team_type}\nTeam Size: ${formData.team_size}\nDuration: ${formData.duration}\nLocation: ${formData.location}\n\nProject Scope:\n${formData.details}`,
+      });
+      setSuccess(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        team_type: "Electrical, Power & Solar PV",
+        team_size: "Standard Crew (5–10 Technicians)",
+        duration: "Short Term Project (1–4 Weeks)",
+        location: "",
+        details: "",
+      });
+      setTimeout(() => {
+        setShowModal(false);
+        setSuccess(false);
+      }, 3500);
+    } catch (err) {
+      alert(lang === "fr" ? "Échec de l'envoi de la demande. Veuillez réessayer." : "Failed to submit request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -315,7 +426,7 @@ export default function BuildATeamPage() {
             </p>
           </div>
           <div className={styles.ctaRight}>
-            <button className={styles.ctaBtn} onClick={() => router.push("/login")}>
+            <button className={styles.ctaBtn} onClick={() => setShowModal(true)}>
               {t.ctaBtn}
             </button>
           </div>
@@ -324,6 +435,152 @@ export default function BuildATeamPage() {
       </main>
 
       <Footer />
+
+      {/* Request a Team Inquiry Modal */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button
+              className={styles.modalClose}
+              onClick={() => setShowModal(false)}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+
+            <div className={styles.modalHeader}>
+              <h2>{t.modalTitle}</h2>
+              <p>{t.modalSub}</p>
+            </div>
+
+            {success ? (
+              <div className={styles.successMsg}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>🎉</div>
+                {t.modalSuccess}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className={styles.twoCol}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelName}</label>
+                    <input
+                      className={styles.input}
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder={lang === "fr" ? "ex: Marc Dubois" : "e.g. John Doe"}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelEmail}</label>
+                    <input
+                      type="email"
+                      className={styles.input}
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="client@domain.com"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.twoCol}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelPhone}</label>
+                    <input
+                      className={styles.input}
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+229 97 00 00 00"
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelLocation}</label>
+                    <input
+                      className={styles.input}
+                      required
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      placeholder={lang === "fr" ? "ex: Cotonou / Douala / Abidjan" : "e.g. Cotonou / Lagos / Abidjan"}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.twoCol}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelTeamType}</label>
+                    <select
+                      className={styles.select}
+                      value={formData.team_type}
+                      onChange={(e) => setFormData({ ...formData, team_type: e.target.value })}
+                    >
+                      <option value="Electrical, Power & Solar PV">{t.teamOpt1}</option>
+                      <option value="Plumbing, Water Sanitation & Networks">{t.teamOpt2}</option>
+                      <option value="Civil Construction, Masonry & Finishing">{t.teamOpt3}</option>
+                      <option value="Carpentry, Joinery & Woodwork">{t.teamOpt4}</option>
+                      <option value="HVAC, Industrial Cooling & Cold Rooms">{t.teamOpt5}</option>
+                      <option value="IT Infrastructure, CCTV & Fiber Optics">{t.teamOpt6}</option>
+                      <option value="Welding, Metalwork & Steel Structures">{t.teamOpt7}</option>
+                      <option value="Painting, Plastering & Drywall">{t.teamOpt8}</option>
+                      <option value="Multi-Disciplinary Project Team">{t.teamOpt9}</option>
+                      <option value="Other (Custom Technical Team)">{t.teamOptOther}</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>{t.labelTeamSize}</label>
+                    <select
+                      className={styles.select}
+                      value={formData.team_size}
+                      onChange={(e) => setFormData({ ...formData, team_size: e.target.value })}
+                    >
+                      <option value="Small Squad (2–4 Technicians)">{t.sizeOpt1}</option>
+                      <option value="Standard Crew (5–10 Technicians)">{t.sizeOpt2}</option>
+                      <option value="Large Workforce (11–25 Workers)">{t.sizeOpt3}</option>
+                      <option value="Major Industrial Team (25+ Workers)">{t.sizeOpt4}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>{t.labelDuration}</label>
+                  <select
+                    className={styles.select}
+                    value={formData.duration}
+                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  >
+                    <option value="Immediate Emergency (1–3 Days)">{t.durOpt1}</option>
+                    <option value="Short Term Project (1–4 Weeks)">{t.durOpt2}</option>
+                    <option value="Medium Term Project (1–3 Months)">{t.durOpt3}</option>
+                    <option value="Long-Term / Ongoing Retainer (3+ Months)">{t.durOpt4}</option>
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>{t.labelDetails}</label>
+                  <textarea
+                    className={styles.textarea}
+                    required
+                    rows={4}
+                    value={formData.details}
+                    onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                    placeholder={t.placeholderDetails}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={loading}
+                >
+                  {loading ? t.btnSubmitting : t.btnSubmit}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
