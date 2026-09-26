@@ -286,24 +286,154 @@ export default function SearchPage() {
       setLoading(true);
       setError(null);
       try {
-        let raw: any[] = [];
-        try {
-          const res = await api.search(searchParams);
-          raw = (Array.isArray(res) ? res : res?.results ?? []) as any[];
-        } catch (searchErr) {
-          console.warn("api.search note, attempting fallback to listUsers:", searchErr);
+        let rawSearch: any[] = [];
+        let rawCompaniesList: any[] = [];
+        let rawCompanyUsersList: any[] = [];
+
+        const [searchRes, companiesRes, companyUsersRes] = await Promise.allSettled([
+          api.search(searchParams),
+          api.listCompanies({ all_status: "true" }),
+          api.listUsers({ role: "company" }),
+        ]);
+
+        if (searchRes.status === "fulfilled") {
+          const v = searchRes.value;
+          rawSearch = (Array.isArray(v) ? v : v?.results ?? []) as any[];
+        } else {
           try {
             const fallbackTechs = await api.listUsers({ role: "TECHNICIAN" });
-            const techList = Array.isArray(fallbackTechs) ? fallbackTechs : (fallbackTechs as any)?.results || [];
-            raw = techList.map((t: any) => ({ ...t, type: "technician" }));
+            rawSearch = (Array.isArray(fallbackTechs) ? fallbackTechs : (fallbackTechs as any)?.results || []).map((t: any) => ({ ...t, type: "technician" }));
           } catch {
-            raw = [];
+            rawSearch = [];
           }
+        }
+
+        if (companiesRes.status === "fulfilled") {
+          const cVal = companiesRes.value;
+          rawCompaniesList = (Array.isArray(cVal) ? cVal : (cVal as any)?.results ?? []) as any[];
+        }
+
+        if (companyUsersRes.status === "fulfilled") {
+          const uVal = companyUsersRes.value;
+          rawCompanyUsersList = (Array.isArray(uVal) ? uVal : (uVal as any)?.results ?? []) as any[];
         }
 
         if (cancelled) return;
 
-        const mapped: SearchResult[] = raw
+        const seenCompanyIds = new Set<string | number>();
+        const mappedCompanies: SearchResult[] = [];
+
+        // 1. Map registered companies from listCompanies
+        for (const item of rawCompaniesList) {
+          const isApproved = Boolean(
+            item.is_verified === true ||
+            item.verified === true ||
+            item.is_approved === true ||
+            item.user?.is_verified === true ||
+            item.user?.is_approved === true ||
+            item.status === "active" ||
+            item.is_active !== false
+          );
+          if (item.status === "suspended" || item.user?.is_active === false) continue;
+          if (!isApproved && item.status !== "active") continue;
+
+          const compId = item.id;
+          const compUserId = item.user?.id || item.user_id;
+          if (seenCompanyIds.has(compId) || (compUserId && seenCompanyIds.has(`user-${compUserId}`))) continue;
+          seenCompanyIds.add(compId);
+          if (compUserId) seenCompanyIds.add(`user-${compUserId}`);
+
+          const compName = item.company_name || item.name || `${item.user?.first_name || ""} ${item.user?.last_name || ""}`.trim() || "Corporate Enterprise";
+          const rawImg = item.logo_url || item.logo || item.image || item.avatar_url || item.avatar || item.user?.avatar_url;
+          const rawCover = item.cover_url || item.banner_url || item.banner || item.cover_image || item.cover || item.user?.banner_url;
+          const role = item.tagline || item.company_type || resolveProfessionTitle(item, lang) || (lang === "fr" ? "Entreprise & Bureau d'Ingénierie" : "Registered Contracting Company");
+          const category = resolveServiceCategoryTag({ ...item, role }, lang);
+          const cleanLoc = resolveCleanLocation(item);
+          const compUsername = item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, "") : undefined);
+          const link = compUsername
+            ? `/profile/@${compUsername.replace(/^@/, "")}?type=company`
+            : `/profile/${compId}?type=company`;
+
+          const rating = parseFloat(item.average_rating || item.rating) || 5.0;
+          const reviews = item.review_count ?? item.reviews_count ?? item.reviews ?? 0;
+          const services = Array.isArray(item.services_offered)
+            ? item.services_offered.map((s: any) => typeof s === "string" ? { title: s } : s)
+            : (item.services || []);
+
+          mappedCompanies.push({
+            id: compId,
+            type: "company",
+            name: compName,
+            role: role,
+            description: item.about || item.description || resolveProfessionalBio(item, lang),
+            image: rawImg ? getImageUrl(rawImg) : "",
+            cover_image: rawCover ? getImageUrl(rawCover) : "",
+            category: category,
+            rating: rating,
+            reviews: reviews,
+            location: cleanLoc,
+            price: item.price ?? item.starting_price,
+            priceLabel: item.price_label,
+            verified: Boolean(item.is_verified || item.verified || item.is_approved || item.user?.is_verified || item.user?.is_approved),
+            skills: Array.isArray(item.services_offered) ? item.services_offered.filter((s: any) => typeof s === "string") : (item.skills ?? []),
+            services: services,
+            link: link,
+            username: compUsername,
+          });
+        }
+
+        // 2. Map company users (if not already added)
+        for (const item of rawCompanyUsersList) {
+          const compId = item.company_profile?.id || item.id;
+          const compUserId = item.id;
+          if (seenCompanyIds.has(compId) || seenCompanyIds.has(`user-${compUserId}`)) continue;
+          seenCompanyIds.add(compId);
+          seenCompanyIds.add(`user-${compUserId}`);
+
+          const isApproved = Boolean(
+            item.is_verified === true ||
+            item.verified === true ||
+            item.is_approved === true ||
+            item.company_profile?.is_verified === true ||
+            item.company_profile?.is_approved === true ||
+            item.is_active !== false
+          );
+          if (item.status === "suspended" || item.is_active === false) continue;
+
+          const compName = item.company_profile?.company_name || item.company_name || `${item.first_name || ""} ${item.last_name || ""}`.trim() || item.username || "Corporate Enterprise";
+          const rawImg = item.company_profile?.logo_url || item.avatar_url || item.avatar;
+          const rawCover = item.company_profile?.cover_url || item.cover_url || item.banner_url || item.banner;
+          const role = item.company_profile?.tagline || item.company_profile?.company_type || resolveProfessionTitle(item, lang) || (lang === "fr" ? "Entreprise & Bureau d'Ingénierie" : "Registered Contracting Company");
+          const category = resolveServiceCategoryTag({ ...item, role }, lang);
+          const cleanLoc = resolveCleanLocation(item);
+          const compUsername = item.username || (item.handle ? String(item.handle).replace(/^@/, "") : undefined);
+          const link = compUsername
+            ? `/profile/@${compUsername.replace(/^@/, "")}?type=company`
+            : `/profile/${compId}?type=company`;
+
+          mappedCompanies.push({
+            id: compId,
+            type: "company",
+            name: compName,
+            role: role,
+            description: item.company_profile?.about || item.bio || resolveProfessionalBio(item, lang),
+            image: rawImg ? getImageUrl(rawImg) : "",
+            cover_image: rawCover ? getImageUrl(rawCover) : "",
+            category: category,
+            rating: parseFloat(item.rating || item.average_rating) || 5.0,
+            reviews: item.reviews_count ?? item.reviews ?? 0,
+            location: cleanLoc,
+            price: item.hourly_rate ?? item.starting_price,
+            verified: Boolean(item.is_verified || item.company_profile?.is_verified || item.is_approved),
+            skills: item.skills || [],
+            services: item.services || [],
+            link: link,
+            username: compUsername,
+          });
+        }
+
+        // 3. Map search results (technicians / services)
+        const mappedSearch: SearchResult[] = rawSearch
           .filter((item) => item.type !== "task")
           .filter((item) => {
             const isApproved = Boolean(
@@ -312,39 +442,44 @@ export default function SearchPage() {
               item.is_approved === true ||
               item.user?.is_verified === true ||
               item.company_profile?.is_verified === true ||
-              item.technician_profile?.is_verified === true
+              item.technician_profile?.is_verified === true ||
+              item.is_active !== false
             );
             return isApproved && item.is_active !== false && item.status !== "suspended";
           })
           .map((item) => {
-          const rawImg = item.avatar_url || item.avatar || item.logo_url || item.image || item.company_profile?.logo || item.technician_profile?.avatar;
-          const rawCover = item.cover_image || item.cover_url || item.banner_url || item.banner || item.cover || item.company_profile?.cover_url || item.company_profile?.banner_url || item.company_profile?.cover_image || item.technician_profile?.banner_url || item.user?.banner_url;
-          const role = resolveProfessionTitle(item, lang);
-          const category = resolveServiceCategoryTag({ ...item, role }, lang);
-          const cleanLoc = resolveCleanLocation(item);
-          return {
-            id: item.id,
-            type: item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician"),
-            name: item.name || item.full_name || item.company_name || "",
-            role: role,
-            description: resolveProfessionalBio(item, lang),
-            image: rawImg ? getImageUrl(rawImg) : "",
-            cover_image: rawCover ? getImageUrl(rawCover) : "",
-            category: category,
-            rating: item.rating ?? item.average_rating,
-            reviews: item.reviews_count ?? item.reviews,
-            location: cleanLoc,
-            price: item.price ?? item.hourly_rate ?? item.starting_price,
-            priceLabel: item.price_label,
-            verified: item.verified ?? item.is_verified,
-            skills: item.skills ?? [],
-            services: item.services || item.profile?.services || [],
-            link: item.type === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/@${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
-            serviceType: item.serviceType,
-            username: item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, '') : undefined),
-          };
-        });
-        setResults(mapped);
+            const rawImg = item.avatar_url || item.avatar || item.logo_url || item.image || item.company_profile?.logo || item.technician_profile?.avatar;
+            const rawCover = item.cover_image || item.cover_url || item.banner_url || item.banner || item.cover || item.company_profile?.cover_url || item.company_profile?.banner_url || item.company_profile?.cover_image || item.technician_profile?.banner_url || item.user?.banner_url;
+            const role = resolveProfessionTitle(item, lang);
+            const category = resolveServiceCategoryTag({ ...item, role }, lang);
+            const cleanLoc = resolveCleanLocation(item);
+            const itemType = item.type || (item.role === "company" ? "company" : item.type === "service" ? "service" : "technician");
+            return {
+              id: item.id,
+              type: itemType,
+              name: item.name || item.full_name || item.company_name || `${item.first_name || ""} ${item.last_name || ""}`.trim() || "",
+              role: role,
+              description: resolveProfessionalBio(item, lang),
+              image: rawImg ? getImageUrl(rawImg) : "",
+              cover_image: rawCover ? getImageUrl(rawCover) : "",
+              category: category,
+              rating: item.rating ?? item.average_rating,
+              reviews: item.reviews_count ?? item.reviews,
+              location: cleanLoc,
+              price: item.price ?? item.hourly_rate ?? item.starting_price,
+              priceLabel: item.price_label,
+              verified: item.verified ?? item.is_verified,
+              skills: item.skills ?? [],
+              services: item.services || item.profile?.services || [],
+              link: itemType === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/@${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
+              serviceType: item.serviceType,
+              username: item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, '') : undefined),
+            };
+          });
+
+        // Combine technicians and companies without duplicates
+        const combined = [...mappedSearch.filter(s => s.type !== "company"), ...mappedCompanies, ...mappedSearch.filter(s => s.type === "company" && !seenCompanyIds.has(s.id))];
+        setResults(combined);
       } catch (e) {
         if (!cancelled) setError(null);
         setResults([]);
@@ -365,6 +500,27 @@ export default function SearchPage() {
 
   const baseFilteredResults = useMemo(() => {
     let list = results;
+
+    // Client-side text search query matching
+    if (query && query.trim()) {
+      const q = query.toLowerCase().trim();
+      list = list.filter((r) => {
+        const nameStr = (r.name || "").toLowerCase();
+        const roleStr = (r.role || "").toLowerCase();
+        const catStr = (r.category || "").toLowerCase();
+        const descStr = (r.description || "").toLowerCase();
+        const skillsStr = (r.skills || []).join(" ").toLowerCase();
+        const servicesStr = (r.services || []).map((s: any) => s.title || "").join(" ").toLowerCase();
+        const locStr = (r.location || "").toLowerCase();
+        return nameStr.includes(q) ||
+               roleStr.includes(q) ||
+               catStr.includes(q) ||
+               descStr.includes(q) ||
+               skillsStr.includes(q) ||
+               servicesStr.includes(q) ||
+               locStr.includes(q);
+      });
+    }
 
     // Client-side category matching fallback
     if (activeCategory && activeCategory !== "any") {
@@ -394,8 +550,43 @@ export default function SearchPage() {
       });
     }
 
+    // Client-side rating filter
+    if (activeRating) {
+      const minR = parseFloat(activeRating);
+      list = list.filter((r) => (r.rating || 0) >= minR);
+    }
+
+    // Client-side budget filter
+    if (budgetMin) {
+      const minB = parseFloat(budgetMin);
+      list = list.filter((r) => {
+        if (!r.price) return true;
+        const numPrice = typeof r.price === "number" ? r.price : parseFloat(String(r.price).replace(/[^0-9.]/g, ""));
+        return isNaN(numPrice) || numPrice >= minB;
+      });
+    }
+    if (budgetMax) {
+      const maxB = parseFloat(budgetMax);
+      list = list.filter((r) => {
+        if (!r.price) return true;
+        const numPrice = typeof r.price === "number" ? r.price : parseFloat(String(r.price).replace(/[^0-9.]/g, ""));
+        return isNaN(numPrice) || numPrice <= maxB;
+      });
+    }
+
+    // Client-side sorting
+    if (sortBy === "highest") {
+      list = [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy === "lowest") {
+      list = [...list].sort((a, b) => {
+        const priceA = typeof a.price === "number" ? a.price : parseFloat(String(a.price || "").replace(/[^0-9.]/g, "")) || 0;
+        const priceB = typeof b.price === "number" ? b.price : parseFloat(String(b.price || "").replace(/[^0-9.]/g, "")) || 0;
+        return priceA - priceB;
+      });
+    }
+
     return list;
-  }, [results, activeCategory, location]);
+  }, [results, query, activeCategory, location, activeRating, budgetMin, budgetMax, sortBy]);
 
   const tabCounts = useMemo(() => {
     return {
