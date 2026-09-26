@@ -46,11 +46,38 @@ export default function AdminVerificationPage() {
   const [selectedDoc, setSelectedDoc] = useState<{ title: string; url: string; type: string } | null>(null);
   const [selectedUserModal, setSelectedUserModal] = useState<VerificationUser | null>(null);
   const [downloadingZipUserId, setDownloadingZipUserId] = useState<number | null>(null);
+  const [requestDocUser, setRequestDocUser] = useState<VerificationUser | null>(null);
+  const [requestDocMessage, setRequestDocMessage] = useState<string>("");
+  const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+  const [requestedHistory, setRequestedHistory] = useState<Record<number, string>>({});
 
   const { data: usersData, loading, refetch } = useFetch(
     () => api.adminListUsers(),
     []
   );
+
+  const handleSendDocRequest = async () => {
+    if (!requestDocUser) return;
+    const name = `${requestDocUser.first_name || ""} ${requestDocUser.last_name || ""}`.trim() || requestDocUser.username;
+    setSendingRequest(true);
+    try {
+      await api.adminRequestUserDocuments(requestDocUser.id, requestDocMessage.trim() || undefined);
+      toast.success(
+        "Document Request Sent",
+        `Official notification and email sent to ${name} (${requestDocUser.email}).`
+      );
+      setRequestedHistory(prev => ({
+        ...prev,
+        [requestDocUser.id]: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }));
+      setRequestDocUser(null);
+      setRequestDocMessage("");
+    } catch (err: any) {
+      toast.error("Request Failed", err?.message || "Could not send document request.");
+    } finally {
+      setSendingRequest(false);
+    }
+  };
 
   const users: VerificationUser[] = useMemo(() => {
     return Array.isArray(usersData) ? usersData : [];
@@ -691,6 +718,15 @@ export default function AdminVerificationPage() {
 
                     {!u.is_verified ? (
                       <>
+                        <button
+                          type="button"
+                          onClick={() => setRequestDocUser(u)}
+                          className={styles.btnReject}
+                          style={{ background: "#fffbeb", color: "#b45309", borderColor: "#fde68a" }}
+                          title="Send official reminder to complete profile & upload KYC documents"
+                        >
+                          <iconify-icon icon="lucide:mail-question" /> Request Docs
+                        </button>
                         <button type="button" onClick={() => handleReject(u)} className={styles.btnReject}>
                           <iconify-icon icon="lucide:x-circle" /> Reject
                         </button>
@@ -844,8 +880,68 @@ export default function AdminVerificationPage() {
                       )}
                     </div>
                     {modalDocs.length === 0 ? (
-                      <div style={{ padding: 20, textAlign: "center", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 13 }}>
-                        No KYC documents uploaded by this user.
+                      <div
+                        style={{
+                          padding: "24px 20px",
+                          textAlign: "center",
+                          background: "linear-gradient(135deg, #fffbf0 0%, #fef3c7 100%)",
+                          borderRadius: 14,
+                          border: "1.5px dashed #f59e0b",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 12,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: "50%",
+                            background: "#fef3c7",
+                            color: "#d97706",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 22,
+                          }}
+                        >
+                          <iconify-icon icon="lucide:file-warning" />
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: "#92400e" }}>
+                            No KYC / Compliance Documents Uploaded
+                          </p>
+                          <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "#b45309" }}>
+                            This applicant has not provided identity or business verification files yet.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setRequestDocUser(selectedUserModal)}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "9px 18px",
+                            background: "linear-gradient(135deg, #ff4500 0%, #e03e00 100%)",
+                            color: "#ffffff",
+                            borderRadius: 10,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            border: "none",
+                            cursor: "pointer",
+                            boxShadow: "0 4px 12px rgba(255, 69, 0, 0.25)",
+                          }}
+                        >
+                          <iconify-icon icon="lucide:send" />
+                          Request Documents & Send Reminder
+                        </button>
+                        {requestedHistory[selectedUserModal.id] && (
+                          <span style={{ fontSize: 11.5, color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                            <iconify-icon icon="lucide:check" /> Reminder sent at {requestedHistory[selectedUserModal.id]}
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <div>
@@ -894,13 +990,34 @@ export default function AdminVerificationPage() {
             </div>
 
             {/* In-Modal Admin Decision Actions */}
-            <div style={{ display: "flex", gap: 12, paddingTop: 16, borderTop: "1px solid #e2e8f0" }}>
+            <div style={{ display: "flex", gap: 12, paddingTop: 16, borderTop: "1px solid #e2e8f0", flexWrap: "wrap" }}>
               <button
                 type="button"
                 onClick={() => setSelectedUserModal(null)}
-                style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer" }}
+                style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff", fontWeight: 700, color: "#64748b", cursor: "pointer", minWidth: 100 }}
               >
                 Close
+              </button>
+              <button
+                type="button"
+                onClick={() => setRequestDocUser(selectedUserModal)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "12px 18px",
+                  borderRadius: 12,
+                  border: "1px solid #fed7aa",
+                  background: "#fff7ed",
+                  color: "#c2410c",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  minWidth: 160,
+                }}
+              >
+                <iconify-icon icon="lucide:mail" /> Request Docs / Reminder
               </button>
               {!selectedUserModal.is_verified ? (
                 <>
@@ -908,7 +1025,7 @@ export default function AdminVerificationPage() {
                     type="button"
                     onClick={() => handleReject(selectedUserModal)}
                     className={styles.btnReject}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 140 }}
                   >
                     <iconify-icon icon="lucide:x-circle" /> Reject Account
                   </button>
@@ -916,7 +1033,7 @@ export default function AdminVerificationPage() {
                     type="button"
                     onClick={() => handleApprove(selectedUserModal)}
                     className={styles.btnApprove}
-                    style={{ flex: 1.5 }}
+                    style={{ flex: 1.5, minWidth: 160 }}
                   >
                     <iconify-icon icon="lucide:check-circle" /> Approve & Verify
                   </button>
@@ -927,7 +1044,7 @@ export default function AdminVerificationPage() {
                     type="button"
                     onClick={() => handleUnverify(selectedUserModal)}
                     className={styles.btnReject}
-                    style={{ flex: 1, background: "#f59e0b", color: "#ffffff", borderColor: "#f59e0b" }}
+                    style={{ flex: 1, background: "#f59e0b", color: "#ffffff", borderColor: "#f59e0b", minWidth: 140 }}
                   >
                     <iconify-icon icon="lucide:rotate-ccw" /> Move to Pending
                   </button>
@@ -935,12 +1052,175 @@ export default function AdminVerificationPage() {
                     type="button"
                     onClick={() => handleReject(selectedUserModal)}
                     className={styles.btnReject}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 140 }}
                   >
                     <iconify-icon icon="lucide:ban" /> Suspend Account
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Request & Profile Completion Reminder Modal */}
+      {requestDocUser && (
+        <div className={styles.modalOverlay} onClick={() => !sendingRequest && setRequestDocUser(null)} style={{ zIndex: 1200 }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 540 }}>
+            <div className={styles.modalHeader}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: "linear-gradient(135deg, rgba(255,69,0,0.1) 0%, rgba(255,107,0,0.15) 100%)",
+                  color: "#ff4500",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 22,
+                }}>
+                  <iconify-icon icon="lucide:mail-plus" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 18, color: "#001f3f", fontWeight: 800 }}>
+                    Request Documents & Complete Profile
+                  </h3>
+                  <p style={{ margin: 0, fontSize: 12.5, color: "#64748b" }}>
+                    Send official email & notification to {requestDocUser.first_name || requestDocUser.username}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => !sendingRequest && setRequestDocUser(null)}
+                className={styles.modalCloseBtn}
+                disabled={sendingRequest}
+              >
+                <iconify-icon icon="lucide:x" />
+              </button>
+            </div>
+
+            <div style={{ padding: "20px 0", display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Recipient summary card */}
+              <div style={{
+                background: "#f8fafc",
+                borderRadius: 12,
+                padding: "14px 16px",
+                border: "1px solid #e2e8f0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}>
+                <div>
+                  <strong style={{ fontSize: 14, color: "#001f3f", display: "block" }}>
+                    {requestDocUser.first_name} {requestDocUser.last_name || ""} (@{requestDocUser.username})
+                  </strong>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                    {requestDocUser.email} • Role: <b>{requestDocUser.role}</b>
+                  </span>
+                </div>
+                <span style={{
+                  padding: "4px 10px",
+                  borderRadius: 20,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  background: "#fee2e2",
+                  color: "#b91c1c",
+                }}>
+                  No KYC Docs
+                </span>
+              </div>
+
+              {/* What will happen explanation */}
+              <div style={{
+                background: "#eff6ff",
+                borderRadius: 12,
+                padding: "12px 16px",
+                border: "1px solid #bfdbfe",
+                fontSize: 12.5,
+                color: "#1e40af",
+                lineHeight: 1.5,
+              }}>
+                <strong style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <iconify-icon icon="lucide:info" /> Automatic Actions Triggered:
+                </strong>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <li>Sends a high-priority <b>Boulotman Transactional Email</b> with the required document checklist.</li>
+                  <li>Generates an in-app <b>governance notification</b> linking directly to their profile KYC upload page.</li>
+                  <li>Logs an administrative audit trail event.</li>
+                </ul>
+              </div>
+
+              {/* Optional Custom Instructions */}
+              <div>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6 }}>
+                  Custom Admin Note / Missing Document Details (Optional)
+                </label>
+                <textarea
+                  value={requestDocMessage}
+                  onChange={(e) => setRequestDocMessage(e.target.value)}
+                  placeholder="e.g. Please provide a clear copy of your National ID card front/back and proof of professional artisan certification to complete your verification."
+                  rows={4}
+                  style={{
+                    width: "100%",
+                    padding: "12px 14px",
+                    borderRadius: 10,
+                    border: "1px solid #cbd5e1",
+                    fontSize: 13,
+                    fontFamily: "inherit",
+                    resize: "vertical",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: "flex", gap: 12, paddingTop: 16, borderTop: "1px solid #e2e8f0" }}>
+              <button
+                type="button"
+                onClick={() => setRequestDocUser(null)}
+                disabled={sendingRequest}
+                style={{
+                  flex: 1,
+                  padding: "12px 18px",
+                  borderRadius: 12,
+                  border: "1px solid #e2e8f0",
+                  background: "#ffffff",
+                  fontWeight: 700,
+                  color: "#64748b",
+                  cursor: sendingRequest ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSendDocRequest}
+                disabled={sendingRequest}
+                style={{
+                  flex: 2,
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  border: "none",
+                  background: "linear-gradient(135deg, #ff4500 0%, #e03e00 100%)",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: sendingRequest ? "wait" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxShadow: "0 4px 14px rgba(255, 69, 0, 0.3)",
+                }}
+              >
+                <iconify-icon icon={sendingRequest ? "lucide:loader-2" : "lucide:send"} style={sendingRequest ? { animation: "spin 1s linear infinite" } : {}} />
+                {sendingRequest ? "Sending Request..." : "Send Request & Email"}
+              </button>
             </div>
           </div>
         </div>

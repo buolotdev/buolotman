@@ -1234,6 +1234,57 @@ def admin_suspend_user(request, user_id):
     return Response({"message": f"{user.email} suspended", "is_active": False})
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_request_user_documents(request, user_id):
+    err = _require_admin(request)
+    if err: return err
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    custom_message = (request.data.get('message') or "").strip()
+    role = str(getattr(user, 'role', 'PRO')).upper()
+    role_link = "/dashboard/technician/profile" if role == "TECHNICIAN" else ("/dashboard/company/profile" if role == "COMPANY" else "/dashboard/client/profile")
+    
+    notification_body = custom_message or "Action Required: Please complete your profile and upload your verification documents so our administrative team can review and approve your account."
+    
+    create_notification(
+        user=user,
+        category="verification",
+        title="Action Required: Upload Verification Documents",
+        body=notification_body,
+        link=role_link,
+        metadata={"user_id": user.id, "type": "kyc_document_request"},
+    )
+    
+    create_audit_log(
+        actor=request.user,
+        action="kyc_documents_requested",
+        entity_type="user",
+        entity_id=user.id,
+        summary=f"Admin requested KYC documents from {user.email}",
+        metadata={"custom_message": custom_message},
+        ip_address=request.META.get("REMOTE_ADDR"),
+    )
+    
+    email_sent = False
+    try:
+        from utils.email_service import send_kyc_document_request_email
+        email_sent = bool(send_kyc_document_request_email(user, custom_message=custom_message))
+    except Exception as e:
+        logger.warning("Could not send KYC document request email to %s: %s", user.email, e)
+
+    return Response({
+        "message": f"Verification document request successfully sent to {user.email}",
+        "user_id": user.id,
+        "email_sent": email_sent
+    })
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_list_users(request):

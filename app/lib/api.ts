@@ -524,6 +524,8 @@ export const api = {
     request<any>(`/auth/admin/users/${userId}/verify/`, { method: "POST", body: JSON.stringify({ action }) }),
   adminSuspendUser: (userId: number, action: "suspend" | "unsuspend" = "suspend") =>
     request<any>(`/auth/admin/users/${userId}/suspend/`, { method: "POST", body: JSON.stringify({ action }) }),
+  adminRequestUserDocuments: (userId: number, message?: string) =>
+    request<any>(`/auth/admin/users/${userId}/request-documents/`, { method: "POST", body: JSON.stringify({ message }) }),
 
   // Governance
   getNotifications: (params?: Record<string, string>) => {

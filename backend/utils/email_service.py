@@ -423,6 +423,102 @@ https://boulotman.com
     )
 
 
+def send_kyc_document_request_email(user, custom_message=None):
+    """
+    Send an official notification email when Admin requests a user to complete their profile and upload KYC/verification documents.
+    """
+    name = (f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}").strip() or user.username or user.email.split('@')[0]
+    role = str(getattr(user, 'role', 'PRO')).upper()
+    role_label = 'Technician' if role == 'TECHNICIAN' else ('Company' if role == 'COMPANY' else 'Client')
+    dashboard_url = f"https://boulotman.com/dashboard/{role.lower()}/profile"
+    subject = f"Action Required: Complete Your BoulotMan {role_label} Profile & Upload Documents"
+
+    custom_note_section = ""
+    if custom_message:
+        custom_note_section = f"""
+        <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 14px 18px; margin: 18px 0;">
+          <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #92400E;">Message from Administrator:</p>
+          <p style="margin: 0; font-size: 13.5px; color: #78350F; line-height: 1.5; font-style: italic;">"{custom_message}"</p>
+        </div>
+        """
+
+    plain_message = f"""Hello {name},
+
+Our administrative and compliance team is currently reviewing your {role_label} account on BoulotMan.
+
+To complete your account review and activate your Verified Badge, please log in to your profile and upload your required identification and technical compliance credentials.
+
+{f'Admin Message: {custom_message}' if custom_message else ''}
+
+Upload your documents here:
+{dashboard_url}
+
+Required Documents Checklist:
+- Government-Issued Photo ID (National ID, Passport, or Driver's License)
+- Technical Certificates / Trade Diplomas or Proof of Experience
+- Business Registration / Tax Certificate (for Companies)
+
+If you have any questions, our support team is available at support@boulotman.com.
+
+Best regards,
+The BoulotMan Verification & Compliance Team
+https://boulotman.com
+"""
+
+    body_content = f"""
+      <div style="text-align: center; margin-bottom: 22px;">
+        <div style="display: inline-block; background-color: #FEF3C7; border: 1px solid #FDE68A; border-radius: 50px; padding: 6px 20px; color: #B45309; font-size: 13px; font-weight: 700;">
+          &#9888; Action Required: Upload Documents
+        </div>
+      </div>
+
+      <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 14px 0;">Hello <strong>{name}</strong>,</p>
+      
+      <p style="font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 16px 0;">
+        Thank you for joining <strong>BoulotMan</strong>! Our administrative review team is ready to verify your <strong>{role_label}</strong> account, but we noticed that your required identification and credential documents have not been uploaded yet.
+      </p>
+
+      {custom_note_section}
+
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #001F3F;">Required to Complete Verification:</p>
+        <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #334155; line-height: 1.8;">
+          <li><strong>Identity Proof:</strong> Valid National ID Card, Passport, or Driver's License</li>
+          <li><strong>Professional Credentials:</strong> Trade Certification, Technical Diploma, or Professional License</li>
+          <li><strong>Profile Details:</strong> Operating location, primary trades, and contact details</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{dashboard_url}" target="_blank" style="background: linear-gradient(135deg, #FF4500 0%, #E03E00 100%); color: #ffffff; padding: 13px 32px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; box-shadow: 0 4px 14px rgba(255, 69, 0, 0.3);">
+          Upload Verification Documents &rarr;
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #F1F5F9; padding-top: 18px;">
+        <p style="font-size: 12px; line-height: 1.6; color: #94A3B8; margin: 0;">
+          Need help? Reply to this email or contact our compliance desk anytime at <a href="mailto:support@boulotman.com" style="color: #FF4500; text-decoration: none; font-weight: 600;">support@boulotman.com</a>.
+        </p>
+      </div>
+    """
+
+    html_message = build_branded_email_html(
+        heading_title="Action Required: Upload Documents",
+        heading_subtitle=f"Complete Your {role_label} Verification",
+        body_content=body_content,
+        preheader=f"{name}, please upload your documents to complete your BoulotMan verification."
+    )
+
+    return send_platform_email(
+        subject=subject,
+        message=plain_message,
+        recipient_list=[user.email],
+        html_message=html_message,
+        sender_type='admin',
+        fail_silently=True
+    )
+
+
 def send_admin_new_user_approval_email(user):
     """
     Send an official notification email to admin@boulotman.com when a new user registers and awaits approval/verification.
