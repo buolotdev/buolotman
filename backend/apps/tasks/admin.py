@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, Bid, Question, Category, Skill, TaskAttachment
+from .models import Task, Bid, Question, Category, Skill, TaskAttachment, ServiceInquiry
 
 
 @admin.register(Category)
@@ -42,3 +42,11 @@ class BidAdmin(admin.ModelAdmin):
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('task', 'asker', 'created_at', 'replied_at')
     search_fields = ('task__title', 'asker__email', 'text')
+
+
+@admin.register(ServiceInquiry)
+class ServiceInquiryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'phone', 'company_name', 'inquiry_type', 'status', 'created_at')
+    list_filter = ('inquiry_type', 'status', 'created_at')
+    search_fields = ('name', 'email', 'phone', 'company_name', 'details')
+
