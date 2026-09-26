@@ -748,7 +748,8 @@ export default function CompanyProfilePage() {
   };
 
   const handleShare = () => {
-    const url = typeof window !== "undefined" ? window.location.origin + `/profile/${profile?.id || user?.id}` : "";
+    const handleName = username || user?.username || profile?.username;
+    const url = typeof window !== "undefined" ? window.location.origin + (handleName ? `/profile/@${handleName.replace(/^@/, '')}` : `/profile/${profile?.id || user?.id}`) : "";
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setShareCopied(true);
@@ -1290,7 +1291,7 @@ export default function CompanyProfilePage() {
               {shareCopied ? t.copied : t.share}
             </button>
             <Link
-              href={profile?.id ? `/profile/${profile.id}` : "/contractors"}
+              href={username ? `/profile/@${username.replace(/^@/, '')}` : (profile?.id ? `/profile/${profile.id}` : "/contractors")}
               className={styles.outlineButton}
               target="_blank"
             >

@@ -104,7 +104,7 @@ export default function SavedProfessionalsPage() {
                         </div>
                       </div>
                       <div className={styles.actions}>
-                        <Link href={`/profile/${professional.id}`} className={styles.viewBtn}>
+                        <Link href={professional.username ? `/profile/@${professional.username.replace(/^@/, '')}` : `/profile/${professional.id}`} className={styles.viewBtn}>
                           {t.viewProfile}
                         </Link>
                         <button

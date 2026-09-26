@@ -480,6 +480,19 @@ export default function PublicProfilePage() {
     [validIdentifier]
   );
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && profile) {
+      const handle = (profile.username || profile.handle || profile.user?.username || "").toString().trim().replace(/^@/, '');
+      if (handle && rawParam && !rawParam.startsWith("@")) {
+        const queryStr = window.location.search || "";
+        const cleanUrl = `/profile/@${handle}${queryStr}`;
+        if (window.location.pathname !== `/profile/@${handle}`) {
+          window.history.replaceState(null, "", cleanUrl);
+        }
+      }
+    }
+  }, [profile, rawParam]);
+
   const validId = profile?.id || numericId;
 
   const { data: meData } = useFetch(

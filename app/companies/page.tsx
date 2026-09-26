@@ -195,7 +195,10 @@ export default function CompaniesPage() {
           <div className={styles.grid}>
             {filteredCompanies.map((company: any) => {
               const profileId = company.id;
-              const companyProfileUrl = `/profile/${profileId}?type=company`;
+              const companyUsername = company.username || company.user?.username;
+              const companyProfileUrl = companyUsername 
+                ? `/profile/@${companyUsername.replace(/^@/, '')}?type=company` 
+                : `/profile/${profileId}?type=company`;
               const companyName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || "Corporate Enterprise";
               const logoUrl = company.logo_url || company.user?.avatar_url;
               const coverUrl = company.cover_url || company.banner_url || company.user?.banner_url || company.cover_image;

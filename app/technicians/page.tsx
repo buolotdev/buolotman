@@ -115,7 +115,12 @@ export default function TechniciansPage() {
                       <span className={styles.rating}>⭐ {tech.average_rating ? Number(tech.average_rating).toFixed(1) : "5.0"}</span> • {resolveCleanLocation(tech)}
                     </div>
                     <div className={styles.cardActions}>
-                      <Link href={`/profile/${tech.id}`} className={styles.btnOutline}>View Profile</Link>
+                      <Link 
+                        href={tech.username ? `/profile/@${tech.username.replace(/^@/, '')}` : `/profile/${tech.id}`} 
+                        className={styles.btnOutline}
+                      >
+                        View Profile
+                      </Link>
                       <Link 
                         href={`/post-task?specialist_id=${tech.id}&specialist_name=${encodeURIComponent(fullName)}`} 
                         className={styles.btnPrimary}

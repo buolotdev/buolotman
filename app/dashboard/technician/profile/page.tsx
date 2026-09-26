@@ -1435,7 +1435,7 @@ export default function TechnicianProfilePage() {
                     {availableNow ? t.availableOn : t.availableOff}
                   </button>
 
-                  <Link href={userData?.id ? `/profile/${userData.id}` : "/dashboard/technician"} className={styles.outlineButton} target="_blank">
+                  <Link href={username ? `/profile/@${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")} className={styles.outlineButton} target="_blank">
                     <iconify-icon icon="lucide:external-link" /> {t.previewPublic}
                   </Link>
 
@@ -2671,7 +2671,7 @@ export default function TechnicianProfilePage() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Link
-                  href={userData?.id ? `/profile/${userData.id}` : "/dashboard/technician"}
+                  href={username ? `/profile/@${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")}
                   target="_blank"
                   className={styles.outlineButton}
                   style={{ minHeight: 44, fontSize: 13.5, justifyContent: "center" }}

@@ -166,6 +166,7 @@ type SearchResult = {
   services?: any[];
   link?: string;
   serviceType?: string;
+  username?: string;
 };
 
 export default function SearchPage() {
@@ -338,8 +339,9 @@ export default function SearchPage() {
             verified: item.verified ?? item.is_verified,
             skills: item.skills ?? [],
             services: item.services || item.profile?.services || [],
-            link: item.type === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : `/profile/${item.id}`,
+            link: item.type === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/@${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
             serviceType: item.serviceType,
+            username: item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, '') : undefined),
           };
         });
         setResults(mapped);
@@ -740,25 +742,25 @@ export default function SearchPage() {
                     </div>
 
                     {result.services && result.services.length > 0 && (
-                      <div style={{ margin: "10px 0 12px 0", background: "#f8fafc", padding: "10px 12px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      <div style={{ margin: "6px 0 10px 0", background: "#f8fafc", padding: "8px 10px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "10.5px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                             {lang === "fr" ? "Services proposés" : "Services Offered"} ({result.services.length})
                           </span>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                          {result.services.slice(0, 3).map((srv: any, sIdx: number) => (
-                            <div key={srv.id || sIdx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", color: "#1e293b" }}>
-                              <span style={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                                <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a", fontSize: "13px" }} />
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          {result.services.slice(0, 2).map((srv: any, sIdx: number) => (
+                            <div key={srv.id || sIdx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px", color: "#1e293b" }}>
+                              <span style={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}>
+                                <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a", fontSize: "12px", flexShrink: 0 }} />
                                 {srv.title}
                               </span>
                               {srv.pricing_min ? (
-                                <span style={{ fontWeight: 700, color: "#ff4500", fontSize: "11px" }}>
+                                <span style={{ fontWeight: 700, color: "#ff4500", fontSize: "11px", flexShrink: 0 }}>
                                   {formatXOF(srv.pricing_min)}
                                 </span>
                               ) : srv.pricing_model ? (
-                                <span style={{ fontSize: "11px", color: "#64748b", textTransform: "capitalize" }}>
+                                <span style={{ fontSize: "11px", color: "#64748b", textTransform: "capitalize", flexShrink: 0 }}>
                                   {srv.pricing_model}
                                 </span>
                               ) : null}
@@ -791,7 +793,10 @@ export default function SearchPage() {
 
                   <div className={styles.resultActions}>
                     <Link
-                      href={result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`}
+                      href={result.username 
+                        ? `/profile/@${result.username.replace(/^@/, '')}${result.type === "company" ? "?type=company" : ""}`
+                        : (result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`)
+                      }
                       className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
                     >
                       {t.viewProfile}

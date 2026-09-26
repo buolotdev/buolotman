@@ -614,14 +614,14 @@
   margin: 0 0 12px;
   color: #64748b;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   font-weight: 500;
-  height: 38px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
 }
 
 .metaRow {
@@ -632,7 +632,7 @@
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid #f1f5f9;
-  height: 32px;
+  min-height: 32px;
 }
 
 .metaItem {

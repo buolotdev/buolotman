@@ -208,7 +208,7 @@ export default function ProviderBoard() {
               const proRole = resolveProfessionTitle(pro, lang);
               const proBio = resolveProfessionalBio(pro, lang);
               const hireUrl = `/post-task?specialist_id=${pro.id}&specialist_name=${encodeURIComponent(fullName)}`;
-              const profileUrl = `/profile/${pro.id}`;
+              const profileUrl = pro.username ? `/profile/@${pro.username.replace(/^@/, '')}` : `/profile/${pro.id}`;
 
               return (
                 <div key={pro.id} className={styles.card}>

@@ -601,7 +601,7 @@ export default function ClientDashboardPage() {
                           <h4>{`${pro.first_name ?? ""} ${pro.last_name ?? ""}`.trim()}</h4>
                           <p>{pro.role || ""}</p>
                         </div>
-                        <Link href={`/profile/${pro.id}`} className={styles.outlineSmallButton}>{t.view}</Link>
+                        <Link href={pro.username ? `/profile/@${pro.username.replace(/^@/, '')}` : `/profile/${pro.id}`} className={styles.outlineSmallButton}>{t.view}</Link>
                       </article>
                     );
                   })}

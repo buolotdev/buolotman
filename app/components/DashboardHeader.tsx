@@ -321,7 +321,7 @@ export default function DashboardHeader({
     const role = userRole.toLowerCase();
     if (role === "admin") return "/dashboard/admin/settings";
     if (role === "company") return "/dashboard/company/profile";
-    if (role === "technician") return user?.id ? `/profile/${user.id}` : "/dashboard/technician/profile";
+    if (role === "technician") return user?.username ? `/profile/@${user.username.replace(/^@/, '')}` : (user?.id ? `/profile/${user.id}` : "/dashboard/technician/profile");
     return "/dashboard/client/profile";
   };
 
