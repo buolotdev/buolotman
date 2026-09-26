@@ -433,9 +433,14 @@ def skill_list(request):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def submit_inquiry(request):
+    if request.method == 'GET':
+        inquiries = ServiceInquiry.objects.all().order_by('-created_at')
+        serializer = ServiceInquirySerializer(inquiries, many=True)
+        return Response(serializer.data)
+
     serializer = ServiceInquirySerializer(data=request.data)
     if serializer.is_valid():
         inquiry = serializer.save()

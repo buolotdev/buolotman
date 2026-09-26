@@ -44,20 +44,22 @@ export default function AdminSupportPage() {
       let localInqs: any[] = [];
       if (typeof window !== "undefined") {
         try {
-          const stored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
+          const contractorStored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
+          const teamStored = JSON.parse(localStorage.getItem("boulotman_team_inquiries") || "[]");
+          const stored = [...(Array.isArray(teamStored) ? teamStored : []), ...(Array.isArray(contractorStored) ? contractorStored : [])];
           if (Array.isArray(stored)) {
             localInqs = stored.map((inq: any) => ({
-              id: inq.id,
-              subject: `[Contractor Project] ${inq.projectTitle || inq.category || "Project Review"}`,
-              client: `${inq.name} (${inq.clientType || "Client"}) - ${inq.city || inq.country || ""}`,
+              id: inq.id || `LOCAL-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+              subject: inq.topic || `[${(inq.team_type || inq.category || "Team Request").toUpperCase()}] ${inq.name || inq.projectTitle || "Workforce Request"}`,
+              client: `${inq.name || "Client"} (${inq.phone || inq.email || ""})`,
               status: inq.status || "Pending",
               messages: [
                 {
-                  id: `msg-${inq.id}`,
-                  sender: inq.name,
-                  role: inq.clientType || "Client",
+                  id: `msg-${inq.id || Math.random()}`,
+                  sender: inq.name || "Client Lead",
+                  role: inq.team_type ? `${inq.team_type} (${inq.team_size || ""})` : (inq.clientType || "Client"),
                   time: inq.created_at ? new Date(inq.created_at).toLocaleString() : "Recent",
-                  body: `Email: ${inq.email} | Phone: ${inq.phone}\nLocation: ${inq.city}, ${inq.country}\nCategory: ${inq.category} | Estimated Budget: ${inq.budget}\nProject Title: ${inq.projectTitle}\n\nScope Description:\n${inq.description}`
+                  body: `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\nLocation: ${inq.location || inq.city || "N/A"}\nTrade: ${inq.team_type || inq.category || "N/A"} | Team Size: ${inq.team_size || "N/A"}\nDuration: ${inq.duration || "N/A"}\n\nProject Scope & Requirements:\n${inq.details || inq.description || inq.message || "N/A"}`
                 }
               ]
             }));
