@@ -242,32 +242,68 @@ export default function BuildATeamPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await api.submitInquiry({
-        ...formData,
-        inquiry_type: "build_a_team",
-        details: `[Build a Team Request]\nTeam Type: ${formData.team_type}\nTeam Size: ${formData.team_size}\nDuration: ${formData.duration}\nLocation: ${formData.location}\n\nProject Scope:\n${formData.details}`,
-      });
-      setSuccess(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        team_type: "Electrical, Power & Solar PV",
-        team_size: "Standard Crew (5–10 Technicians)",
-        duration: "Short Term Project (1–4 Weeks)",
-        location: "",
-        details: "",
-      });
-      setTimeout(() => {
-        setShowModal(false);
-        setSuccess(false);
-      }, 3500);
-    } catch (err) {
-      alert(lang === "fr" ? "Échec de l'envoi de la demande. Veuillez réessayer." : "Failed to submit request. Please try again.");
-    } finally {
-      setLoading(false);
+
+    const detailsBody = `[Build a Team Request]\nClient Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nLocation: ${formData.location}\nTeam Type: ${formData.team_type}\nTeam Size: ${formData.team_size}\nDuration: ${formData.duration}\n\nProject Scope & Requirements:\n${formData.details}`;
+
+    const inquiryRecord = {
+      id: `TEAM-${Date.now().toString().slice(-6)}`,
+      created_at: new Date().toISOString(),
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      location: formData.location,
+      team_type: formData.team_type,
+      team_size: formData.team_size,
+      duration: formData.duration,
+      details: formData.details,
+      status: "Pending Review"
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        const existing = JSON.parse(localStorage.getItem("boulotman_team_inquiries") || "[]");
+        localStorage.setItem("boulotman_team_inquiries", JSON.stringify([inquiryRecord, ...existing]));
+      } catch {}
     }
+
+    try {
+      await Promise.allSettled([
+        api.submitInquiry({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          company_name: `${formData.team_type} (${formData.team_size})`.trim(),
+          inquiry_type: "general",
+          topic: "Build a Team Request",
+          message: detailsBody,
+          details: detailsBody,
+        } as any),
+        api.submitContactForm({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          topic: "Build a Team Request",
+          message: detailsBody,
+        }),
+      ]);
+    } catch {}
+
+    setSuccess(true);
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      team_type: "Electrical, Power & Solar PV",
+      team_size: "Standard Crew (5–10 Technicians)",
+      duration: "Short Term Project (1–4 Weeks)",
+      location: "",
+      details: "",
+    });
+    setLoading(false);
+    setTimeout(() => {
+      setShowModal(false);
+      setSuccess(false);
+    }, 3500);
   };
 
   return (
