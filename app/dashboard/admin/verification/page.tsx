@@ -26,6 +26,7 @@ interface VerificationUser {
   country?: string;
   first_name?: string;
   last_name?: string;
+  company_name?: string;
   role: string;
   created_at: string;
   is_active: boolean;
@@ -34,7 +35,7 @@ interface VerificationUser {
   documents?: DocItem[];
   title?: string;
   bio?: string;
-}
+};
 
 export default function AdminVerificationPage() {
   const toast = useToast();
@@ -1113,24 +1114,39 @@ export default function AdminVerificationPage() {
                 justifyContent: "space-between",
                 gap: 12,
               }}>
-                <div>
-                  <strong style={{ fontSize: 14, color: "#001f3f", display: "block" }}>
-                    {requestDocUser.first_name} {requestDocUser.last_name || ""} (@{requestDocUser.username})
+                <div style={{ minWidth: 0 }}>
+                  <strong style={{ fontSize: 14.5, color: "#001f3f", display: "block", marginBottom: 3, wordBreak: "break-word" }}>
+                    {requestDocUser.company_name || `${requestDocUser.first_name || ""} ${requestDocUser.last_name || ""}`.trim() || requestDocUser.username} (@{requestDocUser.username})
                   </strong>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>
-                    {requestDocUser.email} • Role: <b>{requestDocUser.role}</b>
+                  <span style={{ fontSize: 12, color: "#64748b", display: "flex", flexWrap: "wrap", gap: "6px 10px", alignItems: "center" }}>
+                    <span>{requestDocUser.email}</span>
+                    <span>•</span>
+                    <span>Role: <b style={{ color: "#001f3f" }}>{requestDocUser.role}</b></span>
                   </span>
                 </div>
-                <span style={{
-                  padding: "4px 10px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  background: "#fee2e2",
-                  color: "#b91c1c",
-                }}>
-                  No KYC Docs
-                </span>
+                {(() => {
+                  const userDocs = extractUserDocs(requestDocUser);
+                  const hasDocs = userDocs.length > 0;
+                  return (
+                    <span style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 12px",
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                      background: hasDocs ? "rgba(245, 158, 11, 0.12)" : "rgba(239, 68, 68, 0.1)",
+                      color: hasDocs ? "#b45309" : "#dc2626",
+                      border: `1px solid ${hasDocs ? "rgba(245, 158, 11, 0.25)" : "rgba(239, 68, 68, 0.2)"}`,
+                    }}>
+                      <iconify-icon icon={hasDocs ? "lucide:file-clock" : "lucide:alert-circle"} style={{ fontSize: 14 }} />
+                      {hasDocs ? `${userDocs.length} Docs Submitted` : "No KYC Docs"}
+                    </span>
+                  );
+                })()}
               </div>
 
               {/* What will happen explanation */}
