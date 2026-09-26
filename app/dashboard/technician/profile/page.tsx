@@ -126,6 +126,127 @@ const profileTranslations: Record<string, Record<string, string>> = {
     skillsTitle: "Trade Skills & Specializations",
     addSkillBtn: "+ Add Skill",
     saveAndContinue: "Save & Continue to Next Step →",
+    // Hero & Stats
+    profSpecialist: "Professional Specialist",
+    tasksCompleted: "Completed Tasks",
+    successRate: "Success Rate",
+    // Tab 2 Verification
+    tierVerifTitle: "3-Tier Specialist Verification & ID Uploads",
+    tier2VerifiedBadge: "Tier 2: Professional Verified ✓",
+    tierReviewBadge: "Verification Under Review",
+    tierReqBadge: "Action Required: Upload ID",
+    tier1Title: "1. Identity Verified",
+    tier1Desc: "National ID / Passport (Front & Back) confirmed by Boulot Man security.",
+    tier2Title: "2. Professional Verified",
+    tier2Desc: "Trade certifications, diploma, and technical skills evaluated.",
+    tier3Title: "3. Boulot Man Approved Pro",
+    tier3Desc: "Full background clearance, 10+ jobs completed with ⭐ 4.8+ rating.",
+    tierTargetBadge: "Target Badge",
+    tierApprovedBadge: "Approved Pro ✓",
+    tierActiveBadge: "Active Status ✓",
+    tierReqTier1Badge: "Requires Tier 1",
+    tierInstruction: "Please upload both the Front and Back side of your National ID/Passport, your trade diploma/certificate, and a live photo/selfie. Sensitive identity documents remain strictly private in our encrypted vault and are never displayed publicly.",
+    slot1Title: "National ID (Front Side) *",
+    slot1Sub: "Clear photo of the front of your ID card or Passport",
+    slot1Uploaded: "✓ Uploaded (Ready for review)",
+    slot1Btn: "Upload Front",
+    slot1Replace: "Replace Front",
+    slot2Title: "National ID (Back Side) *",
+    slot2Sub: "Clear photo of the back side showing barcode & signature",
+    slot2Uploaded: "✓ Uploaded (Ready for review)",
+    slot2Btn: "Upload Back",
+    slot2Replace: "Replace Back",
+    slot3Title: "Trade License & Diploma",
+    slot3Sub: "Electrical, Plumbing, HVAC or Vocational qualification",
+    slot3Uploaded: "✓ Uploaded (Ready for review)",
+    slot3Btn: "Upload Cert",
+    slot3Replace: "Replace Cert",
+    slot4Title: "Live Photo / Selfie Check",
+    slot4Sub: "Clear portrait selfie holding your ID for verification",
+    slot4Uploaded: "✓ Uploaded (Ready for review)",
+    slot4Btn: "Upload Selfie",
+    slot4Replace: "Replace Selfie",
+    vaultTitle: "Verified Document Vault",
+    vaultDesc: "All documents encrypted with 256-bit AES Vault Security",
+    noDocsTitle: "No documents uploaded yet",
+    noDocsDesc: "Upload your Front ID, Back ID, and Trade certificates above to complete verification.",
+    viewDoc: "View",
+    // Tab 3 Portfolio
+    portfolioTitle: "Visual Portfolio & Previous Work Showcase",
+    addWorkBtn: "Add Completed Work",
+    portfolioDesc: "Photos and proof of your previous jobs allow clients to visually verify the quality of your craftsmanship before hiring.",
+    proofOfWork: "Proof of Work",
+    // Tab 4 Availability & Radius
+    availabilityTitle: "Work Preferences, Schedule & Service Radius",
+    liveStatusAvailable: "Live Status: Available Now (Online)",
+    liveStatusBusy: "Live Status: Busy / Offline",
+    liveDescAvailable: "Clients searching for immediate dispatch in your area can view your live badge.",
+    liveDescBusy: "Your profile will not receive emergency dispatch calls right now.",
+    btnGoOffline: "Switch to Offline",
+    btnGoAvailable: "Go Available Now",
+    workMode: "Work Mode",
+    onSite: "On-Site Only (Physical Job Sites)",
+    hybrid: "Hybrid (On-Site Inspections + Remote Consulting)",
+    remote: "Remote (Designs, BOQ & CAD only)",
+    travelRadius: "Service Travel Radius",
+    workingSchedule: "Working Schedule",
+    emergencyCalls: "Emergency 24/7 Calls",
+    acceptEmergencyYes: "Yes — Accept Urgent Breakdown Calls",
+    acceptEmergencyNo: "No — Standard Hours Only",
+    // Tab 5 Pricing
+    pricingTitle: "Flexible Pricing & Quotation Options",
+    pricingDesc: "Different tasks require different pricing structures. Set your standard base rates so clients have clear budget expectations.",
+    startingRate: "Starting Rate (Base)",
+    hourlyRate: "Hourly Rate",
+    dailyRate: "Daily Rate",
+    inspectionFee: "Inspection / Call-out Fee",
+    allowNegotiation: "Allow Quotation Requests & Price Negotiation on Custom Projects",
+    // Tab 6 Tools & Mobility
+    toolsTitle: "Tools, Equipment & Mobility Fleet",
+    ownTools: "Own Professional Tools",
+    ownToolsYes: "Yes — Fully Equipped with Professional Tools",
+    ownToolsNo: "No — Basic Hand Tools Only",
+    transportVehicle: "Transport & Vehicle",
+    ppeGear: "PPE Safety Gear Available",
+    ppeYes: "Yes — Complete PPE (Helmet, Safety Boots, High-Vis, Gloves)",
+    ppeNo: "No — Standard Workwear",
+    drivingLicense: "Valid Driving License",
+    drivingLicenseYes: "Yes — Valid Category A & B License",
+    drivingLicenseNo: "No",
+    toolsSectionTitle: "Specialized Tools & Diagnostic Equipment",
+    toolsSectionSubtitle: "Highlights your capacity to clients & corporate teams",
+    noToolsDesc: "No specialized equipment added yet. Add your diagnostic tools, safety gear, testing devices, or heavy tools below.",
+    addToolBtn: "Add Tool",
+    // Tab 7 Payouts & Matching
+    payoutsTitle: "Payout Account & Project Team Eligibility",
+    confidentialPayoutTitle: "Confidential Escrow Payout Account",
+    confidentialPayoutDesc: "Your financial details are encrypted and never shared publicly. Funds released from escrow are transferred directly to this account.",
+    preferredPayoutMethod: "Preferred Payout Method",
+    payoutAccountNo: "Account Number / Phone",
+    matchmakingTitle: "Boulot Man Operational Matchmaking",
+    conciergeTitle: "Concierge Assignments",
+    conciergeDesc: "Direct dispatch for managed corporate clients",
+    buildTeamTitle: "Build a Team Projects",
+    buildTeamDesc: "Join multi-disciplinary engineering crews",
+    leadSupervisorTitle: "Lead Supervisor Capacity",
+    leadSupervisorDesc: "Lead and supervise site technicians on large contracts",
+    // Wizard Navigation
+    prevStep: "Previous Step",
+    backDashboard: "Back to Dashboard",
+    saveProgress: "Save Progress",
+    saveAndNext: "Save & Next Step",
+    completeProfile: "Complete & Save Profile ✓",
+    savingAll: "Saving All Changes...",
+    // Modal
+    addWorkModalTitle: "Add Completed Work / Project",
+    jobTitleLabel: "Job Title *",
+    tradeCategoryLabel: "Trade Category",
+    jobDescLabel: "Job Description",
+    jobLocationLabel: "Location",
+    jobValueLabel: "Job Value (Optional)",
+    coverPhotoLabel: "Project Cover Photo (Optional)",
+    cancelBtn: "Cancel",
+    saveProjectBtn: "Save Project",
   },
   fr: {
     addCover: "Ajouter une photo de couverture",
@@ -162,6 +283,127 @@ const profileTranslations: Record<string, Record<string, string>> = {
     skillsTitle: "Compétences & Spécialisations",
     addSkillBtn: "+ Ajouter une compétence",
     saveAndContinue: "Enregistrer & Étape suivante →",
+    // Hero & Stats
+    profSpecialist: "Spécialiste Professionnel",
+    tasksCompleted: "Missions Terminées",
+    successRate: "Taux de Réussite",
+    // Tab 2 Verification
+    tierVerifTitle: "Vérification des Spécialistes en 3 Niveaux & Documents",
+    tier2VerifiedBadge: "Niveau 2 : Professionnel Vérifié ✓",
+    tierReviewBadge: "Vérification en cours d'examen",
+    tierReqBadge: "Action Requise : ID Requis",
+    tier1Title: "1. Identité Vérifiée",
+    tier1Desc: "Carte d'Identité / Passeport (Recto & Verso) vérifié par la sécurité Boulot Man.",
+    tier2Title: "2. Professionnel Vérifié",
+    tier2Desc: "Diplômes, certificats professionnels et compétences techniques évalués.",
+    tier3Title: "3. Professionnel Certifié Boulot Man",
+    tier3Desc: "Vérification complète, 10+ missions terminées avec une note ⭐ 4.8+.",
+    tierTargetBadge: "Badge Visé",
+    tierApprovedBadge: "Certifié Pro ✓",
+    tierActiveBadge: "Statut Actif ✓",
+    tierReqTier1Badge: "Niveau 1 Requis",
+    tierInstruction: "Veuillez téléverser le recto et le verso de votre pièce d'identité, votre diplôme/certificat et un selfie. Vos documents confidentiels sont chiffrés et ne sont jamais affichés publiquement.",
+    slot1Title: "Pièce d'Identité (Recto) *",
+    slot1Sub: "Photo lisible du recto de votre CNI ou Passeport",
+    slot1Uploaded: "✓ Téléversé (Prêt pour vérification)",
+    slot1Btn: "Téléverser Recto",
+    slot1Replace: "Remplacer Recto",
+    slot2Title: "Pièce d'Identité (Verso) *",
+    slot2Sub: "Photo lisible du verso avec code-barres et signature",
+    slot2Uploaded: "✓ Téléversé (Prêt pour vérification)",
+    slot2Btn: "Téléverser Verso",
+    slot2Replace: "Remplacer Verso",
+    slot3Title: "Diplôme & Certificat Métier",
+    slot3Sub: "Qualification en électricité, plomberie, climatisation ou technique",
+    slot3Uploaded: "✓ Téléversé (Prêt pour vérification)",
+    slot3Btn: "Téléverser Certificat",
+    slot3Replace: "Remplacer Certificat",
+    slot4Title: "Photo en Direct / Selfie",
+    slot4Sub: "Selfie portrait clair tenant votre pièce d'identité",
+    slot4Uploaded: "✓ Téléversé (Prêt pour vérification)",
+    slot4Btn: "Téléverser Selfie",
+    slot4Replace: "Remplacer Selfie",
+    vaultTitle: "Coffre-fort des Documents Vérifiés",
+    vaultDesc: "Tous les documents sont chiffrés avec la sécurité AES-256",
+    noDocsTitle: "Aucun document téléversé pour le moment",
+    noDocsDesc: "Téléversez votre pièce d'identité et vos certificats ci-dessus pour compléter la vérification.",
+    viewDoc: "Voir",
+    // Tab 3 Portfolio
+    portfolioTitle: "Portfolio Visuel & Vitrine de Vos Réalisations",
+    addWorkBtn: "Ajouter une Réalisation",
+    portfolioDesc: "Les photos et preuves de vos chantiers passés permettent aux clients de vérifier la qualité de votre travail avant de vous recruter.",
+    proofOfWork: "Preuve de réalisation",
+    // Tab 4 Availability & Radius
+    availabilityTitle: "Préférences de Travail, Horaires & Rayon d'Intervention",
+    liveStatusAvailable: "Statut en Direct : Disponible Immédiatement (En ligne)",
+    liveStatusBusy: "Statut en Direct : Occupé / Hors ligne",
+    liveDescAvailable: "Les clients recherchant une intervention immédiate dans votre secteur voient votre badge actif.",
+    liveDescBusy: "Votre profil ne recevra pas d'appels d'urgence pour le moment.",
+    btnGoOffline: "Passer Hors Ligne",
+    btnGoAvailable: "Passer Disponible",
+    workMode: "Mode d'intervention",
+    onSite: "Sur site uniquement (Chantiers physiques)",
+    hybrid: "Hybride (Visites sur site + Conseil à distance)",
+    remote: "À distance (Plans, Devis & CAO uniquement)",
+    travelRadius: "Rayon de déplacement",
+    workingSchedule: "Horaires de travail",
+    emergencyCalls: "Interventions d'urgence 24/7",
+    acceptEmergencyYes: "Oui — Accepter les interventions d'urgence",
+    acceptEmergencyNo: "Non — Heures standard uniquement",
+    // Tab 5 Pricing
+    pricingTitle: "Tarification Flexible & Devis Personnalisés",
+    pricingDesc: "Chaque mission a ses spécificités. Définissez vos tarifs de base afin que les clients connaissent vos fourchettes de prix.",
+    startingRate: "Tarif de base minimum",
+    hourlyRate: "Tarif horaire",
+    dailyRate: "Tarif journalier",
+    inspectionFee: "Frais de déplacement / Diagnostic",
+    allowNegotiation: "Autoriser les demandes de devis et la négociation sur les projets sur mesure",
+    // Tab 6 Tools & Mobility
+    toolsTitle: "Outillage, Équipements & Flotte de Déplacement",
+    ownTools: "Outillage professionnel propre",
+    ownToolsYes: "Oui — Entièrement équipé en outils professionnels",
+    ownToolsNo: "Non — Outillage à main basique",
+    transportVehicle: "Moyen de transport / Véhicule",
+    ppeGear: "Équipements de protection individuelle (EPI)",
+    ppeYes: "Oui — EPI complets (Casque, Chaussures, Gants, Gilet)",
+    ppeNo: "Non — Vêtements de travail standard",
+    drivingLicense: "Permis de conduire valide",
+    drivingLicenseYes: "Oui — Permis Catégorie A & B valide",
+    drivingLicenseNo: "Non",
+    toolsSectionTitle: "Outillages spécialisés & Équipements de diagnostic",
+    toolsSectionSubtitle: "Met en valeur vos capacités auprès des particuliers et entreprises",
+    noToolsDesc: "Aucun outillage spécialisé ajouté pour l'instant. Ajoutez vos appareils de mesure, équipements lourds ou outils spécifiques ci-dessous.",
+    addToolBtn: "Ajouter Outil",
+    // Tab 7 Payouts & Matching
+    payoutsTitle: "Compte de Paiement & Éligibilité aux Équipes Projet",
+    confidentialPayoutTitle: "Compte de Versement Escrow Sécurisé",
+    confidentialPayoutDesc: "Vos coordonnées bancaires / mobile money sont chiffrées et confidentielles. Les fonds séquestrés y sont transférés directement.",
+    preferredPayoutMethod: "Mode de versement préféré",
+    payoutAccountNo: "Numéro de compte / Téléphone",
+    matchmakingTitle: "Opportunités & Missions Spéciales Boulot Man",
+    conciergeTitle: "Missions Conciergerie Privée",
+    conciergeDesc: "Affectation directe pour les comptes entreprises",
+    buildTeamTitle: "Projets en Équipes Multi-Corps d'État",
+    buildTeamDesc: "Intégrez des équipes d'ingénierie et de chantiers complexes",
+    leadSupervisorTitle: "Rôle de Chef d'Équipe / Superviseur",
+    leadSupervisorDesc: "Supervisez et dirigez les équipes sur les grands chantiers",
+    // Wizard Navigation
+    prevStep: "Étape Précédente",
+    backDashboard: "Tableau de Bord",
+    saveProgress: "Enregistrer la Progression",
+    saveAndNext: "Enregistrer & Étape Suivante →",
+    completeProfile: "Terminer & Enregistrer le Profil ✓",
+    savingAll: "Enregistrement de toutes les modifications...",
+    // Modal
+    addWorkModalTitle: "Ajouter une Réalisation / Chantier",
+    jobTitleLabel: "Titre du chantier *",
+    tradeCategoryLabel: "Catégorie de métier",
+    jobDescLabel: "Description du projet & travaux réalisés",
+    jobLocationLabel: "Lieu d'exécution",
+    jobValueLabel: "Montant des travaux (Facultatif)",
+    coverPhotoLabel: "Photo du chantier (Facultatif)",
+    cancelBtn: "Annuler",
+    saveProjectBtn: "Enregistrer la réalisation",
   }
 };
 
@@ -1758,19 +2000,19 @@ export default function TechnicianProfilePage() {
                 <section className={styles.card}>
                   <div className={styles.cardHeader}>
                     <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                      <iconify-icon icon="lucide:shield-check" style={{ color: isTechVerified ? "#16a34a" : "#f59e0b" }} /> 3-Tier Specialist Verification & ID Uploads
+                      <iconify-icon icon="lucide:shield-check" style={{ color: isTechVerified ? "#16a34a" : "#f59e0b" }} /> {t.tierVerifTitle}
                     </h2>
                     {isTechVerified ? (
                       <span className={styles.verifiedBadge}>
-                        <iconify-icon icon="lucide:check-circle-2" /> Tier 2: Professional Verified ✓
+                        <iconify-icon icon="lucide:check-circle-2" /> {t.tier2VerifiedBadge}
                       </span>
                     ) : isTier1Pending ? (
                       <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                        <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en cours d'examen" : "Verification Under Review"}
+                        <iconify-icon icon="lucide:clock-4" /> {t.tierReviewBadge}
                       </span>
                     ) : (
                       <span style={{ background: "#fee2e2", color: "#b91c1c", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                        <iconify-icon icon="lucide:alert-circle" /> {lang === "fr" ? "Documents Requis (Non Vérifié)" : "Action Required: Upload ID"}
+                        <iconify-icon icon="lucide:alert-circle" /> {t.tierReqBadge}
                       </span>
                     )}
                   </div>
@@ -1781,46 +2023,46 @@ export default function TechnicianProfilePage() {
                       <div className={styles.tierHeader}>
                         <span style={{ fontSize: 20 }}>🥉</span>
                         {isTier1Verified ? (
-                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Identity Verified ✓</span>
+                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.identityVerified}</span>
                         ) : isTier1Pending ? (
-                          <span className={styles.tierBadge} style={{ background: "#fef3c7", color: "#b45309" }}>{lang === "fr" ? "En cours d'examen" : "Under Review"}</span>
+                          <span className={styles.tierBadge} style={{ background: "#fef3c7", color: "#b45309" }}>{t.tierReviewBadge}</span>
                         ) : (
-                          <span className={styles.tierBadge} style={{ background: "#fee2e2", color: "#b91c1c" }}>{lang === "fr" ? "ID Requis" : "ID Required"}</span>
+                          <span className={styles.tierBadge} style={{ background: "#fee2e2", color: "#b91c1c" }}>{t.tierReqBadge}</span>
                         )}
                       </div>
-                      <h4 className={styles.tierTitle}>1. Identity Verified</h4>
-                      <p className={styles.tierDesc}>National ID / Passport (Front & Back) confirmed by Boulot Man security.</p>
+                      <h4 className={styles.tierTitle}>{t.tier1Title}</h4>
+                      <p className={styles.tierDesc}>{t.tier1Desc}</p>
                     </div>
 
                     <div className={`${styles.tierCard} ${isTier2Verified ? styles.tierCardActive : (isTechVerified ? styles.tierCardCurrent : "")}`}>
                       <div className={styles.tierHeader}>
                         <span style={{ fontSize: 20 }}>🥈</span>
                         {isTier2Verified ? (
-                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Professional Verified ✓</span>
+                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.verifiedPro}</span>
                         ) : isTechVerified ? (
-                          <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>Active Status ✓</span>
+                          <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>{t.tierActiveBadge}</span>
                         ) : (
-                          <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#94a3b8" }}>{lang === "fr" ? "Niveau 1 Requis" : "Requires Tier 1"}</span>
+                          <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#94a3b8" }}>{t.tierReqTier1Badge}</span>
                         )}
                       </div>
-                      <h4 className={styles.tierTitle}>2. Professional Verified</h4>
-                      <p className={styles.tierDesc}>Trade certifications, diploma, and technical skills evaluated.</p>
+                      <h4 className={styles.tierTitle}>{t.tier2Title}</h4>
+                      <p className={styles.tierDesc}>{t.tier2Desc}</p>
                     </div>
 
                     <div className={`${styles.tierCard} ${isTier3Verified ? styles.tierCardActive : ""}`}>
                       <div className={styles.tierHeader}>
                         <span style={{ fontSize: 20 }}>🥇</span>
                         <span className={styles.tierBadge} style={{ background: isTier3Verified ? "#dcfce7" : "#f1f5f9", color: isTier3Verified ? "#16a34a" : "#64748b" }}>
-                          {isTier3Verified ? "Approved Pro ✓" : "Target Badge"}
+                          {isTier3Verified ? t.tierApprovedBadge : t.tierTargetBadge}
                         </span>
                       </div>
-                      <h4 className={styles.tierTitle}>3. Boulot Man Approved Pro</h4>
-                      <p className={styles.tierDesc}>Full background clearance, 10+ jobs completed with ⭐ 4.8+ rating.</p>
+                      <h4 className={styles.tierTitle}>{t.tier3Title}</h4>
+                      <p className={styles.tierDesc}>{t.tier3Desc}</p>
                     </div>
                   </div>
 
                 <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
-                  Please upload both the <strong>Front and Back side</strong> of your National ID/Passport, your trade diploma/certificate, and a live photo/selfie. <strong>Sensitive identity documents remain strictly private</strong> in our encrypted vault and are never displayed publicly.
+                  {t.tierInstruction}
                 </p>
 
                 {/* 4-SLOT DEDICATED UPLOAD GRID */}
@@ -1832,7 +2074,7 @@ export default function TechnicianProfilePage() {
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(frontIdDoc)} title="Click to view enlarged">
                         <DocThumbnail doc={frontIdDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
-                          <iconify-icon icon="lucide:maximize-2" /> View
+                          <iconify-icon icon="lucide:maximize-2" /> {t.viewDoc}
                         </span>
                       </div>
                     ) : (
@@ -1841,9 +2083,9 @@ export default function TechnicianProfilePage() {
                       </div>
                     )}
 
-                    <h4 className={styles.docSlotTitle}>National ID (Front Side) *</h4>
+                    <h4 className={styles.docSlotTitle}>{t.slot1Title}</h4>
                     <p className={styles.docSlotSub}>
-                      {frontIdDoc ? "✓ Uploaded (Ready for review)" : "Clear photo of the front of your ID card or Passport"}
+                      {frontIdDoc ? t.slot1Uploaded : t.slot1Sub}
                     </p>
 
                     <div className={styles.docSlotActions}>
@@ -1863,7 +2105,7 @@ export default function TechnicianProfilePage() {
                         }}
                       >
                         <iconify-icon icon={uploadingSlot === "front" ? "lucide:loader" : "lucide:upload"} />
-                        {uploadingSlot === "front" ? "Uploading..." : frontIdDoc ? "Replace Front" : "Upload Front"}
+                        {uploadingSlot === "front" ? t.uploading : frontIdDoc ? t.slot1Replace : t.slot1Btn}
                       </button>
 
                       {frontIdDoc && (
@@ -1880,7 +2122,7 @@ export default function TechnicianProfilePage() {
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(backIdDoc)} title="Click to view enlarged">
                         <DocThumbnail doc={backIdDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
-                          <iconify-icon icon="lucide:maximize-2" /> View
+                          <iconify-icon icon="lucide:maximize-2" /> {t.viewDoc}
                         </span>
                       </div>
                     ) : (
@@ -1889,9 +2131,9 @@ export default function TechnicianProfilePage() {
                       </div>
                     )}
 
-                    <h4 className={styles.docSlotTitle}>National ID (Back Side) *</h4>
+                    <h4 className={styles.docSlotTitle}>{t.slot2Title}</h4>
                     <p className={styles.docSlotSub}>
-                      {backIdDoc ? "✓ Uploaded (Ready for review)" : "Clear photo of the back side showing barcode & signature"}
+                      {backIdDoc ? t.slot2Uploaded : t.slot2Sub}
                     </p>
 
                     <div className={styles.docSlotActions}>
@@ -1911,7 +2153,7 @@ export default function TechnicianProfilePage() {
                         }}
                       >
                         <iconify-icon icon={uploadingSlot === "back" ? "lucide:loader" : "lucide:upload"} />
-                        {uploadingSlot === "back" ? "Uploading..." : backIdDoc ? "Replace Back" : "Upload Back"}
+                        {uploadingSlot === "back" ? t.uploading : backIdDoc ? t.slot2Replace : t.slot2Btn}
                       </button>
 
                       {backIdDoc && (
@@ -1928,7 +2170,7 @@ export default function TechnicianProfilePage() {
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(certDoc)} title="Click to view enlarged">
                         <DocThumbnail doc={certDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
-                          <iconify-icon icon="lucide:maximize-2" /> View
+                          <iconify-icon icon="lucide:maximize-2" /> {t.viewDoc}
                         </span>
                       </div>
                     ) : (
@@ -1937,9 +2179,9 @@ export default function TechnicianProfilePage() {
                       </div>
                     )}
 
-                    <h4 className={styles.docSlotTitle}>Trade License & Diploma</h4>
+                    <h4 className={styles.docSlotTitle}>{t.slot3Title}</h4>
                     <p className={styles.docSlotSub}>
-                      {certDoc ? "✓ Uploaded (Ready for review)" : "Electrical, Plumbing, HVAC or Vocational qualification"}
+                      {certDoc ? t.slot3Uploaded : t.slot3Sub}
                     </p>
 
                     <div className={styles.docSlotActions}>
@@ -1959,7 +2201,7 @@ export default function TechnicianProfilePage() {
                         }}
                       >
                         <iconify-icon icon={uploadingSlot === "cert" ? "lucide:loader" : "lucide:upload"} />
-                        {uploadingSlot === "cert" ? "Uploading..." : certDoc ? "Replace Cert" : "Upload Cert"}
+                        {uploadingSlot === "cert" ? t.uploading : certDoc ? t.slot3Replace : t.slot3Btn}
                       </button>
 
                       {certDoc && (
@@ -1976,7 +2218,7 @@ export default function TechnicianProfilePage() {
                       <div className={styles.docThumbPreview} onClick={() => setPreviewModalDoc(selfieDoc)} title="Click to view enlarged">
                         <DocThumbnail doc={selfieDoc} fullWidth />
                         <span style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
-                          <iconify-icon icon="lucide:maximize-2" /> View
+                          <iconify-icon icon="lucide:maximize-2" /> {t.viewDoc}
                         </span>
                       </div>
                     ) : (
@@ -1985,9 +2227,9 @@ export default function TechnicianProfilePage() {
                       </div>
                     )}
 
-                    <h4 className={styles.docSlotTitle}>Live Photo / Selfie Check</h4>
+                    <h4 className={styles.docSlotTitle}>{t.slot4Title}</h4>
                     <p className={styles.docSlotSub}>
-                      {selfieDoc ? "✓ Uploaded (Ready for review)" : "Clear portrait selfie holding your ID for verification"}
+                      {selfieDoc ? t.slot4Uploaded : t.slot4Sub}
                     </p>
 
                     <div className={styles.docSlotActions}>
@@ -2007,7 +2249,7 @@ export default function TechnicianProfilePage() {
                         }}
                       >
                         <iconify-icon icon={uploadingSlot === "selfie" ? "lucide:loader" : "lucide:upload"} />
-                        {uploadingSlot === "selfie" ? "Uploading..." : selfieDoc ? "Replace Selfie" : "Upload Selfie"}
+                        {uploadingSlot === "selfie" ? t.uploading : selfieDoc ? t.slot4Replace : t.slot4Btn}
                       </button>
 
                       {selfieDoc && (
@@ -2024,18 +2266,18 @@ export default function TechnicianProfilePage() {
                   <div className={styles.documentsHeader}>
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#001f3f" }}>
                       <iconify-icon icon="lucide:vault" style={{ color: "#16a34a", marginRight: 6 }} />
-                      Verified Document Vault ({allDocuments.length})
+                      {t.vaultTitle} ({allDocuments.length})
                     </h3>
                     <span style={{ fontSize: 12.5, color: "#64748b" }}>
-                      All documents encrypted with 256-bit AES Vault Security
+                      {t.vaultDesc}
                     </span>
                   </div>
 
                   {allDocuments.length === 0 ? (
                     <div style={{ background: "#f8fafc", border: "1.5px dashed #cbd5e1", borderRadius: 16, padding: "28px", textAlign: "center", color: "#64748b" }}>
                       <iconify-icon icon="lucide:file-question" style={{ fontSize: 32, marginBottom: 8, color: "#94a3b8" }} />
-                      <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "#001f3f" }}>No documents uploaded yet</p>
-                      <p style={{ margin: 0, fontSize: 12.5 }}>Upload your Front ID, Back ID, and Trade certificates above to complete verification.</p>
+                      <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "#001f3f" }}>{t.noDocsTitle}</p>
+                      <p style={{ margin: 0, fontSize: 12.5 }}>{t.noDocsDesc}</p>
                     </div>
                   ) : (
                     <div className={styles.documentList}>
@@ -2046,9 +2288,9 @@ export default function TechnicianProfilePage() {
                           <div className={styles.docInfo}>
                             <strong>{doc.title}</strong>
                             <span>
-                              {doc.document_type === "certificate" ? "Trade Qualification" : doc.document_type === "selfie" ? "Selfie Check" : "Identity Document"} • {doc.uploaded_at || "Recent"} •{" "}
+                              {doc.document_type === "certificate" ? (lang === "fr" ? "Qualification Métier" : "Trade Qualification") : doc.document_type === "selfie" ? (lang === "fr" ? "Vérification Selfie" : "Selfie Check") : (lang === "fr" ? "Pièce d'Identité" : "Identity Document")} • {doc.uploaded_at || (lang === "fr" ? "Récent" : "Recent")} •{" "}
                               <strong style={{ color: doc.status === "verified" ? "#16a34a" : "#f59e0b" }}>
-                                {doc.status === "verified" ? "Verified ✓" : "Under Review ⏳"}
+                                {doc.status === "verified" ? (lang === "fr" ? "Vérifié ✓" : "Verified ✓") : (lang === "fr" ? "En cours d'examen ⏳" : "Under Review ⏳")}
                               </strong>
                             </span>
                           </div>
@@ -2059,7 +2301,7 @@ export default function TechnicianProfilePage() {
                               className={styles.viewDocBtn}
                               onClick={() => setPreviewModalDoc(doc)}
                             >
-                              <iconify-icon icon="lucide:eye" /> View
+                              <iconify-icon icon="lucide:eye" /> {t.viewDoc}
                             </button>
 
                             <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteDoc(doc.id, doc.title)} title="Delete Document">
@@ -2080,15 +2322,15 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:image" style={{ color: "#ff4500" }} /> Visual Portfolio & Previous Work Showcase
+                    <iconify-icon icon="lucide:image" style={{ color: "#ff4500" }} /> {t.portfolioTitle}
                   </h2>
                   <button type="button" className={styles.primaryButton} onClick={() => setShowAddProjectModal(true)} style={{ minHeight: 38, padding: "0 16px", fontSize: 13 }}>
-                    <iconify-icon icon="lucide:plus" /> Add Completed Work
+                    <iconify-icon icon="lucide:plus" /> {t.addWorkBtn}
                   </button>
                 </div>
 
                 <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
-                  Photos and proof of your previous jobs allow clients to visually verify the quality of your craftsmanship before hiring.
+                  {t.portfolioDesc}
                 </p>
 
                 <div className={styles.portfolioGrid}>
@@ -2100,7 +2342,7 @@ export default function TechnicianProfilePage() {
                         ) : (
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.75)" }}>
                             <iconify-icon icon="lucide:briefcase" style={{ fontSize: 38 }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>Proof of Work</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>{t.proofOfWork}</span>
                           </div>
                         )}
                         {item.budget && (
@@ -2139,7 +2381,7 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:clock" style={{ color: "#001f3f" }} /> Work Preferences, Schedule & Service Radius
+                    <iconify-icon icon="lucide:clock" style={{ color: "#001f3f" }} /> {t.availabilityTitle}
                   </h2>
                 </div>
 
@@ -2151,10 +2393,10 @@ export default function TechnicianProfilePage() {
                     </div>
                     <div>
                       <strong style={{ display: "block", fontSize: 15, color: "#001f3f" }}>
-                        {availableNow ? "Live Status: Available Now (Online)" : "Live Status: Busy / Offline"}
+                        {availableNow ? t.liveStatusAvailable : t.liveStatusBusy}
                       </strong>
                       <span style={{ fontSize: 12.5, color: "#64748b" }}>
-                        {availableNow ? "Clients searching for immediate dispatch in your area can view your live badge." : "Your profile will not receive emergency dispatch calls right now."}
+                        {availableNow ? t.liveDescAvailable : t.liveDescBusy}
                       </span>
                     </div>
                   </div>
@@ -2165,41 +2407,41 @@ export default function TechnicianProfilePage() {
                     className={styles.primaryButton}
                     style={{ background: availableNow ? "#16a34a" : "#001f3f", minHeight: 40, padding: "0 18px", fontSize: 13 }}
                   >
-                    {availableNow ? "Switch to Offline" : "Go Available Now"}
+                    {availableNow ? t.btnGoOffline : t.btnGoAvailable}
                   </button>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Work Mode</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.workMode}</label>
                     <select className={styles.formInput} value={workPreference} onChange={(e: any) => setWorkPreference(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="on_site">On-Site Only (Physical Job Sites)</option>
-                      <option value="hybrid">Hybrid (On-Site Inspections + Remote Consulting)</option>
-                      <option value="remote">Remote (Designs, BOQ & CAD only)</option>
+                      <option value="on_site">{t.onSite}</option>
+                      <option value="hybrid">{t.hybrid}</option>
+                      <option value="remote">{t.remote}</option>
                     </select>
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Service Travel Radius</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.travelRadius}</label>
                     <select className={styles.formInput} value={serviceRadius} onChange={(e) => setServiceRadius(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="5 km Radius">5 km Radius (Neighborhood only)</option>
-                      <option value="10 km Radius">10 km Radius (Local District)</option>
-                      <option value="25 km Radius">25 km Radius (City-Wide & Suburbs)</option>
-                      <option value="50 km Radius">50 km Radius (Greater Metropolitan Area)</option>
-                      <option value="Nationwide">Nationwide (Willing to travel for large contracts)</option>
+                      <option value="5 km Radius">5 km Radius</option>
+                      <option value="10 km Radius">10 km Radius</option>
+                      <option value="25 km Radius">25 km Radius</option>
+                      <option value="50 km Radius">50 km Radius</option>
+                      <option value="Nationwide">Nationwide</option>
                     </select>
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Working Schedule</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.workingSchedule}</label>
                     <input className={styles.formInput} value={workSchedule} onChange={(e) => setWorkSchedule(e.target.value)} placeholder="e.g. Mon - Sat: 08:00 - 18:00" />
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Emergency 24/7 Calls</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.emergencyCalls}</label>
                     <select className={styles.formInput} value={acceptEmergency ? "yes" : "no"} onChange={(e) => setAcceptEmergency(e.target.value === "yes")} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="yes">Yes — Accept Urgent Breakdown Calls</option>
-                      <option value="no">No — Standard Hours Only</option>
+                      <option value="yes">{t.acceptEmergencyYes}</option>
+                      <option value="no">{t.acceptEmergencyNo}</option>
                     </select>
                   </div>
                 </div>
@@ -2211,29 +2453,29 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:tag" style={{ color: "#ff4500" }} /> Flexible Pricing & Quotation Options
+                    <iconify-icon icon="lucide:tag" style={{ color: "#ff4500" }} /> {t.pricingTitle}
                   </h2>
                 </div>
 
                 <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
-                  Different tasks require different pricing structures. Set your standard base rates so clients have clear budget expectations.
+                  {t.pricingDesc}
                 </p>
 
                 <div className={styles.pricingGrid}>
                   <div className={styles.pricingCard}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Starting Rate (Base)</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{t.startingRate}</span>
                     <input className={styles.formInput} value={startingPrice} onChange={(e) => setStartingPrice(e.target.value)} placeholder="e.g. 15,000 XOF" />
                   </div>
                   <div className={styles.pricingCard}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Hourly Rate</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{t.hourlyRate}</span>
                     <input className={styles.formInput} value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="e.g. 5,000 XOF / hr" />
                   </div>
                   <div className={styles.pricingCard}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Daily Rate</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{t.dailyRate}</span>
                     <input className={styles.formInput} value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} placeholder="e.g. 35,000 XOF / day" />
                   </div>
                   <div className={styles.pricingCard}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Inspection / Call-out Fee</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{t.inspectionFee}</span>
                     <input className={styles.formInput} value={inspectionFee} onChange={(e) => setInspectionFee(e.target.value)} placeholder="e.g. 10,000 XOF" />
                   </div>
                 </div>
@@ -2241,7 +2483,7 @@ export default function TechnicianProfilePage() {
                 <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 10 }}>
                   <input type="checkbox" id="negCheck" checked={isNegotiable} onChange={(e) => setIsNegotiable(e.target.checked)} />
                   <label htmlFor="negCheck" style={{ fontSize: 13.5, fontWeight: 700, color: "#001f3f", cursor: "pointer" }}>
-                    Allow Quotation Requests & Price Negotiation on Custom Projects
+                    {t.allowNegotiation}
                   </label>
                 </div>
               </section>
@@ -2252,37 +2494,37 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:hammer" style={{ color: "#001f3f" }} /> Tools, Equipment & Mobility Fleet
+                    <iconify-icon icon="lucide:hammer" style={{ color: "#001f3f" }} /> {t.toolsTitle}
                   </h2>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Own Professional Tools</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.ownTools}</label>
                     <select className={styles.formInput} value={hasOwnTools ? "yes" : "no"} onChange={(e) => setHasOwnTools(e.target.value === "yes")} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="yes">Yes — Fully Equipped with Professional Tools</option>
-                      <option value="no">No — Basic Hand Tools Only</option>
+                      <option value="yes">{t.ownToolsYes}</option>
+                      <option value="no">{t.ownToolsNo}</option>
                     </select>
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Transport & Vehicle</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.transportVehicle}</label>
                     <input className={styles.formInput} value={vehicleType} onChange={(e) => setVehicleType(e.target.value)} placeholder="e.g. Motorcycle & Utility Pickup" />
                   </div>
                 </div>
 
                 <div className={styles.twoCol}>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>PPE Safety Gear Available</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.ppeGear}</label>
                     <select className={styles.formInput} value={hasPpe ? "yes" : "no"} onChange={(e) => setHasPpe(e.target.value === "yes")} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="yes">Yes — Complete PPE (Helmet, Safety Boots, High-Vis, Gloves)</option>
-                      <option value="no">No — Standard Workwear</option>
+                      <option value="yes">{t.ppeYes}</option>
+                      <option value="no">{t.ppeNo}</option>
                     </select>
                   </div>
                   <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>Valid Driving License</label>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.drivingLicense}</label>
                     <select className={styles.formInput} value={hasDrivingLicense ? "yes" : "no"} onChange={(e) => setHasDrivingLicense(e.target.value === "yes")} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      <option value="yes">Yes — Valid Category A & B License</option>
-                      <option value="no">No</option>
+                      <option value="yes">{t.drivingLicenseYes}</option>
+                      <option value="no">{t.drivingLicenseNo}</option>
                     </select>
                   </div>
                 </div>
@@ -2292,16 +2534,16 @@ export default function TechnicianProfilePage() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
                     <label className={styles.label} style={{ fontSize: 13.5, fontWeight: 800, color: "#001f3f", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
                       <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500", fontSize: 17 }} />
-                      Specialized Tools & Diagnostic Equipment ({toolsList.length})
+                      {t.toolsSectionTitle} ({toolsList.length})
                     </label>
                     <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
-                      Highlights your capacity to clients & corporate teams
+                      {t.toolsSectionSubtitle}
                     </span>
                   </div>
 
                   {toolsList.length === 0 ? (
                     <p style={{ fontSize: 13, color: "#94a3b8", margin: "6px 0 14px", fontStyle: "italic" }}>
-                      No specialized equipment added yet. Add your diagnostic tools, safety gear, testing devices, or heavy tools below.
+                      {t.noToolsDesc}
                     </p>
                   ) : (
                     <div className={styles.toolsGrid}>
@@ -2380,7 +2622,7 @@ export default function TechnicianProfilePage() {
                       }}
                     >
                       <iconify-icon icon="lucide:plus" style={{ fontSize: 15 }} />
-                      Add Tool
+                      {t.addToolBtn}
                     </button>
                   </div>
                 </div>
@@ -2392,7 +2634,7 @@ export default function TechnicianProfilePage() {
               <section className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:wallet" style={{ color: "#001f3f" }} /> Payout Account & Project Team Eligibility
+                    <iconify-icon icon="lucide:wallet" style={{ color: "#001f3f" }} /> {t.payoutsTitle}
                   </h2>
                 </div>
 
@@ -2400,48 +2642,48 @@ export default function TechnicianProfilePage() {
                 <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 16, padding: "16px 20px", marginBottom: 24 }}>
                   <strong style={{ display: "block", color: "#001f3f", fontSize: 14, marginBottom: 4 }}>
                     <iconify-icon icon="lucide:lock" style={{ color: "#ff4500", marginRight: 6 }} />
-                    Confidential Escrow Payout Account
+                    {t.confidentialPayoutTitle}
                   </strong>
                   <p style={{ margin: "0 0 14px", fontSize: 12.5, color: "#64748b" }}>
-                    Your financial details are encrypted and never shared publicly. Funds released from escrow are transferred directly to this account.
+                    {t.confidentialPayoutDesc}
                   </p>
 
                   <div className={styles.twoCol}>
                     <div>
-                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 4, display: "block" }}>Preferred Payout Method</label>
+                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 4, display: "block" }}>{t.preferredPayoutMethod}</label>
                       <input className={styles.formInput} value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)} placeholder="e.g. MTN Mobile Money / Bank Transfer" />
                     </div>
                     <div>
-                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 4, display: "block" }}>Account Number / Phone</label>
+                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 4, display: "block" }}>{t.payoutAccountNo}</label>
                       <input className={styles.formInput} value={payoutAccountNo} onChange={(e) => setPayoutAccountNo(e.target.value)} placeholder="+229 97 00 00 00" />
                     </div>
                   </div>
                 </div>
 
                 {/* Operational Matchmaking Toggles */}
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: "#001f3f", margin: "0 0 12px" }}>Boulot Man Operational Matchmaking</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: "#001f3f", margin: "0 0 12px" }}>{t.matchmakingTitle}</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                   <div style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 14, display: "flex", gap: 10, cursor: "pointer" }} onClick={() => setMatchConcierge(!matchConcierge)}>
                     <input type="checkbox" checked={matchConcierge} onChange={() => {}} style={{ marginTop: 2 }} />
                     <div>
-                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>Concierge Assignments</strong>
-                      <small style={{ color: "#64748b" }}>Direct dispatch for managed corporate clients</small>
+                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>{t.conciergeTitle}</strong>
+                      <small style={{ color: "#64748b" }}>{t.conciergeDesc}</small>
                     </div>
                   </div>
 
                   <div style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 14, display: "flex", gap: 10, cursor: "pointer" }} onClick={() => setMatchBuildTeam(!matchBuildTeam)}>
                     <input type="checkbox" checked={matchBuildTeam} onChange={() => {}} style={{ marginTop: 2 }} />
                     <div>
-                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>Build a Team Projects</strong>
-                      <small style={{ color: "#64748b" }}>Join multi-disciplinary engineering crews</small>
+                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>{t.buildTeamTitle}</strong>
+                      <small style={{ color: "#64748b" }}>{t.buildTeamDesc}</small>
                     </div>
                   </div>
 
                   <div style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 14, display: "flex", gap: 10, cursor: "pointer" }} onClick={() => setMatchSupervisor(!matchSupervisor)}>
                     <input type="checkbox" checked={matchSupervisor} onChange={() => {}} style={{ marginTop: 2 }} />
                     <div>
-                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>Lead Supervisor Capacity</strong>
-                      <small style={{ color: "#64748b" }}>Lead and supervise site technicians on large contracts</small>
+                      <strong style={{ display: "block", fontSize: 13.5, color: "#001f3f" }}>{t.leadSupervisorTitle}</strong>
+                      <small style={{ color: "#64748b" }}>{t.leadSupervisorDesc}</small>
                     </div>
                   </div>
                 </div>
@@ -2458,11 +2700,11 @@ export default function TechnicianProfilePage() {
                     onClick={handlePrevTab}
                     style={{ minHeight: 46, padding: "0 18px", fontSize: 13.5 }}
                   >
-                    <iconify-icon icon="lucide:arrow-left" /> Previous Step
+                    <iconify-icon icon="lucide:arrow-left" /> {t.prevStep}
                   </button>
                 )}
                 <Link href="/dashboard/technician" className={styles.outlineButton} style={{ minHeight: 46, padding: "0 16px", fontSize: 13.5 }}>
-                  Back to Dashboard
+                  {t.backDashboard}
                 </Link>
               </div>
 
@@ -2475,7 +2717,7 @@ export default function TechnicianProfilePage() {
                   style={{ minHeight: 46, padding: "0 20px", fontSize: 13.5 }}
                 >
                   <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:save"} className={profileSaving ? styles.spinIcon : ""} />
-                  {profileSaving ? "Saving..." : "Save Progress"}
+                  {profileSaving ? t.saving : t.saveProgress}
                 </button>
 
                 {!isLastTab ? (
@@ -2486,7 +2728,7 @@ export default function TechnicianProfilePage() {
                     disabled={profileSaving}
                     style={{ minHeight: 46, padding: "0 24px", fontSize: 14, background: "linear-gradient(135deg, #ff4500, #ff7a1f)" }}
                   >
-                    {profileSaving ? "Saving..." : "Save & Next Step"}
+                    {profileSaving ? t.saving : t.saveAndNext}
                     <iconify-icon icon="lucide:arrow-right" />
                   </button>
                 ) : (
@@ -2498,7 +2740,7 @@ export default function TechnicianProfilePage() {
                     style={{ minHeight: 46, padding: "0 28px", fontSize: 14.5, background: "linear-gradient(135deg, #16a34a, #15803d)" }}
                   >
                     <iconify-icon icon={profileSaving ? "lucide:loader" : "lucide:check-circle-2"} className={profileSaving ? styles.spinIcon : ""} />
-                    {profileSaving ? "Saving All Changes..." : "Complete & Save Profile ✓"}
+                    {profileSaving ? t.savingAll : t.completeProfile}
                   </button>
                 )}
               </div>
@@ -2700,8 +2942,8 @@ export default function TechnicianProfilePage() {
       {showAddProjectModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,15,30,0.85)", backdropFilter: "blur(10px)", zIndex: 999999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div style={{ background: "#ffffff", borderRadius: 24, width: "100%", maxWidth: 540, maxHeight: "90vh", overflowY: "auto", padding: 28, boxShadow: "0 25px 60px rgba(0,0,0,0.35)", position: "relative" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, borderBottom: "1px solid #f1f5f9", paddingBottom: 14 }}>
-              <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>Add Completed Work / Project</h3>
+            <div style={{ display: "flex", borderBottom: "1px solid #f1f5f9", paddingBottom: 14, marginBottom: 18, justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#001f3f" }}>{t.addWorkModalTitle}</h3>
               <button type="button" onClick={() => setShowAddProjectModal(false)} style={{ border: "none", background: "#f1f5f9", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <iconify-icon icon="lucide:x" style={{ fontSize: 18, color: "#64748b" }} />
               </button>
@@ -2710,11 +2952,11 @@ export default function TechnicianProfilePage() {
             <form onSubmit={handleAddPortfolio}>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Title *</label>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.jobTitleLabel}</label>
                   <input className={styles.formInput} value={newProjTitle} onChange={(e) => setNewProjTitle(e.target.value)} placeholder="e.g. 10kVA Solar System & Distribution Panel" required />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Trade Category ({PLATFORM_TRADE_CATEGORIES.length} Categories)</label>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.tradeCategoryLabel} ({PLATFORM_TRADE_CATEGORIES.length} Categories)</label>
                   <select className={styles.formInput} value={newProjCategory} onChange={(e) => setNewProjCategory(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 8 }}>
                     {PLATFORM_TRADE_CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -2722,22 +2964,22 @@ export default function TechnicianProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Description</label>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.jobDescLabel}</label>
                   <textarea className={styles.formTextarea} rows={3} value={newProjDesc} onChange={(e) => setNewProjDesc(e.target.value)} placeholder="Explain the problem solved, materials installed, and outcome..." />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Location</label>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.jobLocationLabel}</label>
                     <input className={styles.formInput} value={newProjLocation} onChange={(e) => setNewProjLocation(e.target.value)} placeholder="e.g. Haie Vive, Cotonou" />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Job Value (Optional)</label>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.jobValueLabel}</label>
                     <input className={styles.formInput} value={newProjBudget} onChange={(e) => setNewProjBudget(e.target.value)} placeholder="e.g. 750,000 XOF" />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>Project Cover Photo (Optional)</label>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>{t.coverPhotoLabel}</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -2760,8 +3002,8 @@ export default function TechnicianProfilePage() {
               </div>
 
               <div style={{ display: "flex", gap: 12, marginTop: 22 }}>
-                <button type="button" onClick={() => setShowAddProjectModal(false)} className={styles.outlineButton} style={{ flex: 1, justifyContent: "center", minHeight: 46 }}>Cancel</button>
-                <button type="submit" className={styles.primaryButton} style={{ flex: 1.3, justifyContent: "center", minHeight: 46, background: "linear-gradient(135deg, #ff4500, #ff7a1f)" }}>Save Project</button>
+                <button type="button" onClick={() => setShowAddProjectModal(false)} className={styles.outlineButton} style={{ flex: 1, justifyContent: "center", minHeight: 46 }}>{t.cancelBtn}</button>
+                <button type="submit" className={styles.primaryButton} style={{ flex: 1.3, justifyContent: "center", minHeight: 46, background: "linear-gradient(135deg, #ff4500, #ff7a1f)" }}>{t.saveProjectBtn}</button>
               </div>
             </form>
           </div>
