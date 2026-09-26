@@ -67,7 +67,13 @@ export default function AdminSupportPage() {
         } catch {}
       }
 
-      const combined = [...localInqs, ...mappedInquiries, ...supportTickets];
+      const seen = new Set();
+      const combined = [...localInqs, ...mappedInquiries, ...supportTickets].filter((item) => {
+        if (!item || !item.id) return false;
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
       setAllTickets(combined);
     } catch (err) {
       console.error("Failed to load tickets", err);

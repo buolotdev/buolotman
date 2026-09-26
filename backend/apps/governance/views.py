@@ -667,7 +667,34 @@ def admin_support_tickets(request):
             'status': t.get_status_display() if hasattr(t, 'get_status_display') else t.status.title(),
             'messages': messages
         })
-        
+
+    try:
+        from apps.tasks.models import ServiceInquiry
+        inquiries = ServiceInquiry.objects.all().order_by('-created_at')
+        for inq in inquiries:
+            created_str = inq.created_at.strftime("%d %b %Y, %I:%M %p") if inq.created_at else "Recent"
+            data.append({
+                'id': f"INQ-{inq.id:04d}",
+                'db_id': inq.id,
+                'is_inquiry': True,
+                'subject': f"[{str(inq.inquiry_type or 'General').upper()} Inquiry] {inq.company_name or inq.name}",
+                'client': f"{inq.name or 'Client Lead'} ({inq.email or inq.phone or 'No Contact'})",
+                'role': inq.inquiry_type or 'Client Lead',
+                'status': str(inq.status or 'Pending').title(),
+                'messages': [
+                    {
+                        'id': f"inq-msg-{inq.id}",
+                        'sender': inq.name or 'Inquiry Lead',
+                        'role': inq.company_name or inq.inquiry_type or 'Client',
+                        'avatar': 'https://i.pravatar.cc/150?img=12',
+                        'time': created_str,
+                        'body': f"Email: {inq.email or 'N/A'}\nPhone/WhatsApp: {inq.phone or 'N/A'}\nTrade/Company: {inq.company_name or 'N/A'}\nType: {inq.inquiry_type or 'General'}\n\nProject Scope & Requirements:\n{inq.details or 'No additional details provided.'}"
+                    }
+                ]
+            })
+    except Exception as e:
+        pass
+
     return Response(data)
 
 @api_view(['POST'])
