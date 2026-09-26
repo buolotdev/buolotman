@@ -14,6 +14,7 @@ import DashboardHeader from "@/app/components/DashboardHeader";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { MASTER_CATEGORIES } from "@/app/lib/categories";
 
 export interface PortfolioItem {
   id: string;
@@ -116,7 +117,16 @@ const profileTranslations: Record<string, Record<string, string>> = {
     lastName: "Last Name",
     displayName: "Display / Privacy Name (Shown to clients)",
     headline: "Professional Headline",
-    primaryTrade: "Primary Trade / Occupation",
+    primaryTrade: "Primary Trade / Specialization *",
+    primaryDomain: "Primary Industry Domain *",
+    selectDomainPlaceholder: "Select primary domain...",
+    selectTradePlaceholder: "Select trade specialization...",
+    otherOption: "Other (Specify Custom)",
+    customDomainLabel: "Specify Custom Industry Domain *",
+    customDomainPlaceholder: "e.g. Smart Home Security & Automation",
+    customTradeLabel: "Specify Custom Trade / Specialization *",
+    customTradePlaceholder: "e.g. Fiber Optics Fusion Splicer",
+    suggestedSkills: "Quick Add Skills from this Trade Domain:",
     experienceYears: "Years of Hands-on Experience",
     expertiseLevel: "Skill / Seniority Level",
     education: "Education & Training Institution",
@@ -273,7 +283,16 @@ const profileTranslations: Record<string, Record<string, string>> = {
     lastName: "Nom de famille",
     displayName: "Nom d'affichage (Visible par les clients)",
     headline: "Titre professionnel",
-    primaryTrade: "Métier / Spécialité principale",
+    primaryTrade: "Métier / Spécialisation Principale *",
+    primaryDomain: "Domaine d'Activité Principal *",
+    selectDomainPlaceholder: "Sélectionnez un domaine principal...",
+    selectTradePlaceholder: "Sélectionnez votre spécialité métier...",
+    otherOption: "Autre (Préciser manuellement)",
+    customDomainLabel: "Préciser le Domaine d'Activité Personnalisé *",
+    customDomainPlaceholder: "ex: Domotique & Sécurité Intelligente",
+    customTradeLabel: "Préciser le Métier / Spécialité Personnalisé *",
+    customTradePlaceholder: "ex: Soudeur Fibre Optique de Précision",
+    suggestedSkills: "Ajout Rapide de Compétences depuis ce Domaine :",
     experienceYears: "Années d'expérience pratique",
     expertiseLevel: "Niveau d'expertise",
     education: "Établissement de formation / Diplôme",
@@ -618,6 +637,68 @@ export default function TechnicianProfilePage() {
   const [bio, setBio] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
   const [primaryOccupation, setPrimaryOccupation] = useState("");
+
+  // Hierarchical Category & Trade State
+  const [selectedMainCategory, setSelectedMainCategory] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [customMainCategory, setCustomMainCategory] = useState("");
+  const [customSubCategory, setCustomSubCategory] = useState("");
+
+  const activeCategoryObj = useMemo(() => {
+    if (!selectedMainCategory || selectedMainCategory === "Other") return null;
+    return MASTER_CATEGORIES.find(
+      (c) => c.name.toLowerCase() === selectedMainCategory.toLowerCase()
+    ) || null;
+  }, [selectedMainCategory]);
+
+  const availableSubcategories = useMemo(() => {
+    if (!activeCategoryObj) return [];
+    return activeCategoryObj.skills || [];
+  }, [activeCategoryObj]);
+
+  const handleMainCategoryChange = (val: string) => {
+    setSelectedMainCategory(val);
+    setSelectedSubCategory("");
+    setCustomSubCategory("");
+    if (val === "Other") {
+      setPrimaryOccupation(customMainCategory || "Other");
+    } else {
+      setCustomMainCategory("");
+      setPrimaryOccupation(val);
+    }
+  };
+
+  const handleSubCategoryChange = (val: string) => {
+    setSelectedSubCategory(val);
+    if (val === "Other") {
+      setPrimaryOccupation(
+        customSubCategory || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other")
+      );
+    } else if (val) {
+      setCustomSubCategory("");
+      setPrimaryOccupation(val);
+    } else {
+      setPrimaryOccupation(selectedMainCategory || "");
+    }
+  };
+
+  const handleCustomMainCategoryChange = (val: string) => {
+    setCustomMainCategory(val);
+    setPrimaryOccupation(val.trim() || "Other");
+  };
+
+  const handleCustomSubCategoryChange = (val: string) => {
+    setCustomSubCategory(val);
+    setPrimaryOccupation(
+      val.trim() || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other")
+    );
+  };
+
+  const handleAddQuickSkill = (skillName: string) => {
+    if (!skillName || skills.includes(skillName)) return;
+    setSkills((prev) => [...prev, skillName]);
+    toast.success("Skill Added", `"${skillName}" added to your trade skills.`);
+  };
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
   const [country, setCountry] = useState("");
@@ -740,6 +821,46 @@ export default function TechnicianProfilePage() {
         ? savedP.primaryOccupation 
         : (userData.primary_occupation || techProf.occupation || techProf.category || (userData as any).category || "");
       setPrimaryOccupation(userTrade);
+
+      // Hierarchical Category Resolution
+      const rawTrade = (userTrade || "").trim();
+      if (rawTrade) {
+        const directCatMatch = MASTER_CATEGORIES.find(
+          (c) => c.name.toLowerCase() === rawTrade.toLowerCase()
+        );
+        if (directCatMatch) {
+          setSelectedMainCategory(directCatMatch.name);
+          setSelectedSubCategory("");
+        } else {
+          const skillCatMatch = MASTER_CATEGORIES.find((c) =>
+            c.skills.some((s) => s.toLowerCase() === rawTrade.toLowerCase())
+          );
+          if (skillCatMatch) {
+            setSelectedMainCategory(skillCatMatch.name);
+            const foundSkill = skillCatMatch.skills.find(
+              (s) => s.toLowerCase() === rawTrade.toLowerCase()
+            );
+            setSelectedSubCategory(foundSkill || rawTrade);
+          } else {
+            const parts = rawTrade.split(" - ");
+            if (parts.length === 2 && MASTER_CATEGORIES.some((c) => c.name.toLowerCase() === parts[0].toLowerCase())) {
+              const pCat = MASTER_CATEGORIES.find((c) => c.name.toLowerCase() === parts[0].toLowerCase())!;
+              setSelectedMainCategory(pCat.name);
+              if (parts[1] === "Other") {
+                setSelectedSubCategory("Other");
+              } else {
+                setSelectedSubCategory("Other");
+                setCustomSubCategory(parts[1]);
+              }
+            } else {
+              setSelectedMainCategory("Other");
+              setCustomMainCategory(rawTrade);
+              setSelectedSubCategory("Other");
+              setCustomSubCategory(rawTrade);
+            }
+          }
+        }
+      }
 
       const userExp = savedP.experienceYears !== undefined 
         ? savedP.experienceYears 
@@ -1829,18 +1950,162 @@ export default function TechnicianProfilePage() {
                   </div>
                 </div>
 
-                <div className={styles.twoCol}>
-                  <div>
-                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.primaryTrade}</label>
-                    <select className={styles.formInput} value={primaryOccupation} onChange={(e) => setPrimaryOccupation(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
-                      {PLATFORM_TRADE_CATEGORIES.map((trade) => (
-                        <option key={trade} value={trade}>{trade}</option>
-                      ))}
-                    </select>
+                {/* Hierarchical Primary Industry Domain & Trade Specialization Selector */}
+                <div style={{
+                  background: "#f8fafc",
+                  border: "1.5px solid #e2e8f0",
+                  borderRadius: 16,
+                  padding: "18px 20px",
+                  marginBottom: 16,
+                  marginTop: 6,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                    <iconify-icon icon="lucide:layers" style={{ color: "#ff4500", fontSize: 18 }} />
+                    <span style={{ fontSize: 13.5, fontWeight: 800, color: "#001f3f" }}>
+                      {t.primaryTrade}
+                    </span>
                   </div>
+
+                  <div className={styles.twoCol} style={{ marginBottom: (selectedMainCategory === "Other" || selectedSubCategory === "Other") ? 14 : 0 }}>
+                    <div>
+                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>
+                        {t.primaryDomain}
+                      </label>
+                      <select
+                        className={styles.formInput}
+                        value={selectedMainCategory}
+                        onChange={(e) => handleMainCategoryChange(e.target.value)}
+                        style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10, background: "#fff", fontWeight: 600, borderColor: selectedMainCategory ? "#ff4500" : "#cbd5e1" }}
+                      >
+                        <option value="" disabled>{t.selectDomainPlaceholder}</option>
+                        {MASTER_CATEGORIES.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                        <option value="Other">✨ {t.otherOption}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={styles.label} style={{ fontSize: 12.5, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>
+                        {t.primaryTrade}
+                      </label>
+                      <select
+                        className={styles.formInput}
+                        value={selectedSubCategory}
+                        onChange={(e) => handleSubCategoryChange(e.target.value)}
+                        disabled={!selectedMainCategory || selectedMainCategory === "Other"}
+                        style={{
+                          width: "100%",
+                          height: 44,
+                          padding: "0 12px",
+                          border: "1.5px solid #cbd5e1",
+                          borderRadius: 10,
+                          fontWeight: 600,
+                          background: (!selectedMainCategory || selectedMainCategory === "Other") ? "#f1f5f9" : "#fff",
+                          borderColor: selectedSubCategory ? "#ff4500" : "#cbd5e1",
+                          cursor: (!selectedMainCategory || selectedMainCategory === "Other") ? "not-allowed" : "pointer"
+                        }}
+                      >
+                        <option value="">{t.selectTradePlaceholder}</option>
+                        {availableSubcategories.map((sub) => (
+                          <option key={sub} value={sub}>
+                            {sub}
+                          </option>
+                        ))}
+                        <option value="Other">✨ {t.otherOption}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Custom Input when Main Category is Other */}
+                  {selectedMainCategory === "Other" && (
+                    <div style={{ marginTop: 12, padding: "12px 14px", background: "#fff7ed", border: "1.5px dashed #ffedd5", borderRadius: 12 }}>
+                      <label className={styles.label} style={{ color: "#c2410c", fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                        <iconify-icon icon="lucide:edit-3" /> {t.customDomainLabel}
+                      </label>
+                      <input
+                        className={styles.formInput}
+                        style={{ background: "#ffffff", borderColor: "#fdba74", width: "100%", height: 44, borderRadius: 10, padding: "0 12px" }}
+                        placeholder={t.customDomainPlaceholder}
+                        value={customMainCategory}
+                        onChange={(e) => handleCustomMainCategoryChange(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                  )}
+
+                  {/* Custom Input when Sub-Category / Trade is Other */}
+                  {selectedMainCategory !== "Other" && selectedSubCategory === "Other" && (
+                    <div style={{ marginTop: 12, padding: "12px 14px", background: "#fff7ed", border: "1.5px dashed #ffedd5", borderRadius: 12 }}>
+                      <label className={styles.label} style={{ color: "#c2410c", fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                        <iconify-icon icon="lucide:edit-3" /> {t.customTradeLabel}
+                      </label>
+                      <input
+                        className={styles.formInput}
+                        style={{ background: "#ffffff", borderColor: "#fdba74", width: "100%", height: 44, borderRadius: 10, padding: "0 12px" }}
+                        placeholder={t.customTradePlaceholder}
+                        value={customSubCategory}
+                        onChange={(e) => handleCustomSubCategoryChange(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                  )}
+
+                  {/* Quick Add Skills from Domain */}
+                  {selectedMainCategory && selectedMainCategory !== "Other" && availableSubcategories.length > 0 && (
+                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #cbd5e1" }}>
+                      <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                        <iconify-icon icon="lucide:sparkles" style={{ color: "#ff4500" }} />
+                        {t.suggestedSkills}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {availableSubcategories.map((sub) => {
+                          const isAdded = skills.includes(sub);
+                          return (
+                            <button
+                              key={sub}
+                              type="button"
+                              onClick={() => handleAddQuickSkill(sub)}
+                              disabled={isAdded}
+                              style={{
+                                background: isAdded ? "#e2e8f0" : "#ffffff",
+                                color: isAdded ? "#94a3b8" : "#001f3f",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: 999,
+                                padding: "4px 12px",
+                                fontSize: 11.5,
+                                fontWeight: 600,
+                                cursor: isAdded ? "default" : "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                                transition: "all 0.15s ease",
+                              }}
+                            >
+                              {isAdded ? "✓" : "+"} {sub}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.twoCol}>
                   <div>
                     <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.experienceYears}</label>
                     <input className={styles.formInput} placeholder="e.g. 8" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={styles.label} style={{ fontSize: 13, fontWeight: 700, color: "#001f3f", marginBottom: 6, display: "block" }}>{t.expertiseLevel}</label>
+                    <select className={styles.formInput} value={expertiseLevel} onChange={(e) => setExpertiseLevel(e.target.value)} style={{ width: "100%", height: 44, padding: "0 12px", border: "1.5px solid #cbd5e1", borderRadius: 10 }}>
+                      <option value="Junior">Junior (1-3 Years)</option>
+                      <option value="Intermediate">Intermediate (3-6 Years)</option>
+                      <option value="Senior">Senior Master (6-12 Years)</option>
+                      <option value="Expert">Lead Expert / Site Supervisor (12+ Years)</option>
+                    </select>
                   </div>
                 </div>
 

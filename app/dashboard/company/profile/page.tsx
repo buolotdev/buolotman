@@ -10,6 +10,7 @@ import { api, getImageUrl } from "@/app/lib/api";
 import { useToast } from "@/app/components/Toast";
 import { useDialog } from "@/app/components/Dialog";
 import ImageCropperModal from "@/app/components/ImageCropperModal";
+import { MASTER_CATEGORIES } from "@/app/lib/categories";
 
 export interface TeamMember {
   id: string;
@@ -55,6 +56,16 @@ const translations: Record<string, Record<string, string>> = {
     tradingName: "Trading / Commercial Name (Optional)",
     companyStructure: "Company Structure / Type",
     primaryIndustry: "Primary Industry Sector *",
+    primaryDomain: "Primary Industry Domain *",
+    subSpecialization: "Sub-Sector / Specialization *",
+    selectDomainPlaceholder: "Select primary domain...",
+    selectSpecializationPlaceholder: "Select specialization...",
+    otherOption: "Other (Specify Custom)",
+    customDomainLabel: "Specify Custom Industry Domain *",
+    customDomainPlaceholder: "e.g. Industrial Automation & Robotics",
+    customSpecLabel: "Specify Custom Specialization / Sector *",
+    customSpecPlaceholder: "e.g. PLC Programming & SCADA Integration",
+    suggestedKeywords: "Quick Add Trade Keywords from this Domain:",
     yearFounded: "Year Founded / Established",
     headcount: "Total Company Headcount",
     contactPersonName: "Primary Contact Person Full Name",
@@ -192,6 +203,16 @@ const translations: Record<string, Record<string, string>> = {
     tradingName: "Nom Commercial (Facultatif)",
     companyStructure: "Forme Juridique / Structure",
     primaryIndustry: "Secteur d'Activité Principal *",
+    primaryDomain: "Domaine d'Activité Principal *",
+    subSpecialization: "Spécialisation / Sous-Secteur *",
+    selectDomainPlaceholder: "Sélectionnez un domaine principal...",
+    selectSpecializationPlaceholder: "Sélectionnez une spécialisation...",
+    otherOption: "Autre (Préciser manuellement)",
+    customDomainLabel: "Préciser le Domaine d'Activité Personnalisé *",
+    customDomainPlaceholder: "ex: Automatisation Industrielle & Robotique",
+    customSpecLabel: "Préciser la Spécialisation / Métier Personnalisé *",
+    customSpecPlaceholder: "ex: Programmation Automates & Systèmes SCADA",
+    suggestedKeywords: "Ajout Rapide de Mots-Clés depuis ce Domaine :",
     yearFounded: "Année de Création",
     headcount: "Effectif Total de l'Entreprise",
     contactPersonName: "Nom Complet du Contact Principal",
@@ -442,6 +463,73 @@ export default function CompanyProfilePage() {
   const [saving, setSaving] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
+  // Hierarchical Category & Subcategory State
+  const [selectedMainCategory, setSelectedMainCategory] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [customMainCategory, setCustomMainCategory] = useState("");
+  const [customSubCategory, setCustomSubCategory] = useState("");
+
+  const activeCategoryObj = useMemo(() => {
+    if (!selectedMainCategory || selectedMainCategory === "Other") return null;
+    return MASTER_CATEGORIES.find(
+      (c) => c.name.toLowerCase() === selectedMainCategory.toLowerCase()
+    ) || null;
+  }, [selectedMainCategory]);
+
+  const availableSubcategories = useMemo(() => {
+    if (!activeCategoryObj) return [];
+    return activeCategoryObj.skills || [];
+  }, [activeCategoryObj]);
+
+  const handleMainCategoryChange = (val: string) => {
+    setSelectedMainCategory(val);
+    setSelectedSubCategory("");
+    setCustomSubCategory("");
+    if (val === "Other") {
+      setForm((prev) => ({ ...prev, industry: customMainCategory || "Other" }));
+    } else {
+      setCustomMainCategory("");
+      setForm((prev) => ({ ...prev, industry: val }));
+    }
+  };
+
+  const handleSubCategoryChange = (val: string) => {
+    setSelectedSubCategory(val);
+    if (val === "Other") {
+      setForm((prev) => ({
+        ...prev,
+        industry: customSubCategory || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other"),
+      }));
+    } else if (val) {
+      setCustomSubCategory("");
+      setForm((prev) => ({ ...prev, industry: val }));
+    } else {
+      setForm((prev) => ({ ...prev, industry: selectedMainCategory || "" }));
+    }
+  };
+
+  const handleCustomMainCategoryChange = (val: string) => {
+    setCustomMainCategory(val);
+    setForm((prev) => ({ ...prev, industry: val.trim() || "Other" }));
+  };
+
+  const handleCustomSubCategoryChange = (val: string) => {
+    setCustomSubCategory(val);
+    setForm((prev) => ({
+      ...prev,
+      industry: val.trim() || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other"),
+    }));
+  };
+
+  const handleAddQuickKeyword = (kw: string) => {
+    if (!kw || form.areas_of_expertise.includes(kw)) return;
+    setForm((prev) => ({
+      ...prev,
+      areas_of_expertise: [...prev.areas_of_expertise, kw],
+    }));
+    toast.success("Keyword Added", `"${kw}" added to your expertise keywords.`);
+  };
+
   // Form State - Capabilities & Fleet
   const [capabilities, setCapabilities] = useState(DEFAULT_CAPABILITIES);
   const [equipmentInput, setEquipmentInput] = useState("");
@@ -499,12 +587,13 @@ export default function CompanyProfilePage() {
   useEffect(() => {
     if (profile && !profileLoading && !isInitialSyncedRef.current) {
       isInitialSyncedRef.current = true;
+      const initialIndustry = profile.industry || user?.company_profile?.industry || "";
       setForm({
         company_name: profile.company_name || user?.company_name || "",
         trading_name: profile.trading_name || profile.company_name || user?.company_name || "",
         company_type: profile.company_type || "Limited Liability Company (SARL)",
         year_founded: profile.year_founded || "",
-        industry: profile.industry || "",
+        industry: initialIndustry,
         subject_title: profile.subject_title || "",
         about: profile.about || "",
         website: profile.website || "",
@@ -524,6 +613,47 @@ export default function CompanyProfilePage() {
       if (profile.logo_url) setLogoUrl(profile.logo_url);
       if (profile.cover_url) setCoverUrl(profile.cover_url);
       if (user?.username) setUsername(user.username);
+
+      // Hierarchical Category Resolution
+      const rawInd = initialIndustry.trim();
+      if (rawInd) {
+        const directCatMatch = MASTER_CATEGORIES.find(
+          (c) => c.name.toLowerCase() === rawInd.toLowerCase()
+        );
+        if (directCatMatch) {
+          setSelectedMainCategory(directCatMatch.name);
+          setSelectedSubCategory("");
+        } else {
+          const skillCatMatch = MASTER_CATEGORIES.find((c) =>
+            c.skills.some((s) => s.toLowerCase() === rawInd.toLowerCase())
+          );
+          if (skillCatMatch) {
+            setSelectedMainCategory(skillCatMatch.name);
+            const foundSkill = skillCatMatch.skills.find(
+              (s) => s.toLowerCase() === rawInd.toLowerCase()
+            );
+            setSelectedSubCategory(foundSkill || rawInd);
+          } else {
+            // Check if composite "Main - Sub" or custom
+            const parts = rawInd.split(" - ");
+            if (parts.length === 2 && MASTER_CATEGORIES.some((c) => c.name.toLowerCase() === parts[0].toLowerCase())) {
+              const pCat = MASTER_CATEGORIES.find((c) => c.name.toLowerCase() === parts[0].toLowerCase())!;
+              setSelectedMainCategory(pCat.name);
+              if (parts[1] === "Other") {
+                setSelectedSubCategory("Other");
+              } else {
+                setSelectedSubCategory("Other");
+                setCustomSubCategory(parts[1]);
+              }
+            } else {
+              setSelectedMainCategory("Other");
+              setCustomMainCategory(rawInd);
+              setSelectedSubCategory("Other");
+              setCustomSubCategory(rawInd);
+            }
+          }
+        }
+      }
     }
   }, [profile, profileLoading, user]);
 
@@ -1477,19 +1607,151 @@ export default function CompanyProfilePage() {
               </select>
             </div>
             <div>
-              <label className={styles.label}>{t.primaryIndustry}</label>
-              <select
-                className={styles.select}
-                value={form.industry}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              >
-                {availableCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+              <label className={styles.label}>{t.yearFounded}</label>
+              <input
+                className={styles.input}
+                placeholder="e.g. 2014"
+                value={form.year_founded}
+                onChange={(e) => setForm({ ...form, year_founded: e.target.value })}
+              />
             </div>
+          </div>
+
+          {/* Hierarchical Industry Domain & Sub-Sector Selector */}
+          <div style={{
+            background: "#f8fafc",
+            border: "1.5px solid #e2e8f0",
+            borderRadius: 16,
+            padding: "18px 20px",
+            marginBottom: 20,
+            marginTop: 4,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <iconify-icon icon="lucide:layers" style={{ color: "#ff4500", fontSize: 18 }} />
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#001f3f" }}>
+                {t.primaryIndustry}
+              </span>
+            </div>
+
+            <div className={styles.twoCol} style={{ marginBottom: (selectedMainCategory === "Other" || selectedSubCategory === "Other") ? 14 : 0 }}>
+              <div>
+                <label className={styles.label} style={{ fontSize: 13, fontWeight: 700 }}>
+                  {t.primaryDomain}
+                </label>
+                <select
+                  className={styles.select}
+                  value={selectedMainCategory}
+                  onChange={(e) => handleMainCategoryChange(e.target.value)}
+                  style={{ background: "#ffffff", borderColor: selectedMainCategory ? "#ff4500" : "#cbd5e1" }}
+                >
+                  <option value="" disabled>{t.selectDomainPlaceholder}</option>
+                  {MASTER_CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                  <option value="Other">✨ {t.otherOption}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={styles.label} style={{ fontSize: 13, fontWeight: 700 }}>
+                  {t.subSpecialization}
+                </label>
+                <select
+                  className={styles.select}
+                  value={selectedSubCategory}
+                  onChange={(e) => handleSubCategoryChange(e.target.value)}
+                  disabled={!selectedMainCategory || selectedMainCategory === "Other"}
+                  style={{
+                    background: (!selectedMainCategory || selectedMainCategory === "Other") ? "#f1f5f9" : "#ffffff",
+                    borderColor: selectedSubCategory ? "#ff4500" : "#cbd5e1",
+                    cursor: (!selectedMainCategory || selectedMainCategory === "Other") ? "not-allowed" : "pointer"
+                  }}
+                >
+                  <option value="">{t.selectSpecializationPlaceholder}</option>
+                  {availableSubcategories.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+                  <option value="Other">✨ {t.otherOption}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Custom Input when Main Category is Other */}
+            {selectedMainCategory === "Other" && (
+              <div style={{ marginTop: 12, padding: "12px 14px", background: "#fff7ed", border: "1.5px dashed #ffedd5", borderRadius: 12 }}>
+                <label className={styles.label} style={{ color: "#c2410c", fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <iconify-icon icon="lucide:edit-3" /> {t.customDomainLabel}
+                </label>
+                <input
+                  className={styles.input}
+                  style={{ background: "#ffffff", borderColor: "#fdba74", marginBottom: 0 }}
+                  placeholder={t.customDomainPlaceholder}
+                  value={customMainCategory}
+                  onChange={(e) => handleCustomMainCategoryChange(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            )}
+
+            {/* Custom Input when Sub-Category is Other */}
+            {selectedMainCategory !== "Other" && selectedSubCategory === "Other" && (
+              <div style={{ marginTop: 12, padding: "12px 14px", background: "#fff7ed", border: "1.5px dashed #ffedd5", borderRadius: 12 }}>
+                <label className={styles.label} style={{ color: "#c2410c", fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <iconify-icon icon="lucide:edit-3" /> {t.customSpecLabel}
+                </label>
+                <input
+                  className={styles.input}
+                  style={{ background: "#ffffff", borderColor: "#fdba74", marginBottom: 0 }}
+                  placeholder={t.customSpecPlaceholder}
+                  value={customSubCategory}
+                  onChange={(e) => handleCustomSubCategoryChange(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            )}
+
+            {/* Quick Add Trade Keywords from Domain */}
+            {selectedMainCategory && selectedMainCategory !== "Other" && availableSubcategories.length > 0 && (
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #cbd5e1" }}>
+                <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                  <iconify-icon icon="lucide:sparkles" style={{ color: "#ff4500" }} />
+                  {t.suggestedKeywords}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {availableSubcategories.map((sub) => {
+                    const isAdded = form.areas_of_expertise.includes(sub);
+                    return (
+                      <button
+                        key={sub}
+                        type="button"
+                        onClick={() => handleAddQuickKeyword(sub)}
+                        disabled={isAdded}
+                        style={{
+                          background: isAdded ? "#e2e8f0" : "#ffffff",
+                          color: isAdded ? "#94a3b8" : "#001f3f",
+                          border: isAdded ? "1px solid #cbd5e1" : "1px solid #cbd5e1",
+                          borderRadius: 999,
+                          padding: "4px 12px",
+                          fontSize: 11.5,
+                          fontWeight: 600,
+                          cursor: isAdded ? "default" : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        {isAdded ? "✓" : "+"} {sub}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={styles.twoCol}>
