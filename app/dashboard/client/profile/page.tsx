@@ -52,8 +52,73 @@ const clientProfileTranslations: Record<string, Record<string, string>> = {
     city: "Operating City",
     address: "Default Address / Neighborhood",
     aboutMe: "About You / Note for Technicians",
-    savePersonal: "Save Personal Information",
+    savePersonal: "Save Personal Details",
     saving: "Saving...",
+    saveProgress: "Save Progress",
+    prevStep: "Previous Step",
+    saveAndNext: "Save & Next Step",
+    completeProfile: "Complete Profile",
+    // Tab 2: Client Type & Business
+    bizTitle: "Client Classification & Business Profile",
+    bizSubtitle: "Configure whether you hire as an individual household or as a commercial business/organization.",
+    householdTitle: "Individual / Household",
+    householdDesc: "Hiring for home repairs, plumbing, cleaning, personal assistance and domestic maintenance.",
+    businessClientTitle: "Business Client",
+    businessClientDesc: "Hotels, restaurants, stores, and offices regularly hiring skilled service providers.",
+    ngoTitle: "Organization / NGO",
+    ngoDesc: "Non-profits, institutions, diplomatic missions, and international development agencies.",
+    propertyManagerTitle: "Property Manager / Landlord",
+    propertyManagerDesc: "Real estate owners and managers supervising maintenance across multiple buildings and sites.",
+    householdNotice: "You are currently set as an Individual / Household client. No corporate registration numbers are required.",
+    bizProfileNoticeTitle: "Business Client Hiring Profile",
+    bizProfileNoticeDesc: "This profile is dedicated to corporate hiring, task management, and consolidated billing. (Distinct from Service Provider Company Profiles).",
+    companyName: "Company / Organization Name",
+    industrySector: "Industry / Sector",
+    taxId: "Business Registration / Tax ID (IFU/RCCM)",
+    billingEmail: "Corporate Billing Email",
+    authRepresentative: "Authorized Representative",
+    repPosition: "Representative Position / Title",
+    companyWebsite: "Company Website (Optional)",
+    saveBizProfile: "Save Business Client Profile",
+    // Tab 3: Saved Locations
+    locationsTitle: "Saved Service Locations",
+    locationsSubtitle: "Save locations like Home, Office, Construction Site or Rental Properties so you don't have to retype them when posting tasks.",
+    addLocationBtn: "Add Location",
+    privacyGuardTitle: "Exact Address Privacy Guard",
+    privacyGuardDesc: "Your street name and building/apartment numbers are never displayed publicly on search boards or tasks. They are only shared securely with your assigned specialist upon project confirmation.",
+    noLocationsTitle: "No Saved Locations Yet",
+    noLocationsDesc: "Add your home, office, or job site addresses to easily dispatch tasks.",
+    addFirstLocation: "Add First Location",
+    setAsDefault: "Set as default",
+    primaryLocation: "Primary Location",
+    defaultBadge: "Default",
+    // Tab 4: Verification
+    tier2Title: "Identity & Escrow Trust Verification (Tier 2)",
+    tier2Subtitle: "Verify your legal identity to unlock high-value contracts, unlimited escrow deposits, and the Verified Client badge.",
+    tier1Badge: "Tier 1: Basic Account",
+    tier2Badge: "Tier 2: Verified Client",
+    pendingReview: "Verification Pending Review",
+    submitIdDocs: "Submit Identification Documents",
+    idDocType: "Identification Document Type",
+    idDocNumber: "Document / ID Number",
+    uploadClearPhoto: "Upload Clear Photo / Scan of ID Document",
+    clickToUpload: "Click to upload National ID / Passport Photo",
+    uploadFormatNotice: "PNG, JPG or PDF up to 8MB. Kept 100% confidential.",
+    submitVerification: "Submit for Tier 2 Verification",
+    // Tab 5: Privacy
+    privacyControlsTitle: "Privacy Controls & Notifications",
+    privacyControlsSubtitle: "Control how your name and profile are displayed to specialists and search engines.",
+    abbreviateNameTitle: "Abbreviate Public Name (Privacy Mode)",
+    abbreviateNameDesc: "Display your surname as an initial instead of exposing your full legal name.",
+    directQuotesTitle: "Direct Quotes & Technician Offers",
+    directQuotesDesc: "Allow top-rated specialists and verified enterprise companies to send direct price quotes on your tasks.",
+    smsAlertsTitle: "SMS & Instant Dispatch Alerts",
+    smsAlertsDesc: "Receive SMS alerts on your phone when assigned technicians arrive on-site or submit project milestones.",
+    prefCurrencyTitle: "Preferred Platform Currency",
+    prefCurrencyDesc: "Primary currency for displaying tasks, escrow deposits, and budget calculations.",
+    prefLangTitle: "Preferred Language",
+    prefLangDesc: "Language used for task contracts, receipts, and system emails.",
+    savePreferences: "Save Privacy & Platform Preferences",
   },
   fr: {
     changeCover: "Modifier la Couverture",
@@ -81,6 +146,71 @@ const clientProfileTranslations: Record<string, Record<string, string>> = {
     aboutMe: "À propos de vous / Remarques pour les techniciens",
     savePersonal: "Enregistrer les Informations",
     saving: "Enregistrement...",
+    saveProgress: "Enregistrer la Progression",
+    prevStep: "Étape Précédente",
+    saveAndNext: "Enregistrer & Étape Suivante",
+    completeProfile: "Terminer le Profil",
+    // Tab 2: Client Type & Business
+    bizTitle: "Classification & Profil Professionnel Client",
+    bizSubtitle: "Précisez si vous recrutez en tant que particulier ou entreprise/organisation commerciale.",
+    householdTitle: "Particulier / Ménage",
+    householdDesc: "Pour les travaux domestiques, dépannages, plomberie, ménage et assistance au domicile.",
+    businessClientTitle: "Entreprise / Société",
+    businessClientDesc: "Hôtels, restaurants, commerces et bureaux recrutant régulièrement des prestataires qualifiés.",
+    ngoTitle: "Organisation / ONG",
+    ngoDesc: "Associations, institutions, missions diplomatiques et agences internationales de développement.",
+    propertyManagerTitle: "Gestionnaire Immobilier / Bailleur",
+    propertyManagerDesc: "Propriétaires et syndics supervisant l'entretien de multiples immeubles et chantiers.",
+    householdNotice: "Vous êtes actuellement configuré comme Particulier / Ménage. Aucun numéro d'immatriculation d'entreprise n'est requis.",
+    bizProfileNoticeTitle: "Profil de Recrutement Entreprise",
+    bizProfileNoticeDesc: "Ce profil est dédié au recrutement d'artisans, à la gestion de chantiers et à la facturation consolidée.",
+    companyName: "Nom de l'Entreprise / Organisation",
+    industrySector: "Secteur d'Activité",
+    taxId: "Immatriculation / Identifiant Fiscal (IFU/RCCM)",
+    billingEmail: "E-mail de Facturation Entreprise",
+    authRepresentative: "Représentant Légal / Mandataire",
+    repPosition: "Poste / Fonction du Représentant",
+    companyWebsite: "Site Web de l'Entreprise (Optionnel)",
+    saveBizProfile: "Enregistrer le Profil Entreprise",
+    // Tab 3: Saved Locations
+    locationsTitle: "Lieux d'Intervention Enregistrés",
+    locationsSubtitle: "Enregistrez vos adresses (domicile, bureau, chantier) pour ne pas avoir à les retaper lors de vos publications.",
+    addLocationBtn: "Ajouter une Adresse",
+    privacyGuardTitle: "Protection de Confidentialité de l'Adresse",
+    privacyGuardDesc: "Votre adresse exacte n'est jamais divulguée publiquement. Elle n'est transmise de façon sécurisée qu'à l'artisan sélectionné après confirmation.",
+    noLocationsTitle: "Aucune adresse enregistrée pour l'instant",
+    noLocationsDesc: "Ajoutez vos adresses de domicile ou de chantier pour faciliter l'intervention des artisans.",
+    addFirstLocation: "Ajouter une Première Adresse",
+    setAsDefault: "Définir par défaut",
+    primaryLocation: "Adresse Principale",
+    defaultBadge: "Par défaut",
+    // Tab 4: Verification
+    tier2Title: "Vérification d'Identité & Confiance Séquestre (Niveau 2)",
+    tier2Subtitle: "Vérifiez votre identité légale pour débloquer les contrats à montants élevés, les dépôts sous séquestre illimités et le badge Client Vérifié.",
+    tier1Badge: "Niveau 1 : Compte Standard",
+    tier2Badge: "Niveau 2 : Client Vérifié",
+    pendingReview: "Vérification en cours d'examen",
+    submitIdDocs: "Soumettre une Pièce d'Identité",
+    idDocType: "Type de Pièce d'Identité",
+    idDocNumber: "Numéro de Pièce d'Identité",
+    uploadClearPhoto: "Télécharger une Photo / Scan Lisible du Document",
+    clickToUpload: "Cliquez pour télécharger la CNI / Passeport",
+    uploadFormatNotice: "PNG, JPG ou PDF jusqu'à 8 Mo. Traitement 100% confidentiel.",
+    submitVerification: "Soumettre pour Vérification Niveau 2",
+    // Tab 5: Privacy
+    privacyControlsTitle: "Contrôle de Confidentialité & Notifications",
+    privacyControlsSubtitle: "Gérez la visibilité de votre profil auprès des prestataires et moteurs de recherche.",
+    abbreviateNameTitle: "Abréger le Nom Public (Mode Privé)",
+    abbreviateNameDesc: "Afficher votre nom de famille sous forme d'initiale pour protéger votre anonymat.",
+    directQuotesTitle: "Devis Directs & Propositions des Artisans",
+    directQuotesDesc: "Permettre aux spécialistes certifiés de vous soumettre des devis directs sur vos missions.",
+    smsAlertsTitle: "Alertes SMS & Mises à Jour en Temps Réel",
+    smsAlertsDesc: "Recevez un SMS lorsque l'artisan arrive sur les lieux ou valide une étape du projet.",
+    prefCurrencyTitle: "Devise Principale de la Plateforme",
+    prefCurrencyDesc: "Devise utilisée pour afficher les missions, les dépôts sous séquestre et les devis.",
+    prefLangTitle: "Langue Préférée",
+    prefLangDesc: "Langue utilisée pour les contrats, reçus et e-mails du système.",
+    savePreferences: "Enregistrer les Préférences",
   }
 };
 
@@ -1253,9 +1383,9 @@ export default function ClientProfilePage() {
                 <div>
                   <h3>
                     <iconify-icon icon="lucide:building-2" style={{ color: "#001f3f" }} />
-                    Client Classification & Business Profile
+                    {t.bizTitle}
                   </h3>
-                  <p>Configure whether you hire as an individual household or as a commercial business/organization.</p>
+                  <p>{t.bizSubtitle}</p>
                 </div>
               </div>
 
@@ -1264,26 +1394,26 @@ export default function ClientProfilePage() {
                 {[
                   {
                     id: "household",
-                    title: "Individual / Household",
-                    desc: "Hiring for home repairs, plumbing, cleaning, personal assistance and domestic maintenance.",
+                    title: t.householdTitle,
+                    desc: t.householdDesc,
                     icon: "lucide:home",
                   },
                   {
                     id: "business",
-                    title: "Business Client",
-                    desc: "Hotels, restaurants, stores, and offices regularly hiring skilled service providers.",
+                    title: t.businessClientTitle,
+                    desc: t.businessClientDesc,
                     icon: "lucide:building-2",
                   },
                   {
                     id: "ngo",
-                    title: "Organization / NGO",
-                    desc: "Non-profits, institutions, diplomatic missions, and international development agencies.",
+                    title: t.ngoTitle,
+                    desc: t.ngoDesc,
                     icon: "lucide:landmark",
                   },
                   {
                     id: "property_manager",
-                    title: "Property Manager / Landlord",
-                    desc: "Real estate owners and managers supervising maintenance across multiple buildings and sites.",
+                    title: t.propertyManagerTitle,
+                    desc: t.propertyManagerDesc,
                     icon: "lucide:key",
                   },
                 ].map((ct) => (
@@ -1307,17 +1437,17 @@ export default function ClientProfilePage() {
                   <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "16px 20px", marginBottom: "20px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#001f3f", fontWeight: 800, marginBottom: "4px" }}>
                       <iconify-icon icon="lucide:file-badge" style={{ fontSize: 20, color: "#ff4500" }} />
-                      <span>Business Client Hiring Profile</span>
+                      <span>{t.bizProfileNoticeTitle}</span>
                     </div>
                     <p style={{ margin: 0, fontSize: "13px", color: "#64748b", lineHeight: 1.5 }}>
-                      This profile is dedicated to corporate hiring, task management, and consolidated billing. (Distinct from Service Provider Company Profiles).
+                      {t.bizProfileNoticeDesc}
                     </p>
                   </div>
 
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label htmlFor="biz_name">
-                        <iconify-icon icon="lucide:building-2" /> Company / Organization Name
+                        <iconify-icon icon="lucide:building-2" /> {t.companyName}
                       </label>
                       <input
                         id="biz_name"
@@ -1325,14 +1455,14 @@ export default function ClientProfilePage() {
                         className={styles.formInput}
                         value={businessName}
                         onChange={(e) => setBusinessName(e.target.value)}
-                        placeholder="e.g. Grand Hotel Cotonou SARL"
+                        placeholder={lang === "fr" ? "ex. Grand Hôtel Cotonou SARL" : "e.g. Grand Hotel Cotonou SARL"}
                         required
                       />
                     </div>
 
                     <div className={styles.formGroup}>
                       <label htmlFor="biz_industry">
-                        <iconify-icon icon="lucide:layers" /> Industry / Sector
+                        <iconify-icon icon="lucide:layers" /> {t.industrySector}
                       </label>
                       <select
                         id="biz_industry"
@@ -1340,20 +1470,20 @@ export default function ClientProfilePage() {
                         value={industry}
                         onChange={(e) => setIndustry(e.target.value)}
                       >
-                        <option value="Hospitality & Services">Hospitality & Tourism (Hotels/Restaurants)</option>
-                        <option value="Real Estate & Facilities">Real Estate & Property Management</option>
-                        <option value="Retail & Commercial">Retail & Supermarkets</option>
-                        <option value="Construction & Engineering">Construction & Infrastructure</option>
-                        <option value="Logistics & Transport">Logistics & Supply Chain</option>
-                        <option value="Healthcare & Education">Healthcare & Education</option>
-                        <option value="NGO & Non-Profit">Non-Profit / NGO / Public Mission</option>
-                        <option value="Corporate / Tech">Corporate / Technology / Finance</option>
+                        <option value="Hospitality & Services">{lang === "fr" ? "Hôtellerie & Restauration / Tourisme" : "Hospitality & Tourism (Hotels/Restaurants)"}</option>
+                        <option value="Real Estate & Facilities">{lang === "fr" ? "Immobilier & Gestion de Bâtiments" : "Real Estate & Property Management"}</option>
+                        <option value="Retail & Commercial">{lang === "fr" ? "Commerce, Magasins & Supermarchés" : "Retail & Supermarkets"}</option>
+                        <option value="Construction & Engineering">{lang === "fr" ? "BTP & Ingénierie" : "Construction & Infrastructure"}</option>
+                        <option value="Logistics & Transport">{lang === "fr" ? "Logistique & Transport" : "Logistics & Supply Chain"}</option>
+                        <option value="Healthcare & Education">{lang === "fr" ? "Santé & Éducation" : "Healthcare & Education"}</option>
+                        <option value="NGO & Non-Profit">{lang === "fr" ? "ONG & Organisation Internationale" : "Non-Profit / NGO / Public Mission"}</option>
+                        <option value="Corporate / Tech">{lang === "fr" ? "Technologie, Finance & Siège d'Entreprise" : "Corporate / Technology / Finance"}</option>
                       </select>
                     </div>
 
                     <div className={styles.formGroup}>
                       <label htmlFor="tax_no">
-                        <iconify-icon icon="lucide:receipt" /> Business Registration / Tax ID (IFU/RCCM)
+                        <iconify-icon icon="lucide:receipt" /> {t.taxId}
                       </label>
                       <input
                         id="tax_no"
@@ -1367,7 +1497,7 @@ export default function ClientProfilePage() {
 
                     <div className={styles.formGroup}>
                       <label htmlFor="biz_email">
-                        <iconify-icon icon="lucide:mail" /> Corporate Billing Email
+                        <iconify-icon icon="lucide:mail" /> {t.billingEmail}
                       </label>
                       <input
                         id="biz_email"
@@ -1381,7 +1511,7 @@ export default function ClientProfilePage() {
 
                     <div className={styles.formGroup}>
                       <label htmlFor="rep_name">
-                        <iconify-icon icon="lucide:user-check" /> Authorized Representative
+                        <iconify-icon icon="lucide:user-check" /> {t.authRepresentative}
                       </label>
                       <input
                         id="rep_name"
@@ -1395,7 +1525,7 @@ export default function ClientProfilePage() {
 
                     <div className={styles.formGroup}>
                       <label htmlFor="rep_role">
-                        <iconify-icon icon="lucide:briefcase" /> Representative Position / Title
+                        <iconify-icon icon="lucide:briefcase" /> {t.repPosition}
                       </label>
                       <input
                         id="rep_role"
@@ -1403,13 +1533,13 @@ export default function ClientProfilePage() {
                         className={styles.formInput}
                         value={representativeRole}
                         onChange={(e) => setRepresentativeRole(e.target.value)}
-                        placeholder="e.g. Facilities & Operations Director"
+                        placeholder={lang === "fr" ? "ex. Directeur des Opérations" : "e.g. Facilities & Operations Director"}
                       />
                     </div>
 
                     <div className={`${styles.formGroup} ${styles.formGridFull}`}>
                       <label htmlFor="biz_web">
-                        <iconify-icon icon="lucide:globe" /> Company Website (Optional)
+                        <iconify-icon icon="lucide:globe" /> {t.companyWebsite}
                       </label>
                       <input
                         id="biz_web"
@@ -1425,13 +1555,19 @@ export default function ClientProfilePage() {
                   <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
                     <button type="submit" className={styles.primaryBtn} disabled={saving}>
                       <iconify-icon icon="lucide:check" />
-                      Save Business Client Profile
+                      {t.saveBizProfile}
                     </button>
                   </div>
                 </form>
               ) : (
                 <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "14px", textAlign: "center", color: "#64748b", marginTop: "10px" }}>
-                  <p style={{ margin: 0 }}>You are currently set as an <strong>Individual / Household</strong> client. No corporate registration numbers are required.</p>
+                  <p style={{ margin: 0 }}>
+                    {lang === "fr" ? (
+                      <>Vous êtes actuellement configuré comme client <strong>Particulier / Ménage</strong>. Aucun numéro d'immatriculation d'entreprise n'est requis.</>
+                    ) : (
+                      <>You are currently set as an <strong>Individual / Household</strong> client. No corporate registration numbers are required.</>
+                    )}
+                  </p>
                 </div>
               )}
             </div>
@@ -1444,9 +1580,9 @@ export default function ClientProfilePage() {
                 <div>
                   <h3>
                     <iconify-icon icon="lucide:map-pin" style={{ color: "#ff4500" }} />
-                    Saved Service Locations
+                    {t.locationsTitle}
                   </h3>
-                  <p>Save locations like Home, Office, Construction Site or Rental Properties so you don&apos;t have to retype them when posting tasks.</p>
+                  <p>{t.locationsSubtitle}</p>
                 </div>
                 <button
                   type="button"
@@ -1454,7 +1590,7 @@ export default function ClientProfilePage() {
                   className={styles.primaryBtn}
                   style={{ padding: "9px 18px", fontSize: "13px" }}
                 >
-                  <iconify-icon icon="lucide:plus" /> Add Location
+                  <iconify-icon icon="lucide:plus" /> {t.addLocationBtn}
                 </button>
               </div>
 
@@ -1462,8 +1598,8 @@ export default function ClientProfilePage() {
               <div className={styles.privacyGuardBox}>
                 <iconify-icon icon="lucide:shield-check" />
                 <div>
-                  <strong style={{ display: "block", marginBottom: 2 }}>Exact Address Privacy Guard</strong>
-                  <span>Your street name and building/apartment numbers are never displayed publicly on search boards or tasks. They are only shared securely with your assigned specialist upon project confirmation.</span>
+                  <strong style={{ display: "block", marginBottom: 2 }}>{t.privacyGuardTitle}</strong>
+                  <span>{t.privacyGuardDesc}</span>
                 </div>
               </div>
 
@@ -1473,13 +1609,13 @@ export default function ClientProfilePage() {
                   <div style={{ textAlign: "center", padding: "48px 24px", background: "#f8fafc", borderRadius: "16px", border: "1px dashed #cbd5e1", gridColumn: "1 / -1" }}>
                     <iconify-icon icon="lucide:map-pin" style={{ fontSize: 40, color: "#94a3b8", marginBottom: 12 }} />
                     <h4 style={{ margin: "0 0 6px", color: "#001f3f", fontSize: "16px", fontWeight: 700 }}>
-                      {lang === "fr" ? "Aucune adresse enregistrée" : "No Saved Locations Yet"}
+                      {t.noLocationsTitle}
                     </h4>
                     <p style={{ margin: "0 0 16px", color: "#64748b", fontSize: "13.5px" }}>
-                      {lang === "fr" ? "Ajoutez vos adresses de domicile ou de chantier pour faciliter l'intervention des artisans." : "Add your home, office, or job site addresses to easily dispatch tasks."}
+                      {t.noLocationsDesc}
                     </p>
                     <button type="button" onClick={handleOpenAddAddress} className={styles.primaryBtn} style={{ padding: "8px 18px", fontSize: "13px" }}>
-                      <iconify-icon icon="lucide:plus" /> {lang === "fr" ? "Ajouter une première adresse" : "Add First Location"}
+                      <iconify-icon icon="lucide:plus" /> {t.addFirstLocation}
                     </button>
                   </div>
                 ) : (
@@ -1496,7 +1632,7 @@ export default function ClientProfilePage() {
                           </span>
                           {addr.isDefault && (
                             <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#ff4500", background: "rgba(255,69,0,0.1)", padding: "3px 8px", borderRadius: "6px" }}>
-                              Default
+                              {t.defaultBadge}
                             </span>
                           )}
                         </div>
@@ -1523,10 +1659,10 @@ export default function ClientProfilePage() {
                             onClick={() => handleSetDefaultAddress(addr.id)}
                             style={{ border: "none", background: "transparent", color: "#0284c7", fontSize: "12px", fontWeight: 700, cursor: "pointer", padding: 0 }}
                           >
-                            Set as default
+                            {t.setAsDefault}
                           </button>
                         ) : (
-                          <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700 }}>Primary Location</span>
+                          <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700 }}>{t.primaryLocation}</span>
                         )}
 
                         <div className={styles.addressActions}>
@@ -1534,7 +1670,7 @@ export default function ClientProfilePage() {
                             type="button"
                             className={styles.addressIconBtn}
                             onClick={() => handleEditAddress(addr)}
-                            title="Edit Address"
+                            title={lang === "fr" ? "Modifier l'adresse" : "Edit Address"}
                           >
                             <iconify-icon icon="lucide:pencil" />
                           </button>
@@ -1542,7 +1678,7 @@ export default function ClientProfilePage() {
                             type="button"
                             className={`${styles.addressIconBtn} ${styles.addressIconBtnDanger}`}
                             onClick={() => handleDeleteAddress(addr.id)}
-                            title="Delete Address"
+                            title={lang === "fr" ? "Supprimer l'adresse" : "Delete Address"}
                           >
                             <iconify-icon icon="lucide:trash-2" />
                           </button>
@@ -1562,17 +1698,17 @@ export default function ClientProfilePage() {
                 <div>
                   <h3>
                     <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} />
-                    Identity & Escrow Trust Verification (Tier 2)
+                    {t.tier2Title}
                   </h3>
-                  <p>Verify your legal identity to unlock high-value contracts, unlimited escrow deposits, and the Verified Client badge.</p>
+                  <p>{t.tier2Subtitle}</p>
                 </div>
                 {isVerified ? (
                   <span className={styles.verifiedBadge} style={{ padding: "8px 16px", fontSize: "13px" }}>
-                    <iconify-icon icon="lucide:check-circle-2" /> Verified Client ✓
+                    <iconify-icon icon="lucide:check-circle-2" /> {t.verifiedClient}
                   </span>
                 ) : (
                   <span className={styles.pendingBadge} style={{ padding: "8px 16px", fontSize: "13px" }}>
-                    <iconify-icon icon="lucide:clock" /> Verification Pending Review
+                    <iconify-icon icon="lucide:clock" /> {t.pendingReview}
                   </span>
                 )}
               </div>
@@ -1581,38 +1717,38 @@ export default function ClientProfilePage() {
                 <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "20px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#16a34a", fontWeight: 800, marginBottom: "8px" }}>
                     <iconify-icon icon="lucide:check" style={{ fontSize: 20 }} />
-                    <span>Tier 1: Basic Account</span>
+                    <span>{t.tier1Badge}</span>
                   </div>
                   <ul style={{ margin: 0, paddingLeft: 18, fontSize: "12.5px", color: "#475569", lineHeight: 1.6 }}>
-                    <li>Email Address Verified ✓</li>
-                    <li>Phone Number Verified ✓</li>
-                    <li>Browse Specialists & Companies</li>
-                    <li>Post standard tasks</li>
+                    <li>{lang === "fr" ? "Adresse e-mail vérifiée ✓" : "Email Address Verified ✓"}</li>
+                    <li>{lang === "fr" ? "Numéro de téléphone vérifié ✓" : "Phone Number Verified ✓"}</li>
+                    <li>{lang === "fr" ? "Parcourir artisans et entreprises" : "Browse Specialists & Companies"}</li>
+                    <li>{lang === "fr" ? "Publier des missions standards" : "Post standard tasks"}</li>
                   </ul>
                 </div>
 
                 <div style={{ background: isVerified ? "#f0fdf4" : "rgba(255,69,0,0.03)", border: isVerified ? "1.5px solid #bbf7d0" : "1.5px solid #ff4500", borderRadius: "16px", padding: "20px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", color: isVerified ? "#16a34a" : "#ff4500", fontWeight: 800, marginBottom: "8px" }}>
                     <iconify-icon icon={isVerified ? "lucide:shield-check" : "lucide:sparkles"} style={{ fontSize: 20 }} />
-                    <span>Tier 2: Verified Client</span>
+                    <span>{t.tier2Badge}</span>
                   </div>
                   <ul style={{ margin: 0, paddingLeft: 18, fontSize: "12.5px", color: "#475569", lineHeight: 1.6 }}>
-                    <li>Government ID Confirmed ✓</li>
-                    <li>Escrow Vault high-balance funding</li>
-                    <li>Direct contractor hiring badge</li>
-                    <li>Priority concierge supervision</li>
+                    <li>{lang === "fr" ? "Pièce d'identité officielle validée ✓" : "Government ID Confirmed ✓"}</li>
+                    <li>{lang === "fr" ? "Financement élevé du coffre séquestre" : "Escrow Vault high-balance funding"}</li>
+                    <li>{lang === "fr" ? "Badge de recrutement direct d'entreprises" : "Direct contractor hiring badge"}</li>
+                    <li>{lang === "fr" ? "Supervision prioritaire par notre service conciergerie" : "Priority concierge supervision"}</li>
                   </ul>
                 </div>
               </div>
 
               {!isVerified && (
                 <form onSubmit={handleSubmitVerification} style={{ borderTop: "1px solid #f1f5f9", paddingTop: "24px" }}>
-                  <h4 style={{ fontSize: "16px", fontWeight: 800, color: "#001f3f", margin: "0 0 16px" }}>Submit Identification Documents</h4>
+                  <h4 style={{ fontSize: "16px", fontWeight: 800, color: "#001f3f", margin: "0 0 16px" }}>{t.submitIdDocs}</h4>
                   
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label htmlFor="id_type">
-                        <iconify-icon icon="lucide:file-text" /> Identification Document Type
+                        <iconify-icon icon="lucide:file-text" /> {t.idDocType}
                       </label>
                       <select
                         id="id_type"
@@ -1620,16 +1756,16 @@ export default function ClientProfilePage() {
                         value={idType}
                         onChange={(e) => setIdType(e.target.value as any)}
                       >
-                        <option value="national_id">National ID Card (CNI / CIP)</option>
-                        <option value="passport">International Passport</option>
-                        <option value="drivers_license">Driver&apos;s License (Permis de Conduire)</option>
-                        <option value="residence_permit">Residence Permit / Carte de Séjour</option>
+                        <option value="national_id">{lang === "fr" ? "Carte Nationale d'Identité (CNI / CIP)" : "National ID Card (CNI / CIP)"}</option>
+                        <option value="passport">{lang === "fr" ? "Passeport International" : "International Passport"}</option>
+                        <option value="drivers_license">{lang === "fr" ? "Permis de Conduire" : "Driver's License (Permis de Conduire)"}</option>
+                        <option value="residence_permit">{lang === "fr" ? "Titre de Séjour / Carte de Résident" : "Residence Permit / Carte de Séjour"}</option>
                       </select>
                     </div>
 
                     <div className={styles.formGroup}>
                       <label htmlFor="id_num">
-                        <iconify-icon icon="lucide:hash" /> Document / ID Number
+                        <iconify-icon icon="lucide:hash" /> {t.idDocNumber}
                       </label>
                       <input
                         id="id_num"
@@ -1645,7 +1781,7 @@ export default function ClientProfilePage() {
 
                   <div style={{ marginTop: 20 }}>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#001f3f", marginBottom: "8px" }}>
-                      Upload Clear Photo / Scan of ID Document
+                      {t.uploadClearPhoto}
                     </label>
                     <input
                       ref={idDocInputRef}
@@ -1661,13 +1797,13 @@ export default function ClientProfilePage() {
                       {idDocUrl ? (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", color: "#16a34a", fontWeight: 700 }}>
                           <iconify-icon icon="lucide:check-circle" style={{ fontSize: 28 }} />
-                          <span>Document Attached ({idDocUrl.slice(0, 30)}...) - Click to change</span>
+                          <span>{lang === "fr" ? `Document joint (${idDocUrl.slice(0, 30)}...) - Cliquer pour changer` : `Document Attached (${idDocUrl.slice(0, 30)}...) - Click to change`}</span>
                         </div>
                       ) : (
                         <div>
                           <iconify-icon icon="lucide:upload-cloud" />
-                          <p style={{ margin: "0 0 4px", fontWeight: 700, color: "#001f3f" }}>Click to upload National ID / Passport Photo</p>
-                          <span style={{ fontSize: "12px", color: "#64748b" }}>PNG, JPG or PDF up to 8MB. Kept 100% confidential.</span>
+                          <p style={{ margin: "0 0 4px", fontWeight: 700, color: "#001f3f" }}>{t.clickToUpload}</p>
+                          <span style={{ fontSize: "12px", color: "#64748b" }}>{t.uploadFormatNotice}</span>
                         </div>
                       )}
                     </div>
@@ -1676,7 +1812,7 @@ export default function ClientProfilePage() {
                   <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
                     <button type="submit" className={styles.primaryBtn}>
                       <iconify-icon icon="lucide:shield-check" />
-                      Submit for Tier 2 Verification
+                      {t.submitVerification}
                     </button>
                   </div>
                 </form>
@@ -1691,17 +1827,17 @@ export default function ClientProfilePage() {
                 <div>
                   <h3>
                     <iconify-icon icon="lucide:lock" style={{ color: "#001f3f" }} />
-                    Privacy Controls & Notifications
+                    {t.privacyControlsTitle}
                   </h3>
-                  <p>Control how your name and profile are displayed to specialists and search engines.</p>
+                  <p>{t.privacyControlsSubtitle}</p>
                 </div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div className={styles.switchRow}>
                   <div className={styles.switchInfo}>
-                    <h4>Abbreviate Public Name (Privacy Mode)</h4>
-                    <p>Display your surname as an initial (e.g. <strong>{firstName || "Nelson"} {lastName ? `${lastName[0]}.` : "T."}</strong>) instead of exposing your full legal name.</p>
+                    <h4>{t.abbreviateNameTitle}</h4>
+                    <p>{lang === "fr" ? <>Afficher votre nom sous forme d'initiale (ex. <strong>{firstName || "Nelson"} {lastName ? `${lastName[0]}.` : "T."}</strong>) au lieu d'exposer votre nom complet.</> : <>Display your surname as an initial (e.g. <strong>{firstName || "Nelson"} {lastName ? `${lastName[0]}.` : "T."}</strong>) instead of exposing your full legal name.</>}</p>
                   </div>
                   <select
                     className={styles.formSelect}
@@ -1715,18 +1851,18 @@ export default function ClientProfilePage() {
                     }}
                   >
                     <option value="initial">
-                      {firstName ? `${firstName} ${(lastName || "")[0] ? `${lastName[0].toUpperCase()}.` : ""}`.trim() : "First Name Initial"} (Privacy Mode)
+                      {firstName ? `${firstName} ${(lastName || "")[0] ? `${lastName[0].toUpperCase()}.` : ""}`.trim() : "First Name Initial"} ({lang === "fr" ? "Mode Privé" : "Privacy Mode"})
                     </option>
                     <option value="full">
-                      {fullName || "Full Legal Name"} (Full Name)
+                      {fullName || "Full Legal Name"} ({lang === "fr" ? "Nom Complet" : "Full Name"})
                     </option>
                   </select>
                 </div>
 
                 <div className={styles.switchRow}>
                   <div className={styles.switchInfo}>
-                    <h4>Direct Quotes & Technician Offers</h4>
-                    <p>Allow top-rated specialists and verified enterprise companies to send direct price quotes on your tasks.</p>
+                    <h4>{t.directQuotesTitle}</h4>
+                    <p>{t.directQuotesDesc}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -1743,8 +1879,8 @@ export default function ClientProfilePage() {
 
                 <div className={styles.switchRow}>
                   <div className={styles.switchInfo}>
-                    <h4>SMS & Instant Dispatch Alerts</h4>
-                    <p>Receive SMS alerts on your phone when assigned technicians arrive on-site or submit project milestones.</p>
+                    <h4>{t.smsAlertsTitle}</h4>
+                    <p>{t.smsAlertsDesc}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -1761,8 +1897,8 @@ export default function ClientProfilePage() {
 
                 <div className={styles.switchRow}>
                   <div className={styles.switchInfo}>
-                    <h4>Preferred Platform Currency</h4>
-                    <p>Primary currency for displaying tasks, escrow deposits, and budget calculations.</p>
+                    <h4>{t.prefCurrencyTitle}</h4>
+                    <p>{t.prefCurrencyDesc}</p>
                   </div>
                   <select
                     className={styles.formSelect}
@@ -1785,8 +1921,8 @@ export default function ClientProfilePage() {
 
                 <div className={styles.switchRow}>
                   <div className={styles.switchInfo}>
-                    <h4>Preferred Language</h4>
-                    <p>Language used for task contracts, receipts, and system emails.</p>
+                    <h4>{t.prefLangTitle}</h4>
+                    <p>{t.prefLangDesc}</p>
                   </div>
                   <select
                     className={styles.formSelect}
@@ -1811,7 +1947,7 @@ export default function ClientProfilePage() {
                 <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
                   <button type="button" onClick={handleSavePreferences} className={styles.primaryBtn} disabled={saving}>
                     <iconify-icon icon={saving ? "lucide:loader-2" : "lucide:check-circle-2"} className={saving ? styles.spinIcon : ""} />
-                    Save Privacy & Platform Preferences
+                    {t.savePreferences}
                   </button>
                 </div>
               </div>
@@ -1852,7 +1988,7 @@ export default function ClientProfilePage() {
               }}
             >
               <iconify-icon icon="lucide:arrow-left" />
-              Previous Step
+              {t.prevStep}
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -1862,7 +1998,7 @@ export default function ClientProfilePage() {
                   if (activeTab === "personal") await handleSavePersonal();
                   else if (activeTab === "business") handleSaveBusiness();
                   else if (activeTab === "privacy") await handleSavePreferences();
-                  else toast.show("success", "Progress saved");
+                  else toast.show("success", lang === "fr" ? "Progression enregistrée" : "Progress saved");
                 }}
                 disabled={saving}
                 style={{
@@ -1880,7 +2016,7 @@ export default function ClientProfilePage() {
                 }}
               >
                 <iconify-icon icon={saving ? "lucide:loader" : "lucide:save"} className={saving ? styles.spinIcon : ""} />
-                {saving ? "Saving..." : "Save Progress"}
+                {saving ? t.saving : t.saveProgress}
               </button>
 
               {!isLastTab ? (
@@ -1903,7 +2039,7 @@ export default function ClientProfilePage() {
                     boxShadow: "0 6px 18px rgba(255, 69, 0, 0.3)"
                   }}
                 >
-                  {saving ? "Saving..." : "Save & Next Step"}
+                  {saving ? t.saving : t.saveAndNext}
                   <iconify-icon icon="lucide:arrow-right" />
                 </button>
               ) : (
@@ -1918,16 +2054,16 @@ export default function ClientProfilePage() {
                     padding: "10px 28px",
                     borderRadius: 12,
                     border: "none",
-                    background: "linear-gradient(135deg, #16a34a, #15803d)",
+                    background: "linear-gradient(135deg, #10b981, #059669)",
                     color: "#ffffff",
-                    fontWeight: 700,
-                    fontSize: 14.5,
+                    fontWeight: 800,
+                    fontSize: 14,
                     cursor: "pointer",
-                    boxShadow: "0 6px 18px rgba(22, 163, 74, 0.3)"
+                    boxShadow: "0 6px 18px rgba(16, 185, 129, 0.35)"
                   }}
                 >
-                  <iconify-icon icon={saving ? "lucide:loader" : "lucide:check-circle-2"} className={saving ? styles.spinIcon : ""} />
-                  {saving ? "Saving..." : "Complete & Save Profile ✓"}
+                  <iconify-icon icon={saving ? "lucide:loader-2" : "lucide:check-check"} className={saving ? styles.spinIcon : ""} />
+                  {saving ? t.saving : t.completeProfile}
                 </button>
               )}
             </div>
@@ -1941,7 +2077,9 @@ export default function ClientProfilePage() {
           <div style={{ background: "#ffffff", borderRadius: "20px", width: "100%", maxWidth: "500px", padding: "24px", boxShadow: "0 25px 60px rgba(0,31,63,0.4)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18, borderBottom: "1px solid #f1f5f9", paddingBottom: 12 }}>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "#001f3f" }}>
-                {editingAddressId ? "Edit Service Location" : "Add New Service Location"}
+                {editingAddressId 
+                  ? (lang === "fr" ? "Modifier le lieu de prestation" : "Edit Service Location") 
+                  : (lang === "fr" ? "Ajouter un nouveau lieu" : "Add New Service Location")}
               </h3>
               <button
                 type="button"
@@ -1956,14 +2094,14 @@ export default function ClientProfilePage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                    Location Label (e.g. Home, Office, Site Alpha)
+                    {lang === "fr" ? "Libellé du lieu (ex. Domicile, Bureau, Chantier)" : "Location Label (e.g. Home, Office, Site Alpha)"}
                   </label>
                   <input
                     type="text"
                     className={styles.formInput}
                     value={addrLabel}
                     onChange={(e) => setAddrLabel(e.target.value)}
-                    placeholder="e.g. Primary Residence"
+                    placeholder={lang === "fr" ? "ex. Résidence Principale" : "e.g. Primary Residence"}
                     required
                   />
                 </div>
@@ -1971,24 +2109,24 @@ export default function ClientProfilePage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                      Category
+                      {lang === "fr" ? "Catégorie" : "Category"}
                     </label>
                     <select
                       className={styles.formSelect}
                       value={addrCategory}
                       onChange={(e) => setAddrCategory(e.target.value as any)}
                     >
-                      <option value="home">Home / Apartment</option>
-                      <option value="office">Office / Commercial</option>
-                      <option value="site">Construction Site</option>
-                      <option value="rental">Rental Property</option>
-                      <option value="other">Other Location</option>
+                      <option value="home">{lang === "fr" ? "Domicile / Appartement" : "Home / Apartment"}</option>
+                      <option value="office">{lang === "fr" ? "Bureau / Commercial" : "Office / Commercial"}</option>
+                      <option value="site">{lang === "fr" ? "Chantier de construction" : "Construction Site"}</option>
+                      <option value="rental">{lang === "fr" ? "Bien locatif" : "Rental Property"}</option>
+                      <option value="other">{lang === "fr" ? "Autre lieu" : "Other Location"}</option>
                     </select>
                   </div>
 
                   <div>
                     <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                      City
+                      {lang === "fr" ? "Ville" : "City"}
                     </label>
                     <input
                       type="text"
@@ -2003,41 +2141,41 @@ export default function ClientProfilePage() {
 
                 <div>
                   <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                    Neighborhood / District / Quarter
+                    {lang === "fr" ? "Quartier / Arrondissement / Zone" : "Neighborhood / District / Quarter"}
                   </label>
                   <input
                     type="text"
                     className={styles.formInput}
                     value={addrNeighborhood}
                     onChange={(e) => setAddrNeighborhood(e.target.value)}
-                    placeholder="e.g. Haie Vive, Akpakpa, Cadjehoun"
+                    placeholder={lang === "fr" ? "ex. Haie Vive, Akpakpa, Cadjehoun" : "e.g. Haie Vive, Akpakpa, Cadjehoun"}
                   />
                 </div>
 
                 <div>
                   <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                    Street Address / Building & Landmark (Private)
+                    {lang === "fr" ? "Adresse exacte / Repère & Bâtiment (Privé)" : "Street Address / Building & Landmark (Private)"}
                   </label>
                   <input
                     type="text"
                     className={styles.formInput}
                     value={addrStreet}
                     onChange={(e) => setAddrStreet(e.target.value)}
-                    placeholder="e.g. Rue 340, Immeuble Horizon Apt 4B"
+                    placeholder={lang === "fr" ? "ex. Rue 340, Immeuble Horizon Apt 4B" : "e.g. Rue 340, Immeuble Horizon Apt 4B"}
                     required
                   />
                 </div>
 
                 <div>
                   <label style={{ display: "block", fontSize: "12.5px", fontWeight: 700, color: "#001f3f", marginBottom: 5 }}>
-                    Technician Access Instructions (Optional)
+                    {lang === "fr" ? "Instructions d'accès pour le prestataire (Facultatif)" : "Technician Access Instructions (Optional)"}
                   </label>
                   <input
                     type="text"
                     className={styles.formInput}
                     value={addrAccessNotes}
                     onChange={(e) => setAddrAccessNotes(e.target.value)}
-                    placeholder="e.g. Ring black gate, parking available inside"
+                    placeholder={lang === "fr" ? "ex. Sonner au portail noir, stationnement disponible" : "e.g. Ring black gate, parking available inside"}
                   />
                 </div>
 
@@ -2048,7 +2186,7 @@ export default function ClientProfilePage() {
                     onChange={(e) => setAddrIsDefault(e.target.checked)}
                     style={{ width: 18, height: 18, accentColor: "#ff4500" }}
                   />
-                  <span>Set as default service location for new tasks</span>
+                  <span>{lang === "fr" ? "Définir comme adresse de service par défaut" : "Set as default service location for new tasks"}</span>
                 </label>
               </div>
 
@@ -2059,7 +2197,7 @@ export default function ClientProfilePage() {
                   className={styles.secondaryBtn}
                   style={{ flex: 1, justifyContent: "center" }}
                 >
-                  Cancel
+                  {lang === "fr" ? "Annuler" : "Cancel"}
                 </button>
                 <button
                   type="submit"
@@ -2067,7 +2205,7 @@ export default function ClientProfilePage() {
                   style={{ flex: 1.2, justifyContent: "center" }}
                 >
                   <iconify-icon icon="lucide:check" />
-                  {editingAddressId ? "Update Address" : "Save Location"}
+                  {editingAddressId ? (lang === "fr" ? "Mettre à jour" : "Update Address") : (lang === "fr" ? "Enregistrer le lieu" : "Save Location")}
                 </button>
               </div>
             </form>
