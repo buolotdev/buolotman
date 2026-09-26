@@ -1624,53 +1624,85 @@ export default function CompanyProfilePage() {
       )}
 
       {/* ==================== TAB 2: LEGAL VERIFICATION & 4-TIER BADGES ==================== */}
-      {activeTab === "verification" && (
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3><iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} /> {t.verificationTitle}</h3>
-            <span className={styles.verifiedBadge}>
-              <iconify-icon icon="lucide:check-circle-2" /> {t.tier3Badge}
-            </span>
-          </div>
+      {activeTab === "verification" && (() => {
+        const hasDocs = documents.length > 0;
+        const hasApprovedDocs = documents.some((d: any) => d.is_verified || d.status === "verified");
+        const isTier2Verified = isVerified || hasApprovedDocs;
+        const isTier2Pending = !isTier2Verified && hasDocs;
+        const isTier3Verified = isTier2Verified && (services.length > 0 || projects.length > 0 || teamMembers.length > 0);
+        const isTier4Verified = isTier2Verified && isTier3Verified && profileCompleteness >= 90;
 
-          {/* 4-Tier Interactive Tracker */}
-          <div className={styles.tierGrid}>
-            <div className={`${styles.tierCard} ${styles.tierCardActive}`}>
-              <div className={styles.tierHeader}>
-                <span style={{ fontSize: 20 }}>🥉</span>
-                <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.completedStatus}</span>
-              </div>
-              <h4 className={styles.tierTitle}>{t.tier1Title}</h4>
-              <p className={styles.tierDesc}>{t.tier1Desc}</p>
+        return (
+          <section className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3><iconify-icon icon="lucide:shield-check" style={{ color: isTier2Verified ? "#16a34a" : "#f59e0b" }} /> {t.verificationTitle}</h3>
+              {isTier2Verified ? (
+                <span className={styles.verifiedBadge}>
+                  <iconify-icon icon="lucide:check-circle-2" /> {isTier3Verified ? t.tier3Badge : `${t.tier2Title} ✓`}
+                </span>
+              ) : isTier2Pending ? (
+                <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en cours d'examen" : "Verification Under Review"}
+                </span>
+              ) : (
+                <span style={{ background: "#fee2e2", color: "#b91c1c", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <iconify-icon icon="lucide:alert-circle" /> {lang === "fr" ? "Documents Requis (Non Vérifié)" : "Documents Required (Unverified)"}
+                </span>
+              )}
             </div>
 
-            <div className={`${styles.tierCard} ${styles.tierCardActive}`}>
-              <div className={styles.tierHeader}>
-                <span style={{ fontSize: 20 }}>🥈</span>
-                <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.tier2Title} ✓</span>
+            {/* 4-Tier Interactive Tracker */}
+            <div className={styles.tierGrid}>
+              <div className={`${styles.tierCard} ${styles.tierCardActive}`}>
+                <div className={styles.tierHeader}>
+                  <span style={{ fontSize: 20 }}>🥉</span>
+                  <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.completedStatus}</span>
+                </div>
+                <h4 className={styles.tierTitle}>{t.tier1Title}</h4>
+                <p className={styles.tierDesc}>{t.tier1Desc}</p>
               </div>
-              <h4 className={styles.tierTitle}>{t.tier2Title}</h4>
-              <p className={styles.tierDesc}>{t.tier2Desc}</p>
-            </div>
 
-            <div className={`${styles.tierCard} ${styles.tierCardCurrent}`}>
-              <div className={styles.tierHeader}>
-                <span style={{ fontSize: 20 }}>🥇</span>
-                <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>{t.tier3Badge}</span>
+              <div className={`${styles.tierCard} ${isTier2Verified ? styles.tierCardActive : (isTier2Pending ? styles.tierCardCurrent : "")}`}>
+                <div className={styles.tierHeader}>
+                  <span style={{ fontSize: 20 }}>🥈</span>
+                  {isTier2Verified ? (
+                    <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>{t.tier2Title} ✓</span>
+                  ) : isTier2Pending ? (
+                    <span className={styles.tierBadge} style={{ background: "#fef3c7", color: "#b45309" }}>{lang === "fr" ? "En cours d'examen" : "Under Review"}</span>
+                  ) : (
+                    <span className={styles.tierBadge} style={{ background: "#fee2e2", color: "#b91c1c" }}>{lang === "fr" ? "Documents Requis" : "Action Required"}</span>
+                  )}
+                </div>
+                <h4 className={styles.tierTitle}>{t.tier2Title}</h4>
+                <p className={styles.tierDesc}>{t.tier2Desc}</p>
               </div>
-              <h4 className={styles.tierTitle}>{t.tier3Title}</h4>
-              <p className={styles.tierDesc}>{t.tier3Desc}</p>
-            </div>
 
-            <div className={styles.tierCard}>
-              <div className={styles.tierHeader}>
-                <span style={{ fontSize: 20 }}>💎</span>
-                <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#64748b" }}>{t.targetLevel}</span>
+              <div className={`${styles.tierCard} ${isTier3Verified ? styles.tierCardCurrent : ""}`}>
+                <div className={styles.tierHeader}>
+                  <span style={{ fontSize: 20 }}>🥇</span>
+                  {isTier3Verified ? (
+                    <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>{t.tier3Badge}</span>
+                  ) : isTier2Verified ? (
+                    <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#64748b" }}>{lang === "fr" ? "En cours" : "In Progress"}</span>
+                  ) : (
+                    <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#94a3b8" }}>{lang === "fr" ? "Verrouillé (Niveau 2 Requis)" : "Locked (Requires Tier 2)"}</span>
+                  )}
+                </div>
+                <h4 className={styles.tierTitle}>{t.tier3Title}</h4>
+                <p className={styles.tierDesc}>{t.tier3Desc}</p>
               </div>
-              <h4 className={styles.tierTitle}>{t.tier4Title}</h4>
-              <p className={styles.tierDesc}>{t.tier4Desc}</p>
+
+              <div className={`${styles.tierCard} ${isTier4Verified ? styles.tierCardActive : ""}`}>
+                <div className={styles.tierHeader}>
+                  <span style={{ fontSize: 20 }}>💎</span>
+                  <span className={styles.tierBadge} style={{ background: isTier4Verified ? "#dcfce7" : "#f1f5f9", color: isTier4Verified ? "#16a34a" : "#64748b" }}>
+                    {isTier4Verified ? "Top Tier ✓" : t.targetLevel}
+                  </span>
+                </div>
+                <h4 className={styles.tierTitle}>{t.tier4Title}</h4>
+                <p className={styles.tierDesc}>{t.tier4Desc}</p>
+              </div>
             </div>
-          </div>
 
           <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
             {t.confidentialNotice}

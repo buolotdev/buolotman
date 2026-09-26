@@ -311,9 +311,11 @@ export default function CompanyDashboard() {
                     <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en attente" : "Pending Verification"}
                   </span>
                 )}
-                <span style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <iconify-icon icon="lucide:check-circle-2" /> {t.insured}
-                </span>
+                {Boolean(companyProfile?.is_insured || user?.is_insured) ? (
+                  <span style={{ background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <iconify-icon icon="lucide:check-circle-2" /> {t.insured}
+                  </span>
+                ) : null}
               </div>
               <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
                 {t.companyTrustDesc}
@@ -335,13 +337,13 @@ export default function CompanyDashboard() {
               <iconify-icon icon={isVerified ? "lucide:check-circle-2" : "lucide:clock"} style={{ fontSize: 16, color: isVerified ? '#16a34a' : '#f59e0b' }} />
               <span>{isVerified ? t.tier2 : (lang === "fr" ? "2. Vérification (En attente)" : "2. Business Verification (Pending)")}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#0284c7' : '#64748b', fontWeight: 800 }}>
-              <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: isVerified ? '#0284c7' : '#94a3b8' }} />
-              <span>{t.tier3}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified && (completedProjects > 0 || activeProjects > 0) ? '#0284c7' : '#64748b', fontWeight: isVerified ? 800 : 600 }}>
+              <iconify-icon icon="lucide:award" style={{ fontSize: 16, color: isVerified && (completedProjects > 0 || activeProjects > 0) ? '#0284c7' : '#94a3b8' }} />
+              <span>{isVerified && (completedProjects > 0 || activeProjects > 0) ? t.tier3 : (lang === "fr" ? "3. Capacité (En cours)" : "3. Capability (Target)")}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified ? '#166534' : '#64748b', fontWeight: 700 }}>
-              <iconify-icon icon={isVerified ? "lucide:check-circle-2" : "lucide:circle-dot"} style={{ fontSize: 16, color: isVerified ? '#16a34a' : '#94a3b8' }} />
-              <span>{t.tier4}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: isVerified && Boolean(companyProfile?.is_insured || user?.is_insured) ? '#166534' : '#64748b', fontWeight: 700 }}>
+              <iconify-icon icon={isVerified && Boolean(companyProfile?.is_insured || user?.is_insured) ? "lucide:check-circle-2" : "lucide:circle-dot"} style={{ fontSize: 16, color: isVerified && Boolean(companyProfile?.is_insured || user?.is_insured) ? '#16a34a' : '#94a3b8' }} />
+              <span>{isVerified && Boolean(companyProfile?.is_insured || user?.is_insured) ? (lang === "fr" ? "4. Entreprise Vérifiée ✓" : "4. Verified Company ✓") : t.tier4}</span>
             </div>
           </div>
         </section>

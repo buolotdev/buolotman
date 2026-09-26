@@ -1745,46 +1745,79 @@ export default function TechnicianProfilePage() {
             )}
 
             {/* ==================== TAB 2: 3-TIER VERIFICATION & 4-SLOT UPLOADER ==================== */}
-            {activeTab === "verification" && (
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
-                    <iconify-icon icon="lucide:shield-check" style={{ color: "#16a34a" }} /> 3-Tier Specialist Verification & ID Uploads
-                  </h2>
-                  <span className={styles.verifiedBadge}>
-                    <iconify-icon icon="lucide:check-circle-2" /> Tier 2: Professional Verified ✓
-                  </span>
-                </div>
+            {activeTab === "verification" && (() => {
+              const isTechVerified = Boolean(userData?.is_verified || userData?.technician_profile?.is_verified);
+              const hasIdDocs = Boolean(frontIdDoc || backIdDoc);
+              const hasAllDocs = Boolean(frontIdDoc && backIdDoc);
+              const isTier1Verified = isTechVerified;
+              const isTier1Pending = !isTier1Verified && hasIdDocs;
+              const isTier2Verified = isTechVerified && Boolean(certDoc || skills.length > 0);
+              const isTier3Verified = isTechVerified && ((userData?.tasks_completed_count ?? 0) >= 10 || (userData?.completed_jobs ?? 0) >= 10);
 
-                {/* 3-Tier Progression Tracker */}
-                <div className={styles.tierGrid}>
-                  <div className={`${styles.tierCard} ${styles.tierCardActive}`}>
-                    <div className={styles.tierHeader}>
-                      <span style={{ fontSize: 20 }}>🥉</span>
-                      <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Completed ✓</span>
-                    </div>
-                    <h4 className={styles.tierTitle}>1. Identity Verified</h4>
-                    <p className={styles.tierDesc}>National ID / Passport (Front & Back) confirmed by Boulot Man security.</p>
+              return (
+                <section className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h2 style={{ fontSize: 18, fontWeight: 800, color: "#001f3f", margin: 0 }}>
+                      <iconify-icon icon="lucide:shield-check" style={{ color: isTechVerified ? "#16a34a" : "#f59e0b" }} /> 3-Tier Specialist Verification & ID Uploads
+                    </h2>
+                    {isTechVerified ? (
+                      <span className={styles.verifiedBadge}>
+                        <iconify-icon icon="lucide:check-circle-2" /> Tier 2: Professional Verified ✓
+                      </span>
+                    ) : isTier1Pending ? (
+                      <span style={{ background: "#fef3c7", color: "#b45309", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <iconify-icon icon="lucide:clock-4" /> {lang === "fr" ? "Vérification en cours d'examen" : "Verification Under Review"}
+                      </span>
+                    ) : (
+                      <span style={{ background: "#fee2e2", color: "#b91c1c", padding: "4px 12px", borderRadius: "999px", fontSize: "12px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <iconify-icon icon="lucide:alert-circle" /> {lang === "fr" ? "Documents Requis (Non Vérifié)" : "Action Required: Upload ID"}
+                      </span>
+                    )}
                   </div>
 
-                  <div className={`${styles.tierCard} ${styles.tierCardCurrent}`}>
-                    <div className={styles.tierHeader}>
-                      <span style={{ fontSize: 20 }}>🥈</span>
-                      <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>Active Status ✓</span>
+                  {/* 3-Tier Progression Tracker */}
+                  <div className={styles.tierGrid}>
+                    <div className={`${styles.tierCard} ${isTier1Verified ? styles.tierCardActive : (isTier1Pending ? styles.tierCardCurrent : "")}`}>
+                      <div className={styles.tierHeader}>
+                        <span style={{ fontSize: 20 }}>🥉</span>
+                        {isTier1Verified ? (
+                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Identity Verified ✓</span>
+                        ) : isTier1Pending ? (
+                          <span className={styles.tierBadge} style={{ background: "#fef3c7", color: "#b45309" }}>{lang === "fr" ? "En cours d'examen" : "Under Review"}</span>
+                        ) : (
+                          <span className={styles.tierBadge} style={{ background: "#fee2e2", color: "#b91c1c" }}>{lang === "fr" ? "ID Requis" : "ID Required"}</span>
+                        )}
+                      </div>
+                      <h4 className={styles.tierTitle}>1. Identity Verified</h4>
+                      <p className={styles.tierDesc}>National ID / Passport (Front & Back) confirmed by Boulot Man security.</p>
                     </div>
-                    <h4 className={styles.tierTitle}>2. Professional Verified</h4>
-                    <p className={styles.tierDesc}>Trade certifications, diploma, and technical skills evaluated.</p>
-                  </div>
 
-                  <div className={styles.tierCard}>
-                    <div className={styles.tierHeader}>
-                      <span style={{ fontSize: 20 }}>🥇</span>
-                      <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#64748b" }}>Target Badge</span>
+                    <div className={`${styles.tierCard} ${isTier2Verified ? styles.tierCardActive : (isTechVerified ? styles.tierCardCurrent : "")}`}>
+                      <div className={styles.tierHeader}>
+                        <span style={{ fontSize: 20 }}>🥈</span>
+                        {isTier2Verified ? (
+                          <span className={styles.tierBadge} style={{ background: "#dcfce7", color: "#16a34a" }}>Professional Verified ✓</span>
+                        ) : isTechVerified ? (
+                          <span className={styles.tierBadge} style={{ background: "rgba(255,69,0,0.1)", color: "#ff4500" }}>Active Status ✓</span>
+                        ) : (
+                          <span className={styles.tierBadge} style={{ background: "#f1f5f9", color: "#94a3b8" }}>{lang === "fr" ? "Niveau 1 Requis" : "Requires Tier 1"}</span>
+                        )}
+                      </div>
+                      <h4 className={styles.tierTitle}>2. Professional Verified</h4>
+                      <p className={styles.tierDesc}>Trade certifications, diploma, and technical skills evaluated.</p>
                     </div>
-                    <h4 className={styles.tierTitle}>3. Boulot Man Approved Pro</h4>
-                    <p className={styles.tierDesc}>Full background clearance, 10+ jobs completed with ⭐ 4.8+ rating.</p>
+
+                    <div className={`${styles.tierCard} ${isTier3Verified ? styles.tierCardActive : ""}`}>
+                      <div className={styles.tierHeader}>
+                        <span style={{ fontSize: 20 }}>🥇</span>
+                        <span className={styles.tierBadge} style={{ background: isTier3Verified ? "#dcfce7" : "#f1f5f9", color: isTier3Verified ? "#16a34a" : "#64748b" }}>
+                          {isTier3Verified ? "Approved Pro ✓" : "Target Badge"}
+                        </span>
+                      </div>
+                      <h4 className={styles.tierTitle}>3. Boulot Man Approved Pro</h4>
+                      <p className={styles.tierDesc}>Full background clearance, 10+ jobs completed with ⭐ 4.8+ rating.</p>
+                    </div>
                   </div>
-                </div>
 
                 <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b", lineHeight: 1.5 }}>
                   Please upload both the <strong>Front and Back side</strong> of your National ID/Passport, your trade diploma/certificate, and a live photo/selfie. <strong>Sensitive identity documents remain strictly private</strong> in our encrypted vault and are never displayed publicly.
@@ -2039,7 +2072,8 @@ export default function TechnicianProfilePage() {
                   )}
                 </div>
               </section>
-            )}
+            );
+          })()}
 
             {/* ==================== TAB 3: VISUAL PORTFOLIO ==================== */}
             {activeTab === "portfolio" && (
