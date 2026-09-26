@@ -1837,7 +1837,8 @@ export default function CompanyProfilePage() {
             )}
           </div>
         </section>
-      )}
+      );
+    })()}
 
       {/* ==================== TAB 3: EXECUTION CAPABILITIES & FLEET ==================== */}
       {activeTab === "capabilities" && (
