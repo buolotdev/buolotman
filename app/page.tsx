@@ -311,7 +311,7 @@ export default function Home() {
     []
   );
   const { data: prosData, loading: prosLoading } = useFetch(
-    () => api.listUsers({ role: "technician", limit: "10" }),
+    () => api.listUsers({ role: "technician", limit: "12" }),
     []
   );
   const { data: companiesData, loading: companiesLoading } = useFetch(
@@ -523,7 +523,7 @@ export default function Home() {
     };
   }).slice(0, 15);
 
-  const rawPros = (Array.isArray(prosData) ? prosData : []) as PublicProfessional[];
+  const rawPros = (Array.isArray(prosData) ? prosData : ((prosData as any)?.results || [])) as PublicProfessional[];
   const pros = filterByLocation(rawPros);
   const rawCompanies = (Array.isArray(companiesData) ? companiesData : []) as PublicCompany[];
   const companies = filterByLocation(rawCompanies);
@@ -749,7 +749,7 @@ export default function Home() {
                 <p style={{ marginTop: 10, fontWeight: 600 }}>{t.prosLoading}</p>
               </div>
             ) : pros && pros.length > 0 ? (
-              pros.slice(0, 10).map((pro: any) => {
+              pros.slice(0, 12).map((pro: any) => {
                 const isSelf = Boolean(meData?.id && (String(meData.id) === String(pro.id) || (pro.user_id && String(meData.id) === String(pro.user_id)) || meData.username === pro.username));
                 const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
                 const rawAvatar = pro.avatar || pro.avatar_url || pro.profile_photo_url || pro.user?.avatar_url || pro.user?.profile_photo_url;
