@@ -543,7 +543,7 @@ export default function HowItWorksPage() {
               ))}
             </ul>
             <p>
-              <Link href="/technicians">{t.browseTechs}</Link><br/>
+              <Link href="/search?tab=technician">{t.browseTechs}</Link><br/>
               <Link href="/companies">{t.browseComps}</Link>
             </p>
           </div>

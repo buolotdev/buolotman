@@ -346,7 +346,7 @@ export default function ClientProjectsPage() {
                 <p style={{ margin: 0, color: "#64748b", fontSize: "14px", maxWidth: "400px" }}>
                   {t.noProjectsDesc}
                 </p>
-                <Link href="/technicians" className={styles.btnPrimary} style={{ marginTop: "10px" }}>
+                <Link href="/search?tab=technician" className={styles.btnPrimary} style={{ marginTop: "10px" }}>
                   {t.browseTechs}
                 </Link>
               </div>

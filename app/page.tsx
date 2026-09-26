@@ -878,7 +878,7 @@ export default function Home() {
           </div>
 
           <div className="bm-ftx-footer">
-            <Link href="/technicians">{t.ftxFooterLink}</Link>
+            <Link href="/search?tab=technician">{t.ftxFooterLink}</Link>
           </div>
         </div>
       </section>
