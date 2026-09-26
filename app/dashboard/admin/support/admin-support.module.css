@@ -150,10 +150,111 @@
   line-height: 1.1;
 }
 
+/* ================= TABS & FILTER BAR ================= */
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.categoryTab {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.categoryTab:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.categoryTabActive {
+  background: #001f3f !important;
+  color: #ffffff !important;
+  border-color: #001f3f !important;
+  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.18);
+}
+
+.tabBadge {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+}
+
+.categoryTab:not(.categoryTabActive) .tabBadge {
+  background: #cbd5e1;
+  color: #1e293b;
+}
+
+.searchAndFilterRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInputIcon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  font-size: 12.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  background: #ffffff;
+  border-color: #ff4500;
+  box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+}
+
+.statusFilterSelect {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+}
+
 /* ================= SUPPORT INBOX & CHAT LAYOUT ================= */
 .supportLayout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 390px 1fr;
   gap: 20px;
   min-height: 580px;
 }
@@ -171,8 +272,14 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
   box-shadow: 0 4px 16px rgba(0, 31, 63, 0.03);
+}
+
+.inboxHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .inboxTitle {
@@ -180,14 +287,18 @@
   font-weight: 800;
   color: #001f3f;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .ticketList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   overflow-y: auto;
   max-height: 520px;
+  padding-right: 4px;
 }
 
 .ticketItem {
@@ -197,6 +308,9 @@
   border: 1px solid #e2e8f0;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .ticketItem:hover {
@@ -209,29 +323,62 @@
   background: #ffffff !important;
   border-color: #ff4500 !important;
   border-left: 4px solid #ff4500 !important;
-  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.1) !important;
+  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.12) !important;
+}
+
+.ticketTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .ticketSubject {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #001f3f;
-  margin-bottom: 4px;
+  line-height: 1.35;
 }
 
 .ticketMeta {
   font-size: 12px;
   color: #64748b;
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.ticketFooterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.badgeOrigin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badgeClient { background: rgba(14, 165, 233, 0.12); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.25); }
+.badgeTechnician { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25); }
+.badgeCompany { background: rgba(139, 92, 246, 0.12); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.25); }
+.badgeGeneral { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
 
 .status {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -239,6 +386,67 @@
 .statusPending { background: rgba(255, 69, 0, 0.12); color: #ff4500; }
 .statusAwaiting { background: rgba(14, 165, 233, 0.12); color: #0284c7; }
 .statusResolved { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
+
+/* ================= QUICK CONTACT & SPEC BOX ================= */
+.quickActionsBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.quickActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.quickActionBtn:hover {
+  background: #001f3f;
+  color: #ffffff;
+  border-color: #001f3f;
+}
+
+.specsBox {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.specItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.specLabel {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.specVal {
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 800;
+}
 
 /* ================= CHAT AREA ================= */
 .chatCard {
