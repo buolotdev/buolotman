@@ -65,11 +65,14 @@ function Header() {
 
 
     const handleDocumentClick = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      if (!target || !root.contains(target)) {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (!target.closest(".bmDropWrap")) {
         root.querySelectorAll(".bmDropMenu").forEach((m) => {
           (m as HTMLElement).style.display = "none";
         });
+      }
+      if (!root.contains(target)) {
         root.querySelectorAll('.bmMega').forEach((m) => {
           m.classList.remove('active');
         });
