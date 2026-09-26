@@ -153,6 +153,28 @@ body {
   color: var(--text);
 }
 
+.bm-mobile-sp-wrapper #bmMobileServiceProvidersSub a {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px 12px 28px !important;
+  color: #001F3F !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #edf2f7 !important;
+  background: transparent !important;
+}
+
+.bm-mobile-sp-wrapper #bmMobileServiceProvidersSub a:last-child {
+  border-bottom: none !important;
+}
+
+.bm-mobile-sp-wrapper #bmMobileServiceProvidersSub a:active,
+.bm-mobile-sp-wrapper #bmMobileServiceProvidersSub a:hover {
+  background: #edf4fb !important;
+  color: #FF4500 !important;
+}
+
 /* ================= HERO ================= */
 .bm-main-hero,
 #hero.bm-main-hero {

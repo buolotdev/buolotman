@@ -112,6 +112,23 @@ function Header() {
         if (mainMobileMenu) mainMobileMenu.classList.toggle("active");
       }
 
+      // Mobile Main Menu Service Providers Dropdown Toggle
+      const spToggle = target.closest("#bmMobileServiceProvidersToggle");
+      if (spToggle) {
+        e.preventDefault();
+        e.stopPropagation();
+        const sub = document.getElementById("bmMobileServiceProvidersSub");
+        const chevron = document.getElementById("bmMobileServiceProvidersChevron");
+        if (sub) {
+          const isOpen = sub.style.display === "block";
+          sub.style.display = isOpen ? "none" : "block";
+          if (chevron) {
+            chevron.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+          }
+        }
+        return;
+      }
+
       // Mobile Accordion Sections
       const topBtn = target.closest(".bmMobileTop");
       if (topBtn) {
@@ -1771,7 +1788,24 @@ function Header() {
   </div>
   <div class="bm-main-mobile-menu" id="bmMainMobileMenu">
     <a href="/find-tasks">${lang === 'fr' ? 'Trouver des tâches' : 'Find Tasks'}</a>
-    <a href="/service-providers/technicians">Service Providers</a>
+    
+    <div class="bm-mobile-sp-wrapper" style="border-bottom: 1px solid var(--border);">
+      <div id="bmMobileServiceProvidersToggle" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; cursor: pointer; user-select: none; color: var(--text); font-weight: 500; font-size: 15px;">
+        <span>${lang === 'fr' ? 'Prestataires' : 'Service Providers'}</span>
+        <iconify-icon icon="lucide:chevron-down" id="bmMobileServiceProvidersChevron" style="font-size: 16px; color: #64748b; transition: transform 0.2s ease;"></iconify-icon>
+      </div>
+      <div id="bmMobileServiceProvidersSub" style="display: none; background: #f8fafc; padding: 6px 0 6px 12px; border-top: 1px solid #edf2f7;">
+        <a href="/service-providers/technicians" style="display: flex; align-items: center; gap: 10px; padding: 11px 16px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 600; border-bottom: 1px solid #e2e8f0;">
+          <iconify-icon icon="lucide:user-check" style="color: #FF4500; font-size: 18px;"></iconify-icon>
+          <span>${lang === 'fr' ? 'Trouver des techniciens (Professionnels)' : 'Find Technicians (Professionals)'}</span>
+        </a>
+        <a href="/search?type=company" style="display: flex; align-items: center; gap: 10px; padding: 11px 16px; color: #001F3F; text-decoration: none; font-size: 14px; font-weight: 600; border-bottom: none;">
+          <iconify-icon icon="lucide:building-2" style="color: #FF4500; font-size: 18px;"></iconify-icon>
+          <span>${lang === 'fr' ? 'Trouver des entreprises (Sociétés)' : 'Find Companies (Enterprise)'}</span>
+        </a>
+      </div>
+    </div>
+
     <a href="/it-on-demand">${lang === 'fr' ? 'IT sur Demande' : 'IT On-Demand'}</a>
     <a href="/concierge">${lang === 'fr' ? 'Concierge' : 'Concierge'}</a>
     <a href="/contractors">${lang === 'fr' ? 'Entreprise' : 'Enterprise'}</a>
