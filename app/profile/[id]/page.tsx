@@ -269,8 +269,9 @@ export default function PublicProfilePage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const rawParam = params?.id ? decodeURIComponent(params.id).trim() : "";
+  const cleanUsername = rawParam.replace(/^@/, "").trim().toLowerCase();
   const validIdentifier = rawParam || null;
-  const numericId = /^\d+$/.test(rawParam) ? Number(rawParam) : null;
+  const numericId = /^\d+$/.test(rawParam) ? Number(rawParam) : (/^\d+$/.test(cleanUsername) ? Number(cleanUsername) : null);
   const isCompanyQuery = searchParams?.get("type") === "company";
 
   const [lang, setLang] = useState("en");
@@ -295,11 +296,11 @@ export default function PublicProfilePage() {
 
       let baseUser: any = null;
 
-      // 0. If explicitly marked as company or browsing company directory
+      // 0. If explicitly marked as company or browsing company directory by numeric ID
       if (isCompanyQuery && numericId) {
         try {
           const compRes = await api.getCompanyById(numericId);
-          if (compRes && compRes.id) {
+          if (compRes && (compRes.id || compRes.company_name)) {
             baseUser = {
               ...compRes,
               role: "COMPANY",
@@ -334,12 +335,17 @@ export default function PublicProfilePage() {
 
       // 1. Try direct user profile (supports numeric ID or username / @username) if not already loaded
       if (!baseUser) {
-        try {
-          const userRes = await api.getUserProfile(validIdentifier);
-          if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
-            baseUser = userRes;
-          }
-        } catch {}
+        // Try with numericId if available first, else clean username or raw identifier
+        const tryIds = [numericId, cleanUsername, validIdentifier].filter(Boolean) as (string | number)[];
+        for (const tryId of tryIds) {
+          try {
+            const userRes = await api.getUserProfile(tryId);
+            if (userRes && (userRes.id || userRes.username || userRes.first_name || userRes.company_name)) {
+              baseUser = userRes;
+              break;
+            }
+          } catch {}
+        }
       }
 
       // 2. If user is a COMPANY, enrich with company profile data if available
@@ -401,16 +407,134 @@ export default function PublicProfilePage() {
         } catch {}
       }
 
-      // 4. Fallback to technician users list if still not found
+      // 4. Fallback to technician users list matching username, handle, full name, or ID
       if (!baseUser) {
         try {
-          const techList = await api.listUsers({ limit: "100" });
+          const techList = await api.listUsers({ all_status: "true", limit: "200" });
           const techArray = Array.isArray(techList) ? techList : (techList as any)?.results || [];
-          const matchTech = techArray.find(
-            (u: any) => String(u.id) === String(validIdentifier) || String(u.user_id) === String(validIdentifier)
-          );
+          const matchTech = techArray.find((u: any) => {
+            const uId = String(u.id ?? "");
+            const uUserId = String(u.user_id ?? u.user?.id ?? "");
+            const uUsername = String(u.username || u.user?.username || "").replace(/^@/, "").toLowerCase().trim();
+            const uHandle = String(u.handle || "").replace(/^@/, "").toLowerCase().trim();
+            const uEmail = String(u.email || u.user?.email || "").toLowerCase().trim();
+            const uEmailPrefix = uEmail.includes("@") ? uEmail.split("@")[0] : "";
+            const uFullName = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+            return (
+              (numericId && (uId === String(numericId) || uUserId === String(numericId))) ||
+              (cleanUsername && (
+                uId === cleanUsername ||
+                uUserId === cleanUsername ||
+                uUsername === cleanUsername ||
+                uHandle === cleanUsername ||
+                (uEmailPrefix && uEmailPrefix === cleanUsername) ||
+                (uFullName && uFullName === cleanUsername.replace(/[^a-z0-9]/g, ""))
+              ))
+            );
+          });
+
           if (matchTech) {
             baseUser = matchTech;
+            // Attempt to get full profile by numeric ID if available
+            if (matchTech.id && !isNaN(Number(matchTech.id))) {
+              try {
+                const fullUser = await api.getUserProfile(Number(matchTech.id));
+                if (fullUser && (fullUser.id || fullUser.username)) {
+                  baseUser = { ...matchTech, ...fullUser };
+                }
+              } catch {}
+            }
+          }
+        } catch {}
+      }
+
+      // 5. Fallback to registered companies list matching username, slug, or company name
+      if (!baseUser) {
+        try {
+          const compList = await api.listCompanies({ all_status: "true" });
+          const compArray = Array.isArray(compList) ? compList : (compList as any)?.results || [];
+          const matchComp = compArray.find((c: any) => {
+            const cId = String(c.id ?? "");
+            const cUsername = String(c.username || c.user?.username || "").replace(/^@/, "").toLowerCase().trim();
+            const cHandle = String(c.handle || "").replace(/^@/, "").toLowerCase().trim();
+            const cSlug = String(c.slug || "").toLowerCase().trim();
+            const cCompName = String(c.company_name || c.trading_name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+            return (
+              (numericId && cId === String(numericId)) ||
+              (cleanUsername && (
+                cId === cleanUsername ||
+                cUsername === cleanUsername ||
+                cHandle === cleanUsername ||
+                cSlug === cleanUsername ||
+                (cCompName && cCompName === cleanUsername.replace(/[^a-z0-9]/g, ""))
+              ))
+            );
+          });
+
+          if (matchComp) {
+            let fullComp = matchComp;
+            if (matchComp.id && !isNaN(Number(matchComp.id))) {
+              try {
+                const fetchedComp = await api.getCompanyById(Number(matchComp.id));
+                if (fetchedComp && fetchedComp.id) {
+                  fullComp = { ...matchComp, ...fetchedComp };
+                }
+              } catch {}
+            }
+
+            baseUser = {
+              ...fullComp,
+              role: "COMPANY",
+              company_name: fullComp.company_name || "Enterprise Contractor",
+              trading_name: fullComp.trading_name || fullComp.company_name,
+              company_type: fullComp.company_type,
+              year_founded: fullComp.year_founded,
+              industry: fullComp.industry,
+              subject_title: fullComp.subject_title,
+              about: fullComp.about || fullComp.description,
+              website: fullComp.website,
+              headquarters: fullComp.headquarters || fullComp.city,
+              employee_count: fullComp.employee_count || fullComp.company_size,
+              working_hours: fullComp.working_hours || fullComp.business_hours,
+              preferred_language: fullComp.preferred_language,
+              logo_url: fullComp.logo || fullComp.logo_url || "",
+              avatar_url: fullComp.logo || fullComp.logo_url || fullComp.avatar_url || "",
+              banner_url: fullComp.cover_url || fullComp.banner_url || fullComp.cover_image,
+              is_verified: fullComp.is_verified ?? false,
+              average_rating: fullComp.average_rating,
+              review_count: fullComp.review_count ?? 0,
+              completed_tasks: fullComp.completed_tasks ?? 0,
+              services: fullComp.services || [],
+              projects: fullComp.projects || fullComp.portfolio || [],
+              team: fullComp.team_members || fullComp.team || [],
+              verification_documents: fullComp.verification_documents || [],
+              registration_number: fullComp.registration_number || "",
+            };
+          }
+        } catch {}
+      }
+
+      // 6. Check logged in user (getMe) if viewing own profile handle
+      if (!baseUser && typeof window !== "undefined" && localStorage.getItem("access_token")) {
+        try {
+          const me = await api.getMe();
+          if (me) {
+            const meUsername = String(me.username || "").replace(/^@/, "").toLowerCase().trim();
+            const meHandle = String(me.handle || "").replace(/^@/, "").toLowerCase().trim();
+            const meFullName = `${me.first_name || ""} ${me.last_name || ""}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (
+              (numericId && String(me.id) === String(numericId)) ||
+              (cleanUsername && (
+                String(me.id) === cleanUsername ||
+                meUsername === cleanUsername ||
+                meHandle === cleanUsername ||
+                (meFullName && meFullName === cleanUsername.replace(/[^a-z0-9]/g, ""))
+              ))
+            ) {
+              baseUser = me;
+            }
           }
         } catch {}
       }
