@@ -150,54 +150,64 @@
   line-height: 1.1;
 }
 
-/* ================= TABS & FILTER BAR ================= */
-.categoryTabs {
+/* ================= FULL WIDTH TOP CATEGORY NAV BAR ================= */
+.topNavContainer {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 8px;
   display: flex;
+  align-items: center;
   gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 31, 63, 0.04);
   overflow-x: auto;
-  padding-bottom: 4px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
 }
 
-.categoryTab {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  display: inline-flex;
+.topNavBtn {
+  flex: 1;
+  min-width: 170px;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
-.categoryTab:hover {
+.topNavBtn:hover {
   background: #e2e8f0;
   color: #0f172a;
+  transform: translateY(-1px);
 }
 
-.categoryTabActive {
-  background: #001f3f !important;
+.topNavBtnActive {
+  background: linear-gradient(135deg, #001f3f 0%, #0b3c6f 100%) !important;
   color: #ffffff !important;
   border-color: #001f3f !important;
-  box-shadow: 0 4px 12px rgba(0, 31, 63, 0.18);
+  box-shadow: 0 4px 16px rgba(0, 31, 63, 0.22) !important;
 }
 
-.tabBadge {
-  background: rgba(255, 255, 255, 0.25);
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 10.5px;
-}
-
-.categoryTab:not(.categoryTabActive) .tabBadge {
+.topNavBadge {
   background: #cbd5e1;
-  color: #1e293b;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.topNavBtnActive .topNavBadge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
 }
 
 .searchAndFilterRow {

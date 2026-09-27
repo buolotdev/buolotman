@@ -86,19 +86,21 @@ export default function AdminSupportPage() {
     fetchAll();
   }, []);
 
-  const tickets = allTickets;
-
   useEffect(() => {
-    if (tickets && tickets.length > 0) {
+    if (filteredTickets && filteredTickets.length > 0) {
       setActiveTicket((prev: any) => {
-        if (!prev) return tickets[0];
-        const updated = tickets.find((t: any) => t.id === prev.id);
-        return updated || tickets[0];
+        if (!prev) return filteredTickets[0];
+        const isCurrentInFiltered = filteredTickets.some((t: any) => t.id === prev.id);
+        if (isCurrentInFiltered) {
+          const updated = filteredTickets.find((t: any) => t.id === prev.id);
+          return updated || prev;
+        }
+        return filteredTickets[0];
       });
     } else {
       setActiveTicket(null);
     }
-  }, [allTickets]);
+  }, [activeTab, searchQuery, statusFilter, allTickets]);
 
   const handleSend = async () => {
     if (!replyText.trim() || !activeTicket) return;
@@ -301,48 +303,48 @@ export default function AdminSupportPage() {
         </div>
       </div>
 
+      {/* FULL WIDTH PROMINENT TOP CATEGORY NAVIGATION BAR */}
+      <div className={styles.topNavContainer}>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "all" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("all")}
+        >
+          <iconify-icon icon="lucide:layout-grid" /> All Inquiries <span className={styles.topNavBadge}>{tabCounts.all}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "client" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("client")}
+        >
+          <iconify-icon icon="lucide:user" /> Client Tickets <span className={styles.topNavBadge}>{tabCounts.client}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "technician" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("technician")}
+        >
+          <iconify-icon icon="lucide:wrench" /> Technician Support <span className={styles.topNavBadge}>{tabCounts.technician}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "company" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("company")}
+        >
+          <iconify-icon icon="lucide:building-2" /> Teams & Companies <span className={styles.topNavBadge}>{tabCounts.company}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "general" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("general")}
+        >
+          <iconify-icon icon="lucide:star" /> General Leads <span className={styles.topNavBadge}>{tabCounts.general}</span>
+        </button>
+      </div>
+
       {/* SUPPORT HELPDESK INBOX & CHAT */}
       <div className={styles.supportLayout}>
-        {/* INBOX LIST WITH CATEGORY TABS & SEARCH */}
+        {/* INBOX LIST WITH SEARCH & STATUS FILTER */}
         <div className={styles.inboxCard}>
           <div className={styles.inboxHeader}>
             <h3 className={styles.inboxTitle}>
               <iconify-icon icon="lucide:mail" style={{ color: "#ff4500" }} /> Ticket Inbox ({filteredTickets.length})
             </h3>
-          </div>
-
-          {/* SEPARATE CATEGORY TABS */}
-          <div className={styles.categoryTabs}>
-            <button
-              className={`${styles.categoryTab} ${activeTab === "all" ? styles.categoryTabActive : ""}`}
-              onClick={() => setActiveTab("all")}
-            >
-              <iconify-icon icon="lucide:layout-grid" /> All <span className={styles.tabBadge}>{tabCounts.all}</span>
-            </button>
-            <button
-              className={`${styles.categoryTab} ${activeTab === "client" ? styles.categoryTabActive : ""}`}
-              onClick={() => setActiveTab("client")}
-            >
-              <iconify-icon icon="lucide:user" /> Clients <span className={styles.tabBadge}>{tabCounts.client}</span>
-            </button>
-            <button
-              className={`${styles.categoryTab} ${activeTab === "technician" ? styles.categoryTabActive : ""}`}
-              onClick={() => setActiveTab("technician")}
-            >
-              <iconify-icon icon="lucide:wrench" /> Technicians <span className={styles.tabBadge}>{tabCounts.technician}</span>
-            </button>
-            <button
-              className={`${styles.categoryTab} ${activeTab === "company" ? styles.categoryTabActive : ""}`}
-              onClick={() => setActiveTab("company")}
-            >
-              <iconify-icon icon="lucide:building-2" /> Teams & Companies <span className={styles.tabBadge}>{tabCounts.company}</span>
-            </button>
-            <button
-              className={`${styles.categoryTab} ${activeTab === "general" ? styles.categoryTabActive : ""}`}
-              onClick={() => setActiveTab("general")}
-            >
-              <iconify-icon icon="lucide:star" /> Leads <span className={styles.tabBadge}>{tabCounts.general}</span>
-            </button>
           </div>
 
           {/* SEARCH & STATUS FILTER ROW */}
