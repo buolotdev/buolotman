@@ -900,7 +900,7 @@ export default function SearchPage() {
                       <div className={styles.cardLeft}>
                         {/* Header Row: Avatar, Name & Badges */}
                         <div className={styles.cardHeaderRow}>
-                          <div className={styles.avatarBox}>
+                          <div className={styles.avatarCircle}>
                             {result.image ? (
                               <img
                                 src={result.image}
@@ -916,6 +916,7 @@ export default function SearchPage() {
                               </div>
                             )}
                           </div>
+
 
                           <div className={styles.headerInfo}>
                             <div className={styles.nameRow}>
