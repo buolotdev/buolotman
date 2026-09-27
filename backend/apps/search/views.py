@@ -10,7 +10,7 @@ from apps.accounts.models import TechnicianService
 from apps.accounts.serializers import UserPublicSerializer
 from apps.companies.models import CompanyProfile
 from apps.companies.serializers import CompanyProfileSerializer
-from apps.tasks.models import Task
+from apps.tasks.models import Task, TaskReview
 from apps.tasks.serializers import TaskListSerializer
 
 
@@ -242,24 +242,33 @@ def search(request):
 
                 tech_cover = (user.banner_url or getattr(profile, 'banner_url', '') or getattr(user, 'cover_image', '') or '').strip()
 
+                # Get real published review if available for this technician
+                random_review = TaskReview.objects.filter(target_user=user, status='Published').exclude(comment='').order_by('?').first()
+                review_quote = random_review.comment if random_review else ''
+
                 results.append({
                     'id': user.id,
                     'type': 'technician',
                     'name': f"{user.first_name} {user.last_name}".strip() or user.username,
                     'role': 'Technician',
                     'description': profile.bio if profile else '',
+                    'bio': profile.bio if profile else '',
+                    'random_review': review_quote,
                     'image': user.avatar_url,
                     'cover_image': tech_cover,
                     'banner_url': tech_cover,
                     'city': tech_city,
                     'country': tech_country,
                     'category': category_name,
-                    'rating': float(profile.average_rating) if profile else None,
+                    'rating': float(profile.average_rating) if (profile and profile.average_rating and profile.average_rating > 0) else None,
                     'reviews': profile.completed_jobs if profile else 0,
+                    'completed_jobs': profile.completed_jobs if profile else 0,
+                    'hourly_rate': float(profile.hourly_rate) if (profile and profile.hourly_rate is not None) else None,
                     'location': clean_tech_loc,
-                    'price': float(profile.hourly_rate) if profile and profile.hourly_rate is not None else None,
+                    'price': float(profile.hourly_rate) if (profile and profile.hourly_rate is not None) else None,
                     'priceLabel': 'hourly rate',
                     'verified': bool(user.is_verified or (profile and profile.is_verified)),
+                    'is_verified': bool(user.is_verified or (profile and profile.is_verified)),
                     'skills': all_skills,
                     'services': tech_services,
                     'profile': base,

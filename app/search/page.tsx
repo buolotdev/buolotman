@@ -901,9 +901,20 @@ export default function SearchPage() {
                   .join("")
                   .toUpperCase();
 
-                const reviewsNum = result.reviews != null && Number(result.reviews) > 0 ? Number(result.reviews) : 128;
-                const ratingNum = result.rating != null && Number(result.rating) > 0 ? Number(result.rating).toFixed(1) : "4.9";
-                const jobsCount = reviewsNum > 10 ? `${reviewsNum}+` : "350+";
+                const hasRating = result.rating != null && Number(result.rating) > 0;
+                const ratingDisplay = hasRating ? Number(result.rating).toFixed(1) : (lang === "fr" ? "Nouveau" : "New");
+                const actualJobs = (result as any).completed_jobs != null
+                  ? Number((result as any).completed_jobs)
+                  : (result.reviews != null ? Number(result.reviews) : 0);
+                const hasRate = (result as any).hourly_rate != null && Number((result as any).hourly_rate) > 0
+                  ? Number((result as any).hourly_rate)
+                  : (result.price != null && Number(result.price) > 0 ? Number(result.price) : null);
+                const isVerifiedUser = Boolean(result.verified || (result as any).is_verified);
+                const reviewText = (result as any).random_review || result.description || (result as any).bio || (lang === "fr" ? "Disponible pour missions et interventions rapides." : "Available for direct dispatch and project booking.");
+
+                const reviewsNum = actualJobs;
+                const ratingNum = ratingDisplay;
+                const jobsCount = `${actualJobs}+`;
 
                 if (result.type === "technician") {
                   return (
@@ -912,78 +923,86 @@ export default function SearchPage() {
                       <div className={styles.techHeaderBar} />
 
                       <div className={styles.techCardBody}>
-                        {/* Avatar & Available Now Badge */}
-                        <div className={styles.techAvatarRow}>
-                          <div className={styles.techAvatarCircle}>
-                            {result.image ? (
-                              <img
-                                src={result.image}
-                                alt={result.name}
-                                className={styles.techAvatarImg}
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <div className={styles.techAvatarInitials}>
-                                {initials || "BM"}
-                              </div>
-                            )}
+                        <div className={styles.techTopArea}>
+                          {/* Avatar & Available Now Badge */}
+                          <div className={styles.techAvatarRow}>
+                            <div className={styles.techAvatarCircle}>
+                              {result.image ? (
+                                <img
+                                  src={result.image}
+                                  alt={result.name}
+                                  className={styles.techAvatarImg}
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className={styles.techAvatarInitials}>
+                                  {initials || "BM"}
+                                </div>
+                              )}
+                            </div>
+
+                            <span className={styles.availableBadge}>
+                              <span className={styles.greenDot} />
+                              {t.availableNow}
+                            </span>
                           </div>
 
-                          <span className={styles.availableBadge}>
-                            <span className={styles.greenDot} />
-                            {t.availableNow}
-                          </span>
-                        </div>
+                          {/* Technician Name */}
+                          <h2 className={styles.techName} title={result.name}>
+                            {result.name}
+                          </h2>
 
-                        {/* Technician Name */}
-                        <h2 className={styles.techName} title={result.name}>
-                          {result.name}
-                        </h2>
+                          {/* Profession Subtitle */}
+                          <p className={styles.techProfession}>
+                            {result.role || (lang === "fr" ? "Spécialiste Technique" : "Technical Specialist")}
+                          </p>
 
-                        {/* Profession Subtitle */}
-                        <p className={styles.techProfession}>
-                          {result.role || (lang === "fr" ? "Spécialiste Technique Certifié" : "Certified Technical Specialist")}
-                        </p>
+                          {/* ID Verified Badge - Only show if verified */}
+                          {isVerifiedUser && (
+                            <div className={styles.techIdVerified}>
+                              <iconify-icon icon="lucide:shield-check" style={{ fontSize: "13px" }} />
+                              <span>{t.idVerified}</span>
+                            </div>
+                          )}
 
-                        {/* ID Verified Badge */}
-                        <div className={styles.techIdVerified}>
-                          <iconify-icon icon="lucide:shield-check" style={{ fontSize: "13px" }} />
-                          <span>{t.idVerified}</span>
-                        </div>
-
-                        {/* Meta Info Row: Rating + Jobs, Location, Rate */}
-                        <div className={styles.techMetaRow}>
-                          <span className={styles.techMetaItem}>
-                            <iconify-icon icon="lucide:star" className={styles.starYellow} />
-                            <strong>{ratingNum}</strong> ({reviewsNum} {t.verifiedJobs})
-                          </span>
-
-                          <span className={styles.techMetaItem}>
-                            <iconify-icon icon="lucide:map-pin" style={{ color: "#64748b" }} />
-                            <span>{result.location || "Douala, Cameroon"}</span>
-                          </span>
-
-                          <span className={styles.techMetaItem}>
-                            <iconify-icon icon="lucide:banknote" style={{ color: "#64748b" }} />
-                            <span>{t.ratesFrom} <strong>{(result as any).hourly_rate ? formatXOF((result as any).hourly_rate) : "5,000 XAF"}/hr</strong></span>
-                          </span>
-                        </div>
-
-                        {/* Skill Badges (Blue Rounded Pills) */}
-                        <div className={styles.techSkillsRow}>
-                          {displayTags.slice(0, 4).map((skill: string, sIdx: number) => (
-                            <span key={sIdx} className={styles.techSkillPill} title={skill}>
-                              {skill}
+                          {/* Meta Info Row: Rating + Jobs, Location, Rate */}
+                          <div className={styles.techMetaRow}>
+                            <span className={styles.techMetaItem}>
+                              <iconify-icon icon="lucide:star" className={hasRating ? styles.starYellow : styles.starMuted} />
+                              <strong>{ratingDisplay}</strong> ({actualJobs} {t.verifiedJobs})
                             </span>
-                          ))}
+
+                            <span className={styles.techMetaItem}>
+                              <iconify-icon icon="lucide:map-pin" style={{ color: "#64748b" }} />
+                              <span>{result.location || "Douala, Cameroon"}</span>
+                            </span>
+
+                            <span className={styles.techMetaItem}>
+                              <iconify-icon icon="lucide:banknote" style={{ color: "#64748b" }} />
+                              {hasRate ? (
+                                <span>{t.ratesFrom} <strong>{formatXOF(hasRate)}/hr</strong></span>
+                              ) : (
+                                <span><strong>{lang === "fr" ? "Sur devis" : "Rate on request"}</strong></span>
+                              )}
+                            </span>
+                          </div>
+
+                          {/* Skill Badges (Blue Rounded Pills) */}
+                          <div className={styles.techSkillsRow}>
+                            {displayTags.slice(0, 4).map((skill: string, sIdx: number) => (
+                              <span key={sIdx} className={styles.techSkillPill} title={skill}>
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
                         </div>
 
                         {/* Bottom Row: Quote Review + Orange BOOK NOW Button */}
                         <div className={styles.techBottomRow}>
-                          <p className={styles.techQuote} title={result.description || ""}>
-                            {result.description || t.defaultReview}
+                          <p className={styles.techQuote} title={reviewText}>
+                            "{reviewText}"
                           </p>
 
                           <Link href={profileLink} className={styles.bookNowBtn}>
