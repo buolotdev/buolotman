@@ -43,7 +43,33 @@ def search(request):
     category_raw = (request.query_params.get('category') or '').strip()
     category_slug = category_raw.lower()
     category_name = category_raw.replace('-', ' ').replace('_', ' ').strip()
-    cat_keywords = [w for w in category_name.replace('&', ' ').split() if len(w) > 2 and w.lower() not in ('and', 'the', 'for', 'services', 'service')]
+    STOP_WORDS = {
+        'and', 'the', 'for', 'with', 'all', 'services', 'service', 'engineering',
+        'systems', 'system', 'management', 'development', 'general', 'support',
+        'independent', 'registered', 'certified', 'specialist', 'technician', 'company', 'enterprise'
+    }
+    cat_keywords = [w for w in category_name.replace('&', ' ').split() if len(w) > 2 and w.lower() not in STOP_WORDS]
+
+    CATEGORY_DOMAIN_KEYWORDS = {
+        'software-and-digital-engineering': ['software', 'develop', 'web', 'mobile', 'frontend', 'backend', 'api', 'react', 'python', 'javascript', 'figma', 'database', 'wordpress', 'cms', 'mvp'],
+        'it-infrastructure-and-networking': ['network', 'reseau', 'cabling', 'cablage', 'server', 'serveur', 'hardware', 'lan', 'wan', 'cisco', 'switch', 'router', 'backup'],
+        'cybersecurity-services': ['cyber', 'security', 'securite', 'pentest', 'audit', 'hacking', 'forensic', 'vulnerability', 'firewall', 'malware', 'soc'],
+        'cloud-and-systems-engineering': ['cloud', 'aws', 'azure', 'gcp', 'devops', 'docker', 'kubernetes', 'k8s', 'terraform', 'microservice'],
+        'electrical-and-electronics-engineering': ['electr', 'wiring', 'cablage', 'circuit', 'breaker', 'disjoncteur', 'tableau', 'generator', 'generateur', 'surge', 'lighting', 'eclairage', 'transformer', 'pcb'],
+        'civil-construction-and-architecture': ['civil', 'construction', 'architect', 'masonry', 'macon', 'carpentr', 'menuiserie', 'roof', 'toiture', 'tile', 'carrelage', 'paint', 'peinture', 'plaster', 'platre', 'weld', 'soudure'],
+        'mechanical-and-industrial-engineering': ['mechanic', 'mecanique', 'hvac', 'climat', 'refrigerat', 'froid', 'industrial', 'plumb', 'plomberie', 'pump', 'pompe', 'hydraulic', 'pneumatic', 'boiler', 'chaudiere'],
+        'renewable-energy-and-utilities': ['renew', 'renouvelable', 'solar', 'solaire', 'inverter', 'onduleur', 'battery', 'batterie', 'wind', 'eolien', 'smart grid'],
+        'automotive-and-heavy-equipment': ['auto', 'automobile', 'car', 'vehicule', 'engine', 'moteur', 'brake', 'frein', 'suspension', 'transmission', 'diesel', 'heavy equipment', 'camion', 'truck'],
+        'telecom-broadcast-and-security-systems': ['telecom', 'cctv', 'camera', 'surveillance', 'electric fence', 'cloture', 'biometric', 'alarm', 'alarme', 'intercom', 'fiber', 'fibre', 'antenn'],
+        'handyman-and-home-maintenance': ['handyman', 'bricolage', 'repair', 'reparation', 'furniture', 'meuble', 'assembly', 'montage', 'door lock', 'serrure', 'curtain', 'tap', 'robinet'],
+        'cleaning-outdoor-and-environmental-services': ['clean', 'nettoyage', 'fumigation', 'pest', 'deratisation', 'lawn', 'garden', 'jardin', 'septic', 'fosse', 'waste', 'dechet', 'pool', 'piscine'],
+        'transport-logistics-and-support-services': ['transport', 'logist', 'delivery', 'livraison', 'dispatch', 'relocation', 'moving', 'demenagement', 'cargo', 'fret', 'courier', 'parcel', 'colis'],
+        'health-beauty-and-personal-care': ['health', 'sante', 'beauty', 'beaute', 'care', 'soin', 'massage', 'hair', 'coiffure', 'nail', 'manucure', 'makeup', 'maquillage', 'fitness', 'barber'],
+        'education-language-and-document-services': ['educat', 'tutor', 'soutien', 'math', 'science', 'language', 'langue', 'english', 'french', 'music', 'traduction', 'translation', 'curriculum'],
+    }
+
+    extra_cat_keywords = CATEGORY_DOMAIN_KEYWORDS.get(category_slug, [])
+    all_search_keywords = list(set(cat_keywords + extra_cat_keywords))
 
     tasks = Task.objects.select_related('client', 'category').prefetch_related('skills').filter(status='open')
     if query:
@@ -53,15 +79,13 @@ def search(request):
             Q(category__slug__iexact=category_slug)
             | Q(category__name__icontains=category_name)
             | Q(title__icontains=category_name)
-            | Q(description__icontains=category_name)
             | Q(skills__name__icontains=category_name)
             | Q(skills__slug__icontains=category_slug)
         )
-        for kw in cat_keywords:
+        for kw in all_search_keywords:
             task_cat_q |= (
                 Q(category__name__icontains=kw)
                 | Q(title__icontains=kw)
-                | Q(description__icontains=kw)
                 | Q(skills__name__icontains=kw)
             )
         tasks = tasks.filter(task_cat_q).distinct()
@@ -90,21 +114,17 @@ def search(request):
             Q(technician_services__category__slug__iexact=category_slug)
             | Q(technician_services__category__name__icontains=category_name)
             | Q(technician_services__title__icontains=category_name)
-            | Q(technician_services__description__icontains=category_name)
             | Q(technician_profile__skills__name__icontains=category_name)
             | Q(technician_profile__skills__slug__icontains=category_slug)
-            | Q(technician_profile__bio__icontains=category_name)
             | Q(portfolio_items__category__icontains=category_name)
             | Q(portfolio_items__title__icontains=category_name)
         )
-        for kw in cat_keywords:
+        for kw in all_search_keywords:
             user_cat_q |= (
                 Q(technician_services__category__name__icontains=kw)
                 | Q(technician_services__title__icontains=kw)
-                | Q(technician_services__description__icontains=kw)
                 | Q(technician_profile__skills__name__icontains=kw)
                 | Q(technician_profile__skills__slug__icontains=kw)
-                | Q(technician_profile__bio__icontains=kw)
                 | Q(portfolio_items__category__icontains=kw)
             )
         users = users.filter(user_cat_q).distinct()
@@ -119,7 +139,6 @@ def search(request):
     if category_raw and category_slug != 'any':
         comp_cat_q = (
             Q(company_name__icontains=category_name)
-            | Q(about__icontains=category_name)
             | Q(services__title__icontains=category_name)
             | Q(services__description__icontains=category_name)
             | Q(services__category__icontains=category_name)
@@ -127,15 +146,15 @@ def search(request):
             | Q(services_offered__icontains=category_name)
             | Q(services_offered__icontains=category_slug)
         )
-        for kw in cat_keywords:
+        for kw in all_search_keywords:
             comp_cat_q |= (
                 Q(company_name__icontains=kw)
-                | Q(about__icontains=kw)
                 | Q(services__title__icontains=kw)
                 | Q(services__category__icontains=kw)
                 | Q(services_offered__icontains=kw)
             )
         companies = companies.filter(comp_cat_q).distinct()
+
 
     services = TechnicianService.objects.select_related('technician', 'category').filter(is_active=True, technician__is_active=True)
 
@@ -154,15 +173,14 @@ def search(request):
             Q(category__slug__iexact=category_slug)
             | Q(category__name__icontains=category_name)
             | Q(title__icontains=category_name)
-            | Q(description__icontains=category_name)
         )
-        for kw in cat_keywords:
+        for kw in all_search_keywords:
             srv_cat_q |= (
                 Q(category__name__icontains=kw)
                 | Q(title__icontains=kw)
-                | Q(description__icontains=kw)
             )
         services = services.filter(srv_cat_q).distinct()
+
     if location:
         services = services.filter(Q(coverage_area__icontains=location) | Q(technician__country__icontains=location))
     if min_rating is not None:

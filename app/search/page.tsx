@@ -10,7 +10,11 @@ import Header from "../components/Header";
 import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
-import { mergeWithMasterCategories } from "../lib/categories";
+import { mergeWithMasterCategories, isCategoryMatch } from "../lib/categories";
+
+
+
+
 import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio, resolveCleanLocation, resolveExpertiseTags } from "../lib/professionUtils";
 
 function CardMedia({ result }: { result: SearchResult }) {
@@ -522,24 +526,11 @@ export default function SearchPage() {
       });
     }
 
-    // Client-side category matching fallback
+    // Client-side category matching
     if (activeCategory && activeCategory !== "any") {
-      const catSlug = activeCategory.toLowerCase();
-      const catQuery = catSlug.replace(/[-_]/g, " ");
-      list = list.filter((r) => {
-        const catStr = (r.category || "").toLowerCase();
-        const roleStr = (r.role || "").toLowerCase();
-        const skillsStr = (r.skills || []).join(" ").toLowerCase();
-        const servicesStr = (r.services || []).map((s: any) => s.title || "").join(" ").toLowerCase();
-        const descStr = (r.description || "").toLowerCase();
-        const full = `${catStr} ${roleStr} ${skillsStr} ${servicesStr} ${descStr}`;
-        
-        // Exact slug or word match
-        if (full.includes(catSlug) || full.includes(catQuery)) return true;
-        const keywords = catQuery.split(" ").filter((w: string) => w.length > 2);
-        return keywords.some((kw: string) => full.includes(kw));
-      });
+      list = list.filter((r) => isCategoryMatch(r, activeCategory));
     }
+
 
     // Client-side location matching fallback
     if (location && !["global", "all locations", "any", "toutes les localisations"].includes(location.toLowerCase().trim())) {

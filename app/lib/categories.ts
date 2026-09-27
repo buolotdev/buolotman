@@ -279,6 +279,106 @@ export const MASTER_CATEGORIES: MasterCategory[] = [
   }
 ];
 
+export const MASTER_CATEGORY_PATTERNS: Record<string, RegExp> = {
+  "software-and-digital-engineering": /\b(software|développ|develop|web|mobile|android|ios|frontend|backend|api|react|nextjs|python|javascript|typescript|fullstack|ui\s*\/\s*ux|figma|database|e-commerce|ecommerce|wordpress|cms|sql|django|flask|node|programmer|informatique)\b/i,
+  "it-infrastructure-and-networking": /\b(network|réseau|reseau|cabling|câblage|cablage|serveur|server|hardware|matériel|materiel|lan|wan|active directory|virtualization|vmware|cisco|switch|routeur|router|it support|helpdesk|backup|storage)\b/i,
+  "cybersecurity-services": /\b(cyber|sécurité|securite|penetration|pentest|audit|hacking|forensic|gdpr|rgpd|hipaa|vulnerability|cryptograph|encryption|iam|firewall|malware|antivirus|soc|siem|infosec)\b/i,
+  "cloud-and-systems-engineering": /\b(cloud|aws|azure|gcp|devops|ci\s*\/\s*cd|docker|kubernetes|k8s|terraform|infrastructure as code|microservice|cluster|replication|prometheus|grafana|helm|ansible)\b/i,
+  "electrical-and-electronics-engineering": /\b(electr|électric|electric|câblage|cablage|wiring|circuit|breaker|disjoncteur|tableau|generator|générateur|generateur|groupe électrogène|groupe electrogene|surge|lighting|éclairage|eclairage|transformer|transformateur|appliance|electromenag|électroménag|pcb|carte électronique|carte electronique|domotique|courant fort|courant faible)\b/i,
+  "civil-construction-and-architecture": /\b(civil|bâtiment|batiment|construction|architect|maçon|macon|masonry|carpentr|menuiserie|wood|bois|roof|toiture|tile|carrelage|marble|marbre|peint|paint|plaster|plâtre|platre|weld|soudure|fabrication|paving|structural|bepc|bac|génie civil|genie civil|chantier|charpente)\b/i,
+  "mechanical-and-industrial-engineering": /\b(mechanic|mécanique|mecanique|hvac|climat|air condition|refrigerat|froid|industrial|industriel|machiner|plumb|plomberie|pump|pompe|hydraulic|hydraulique|pneumatic|pneumatique|boiler|chaudière|chaudiere|cold room|chambre froide|cnc|tourneur|tuyauterie)\b/i,
+  "renewable-energy-and-utilities": /\b(renew|renouvelable|solar|solaire|photovoltaic|photovoltaïque|inverter|onduleur|battery|batterie|wind|éolien|eolien|smart grid|energy audit|hydroelectric|hydroélectrique|geothermal|ev charg|borne de recharge|panneau solaire)\b/i,
+  "automotive-and-heavy-equipment": /\b(auto|automobile|car |véhicule|vehicule|engine|moteur|brake|frein|suspension|transmission|diesel|heavy equipment|engin lourd|truck|camion|pneu|tire|bodywork|carrosserie|vidange|mécanique auto|mecanique auto)\b/i,
+  "telecom-broadcast-and-security-systems": /\b(telecom|télécom|cctv|caméra|camera|surveillance|electric fence|clôture électrique|cloture electrique|biometric|biométrie|biometrie|alarm|alarme|intercom|fiber|fibre|optique|antenn|smart home|radio communication|contrôle d'accès|controle d'acces)\b/i,
+  "handyman-and-home-maintenance": /\b(handyman|bricolage|home repair|réparation|furniture|meuble|assembly|montage|door lock|serrure|serrurier|curtain|rideau|tap|robinet|switch|interrupteur|pressure wash|patching|dépannage maison)\b/i,
+  "cleaning-outdoor-and-environmental-services": /\b(clean|nettoyage|fumigation|pest|dératisation|deratisation|désinfection|desinfection|lawn|pelouse|garden|jardin|landscape|paysag|septic|fosse|sanitation|vidange|water tank|carpet|tapis|vitre|waste|déchet|dechet|tree|arbre|pool|piscine|ménage|menage)\b/i,
+  "transport-logistics-and-support-services": /\b(transport|logist|delivery|livraison|dispatch|déménagement|demenagement|relocation|moving|truck|cargo|fret|courier|courrier|parcel|colis|fleet|flotte|warehouse|entrepôt|entrepot|chauffeur|driver|rental|location voiture|coursier)\b/i,
+  "health-beauty-and-personal-care": /\b(health|santé|sante|beauty|beauté|beaute|care|soin|massage|hair|coiffur|nail|manucure|pédicure|pedicure|makeup|maquillage|skin|dermatolog|fitness|coach|nutrition|acupuncture|barber|barbier|esthétique|esthetique)\b/i,
+  "education-language-and-document-services": /\b(educat|cours|tutor|soutien|scolaire|math|physic|science|language|langue|english|anglais|french|français|francais|music|musique|exam|traduction|translation|interpret|document|rédaction|redaction|curriculum|professeur|enseignant)\b/i
+};
+
+const STOP_WORDS = new Set([
+  "and", "the", "for", "with", "all", "services", "service", "engineering",
+  "systems", "system", "management", "development", "general", "support",
+  "independent", "registered", "certified", "specialist", "technician", "company", "enterprise"
+]);
+
+export function isCategoryMatch(item: any, selectedCategory: string): boolean {
+  if (!selectedCategory || selectedCategory === "any" || selectedCategory === "all") {
+    return true;
+  }
+
+  const rawTarget = String(selectedCategory).trim().toLowerCase();
+  const targetSlug = rawTarget.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+  // Find matching master category
+  const master = MASTER_CATEGORIES.find(
+    (m) => m.slug === targetSlug || m.slug === rawTarget || m.name.toLowerCase() === rawTarget
+  );
+
+  // Extract searchable strings from item
+  const itemCategory = String(item.category || item.category_name || item.service_category || "").toLowerCase();
+  const itemRole = String(item.role || item.profession || item.tagline || "").toLowerCase();
+  const itemBio = String(item.description || item.about || item.bio || "").toLowerCase();
+
+  const skillsArr: string[] = Array.isArray(item.skills)
+    ? item.skills.map((s: any) => (typeof s === "string" ? s : s?.name || "")).filter(Boolean)
+    : [];
+  const servicesArr: string[] = Array.isArray(item.services)
+    ? item.services.map((s: any) => (typeof s === "string" ? s : s?.title || s?.name || "")).filter(Boolean)
+    : [];
+
+  const itemSkillsStr = skillsArr.join(" ").toLowerCase();
+  const itemServicesStr = servicesArr.join(" ").toLowerCase();
+
+  // Combine primary identifier text (high confidence)
+  const primaryText = `${itemCategory} ${itemRole} ${itemSkillsStr} ${itemServicesStr}`.toLowerCase();
+
+  if (master) {
+    // 1. Direct category match
+    if (itemCategory.includes(master.name.toLowerCase()) || itemCategory.includes(master.slug)) {
+      return true;
+    }
+
+    // 2. Exact match against master skills
+    for (const skill of master.skills) {
+      const sLow = skill.toLowerCase();
+      if (primaryText.includes(sLow)) return true;
+      for (const itemSkill of skillsArr) {
+        if (sLow.includes(itemSkill.toLowerCase()) || itemSkill.toLowerCase().includes(sLow)) return true;
+      }
+      for (const itemSrv of servicesArr) {
+        if (sLow.includes(itemSrv.toLowerCase()) || itemSrv.toLowerCase().includes(sLow)) return true;
+      }
+    }
+
+    // 3. Domain pattern regex match on primaryText
+    const pattern = MASTER_CATEGORY_PATTERNS[master.slug];
+    if (pattern && (pattern.test(primaryText) || pattern.test(itemCategory) || pattern.test(itemRole))) {
+      return true;
+    }
+
+    // 4. If primary text didn't match, check bio only with strict pattern test (excluding generic mentions)
+    if (pattern && pattern.test(itemBio)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Non-master / custom category fallback
+  const nonStopTokens = rawTarget
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  if (nonStopTokens.length === 0) {
+    return primaryText.includes(rawTarget);
+  }
+
+  return nonStopTokens.some((tok) => primaryText.includes(tok));
+}
+
+
 export function mergeWithMasterCategories(apiCategories: any[] | null | undefined): Array<{
   id: number | string;
   name: string;
@@ -351,3 +451,5 @@ export function mergeWithMasterCategories(apiCategories: any[] | null | undefine
 
   return Array.from(categoriesMap.values());
 }
+
+
