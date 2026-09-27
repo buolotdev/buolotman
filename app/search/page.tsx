@@ -113,6 +113,12 @@ const translations: Record<string, Record<string, any>> = {
     requestService: "Request Service",
     previous: "Previous",
     next: "Next",
+    availableNow: "AVAILABLE NOW",
+    idVerified: "ID VERIFIED",
+    verifiedJobs: "verified jobs",
+    ratesFrom: "Rates from",
+    bookNow: "BOOK NOW",
+    defaultReview: "Punctual, professional, and delivered high quality work on time. Highly recommended!",
   },
   fr: {
     searchPlaceholder: "Rechercher un service...",
@@ -148,6 +154,12 @@ const translations: Record<string, Record<string, any>> = {
     requestService: "Demander le service",
     previous: "Précédent",
     next: "Suivant",
+    availableNow: "DISPONIBLE MAINTENANT",
+    idVerified: "ID VÉRIFIÉ",
+    verifiedJobs: "missions vérifiées",
+    ratesFrom: "Tarifs dès",
+    bookNow: "RÉSERVER",
+    defaultReview: "Ponctuel, professionnel et a fourni un travail de haute qualité dans les délais. Fortement recommandé !",
   }
 };
 
@@ -893,6 +905,96 @@ export default function SearchPage() {
                 const ratingNum = result.rating != null && Number(result.rating) > 0 ? Number(result.rating).toFixed(1) : "4.9";
                 const jobsCount = reviewsNum > 10 ? `${reviewsNum}+` : "350+";
 
+                if (result.type === "technician") {
+                  return (
+                    <article key={`tech-${result.id}-${idx}`} className={styles.techCard}>
+                      {/* Top Navy Blue Header Bar */}
+                      <div className={styles.techHeaderBar} />
+
+                      <div className={styles.techCardBody}>
+                        {/* Avatar & Available Now Badge */}
+                        <div className={styles.techAvatarRow}>
+                          <div className={styles.techAvatarCircle}>
+                            {result.image ? (
+                              <img
+                                src={result.image}
+                                alt={result.name}
+                                className={styles.techAvatarImg}
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <div className={styles.techAvatarInitials}>
+                                {initials || "BM"}
+                              </div>
+                            )}
+                          </div>
+
+                          <span className={styles.availableBadge}>
+                            <span className={styles.greenDot} />
+                            {t.availableNow}
+                          </span>
+                        </div>
+
+                        {/* Technician Name */}
+                        <h2 className={styles.techName} title={result.name}>
+                          {result.name}
+                        </h2>
+
+                        {/* Profession Subtitle */}
+                        <p className={styles.techProfession}>
+                          {result.role || (lang === "fr" ? "Spécialiste Technique Certifié" : "Certified Technical Specialist")}
+                        </p>
+
+                        {/* ID Verified Badge */}
+                        <div className={styles.techIdVerified}>
+                          <iconify-icon icon="lucide:shield-check" style={{ fontSize: "13px" }} />
+                          <span>{t.idVerified}</span>
+                        </div>
+
+                        {/* Meta Info Row: Rating + Jobs, Location, Rate */}
+                        <div className={styles.techMetaRow}>
+                          <span className={styles.techMetaItem}>
+                            <iconify-icon icon="lucide:star" className={styles.starYellow} />
+                            <strong>{ratingNum}</strong> ({reviewsNum} {t.verifiedJobs})
+                          </span>
+
+                          <span className={styles.techMetaItem}>
+                            <iconify-icon icon="lucide:map-pin" style={{ color: "#64748b" }} />
+                            <span>{result.location || "Douala, Cameroon"}</span>
+                          </span>
+
+                          <span className={styles.techMetaItem}>
+                            <iconify-icon icon="lucide:banknote" style={{ color: "#64748b" }} />
+                            <span>{t.ratesFrom} <strong>{(result as any).hourly_rate ? formatXOF((result as any).hourly_rate) : "5,000 XAF"}/hr</strong></span>
+                          </span>
+                        </div>
+
+                        {/* Skill Badges (Blue Rounded Pills) */}
+                        <div className={styles.techSkillsRow}>
+                          {displayTags.slice(0, 4).map((skill: string, sIdx: number) => (
+                            <span key={sIdx} className={styles.techSkillPill} title={skill}>
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+
+                        {/* Bottom Row: Quote Review + Orange BOOK NOW Button */}
+                        <div className={styles.techBottomRow}>
+                          <p className={styles.techQuote} title={result.description || ""}>
+                            {result.description || t.defaultReview}
+                          </p>
+
+                          <Link href={profileLink} className={styles.bookNowBtn}>
+                            {t.bookNow}
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
+
                 return (
                   <article key={`${result.type}-${result.id}-${idx}`} className={styles.referenceCard}>
                     <div className={styles.cardMain}>
@@ -924,35 +1026,20 @@ export default function SearchPage() {
                                 {result.name}
                               </h2>
                               <div className={styles.badgeGroup}>
-                                {result.type === "company" ? (
-                                  <>
-                                    <span className={styles.badgeBlue}>
-                                      <iconify-icon icon="lucide:check-circle-2" />
-                                      {lang === "fr" ? "Entreprise Vérifiée" : "Verified Business"}
-                                    </span>
-                                    <span className={styles.badgeOrange}>
-                                      <iconify-icon icon="lucide:award" />
-                                      {lang === "fr" ? "Certifié Pro" : "Pro Certified"}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span className={styles.badgeBlue}>
-                                      <iconify-icon icon="lucide:shield-check" />
-                                      {lang === "fr" ? "Vérifié" : "Verified Business"}
-                                    </span>
-                                    <span className={styles.badgeOrange}>
-                                      <iconify-icon icon="lucide:award" />
-                                      {lang === "fr" ? "Certifié Pro" : "Pro Certified"}
-                                    </span>
-                                  </>
-                                )}
+                                <span className={styles.badgeBlue}>
+                                  <iconify-icon icon="lucide:check-circle-2" />
+                                  {lang === "fr" ? "Entreprise Vérifiée" : "Verified Business"}
+                                </span>
+                                <span className={styles.badgeOrange}>
+                                  <iconify-icon icon="lucide:award" />
+                                  {lang === "fr" ? "Certifié Pro" : "Pro Certified"}
+                                </span>
                               </div>
                             </div>
 
-                            {/* Profession / Headline (Civil Engineering, etc.) */}
+                            {/* Profession / Headline */}
                             <p className={styles.cardProfession}>
-                              {result.role || (result.type === "company" ? "General Contractors & Civil Engineering" : "Certified Specialist")}
+                              {result.role || "General Contractors & Civil Engineering"}
                             </p>
 
                             {/* Location with Pin */}

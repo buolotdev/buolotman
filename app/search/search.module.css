@@ -666,6 +666,225 @@
   transform: translateY(-1px);
 }
 
+/* =========================================================
+   TECHNICIAN REFERENCE CARD (Matches Client Design Exactly)
+   ========================================================= */
+
+.techCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 4px 18px rgba(0, 31, 63, 0.07);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  width: 100%;
+}
+
+.techCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 31, 63, 0.12);
+  border-color: #0284c7;
+}
+
+.techHeaderBar {
+  background: #002d5a;
+  height: 28px;
+  width: 100%;
+}
+
+.techCardBody {
+  padding: 0 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.techAvatarRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -20px;
+}
+
+.techAvatarCircle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: #ffffff;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+.techAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.techAvatarInitials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #001f3f;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 16px;
+  border-radius: 50%;
+}
+
+.availableBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e6f9ed;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.greenDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.techName {
+  margin: 2px 0 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #001f3f;
+  line-height: 1.25;
+}
+
+.techProfession {
+  margin: 1px 0 0 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-style: italic;
+  color: #475569;
+  line-height: 1.35;
+}
+
+.techIdVerified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e0f2fe;
+  color: #0284c7;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.techMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: #334155;
+  margin-top: 3px;
+}
+
+.techMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.techMetaItem strong {
+  font-weight: 700;
+  color: #001f3f;
+}
+
+.techSkillsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.techSkillPill {
+  background: #0284c7;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.techBottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.techQuote {
+  flex: 1;
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.bookNowBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f95724;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  box-shadow: 0 3px 10px rgba(249, 87, 36, 0.25);
+  transition: background 0.15s ease, transform 0.15s ease;
+  text-transform: uppercase;
+}
+
+.bookNowBtn:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+}
+
 
 
 .pagination {
