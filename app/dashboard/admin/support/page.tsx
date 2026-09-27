@@ -7,6 +7,9 @@ import { useFetch } from "@/app/lib/useFetch";
 
 export default function AdminSupportPage() {
   const [allTickets, setAllTickets] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"all" | "client" | "technician" | "company" | "general">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
@@ -81,46 +84,6 @@ export default function AdminSupportPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  useEffect(() => {
-    if (filteredTickets && filteredTickets.length > 0) {
-      setActiveTicket((prev: any) => {
-        if (!prev) return filteredTickets[0];
-        const isCurrentInFiltered = filteredTickets.some((t: any) => t.id === prev.id);
-        if (isCurrentInFiltered) {
-          const updated = filteredTickets.find((t: any) => t.id === prev.id);
-          return updated || prev;
-        }
-        return filteredTickets[0];
-      });
-    } else {
-      setActiveTicket(null);
-    }
-  }, [activeTab, searchQuery, statusFilter, allTickets]);
-
-  const handleSend = async () => {
-    if (!replyText.trim() || !activeTicket) return;
-    setSending(true);
-    try {
-      if (activeTicket.db_id) {
-        await api.replySupportTicket(activeTicket.db_id, replyText);
-      }
-      setReplyText("");
-      fetchAll();
-    } catch (err) {
-      alert("Failed to send reply");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const [activeTab, setActiveTab] = useState<"all" | "client" | "technician" | "company" | "general">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   const getTicketCategory = (ticket: any): "client" | "technician" | "company" | "general" => {
     const role = (ticket.role || "").toLowerCase();
@@ -236,6 +199,42 @@ export default function AdminSupportPage() {
       case "awaiting response": return styles.statusAwaiting;
       case "resolved": return styles.statusResolved;
       default: return styles.statusPending;
+    }
+  };
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  useEffect(() => {
+    if (filteredTickets && filteredTickets.length > 0) {
+      setActiveTicket((prev: any) => {
+        if (!prev) return filteredTickets[0];
+        const isCurrentInFiltered = filteredTickets.some((t: any) => t.id === prev.id);
+        if (isCurrentInFiltered) {
+          const updated = filteredTickets.find((t: any) => t.id === prev.id);
+          return updated || prev;
+        }
+        return filteredTickets[0];
+      });
+    } else {
+      setActiveTicket(null);
+    }
+  }, [activeTab, searchQuery, statusFilter, allTickets]);
+
+  const handleSend = async () => {
+    if (!replyText.trim() || !activeTicket) return;
+    setSending(true);
+    try {
+      if (activeTicket.db_id) {
+        await api.replySupportTicket(activeTicket.db_id, replyText);
+      }
+      setReplyText("");
+      fetchAll();
+    } catch (err) {
+      alert("Failed to send reply");
+    } finally {
+      setSending(false);
     }
   };
 
