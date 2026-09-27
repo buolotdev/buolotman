@@ -32,6 +32,19 @@ export function isGarbageText(str: string): boolean {
   return false;
 }
 
+function cleanDegreeTitle(raw: string): string {
+  if (!raw || typeof raw !== "string") return "";
+  let clean = raw.trim();
+  clean = clean.replace(/^(certified\s+)?(bachelor\s+of\s+|master\s+of\s+|phd\s+in\s+|degree\s+in\s+|diploma\s+in\s+|certificate\s+in\s+|license\s+in\s+)/i, "");
+  clean = clean.replace(/^(bachelor|master|diploma|degree)\s+/i, "");
+  clean = clean.trim();
+  if (clean.toLowerCase().includes("electrical enginee")) return "Electrical Engineer";
+  if (clean.toLowerCase().includes("civil enginee")) return "Civil Engineer";
+  if (clean.toLowerCase().includes("mechanical enginee")) return "Mechanical Engineer";
+  if (clean.toLowerCase().includes("computer") || clean.toLowerCase().includes("software")) return "Software Engineer";
+  return clean ? (clean.charAt(0).toUpperCase() + clean.slice(1)) : "";
+}
+
 export function resolveProfessionTitle(item: any, lang: string = "en"): string {
   if (!item) return lang === "fr" ? "Spécialiste Qualifié" : "Certified Specialist";
 
@@ -53,11 +66,18 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
       if (srvTitle === srvTitle.toUpperCase() && srvTitle.length > 3) {
         return srvTitle.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
       }
-      return srvTitle;
+      return cleanDegreeTitle(srvTitle);
     }
   }
 
-  // 2. Check skills list (e.g. ["Plumber"], ["Electrician"], ["Welder"])
+  // 2. Check direct specific specialty / profession / headline / primary_occupation
+  const explicitRole = item.specialty || item.profession || item.primary_occupation || item.headline || item.title || item.technician_profile?.primary_occupation;
+  if (explicitRole && typeof explicitRole === "string" && !isGarbageText(explicitRole)) {
+    const cleaned = cleanDegreeTitle(explicitRole.trim());
+    if (cleaned && !isGarbageText(cleaned)) return cleaned;
+  }
+
+  // 3. Check skills list (e.g. ["Plumber"], ["Electrician"], ["Welder"])
   const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
   if (Array.isArray(skills) && skills.length > 0) {
     const validSkill = skills.find((s: string) => !isGarbageText(s));
@@ -66,16 +86,17 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 3. Check direct specific specialty / profession / headline
-  const explicitRole = item.specialty || item.profession || item.headline || item.title;
-  if (explicitRole && typeof explicitRole === "string" && !isGarbageText(explicitRole)) {
-    return explicitRole.trim();
+  // 4. Check category / category_name (e.g. "Handyman & Home Maintenance" -> "Plumbing Technician" or "Handyman")
+  const cat = item.category || item.category_name || item.service_category || item.technician_profile?.category;
+  if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services") {
+    return formatCategoryToProfession(cat.trim(), lang);
   }
 
-  // 4. Check category / category_name (e.g. "Handyman & Home Maintenance" -> "Plumbing Technician" or "Handyman")
-  const cat = item.category || item.category_name || item.service_category;
-  if (cat && typeof cat === "string" && !isGarbageText(cat)) {
-    return formatCategoryToProfession(cat.trim(), lang);
+  // 5. Check education_level / expertise_level for actual trade
+  const edu = item.education_level || item.expertise_level;
+  if (edu && typeof edu === "string" && !isGarbageText(edu)) {
+    const cleanedEdu = cleanDegreeTitle(edu);
+    if (cleanedEdu && !isGarbageText(cleanedEdu)) return cleanedEdu;
   }
 
   return lang === "fr" ? "Spécialiste Technique" : "Technical Specialist";
@@ -106,7 +127,7 @@ export function formatSkillToProfession(skill: string, lang: string = "en"): str
 
 export function formatCategoryToProfession(category: string, lang: string = "en"): string {
   const c = category.toLowerCase();
-  if (c.includes("handyman") || c.includes("home maintenance")) {
+  if (c.includes("handyman") || c.includes("home maintenance") || c.includes("plumb")) {
     return lang === "fr" ? "Technicien en Plomberie & Maintenance" : "Plumbing & Maintenance Pro";
   }
   if (c.includes("software") || c.includes("digital engineering")) {
@@ -122,13 +143,13 @@ export function formatCategoryToProfession(category: string, lang: string = "en"
     return lang === "fr" ? "Électricien Certifié" : "Certified Electrician";
   }
   if (c.includes("civil") || c.includes("construction") || c.includes("architecture")) {
-    return lang === "fr" ? "Spécialiste BTP & Construction" : "Civil & Construction Specialist";
+    return lang === "fr" ? "Ingénieur Génie Civil & BTP" : "Civil & Construction Engineer";
   }
   if (c.includes("mechanical") || c.includes("industrial")) {
     return lang === "fr" ? "Ingénieur Mécanique & Industriel" : "Mechanical Engineer";
   }
   if (c.includes("automotive") || c.includes("heavy equipment")) {
-    return lang === "fr" ? "Technicien Automobile" : "Auto Mechanic";
+    return lang === "fr" ? "Mécanicien Automobile" : "Auto Mechanic";
   }
   if (c.includes("clean") || c.includes("environmental")) {
     return lang === "fr" ? "Spécialiste du Nettoyage" : "Cleaning Specialist";
@@ -141,6 +162,51 @@ export function formatCategoryToProfession(category: string, lang: string = "en"
   }
 
   return category;
+}
+
+export function resolveExpertiseTags(item: any, lang: string = "en"): string[] {
+  // 1. Direct skills if available
+  const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
+  if (Array.isArray(skills) && skills.length > 0) {
+    const valid = skills.filter((s: string) => !isGarbageText(s)).map((s: string) => s.trim());
+    if (valid.length > 0) return valid;
+  }
+
+  // 2. Services titles
+  const services = item.services || item.profile?.services || item.technician_profile?.services || [];
+  if (Array.isArray(services) && services.length > 0) {
+    const srvTitles = services.map((s: any) => s.title).filter((t: string) => Boolean(t) && !isGarbageText(t));
+    if (srvTitles.length > 0) return srvTitles;
+  }
+
+  // 3. Domain fallback based on profession
+  const prof = (resolveProfessionTitle(item, lang) || "").toLowerCase();
+  if (prof.includes("plumb") || prof.includes("water") || prof.includes("sanitation")) {
+    return lang === "fr" ? ["Plomberie", "Tuyauterie", "Sanitaire", "Dépannage"] : ["Plumbing", "Pipe Fitting", "Drainage", "Installation"];
+  }
+  if (prof.includes("electr") || prof.includes("câblage") || prof.includes("wiring")) {
+    return lang === "fr" ? ["Câblage", "Installation", "Tableau Électrique", "Dépannage"] : ["Electrical Wiring", "Circuit Repair", "Panel Upgrade", "Safety Check"];
+  }
+  if (prof.includes("civil") || prof.includes("construction") || prof.includes("mason") || prof.includes("bâtiment")) {
+    return lang === "fr" ? ["Génie Civil", "Maçonnerie", "Structure", "Chantier BTP"] : ["Civil Works", "Masonry", "Structural Engineering", "Renovation"];
+  }
+  if (prof.includes("cctv") || prof.includes("secur") || prof.includes("telecom")) {
+    return lang === "fr" ? ["Vidéosurveillance", "CCTV", "Contrôle d'accès", "Réseaux"] : ["CCTV Setup", "Surveillance", "Access Control", "Security Wiring"];
+  }
+  if (prof.includes("auto") || prof.includes("mechanic") || prof.includes("véhicule")) {
+    return lang === "fr" ? ["Diagnostic Moteur", "Freinage", "Entretien Auto", "Mécanique"] : ["Engine Diagnostics", "Brake Repair", "Vehicle Service", "Tune-Up"];
+  }
+  if (prof.includes("soft") || prof.includes("web") || prof.includes("it") || prof.includes("network") || prof.includes("dev")) {
+    return lang === "fr" ? ["Développement Web", "Solutions IT", "Réseaux", "Base de Données"] : ["Web Development", "IT Solutions", "Network Systems", "Backend API"];
+  }
+  if (prof.includes("carpent") || prof.includes("menuis") || prof.includes("wood")) {
+    return lang === "fr" ? ["Menuiserie", "Ameublement", "Bois & Finitions", "Pose"] : ["Carpentry", "Custom Furniture", "Woodwork", "Installation"];
+  }
+  if (prof.includes("clean") || prof.includes("nettoyage")) {
+    return lang === "fr" ? ["Nettoyage Pro", "Entretien Bureaux", "Désinfection"] : ["Commercial Cleaning", "Office Care", "Sanitization"];
+  }
+
+  return lang === "fr" ? ["Assistance Technique", "Maintenance Pro", "Intervention Rapide"] : ["Technical Service", "Quality Maintenance", "Quick Dispatch"];
 }
 
 export function resolveServiceCategoryTag(item: any, lang: string = "en"): string {

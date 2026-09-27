@@ -11,7 +11,7 @@ import { SkeletonBlock, SkeletonCard } from "../components/skeleton/Skeleton";
 import { formatXOF } from "../lib/format";
 import styles from "./search.module.css";
 import { mergeWithMasterCategories } from "../lib/categories";
-import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio, resolveCleanLocation } from "../lib/professionUtils";
+import { resolveProfessionTitle, resolveServiceCategoryTag, resolveProfessionalBio, resolveCleanLocation, resolveExpertiseTags } from "../lib/professionUtils";
 
 function CardMedia({ result }: { result: SearchResult }) {
   const [hasAvatarError, setHasAvatarError] = useState(false);
@@ -469,7 +469,7 @@ export default function SearchPage() {
               price: item.price ?? item.hourly_rate ?? item.starting_price,
               priceLabel: item.price_label,
               verified: item.verified ?? item.is_verified,
-              skills: item.skills ?? [],
+              skills: resolveExpertiseTags(item, lang),
               services: item.services || item.profile?.services || [],
               link: itemType === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/@${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
               serviceType: item.serviceType,

@@ -11,6 +11,7 @@ import { formatTimeAgo, formatDateTime } from "./lib/format";
 import { SkeletonBlock, SkeletonStat } from "./components/skeleton/Skeleton";
 import { useLocation } from "./context/LocationContext";
 import { mergeWithMasterCategories } from "./lib/categories";
+import { resolveProfessionTitle, resolveProfessionalBio, resolveExpertiseTags, resolveCleanLocation } from "./lib/professionUtils";
 
 const ICON_BY_KEY: Record<string, string> = {
   "software-and-digital-engineering": "lucide:cpu",
@@ -754,7 +755,7 @@ export default function Home() {
                 const fullName = [pro.first_name, pro.last_name].filter(Boolean).join(" ").trim() || pro.username || "Verified Professional";
                 const rawAvatar = pro.avatar || pro.avatar_url || pro.profile_photo_url || pro.user?.avatar_url || pro.user?.profile_photo_url;
                 const avatarUrl = rawAvatar ? getImageUrl(rawAvatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=001f3f&color=fff&bold=true&size=128`;
-                const locationText = [pro.neighborhood, pro.city, pro.country].filter(Boolean).join(", ") || pro.city || pro.country || "Remote Available";
+                const locationText = resolveCleanLocation(pro);
                 
                 // Smart rating calculation
                 const rawRating = Number(pro.average_rating || pro.rating || 0);
@@ -763,18 +764,14 @@ export default function Home() {
                 const isNew = rawRating === 0 && reviewCount === 0;
 
                 // Professional fallback for description
-                let bioText = (pro.bio || pro.description || "").trim();
-                if (!bioText || bioText.length < 8 || /^[a-z0-9_]{6,}$/i.test(bioText)) {
-                  bioText = "Certified and vetted technical professional specialized in reliable on-demand repairs, maintenance, and precision installations.";
-                }
+                const bioText = resolveProfessionalBio(pro, lang);
 
-                // Skills chips (Cleanly capped at 2 for front cards, rest accessible in profile)
-                const allSkills = Array.isArray(pro.skills) && pro.skills.length > 0 
-                  ? pro.skills 
-                  : [pro.title || "Technical Expert", "Maintenance"];
+                // Skills chips (Resolved cleanly from actual profile/expertise)
+                const allSkills = resolveExpertiseTags(pro, lang);
                 const displaySkills = allSkills.slice(0, 2);
                 const remainingCount = allSkills.length - displaySkills.length;
                 const isProVerified = Boolean(pro.is_verified || pro.verified || pro.technician_profile?.is_verified || pro.user?.is_verified);
+                const proRole = resolveProfessionTitle(pro, lang);
 
                 return (
                   <div className="bm-ftx-card" key={pro.id}>
@@ -813,7 +810,7 @@ export default function Home() {
                       </div>
                       <div className="bm-ftx-info">
                         <h3 className="bm-ftx-name" title={fullName}>{fullName}</h3>
-                        <div className="bm-ftx-role">{pro.title || t.ftxRoleTech}</div>
+                        <div className="bm-ftx-role">{proRole}</div>
                       </div>
                     </div>
 
