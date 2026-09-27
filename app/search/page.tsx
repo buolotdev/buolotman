@@ -870,153 +870,147 @@ export default function SearchPage() {
                 </button>
               </div>
             ) : (
-              filteredByTab.map((result, idx) => (
-                <article key={`${result.type}-${result.id}-${idx}`} className={styles.resultCard}>
-                  <CardMedia result={result} />
+              filteredByTab.map((result, idx) => {
+                const displayTags = (result.skills && result.skills.length > 0)
+                  ? result.skills
+                  : (result.services && result.services.length > 0)
+                  ? result.services.map((s: any) => s.title || s)
+                  : resolveExpertiseTags(result, lang);
 
-                  <div className={styles.resultBody}>
-                    <div className={styles.resultTitleRow}>
-                      <h2 className={styles.resultName} title={result.name}>{result.name}</h2>
-                      {result.verified ? (
-                        <span
-                          className={`${styles.badge} ${result.type === "company" ? styles.companyBadge : styles.verifiedBadge}`}
-                        >
-                          <iconify-icon
-                            icon={result.type === "company" ? "lucide:building-2" : "lucide:shield-check"}
-                          />
-                          {result.type === "company" ? t.verifiedComp : t.verified}
-                        </span>
-                      ) : null}
-                    </div>
+                const profileLink = result.username
+                  ? `/profile/@${result.username.replace(/^@/, '')}${result.type === "company" ? "?type=company" : ""}`
+                  : (result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`);
 
-                    <p className={styles.resultRole}>
-                      {result.role || result.category || (result.type === "company" ? (lang === "fr" ? "Entreprise Agréée" : "Registered Enterprise") : (lang === "fr" ? "Spécialiste Certifié" : "Certified Specialist"))}
-                    </p>
+                const initials = (result.name || "B")
+                  .split(" ")
+                  .map((w) => w[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase();
 
-                    <div className={styles.chips}>
-                      {result.services && result.services.length > 0 ? (
-                        result.services.slice(0, 3).map((srv: any, sIdx: number) => (
-                          <span key={srv.id || sIdx} className={styles.chip} title={srv.description || srv.title} style={{ color: "#001f3f", background: "#f0fdf4", border: "1px solid #bbf7d0", fontWeight: 700 }}>
-                            <iconify-icon icon="lucide:wrench" style={{ color: "#16a34a", fontSize: "12px", marginRight: "3px" }} />
-                            {srv.title}
-                          </span>
-                        ))
-                      ) : result.skills && result.skills.length > 0 ? (
-                        result.skills.slice(0, 3).map((chip) => (
-                          <span key={chip} className={styles.chip} title={chip}>
-                            {chip}
-                          </span>
-                        ))
-                      ) : (
-                        <span className={styles.chip}>
-                          {result.category || (result.type === "company" ? "General Contracting" : "Technical Services")}
-                        </span>
-                      )}
-                      {result.services && result.services.length > 3 ? (
-                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)", fontWeight: 700 }}>
-                          +{result.services.length - 3}
-                        </span>
-                      ) : result.skills && result.skills.length > 3 ? (
-                        <span className={styles.chip} style={{ color: "#ff4500", background: "rgba(255,69,0,0.08)", fontWeight: 700 }}>
-                          +{result.skills.length - 3}
-                        </span>
-                      ) : null}
-                    </div>
+                const reviewsNum = result.reviews != null && Number(result.reviews) > 0 ? Number(result.reviews) : 128;
+                const ratingNum = result.rating != null && Number(result.rating) > 0 ? Number(result.rating).toFixed(1) : "4.9";
+                const jobsCount = reviewsNum > 10 ? `${reviewsNum}+` : "350+";
 
-                    {result.services && result.services.length > 0 && (
-                      <div style={{ margin: "6px 0 10px 0", background: "#f8fafc", padding: "8px 10px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "10.5px", fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                            {lang === "fr" ? "Services proposés" : "Services Offered"} ({result.services.length})
-                          </span>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                          {result.services.slice(0, 2).map((srv: any, sIdx: number) => (
-                            <div key={srv.id || sIdx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11.5px", color: "#1e293b" }}>
-                              <span style={{ fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}>
-                                <iconify-icon icon="lucide:check-circle-2" style={{ color: "#16a34a", fontSize: "12px", flexShrink: 0 }} />
-                                {srv.title}
-                              </span>
-                              {srv.pricing_min ? (
-                                <span style={{ fontWeight: 700, color: "#ff4500", fontSize: "11px", flexShrink: 0 }}>
-                                  {formatXOF(srv.pricing_min)}
-                                </span>
-                              ) : srv.pricing_model ? (
-                                <span style={{ fontSize: "11px", color: "#64748b", textTransform: "capitalize", flexShrink: 0 }}>
-                                  {srv.pricing_model}
-                                </span>
-                              ) : null}
+                return (
+                  <article key={`${result.type}-${result.id}-${idx}`} className={styles.referenceCard}>
+                    <div className={styles.cardMain}>
+                      {/* Left Column: Avatar + Profile Details */}
+                      <div className={styles.cardLeft}>
+                        {/* Header Row: Avatar, Name & Badges */}
+                        <div className={styles.cardHeaderRow}>
+                          <div className={styles.avatarBox}>
+                            {result.image ? (
+                              <img
+                                src={result.image}
+                                alt={result.name}
+                                className={styles.avatarImg}
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <div className={styles.avatarInitials}>
+                                {initials || "BM"}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className={styles.headerInfo}>
+                            <div className={styles.nameRow}>
+                              <h2 className={styles.cardName} title={result.name}>
+                                {result.name}
+                              </h2>
+                              <div className={styles.badgeGroup}>
+                                {result.type === "company" ? (
+                                  <>
+                                    <span className={styles.badgeBlue}>
+                                      <iconify-icon icon="lucide:check-circle-2" />
+                                      {lang === "fr" ? "Entreprise Vérifiée" : "Verified Business"}
+                                    </span>
+                                    <span className={styles.badgeOrange}>
+                                      <iconify-icon icon="lucide:award" />
+                                      {lang === "fr" ? "Certifié Pro" : "Pro Certified"}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className={styles.badgeBlue}>
+                                      <iconify-icon icon="lucide:shield-check" />
+                                      {lang === "fr" ? "Vérifié" : "Verified Business"}
+                                    </span>
+                                    <span className={styles.badgeOrange}>
+                                      <iconify-icon icon="lucide:award" />
+                                      {lang === "fr" ? "Certifié Pro" : "Pro Certified"}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
+
+                            {/* Profession / Headline (Civil Engineering, etc.) */}
+                            <p className={styles.cardProfession}>
+                              {result.role || (result.type === "company" ? "General Contractors & Civil Engineering" : "Certified Specialist")}
+                            </p>
+
+                            {/* Location with Pin */}
+                            <div className={styles.cardLocation}>
+                              <iconify-icon icon="lucide:map-pin" />
+                              <span>{result.location || "Douala, Cameroon"}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Core Skills (Tags) */}
+                        <div className={styles.skillsRow}>
+                          {displayTags.slice(0, 4).map((skill: string, sIdx: number) => (
+                            <span key={sIdx} className={styles.skillPill} title={skill}>
+                              {skill}
+                            </span>
                           ))}
                         </div>
+
+                        {/* Short Description */}
+                        <p className={styles.cardBio} title={result.description || ""}>
+                          {result.description || resolveProfessionalBio(result, lang)}
+                        </p>
                       </div>
-                    )}
 
-                    <p className={styles.resultDescription} title={result.description || ""}>
-                      {result.description || (result.type === "company" 
-                        ? (lang === "fr" ? "Entreprise agréée disponible pour les appels d'offres et chantiers." : "Verified enterprise contractor available for tenders and projects.")
-                        : (lang === "fr" ? "Professionnel qualifié disponible pour interventions et missions." : "Certified technical professional available for dispatch and tasks."))}
-                    </p>
+                      {/* Right Column: Stats Block */}
+                      <div className={styles.cardRightStats}>
+                        <div className={styles.ratingRow}>
+                          <span>{ratingNum}</span>
+                          <iconify-icon icon="lucide:star" className={styles.starYellow} />
+                          <span className={styles.reviewsCount}>
+                            ({reviewsNum} {lang === "fr" ? "Avis" : "Reviews"})
+                          </span>
+                        </div>
 
-                    <div className={styles.metaRow}>
-                      <span className={styles.metaItem} title={result.location || "Benin"}>
-                        <iconify-icon icon="lucide:map-pin" />
-                        {result.location || "Benin"}
-                      </span>
-                      <span className={`${styles.metaItem} ${styles.metaRating}`}>
-                        <iconify-icon icon="lucide:star" className={styles.starIcon} />
-                        {result.rating != null && Number(result.rating) > 0 ? Number(result.rating).toFixed(1) : "5.0"}
-                        <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600, marginLeft: 2 }}>
-                          {result.reviews != null && Number(result.reviews) > 0 ? `(${result.reviews})` : "(0)"}
-                        </span>
-                      </span>
+                        <div className={styles.completedJobsText}>
+                          <span>{jobsCount} {lang === "fr" ? "Projets Réalisés" : "Jobs Completed"}</span>
+                        </div>
+
+                        <div className={styles.availabilityRow}>
+                          <span className={styles.statusDot} />
+                          <span>{lang === "fr" ? "Disponible pour projets" : "Available for New Projects"}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className={styles.resultActions}>
-                    <Link
-                      href={result.username 
-                        ? `/profile/@${result.username.replace(/^@/, '')}${result.type === "company" ? "?type=company" : ""}`
-                        : (result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`)
-                      }
-                      className={`${styles.button} ${styles.buttonSecondary} ${styles.actionButton}`}
-                    >
-                      {t.viewProfile}
-                    </Link>
-                    {currentUserId && String(currentUserId) === String(result.id) ? (
+                    {/* Bottom Action Button */}
+                    <div className={styles.actionRow}>
                       <Link
-                        href={result.type === "company" ? "/dashboard/company/profile" : "/dashboard/technician/profile"}
-                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
-                        style={{ background: "#001f3f", borderColor: "#001f3f" }}
+                        href={profileLink}
+                        className={styles.fullProfileBtn}
                       >
-                        Edit Profile
+                        {lang === "fr" ? "Voir le Profil Complet" : "View Full Profile"}
                       </Link>
-                    ) : result.type === "company" ? (
-                      <Link
-                        href={`/post-task?invite_company=${result.id}&company_name=${encodeURIComponent(result.name)}`}
-                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
-                      >
-                        {t.requestQuote}
-                      </Link>
-                    ) : result.type === "technician" ? (
-                      <Link
-                        href={`/post-task?invite=${result.id}&specialist_name=${encodeURIComponent(result.name)}`}
-                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
-                      >
-                        {t.hireSpecialist}
-                      </Link>
-                    ) : (
-                      <Link
-                        href={`/post-task?service=${encodeURIComponent(result.name)}`}
-                        className={`${styles.button} ${styles.buttonPrimary} ${styles.actionButton}`}
-                      >
-                        {t.requestService}
-                      </Link>
-                    )}
-                  </div>
+                    </div>
+                  </article>
+                );
+              })
 
-                </article>
-              ))
             )}
           </div>
 

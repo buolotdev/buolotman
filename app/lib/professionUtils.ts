@@ -46,19 +46,53 @@ function cleanDegreeTitle(raw: string): string {
 }
 
 export function resolveProfessionTitle(item: any, lang: string = "en"): string {
-  if (!item) return lang === "fr" ? "Spécialiste Qualifié" : "Certified Specialist";
+  if (!item) return lang === "fr" ? "Entreprise & Ingénierie" : "General Contractors & Civil Engineering";
 
   // If company
   const isCompany = item.type === "company" || item.role?.toString().toLowerCase() === "company";
   if (isCompany) {
-    if (item.category && item.category !== "General Contracting" && !isGarbageText(item.category)) {
+    if (item.headline && !isGarbageText(item.headline)) return item.headline;
+    if (item.tagline && !isGarbageText(item.tagline)) return item.tagline;
+    if (item.company_type && !isGarbageText(item.company_type)) return item.company_type;
+    if (item.category && item.category !== "General Contracting" && item.category !== "Technical Services" && !isGarbageText(item.category)) {
       return item.category;
     }
     if (item.category_name && !isGarbageText(item.category_name)) return item.category_name;
-    return lang === "fr" ? "Entreprise Agréée" : "Registered Enterprise";
+
+    // Check services offered or skills for company
+    const services = item.services || item.services_offered || item.servicesOffered || [];
+    if (Array.isArray(services) && services.length > 0) {
+      const firstSrv = typeof services[0] === "string" ? services[0] : services[0]?.title || services[0]?.name;
+      if (firstSrv && !isGarbageText(firstSrv)) return firstSrv;
+    }
+    const skills = item.skills || [];
+    if (Array.isArray(skills) && skills.length > 0 && !isGarbageText(skills[0])) {
+      return formatSkillToProfession(skills[0], lang);
+    }
+
+    // Infer from company name
+    const compName = (item.name || item.company_name || "").toLowerCase();
+    if (compName.includes("dripline") || compName.includes("tech") || compName.includes("soft") || compName.includes("digital")) {
+      return lang === "fr" ? "Agence Digitale & Ingénierie Logicielle" : "Software & Digital Engineering";
+    }
+    if (compName.includes("maison") || compName.includes("electr") || compName.includes("elec")) {
+      return lang === "fr" ? "Installations Électriques & Bâtiment" : "Electrical Systems & Building";
+    }
+    if (compName.includes("build") || compName.includes("construct") || compName.includes("btp") || compName.includes("civil")) {
+      return lang === "fr" ? "Génie Civil & Entreprise Générale" : "General Contractors & Civil Engineering";
+    }
+
+    return lang === "fr" ? "Entreprise Générale & Ingénierie" : "General Contractors & Civil Engineering";
   }
 
-  // 1. PRIORITY: Check services offered posted by technician in their profile (e.g. "IT ENGINEER", "Plumbing Repair", "Certified Electrician")
+  // 1. Direct explicit profession / headline / specialty
+  const explicitRole = item.profession || item.headline || item.specialty || item.primary_occupation || item.title || item.technician_profile?.primary_occupation;
+  if (explicitRole && typeof explicitRole === "string" && !isGarbageText(explicitRole)) {
+    const cleaned = cleanDegreeTitle(explicitRole.trim());
+    if (cleaned && !isGarbageText(cleaned)) return cleaned;
+  }
+
+  // 2. PRIORITY: Check services offered posted by technician in their profile
   const services = item.services || item.profile?.services || item.technician_profile?.services || [];
   if (Array.isArray(services) && services.length > 0 && services[0]?.title) {
     const srvTitle = services[0].title.trim();
@@ -70,14 +104,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 2. Check direct specific specialty / profession / headline / primary_occupation
-  const explicitRole = item.specialty || item.profession || item.primary_occupation || item.headline || item.title || item.technician_profile?.primary_occupation;
-  if (explicitRole && typeof explicitRole === "string" && !isGarbageText(explicitRole)) {
-    const cleaned = cleanDegreeTitle(explicitRole.trim());
-    if (cleaned && !isGarbageText(cleaned)) return cleaned;
-  }
-
-  // 3. Check skills list (e.g. ["Plumber"], ["Electrician"], ["Welder"])
+  // 3. Check skills list
   const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
   if (Array.isArray(skills) && skills.length > 0) {
     const validSkill = skills.find((s: string) => !isGarbageText(s));
@@ -86,21 +113,22 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 4. Check category / category_name (e.g. "Handyman & Home Maintenance" -> "Plumbing Technician" or "Handyman")
+  // 4. Check category
   const cat = item.category || item.category_name || item.service_category || item.technician_profile?.category;
   if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services") {
     return formatCategoryToProfession(cat.trim(), lang);
   }
 
-  // 5. Check education_level / expertise_level for actual trade
+  // 5. Check education
   const edu = item.education_level || item.expertise_level;
   if (edu && typeof edu === "string" && !isGarbageText(edu)) {
     const cleanedEdu = cleanDegreeTitle(edu);
     if (cleanedEdu && !isGarbageText(cleanedEdu)) return cleanedEdu;
   }
 
-  return lang === "fr" ? "Spécialiste Technique" : "Technical Specialist";
+  return lang === "fr" ? "Spécialiste Technique Certifié" : "Certified Technical Specialist";
 }
+
 
 export function formatSkillToProfession(skill: string, lang: string = "en"): string {
   const s = skill.toLowerCase();
