@@ -117,7 +117,8 @@ const translations: Record<string, Record<string, any>> = {
     idVerified: "ID VERIFIED",
     verifiedJobs: "verified jobs",
     ratesFrom: "Rates from",
-    bookNow: "BOOK NOW",
+    bookNow: "HIRE NOW",
+    hireNow: "HIRE NOW",
     defaultReview: "Punctual, professional, and delivered high quality work on time. Highly recommended!",
   },
   fr: {
@@ -158,7 +159,8 @@ const translations: Record<string, Record<string, any>> = {
     idVerified: "ID VÉRIFIÉ",
     verifiedJobs: "missions vérifiées",
     ratesFrom: "Tarifs dès",
-    bookNow: "RÉSERVER",
+    bookNow: "RECRUTER",
+    hireNow: "RECRUTER",
     defaultReview: "Ponctuel, professionnel et a fourni un travail de haute qualité dans les délais. Fortement recommandé !",
   }
 };
@@ -989,9 +991,9 @@ export default function SearchPage() {
                             </span>
                           </div>
 
-                          {/* Skill Badges (Blue Rounded Pills) */}
+                          {/* Skill Badges (Blue Rounded Pills - Scrollable) */}
                           <div className={styles.techSkillsRow}>
-                            {displayTags.slice(0, 4).map((skill: string, sIdx: number) => (
+                            {displayTags.map((skill: string, sIdx: number) => (
                               <span key={sIdx} className={styles.techSkillPill} title={skill}>
                                 {skill}
                               </span>
@@ -999,14 +1001,14 @@ export default function SearchPage() {
                           </div>
                         </div>
 
-                        {/* Bottom Row: Quote Review + Orange BOOK NOW Button */}
+                        {/* Bottom Row: Quote Review + Orange HIRE NOW Button */}
                         <div className={styles.techBottomRow}>
                           <p className={styles.techQuote} title={reviewText}>
                             "{reviewText}"
                           </p>
 
-                          <Link href={profileLink} className={styles.bookNowBtn}>
-                            {t.bookNow}
+                          <Link href={profileLink} className={styles.hireNowBtn}>
+                            {t.hireNow || "HIRE NOW"}
                           </Link>
                         </div>
                       </div>

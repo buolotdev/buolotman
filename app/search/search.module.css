@@ -698,17 +698,17 @@
 
 .techHeaderBar {
   background: #002d5a;
-  height: 32px;
+  height: 52px;
   width: 100%;
 }
 
 .techCardBody {
-  padding: 0 20px 18px;
+  padding: 0 22px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex: 1;
-  gap: 10px;
+  gap: 12px;
 }
 
 .techTopArea {
@@ -722,21 +722,21 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  margin-top: -30px;
+  margin-top: -38px;
 }
 
 .techAvatarCircle {
-  width: 68px;
-  height: 68px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  border: 3.5px solid #ffffff;
+  border: 4px solid #ffffff;
   background: #ffffff;
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .techAvatarImg {
@@ -755,7 +755,7 @@
   background: #001f3f;
   color: #ffffff;
   font-weight: 800;
-  font-size: 20px;
+  font-size: 22px;
   border-radius: 50%;
 }
 
@@ -784,8 +784,8 @@
 }
 
 .techName {
-  margin: 2px 0 0 0;
-  font-size: 18px;
+  margin: 4px 0 0 0;
+  font-size: 19px;
   font-weight: 800;
   color: #001f3f;
   line-height: 1.25;
@@ -840,19 +840,38 @@
 .techSkillsRow {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 4px;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-top: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.techSkillsRow::-webkit-scrollbar {
+  height: 4px;
+}
+
+.techSkillsRow::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.techSkillsRow::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
 }
 
 .techSkillPill {
   background: #0284c7;
   color: #ffffff;
   border-radius: 999px;
-  padding: 3px 12px;
-  font-size: 11.5px;
+  padding: 4px 14px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .techBottomRow {
@@ -867,7 +886,7 @@
 
 .techQuote {
   flex: 1;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #475569;
   line-height: 1.45;
   display: -webkit-box;
@@ -875,17 +894,19 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+  font-style: italic;
 }
 
-.bookNowBtn {
+.bookNowBtn,
+.hireNowBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: #f95724;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 800;
-  padding: 8px 16px;
+  padding: 9px 18px;
   border-radius: 6px;
   text-decoration: none;
   white-space: nowrap;
@@ -895,7 +916,8 @@
   text-transform: uppercase;
 }
 
-.bookNowBtn:hover {
+.bookNowBtn:hover,
+.hireNowBtn:hover {
   background: #ea580c;
   transform: translateY(-1px);
 }
