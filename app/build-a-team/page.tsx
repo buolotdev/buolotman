@@ -72,32 +72,42 @@ const translations: Record<string, Record<string, any>> = {
     ctaTitle: "Build Your Team Today",
     ctaDesc: "Whether it’s a renovation, installation, or full project, Boulot Man gives you a ready workforce — fast, verified, and managed.",
     ctaBtn: "Request a Team",
+    modalBadge: "Enterprise & Managed Workforce",
     modalTitle: "Request a Technical Team",
-    modalSub: "Specify your project needs and workforce requirements. Boulot Man will assemble, structure, and dispatch your verified team.",
+    modalSub: "Configure your squad scale, dynamic roles, and site readiness. Boulot Man will dispatch verified engineers & artisans.",
     
-    // Intake Sections
-    sec1Title: "1. Team Scale & Structure",
+    // Steps
+    stepTab1Title: "1. Scale & Roles",
+    stepTab1Sub: "Team Structure",
+    stepTab2Title: "2. Logistics & Site",
+    stepTab2Sub: "Duration & Tools",
+    stepTab3Title: "3. Contact & Scope",
+    stepTab3Sub: "Client Information",
+
+    // Step 1: Scale & Roles
+    sec1Title: "Team Scale & Leadership Structure",
     sec1Badge: "Core Request",
     reqTypeIndividual: "Individual Expert",
-    reqTypeIndividualDesc: "Single concierge, engineer, or technician",
+    reqTypeIndividualDesc: "Single concierge, engineer, or specialized technician",
     reqTypeSquad: "Dedicated Team / Squad",
     reqTypeSquadDesc: "Multiple cross-functional professionals working together",
-    labelTeamSize: "Estimated Team Size *",
+    labelTeamSize: "Estimated Team Size Needed *",
     sizeOpt1: "2–3 people (Small Squad)",
     sizeOpt2: "4–7 people (Standard Crew)",
     sizeOpt3: "8+ people (Large Workforce)",
-    pmToggleTitle: "Do you require a dedicated Project Manager / Team Lead on-site?",
-    pmToggleSub: "Recommended for diaspora & remote owners needing a single point of accountability.",
+    pmToggleTitle: "Require a dedicated Project Manager / Team Lead on-site?",
+    pmDiasporaBadge: "Recommended for Diaspora",
+    pmToggleSub: "Essential for remote owners requiring a single point of on-site accountability.",
 
-    sec2Title: "2. Roles & Skills Matrix",
+    sec2Title: "Roles & Skills Matrix",
     sec2Badge: "Dynamic Checklist",
-    labelCategory: "Primary Project Category *",
+    labelCategory: "Primary Category / Trade *",
     catCivil: "Civil Engineering, Construction & Architecture",
     catTech: "Technology, Networks & Systems",
     catMaintenance: "Handyman, Electrical & Maintenance",
     catSolar: "Solar PV, Power & Renewable Energy",
     catOther: "Multi-Disciplinary / Custom Team",
-    rolesTitle: "Specific Roles Needed in Squad (Select all that apply):",
+    rolesTitle: "Select specific roles needed in squad:",
     
     // Civil Roles
     roleCivil1: "Lead Site Engineer / Owner's Rep",
@@ -129,7 +139,8 @@ const translations: Record<string, Record<string, any>> = {
     roleOther3: "Professional Painter & Plasterer",
     roleOther4: "Site Safety / Security Officer",
 
-    sec3Title: "3. Team Logistics & Duration",
+    // Step 2: Logistics & Site
+    sec3Title: "Team Logistics & Duration",
     sec3Badge: "Commitment & Presence",
     labelDuration: "Deployment Duration *",
     durOpt1: "One-off Day Project (Emergency site audit / rapid rollout)",
@@ -137,20 +148,21 @@ const translations: Record<string, Record<string, any>> = {
     durOpt3: "Medium-term (1 to 6 months)",
     durOpt4: "Long-term Retainer (6+ months / Ongoing site management)",
     labelArrangement: "Working Arrangement *",
-    arrOpt1: "Full-time On-site (Daily physical presence)",
-    arrOpt2: "Part-time / Rotational (Specified days per week)",
-    arrOpt3: "Hybrid (Remote management with weekly physical site inspections)",
+    arrOpt1: "🏢 Full-time On-site (Daily physical presence)",
+    arrOpt2: "🔄 Part-time / Rotational (Specified days per week)",
+    arrOpt3: "🌐 Hybrid (Remote management with weekly physical site inspections)",
 
-    sec4Title: "4. Workspace & Equipment Readiness",
+    sec4Title: "Workspace & Equipment Readiness",
     sec4Badge: "Logistics & Welfare",
     labelEquip: "Tools & Heavy Machinery *",
-    equipOpt1: "Boulot Man should fully equip the team.",
-    equipOpt2: "The site / client will provide necessary tools and heavy equipment.",
+    equipOpt1: "🛠️ Boulot Man should fully equip the team.",
+    equipOpt2: "🏗️ The site / client will provide necessary tools and heavy equipment.",
     labelWelfare: "Site Welfare & Access Readiness (Check all that apply):",
     welfareOpt1: "Secure storage available on-site for tools & materials.",
     welfareOpt2: "Power and water supply are active on-site.",
     welfareOpt3: "Permits and local authorizations are already cleared.",
 
+    // Step 3: Contact & Scope
     secContactTitle: "Client & Contact Details",
     labelName: "Your Full Name *",
     labelEmail: "Email Address *",
@@ -158,9 +170,14 @@ const translations: Record<string, Record<string, any>> = {
     labelLocation: "Project Location / City *",
     labelDetails: "Project Scope & Additional Requirements",
     placeholderDetails: "Describe project scope, site conditions, certifications, special materials or deadlines...",
-    btnSubmit: "Submit Team Request",
-    btnSubmitting: "Submitting Team Request...",
-    modalSuccess: "Your team request has been submitted successfully! A Boulot Man operations coordinator will contact you shortly."
+    btnNext: "Continue",
+    btnBack: "Back",
+    btnSubmit: "Submit Workforce Request",
+    btnSubmitting: "Submitting Request...",
+    modalSuccess: "Your team request has been submitted successfully! A Boulot Man operations coordinator will contact you shortly to finalize details.",
+    trust1: "Verified Workforce",
+    trust2: "Escrow Protection",
+    trust3: "24/7 Operations Support"
   },
   fr: {
     heroTitle: "Créer une Équipe",
@@ -226,11 +243,20 @@ const translations: Record<string, Record<string, any>> = {
     ctaTitle: "Constituez Votre Équipe Aujourd'hui",
     ctaDesc: "Rénovation, installation industrielle ou construction : bénéficiez d'une main-d'œuvre prête à intervenir, vérifiée et encadrée.",
     ctaBtn: "Demander une Équipe",
+    modalBadge: "Main-d'œuvre Entreprise & Gérée",
     modalTitle: "Demander une Équipe Technique",
-    modalSub: "Précisez vos besoins et votre cahier des charges. Boulot Man assemble, structure et déploie votre équipe sur site.",
+    modalSub: "Configurez l'effectif, les compétences requises et l'outillage. Boulot Man déploie des équipes qualifiées.",
     
-    // Intake Sections FR
-    sec1Title: "1. Structure & Échelle de l'Équipe",
+    // Steps FR
+    stepTab1Title: "1. Structure & Rôles",
+    stepTab1Sub: "Taille & Profils",
+    stepTab2Title: "2. Logistique & Site",
+    stepTab2Sub: "Durée & Outillage",
+    stepTab3Title: "3. Coordonnées & Projet",
+    stepTab3Sub: "Informations Client",
+
+    // Step 1: Scale & Roles FR
+    sec1Title: "Structure & Échelle de l'Équipe",
     sec1Badge: "Besoin Principal",
     reqTypeIndividual: "Expert Individuel",
     reqTypeIndividualDesc: "Concierge, ingénieur ou technicien spécialisé unique",
@@ -241,9 +267,10 @@ const translations: Record<string, Record<string, any>> = {
     sizeOpt2: "4 à 7 personnes (Équipe Standard)",
     sizeOpt3: "8+ personnes (Effectif Important)",
     pmToggleTitle: "Avez-vous besoin d'un Chef de Projet / Team Lead dédié sur site ?",
+    pmDiasporaBadge: "Recommandé pour la Diaspora",
     pmToggleSub: "Recommandé pour la diaspora et la supervision clé en main avec un responsable unique.",
 
-    sec2Title: "2. Rôles & Matrice de Compétences",
+    sec2Title: "Rôles & Matrice de Compétences",
     sec2Badge: "Checklist Dynamique",
     labelCategory: "Corps de Métier Principal *",
     catCivil: "BTP, Génie Civil, Maçonnerie & Architecture",
@@ -283,7 +310,8 @@ const translations: Record<string, Record<string, any>> = {
     roleOther3: "Peintre Professionnel & Plaquiste",
     roleOther4: "Agent de Sécurité & Gardiennage Chantier",
 
-    sec3Title: "3. Logistique & Durée du Déploiement",
+    // Step 2: Logistics & Site FR
+    sec3Title: "Logistique & Durée du Déploiement",
     sec3Badge: "Engagement & Présence",
     labelDuration: "Durée de la Mission *",
     durOpt1: "Mission Ponctuelle (Audit d'urgence / Déploiement rapide 1 jour)",
@@ -291,30 +319,36 @@ const translations: Record<string, Record<string, any>> = {
     durOpt3: "Moyen Terme (1 à 6 Mois)",
     durOpt4: "Contrat Continu / Régie (6+ Mois / Gestion permanente)",
     labelArrangement: "Mode d'Intervention *",
-    arrOpt1: "Temps Plein sur Site (Présence physique quotidienne)",
-    arrOpt2: "Temps Partiel / Rotation (Jours déterminés par semaine)",
-    arrOpt3: "Hybride (Gestion à distance avec visites hebdomadaires sur site)",
+    arrOpt1: "🏢 Temps Plein sur Site (Présence physique quotidienne)",
+    arrOpt2: "🔄 Temps Partiel / Rotation (Jours déterminés par semaine)",
+    arrOpt3: "🌐 Hybride (Gestion à distance avec visites hebdomadaires sur site)",
 
-    sec4Title: "4. Outillage & Préparation du Site",
+    sec4Title: "Outillage & Préparation du Site",
     sec4Badge: "Logistique & Chantier",
     labelEquip: "Outillage & Équipements Lourds *",
-    equipOpt1: "Boulot Man doit équiper entièrement l'équipe.",
-    equipOpt2: "Le site / client fournit les outils nécessaires et engins.",
+    equipOpt1: "🛠️ Boulot Man doit équiper entièrement l'équipe.",
+    equipOpt2: "🏗️ Le site / client fournit les outils nécessaires et engins.",
     labelWelfare: "État du Chantier & Accès (Cochez ce qui s'applique) :",
     welfareOpt1: "Espace de stockage sécurisé disponible pour outils & matériaux.",
     welfareOpt2: "Alimentation eau et électricité active sur place.",
     welfareOpt3: "Autorisations administratives et permis déjà validés.",
 
-    secContactTitle: "Coordonnées du Demandeur",
+    // Step 3: Contact & Scope FR
+    secContactTitle: "Coordonnées & Description du Projet",
     labelName: "Nom et Prénom *",
     labelEmail: "Adresse E-mail *",
     labelPhone: "Numéro Téléphone / WhatsApp *",
     labelLocation: "Localisation du Projet / Ville *",
     labelDetails: "Cahier des Charges & Exigences Particulières",
     placeholderDetails: "Décrivez l'envergure du projet, l'état du site, les certifications requises et délais attendus...",
+    btnNext: "Continuer",
+    btnBack: "Retour",
     btnSubmit: "Envoyer la Demande d'Équipe",
     btnSubmitting: "Envoi en cours...",
-    modalSuccess: "Votre demande d'équipe a été soumise avec succès ! Un coordinateur d'opérations Boulot Man vous contactera rapidement."
+    modalSuccess: "Votre demande d'équipe a été soumise avec succès ! Un coordinateur d'opérations Boulot Man vous contactera rapidement.",
+    trust1: "Main-d'œuvre Vérifiée",
+    trust2: "Paiement Sécurisé Escrow",
+    trust3: "Support Opérations 24/7"
   }
 };
 
@@ -325,6 +359,7 @@ export default function BuildATeamPage() {
 
   // Request a Team Modal State
   const [showModal, setShowModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -498,6 +533,7 @@ ${formData.details || "No additional notes specified."}`;
     setTimeout(() => {
       setShowModal(false);
       setSuccess(false);
+      setCurrentStep(1);
     }, 3500);
   };
 
@@ -649,7 +685,13 @@ ${formData.details || "No additional notes specified."}`;
             <p>{t.ctaDesc}</p>
           </div>
           <div className={styles.ctaRight}>
-            <button className={styles.ctaBtn} onClick={() => setShowModal(true)}>
+            <button
+              className={styles.ctaBtn}
+              onClick={() => {
+                setShowModal(true);
+                setCurrentStep(1);
+              }}
+            >
               {t.ctaBtn}
             </button>
           </div>
@@ -658,7 +700,7 @@ ${formData.details || "No additional notes specified."}`;
 
       <Footer />
 
-      {/* ================= REQUEST A TEAM MODAL ================= */}
+      {/* ================= REQUEST A TEAM MODAL (WIZARD REDESIGN) ================= */}
       {showModal && (
         <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -670,326 +712,477 @@ ${formData.details || "No additional notes specified."}`;
               ×
             </button>
 
-            <div className={styles.modalHeader}>
-              <h2>{t.modalTitle}</h2>
+            {/* HEADER HERO BANNER */}
+            <div className={styles.modalTopBanner}>
+              <div className={styles.modalPillBadge}>
+                <iconify-icon icon="lucide:sparkles" />
+                {t.modalBadge}
+              </div>
+              <h2>
+                <iconify-icon icon="lucide:hard-hat" style={{ color: "#ff4500" }} />
+                {t.modalTitle}
+              </h2>
               <p>{t.modalSub}</p>
             </div>
 
-            {success ? (
-              <div className={styles.successMsg}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>✅</div>
-                {t.modalSuccess}
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                {/* 0. CONTACT INFORMATION */}
-                <div className={styles.formSection}>
-                  <div className={styles.sectionTitleRow}>
-                    <h3 className={styles.sectionTitle}>
-                      <iconify-icon icon="lucide:user-check" style={{ color: "#ff4500", fontSize: 18 }} />
-                      {t.secContactTitle}
-                    </h3>
-                  </div>
-
-                  <div className={styles.twoCol}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>{t.labelName}</label>
-                      <input
-                        className={styles.input}
-                        required
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder={lang === "fr" ? "ex: Marc Dubois" : "e.g. John Doe"}
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>{t.labelEmail}</label>
-                      <input
-                        type="email"
-                        className={styles.input}
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="client@domain.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.twoCol}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>{t.labelPhone}</label>
-                      <input
-                        className={styles.input}
-                        required
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+229 97 00 00 00"
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>{t.labelLocation}</label>
-                      <input
-                        className={styles.input}
-                        required
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder={lang === "fr" ? "ex: Cotonou / Douala / Abidjan" : "e.g. Cotonou / Lagos / Abidjan"}
-                      />
-                    </div>
-                  </div>
+            {/* STEPPER PROGRESS TABS */}
+            <div className={styles.stepperBar}>
+              <button
+                type="button"
+                className={`${styles.stepTab} ${currentStep === 1 ? styles.stepTabActive : ""} ${currentStep > 1 ? styles.stepTabCompleted : ""}`}
+                onClick={() => setCurrentStep(1)}
+              >
+                <div className={styles.stepNumber}>
+                  {currentStep > 1 ? <iconify-icon icon="lucide:check" /> : "1"}
                 </div>
+                <div className={styles.stepText}>
+                  <span className={styles.stepTitle}>{t.stepTab1Title}</span>
+                  <span className={styles.stepSub}>{t.stepTab1Sub}</span>
+                </div>
+              </button>
 
-                {/* 1. TEAM SCALE & STRUCTURE */}
-                <div className={styles.formSection}>
-                  <div className={styles.sectionTitleRow}>
-                    <h3 className={styles.sectionTitle}>
-                      <iconify-icon icon="lucide:users" style={{ color: "#ff4500", fontSize: 18 }} />
-                      {t.sec1Title}
-                    </h3>
-                    <span className={styles.sectionBadge}>{t.sec1Badge}</span>
-                  </div>
+              <button
+                type="button"
+                className={`${styles.stepTab} ${currentStep === 2 ? styles.stepTabActive : ""} ${currentStep > 2 ? styles.stepTabCompleted : ""}`}
+                onClick={() => setCurrentStep(2)}
+              >
+                <div className={styles.stepNumber}>
+                  {currentStep > 2 ? <iconify-icon icon="lucide:check" /> : "2"}
+                </div>
+                <div className={styles.stepText}>
+                  <span className={styles.stepTitle}>{t.stepTab2Title}</span>
+                  <span className={styles.stepSub}>{t.stepTab2Sub}</span>
+                </div>
+              </button>
 
-                  {/* Request Type Radio Cards */}
-                  <div className={styles.typeGrid}>
-                    <div
-                      className={`${styles.typeCard} ${formData.request_type === "individual" ? styles.typeCardActive : ""}`}
-                      onClick={() => setFormData({ ...formData, request_type: "individual" })}
-                    >
-                      <span className={styles.typeRadioDot} />
-                      <div className={styles.typeCardBody}>
-                        <div className={styles.typeCardTitle}>👤 {t.reqTypeIndividual}</div>
-                        <div className={styles.typeCardDesc}>{t.reqTypeIndividualDesc}</div>
+              <button
+                type="button"
+                className={`${styles.stepTab} ${currentStep === 3 ? styles.stepTabActive : ""}`}
+                onClick={() => setCurrentStep(3)}
+              >
+                <div className={styles.stepNumber}>
+                  {currentStep === 3 ? "3" : "3"}
+                </div>
+                <div className={styles.stepText}>
+                  <span className={styles.stepTitle}>{t.stepTab3Title}</span>
+                  <span className={styles.stepSub}>{t.stepTab3Sub}</span>
+                </div>
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className={styles.modalBody}>
+              {success ? (
+                <div className={styles.successMsg}>
+                  <div style={{ fontSize: 48, marginBottom: 12 }}>🚀</div>
+                  <h3 style={{ color: "#166534", margin: "0 0 8px 0", fontSize: 20 }}>Request Submitted!</h3>
+                  <p style={{ margin: 0 }}>{t.modalSuccess}</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  {/* ================= STEP 1: SCALE & ROLES ================= */}
+                  {currentStep === 1 && (
+                    <div>
+                      {/* 1. TEAM SCALE & STRUCTURE */}
+                      <div className={styles.formSection}>
+                        <div className={styles.sectionTitleRow}>
+                          <h3 className={styles.sectionTitle}>
+                            <span className={styles.sectionTitleIcon}>
+                              <iconify-icon icon="lucide:users-round" />
+                            </span>
+                            {t.sec1Title}
+                          </h3>
+                          <span className={styles.sectionBadge}>{t.sec1Badge}</span>
+                        </div>
+
+                        {/* Request Type Radio Cards */}
+                        <div className={styles.typeGrid}>
+                          <div
+                            className={`${styles.typeCard} ${formData.request_type === "individual" ? styles.typeCardActive : ""}`}
+                            onClick={() => setFormData({ ...formData, request_type: "individual" })}
+                          >
+                            <div className={styles.typeCardIconBox}>
+                              <iconify-icon icon="lucide:user-check" />
+                            </div>
+                            <div className={styles.typeCardBody}>
+                              <div className={styles.typeCardTitle}>{t.reqTypeIndividual}</div>
+                              <div className={styles.typeCardDesc}>{t.reqTypeIndividualDesc}</div>
+                            </div>
+                            <span className={styles.typeRadioDot} />
+                          </div>
+
+                          <div
+                            className={`${styles.typeCard} ${formData.request_type === "squad" ? styles.typeCardActive : ""}`}
+                            onClick={() => setFormData({ ...formData, request_type: "squad" })}
+                          >
+                            <div className={styles.typeCardIconBox}>
+                              <iconify-icon icon="lucide:users" />
+                            </div>
+                            <div className={styles.typeCardBody}>
+                              <div className={styles.typeCardTitle}>{t.reqTypeSquad}</div>
+                              <div className={styles.typeCardDesc}>{t.reqTypeSquadDesc}</div>
+                            </div>
+                            <span className={styles.typeRadioDot} />
+                          </div>
+                        </div>
+
+                        {/* Team Size dropdown if squad */}
+                        {formData.request_type === "squad" && (
+                          <div className={styles.formGroup} style={{ marginTop: 14 }}>
+                            <label className={styles.label}>{t.labelTeamSize}</label>
+                            <select
+                              className={styles.select}
+                              value={formData.team_size}
+                              onChange={(e) => setFormData({ ...formData, team_size: e.target.value })}
+                            >
+                              <option value="2–3 people (Small Squad)">{t.sizeOpt1}</option>
+                              <option value="4–7 people (Standard Crew)">{t.sizeOpt2}</option>
+                              <option value="8+ people (Large Workforce)">{t.sizeOpt3}</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Leadership Preference Toggle */}
+                        <div
+                          className={`${styles.toggleRow} ${formData.pm_lead_required ? styles.toggleRowActive : ""}`}
+                          onClick={() => setFormData({ ...formData, pm_lead_required: !formData.pm_lead_required })}
+                          style={{ marginTop: 14 }}
+                        >
+                          <div className={styles.toggleInfo}>
+                            <div className={styles.toggleTitle}>
+                              <iconify-icon icon="lucide:shield-check" style={{ color: "#ff4500", fontSize: 18 }} />
+                              <span>{t.pmToggleTitle}</span>
+                              <span className={styles.diasporaBadge}>{t.pmDiasporaBadge}</span>
+                            </div>
+                            <div className={styles.toggleSub}>{t.pmToggleSub}</div>
+                          </div>
+                          <label className={styles.switch} onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={formData.pm_lead_required}
+                              onChange={(e) => setFormData({ ...formData, pm_lead_required: e.target.checked })}
+                            />
+                            <span className={styles.slider}></span>
+                          </label>
+                        </div>
                       </div>
-                    </div>
 
-                    <div
-                      className={`${styles.typeCard} ${formData.request_type === "squad" ? styles.typeCardActive : ""}`}
-                      onClick={() => setFormData({ ...formData, request_type: "squad" })}
-                    >
-                      <span className={styles.typeRadioDot} />
-                      <div className={styles.typeCardBody}>
-                        <div className={styles.typeCardTitle}>👥 {t.reqTypeSquad}</div>
-                        <div className={styles.typeCardDesc}>{t.reqTypeSquadDesc}</div>
+                      {/* 2. ROLES & SKILLS MATRIX */}
+                      <div className={styles.formSection}>
+                        <div className={styles.sectionTitleRow}>
+                          <h3 className={styles.sectionTitle}>
+                            <span className={styles.sectionTitleIcon}>
+                              <iconify-icon icon="lucide:layers" />
+                            </span>
+                            {t.sec2Title}
+                          </h3>
+                          <span className={styles.sectionBadge}>{t.sec2Badge}</span>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>{t.labelCategory}</label>
+                          <select
+                            className={styles.select}
+                            value={formData.primary_category}
+                            onChange={(e) => {
+                              const newCat = e.target.value;
+                              setFormData({
+                                ...formData,
+                                primary_category: newCat,
+                                roles: []
+                              });
+                            }}
+                          >
+                            <option value="civil">{t.catCivil}</option>
+                            <option value="tech">{t.catTech}</option>
+                            <option value="maintenance">{t.catMaintenance}</option>
+                            <option value="solar">{t.catSolar}</option>
+                            <option value="other">{t.catOther}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className={styles.label} style={{ marginTop: 12 }}>{t.rolesTitle}</label>
+                          <div className={styles.rolesMatrixGrid}>
+                            {getRolesForCategory().map((roleItem: string, idx: number) => {
+                              const isSelected = formData.roles.includes(roleItem);
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`${styles.roleCheckboxItem} ${isSelected ? styles.roleCheckboxActive : ""}`}
+                                  onClick={() => handleToggleRole(roleItem)}
+                                >
+                                  <span className={styles.customCheckSquare}>
+                                    {isSelected && <iconify-icon icon="lucide:check" />}
+                                  </span>
+                                  <span>{roleItem}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Team Size dropdown if squad */}
-                  {formData.request_type === "squad" && (
-                    <div className={styles.formGroup} style={{ marginTop: 12 }}>
-                      <label className={styles.label}>{t.labelTeamSize}</label>
-                      <select
-                        className={styles.select}
-                        value={formData.team_size}
-                        onChange={(e) => setFormData({ ...formData, team_size: e.target.value })}
-                      >
-                        <option value="2–3 people (Small Squad)">{t.sizeOpt1}</option>
-                        <option value="4–7 people (Standard Crew)">{t.sizeOpt2}</option>
-                        <option value="8+ people (Large Workforce)">{t.sizeOpt3}</option>
-                      </select>
+                      <div className={styles.stepperControls}>
+                        <div />
+                        <button
+                          type="button"
+                          className={styles.nextBtn}
+                          onClick={() => setCurrentStep(2)}
+                        >
+                          {t.btnNext} <iconify-icon icon="lucide:arrow-right" />
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                  {/* Leadership Preference Toggle */}
-                  <div
-                    className={`${styles.toggleRow} ${formData.pm_lead_required ? styles.toggleRowActive : ""}`}
-                    onClick={() => setFormData({ ...formData, pm_lead_required: !formData.pm_lead_required })}
-                    style={{ marginTop: 12 }}
-                  >
-                    <div className={styles.toggleInfo}>
-                      <div className={styles.toggleTitle}>
-                        <iconify-icon icon="lucide:shield-check" style={{ color: "#ff4500", fontSize: 16 }} />
-                        {t.pmToggleTitle}
+                  {/* ================= STEP 2: LOGISTICS & SITE ================= */}
+                  {currentStep === 2 && (
+                    <div>
+                      {/* 3. TEAM LOGISTICS & DURATION */}
+                      <div className={styles.formSection}>
+                        <div className={styles.sectionTitleRow}>
+                          <h3 className={styles.sectionTitle}>
+                            <span className={styles.sectionTitleIcon}>
+                              <iconify-icon icon="lucide:calendar-clock" />
+                            </span>
+                            {t.sec3Title}
+                          </h3>
+                          <span className={styles.sectionBadge}>{t.sec3Badge}</span>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>{t.labelDuration}</label>
+                          <select
+                            className={styles.select}
+                            value={formData.duration}
+                            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                          >
+                            <option value="One-off Day Project (Emergency site audit / rapid rollout)">{t.durOpt1}</option>
+                            <option value="Short-term (1 to 4 weeks)">{t.durOpt2}</option>
+                            <option value="Medium-term (1 to 6 months)">{t.durOpt3}</option>
+                            <option value="Long-term Retainer (6+ months / Ongoing site management)">{t.durOpt4}</option>
+                          </select>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>{t.labelArrangement}</label>
+                          <div className={styles.pillRadioGroup}>
+                            {[
+                              { val: "Full-time On-site (Daily physical presence)", label: t.arrOpt1 },
+                              { val: "Part-time / Rotational (Specified days per week)", label: t.arrOpt2 },
+                              { val: "Hybrid (Remote management with weekly physical site inspections)", label: t.arrOpt3 },
+                            ].map((item, i) => (
+                              <div
+                                key={i}
+                                className={`${styles.pillRadioItem} ${formData.working_arrangement === item.val ? styles.pillRadioActive : ""}`}
+                                onClick={() => setFormData({ ...formData, working_arrangement: item.val })}
+                              >
+                                <span className={styles.pillRadioDot} />
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <div className={styles.toggleSub}>{t.pmToggleSub}</div>
-                    </div>
-                    <label className={styles.switch} onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={formData.pm_lead_required}
-                        onChange={(e) => setFormData({ ...formData, pm_lead_required: e.target.checked })}
-                      />
-                      <span className={styles.slider}></span>
-                    </label>
-                  </div>
-                </div>
 
-                {/* 2. ROLES & SKILLS MATRIX (DYNAMIC CHECKLIST) */}
-                <div className={styles.formSection}>
-                  <div className={styles.sectionTitleRow}>
-                    <h3 className={styles.sectionTitle}>
-                      <iconify-icon icon="lucide:layers" style={{ color: "#ff4500", fontSize: 18 }} />
-                      {t.sec2Title}
-                    </h3>
-                    <span className={styles.sectionBadge}>{t.sec2Badge}</span>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>{t.labelCategory}</label>
-                    <select
-                      className={styles.select}
-                      value={formData.primary_category}
-                      onChange={(e) => {
-                        const newCat = e.target.value;
-                        setFormData({
-                          ...formData,
-                          primary_category: newCat,
-                          roles: [] // reset roles on category switch
-                        });
-                      }}
-                    >
-                      <option value="civil">{t.catCivil}</option>
-                      <option value="tech">{t.catTech}</option>
-                      <option value="maintenance">{t.catMaintenance}</option>
-                      <option value="solar">{t.catSolar}</option>
-                      <option value="other">{t.catOther}</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={styles.label} style={{ marginTop: 10 }}>{t.rolesTitle}</label>
-                    <div className={styles.rolesMatrixGrid}>
-                      {getRolesForCategory().map((roleItem: string, idx: number) => {
-                        const isSelected = formData.roles.includes(roleItem);
-                        return (
-                          <div
-                            key={idx}
-                            className={`${styles.roleCheckboxItem} ${isSelected ? styles.roleCheckboxActive : ""}`}
-                            onClick={() => handleToggleRole(roleItem)}
-                          >
-                            <span className={styles.customCheckSquare}>
-                              {isSelected && <iconify-icon icon="lucide:check" />}
+                      {/* 4. WORKSPACE & EQUIPMENT READINESS */}
+                      <div className={styles.formSection}>
+                        <div className={styles.sectionTitleRow}>
+                          <h3 className={styles.sectionTitle}>
+                            <span className={styles.sectionTitleIcon}>
+                              <iconify-icon icon="lucide:wrench" />
                             </span>
-                            <span>{roleItem}</span>
+                            {t.sec4Title}
+                          </h3>
+                          <span className={styles.sectionBadge}>{t.sec4Badge}</span>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>{t.labelEquip}</label>
+                          <div className={styles.pillRadioGroup}>
+                            {[
+                              { val: "Boulot Man should fully equip the team.", label: t.equipOpt1 },
+                              { val: "The site / client will provide necessary tools and heavy equipment.", label: t.equipOpt2 },
+                            ].map((item, i) => (
+                              <div
+                                key={i}
+                                className={`${styles.pillRadioItem} ${formData.equipment_provision === item.val ? styles.pillRadioActive : ""}`}
+                                onClick={() => setFormData({ ...formData, equipment_provision: item.val })}
+                              >
+                                <span className={styles.pillRadioDot} />
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. TEAM LOGISTICS & DURATION */}
-                <div className={styles.formSection}>
-                  <div className={styles.sectionTitleRow}>
-                    <h3 className={styles.sectionTitle}>
-                      <iconify-icon icon="lucide:calendar-clock" style={{ color: "#ff4500", fontSize: 18 }} />
-                      {t.sec3Title}
-                    </h3>
-                    <span className={styles.sectionBadge}>{t.sec3Badge}</span>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>{t.labelDuration}</label>
-                    <select
-                      className={styles.select}
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    >
-                      <option value="One-off Day Project (Emergency site audit / rapid rollout)">{t.durOpt1}</option>
-                      <option value="Short-term (1 to 4 weeks)">{t.durOpt2}</option>
-                      <option value="Medium-term (1 to 6 months)">{t.durOpt3}</option>
-                      <option value="Long-term Retainer (6+ months / Ongoing site management)">{t.durOpt4}</option>
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>{t.labelArrangement}</label>
-                    <div className={styles.pillRadioGroup}>
-                      {[
-                        { val: "Full-time On-site (Daily physical presence)", label: t.arrOpt1 },
-                        { val: "Part-time / Rotational (Specified days per week)", label: t.arrOpt2 },
-                        { val: "Hybrid (Remote management with weekly physical site inspections)", label: t.arrOpt3 },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className={`${styles.pillRadioItem} ${formData.working_arrangement === item.val ? styles.pillRadioActive : ""}`}
-                          onClick={() => setFormData({ ...formData, working_arrangement: item.val })}
-                        >
-                          <span className={styles.pillRadioDot} />
-                          <span>{item.label}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
 
-                {/* 4. WORKSPACE & EQUIPMENT READINESS */}
-                <div className={styles.formSection}>
-                  <div className={styles.sectionTitleRow}>
-                    <h3 className={styles.sectionTitle}>
-                      <iconify-icon icon="lucide:wrench" style={{ color: "#ff4500", fontSize: 18 }} />
-                      {t.sec4Title}
-                    </h3>
-                    <span className={styles.sectionBadge}>{t.sec4Badge}</span>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>{t.labelEquip}</label>
-                    <div className={styles.pillRadioGroup}>
-                      {[
-                        { val: "Boulot Man should fully equip the team.", label: t.equipOpt1 },
-                        { val: "The site / client will provide necessary tools and heavy equipment.", label: t.equipOpt2 },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className={`${styles.pillRadioItem} ${formData.equipment_provision === item.val ? styles.pillRadioActive : ""}`}
-                          onClick={() => setFormData({ ...formData, equipment_provision: item.val })}
-                        >
-                          <span className={styles.pillRadioDot} />
-                          <span>{item.label}</span>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label} style={{ marginTop: 10 }}>{t.labelWelfare}</label>
+                          <div className={styles.pillRadioGroup}>
+                            {[
+                              { val: "Secure storage available on-site for tools & materials.", label: t.welfareOpt1 },
+                              { val: "Power and water supply are active on-site.", label: t.welfareOpt2 },
+                              { val: "Permits and local authorizations are already cleared.", label: t.welfareOpt3 },
+                            ].map((item, i) => {
+                              const isChecked = formData.site_welfare.includes(item.val);
+                              return (
+                                <div
+                                  key={i}
+                                  className={`${styles.roleCheckboxItem} ${isChecked ? styles.roleCheckboxActive : ""}`}
+                                  onClick={() => handleToggleWelfare(item.val)}
+                                >
+                                  <span className={styles.customCheckSquare}>
+                                    {isChecked && <iconify-icon icon="lucide:check" />}
+                                  </span>
+                                  <span>{item.label}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} style={{ marginTop: 8 }}>{t.labelWelfare}</label>
-                    <div className={styles.pillRadioGroup}>
-                      {[
-                        { val: "Secure storage available on-site for tools & materials.", label: t.welfareOpt1 },
-                        { val: "Power and water supply are active on-site.", label: t.welfareOpt2 },
-                        { val: "Permits and local authorizations are already cleared.", label: t.welfareOpt3 },
-                      ].map((item, i) => {
-                        const isChecked = formData.site_welfare.includes(item.val);
-                        return (
-                          <div
-                            key={i}
-                            className={`${styles.roleCheckboxItem} ${isChecked ? styles.roleCheckboxActive : ""}`}
-                            onClick={() => handleToggleWelfare(item.val)}
-                          >
-                            <span className={styles.customCheckSquare}>
-                              {isChecked && <iconify-icon icon="lucide:check" />}
+                      <div className={styles.stepperControls}>
+                        <button
+                          type="button"
+                          className={styles.backBtn}
+                          onClick={() => setCurrentStep(1)}
+                        >
+                          <iconify-icon icon="lucide:arrow-left" /> {t.btnBack}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.nextBtn}
+                          onClick={() => setCurrentStep(3)}
+                        >
+                          {t.btnNext} <iconify-icon icon="lucide:arrow-right" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ================= STEP 3: CONTACT & SCOPE ================= */}
+                  {currentStep === 3 && (
+                    <div>
+                      <div className={styles.formSection}>
+                        <div className={styles.sectionTitleRow}>
+                          <h3 className={styles.sectionTitle}>
+                            <span className={styles.sectionTitleIcon}>
+                              <iconify-icon icon="lucide:contact-2" />
                             </span>
-                            <span>{item.label}</span>
+                            {t.secContactTitle}
+                          </h3>
+                        </div>
+
+                        <div className={styles.twoCol}>
+                          <div className={styles.formGroup}>
+                            <label className={styles.label}>{t.labelName}</label>
+                            <div className={styles.inputWrapper}>
+                              <iconify-icon icon="lucide:user" className={styles.inputIcon} />
+                              <input
+                                className={styles.inputWithIcon}
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder={lang === "fr" ? "ex: Marc Dubois" : "e.g. John Doe"}
+                              />
+                            </div>
                           </div>
-                        );
-                      })}
+                          <div className={styles.formGroup}>
+                            <label className={styles.label}>{t.labelEmail}</label>
+                            <div className={styles.inputWrapper}>
+                              <iconify-icon icon="lucide:mail" className={styles.inputIcon} />
+                              <input
+                                type="email"
+                                className={styles.inputWithIcon}
+                                required
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                placeholder="client@domain.com"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.twoCol}>
+                          <div className={styles.formGroup}>
+                            <label className={styles.label}>{t.labelPhone}</label>
+                            <div className={styles.inputWrapper}>
+                              <iconify-icon icon="lucide:phone" className={styles.inputIcon} />
+                              <input
+                                className={styles.inputWithIcon}
+                                required
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                placeholder="+229 97 00 00 00"
+                              />
+                            </div>
+                          </div>
+                          <div className={styles.formGroup}>
+                            <label className={styles.label}>{t.labelLocation}</label>
+                            <div className={styles.inputWrapper}>
+                              <iconify-icon icon="lucide:map-pin" className={styles.inputIcon} />
+                              <input
+                                className={styles.inputWithIcon}
+                                required
+                                value={formData.location}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                placeholder={lang === "fr" ? "ex: Cotonou / Douala / Abidjan" : "e.g. Cotonou / Lagos / Abidjan"}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.formGroup} style={{ marginTop: 8 }}>
+                          <label className={styles.label}>{t.labelDetails}</label>
+                          <textarea
+                            className={styles.textarea}
+                            rows={3}
+                            value={formData.details}
+                            onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                            placeholder={t.placeholderDetails}
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.stepperControls}>
+                        <button
+                          type="button"
+                          className={styles.backBtn}
+                          onClick={() => setCurrentStep(2)}
+                        >
+                          <iconify-icon icon="lucide:arrow-left" /> {t.btnBack}
+                        </button>
+                        <button
+                          type="submit"
+                          className={styles.submitBtn}
+                          disabled={loading}
+                        >
+                          <iconify-icon icon={loading ? "lucide:loader" : "lucide:send"} />
+                          {loading ? t.btnSubmitting : t.btnSubmit}
+                        </button>
+                      </div>
+
+                      <div className={styles.trustBar}>
+                        <div className={styles.trustItem}>
+                          <iconify-icon icon="lucide:check-circle-2" className={styles.trustIcon} />
+                          <span>{t.trust1}</span>
+                        </div>
+                        <div className={styles.trustItem}>
+                          <iconify-icon icon="lucide:shield-check" className={styles.trustIcon} />
+                          <span>{t.trust2}</span>
+                        </div>
+                        <div className={styles.trustItem}>
+                          <iconify-icon icon="lucide:headphones" className={styles.trustIcon} />
+                          <span>{t.trust3}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* SCOPE & REQUIREMENTS TEXTAREA */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>{t.labelDetails}</label>
-                  <textarea
-                    className={styles.textarea}
-                    rows={3}
-                    value={formData.details}
-                    onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-                    placeholder={t.placeholderDetails}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={loading}
-                >
-                  <iconify-icon icon={loading ? "lucide:loader" : "lucide:send"} />
-                  {loading ? t.btnSubmitting : t.btnSubmit}
-                </button>
-              </form>
-            )}
+                  )}
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}
