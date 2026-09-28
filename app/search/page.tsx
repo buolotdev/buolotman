@@ -265,6 +265,27 @@ export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (activeCategory && activeCategory !== "any") count++;
+    if (activeType && activeType !== "any") count++;
+    if (activeRating) count++;
+    if (budgetMin || budgetMax) count++;
+    return count;
+  }, [activeCategory, activeType, activeRating, budgetMin, budgetMax]);
+
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileFilterOpen]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -615,8 +636,8 @@ export default function SearchPage() {
   return (
     <div className={styles.page}>
       <Header />
-      <div className={styles.container} style={{ paddingTop: 24, paddingBottom: 0 }}>
-        <form className={styles.searchBar} style={{ maxWidth: 800, margin: '0 auto', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} role="search" onSubmit={submitSearch}>
+      <div className={styles.container} style={{ paddingTop: 20, paddingBottom: 0 }}>
+        <form className={styles.searchBar} role="search" onSubmit={submitSearch}>
           <label className={styles.searchField}>
             <span className={styles.iconWrap} aria-hidden="true">
               <iconify-icon icon="lucide:search" />
@@ -640,7 +661,6 @@ export default function SearchPage() {
               onChange={(e) => setLocation(e.target.value)}
               placeholder="City, region, or Global"
               aria-label="Location"
-              style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none' }}
             />
             <datalist id="search-locations-list">
               <option value="Global" />
@@ -672,31 +692,59 @@ export default function SearchPage() {
       </div>
 
       <main className={`${styles.container} ${styles.main}`}>
-        <aside className={styles.sidebar}>
+        {/* Mobile Drawer Backdrop */}
+        {isMobileFilterOpen && (
+          <div
+            className={styles.drawerBackdrop}
+            onClick={() => setIsMobileFilterOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        <aside className={`${styles.sidebar} ${isMobileFilterOpen ? styles.sidebarOpen : ""}`}>
           <div className={styles.filterHeader}>
-            <h1 className={styles.filterTitle}>{t.filtersTitle}</h1>
-            <button
-              type="button"
-              className={styles.clearButton}
-              onClick={() => {
-                setActiveCategory("any");
-                setActiveType("any");
-                setActiveRating("");
-                setQuery("");
-                setLocation("");
-                setBudgetMin("");
-                setBudgetMax("");
-                setPage(1);
-              }}
-            >
-              {t.clearAll}
-            </button>
+            <div className={styles.filterHeaderTitleGroup}>
+              <iconify-icon icon="lucide:sliders-horizontal" className={styles.filterHeaderIcon} />
+              <h2 className={styles.filterTitle}>{t.filtersTitle}</h2>
+              {activeFilterCount > 0 && (
+                <span className={styles.filterBadgeCount}>{activeFilterCount}</span>
+              )}
+            </div>
+
+            <div className={styles.filterHeaderActions}>
+              {activeFilterCount > 0 && (
+                <button
+                  type="button"
+                  className={styles.clearButton}
+                  onClick={() => {
+                    setActiveCategory("any");
+                    setActiveType("any");
+                    setActiveRating("");
+                    setQuery("");
+                    setLocation("");
+                    setBudgetMin("");
+                    setBudgetMax("");
+                    setPage(1);
+                  }}
+                >
+                  {t.clearAll}
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.sidebarCloseBtn}
+                onClick={() => setIsMobileFilterOpen(false)}
+                aria-label="Close filters"
+              >
+                <iconify-icon icon="lucide:x" />
+              </button>
+            </div>
           </div>
 
           <section className={styles.filterSection} aria-labelledby="service-category-title">
-            <h2 id="service-category-title" className={styles.sectionTitle}>
+            <h3 id="service-category-title" className={styles.sectionTitle}>
               {t.serviceCat}
-            </h2>
+            </h3>
             <div className={styles.optionList}>
               <button
                 type="button"
@@ -729,9 +777,9 @@ export default function SearchPage() {
           </section>
 
           <section className={styles.filterSection} aria-labelledby="budget-title">
-            <h2 id="budget-title" className={styles.sectionTitle}>
+            <h3 id="budget-title" className={styles.sectionTitle}>
               {t.budgetTitle}
-            </h2>
+            </h3>
             <div className={styles.budgetGrid}>
               <label className={styles.budgetField}>
                 <span>{t.min}</span>
@@ -759,9 +807,9 @@ export default function SearchPage() {
           </section>
 
           <section className={styles.filterSection} aria-labelledby="professional-type-title">
-            <h2 id="professional-type-title" className={styles.sectionTitle}>
+            <h3 id="professional-type-title" className={styles.sectionTitle}>
               {t.proTypeTitle}
-            </h2>
+            </h3>
             <div className={styles.optionList}>
               {professionalTypes.map((option) => (
                 <button
@@ -786,9 +834,9 @@ export default function SearchPage() {
           </section>
 
           <section className={styles.filterSection} aria-labelledby="rating-title">
-            <h2 id="rating-title" className={styles.sectionTitle}>
+            <h3 id="rating-title" className={styles.sectionTitle}>
               {t.minRatingTitle}
-            </h2>
+            </h3>
             <div className={styles.optionList}>
               <button
                 type="button"
@@ -816,9 +864,49 @@ export default function SearchPage() {
               ))}
             </div>
           </section>
+
+          <div className={styles.drawerFooter}>
+            <button
+              type="button"
+              className={styles.applyFilterBtn}
+              onClick={() => setIsMobileFilterOpen(false)}
+            >
+              {lang === "fr"
+                ? `Afficher ${filteredByTab.length} résultat${filteredByTab.length > 1 ? "s" : ""}`
+                : `Show ${filteredByTab.length} Result${filteredByTab.length === 1 ? "" : "s"}`}
+            </button>
+          </div>
         </aside>
 
         <section className={styles.resultsArea}>
+          {/* Mobile Filter & Sort Control Bar */}
+          <div className={styles.mobileFilterControls}>
+            <button
+              type="button"
+              className={styles.mobileFilterToggleBtn}
+              onClick={() => setIsMobileFilterOpen(true)}
+            >
+              <iconify-icon icon="lucide:sliders-horizontal" />
+              <span>{t.filtersTitle}</span>
+              {activeFilterCount > 0 && (
+                <span className={styles.filterBadgeCount}>{activeFilterCount}</span>
+              )}
+            </button>
+
+            <label className={styles.mobileSortBy}>
+              <iconify-icon icon="lucide:arrow-up-down" />
+              <select
+                aria-label="Sort results"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="relevance">{t.sortRelevance}</option>
+                <option value="highest">{t.sortHighest}</option>
+                <option value="lowest">{t.sortLowest}</option>
+              </select>
+            </label>
+          </div>
+
           <div className={styles.resultsTopBar}>
             <div className={styles.tabs} role="tablist" aria-label="Result categories">
               {tabs.map((tab) => {
