@@ -10,8 +10,8 @@ import styles from "./partnerships.module.css";
 
 const translations: Record<string, Record<string, any>> = {
   en: {
-    heroBadge: "Strategic Ecosystem Partnerships",
-    heroTitle: "Partner With Africa’s #1 On-Demand Workforce Network",
+    heroBadge: "Strategic Ecosystem & Institutional Partnerships",
+    heroTitle: "Partner With Africa’s #1 On-Demand Technical Workforce Infrastructure",
     heroSubtitle: "Collaborate with Boulot Man to empower certified technical professionals, scale enterprise service operations, drive youth employment, and unlock digital workforce growth across the continent.",
     btnSubmitProposal: "Submit Partnership Proposal",
     btnExploreTracks: "Explore Partnership Tracks",
@@ -42,23 +42,44 @@ const translations: Record<string, Record<string, any>> = {
     benefit5Desc: "Standardized quality across East, West, and Central Africa with localized currency support and regulatory compliance.",
     benefit6Title: "Co-Branded Impact & PR",
     benefit6Desc: "Joint press releases, CSR milestone features, and co-marketing campaigns highlighting tangible economic empowerment.",
-    formBadge: "Get In Touch",
-    formTitle: "Start A Strategic Conversation",
-    formDesc: "Fill out the partnership overview below and our executive partnerships team will reach out with a tailored collaboration framework.",
-    labelOrg: "Organization / Company Name *",
-    phOrg: "e.g. Acme Telecom / Ministry of Youth",
-    labelContact: "Contact Person & Title *",
-    phContact: "e.g. John Doe, Head of Operations",
-    labelEmail: "Work Email Address *",
+    formBadge: "Enterprise Intake",
+    formTitle: "Submit Strategic Partnership Proposal",
+    formDesc: "Provide your institutional requirements below. Our executive partnerships committee will evaluate your submission and schedule a formal briefing within 24 business hours.",
+    
+    sec1: "1. Organization Profile",
+    labelOrg: "Organization / Company Legal Name *",
+    phOrg: "e.g. Acme Telecom / Ministry of Digital Economy",
+    labelOrgType: "Organization Type *",
+    labelWebsite: "Official Website / Portal",
+    phWebsite: "https://example.com",
+    labelCountry: "Headquarters / Target Country *",
+
+    sec2: "2. Partnership Track & Scope",
+    labelTrack: "Primary Collaboration Track *",
+    labelScale: "Estimated Target Scale / Scope *",
+    phScale: "e.g. 500+ technicians / 12 regional sites / $250k grant program",
+    labelBudget: "Budget / Investment Tier",
+    labelTimeframe: "Target Launch Timeframe",
+
+    sec3: "3. Executive Contact & Meeting Preference",
+    labelContact: "Lead Contact Person & Title *",
+    phContact: "e.g. Sarah K., Director of Strategic Alliances",
+    labelEmail: "Official Work Email *",
     phEmail: "partner@organization.com",
-    labelPhone: "Phone / WhatsApp Number",
+    labelPhone: "Direct Phone / WhatsApp Number *",
     phPhone: "+250 788 123 456",
-    labelCountry: "Primary Country / Region",
-    labelTrack: "Partnership Track",
-    labelObjectives: "Partnership Objectives & Scope",
-    phObjectives: "Briefly describe your organization's goals and how you'd like to collaborate with Boulot Man...",
+    labelMeeting: "Preferred Briefing Platform",
+
+    sec4: "4. Proposal Narrative & Objectives",
+    labelObjectives: "Detailed Objectives & Value Proposition *",
+    phObjectives: "Detail the specific goals, integration touchpoints, target outcomes, and operational synergy you envision with Boulot Man...",
+
+    sec5: "5. Supporting Documentation & RFPs",
+    uploadPrompt: "Click to upload Concept Notes, RFPs, Pitch Decks, or MoUs (PDF, DOCX, PNG up to 25MB)",
+    noFiles: "No documents attached yet.",
+
     btnSubmitting: "Submitting Proposal...",
-    btnSubmitForm: "Submit Partnership Proposal",
+    btnSubmitForm: "Submit Official Partnership Proposal",
     faqBadge: "Frequently Asked Questions",
     faqTitle: "Everything You Need To Know",
     faqDesc: "Answers to common questions regarding institutional onboarding, contracts, and integrations.",
@@ -66,24 +87,24 @@ const translations: Record<string, Record<string, any>> = {
     bottomDesc: "Join dozens of forward-thinking enterprises, agencies, and institutions leveraging Boulot Man's digital infrastructure.",
     btnBottomContact: "Contact Strategic Partnerships",
     btnLearnMission: "Learn About Our Mission",
-    modalTitle: "Submit Partnership Proposal",
-    modalTrackLabel: "Track:",
+    modalTitle: "Strategic Partnership Fast-Track",
+    modalTrackLabel: "Selected Track:",
     modalOrgLabel: "Organization Name *",
-    modalContactLabel: "Contact Person *",
-    modalEmailLabel: "Email Address *",
-    modalPhoneLabel: "Phone / WhatsApp",
-    modalNotesLabel: "Collaboration Notes",
-    phModalNotes: "Briefly describe your proposal...",
-    btnSendProposal: "Send Proposal",
-    toastWarningTitle: "Incomplete Form",
-    toastWarningMsg: "Please fill in your organization name, contact person, and email address.",
-    toastSuccessTitle: "Proposal Received!",
-    toastSuccessMsg: "Thank you for reaching out. Our strategic partnership team will review your submission and contact you within 24 business hours."
+    modalContactLabel: "Contact Person & Title *",
+    modalEmailLabel: "Work Email *",
+    modalPhoneLabel: "Phone / WhatsApp *",
+    modalNotesLabel: "Collaboration Overview",
+    phModalNotes: "Briefly outline your goals, budget tier, and geographic targets...",
+    btnSendProposal: "Send Partnership Inquiry",
+    toastWarningTitle: "Incomplete Information",
+    toastWarningMsg: "Please complete all mandatory fields (Organization, Contact, Work Email, Phone, Track, and Scope).",
+    toastSuccessTitle: "Partnership Proposal Submitted!",
+    toastSuccessMsg: "Thank you for reaching out. Our strategic alliance director has received your proposal and will respond within 24 business hours."
   },
   fr: {
     heroBadge: "Partenariats Stratégiques & Écosystème",
-    heroTitle: "Associez-vous au Réseau N°1 de Services Techniques en Afrique",
-    heroSubtitle: "Collaborez avec Boulot Man pour soutenir les artisans qualifiés, optimiser vos interventions d'entreprise, favoriser l'emploi des jeunes et structurer le travail technique sur le continent.",
+    heroTitle: "Associez-vous à l'Infrastructure N°1 de Main-d'œuvre Technique en Afrique",
+    heroSubtitle: "Collaborez avec Boulot Man pour structurer les artisans qualifiés, automatiser vos opérations d'entreprise, booster l'emploi des jeunes et accélérer la croissance de la main-d'œuvre numérique.",
     btnSubmitProposal: "Soumettre une Proposition",
     btnExploreTracks: "Découvrir les Programmes",
     stat1Number: "50 000+",
@@ -113,23 +134,44 @@ const translations: Record<string, Record<string, any>> = {
     benefit5Desc: "Standards de qualité homogènes en Afrique de l'Est, de l'Ouest et Centrale, avec gestion multidevise et conformité légale.",
     benefit6Title: "Impact Économique & Communication Conjointe",
     benefit6Desc: "Communiqués de presse conjoints, valorisation RSE et campagnes valorisant l'impact concret sur l'autonomisation économique locale.",
-    formBadge: "Contact Direct",
-    formTitle: "Démarrer une Collaboration Stratégique",
-    formDesc: "Présentez brièvement vos besoins ci-dessous. Notre équipe Partenariats Stratégiques prendra contact pour vous proposer un cadre de collaboration sur-mesure.",
-    labelOrg: "Nom de l'Organisation / Entreprise *",
-    phOrg: "ex. Acme Telecom / Ministère de la Jeunesse",
-    labelContact: "Nom du Contact & Fonction *",
-    phContact: "ex. Jean Dupont, Directeur des Opérations",
-    labelEmail: "Adresse E-mail Professionnelle *",
+    formBadge: "Formulaire Entreprise",
+    formTitle: "Soumettre une Proposition de Partenariat Stratégique",
+    formDesc: "Détaillez vos besoins institutionnels ci-dessous. Notre comité partenariats étudiera votre dossier et planifiera un entretien formel sous 24 heures ouvrées.",
+    
+    sec1: "1. Profil de l'Organisation",
+    labelOrg: "Nom Légal de l'Organisation / Entreprise *",
+    phOrg: "ex. Acme Telecom / Ministère de l'Économie Numérique",
+    labelOrgType: "Type d'Organisation *",
+    labelWebsite: "Site Web Officiel / Portail",
+    phWebsite: "https://exemple.com",
+    labelCountry: "Siège / Pays Cible *",
+
+    sec2: "2. Programme de Partenariat & Envergure",
+    labelTrack: "Programme de Collaboration Principal *",
+    labelScale: "Envergure / Volume Estimé *",
+    phScale: "ex. 500+ techniciens / 12 sites régionaux / Programme subventionné 250k$",
+    labelBudget: "Budget / Fourchette d'Investissement",
+    labelTimeframe: "Échéance de Déploiement Souhaitée",
+
+    sec3: "3. Contact Exécutif & Préférence de Réunion",
+    labelContact: "Nom du Contact & Titre / Fonction *",
+    phContact: "ex. Sarah K., Directrice des Alliances Stratégiques",
+    labelEmail: "E-mail Professionnel Officiel *",
     phEmail: "partenaire@organisation.com",
-    labelPhone: "Numéro de Téléphone / WhatsApp",
+    labelPhone: "Numéro Direct / WhatsApp *",
     phPhone: "+250 788 123 456",
-    labelCountry: "Pays / Région Principale",
-    labelTrack: "Type de Partenariat",
-    labelObjectives: "Objectifs & Périmètre du Projet",
-    phObjectives: "Décrivez brièvement les objectifs de votre organisation et votre vision de collaboration avec Boulot Man...",
+    labelMeeting: "Plateforme de Réunion Préférée",
+
+    sec4: "4. Proposition & Objectifs Détaillés",
+    labelObjectives: "Objectifs & Synergie Opérationnelle *",
+    phObjectives: "Décrivez précisément vos objectifs stratégiques, les besoins d'intégration, les résultats attendus et la valeur conjointe...",
+
+    sec5: "5. Documents & Termes de Référence (TDR)",
+    uploadPrompt: "Cliquez pour joindre notes conceptuelles, TDR, présentations ou accords types (PDF, DOCX, PNG jusqu'à 25 Mo)",
+    noFiles: "Aucun document joint pour le moment.",
+
     btnSubmitting: "Envoi en cours...",
-    btnSubmitForm: "Envoyer la Proposition",
+    btnSubmitForm: "Soumettre la Proposition Officielle",
     faqBadge: "Foire Aux Questions",
     faqTitle: "Tout Ce Que Vous Devez Savoir",
     faqDesc: "Réponses aux questions courantes sur l'intégration institutionnelle, les contrats et les déploiements.",
@@ -137,19 +179,19 @@ const translations: Record<string, Record<string, any>> = {
     bottomDesc: "Rejoignez les dizaines d'entreprises, institutions et agences qui font confiance à l'infrastructure Boulot Man.",
     btnBottomContact: "Contacter les Partenariats Stratégiques",
     btnLearnMission: "Découvrir Notre Mission",
-    modalTitle: "Soumettre une Proposition",
-    modalTrackLabel: "Programme :",
+    modalTitle: "Partenariat Stratégique Accéléré",
+    modalTrackLabel: "Programme sélectionné :",
     modalOrgLabel: "Nom de l'Organisation *",
-    modalContactLabel: "Nom du Contact *",
-    modalEmailLabel: "Adresse E-mail *",
-    modalPhoneLabel: "Téléphone / WhatsApp",
-    modalNotesLabel: "Détails de la Collaboration",
-    phModalNotes: "Décrivez brièvement votre proposition...",
-    btnSendProposal: "Envoyer la Proposition",
+    modalContactLabel: "Nom & Titre du Contact *",
+    modalEmailLabel: "E-mail Professionnel *",
+    modalPhoneLabel: "Téléphone / WhatsApp *",
+    modalNotesLabel: "Aperçu de la Collaboration",
+    phModalNotes: "Décrivez brièvement vos objectifs, le budget envisagé et la zone géographique...",
+    btnSendProposal: "Envoyer la Demande",
     toastWarningTitle: "Formulaire Incomplet",
-    toastWarningMsg: "Veuillez renseigner le nom de l'organisation, le contact et l'adresse e-mail.",
-    toastSuccessTitle: "Proposition Reçue !",
-    toastSuccessMsg: "Merci de votre démarche. Notre équipe partenariats étudiera votre demande et vous répondra sous 24 heures ouvrées."
+    toastWarningMsg: "Veuillez remplir tous les champs obligatoires (Organisation, Contact, E-mail, Téléphone, Programme et Objectifs).",
+    toastSuccessTitle: "Proposition de Partenariat Reçue !",
+    toastSuccessMsg: "Merci de votre démarche. Notre direction des partenariats examinera votre dossier et vous contactera sous 24 heures ouvrées."
   }
 };
 
@@ -279,6 +321,9 @@ export default function PartnershipsPage() {
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(0);
   const [lang, setLang] = useState("en");
 
+  // Files state
+  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+
   useEffect(() => {
     const updateLang = () => {
       setLang(localStorage.getItem("lang") || "en");
@@ -292,13 +337,30 @@ export default function PartnershipsPage() {
 
   const [form, setForm] = useState({
     orgName: "",
+    orgType: "Corporation / Enterprise",
+    website: "",
+    country: "Rwanda",
+    track: "Enterprise & Corporate Solutions",
+    scale: "",
+    budget: "$25,000 - $100,000",
+    timeframe: "Immediate / Q1",
     contactName: "",
     email: "",
     phone: "",
-    country: "Rwanda",
-    track: "Enterprise & Corporate Solutions",
+    meetingPlatform: "Google Meet",
     details: "",
   });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const names = Array.from(e.target.files).map((f) => f.name);
+      setAttachedFiles((prev) => [...prev, ...names]);
+    }
+  };
+
+  const removeFile = (idx: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   const openInquiryModal = (trackName?: string) => {
     if (trackName) {
@@ -310,35 +372,90 @@ export default function PartnershipsPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.orgName.trim() || !form.email.trim() || !form.contactName.trim()) {
+    if (!form.orgName.trim() || !form.email.trim() || !form.contactName.trim() || !form.phone.trim()) {
       toast.warning(t.toastWarningTitle, t.toastWarningMsg);
       return;
     }
 
     setSubmitting(true);
     try {
-      await api.submitInquiry({
+      const payloadDetails = `=== 1. Organization Profile ===
+Organization / Company Legal Name: ${form.orgName}
+Organization Type: ${form.orgType}
+Official Website: ${form.website || "N/A"}
+Country / Region: ${form.country}
+
+=== 2. Partnership Track & Scale ===
+Partnership Track: ${form.track}
+Estimated Scale / Scope: ${form.scale || "Not specified"}
+Budget / Investment Tier: ${form.budget}
+Target Launch Timeframe: ${form.timeframe}
+
+=== 3. Executive Contact & Meeting ===
+Lead Contact: ${form.contactName}
+Work Email: ${form.email}
+Phone / WhatsApp: ${form.phone}
+Preferred Meeting: ${form.meetingPlatform}
+
+=== 4. Objectives & Requirements ===
+${form.details || "No additional narrative provided."}
+
+=== 5. Documentation ===
+Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+
+      const newInquiry = {
+        id: `PARTNER-${Date.now().toString().slice(-6)}`,
+        created_at: new Date().toISOString(),
+        topic: `[PARTNERSHIP PROPOSAL] ${form.orgName} - ${form.track}`,
         name: form.contactName,
+        company_name: form.orgName,
         email: form.email,
         phone: form.phone,
-        company_name: form.orgName,
-        inquiry_type: "partnership",
-        details: `Partnership Track: ${form.track}\nCountry / Region: ${form.country}\n\nCollaboration Scope:\n${form.details || "No additional details provided."}`
-      });
+        city: form.country,
+        category: form.track,
+        details: payloadDetails,
+        attached_files: attachedFiles,
+        status: "Pending",
+      };
+
+      if (typeof window !== "undefined") {
+        const existing = JSON.parse(localStorage.getItem("boulotman_partnership_inquiries") || "[]");
+        localStorage.setItem("boulotman_partnership_inquiries", JSON.stringify([newInquiry, ...existing]));
+      }
+
+      await Promise.allSettled([
+        api.submitInquiry({
+          name: form.contactName,
+          email: form.email,
+          phone: form.phone,
+          company_name: form.orgName,
+          inquiry_type: "partnership",
+          details: payloadDetails
+        }),
+        api.createSupportTicket({
+          subject: `[Partnership Proposal] ${form.orgName} - ${form.track}`,
+          body: `Executive Contact: ${form.contactName} (${form.email} | ${form.phone})\nOrg Type: ${form.orgType}\nCountry: ${form.country}\nTrack: ${form.track}\nScale: ${form.scale}\nBudget: ${form.budget}\nTimeframe: ${form.timeframe}\nMeeting: ${form.meetingPlatform}\nAttachments: ${attachedFiles.join(", ") || "None"}\n\nObjectives:\n${form.details}`
+        })
+      ]);
+
       setModalOpen(false);
-      toast.success(
-        t.toastSuccessTitle,
-        t.toastSuccessMsg
-      );
+      toast.success(t.toastSuccessTitle, t.toastSuccessMsg);
       setForm({
         orgName: "",
+        orgType: "Corporation / Enterprise",
+        website: "",
+        country: "Rwanda",
+        track: "Enterprise & Corporate Solutions",
+        scale: "",
+        budget: "$25,000 - $100,000",
+        timeframe: "Immediate / Q1",
         contactName: "",
         email: "",
         phone: "",
-        country: "Rwanda",
-        track: "Enterprise & Corporate Solutions",
+        meetingPlatform: "Google Meet",
         details: "",
       });
+      setAttachedFiles([]);
     } catch (err) {
       toast.error("Submission Error", "Failed to submit proposal. Please try again.");
     } finally {
@@ -362,13 +479,9 @@ export default function PartnershipsPage() {
           </p>
 
           <div className={styles.heroActionGroup}>
-            <button
-              type="button"
-              onClick={() => openInquiryModal("Enterprise & Corporate Solutions")}
-              className={styles.heroBtnPrimary}
-            >
+            <a href="#inquiry-form" className={styles.heroBtnPrimary}>
               <iconify-icon icon="lucide:send" style={{ fontSize: "18px" }} /> {t.btnSubmitProposal}
-            </button>
+            </a>
             <a href="#partner-tracks" className={styles.heroBtnSecondary}>
               <iconify-icon icon="lucide:layers" style={{ fontSize: "18px" }} /> {t.btnExploreTracks}
             </a>
@@ -518,7 +631,7 @@ export default function PartnershipsPage() {
           </div>
         </section>
 
-        {/* ================= INLINE PROPOSAL FORM ================= */}
+        {/* ================= INLINE ENTERPRISE PROPOSAL FORM ================= */}
         <section id="inquiry-form" className={styles.section}>
           <div className={styles.formSection}>
             <div className={styles.sectionHeader} style={{ marginBottom: "32px" }}>
@@ -530,97 +643,246 @@ export default function PartnershipsPage() {
             </div>
 
             <form onSubmit={handleFormSubmit}>
-              <div className={styles.formGrid}>
-                <div>
-                  <label className={styles.formLabel}>{t.labelOrg}</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={t.phOrg}
-                    className={styles.formInput}
-                    value={form.orgName}
-                    onChange={(e) => setForm({ ...form, orgName: e.target.value })}
-                  />
-                </div>
+              {/* SECTION 1 */}
+              <div className={styles.formBlock}>
+                <h3 className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:building-2" /> {t.sec1}
+                </h3>
+                <div className={styles.formGrid}>
+                  <div>
+                    <label className={styles.formLabel}>{t.labelOrg}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder={t.phOrg}
+                      className={styles.formInput}
+                      value={form.orgName}
+                      onChange={(e) => setForm({ ...form, orgName: e.target.value })}
+                    />
+                  </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.labelContact}</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={t.phContact}
-                    className={styles.formInput}
-                    value={form.contactName}
-                    onChange={(e) => setForm({ ...form, contactName: e.target.value })}
-                  />
-                </div>
+                  <div>
+                    <label className={styles.formLabel}>{t.labelOrgType}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.orgType}
+                      onChange={(e) => setForm({ ...form, orgType: e.target.value })}
+                    >
+                      <option value="Corporation / Enterprise">Corporation / Enterprise</option>
+                      <option value="Government Agency / Ministry">Government Agency / Ministry</option>
+                      <option value="International NGO / Development Body">International NGO / Development Body</option>
+                      <option value="TVET / University / Polytechnic">TVET / University / Polytechnic</option>
+                      <option value="Hardware / Equipment Manufacturer">Hardware / Equipment Manufacturer</option>
+                      <option value="Telecom / Energy Infrastructure">Telecom / Energy Infrastructure</option>
+                      <option value="Financial Institution / FinTech">Financial Institution / FinTech</option>
+                      <option value="Other">Other Institutional Entity</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.labelEmail}</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder={t.phEmail}
-                    className={styles.formInput}
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
-                </div>
+                  <div>
+                    <label className={styles.formLabel}>{t.labelWebsite}</label>
+                    <input
+                      type="url"
+                      placeholder={t.phWebsite}
+                      className={styles.formInput}
+                      value={form.website}
+                      onChange={(e) => setForm({ ...form, website: e.target.value })}
+                    />
+                  </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.labelPhone}</label>
-                  <input
-                    type="tel"
-                    placeholder={t.phPhone}
-                    className={styles.formInput}
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  />
+                  <div>
+                    <label className={styles.formLabel}>{t.labelCountry}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.country}
+                      onChange={(e) => setForm({ ...form, country: e.target.value })}
+                    >
+                      <option value="Rwanda">Rwanda (Kigali HQ)</option>
+                      <option value="Cameroon">Cameroon (Douala / Yaoundé)</option>
+                      <option value="Nigeria">Nigeria (Lagos / Abuja)</option>
+                      <option value="Kenya">Kenya (Nairobi)</option>
+                      <option value="Ghana">Ghana (Accra)</option>
+                      <option value="Ivory Coast">Ivory Coast (Abidjan)</option>
+                      <option value="South Africa">South Africa (Johannesburg)</option>
+                      <option value="Tanzania">Tanzania (Dar es Salaam)</option>
+                      <option value="Pan-African / Cross-Border">Pan-African / Cross-Border</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.labelCountry}</label>
-                  <select
-                    className={styles.formSelect}
-                    value={form.country}
-                    onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  >
-                    <option value="Rwanda">Rwanda</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="Ivory Coast">Ivory Coast</option>
-                    <option value="Cameroon">Cameroon</option>
-                    <option value="Pan-African / Global">Pan-African / Global</option>
-                  </select>
+              {/* SECTION 2 */}
+              <div className={styles.formBlock}>
+                <h3 className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:layers" /> {t.sec2}
+                </h3>
+                <div className={styles.formGrid}>
+                  <div>
+                    <label className={styles.formLabel}>{t.labelTrack}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.track}
+                      onChange={(e) => setForm({ ...form, track: e.target.value })}
+                    >
+                      <option value="Enterprise & Corporate Solutions">Enterprise &amp; Facility Management</option>
+                      <option value="Government & NGO Program">Government &amp; NGO Youth Employment</option>
+                      <option value="Vocational & Training Institute">Vocational &amp; Technical Training Institute</option>
+                      <option value="Fintech, Tools & Hardware Supplier">Fintech, Tool &amp; Equipment Supplier</option>
+                      <option value="Telecom & Energy Infrastructure Dispatch">Telecom &amp; Energy Infrastructure Dispatch</option>
+                      <option value="Other">Other Strategic Initiative</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelScale}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder={t.phScale}
+                      className={styles.formInput}
+                      value={form.scale}
+                      onChange={(e) => setForm({ ...form, scale: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelBudget}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.budget}
+                      onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                    >
+                      <option value="Under $25,000">Under $25,000 USD / Equiv</option>
+                      <option value="$25,000 - $100,000">$25,000 - $100,000 USD</option>
+                      <option value="$100,000 - $500,000">$100,000 - $500,000 USD</option>
+                      <option value="$500,000+ Enterprise Scale">$500,000+ Enterprise Scale</option>
+                      <option value="Institutional Grant / Non-Commercial">Institutional Grant / Non-Commercial</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelTimeframe}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.timeframe}
+                      onChange={(e) => setForm({ ...form, timeframe: e.target.value })}
+                    >
+                      <option value="Immediate / Q1">Immediate / Q1 Launch</option>
+                      <option value="1 - 3 Months">1 - 3 Months Preparation</option>
+                      <option value="3 - 6 Months">3 - 6 Months Planning</option>
+                      <option value="Annual Strategic Roadmap">Annual Strategic Roadmap</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.labelTrack}</label>
-                  <select
-                    className={styles.formSelect}
-                    value={form.track}
-                    onChange={(e) => setForm({ ...form, track: e.target.value })}
-                  >
-                    <option value="Enterprise & Corporate Solutions">Enterprise &amp; Facility Management</option>
-                    <option value="Government & NGO Program">Government &amp; NGO Youth Employment</option>
-                    <option value="Vocational & Training Institute">Vocational &amp; Technical Training Institute</option>
-                    <option value="Fintech, Tools & Hardware Supplier">Fintech, Tool &amp; Equipment Supplier</option>
-                    <option value="Other">Other Strategic Initiative</option>
-                  </select>
+              {/* SECTION 3 */}
+              <div className={styles.formBlock}>
+                <h3 className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:user-check" /> {t.sec3}
+                </h3>
+                <div className={styles.formGrid}>
+                  <div>
+                    <label className={styles.formLabel}>{t.labelContact}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder={t.phContact}
+                      className={styles.formInput}
+                      value={form.contactName}
+                      onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelEmail}</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder={t.phEmail}
+                      className={styles.formInput}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelPhone}</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder={t.phPhone}
+                      className={styles.formInput}
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.labelMeeting}</label>
+                    <select
+                      className={styles.formSelect}
+                      value={form.meetingPlatform}
+                      onChange={(e) => setForm({ ...form, meetingPlatform: e.target.value })}
+                    >
+                      <option value="Google Meet">Google Meet</option>
+                      <option value="Microsoft Teams">Microsoft Teams</option>
+                      <option value="Zoom">Zoom</option>
+                      <option value="In-Person at Boulot Man Hub">In-Person at Boulot Man Hub</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
+              {/* SECTION 4 */}
+              <div className={styles.formBlock}>
+                <h3 className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:file-text" /> {t.sec4}
+                </h3>
                 <div className={styles.formGroupFull}>
                   <label className={styles.formLabel}>{t.labelObjectives}</label>
                   <textarea
                     rows={4}
+                    required
                     placeholder={t.phObjectives}
                     className={styles.formTextarea}
                     value={form.details}
                     onChange={(e) => setForm({ ...form, details: e.target.value })}
                   />
                 </div>
+              </div>
+
+              {/* SECTION 5 */}
+              <div className={styles.formBlock}>
+                <h3 className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:paperclip" /> {t.sec5}
+                </h3>
+                <label className={styles.uploadZone}>
+                  <input
+                    type="file"
+                    multiple
+                    style={{ display: "none" }}
+                    onChange={handleFileUpload}
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
+                  />
+                  <iconify-icon icon="lucide:upload-cloud" style={{ fontSize: "28px", color: "#ff4500" }} />
+                  <span style={{ fontSize: "14px", color: "#001F3F", fontWeight: 600 }}>{t.uploadPrompt}</span>
+                </label>
+
+                {attachedFiles.length > 0 ? (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
+                    {attachedFiles.map((name, idx) => (
+                      <span key={idx} className={styles.fileBadge}>
+                        📎 {name}
+                        <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: "13px", color: "#94a3b8", margin: "8px 0 0 0" }}>{t.noFiles}</p>
+                )}
               </div>
 
               <button type="submit" disabled={submitting} className={styles.submitBtn}>
@@ -675,13 +937,12 @@ export default function PartnershipsPage() {
             {t.bottomDesc}
           </p>
           <div className={styles.heroActionGroup}>
-            <button
-              type="button"
-              onClick={() => openInquiryModal("Enterprise & Corporate Solutions")}
+            <a
+              href="#inquiry-form"
               className={styles.heroBtnPrimary}
             >
               <iconify-icon icon="lucide:mail" /> {t.btnBottomContact}
-            </button>
+            </a>
             <Link href="/about" className={styles.heroBtnSecondary}>
               <iconify-icon icon="lucide:info" /> {t.btnLearnMission}
             </Link>
@@ -714,7 +975,7 @@ export default function PartnershipsPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Acme Corp"
+                    placeholder="e.g. Acme Corp / Ministry of Youth"
                     className={styles.formInput}
                     value={form.orgName}
                     onChange={(e) => setForm({ ...form, orgName: e.target.value })}
@@ -733,26 +994,41 @@ export default function PartnershipsPage() {
                   />
                 </div>
 
-                <div>
-                  <label className={styles.formLabel}>{t.modalEmailLabel}</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="name@organization.com"
-                    className={styles.formInput}
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label className={styles.formLabel}>{t.modalEmailLabel}</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="name@organization.com"
+                      className={styles.formInput}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={styles.formLabel}>{t.modalPhoneLabel}</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="+250 ..."
+                      className={styles.formInput}
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className={styles.formLabel}>{t.modalPhoneLabel}</label>
+                  <label className={styles.formLabel}>{t.labelScale}</label>
                   <input
-                    type="tel"
-                    placeholder="+250 ..."
+                    type="text"
+                    required
+                    placeholder="e.g. 500+ workers / 10 regional hubs"
                     className={styles.formInput}
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    value={form.scale}
+                    onChange={(e) => setForm({ ...form, scale: e.target.value })}
                   />
                 </div>
 
@@ -780,4 +1056,3 @@ export default function PartnershipsPage() {
     </div>
   );
 }
-

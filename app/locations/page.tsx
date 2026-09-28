@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/lib/api";
 import styles from "./locations.module.css";
 
 interface LocationCardData {
@@ -168,11 +169,28 @@ export default function LocationsPage() {
   const [requestForm, setRequestForm] = useState({
     name: "",
     email: "",
+    phone: "",
     country: "",
     city: "",
-    role: ""
+    district: "",
+    role: "Client / Property Owner",
+    volume: "6 - 20 jobs / month",
+    trades: ["Electrical", "Plumbing", "Solar PV & Power"],
+    isChampion: false,
+    details: ""
   });
   const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [submittingReq, setSubmittingReq] = useState(false);
+
+  const toggleTrade = (trade: string) => {
+    setRequestForm((prev) => {
+      const exists = prev.trades.includes(trade);
+      return {
+        ...prev,
+        trades: exists ? prev.trades.filter((t) => t !== trade) : [...prev.trades, trade]
+      };
+    });
+  };
 
   const handleHeroQuickClick = (term: string) => {
     setHeroSearch(term);
@@ -203,9 +221,86 @@ export default function LocationsPage() {
     return searchMatch && countryMatch && statusMatch;
   });
 
-  const handleSubmitRequest = (e: React.FormEvent) => {
+  const handleSubmitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRequestSubmitted(true);
+    if (!requestForm.name.trim() || !requestForm.email.trim() || !requestForm.city.trim() || !requestForm.country.trim()) {
+      return;
+    }
+
+    setSubmittingReq(true);
+    try {
+      const payloadDetails = `=== 1. Expansion Location & Target ===
+Target City / Urban Area: ${requestForm.city}
+Country: ${requestForm.country}
+District / Sub-region: ${requestForm.district || "General Area"}
+
+=== 2. Requester Profile & Scale ===
+Requester Name: ${requestForm.name}
+Role / Stakeholder: ${requestForm.role}
+Email: ${requestForm.email}
+Phone / WhatsApp: ${requestForm.phone || "N/A"}
+Estimated Demand Volume: ${requestForm.volume}
+Local Champion / Hub Partner: ${requestForm.isChampion ? "Yes (Interested in onboarding local artisans)" : "No (Standard user request)"}
+
+=== 3. High Demand Trades Needed ===
+Requested Trades: ${requestForm.trades.join(", ") || "General Skilled Trades"}
+
+=== 4. Regional Insights & Comments ===
+${requestForm.details || "No additional comments provided."}`;
+
+      const newInquiry = {
+        id: `LOC-${Date.now().toString().slice(-6)}`,
+        created_at: new Date().toISOString(),
+        topic: `[CITY EXPANSION] ${requestForm.city}, ${requestForm.country} - ${requestForm.role}`,
+        name: requestForm.name,
+        email: requestForm.email,
+        phone: requestForm.phone,
+        city: `${requestForm.city}, ${requestForm.country}`,
+        category: "City Expansion Request",
+        details: payloadDetails,
+        status: "Pending"
+      };
+
+      if (typeof window !== "undefined") {
+        const existing = JSON.parse(localStorage.getItem("boulotman_location_inquiries") || "[]");
+        localStorage.setItem("boulotman_location_inquiries", JSON.stringify([newInquiry, ...existing]));
+      }
+
+      await Promise.allSettled([
+        api.submitInquiry({
+          name: requestForm.name,
+          email: requestForm.email,
+          phone: requestForm.phone,
+          company_name: requestForm.isChampion ? "City Champion Lead" : requestForm.role,
+          inquiry_type: "general",
+          details: payloadDetails
+        }),
+        api.createSupportTicket({
+          subject: `[City Expansion Request] ${requestForm.city}, ${requestForm.country} (${requestForm.role})`,
+          body: `Requester: ${requestForm.name} (${requestForm.email} | ${requestForm.phone})\nTarget: ${requestForm.city}, ${requestForm.country} (${requestForm.district})\nRole: ${requestForm.role}\nTrades: ${requestForm.trades.join(", ")}\nVolume: ${requestForm.volume}\nCity Champion: ${requestForm.isChampion ? "YES" : "NO"}\n\nNotes:\n${requestForm.details}`
+        })
+      ]);
+
+      setRequestSubmitted(true);
+      setRequestForm({
+        name: "",
+        email: "",
+        phone: "",
+        country: "",
+        city: "",
+        district: "",
+        role: "Client / Property Owner",
+        volume: "6 - 20 jobs / month",
+        trades: ["Electrical", "Plumbing", "Solar PV & Power"],
+        isChampion: false,
+        details: ""
+      });
+    } catch (err) {
+      console.error("Failed to submit location request", err);
+      setRequestSubmitted(true);
+    } finally {
+      setSubmittingReq(false);
+    }
   };
 
   return (
@@ -539,87 +634,221 @@ export default function LocationsPage() {
             </div>
 
             <form className={styles.formCard} onSubmit={handleSubmitRequest}>
-              <h3>Request Boulot Man in Your City</h3>
-              <p>Tell us the location and how you would like to use Boulot Man.</p>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#001F3F", marginBottom: "4px" }}>
+                Request Boulot Man in Your City
+              </h3>
+              <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "20px" }}>
+                Tell us where you need services, your expected demand, and how you want to collaborate.
+              </p>
 
               {requestSubmitted && (
                 <div className={styles.successMsg}>
-                  <span>✓</span>
+                  <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: "20px" }} />
                   <span>
-                    Your request for {requestForm.city ? `${requestForm.city}, ` : ""}{requestForm.country} has been received!
+                    Your expansion request has been registered and routed to our regional operations director!
                   </span>
                 </div>
               )}
 
-              <div className={styles.formGrid}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="reqName">Your Name</label>
-                  <input
-                    type="text"
-                    id="reqName"
-                    required
-                    value={requestForm.name}
-                    onChange={(e) => setRequestForm({ ...requestForm, name: e.target.value })}
-                  />
+              {/* SECTION 1: Target Location */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:map-pin" /> 1. Target Expansion Geography
                 </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqCountry">Country *</label>
+                    <input
+                      type="text"
+                      id="reqCountry"
+                      placeholder="e.g. Senegal, Ivory Coast, Benin, Congo"
+                      required
+                      value={requestForm.country}
+                      onChange={(e) => setRequestForm({ ...requestForm, country: e.target.value })}
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="reqEmail">Email</label>
-                  <input
-                    type="email"
-                    id="reqEmail"
-                    required
-                    value={requestForm.email}
-                    onChange={(e) => setRequestForm({ ...requestForm, email: e.target.value })}
-                  />
-                </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqCity">Target City / Town *</label>
+                    <input
+                      type="text"
+                      id="reqCity"
+                      placeholder="e.g. Dakar, Abidjan, Cotonou, Brazzaville"
+                      required
+                      value={requestForm.city}
+                      onChange={(e) => setRequestForm({ ...requestForm, city: e.target.value })}
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="reqCountry">Country</label>
-                  <input
-                    type="text"
-                    id="reqCountry"
-                    placeholder="e.g. Senegal, Ivory Coast, Benin"
-                    required
-                    value={requestForm.country}
-                    onChange={(e) => setRequestForm({ ...requestForm, country: e.target.value })}
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="reqCity">City</label>
-                  <input
-                    type="text"
-                    id="reqCity"
-                    placeholder="e.g. Dakar, Abidjan, Cotonou"
-                    required
-                    value={requestForm.city}
-                    onChange={(e) => setRequestForm({ ...requestForm, city: e.target.value })}
-                  />
-                </div>
-
-                <div className={`${styles.formGroup} ${styles.formFull}`}>
-                  <label htmlFor="reqRole">I want to use Boulot Man as</label>
-                  <select
-                    id="reqRole"
-                    required
-                    value={requestForm.role}
-                    onChange={(e) => setRequestForm({ ...requestForm, role: e.target.value })}
-                  >
-                    <option value="">Select</option>
-                    <option>Client</option>
-                    <option>Technician / Professional</option>
-                    <option>Engineer</option>
-                    <option>Company</option>
-                    <option>Contractor</option>
-                    <option>Organization</option>
-                    <option>Other</option>
-                  </select>
+                  <div className={`${styles.formGroup} ${styles.formFull}`}>
+                    <label htmlFor="reqDistrict">District / Municipal Zone / Neighborhoods</label>
+                    <input
+                      type="text"
+                      id="reqDistrict"
+                      placeholder="e.g. Plateau, Almadies, Cocody, Akwa, Downtown"
+                      value={requestForm.district}
+                      onChange={(e) => setRequestForm({ ...requestForm, district: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <button type="submit" className={styles.submitBtn}>
-                Submit Location Request
+              {/* SECTION 2: Requester Profile */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:user-check" /> 2. Requester Profile &amp; Contact
+                </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqName">Full Name *</label>
+                    <input
+                      type="text"
+                      id="reqName"
+                      required
+                      placeholder="Your full name"
+                      value={requestForm.name}
+                      onChange={(e) => setRequestForm({ ...requestForm, name: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqRole">Your Role / Perspective *</label>
+                    <select
+                      id="reqRole"
+                      required
+                      value={requestForm.role}
+                      onChange={(e) => setRequestForm({ ...requestForm, role: e.target.value })}
+                    >
+                      <option value="Client / Property Owner">Client / Property Owner</option>
+                      <option value="Technician / Skilled Artisan">Technician / Skilled Artisan</option>
+                      <option value="General Contractor / Builder">General Contractor / Builder</option>
+                      <option value="Commercial SME / Enterprise">Commercial SME / Enterprise</option>
+                      <option value="Diaspora Investor">Diaspora Property Investor</option>
+                      <option value="Local Partner / Franchise Lead">Local Partner / Franchise Lead</option>
+                      <option value="Other">Other Community Stakeholder</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqEmail">Official Email *</label>
+                    <input
+                      type="email"
+                      id="reqEmail"
+                      required
+                      placeholder="name@domain.com"
+                      value={requestForm.email}
+                      onChange={(e) => setRequestForm({ ...requestForm, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="reqPhone">Phone / WhatsApp Number</label>
+                    <input
+                      type="tel"
+                      id="reqPhone"
+                      placeholder="+221 ..."
+                      value={requestForm.phone}
+                      onChange={(e) => setRequestForm({ ...requestForm, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: High-Demand Trades */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:wrench" /> 3. High Demand Trades Needed
+                </div>
+                <p style={{ fontSize: "12.5px", color: "#64748b", margin: "0 0 10px 0" }}>
+                  Select the services most urgently required in this area:
+                </p>
+                <div className={styles.pillsWrap}>
+                  {[
+                    "Electrical & Wiring",
+                    "Plumbing & Sanitation",
+                    "Solar PV & Inverters",
+                    "Masonry & Civil Works",
+                    "Painting & Finishes",
+                    "HVAC & Air Conditioning",
+                    "Generator & Heavy Power",
+                    "CCTV & Security Tech",
+                    "Welding & Metalwork",
+                    "Carpentry & Roofing"
+                  ].map((trade) => {
+                    const isSelected = requestForm.trades.includes(trade);
+                    return (
+                      <button
+                        type="button"
+                        key={trade}
+                        onClick={() => toggleTrade(trade)}
+                        className={`${styles.pillBtn} ${isSelected ? styles.pillBtnActive : ""}`}
+                      >
+                        <iconify-icon icon={isSelected ? "lucide:check" : "lucide:plus"} />
+                        {trade}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 4: Volume & Local Champion */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:activity" /> 4. Scale &amp; Local Community Champion
+                </div>
+                <div className={styles.formGrid}>
+                  <div className={`${styles.formGroup} ${styles.formFull}`}>
+                    <label htmlFor="reqVolume">Estimated Monthly Demand / Project Pipeline</label>
+                    <select
+                      id="reqVolume"
+                      value={requestForm.volume}
+                      onChange={(e) => setRequestForm({ ...requestForm, volume: e.target.value })}
+                    >
+                      <option value="1 - 5 jobs / month">1 - 5 jobs / month (Occasional / Personal)</option>
+                      <option value="6 - 20 jobs / month">6 - 20 jobs / month (Active Residential & SME)</option>
+                      <option value="20 - 50+ jobs / month">20 - 50+ jobs / month (High Commercial Demand)</option>
+                      <option value="Enterprise / Large Infrastructure">Enterprise / Large Infrastructure Project</option>
+                    </select>
+                  </div>
+
+                  <div className={`${styles.formGroup} ${styles.formFull}`}>
+                    <label className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={requestForm.isChampion}
+                        onChange={(e) => setRequestForm({ ...requestForm, isChampion: e.target.checked })}
+                      />
+                      <span>
+                        🌟 <strong>I want to be a City Champion:</strong> I can help Boulot Man onboard local verified artisans, coordinate testing hubs, or manage local partner relations.
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className={`${styles.formGroup} ${styles.formFull}`}>
+                    <label htmlFor="reqDetails">Local Market Notes &amp; Specific Requirements</label>
+                    <textarea
+                      id="reqDetails"
+                      rows={3}
+                      placeholder="Tell us about the local trade landscape, specific challenges, or upcoming commercial developments..."
+                      className={styles.formTextarea}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #d6dce4",
+                        fontFamily: "inherit",
+                        fontSize: "13.5px",
+                        resize: "vertical"
+                      }}
+                      value={requestForm.details}
+                      onChange={(e) => setRequestForm({ ...requestForm, details: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" disabled={submittingReq} className={styles.submitBtn}>
+                {submittingReq ? "Registering Request..." : "Submit City Expansion Request"}
               </button>
             </form>
           </div>

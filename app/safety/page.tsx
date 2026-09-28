@@ -86,48 +86,92 @@ export default function SafetyCenterPage() {
   const [reportForm, setReportForm] = useState({
     name: "",
     email: "",
-    role: "",
-    issueType: "",
+    phone: "",
+    role: "Client",
+    issueType: "Fraud / Payment Scam",
+    severity: "High Risk / Active Threat",
     username: "",
+    offenderRole: "Technician / Professional",
     reference: "",
+    location: "",
+    incidentTime: "",
     description: "",
-    contactMethod: ""
+    contactMethod: "Email"
   });
+  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const names = Array.from(e.target.files).map((f) => f.name);
+      setAttachedFiles((prev) => [...prev, ...names]);
+    }
+  };
+
+  const removeFile = (idx: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reportForm.name.trim() || !reportForm.email.trim() || !reportForm.description.trim()) {
+      return;
+    }
+
+    setSubmitting(true);
     try {
+      const payloadDetails = `=== 1. Reporter Details ===
+Reporter: ${reportForm.name}
+Role: ${reportForm.role}
+Email: ${reportForm.email}
+Phone / WhatsApp: ${reportForm.phone || "N/A"}
+Preferred Contact: ${reportForm.contactMethod}
+
+=== 2. Threat Classification & Severity ===
+Concern Type: ${reportForm.issueType}
+Risk Level: ${reportForm.severity}
+Location / Worksite: ${reportForm.location || "N/A"}
+Time of Incident: ${reportForm.incidentTime || "Recent"}
+
+=== 3. Reported Party & Reference ===
+Reported Username / Company: ${reportForm.username || "Unknown"}
+Offending Party Role: ${reportForm.offenderRole}
+Task / Project Reference: ${reportForm.reference || "N/A"}
+
+=== 4. Incident Statement & Chronology ===
+${reportForm.description}
+
+=== 5. Attached Proof & Evidence ===
+Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+
       const newReport = {
-        id: `SR-${Date.now().toString().slice(-6)}`,
+        id: `SAFE-${Date.now().toString().slice(-6)}`,
         created_at: new Date().toISOString(),
+        topic: `[SAFETY CONCERN] ${reportForm.issueType} - ${reportForm.username || reportForm.name}`,
         name: reportForm.name,
         email: reportForm.email,
-        role: reportForm.role,
-        issueType: reportForm.issueType,
-        username: reportForm.username,
-        reference: reportForm.reference,
-        description: reportForm.description,
-        contactMethod: reportForm.contactMethod,
+        phone: reportForm.phone,
+        city: reportForm.location || "Trust & Safety",
+        category: reportForm.issueType,
+        details: payloadDetails,
+        attached_files: attachedFiles,
         status: "Open"
       };
 
       if (typeof window !== "undefined") {
-        const existing = JSON.parse(localStorage.getItem("boulotman_safety_reports") || "[]");
-        localStorage.setItem("boulotman_safety_reports", JSON.stringify([newReport, ...existing]));
+        const existing = JSON.parse(localStorage.getItem("boulotman_safety_inquiries") || "[]");
+        localStorage.setItem("boulotman_safety_inquiries", JSON.stringify([newReport, ...existing]));
       }
-
-      // Sync with backend dispute and support tables
-      const safetyBody = `Reporter: ${reportForm.name} (${reportForm.role}) | Email: ${reportForm.email}\nReported Target: ${reportForm.username || "N/A"} | Ref: ${reportForm.reference || "N/A"}\nConcern Type: ${reportForm.issueType}\nContact Preference: ${reportForm.contactMethod}\n\nDetails:\n${reportForm.description}`;
 
       await Promise.allSettled([
         api.createSupportTicket({
-          subject: `[Safety Concern] ${reportForm.issueType} - ${reportForm.username || reportForm.name}`,
-          body: safetyBody
+          subject: `[Safety & Trust Incident] ${reportForm.issueType} - ${reportForm.username || reportForm.name} (${reportForm.severity})`,
+          body: `Reporter: ${reportForm.name} (${reportForm.role} | ${reportForm.email} | ${reportForm.phone})\nTarget: ${reportForm.username} (${reportForm.offenderRole})\nRef: ${reportForm.reference}\nLocation: ${reportForm.location}\nConcern: ${reportForm.issueType}\nSeverity: ${reportForm.severity}\nEvidence: ${attachedFiles.join(", ") || "None"}\n\nStatement:\n${reportForm.description}`
         }),
         api.createDispute({
-          reason: `Safety Violation: ${reportForm.issueType}`,
-          description: safetyBody,
+          reason: `Safety Violation [${reportForm.severity}]: ${reportForm.issueType}`,
+          description: payloadDetails,
           against_name: reportForm.username || ""
         })
       ]);
@@ -136,16 +180,24 @@ export default function SafetyCenterPage() {
       setReportForm({
         name: "",
         email: "",
-        role: "",
-        issueType: "",
+        phone: "",
+        role: "Client",
+        issueType: "Fraud / Payment Scam",
+        severity: "High Risk / Active Threat",
         username: "",
+        offenderRole: "Technician / Professional",
         reference: "",
+        location: "",
+        incidentTime: "",
         description: "",
-        contactMethod: ""
+        contactMethod: "Email"
       });
+      setAttachedFiles([]);
     } catch (err) {
       console.error("Failed to submit safety report", err);
       setReportSubmitted(true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -529,127 +581,258 @@ export default function SafetyCenterPage() {
             </div>
 
             <form className={styles.formCard} onSubmit={handleSubmitReport}>
-              <h3>Safety Report</h3>
-              <p>Provide enough information for the concern to be reviewed.</p>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#001F3F", marginBottom: "4px" }}>
+                Trust &amp; Safety Incident Report
+              </h3>
+              <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "20px" }}>
+                Provide detailed evidence for immediate investigation and platform enforcement.
+              </p>
 
               {reportSubmitted && (
                 <div className={styles.successMsg}>
-                  <span>✓</span>
-                  <span>Your safety report has been submitted to Boulot Man trust &amp; safety team for immediate review.</span>
+                  <iconify-icon icon="lucide:check-circle-2" style={{ fontSize: "22px" }} />
+                  <span>Your safety report has been submitted to the trust &amp; safety operations tribunal for immediate review.</span>
                 </div>
               )}
 
-              <div className={styles.formGrid}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyName">Your Name</label>
-                  <input
-                    type="text"
-                    id="safetyName"
-                    required
-                    value={reportForm.name}
-                    onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
-                  />
+              {/* SECTION 1: Reporter Details */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:user-check" /> 1. Reporter Profile &amp; Contact
                 </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyName">Your Name *</label>
+                    <input
+                      type="text"
+                      id="safetyName"
+                      required
+                      placeholder="Your full name"
+                      value={reportForm.name}
+                      onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyEmail">Email</label>
-                  <input
-                    type="email"
-                    id="safetyEmail"
-                    required
-                    value={reportForm.email}
-                    onChange={(e) => setReportForm({ ...reportForm, email: e.target.value })}
-                  />
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyEmail">Official Email *</label>
+                    <input
+                      type="email"
+                      id="safetyEmail"
+                      required
+                      placeholder="name@domain.com"
+                      value={reportForm.email}
+                      onChange={(e) => setReportForm({ ...reportForm, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyPhone">Phone / WhatsApp Number</label>
+                    <input
+                      type="tel"
+                      id="safetyPhone"
+                      placeholder="+250 ..."
+                      value={reportForm.phone}
+                      onChange={(e) => setReportForm({ ...reportForm, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyRole">Your Platform Role *</label>
+                    <select
+                      id="safetyRole"
+                      required
+                      value={reportForm.role}
+                      onChange={(e) => setReportForm({ ...reportForm, role: e.target.value })}
+                    >
+                      <option value="Client">Client / Homeowner</option>
+                      <option value="Technician / Professional">Technician / Professional</option>
+                      <option value="Engineer">Engineer / Specialist</option>
+                      <option value="Company / Contractor">Company / Contractor</option>
+                      <option value="B-Market Merchant">B-Market Merchant</option>
+                      <option value="Other">Other Platform User</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyRole">Your Role</label>
-                  <select
-                    id="safetyRole"
-                    required
-                    value={reportForm.role}
-                    onChange={(e) => setReportForm({ ...reportForm, role: e.target.value })}
-                  >
-                    <option value="">Select</option>
-                    <option>Client</option>
-                    <option>Technician / Professional</option>
-                    <option>Engineer</option>
-                    <option>Company</option>
-                    <option>Other</option>
-                  </select>
+              {/* SECTION 2: Threat & Incident Classification */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:alert-triangle" /> 2. Threat Classification &amp; Urgency
                 </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyIssueType">Concern Category *</label>
+                    <select
+                      id="safetyIssueType"
+                      required
+                      value={reportForm.issueType}
+                      onChange={(e) => setReportForm({ ...reportForm, issueType: e.target.value })}
+                    >
+                      <option value="Fraud / Payment Scam">Fraud / Payment Scam</option>
+                      <option value="Suspicious / Fake Account">Suspicious / Fake Account</option>
+                      <option value="Harassment / Physical Threat">Harassment / Physical Threat</option>
+                      <option value="False Credentials / Fake License">False Credentials / Fake License</option>
+                      <option value="Unsafe Work / Worksite Hazard">Unsafe Work / Worksite Hazard</option>
+                      <option value="Account Impersonation / Takeover">Account Impersonation / Takeover</option>
+                      <option value="Privacy / Data Leak">Privacy / Unauthorized Data Sharing</option>
+                      <option value="Other">Other Trust &amp; Safety Breach</option>
+                    </select>
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyIssueType">Concern Type</label>
-                  <select
-                    id="safetyIssueType"
-                    required
-                    value={reportForm.issueType}
-                    onChange={(e) => setReportForm({ ...reportForm, issueType: e.target.value })}
-                  >
-                    <option value="">Select concern</option>
-                    <option>Suspicious / Fake Account</option>
-                    <option>Fraud / Payment Scam</option>
-                    <option>Harassment / Threat</option>
-                    <option>False Credentials</option>
-                    <option>Unsafe Work</option>
-                    <option>Account Impersonation</option>
-                    <option>Privacy Concern</option>
-                    <option>Other</option>
-                  </select>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetySeverity">Threat / Severity Level *</label>
+                    <select
+                      id="safetySeverity"
+                      required
+                      value={reportForm.severity}
+                      onChange={(e) => setReportForm({ ...reportForm, severity: e.target.value })}
+                    >
+                      <option value="Immediate Risk / Emergency">🚨 Immediate Risk / Active Danger</option>
+                      <option value="High Risk / Active Threat">⚠️ High Risk / Active Threat or Fraud</option>
+                      <option value="Medium / Platform Violation">Medium / Policy Breach</option>
+                      <option value="Low / Suspicious Precaution">Low / Preventive Report</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyLocation">Incident Location / City</label>
+                    <input
+                      type="text"
+                      id="safetyLocation"
+                      placeholder="e.g. Kigali / Douala site / In-app chat"
+                      value={reportForm.location}
+                      onChange={(e) => setReportForm({ ...reportForm, location: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyTime">Approximate Time / Date</label>
+                    <input
+                      type="text"
+                      id="safetyTime"
+                      placeholder="e.g. Today 2:00 PM / Yesterday"
+                      value={reportForm.incidentTime}
+                      onChange={(e) => setReportForm({ ...reportForm, incidentTime: e.target.value })}
+                    />
+                  </div>
                 </div>
+              </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyUsername">Reported Username / Company</label>
-                  <input
-                    type="text"
-                    id="safetyUsername"
-                    placeholder="@username or company name"
-                    value={reportForm.username}
-                    onChange={(e) => setReportForm({ ...reportForm, username: e.target.value })}
-                  />
+              {/* SECTION 3: Offending Party Details */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:user-x" /> 3. Offending Party &amp; Task Reference
                 </div>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyUsername">Reported Username / Company</label>
+                    <input
+                      type="text"
+                      id="safetyUsername"
+                      placeholder="@username or company name"
+                      value={reportForm.username}
+                      onChange={(e) => setReportForm({ ...reportForm, username: e.target.value })}
+                    />
+                  </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="safetyRef">Task / Project Reference</label>
-                  <input
-                    type="text"
-                    id="safetyRef"
-                    placeholder="If applicable"
-                    value={reportForm.reference}
-                    onChange={(e) => setReportForm({ ...reportForm, reference: e.target.value })}
-                  />
+                  <div className={styles.formGroup}>
+                    <label htmlFor="safetyOffenderRole">Offending Party's Role</label>
+                    <select
+                      id="safetyOffenderRole"
+                      value={reportForm.offenderRole}
+                      onChange={(e) => setReportForm({ ...reportForm, offenderRole: e.target.value })}
+                    >
+                      <option value="Technician / Professional">Technician / Professional</option>
+                      <option value="Client / Property Owner">Client / Property Owner</option>
+                      <option value="Contractor / General Builder">Contractor / General Builder</option>
+                      <option value="Fake / Impersonating Account">Fake / Impersonating Account</option>
+                      <option value="Unknown Contact">Unknown Contact</option>
+                    </select>
+                  </div>
+
+                  <div className={`${styles.formGroup} ${styles.formFull}`}>
+                    <label htmlFor="safetyRef">Task, Project, or Quote Reference</label>
+                    <input
+                      type="text"
+                      id="safetyRef"
+                      placeholder="e.g. TSK-1082 or contract ID if applicable"
+                      value={reportForm.reference}
+                      onChange={(e) => setReportForm({ ...reportForm, reference: e.target.value })}
+                    />
+                  </div>
                 </div>
+              </div>
 
+              {/* SECTION 4: Statement */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:file-text" /> 4. Detailed Incident Statement
+                </div>
                 <div className={`${styles.formGroup} ${styles.formFull}`}>
-                  <label htmlFor="safetyDesc">Describe What Happened</label>
+                  <label htmlFor="safetyDesc">Describe What Happened *</label>
                   <textarea
                     id="safetyDesc"
-                    placeholder="Describe the concern, when it happened and any important details that may help with review."
+                    rows={4}
+                    placeholder="Describe the safety concern, when it happened, exact quotes/conduct, and any immediate actions taken..."
                     required
                     value={reportForm.description}
                     onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
                   ></textarea>
                 </div>
 
-                <div className={`${styles.formGroup} ${styles.formFull}`}>
-                  <label htmlFor="safetyContact">Preferred Contact Method</label>
+                <div className={`${styles.formGroup} ${styles.formFull}`} style={{ marginTop: "12px" }}>
+                  <label htmlFor="safetyContact">Preferred Follow-up Contact Method</label>
                   <select
                     id="safetyContact"
                     required
                     value={reportForm.contactMethod}
                     onChange={(e) => setReportForm({ ...reportForm, contactMethod: e.target.value })}
                   >
-                    <option value="">Select</option>
-                    <option>Email</option>
-                    <option>Phone</option>
-                    <option>Platform Message</option>
+                    <option value="Email">Official Email</option>
+                    <option value="Phone">Phone / WhatsApp Call (Urgent)</option>
+                    <option value="Platform Message">Platform Support Ticket</option>
                   </select>
                 </div>
               </div>
 
-              <button type="submit" className={styles.submitBtn}>
-                Submit Safety Report
+              {/* SECTION 5: Evidence Upload */}
+              <div className={styles.formBlock}>
+                <div className={styles.blockTitle}>
+                  <iconify-icon icon="lucide:paperclip" /> 5. Supporting Proof &amp; Evidence
+                </div>
+                <label className={styles.uploadZone}>
+                  <input
+                    type="file"
+                    multiple
+                    style={{ display: "none" }}
+                    onChange={handleFileUpload}
+                    accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+                  />
+                  <iconify-icon icon="lucide:upload-cloud" style={{ fontSize: "24px", color: "#ff4500" }} />
+                  <span style={{ fontSize: "13px", color: "#001F3F", fontWeight: 600 }}>
+                    Click to upload screenshots, site photos, payment receipts, or ID documents (PNG, JPG, PDF up to 20MB)
+                  </span>
+                </label>
+
+                {attachedFiles.length > 0 ? (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
+                    {attachedFiles.map((name, idx) => (
+                      <span key={idx} className={styles.fileBadge}>
+                        📎 {name}
+                        <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: "12px", color: "#94a3b8", margin: "6px 0 0 0" }}>No evidence files attached yet.</p>
+                )}
+              </div>
+
+              <button type="submit" disabled={submitting} className={styles.submitBtn}>
+                {submitting ? "Submitting Safety Incident Report..." : "Submit Official Safety Report"}
               </button>
             </form>
           </div>

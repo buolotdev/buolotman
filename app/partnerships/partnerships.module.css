@@ -441,9 +441,82 @@
   box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.1);
 }
 
-.formTextarea {
-  resize: vertical;
-  min-height: 110px;
+.formBlock {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+
+.blockTitle {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #001F3F;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.uploadZone {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border: 2px dashed #cbd5e1 !important;
+  border-radius: 14px !important;
+  padding: 20px !important;
+  text-align: center !important;
+  background: #f8fafc !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  user-select: none !important;
+  margin-top: 6px !important;
+}
+
+.uploadZone:hover {
+  border-color: #ff4500 !important;
+  background: #fff9f6 !important;
+}
+
+.fileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.fileBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #001F3F;
+}
+
+.fileRemove {
+  cursor: pointer;
+  color: #dc2626;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fee2e2;
 }
 
 .submitBtn {

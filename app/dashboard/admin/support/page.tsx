@@ -3,11 +3,23 @@
 import React, { useState, useEffect } from "react";
 import styles from "./admin-support.module.css";
 import { api } from "@/app/lib/api";
-import { useFetch } from "@/app/lib/useFetch";
 
 export default function AdminSupportPage() {
   const [allTickets, setAllTickets] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"all" | "concierge" | "team" | "contractor" | "client" | "technician" | "general">("all");
+  const [activeTab, setActiveTab] = useState<
+    | "all"
+    | "concierge"
+    | "team"
+    | "partnership"
+    | "location"
+    | "dispute"
+    | "safety"
+    | "community"
+    | "contractor"
+    | "client"
+    | "technician"
+    | "general"
+  >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -47,27 +59,39 @@ export default function AdminSupportPage() {
       let localInqs: any[] = [];
       if (typeof window !== "undefined") {
         try {
-          const contractorStored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
-          const teamStored = JSON.parse(localStorage.getItem("boulotman_team_inquiries") || "[]");
           const conciergeStored = JSON.parse(localStorage.getItem("boulotman_concierge_inquiries") || "[]");
+          const teamStored = JSON.parse(localStorage.getItem("boulotman_team_inquiries") || "[]");
+          const partnershipStored = JSON.parse(localStorage.getItem("boulotman_partnership_inquiries") || "[]");
+          const locationStored = JSON.parse(localStorage.getItem("boulotman_location_inquiries") || "[]");
+          const disputeStored = JSON.parse(localStorage.getItem("boulotman_dispute_inquiries") || "[]");
+          const safetyStored = JSON.parse(localStorage.getItem("boulotman_safety_inquiries") || "[]");
+          const communityStored = JSON.parse(localStorage.getItem("boulotman_community_inquiries") || "[]");
+          const contractorStored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
+
           const stored = [
             ...(Array.isArray(conciergeStored) ? conciergeStored : []),
             ...(Array.isArray(teamStored) ? teamStored : []),
+            ...(Array.isArray(partnershipStored) ? partnershipStored : []),
+            ...(Array.isArray(locationStored) ? locationStored : []),
+            ...(Array.isArray(disputeStored) ? disputeStored : []),
+            ...(Array.isArray(safetyStored) ? safetyStored : []),
+            ...(Array.isArray(communityStored) ? communityStored : []),
             ...(Array.isArray(contractorStored) ? contractorStored : [])
           ];
+
           if (Array.isArray(stored)) {
             localInqs = stored.map((inq: any) => ({
               id: inq.id || `LOCAL-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-              subject: inq.topic || `[${(inq.category || inq.team_type || "Concierge Request").toUpperCase()}] ${inq.title || inq.name || inq.projectTitle || "Service Request"}`,
-              client: `${inq.name || "Client"} (${inq.phone || inq.email || ""})`,
+              subject: inq.topic || `[${(inq.category || inq.team_type || "Inquiry").toUpperCase()}] ${inq.title || inq.name || inq.projectTitle || "Service Request"}`,
+              client: `${inq.name || "Lead"} (${inq.phone || inq.email || ""})`,
               status: inq.status || "Pending",
               messages: [
                 {
                   id: `msg-${inq.id || Math.random()}`,
                   sender: inq.name || "Client Lead",
-                  role: inq.category ? `Concierge (${inq.category})` : (inq.team_type ? `${inq.team_type} (${inq.team_size || ""})` : (inq.clientType || "Client")),
+                  role: inq.category ? inq.category : (inq.team_type ? `${inq.team_type}` : (inq.clientType || "Platform User")),
                   time: inq.created_at ? new Date(inq.created_at).toLocaleString() : "Recent",
-                  body: `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\nLocation: ${inq.city || inq.location || "N/A"}\nCategory: ${inq.category || inq.team_type || "N/A"}\n\nProject Scope & Requirements:\n${inq.details || inq.description || inq.message || "N/A"}`
+                  body: inq.details ? inq.details : `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\nLocation: ${inq.city || inq.location || "N/A"}\nCategory: ${inq.category || inq.team_type || "N/A"}\n\nProject Scope & Requirements:\n${inq.description || inq.message || "N/A"}`
                 }
               ]
             }));
@@ -90,7 +114,18 @@ export default function AdminSupportPage() {
     }
   };
 
-  const getTicketCategory = (ticket: any): "concierge" | "team" | "contractor" | "client" | "technician" | "general" => {
+  const getTicketCategory = (ticket: any):
+    | "concierge"
+    | "team"
+    | "partnership"
+    | "location"
+    | "dispute"
+    | "safety"
+    | "community"
+    | "contractor"
+    | "client"
+    | "technician"
+    | "general" => {
     const role = (ticket.role || "").toLowerCase();
     const client = (ticket.client || "").toLowerCase();
     const subject = (ticket.subject || "").toLowerCase();
@@ -111,6 +146,51 @@ export default function AdminSupportPage() {
       return "team";
     }
     if (
+      subject.includes("partnership") ||
+      subject.includes("institutional") ||
+      role.includes("partnership") ||
+      body.includes("partnership track") ||
+      body.includes("organization type:")
+    ) {
+      return "partnership";
+    }
+    if (
+      subject.includes("city expansion") ||
+      subject.includes("expansion geography") ||
+      body.includes("target expansion geography") ||
+      body.includes("city champion") ||
+      body.includes("requested trades:")
+    ) {
+      return "location";
+    }
+    if (
+      subject.includes("dispute") ||
+      subject.includes("escrow mediation") ||
+      body.includes("claimant profile") ||
+      body.includes("dispute category:") ||
+      body.includes("disputed amount:")
+    ) {
+      return "dispute";
+    }
+    if (
+      subject.includes("safety") ||
+      subject.includes("trust & safety") ||
+      subject.includes("threat") ||
+      body.includes("threat classification") ||
+      body.includes("risk level:") ||
+      body.includes("safety concern")
+    ) {
+      return "safety";
+    }
+    if (
+      subject.includes("community") ||
+      subject.includes("guideline") ||
+      body.includes("violation nature") ||
+      body.includes("anonymous community member")
+    ) {
+      return "community";
+    }
+    if (
       subject.includes("contractor") ||
       subject.includes("subcontract") ||
       role.includes("contractor") ||
@@ -123,7 +203,6 @@ export default function AdminSupportPage() {
       return "technician";
     }
     if (
-      subject.includes("partnership") ||
       subject.includes("investor") ||
       subject.includes("career") ||
       role.includes("general") ||
@@ -140,6 +219,16 @@ export default function AdminSupportPage() {
         return <span className={`${styles.badgeOrigin} ${styles.badgeConcierge}`}><iconify-icon icon="lucide:sparkles" /> VIP Concierge</span>;
       case "team":
         return <span className={`${styles.badgeOrigin} ${styles.badgeTeam}`}><iconify-icon icon="lucide:users" /> Build a Team</span>;
+      case "partnership":
+        return <span className={`${styles.badgeOrigin} ${styles.badgePartnership}`}><iconify-icon icon="lucide:handshake" /> Strategic Partner</span>;
+      case "location":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeLocation}`}><iconify-icon icon="lucide:map-pin" /> City Request</span>;
+      case "dispute":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeDispute}`}><iconify-icon icon="lucide:scale" /> Dispute / Escrow</span>;
+      case "safety":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeSafety}`}><iconify-icon icon="lucide:shield-alert" /> Trust & Safety</span>;
+      case "community":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeCommunity}`}><iconify-icon icon="lucide:flag" /> Community Report</span>;
       case "contractor":
         return <span className={`${styles.badgeOrigin} ${styles.badgeContractor}`}><iconify-icon icon="lucide:building-2" /> Contractor</span>;
       case "technician":
@@ -153,32 +242,33 @@ export default function AdminSupportPage() {
 
   const extractContactInfo = (ticket: any) => {
     const body = ticket?.messages?.[0]?.body || "";
-    const emailMatch = body.match(/Email:\s*([^\s|,\n]+)/i) || (ticket?.client?.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/));
+    const emailMatch = body.match(/Email(?:\s*Address)?:\s*([^\s|,\n]+)/i) || (ticket?.client?.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/));
     const phoneMatch = body.match(/Phone(?:\/WhatsApp)?:\s*([^\s|,\n]+)/i);
-    const locationMatch = body.match(/(?:Location|City \/ Neighborhood|Location \/ City):\s*([^\n|]+)/i);
-    const tradeMatch = body.match(/(?:Category|Primary Trade|Trade(?:\/Company)?):\s*([^\n|]+)/i);
-    const teamSizeMatch = body.match(/Team Size:\s*([^\n|]+)/i);
-    const durationMatch = body.match(/(?:Deployment Duration|Duration):\s*([^\n|]+)/i);
-    const requestTypeMatch = body.match(/Request Type:\s*([^\n|]+)/i);
+    const locationMatch = body.match(/(?:Location|City \/ Neighborhood|Location \/ City|Target City \/ Urban Area|Country \/ Region|Location \/ Worksite):\s*([^\n|]+)/i);
+    const tradeMatch = body.match(/(?:Category|Primary Trade|Trade(?:\/Company)?|Requested Trades|Violation Nature|Concern Category|Dispute Category):\s*([^\n|]+)/i);
+    const teamSizeMatch = body.match(/(?:Team Size|Estimated Scale \/ Scope|Estimated Demand Volume):\s*([^\n|]+)/i);
+    const durationMatch = body.match(/(?:Deployment Duration|Duration|Target Launch Timeframe):\s*([^\n|]+)/i);
+    const requestTypeMatch = body.match(/(?:Request Type|Partnership Track|Organization Type|Dispute Classification):\s*([^\n|]+)/i);
     const pmLeadMatch = body.match(/On-Site PM \/ Team Lead:\s*([^\n|]+)/i);
-    const rolesMatch = body.match(/Roles Needed:\s*([^\n|]+)/i);
+    const rolesMatch = body.match(/(?:Roles Needed|Offending Party Role|Role of Offending Party):\s*([^\n|]+)/i);
     const arrangementMatch = body.match(/Working Arrangement:\s*([^\n|]+)/i);
     const equipmentMatch = body.match(/Equipment Provision:\s*([^\n|]+)/i);
     const siteReadinessMatch = body.match(/Site Readiness:\s*([^\n|]+)/i);
     
-    // Concierge specific fields
-    const projectTitleMatch = body.match(/Project Title:\s*([^\n|]+)/i);
-    const locationTypeMatch = body.match(/Location Type:\s*([^\n|]+)/i);
-    const accessMatch = body.match(/Access Instructions:\s*([^\n|]+)/i);
+    // Concierge & Enterprise specific fields
+    const projectTitleMatch = body.match(/(?:Project Title|Organization \/ Company Legal Name|Reported User \/ Entity|Reported Username \/ Company|Reported Counterparty):\s*([^\n|]+)/i);
+    const locationTypeMatch = body.match(/(?:Location Mode|Location Type|District \/ Sub-region):\s*([^\n|]+)/i);
+    const accessMatch = body.match(/(?:Access Instructions|Preferred Meeting|Preferred Contact):\s*([^\n|]+)/i);
     const sitePhaseMatch = body.match(/Site Phase:\s*([^\n|]+)/i);
     const tasksMatch = body.match(/Tasks:\s*([^\n|]+)/i);
-    const blueprintsMatch = body.match(/Plans & Blueprints:\s*([^\n|]+)/i);
-    const techSystemsMatch = body.match(/Tech Systems:\s*([^\n|]+)/i);
-    const techAccessMatch = body.match(/Access:\s*([^\n|]+)/i);
-    const urgencyMatch = body.match(/(?:Urgency Level|Urgency):\s*([^\n|]+)/i);
-    const updatesMatch = body.match(/Updates Frequency:\s*([^\n|]+)/i);
-    const budgetMatch = body.match(/Estimated Budget:\s*([^\n|]+)/i);
+    const blueprintsMatch = body.match(/(?:Plans & Blueprints|Official Website|Task \/ Contract Reference|Task, Project, or Order Reference ID|Task \/ Project ID):\s*([^\n|]+)/i);
+    const techSystemsMatch = body.match(/(?:Tech Systems|Disputed Amount|Desired Outcome):\s*([^\n|]+)/i);
+    const techAccessMatch = body.match(/(?:Access|Escrow Status):\s*([^\n|]+)/i);
+    const urgencyMatch = body.match(/(?:Urgency Level|Urgency|Severity|Risk Level|Threat \/ Severity Level):\s*([^\n|]+)/i);
+    const updatesMatch = body.match(/(?:Updates Frequency|Approximate Time|Time of Incident|Approximate Date):\s*([^\n|]+)/i);
+    const budgetMatch = body.match(/(?:Estimated Budget|Budget \/ Investment Tier|Disputed Amount):\s*([^\n|]+)/i);
     const attachmentsMatch = body.match(/Attachments:\s*([^\n|]+)/i);
+    const championMatch = body.match(/Local Champion \/ Hub Partner:\s*([^\n|]+)/i);
 
     return {
       email: emailMatch ? emailMatch[1] : null,
@@ -205,6 +295,7 @@ export default function AdminSupportPage() {
       updates: updatesMatch ? updatesMatch[1]?.trim() : null,
       budget: budgetMatch ? budgetMatch[1]?.trim() : null,
       attachments: attachmentsMatch ? attachmentsMatch[1]?.trim() : null,
+      champion: championMatch ? championMatch[1]?.trim() : null,
     };
   };
 
@@ -239,6 +330,11 @@ export default function AdminSupportPage() {
     all: allTickets.length,
     concierge: allTickets.filter((t) => getTicketCategory(t) === "concierge").length,
     team: allTickets.filter((t) => getTicketCategory(t) === "team").length,
+    partnership: allTickets.filter((t) => getTicketCategory(t) === "partnership").length,
+    location: allTickets.filter((t) => getTicketCategory(t) === "location").length,
+    dispute: allTickets.filter((t) => getTicketCategory(t) === "dispute").length,
+    safety: allTickets.filter((t) => getTicketCategory(t) === "safety").length,
+    community: allTickets.filter((t) => getTicketCategory(t) === "community").length,
     contractor: allTickets.filter((t) => getTicketCategory(t) === "contractor").length,
     client: allTickets.filter((t) => getTicketCategory(t) === "client").length,
     technician: allTickets.filter((t) => getTicketCategory(t) === "technician").length,
@@ -247,17 +343,23 @@ export default function AdminSupportPage() {
 
   const totals = {
     total: allTickets.length,
-    pending: allTickets.filter((t: any) => t.status?.toLowerCase().includes("pending")).length,
+    pending: allTickets.filter((t: any) => t.status?.toLowerCase().includes("pending") || t.status?.toLowerCase().includes("open")).length,
     awaiting: allTickets.filter((t: any) => t.status?.toLowerCase().includes("awaiting")).length,
     resolved: allTickets.filter((t: any) => t.status?.toLowerCase().includes("resolved")).length,
   };
 
   const getStatusClass = (status: string) => {
     switch (status?.toLowerCase()) {
-      case "pending": return styles.statusPending;
-      case "awaiting response": return styles.statusAwaiting;
-      case "resolved": return styles.statusResolved;
-      default: return styles.statusPending;
+      case "pending":
+      case "open":
+        return styles.statusPending;
+      case "awaiting response":
+      case "awaiting":
+        return styles.statusAwaiting;
+      case "resolved":
+        return styles.statusResolved;
+      default:
+        return styles.statusPending;
     }
   };
 
@@ -310,7 +412,7 @@ export default function AdminSupportPage() {
           </div>
           <h1 className={styles.heroTitle}>Support Tickets & Inquiries</h1>
           <p className={styles.heroSubtitle}>
-            Resolve customer inquiries, assist technicians and clients with platform troubleshooting, and dispatch official support replies.
+            Review customer inquiries, partnership proposals, city expansion requests, dispute mediation cases, and safety reports.
           </p>
         </div>
         <div className={styles.heroDecoIcon}>
@@ -361,7 +463,7 @@ export default function AdminSupportPage() {
         </div>
       </div>
 
-      {/* FULL WIDTH PROMINENT TOP CATEGORY NAVIGATION BAR */}
+      {/* FULL WIDTH PROMINENT TOP CATEGORY NAVIGATION BAR WITH HORIZONTAL SCROLL */}
       <div className={styles.topNavContainer}>
         <button
           className={`${styles.topNavBtn} ${activeTab === "all" ? styles.topNavBtnActive : ""}`}
@@ -382,10 +484,40 @@ export default function AdminSupportPage() {
           <iconify-icon icon="lucide:users" /> Build a Team <span className={styles.topNavBadge}>{tabCounts.team}</span>
         </button>
         <button
+          className={`${styles.topNavBtn} ${activeTab === "partnership" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("partnership")}
+        >
+          <iconify-icon icon="lucide:handshake" /> Partnerships <span className={styles.topNavBadge}>{tabCounts.partnership}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "location" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("location")}
+        >
+          <iconify-icon icon="lucide:map-pin" /> City Requests <span className={styles.topNavBadge}>{tabCounts.location}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "dispute" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("dispute")}
+        >
+          <iconify-icon icon="lucide:scale" /> Dispute / Escrow <span className={styles.topNavBadge}>{tabCounts.dispute}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "safety" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("safety")}
+        >
+          <iconify-icon icon="lucide:shield-alert" /> Trust &amp; Safety <span className={styles.topNavBadge}>{tabCounts.safety}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "community" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("community")}
+        >
+          <iconify-icon icon="lucide:flag" /> Community Reports <span className={styles.topNavBadge}>{tabCounts.community}</span>
+        </button>
+        <button
           className={`${styles.topNavBtn} ${activeTab === "contractor" ? styles.topNavBtnActive : ""}`}
           onClick={() => setActiveTab("contractor")}
         >
-          <iconify-icon icon="lucide:building-2" /> Contractors & Companies <span className={styles.topNavBadge}>{tabCounts.contractor}</span>
+          <iconify-icon icon="lucide:building-2" /> Contractors &amp; Companies <span className={styles.topNavBadge}>{tabCounts.contractor}</span>
         </button>
         <button
           className={`${styles.topNavBtn} ${activeTab === "client" ? styles.topNavBtnActive : ""}`}
@@ -436,6 +568,7 @@ export default function AdminSupportPage() {
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
+              <option value="open">Open</option>
               <option value="awaiting">Awaiting</option>
               <option value="resolved">Resolved</option>
             </select>
@@ -448,24 +581,35 @@ export default function AdminSupportPage() {
             ) : filteredTickets.length === 0 ? (
               <p style={{ padding: 20, textAlign: "center", color: "#94a3b8" }}>No tickets found in this category.</p>
             ) : (
-              filteredTickets.map((ticket: any) => {
-                const category = getTicketCategory(ticket);
+              filteredTickets.map((t: any) => {
+                const cat = getTicketCategory(t);
+                const isSelected = activeTicket?.id === t.id;
+                const contact = extractContactInfo(t);
+
                 return (
                   <div
-                    key={ticket.id}
-                    className={`${styles.ticketItem} ${activeTicket?.id === ticket.id ? styles.ticketItemActive : ""}`}
-                    onClick={() => setActiveTicket(ticket)}
+                    key={t.id}
+                    onClick={() => setActiveTicket(t)}
+                    className={`${styles.ticketItem} ${isSelected ? styles.ticketItemActive : ""}`}
                   >
                     <div className={styles.ticketTopRow}>
-                      <div className={styles.ticketSubject}>{ticket.subject || "Support Inquiry"}</div>
+                      <span className={styles.ticketSubject}>{t.subject}</span>
                     </div>
-                    <div className={styles.ticketMeta}>
-                      <iconify-icon icon="lucide:user" /> {ticket.client || "Marketplace User"}
+
+                    <div className={styles.ticketMeta} style={{ marginTop: 4 }}>
+                      <iconify-icon icon="lucide:user" /> {t.client}
                     </div>
+
+                    {contact?.location && (
+                      <div className={styles.ticketMeta} style={{ marginTop: 2 }}>
+                        <iconify-icon icon="lucide:map-pin" /> {contact.location}
+                      </div>
+                    )}
+
                     <div className={styles.ticketFooterRow}>
-                      {getOriginBadge(category)}
-                      <span className={`${styles.status} ${getStatusClass(ticket.status)}`}>
-                        {ticket.status || "Pending"}
+                      {getOriginBadge(cat)}
+                      <span className={`${styles.status} ${getStatusClass(t.status)}`}>
+                        {t.status || "Pending"}
                       </span>
                     </div>
                   </div>
@@ -475,24 +619,26 @@ export default function AdminSupportPage() {
           </div>
         </div>
 
-        {/* CHAT / DETAIL THREAD */}
-        <div className={styles.chatCard}>
+        {/* CHAT / TICKET DETAILS VIEW */}
+        <div className={styles.chatArea}>
           {activeTicket ? (
-            <>
+            <div className={styles.chatCard}>
               <div className={styles.chatHeader}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     {getOriginBadge(activeCategory)}
-                    <span style={{ fontSize: 12, color: "#64748b" }}>ID: #{activeTicket.id}</span>
+                    <span className={`${styles.status} ${getStatusClass(activeTicket.status)}`}>
+                      {activeTicket.status || "Pending"}
+                    </span>
                   </div>
                   <h2 className={styles.chatTitle}>{activeTicket.subject}</h2>
+                  <div className={styles.ticketMeta} style={{ marginTop: 4 }}>
+                    <span>Case ID: <strong>{activeTicket.id}</strong></span> • <span>Requester: <strong>{activeTicket.client}</strong></span>
+                  </div>
                 </div>
-                <span className={`${styles.status} ${getStatusClass(activeTicket.status)}`}>
-                  {activeTicket.status || "Pending"}
-                </span>
               </div>
 
-              {/* QUICK ACTION BAR */}
+              {/* QUICK DIRECT CONTACT ACTIONS */}
               <div className={styles.quickActionsBar}>
                 {activeContact?.email && (
                   <a href={`mailto:${activeContact.email}`} className={styles.quickActionBtn}>
@@ -517,143 +663,101 @@ export default function AdminSupportPage() {
                 )}
               </div>
 
-              {/* STRUCTURED SPECIFICATION BOX FOR CONCIERGE / TEAM / CONTRACTOR REQUESTS */}
-              {(activeContact?.projectTitle || activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles || activeContact?.sitePhase || activeContact?.techSystems || activeContact?.budget || activeContact?.urgency) && (
+              {/* STRUCTURED SPECIFICATION BOX FOR ALL FORMS */}
+              {(activeContact?.projectTitle || activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles || activeContact?.sitePhase || activeContact?.techSystems || activeContact?.budget || activeContact?.urgency || activeContact?.champion || activeContact?.attachments) && (
                 <div className={styles.specsBox}>
                   {activeContact.projectTitle && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Project / Request Title</span>
+                      <span className={styles.specLabel}>Project / Entity / Subject Name</span>
                       <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F", fontSize: 14 }}>{activeContact.projectTitle}</span>
                     </div>
                   )}
                   {activeContact.trade && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Category / Trade</span>
+                      <span className={styles.specLabel}>Category / Trade / Nature</span>
                       <span className={styles.specVal}>{activeContact.trade}</span>
-                    </div>
-                  )}
-                  {activeContact.locationType && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Location Mode</span>
-                      <span className={styles.specVal}>{activeContact.locationType}</span>
                     </div>
                   )}
                   {activeContact.location && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>City / Location</span>
+                      <span className={styles.specLabel}>City / Location / Region</span>
                       <span className={styles.specVal}>{activeContact.location}</span>
+                    </div>
+                  )}
+                  {activeContact.locationType && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Location / Sub-Region Mode</span>
+                      <span className={styles.specVal}>{activeContact.locationType}</span>
                     </div>
                   )}
                   {activeContact.requestType && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Request Type</span>
+                      <span className={styles.specLabel}>Request / Track / Classification</span>
                       <span className={styles.specVal}>{activeContact.requestType}</span>
                     </div>
                   )}
                   {activeContact.teamSize && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Team Scale</span>
+                      <span className={styles.specLabel}>Scale / Volume / Scope</span>
                       <span className={styles.specVal}>{activeContact.teamSize}</span>
-                    </div>
-                  )}
-                  {activeContact.pmLead && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>On-Site PM / Lead</span>
-                      <span className={styles.specVal} style={{ color: activeContact.pmLead.includes("Yes") ? "#16a34a" : "#0f172a" }}>
-                        {activeContact.pmLead}
-                      </span>
-                    </div>
-                  )}
-                  {activeContact.sitePhase && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Site Phase</span>
-                      <span className={styles.specVal}>{activeContact.sitePhase}</span>
-                    </div>
-                  )}
-                  {activeContact.blueprints && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Plans / Blueprints</span>
-                      <span className={styles.specVal}>{activeContact.blueprints}</span>
-                    </div>
-                  )}
-                  {activeContact.tasks && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Authorized Tasks</span>
-                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.tasks}</span>
-                    </div>
-                  )}
-                  {activeContact.techSystems && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Tech Systems & Infrastructure</span>
-                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.techSystems}</span>
-                    </div>
-                  )}
-                  {activeContact.techAccess && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Access Mode</span>
-                      <span className={styles.specVal}>{activeContact.techAccess}</span>
-                    </div>
-                  )}
-                  {activeContact.roles && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Roles & Skills Matrix</span>
-                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.roles}</span>
-                    </div>
-                  )}
-                  {activeContact.urgency && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Urgency / Timeline</span>
-                      <span className={styles.specVal} style={{ color: activeContact.urgency.includes("Emergency") || activeContact.urgency.includes("🚨") ? "#dc2626" : "#0f172a", fontWeight: 700 }}>
-                        {activeContact.urgency}
-                      </span>
-                    </div>
-                  )}
-                  {activeContact.updates && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Reporting Frequency</span>
-                      <span className={styles.specVal}>{activeContact.updates}</span>
                     </div>
                   )}
                   {activeContact.budget && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Estimated Budget</span>
+                      <span className={styles.specLabel}>Budget / Disputed Value</span>
                       <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F" }}>{activeContact.budget}</span>
+                    </div>
+                  )}
+                  {activeContact.urgency && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Urgency / Risk Severity</span>
+                      <span className={styles.specVal} style={{ color: activeContact.urgency.includes("Emergency") || activeContact.urgency.includes("Risk") || activeContact.urgency.includes("🚨") ? "#dc2626" : "#0f172a", fontWeight: 700 }}>
+                        {activeContact.urgency}
+                      </span>
                     </div>
                   )}
                   {activeContact.duration && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Deployment Duration</span>
+                      <span className={styles.specLabel}>Duration / Launch Timeframe</span>
                       <span className={styles.specVal}>{activeContact.duration}</span>
                     </div>
                   )}
-                  {activeContact.arrangement && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Working Arrangement</span>
-                      <span className={styles.specVal}>{activeContact.arrangement}</span>
+                  {activeContact.champion && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>City Champion Status</span>
+                      <span className={styles.specVal} style={{ color: activeContact.champion.includes("Yes") ? "#16a34a" : "#0f172a", fontWeight: 700 }}>
+                        🌟 {activeContact.champion}
+                      </span>
                     </div>
                   )}
-                  {activeContact.equipment && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Equipment Provision</span>
-                      <span className={styles.specVal}>{activeContact.equipment}</span>
+                  {activeContact.roles && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Roles / Offending Party Details</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.roles}</span>
+                    </div>
+                  )}
+                  {activeContact.blueprints && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Task / Contract Reference / Portal</span>
+                      <span className={styles.specVal}>{activeContact.blueprints}</span>
+                    </div>
+                  )}
+                  {activeContact.techSystems && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Tech Systems / Desired Outcome</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.techSystems}</span>
                     </div>
                   )}
                   {activeContact.access && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Access & Entry Instructions</span>
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Meeting / Access Preference</span>
                       <span className={styles.specVal}>{activeContact.access}</span>
                     </div>
                   )}
                   {activeContact.attachments && activeContact.attachments !== "None attached" && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Attachments & Media</span>
+                      <span className={styles.specLabel}>Attached Documentation &amp; Evidence</span>
                       <span className={styles.specVal} style={{ fontWeight: 600, color: "#2563eb" }}>📎 {activeContact.attachments}</span>
-                    </div>
-                  )}
-                  {activeContact.siteReadiness && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Site Welfare & Readiness</span>
-                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#059669" }}>{activeContact.siteReadiness}</span>
                     </div>
                   )}
                 </div>
@@ -663,9 +767,9 @@ export default function AdminSupportPage() {
               <div className={styles.thread}>
                 {(activeTicket.messages || []).map((msg: any) => {
                   const bodyText = msg.body || "";
-                  const isIntake = bodyText.includes("=== 1.") || bodyText.includes("[VIP Concierge Request]") || bodyText.includes("[Build a Team Request]") || bodyText.includes("=== Scope & Additional Requirements ===");
+                  const isIntake = bodyText.includes("=== 1.") || bodyText.includes("[VIP Concierge Request]") || bodyText.includes("[Build a Team Request]") || bodyText.includes("=== Scope & Additional Requirements ===") || bodyText.includes("=== 4.");
                   const scopeMatch = isIntake ? (
-                    bodyText.match(/(?:Scope & Additional Requirements|Project Scope & Requirements|Description):\s*([\s\S]*?)(?=\n===|$)/i) ||
+                    bodyText.match(/(?:Scope & Additional Requirements|Project Scope & Requirements|Description|Statement of Facts|Objectives & Requirements|Regional Insights & Comments|Incident Statement & Chronology):\s*([\s\S]*?)(?=\n===|$)/i) ||
                     bodyText.match(/Details:\s*([\s\S]*?)(?=\n===|$)/i)
                   ) : null;
                   const scopeText = scopeMatch ? scopeMatch[1]?.trim() : null;
@@ -681,53 +785,54 @@ export default function AdminSupportPage() {
                           </div>
                         )}
                         <div>
-                          <div className={styles.senderName}>{msg.sender} <span style={{ color: "#64748b", fontWeight: 500 }}>({msg.role || "User"})</span></div>
-                          <div style={{ fontSize: 11, color: "#94a3b8" }}>{msg.time || "Recent"}</div>
+                          <div className={styles.messageSender}>{msg.sender}</div>
+                          <div className={styles.messageRole}>{msg.role || "Requester"}</div>
                         </div>
+                        <div className={styles.messageTime}>{msg.time}</div>
                       </div>
 
-                      {isIntake ? (
-                        <div>
-                          <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-                            <iconify-icon icon="lucide:check-circle" style={{ color: "#16a34a" }} />
-                            <span>Inquiry parameters captured and displayed in the specification grid above.</span>
+                      {scopeText ? (
+                        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 10, padding: "12px 14px", marginTop: 8 }}>
+                          <strong style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", display: "block", marginBottom: 4 }}>
+                            Submission Statement / Scope:
+                          </strong>
+                          <div style={{ whiteSpace: "pre-wrap", color: "#1e293b", fontSize: 13.5, lineHeight: 1.6 }}>
+                            {scopeText}
                           </div>
-                          {scopeText && scopeText !== "N/A" && !scopeText.startsWith("[VIP") && !scopeText.startsWith("[Build") && (
-                            <div className={styles.structuredNoteBox}>
-                              <div className={styles.structuredNoteTitle}>
-                                <iconify-icon icon="lucide:file-text" style={{ color: "#ff4500" }} /> Client Description & Scope Notes
-                              </div>
-                              <div className={styles.structuredNoteText}>{scopeText}</div>
-                            </div>
-                          )}
                         </div>
                       ) : (
-                        <div className={styles.messageBody} style={{ whiteSpace: "pre-line" }}>{msg.body}</div>
+                        <div className={styles.messageBody}>{bodyText}</div>
                       )}
                     </div>
                   );
                 })}
               </div>
 
-              {/* REPLY COMPOSER */}
-              <div className={styles.composer}>
+              {/* REPLY FORM */}
+              <div className={styles.replyArea}>
                 <textarea
-                  className={styles.textarea}
-                  rows={3}
-                  placeholder="Type an official admin response or follow-up note..."
+                  className={styles.replyTextarea}
+                  placeholder="Type an official reply or resolution note to the requester..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
+                  rows={3}
                 />
-                <button className={styles.sendBtn} onClick={handleSend} disabled={sending}>
-                  <iconify-icon icon="lucide:send" /> {sending ? "Sending..." : "Dispatch Reply"}
-                </button>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                  <button
+                    className={styles.replySubmitBtn}
+                    onClick={handleSend}
+                    disabled={sending || !replyText.trim()}
+                  >
+                    {sending ? "Sending..." : "Send Official Reply"}
+                  </button>
+                </div>
               </div>
-            </>
+            </div>
           ) : (
             <div className={styles.emptyState}>
-              <iconify-icon icon="lucide:inbox" style={{ fontSize: 48, marginBottom: 12, opacity: 0.5 }} />
-              <h3 style={{ margin: "0 0 4px", fontSize: 18, color: "#001f3f" }}>Select a Ticket</h3>
-              <p style={{ margin: 0, fontSize: 13 }}>Click any ticket on the left to inspect conversation history and reply.</p>
+              <iconify-icon icon="lucide:message-square" style={{ fontSize: 48, color: "#cbd5e1" }} />
+              <h3>Select a ticket or inquiry</h3>
+              <p>Choose an item from the inbox to review details, structured specifications, and send responses.</p>
             </div>
           )}
         </div>
