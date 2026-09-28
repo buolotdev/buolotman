@@ -831,15 +831,6 @@ ${requestForm.details || "No additional comments provided."}`;
                       rows={3}
                       placeholder="Tell us about the local trade landscape, specific challenges, or upcoming commercial developments..."
                       className={styles.formTextarea}
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid #d6dce4",
-                        fontFamily: "inherit",
-                        fontSize: "13.5px",
-                        resize: "vertical"
-                      }}
                       value={requestForm.details}
                       onChange={(e) => setRequestForm({ ...requestForm, details: e.target.value })}
                     />
