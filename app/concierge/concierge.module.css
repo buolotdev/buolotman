@@ -641,28 +641,40 @@
 
 /* ================= FILE UPLOAD ZONE ================= */
 .uploadZone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 18px;
-  text-align: center;
-  background: #f8fafc;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border: 2px dashed #cbd5e1 !important;
+  border-radius: 14px !important;
+  padding: 24px 20px !important;
+  text-align: center !important;
+  background: #f8fafc !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  user-select: none !important;
+  margin: 0 !important;
 }
 
 .uploadZone:hover {
-  border-color: #FF4500;
-  background: #fffdfc;
+  border-color: #FF4500 !important;
+  background: #fff9f6 !important;
+  transform: translateY(-1px);
 }
 
 .uploadIcon {
-  font-size: 24px;
+  font-size: 32px;
   color: #FF4500;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .uploadText {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #001F3F;
 }
@@ -670,34 +682,49 @@
 .uploadSub {
   font-size: 11.5px;
   color: #64748b;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .fileList {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .fileBadge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #e2e8f0;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11.5px;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
-  color: #1e293b;
+  color: #001F3F;
+  box-shadow: 0 2px 6px rgba(0, 31, 63, 0.04);
 }
 
 .fileRemove {
   cursor: pointer;
   color: #dc2626;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fee2e2;
+  transition: all 0.15s ease;
+}
+
+.fileRemove:hover {
+  background: #dc2626;
+  color: #ffffff;
 }
 
 /* ================= SUBMIT BUTTON & SUCCESS ================= */

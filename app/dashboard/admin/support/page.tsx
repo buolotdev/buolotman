@@ -7,7 +7,7 @@ import { useFetch } from "@/app/lib/useFetch";
 
 export default function AdminSupportPage() {
   const [allTickets, setAllTickets] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"all" | "client" | "technician" | "company" | "general">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "concierge" | "team" | "contractor" | "client" | "technician" | "general">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -90,33 +90,42 @@ export default function AdminSupportPage() {
     }
   };
 
-  const getTicketCategory = (ticket: any): "client" | "technician" | "company" | "general" => {
+  const getTicketCategory = (ticket: any): "concierge" | "team" | "contractor" | "client" | "technician" | "general" => {
     const role = (ticket.role || "").toLowerCase();
     const client = (ticket.client || "").toLowerCase();
     const subject = (ticket.subject || "").toLowerCase();
     const body = (ticket.messages?.[0]?.body || "").toLowerCase();
 
+    if (subject.includes("concierge") || role.includes("concierge") || body.includes("vip concierge") || body.includes("concierge request")) {
+      return "concierge";
+    }
+    if (
+      subject.includes("team request") ||
+      subject.includes("build a team") ||
+      subject.includes("squad") ||
+      role.includes("team request") ||
+      body.includes("team scale") ||
+      body.includes("team size:") ||
+      body.includes("build a team")
+    ) {
+      return "team";
+    }
+    if (
+      subject.includes("contractor") ||
+      subject.includes("subcontract") ||
+      role.includes("contractor") ||
+      role.includes("company") ||
+      client.includes("company")
+    ) {
+      return "contractor";
+    }
     if (role.includes("technician") || client.includes("technician")) {
       return "technician";
     }
     if (
-      role.includes("company") ||
-      role.includes("team") ||
-      role.includes("contractor") ||
-      subject.includes("team") ||
-      subject.includes("crew") ||
-      subject.includes("contractor") ||
-      body.includes("team type") ||
-      body.includes("trade:")
-    ) {
-      return "company";
-    }
-    if (
-      subject.includes("concierge") ||
       subject.includes("partnership") ||
       subject.includes("investor") ||
       subject.includes("career") ||
-      role.includes("concierge") ||
       role.includes("general") ||
       role.includes("lead")
     ) {
@@ -127,12 +136,16 @@ export default function AdminSupportPage() {
 
   const getOriginBadge = (category: string) => {
     switch (category) {
+      case "concierge":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeConcierge}`}><iconify-icon icon="lucide:sparkles" /> VIP Concierge</span>;
+      case "team":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeTeam}`}><iconify-icon icon="lucide:users" /> Build a Team</span>;
+      case "contractor":
+        return <span className={`${styles.badgeOrigin} ${styles.badgeContractor}`}><iconify-icon icon="lucide:building-2" /> Contractor</span>;
       case "technician":
         return <span className={`${styles.badgeOrigin} ${styles.badgeTechnician}`}><iconify-icon icon="lucide:wrench" /> Technician</span>;
-      case "company":
-        return <span className={`${styles.badgeOrigin} ${styles.badgeCompany}`}><iconify-icon icon="lucide:building-2" /> Team / Company</span>;
       case "general":
-        return <span className={`${styles.badgeOrigin} ${styles.badgeGeneral}`}><iconify-icon icon="lucide:star" /> Concierge / Lead</span>;
+        return <span className={`${styles.badgeOrigin} ${styles.badgeGeneral}`}><iconify-icon icon="lucide:mail" /> General Lead</span>;
       default:
         return <span className={`${styles.badgeOrigin} ${styles.badgeClient}`}><iconify-icon icon="lucide:user" /> Client</span>;
     }
@@ -224,9 +237,11 @@ export default function AdminSupportPage() {
 
   const tabCounts = {
     all: allTickets.length,
+    concierge: allTickets.filter((t) => getTicketCategory(t) === "concierge").length,
+    team: allTickets.filter((t) => getTicketCategory(t) === "team").length,
+    contractor: allTickets.filter((t) => getTicketCategory(t) === "contractor").length,
     client: allTickets.filter((t) => getTicketCategory(t) === "client").length,
     technician: allTickets.filter((t) => getTicketCategory(t) === "technician").length,
-    company: allTickets.filter((t) => getTicketCategory(t) === "company").length,
     general: allTickets.filter((t) => getTicketCategory(t) === "general").length,
   };
 
@@ -355,6 +370,24 @@ export default function AdminSupportPage() {
           <iconify-icon icon="lucide:layout-grid" /> All Inquiries <span className={styles.topNavBadge}>{tabCounts.all}</span>
         </button>
         <button
+          className={`${styles.topNavBtn} ${activeTab === "concierge" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("concierge")}
+        >
+          <iconify-icon icon="lucide:sparkles" /> VIP Concierge <span className={styles.topNavBadge}>{tabCounts.concierge}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "team" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("team")}
+        >
+          <iconify-icon icon="lucide:users" /> Build a Team <span className={styles.topNavBadge}>{tabCounts.team}</span>
+        </button>
+        <button
+          className={`${styles.topNavBtn} ${activeTab === "contractor" ? styles.topNavBtnActive : ""}`}
+          onClick={() => setActiveTab("contractor")}
+        >
+          <iconify-icon icon="lucide:building-2" /> Contractors & Companies <span className={styles.topNavBadge}>{tabCounts.contractor}</span>
+        </button>
+        <button
           className={`${styles.topNavBtn} ${activeTab === "client" ? styles.topNavBtnActive : ""}`}
           onClick={() => setActiveTab("client")}
         >
@@ -367,16 +400,10 @@ export default function AdminSupportPage() {
           <iconify-icon icon="lucide:wrench" /> Technician Support <span className={styles.topNavBadge}>{tabCounts.technician}</span>
         </button>
         <button
-          className={`${styles.topNavBtn} ${activeTab === "company" ? styles.topNavBtnActive : ""}`}
-          onClick={() => setActiveTab("company")}
-        >
-          <iconify-icon icon="lucide:building-2" /> Teams & Companies <span className={styles.topNavBadge}>{tabCounts.company}</span>
-        </button>
-        <button
           className={`${styles.topNavBtn} ${activeTab === "general" ? styles.topNavBtnActive : ""}`}
           onClick={() => setActiveTab("general")}
         >
-          <iconify-icon icon="lucide:star" /> General Leads <span className={styles.topNavBadge}>{tabCounts.general}</span>
+          <iconify-icon icon="lucide:mail" /> General Leads <span className={styles.topNavBadge}>{tabCounts.general}</span>
         </button>
       </div>
 
@@ -634,24 +661,52 @@ export default function AdminSupportPage() {
 
               {/* MESSAGES THREAD */}
               <div className={styles.thread}>
-                {(activeTicket.messages || []).map((msg: any) => (
-                  <div key={msg.id} className={styles.message}>
-                    <div className={styles.messageHeader}>
-                      {msg.avatar ? (
-                        <img src={msg.avatar} alt={msg.sender} className={styles.messageAvatar} />
-                      ) : (
-                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#001f3f", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>
-                          {(msg.sender?.[0] || "U").toUpperCase()}
+                {(activeTicket.messages || []).map((msg: any) => {
+                  const bodyText = msg.body || "";
+                  const isIntake = bodyText.includes("=== 1.") || bodyText.includes("[VIP Concierge Request]") || bodyText.includes("[Build a Team Request]") || bodyText.includes("=== Scope & Additional Requirements ===");
+                  const scopeMatch = isIntake ? (
+                    bodyText.match(/(?:Scope & Additional Requirements|Project Scope & Requirements|Description):\s*([\s\S]*?)(?=\n===|$)/i) ||
+                    bodyText.match(/Details:\s*([\s\S]*?)(?=\n===|$)/i)
+                  ) : null;
+                  const scopeText = scopeMatch ? scopeMatch[1]?.trim() : null;
+
+                  return (
+                    <div key={msg.id} className={styles.message}>
+                      <div className={styles.messageHeader}>
+                        {msg.avatar ? (
+                          <img src={msg.avatar} alt={msg.sender} className={styles.messageAvatar} />
+                        ) : (
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#001f3f", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>
+                            {(msg.sender?.[0] || "U").toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div className={styles.senderName}>{msg.sender} <span style={{ color: "#64748b", fontWeight: 500 }}>({msg.role || "User"})</span></div>
+                          <div style={{ fontSize: 11, color: "#94a3b8" }}>{msg.time || "Recent"}</div>
                         </div>
-                      )}
-                      <div>
-                        <div className={styles.senderName}>{msg.sender} <span style={{ color: "#64748b", fontWeight: 500 }}>({msg.role || "User"})</span></div>
-                        <div style={{ fontSize: 11, color: "#94a3b8" }}>{msg.time || "Recent"}</div>
                       </div>
+
+                      {isIntake ? (
+                        <div>
+                          <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+                            <iconify-icon icon="lucide:check-circle" style={{ color: "#16a34a" }} />
+                            <span>Inquiry parameters captured and displayed in the specification grid above.</span>
+                          </div>
+                          {scopeText && scopeText !== "N/A" && !scopeText.startsWith("[VIP") && !scopeText.startsWith("[Build") && (
+                            <div className={styles.structuredNoteBox}>
+                              <div className={styles.structuredNoteTitle}>
+                                <iconify-icon icon="lucide:file-text" style={{ color: "#ff4500" }} /> Client Description & Scope Notes
+                              </div>
+                              <div className={styles.structuredNoteText}>{scopeText}</div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className={styles.messageBody} style={{ whiteSpace: "pre-line" }}>{msg.body}</div>
+                      )}
                     </div>
-                    <div className={styles.messageBody} style={{ whiteSpace: "pre-line" }}>{msg.body}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* REPLY COMPOSER */}
