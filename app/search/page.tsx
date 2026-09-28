@@ -956,9 +956,9 @@ export default function SearchPage() {
                             {result.name}
                           </h2>
 
-                          {/* Profession Subtitle */}
+                          {/* Profession Subtitle (Straight text, not italic) */}
                           <p className={styles.techProfession}>
-                            {result.role || (lang === "fr" ? "Spécialiste Technique" : "Technical Specialist")}
+                            {result.role || resolveProfessionTitle(result, lang)}
                           </p>
 
                           {/* ID Verified Badge - Only show if verified */}
@@ -978,7 +978,7 @@ export default function SearchPage() {
 
                             <span className={styles.techMetaItem}>
                               <iconify-icon icon="lucide:map-pin" style={{ color: "#64748b" }} />
-                              <span>{result.location || "Douala, Cameroon"}</span>
+                              <span>{resolveCleanLocation(result)}</span>
                             </span>
 
                             <span className={styles.techMetaItem}>

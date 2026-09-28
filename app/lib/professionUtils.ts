@@ -376,69 +376,65 @@ function cleanPlaceString(name: string): string {
 export function resolveCleanLocation(item: any): string {
   if (!item) return "West Africa";
 
-  // 1. Check explicit neighborhood and city (e.g., "Bonamoussadi, Douala" or "Haie Vive, Cotonou")
-  const neighborhood = cleanPlaceString(
+  const rawNeighborhood = cleanPlaceString(
     (item.neighborhood || item.user?.neighborhood || item.company_profile?.neighborhood || item.technician_profile?.neighborhood || "").toString()
   );
-  const city = cleanPlaceString((item.city || item.user?.city || item.company_profile?.city || item.technician_profile?.city || "").toString());
-  const country = cleanPlaceString((item.country || item.user?.country || item.company_profile?.country || item.technician_profile?.country || "").toString());
+  const rawCity = cleanPlaceString((item.city || item.user?.city || item.company_profile?.city || item.technician_profile?.city || "").toString());
+  const rawCountry = cleanPlaceString((item.country || item.user?.country || item.company_profile?.country || item.technician_profile?.country || "").toString());
 
-  if (neighborhood && !isStreetAddress(neighborhood) && !isGarbageText(neighborhood)) {
-    if (city && !isStreetAddress(city) && !isGarbageText(city) && neighborhood.toLowerCase() !== city.toLowerCase()) {
-      return `${neighborhood}, ${city}`;
+  // 1. If explicit neighborhood and city (e.g. "Akwa, Douala" or "Bastos, Yaoundé")
+  if (rawNeighborhood && !isStreetAddress(rawNeighborhood) && !isGarbageText(rawNeighborhood)) {
+    if (rawCity && !isStreetAddress(rawCity) && !isGarbageText(rawCity) && rawNeighborhood.toLowerCase() !== rawCity.toLowerCase()) {
+      return `${rawNeighborhood}, ${rawCity}`;
     }
+    return rawNeighborhood;
   }
 
-  // 2. If city is present
-  if (city && !isStreetAddress(city) && !isGarbageText(city)) {
-    if (country && country.toLowerCase() !== city.toLowerCase() && !isGarbageText(country)) {
-      return `${city}, ${country}`;
-    }
-    return city;
-  }
-
-  // 3. Extract from raw address/headquarters/location string
+  // 2. Extract from raw address/location
   const rawLoc = (
     item.location ||
     item.coverage_area ||
     item.headquarters ||
     item.address ||
     item.user?.address ||
-    country ||
+    rawCountry ||
     ""
   ).toString().trim();
 
   if (!rawLoc) {
-    return country && !isGarbageText(country) ? country : "West Africa";
+    return rawCountry && !isGarbageText(rawCountry) ? rawCountry : "West Africa";
   }
 
-  // If rawLoc contains commas (e.g., "Rue IPPB, Haie Vive, Cotonou, Benin" or "Bonamoussadi, Douala")
-  if (rawLoc.includes(",")) {
-    const parts = rawLoc
-      .split(",")
-      .map((p: string) => cleanPlaceString(p))
-      .filter((p: string) => p.length > 1 && !isStreetAddress(p) && !/^[\d\s\-_]+$/.test(p) && !isGarbageText(p));
-
-    if (parts.length >= 3) {
-      // e.g. [Haie Vive, Cotonou, Benin] -> "Haie Vive, Cotonou" (Neighborhood, City)
-      return `${parts[0]}, ${parts[1]}`;
-    } else if (parts.length === 2) {
-      return `${parts[0]}, ${parts[1]}`;
-    } else if (parts.length === 1) {
-      return parts[0];
+  // Split and deduplicate components (e.g. "Yaounde, Cameroon, Cameroon" -> ["Yaounde", "Cameroon"])
+  const rawParts = rawLoc.split(/[,;\/]+/).map((p: string) => cleanPlaceString(p)).filter(Boolean);
+  const uniqueParts: string[] = [];
+  for (const p of rawParts) {
+    const cleanP = cleanPlaceString(p);
+    if (!cleanP || isStreetAddress(cleanP) || /^[\d\s\-_]+$/.test(cleanP) || isGarbageText(cleanP)) continue;
+    if (!uniqueParts.some(existing => existing.toLowerCase() === cleanP.toLowerCase())) {
+      uniqueParts.push(cleanP);
     }
   }
 
-  // If single string is a street address (e.g. "Rue IPPB, Bloc L-64")
-  if (isStreetAddress(rawLoc)) {
-    return country && !isGarbageText(country) ? country : "West Africa";
+  if (uniqueParts.length >= 3) {
+    // [Akwa, Douala, Cameroon] -> "Akwa, Douala" (Neighborhood, City)
+    return `${uniqueParts[0]}, ${uniqueParts[1]}`;
+  } else if (uniqueParts.length === 2) {
+    return `${uniqueParts[0]}, ${uniqueParts[1]}`;
+  } else if (uniqueParts.length === 1) {
+    if (rawCountry && uniqueParts[0].toLowerCase() !== rawCountry.toLowerCase() && !isGarbageText(rawCountry)) {
+      return `${uniqueParts[0]}, ${rawCountry}`;
+    }
+    return uniqueParts[0];
   }
 
-  const cleaned = cleanPlaceString(rawLoc);
-  if (isGarbageText(cleaned)) {
-    return country && !isGarbageText(country) ? country : "West Africa";
+  if (rawCity && !isGarbageText(rawCity)) {
+    if (rawCountry && rawCity.toLowerCase() !== rawCountry.toLowerCase() && !isGarbageText(rawCountry)) {
+      return `${rawCity}, ${rawCountry}`;
+    }
+    return rawCity;
   }
 
-  return cleaned || (country && !isGarbageText(country) ? country : "West Africa");
+  return rawCountry && !isGarbageText(rawCountry) ? rawCountry : "West Africa";
 }
 
