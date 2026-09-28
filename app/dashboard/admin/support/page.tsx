@@ -137,9 +137,15 @@ export default function AdminSupportPage() {
     const emailMatch = body.match(/Email:\s*([^\s|,\n]+)/i) || (ticket?.client?.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/));
     const phoneMatch = body.match(/Phone(?:\/WhatsApp)?:\s*([^\s|,\n]+)/i);
     const locationMatch = body.match(/Location:\s*([^\n|]+)/i);
-    const tradeMatch = body.match(/Trade(?:\/Company)?:\s*([^\n|]+)/i);
+    const tradeMatch = body.match(/(?:Category|Primary Trade|Trade(?:\/Company)?):\s*([^\n|]+)/i);
     const teamSizeMatch = body.match(/Team Size:\s*([^\n|]+)/i);
-    const durationMatch = body.match(/Duration:\s*([^\n|]+)/i);
+    const durationMatch = body.match(/(?:Deployment Duration|Duration):\s*([^\n|]+)/i);
+    const requestTypeMatch = body.match(/Request Type:\s*([^\n|]+)/i);
+    const pmLeadMatch = body.match(/On-Site PM \/ Team Lead:\s*([^\n|]+)/i);
+    const rolesMatch = body.match(/Roles Needed:\s*([^\n|]+)/i);
+    const arrangementMatch = body.match(/Working Arrangement:\s*([^\n|]+)/i);
+    const equipmentMatch = body.match(/Equipment Provision:\s*([^\n|]+)/i);
+    const siteReadinessMatch = body.match(/Site Readiness:\s*([^\n|]+)/i);
 
     return {
       email: emailMatch ? emailMatch[1] : null,
@@ -148,6 +154,12 @@ export default function AdminSupportPage() {
       trade: tradeMatch ? tradeMatch[1]?.trim() : null,
       teamSize: teamSizeMatch ? teamSizeMatch[1]?.trim() : null,
       duration: durationMatch ? durationMatch[1]?.trim() : null,
+      requestType: requestTypeMatch ? requestTypeMatch[1]?.trim() : null,
+      pmLead: pmLeadMatch ? pmLeadMatch[1]?.trim() : null,
+      roles: rolesMatch ? rolesMatch[1]?.trim() : null,
+      arrangement: arrangementMatch ? arrangementMatch[1]?.trim() : null,
+      equipment: equipmentMatch ? equipmentMatch[1]?.trim() : null,
+      siteReadiness: siteReadinessMatch ? siteReadinessMatch[1]?.trim() : null,
     };
   };
 
@@ -447,18 +459,56 @@ export default function AdminSupportPage() {
               </div>
 
               {/* STRUCTURED SPECIFICATION BOX FOR TEAM / CONTRACTOR REQUESTS */}
-              {(activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration) && (
+              {(activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles) && (
                 <div className={styles.specsBox}>
+                  {activeContact.requestType && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Request Type</span>
+                      <span className={styles.specVal}>{activeContact.requestType}</span>
+                    </div>
+                  )}
+                  {activeContact.teamSize && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Team Scale</span>
+                      <span className={styles.specVal}>{activeContact.teamSize}</span>
+                    </div>
+                  )}
+                  {activeContact.pmLead && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>On-Site PM / Lead</span>
+                      <span className={styles.specVal} style={{ color: activeContact.pmLead.includes("Yes") ? "#16a34a" : "#0f172a" }}>
+                        {activeContact.pmLead}
+                      </span>
+                    </div>
+                  )}
                   {activeContact.trade && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Primary Trade</span>
                       <span className={styles.specVal}>{activeContact.trade}</span>
                     </div>
                   )}
-                  {activeContact.teamSize && (
+                  {activeContact.roles && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Roles & Skills Matrix</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.roles}</span>
+                    </div>
+                  )}
+                  {activeContact.duration && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Team Size</span>
-                      <span className={styles.specVal}>{activeContact.teamSize}</span>
+                      <span className={styles.specLabel}>Deployment Duration</span>
+                      <span className={styles.specVal}>{activeContact.duration}</span>
+                    </div>
+                  )}
+                  {activeContact.arrangement && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Working Arrangement</span>
+                      <span className={styles.specVal}>{activeContact.arrangement}</span>
+                    </div>
+                  )}
+                  {activeContact.equipment && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Equipment Provision</span>
+                      <span className={styles.specVal}>{activeContact.equipment}</span>
                     </div>
                   )}
                   {activeContact.location && (
@@ -467,10 +517,10 @@ export default function AdminSupportPage() {
                       <span className={styles.specVal}>{activeContact.location}</span>
                     </div>
                   )}
-                  {activeContact.duration && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Project Duration</span>
-                      <span className={styles.specVal}>{activeContact.duration}</span>
+                  {activeContact.siteReadiness && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Site Welfare & Readiness</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#059669" }}>{activeContact.siteReadiness}</span>
                     </div>
                   )}
                 </div>

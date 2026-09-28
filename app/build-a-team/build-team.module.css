@@ -394,11 +394,11 @@
 .modalContent {
   background: #ffffff;
   border-radius: 24px;
-  max-width: 680px;
+  max-width: 760px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  padding: clamp(24px, 4vw, 36px);
+  padding: clamp(20px, 3.5vw, 32px);
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -421,6 +421,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  z-index: 2;
 }
 
 .modalClose:hover {
@@ -430,12 +431,12 @@
 }
 
 .modalHeader {
-  margin-bottom: 22px;
-  padding-right: 32px;
+  margin-bottom: 20px;
+  padding-right: 40px;
 }
 
 .modalHeader h2 {
-  font-size: clamp(20px, 3vw, 24px);
+  font-size: clamp(20px, 3vw, 25px);
   font-weight: 800;
   color: #001F3F;
   margin: 0 0 6px 0;
@@ -449,8 +450,55 @@
   line-height: 1.5;
 }
 
+/* ================= INTAKE SECTIONS ================= */
+.formSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  transition: border-color 0.2s ease;
+}
+
+.formSection:focus-within {
+  border-color: #cbd5e1;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #001f3f;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.sectionBadge {
+  font-size: 11px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
 .formGroup {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
 }
 
 .twoCol {
@@ -468,7 +516,7 @@
 
 .label {
   display: block;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #001F3F;
   margin-bottom: 6px;
@@ -479,10 +527,10 @@
 .textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 14px;
+  padding: 11px 13px;
   border: 1.5px solid #cbd5e1;
-  border-radius: 12px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
   color: #001F3F;
   background: #ffffff;
   outline: none;
@@ -499,7 +547,278 @@
 
 .textarea {
   resize: vertical;
-  min-height: 90px;
+  min-height: 80px;
+}
+
+/* ================= 1. SCALE / TYPE CARDS ================= */
+.typeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 540px) {
+  .typeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.typeCard {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: left;
+}
+
+.typeCard:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.typeCardActive {
+  border-color: #ff4500;
+  background: #fff8f5;
+  box-shadow: 0 4px 14px rgba(255, 69, 0, 0.12);
+}
+
+.typeCardIcon {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.typeCardBody {
+  flex: 1;
+}
+
+.typeCardTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #001f3f;
+  margin-bottom: 2px;
+}
+
+.typeCardDesc {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.typeRadioDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  margin-top: 2px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.typeCardActive .typeRadioDot {
+  border-color: #ff4500;
+  background: #ff4500;
+  box-shadow: inset 0 0 0 3px #ffffff;
+}
+
+/* ================= TOGGLE / SWITCH ROW ================= */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.toggleRow:hover {
+  border-color: #cbd5e1;
+}
+
+.toggleRowActive {
+  border-color: #ff4500;
+  background: #fff9f6;
+}
+
+.toggleInfo {
+  flex: 1;
+}
+
+.toggleTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.toggleSub {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch input:checked + .slider {
+  background-color: #ff4500;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* ================= 2. DYNAMIC ROLES CHECKBOX MATRIX ================= */
+.rolesMatrixGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.roleCheckboxItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.roleCheckboxItem:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.roleCheckboxActive {
+  border-color: #ff4500;
+  background: #fff8f5;
+  color: #001f3f;
+  font-weight: 700;
+}
+
+.customCheckSquare {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.roleCheckboxActive .customCheckSquare {
+  background: #ff4500;
+  border-color: #ff4500;
+}
+
+/* ================= 3 & 4. RADIO / CHECKBOX PILLS ================= */
+.pillRadioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pillRadioItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.pillRadioItem:hover {
+  border-color: #cbd5e1;
+}
+
+.pillRadioActive {
+  border-color: #ff4500;
+  background: #fff8f5;
+  color: #001f3f;
+  font-weight: 700;
+}
+
+.pillRadioDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pillRadioActive .pillRadioDot {
+  border-color: #ff4500;
+  background: #ff4500;
+  box-shadow: inset 0 0 0 3px #ffffff;
 }
 
 .submitBtn {
@@ -508,13 +827,17 @@
   color: #ffffff;
   border: none;
   border-radius: 12px;
-  padding: 15px 24px;
+  padding: 14px 24px;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   box-shadow: 0 4px 14px rgba(255, 69, 0, 0.35);
-  margin-top: 8px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -532,7 +855,7 @@
   border: 1.5px solid #bbf7d0;
   color: #166534;
   border-radius: 16px;
-  padding: 24px;
+  padding: 28px 24px;
   text-align: center;
   font-size: 15px;
   line-height: 1.6;
