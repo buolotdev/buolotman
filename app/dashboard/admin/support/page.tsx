@@ -49,20 +49,25 @@ export default function AdminSupportPage() {
         try {
           const contractorStored = JSON.parse(localStorage.getItem("boulotman_contractor_inquiries") || "[]");
           const teamStored = JSON.parse(localStorage.getItem("boulotman_team_inquiries") || "[]");
-          const stored = [...(Array.isArray(teamStored) ? teamStored : []), ...(Array.isArray(contractorStored) ? contractorStored : [])];
+          const conciergeStored = JSON.parse(localStorage.getItem("boulotman_concierge_inquiries") || "[]");
+          const stored = [
+            ...(Array.isArray(conciergeStored) ? conciergeStored : []),
+            ...(Array.isArray(teamStored) ? teamStored : []),
+            ...(Array.isArray(contractorStored) ? contractorStored : [])
+          ];
           if (Array.isArray(stored)) {
             localInqs = stored.map((inq: any) => ({
               id: inq.id || `LOCAL-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-              subject: inq.topic || `[${(inq.team_type || inq.category || "Team Request").toUpperCase()}] ${inq.name || inq.projectTitle || "Workforce Request"}`,
+              subject: inq.topic || `[${(inq.category || inq.team_type || "Concierge Request").toUpperCase()}] ${inq.title || inq.name || inq.projectTitle || "Service Request"}`,
               client: `${inq.name || "Client"} (${inq.phone || inq.email || ""})`,
               status: inq.status || "Pending",
               messages: [
                 {
                   id: `msg-${inq.id || Math.random()}`,
                   sender: inq.name || "Client Lead",
-                  role: inq.team_type ? `${inq.team_type} (${inq.team_size || ""})` : (inq.clientType || "Client"),
+                  role: inq.category ? `Concierge (${inq.category})` : (inq.team_type ? `${inq.team_type} (${inq.team_size || ""})` : (inq.clientType || "Client")),
                   time: inq.created_at ? new Date(inq.created_at).toLocaleString() : "Recent",
-                  body: `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\nLocation: ${inq.location || inq.city || "N/A"}\nTrade: ${inq.team_type || inq.category || "N/A"} | Team Size: ${inq.team_size || "N/A"}\nDuration: ${inq.duration || "N/A"}\n\nProject Scope & Requirements:\n${inq.details || inq.description || inq.message || "N/A"}`
+                  body: `Email: ${inq.email || "N/A"} | Phone: ${inq.phone || "N/A"}\nLocation: ${inq.city || inq.location || "N/A"}\nCategory: ${inq.category || inq.team_type || "N/A"}\n\nProject Scope & Requirements:\n${inq.details || inq.description || inq.message || "N/A"}`
                 }
               ]
             }));
@@ -111,6 +116,7 @@ export default function AdminSupportPage() {
       subject.includes("partnership") ||
       subject.includes("investor") ||
       subject.includes("career") ||
+      role.includes("concierge") ||
       role.includes("general") ||
       role.includes("lead")
     ) {
@@ -126,7 +132,7 @@ export default function AdminSupportPage() {
       case "company":
         return <span className={`${styles.badgeOrigin} ${styles.badgeCompany}`}><iconify-icon icon="lucide:building-2" /> Team / Company</span>;
       case "general":
-        return <span className={`${styles.badgeOrigin} ${styles.badgeGeneral}`}><iconify-icon icon="lucide:star" /> General Lead</span>;
+        return <span className={`${styles.badgeOrigin} ${styles.badgeGeneral}`}><iconify-icon icon="lucide:star" /> Concierge / Lead</span>;
       default:
         return <span className={`${styles.badgeOrigin} ${styles.badgeClient}`}><iconify-icon icon="lucide:user" /> Client</span>;
     }
@@ -136,7 +142,7 @@ export default function AdminSupportPage() {
     const body = ticket?.messages?.[0]?.body || "";
     const emailMatch = body.match(/Email:\s*([^\s|,\n]+)/i) || (ticket?.client?.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/));
     const phoneMatch = body.match(/Phone(?:\/WhatsApp)?:\s*([^\s|,\n]+)/i);
-    const locationMatch = body.match(/Location:\s*([^\n|]+)/i);
+    const locationMatch = body.match(/(?:Location|City \/ Neighborhood|Location \/ City):\s*([^\n|]+)/i);
     const tradeMatch = body.match(/(?:Category|Primary Trade|Trade(?:\/Company)?):\s*([^\n|]+)/i);
     const teamSizeMatch = body.match(/Team Size:\s*([^\n|]+)/i);
     const durationMatch = body.match(/(?:Deployment Duration|Duration):\s*([^\n|]+)/i);
@@ -146,6 +152,20 @@ export default function AdminSupportPage() {
     const arrangementMatch = body.match(/Working Arrangement:\s*([^\n|]+)/i);
     const equipmentMatch = body.match(/Equipment Provision:\s*([^\n|]+)/i);
     const siteReadinessMatch = body.match(/Site Readiness:\s*([^\n|]+)/i);
+    
+    // Concierge specific fields
+    const projectTitleMatch = body.match(/Project Title:\s*([^\n|]+)/i);
+    const locationTypeMatch = body.match(/Location Type:\s*([^\n|]+)/i);
+    const accessMatch = body.match(/Access Instructions:\s*([^\n|]+)/i);
+    const sitePhaseMatch = body.match(/Site Phase:\s*([^\n|]+)/i);
+    const tasksMatch = body.match(/Tasks:\s*([^\n|]+)/i);
+    const blueprintsMatch = body.match(/Plans & Blueprints:\s*([^\n|]+)/i);
+    const techSystemsMatch = body.match(/Tech Systems:\s*([^\n|]+)/i);
+    const techAccessMatch = body.match(/Access:\s*([^\n|]+)/i);
+    const urgencyMatch = body.match(/(?:Urgency Level|Urgency):\s*([^\n|]+)/i);
+    const updatesMatch = body.match(/Updates Frequency:\s*([^\n|]+)/i);
+    const budgetMatch = body.match(/Estimated Budget:\s*([^\n|]+)/i);
+    const attachmentsMatch = body.match(/Attachments:\s*([^\n|]+)/i);
 
     return {
       email: emailMatch ? emailMatch[1] : null,
@@ -160,6 +180,18 @@ export default function AdminSupportPage() {
       arrangement: arrangementMatch ? arrangementMatch[1]?.trim() : null,
       equipment: equipmentMatch ? equipmentMatch[1]?.trim() : null,
       siteReadiness: siteReadinessMatch ? siteReadinessMatch[1]?.trim() : null,
+      projectTitle: projectTitleMatch ? projectTitleMatch[1]?.trim() : null,
+      locationType: locationTypeMatch ? locationTypeMatch[1]?.trim() : null,
+      access: accessMatch ? accessMatch[1]?.trim() : null,
+      sitePhase: sitePhaseMatch ? sitePhaseMatch[1]?.trim() : null,
+      tasks: tasksMatch ? tasksMatch[1]?.trim() : null,
+      blueprints: blueprintsMatch ? blueprintsMatch[1]?.trim() : null,
+      techSystems: techSystemsMatch ? techSystemsMatch[1]?.trim() : null,
+      techAccess: techAccessMatch ? techAccessMatch[1]?.trim() : null,
+      urgency: urgencyMatch ? urgencyMatch[1]?.trim() : null,
+      updates: updatesMatch ? updatesMatch[1]?.trim() : null,
+      budget: budgetMatch ? budgetMatch[1]?.trim() : null,
+      attachments: attachmentsMatch ? attachmentsMatch[1]?.trim() : null,
     };
   };
 
@@ -458,9 +490,33 @@ export default function AdminSupportPage() {
                 )}
               </div>
 
-              {/* STRUCTURED SPECIFICATION BOX FOR TEAM / CONTRACTOR REQUESTS */}
-              {(activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles) && (
+              {/* STRUCTURED SPECIFICATION BOX FOR CONCIERGE / TEAM / CONTRACTOR REQUESTS */}
+              {(activeContact?.projectTitle || activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles || activeContact?.sitePhase || activeContact?.techSystems || activeContact?.budget || activeContact?.urgency) && (
                 <div className={styles.specsBox}>
+                  {activeContact.projectTitle && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Project / Request Title</span>
+                      <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F", fontSize: 14 }}>{activeContact.projectTitle}</span>
+                    </div>
+                  )}
+                  {activeContact.trade && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Category / Trade</span>
+                      <span className={styles.specVal}>{activeContact.trade}</span>
+                    </div>
+                  )}
+                  {activeContact.locationType && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Location Mode</span>
+                      <span className={styles.specVal}>{activeContact.locationType}</span>
+                    </div>
+                  )}
+                  {activeContact.location && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>City / Location</span>
+                      <span className={styles.specVal}>{activeContact.location}</span>
+                    </div>
+                  )}
                   {activeContact.requestType && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Request Type</span>
@@ -481,16 +537,60 @@ export default function AdminSupportPage() {
                       </span>
                     </div>
                   )}
-                  {activeContact.trade && (
+                  {activeContact.sitePhase && (
                     <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Primary Trade</span>
-                      <span className={styles.specVal}>{activeContact.trade}</span>
+                      <span className={styles.specLabel}>Site Phase</span>
+                      <span className={styles.specVal}>{activeContact.sitePhase}</span>
+                    </div>
+                  )}
+                  {activeContact.blueprints && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Plans / Blueprints</span>
+                      <span className={styles.specVal}>{activeContact.blueprints}</span>
+                    </div>
+                  )}
+                  {activeContact.tasks && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Authorized Tasks</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.tasks}</span>
+                    </div>
+                  )}
+                  {activeContact.techSystems && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Tech Systems & Infrastructure</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.techSystems}</span>
+                    </div>
+                  )}
+                  {activeContact.techAccess && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Access Mode</span>
+                      <span className={styles.specVal}>{activeContact.techAccess}</span>
                     </div>
                   )}
                   {activeContact.roles && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>Roles & Skills Matrix</span>
                       <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.roles}</span>
+                    </div>
+                  )}
+                  {activeContact.urgency && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Urgency / Timeline</span>
+                      <span className={styles.specVal} style={{ color: activeContact.urgency.includes("Emergency") || activeContact.urgency.includes("🚨") ? "#dc2626" : "#0f172a", fontWeight: 700 }}>
+                        {activeContact.urgency}
+                      </span>
+                    </div>
+                  )}
+                  {activeContact.updates && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Reporting Frequency</span>
+                      <span className={styles.specVal}>{activeContact.updates}</span>
+                    </div>
+                  )}
+                  {activeContact.budget && (
+                    <div className={styles.specItem}>
+                      <span className={styles.specLabel}>Estimated Budget</span>
+                      <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F" }}>{activeContact.budget}</span>
                     </div>
                   )}
                   {activeContact.duration && (
@@ -511,10 +611,16 @@ export default function AdminSupportPage() {
                       <span className={styles.specVal}>{activeContact.equipment}</span>
                     </div>
                   )}
-                  {activeContact.location && (
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Location / City</span>
-                      <span className={styles.specVal}>{activeContact.location}</span>
+                  {activeContact.access && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Access & Entry Instructions</span>
+                      <span className={styles.specVal}>{activeContact.access}</span>
+                    </div>
+                  )}
+                  {activeContact.attachments && activeContact.attachments !== "None attached" && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
+                      <span className={styles.specLabel}>Attachments & Media</span>
+                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#2563eb" }}>📎 {activeContact.attachments}</span>
                     </div>
                   )}
                   {activeContact.siteReadiness && (
