@@ -1223,13 +1223,13 @@ export default function ClientProfilePage() {
                     </div>
                     <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                       <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-                        Login with this username or share: <strong>boulotman.com/profile/@{username ? username.replace(/^@/, '') : 'handle'}</strong>
+                        Login with this username or share: <strong>boulotman.com/profile/{username ? username.replace(/^@/, '') : 'handle'}</strong>
                       </p>
                       {username && (
                         <button
                           type="button"
                           onClick={() => {
-                            const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/@${username.replace(/^@/, '')}`;
+                            const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/${username.replace(/^@/, '')}`;
                             navigator.clipboard.writeText(url);
                             toast.show("success", "Profile link copied!");
                           }}

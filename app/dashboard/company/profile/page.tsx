@@ -879,7 +879,7 @@ export default function CompanyProfilePage() {
 
   const handleShare = () => {
     const handleName = username || user?.username || profile?.username;
-    const url = typeof window !== "undefined" ? window.location.origin + (handleName ? `/profile/@${handleName.replace(/^@/, '')}` : `/profile/${profile?.id || user?.id}`) : "";
+    const url = typeof window !== "undefined" ? window.location.origin + (handleName ? `/profile/${handleName.replace(/^@/, '')}` : `/profile/${profile?.id || user?.id}`) : "";
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setShareCopied(true);
@@ -1421,7 +1421,7 @@ export default function CompanyProfilePage() {
               {shareCopied ? t.copied : t.share}
             </button>
             <Link
-              href={username ? `/profile/@${username.replace(/^@/, '')}` : (profile?.id ? `/profile/${profile.id}` : "/contractors")}
+              href={username ? `/profile/${username.replace(/^@/, '')}` : (profile?.id ? `/profile/${profile.id}` : "/contractors")}
               className={styles.outlineButton}
               target="_blank"
             >
@@ -1541,13 +1541,13 @@ export default function CompanyProfilePage() {
             </div>
             <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
               <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-                Login with this handle or share direct corporate link: <strong>boulotman.com/profile/@{username ? username.replace(/^@/, '') : 'handle'}</strong>
+                Login with this handle or share direct corporate link: <strong>boulotman.com/profile/{username ? username.replace(/^@/, '') : 'handle'}</strong>
               </p>
               {username && (
                 <button
                   type="button"
                   onClick={() => {
-                    const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/@${username.replace(/^@/, '')}`;
+                    const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/${username.replace(/^@/, '')}`;
                     navigator.clipboard.writeText(url);
                     toast.show("success", "Company profile link copied to clipboard!");
                   }}

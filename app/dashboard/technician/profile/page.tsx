@@ -1798,7 +1798,7 @@ export default function TechnicianProfilePage() {
                     {availableNow ? t.availableOn : t.availableOff}
                   </button>
 
-                  <Link href={username ? `/profile/@${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")} className={styles.outlineButton} target="_blank">
+                  <Link href={username ? `/profile/${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")} className={styles.outlineButton} target="_blank">
                     <iconify-icon icon="lucide:external-link" /> {t.previewPublic}
                   </Link>
 
@@ -1899,13 +1899,13 @@ export default function TechnicianProfilePage() {
                   </div>
                   <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                     <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-                      Direct profile link: <strong>boulotman.com/profile/@{username ? username.replace(/^@/, '') : 'handle'}</strong>
+                      Direct profile link: <strong>boulotman.com/profile/{username ? username.replace(/^@/, '') : 'handle'}</strong>
                     </p>
                     {username && (
                       <button
                         type="button"
                         onClick={() => {
-                          const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/@${username.replace(/^@/, '')}`;
+                          const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://boulotman.com'}/profile/${username.replace(/^@/, '')}`;
                           navigator.clipboard.writeText(url);
                           toast.show("success", "Public profile link copied to clipboard!");
                         }}
@@ -3178,7 +3178,7 @@ export default function TechnicianProfilePage() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Link
-                  href={username ? `/profile/@${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")}
+                  href={username ? `/profile/${username.replace(/^@/, '')}` : (userData?.id ? `/profile/${userData.id}` : "/dashboard/technician")}
                   target="_blank"
                   className={styles.outlineButton}
                   style={{ minHeight: 44, fontSize: 13.5, justifyContent: "center" }}

@@ -197,7 +197,7 @@ export default function CompaniesPage() {
               const profileId = company.id;
               const companyUsername = company.username || company.user?.username;
               const companyProfileUrl = companyUsername 
-                ? `/profile/@${companyUsername.replace(/^@/, '')}?type=company` 
+                ? `/profile/${companyUsername.replace(/^@/, '')}?type=company` 
                 : `/profile/${profileId}?type=company`;
               const companyName = company.company_name || `${company.user?.first_name || ""} ${company.user?.last_name || ""}`.trim() || "Corporate Enterprise";
               const logoUrl = company.logo_url || company.user?.avatar_url;

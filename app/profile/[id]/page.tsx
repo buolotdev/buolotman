@@ -607,10 +607,10 @@ export default function PublicProfilePage() {
   useEffect(() => {
     if (typeof window !== "undefined" && profile) {
       const handle = (profile.username || profile.handle || profile.user?.username || "").toString().trim().replace(/^@/, '');
-      if (handle && rawParam && !rawParam.startsWith("@")) {
+      if (handle) {
         const queryStr = window.location.search || "";
-        const cleanUrl = `/profile/@${handle}${queryStr}`;
-        if (window.location.pathname !== `/profile/@${handle}`) {
+        const cleanUrl = `/profile/${handle}${queryStr}`;
+        if (window.location.pathname !== `/profile/${handle}`) {
           window.history.replaceState(null, "", cleanUrl);
         }
       }

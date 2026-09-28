@@ -369,7 +369,7 @@ export default function SearchPage() {
           const cleanLoc = resolveCleanLocation(item);
           const compUsername = item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, "") : undefined);
           const link = compUsername
-            ? `/profile/@${compUsername.replace(/^@/, "")}?type=company`
+            ? `/profile/${compUsername.replace(/^@/, "")}?type=company`
             : `/profile/${compId}?type=company`;
 
           const rating = parseFloat(item.average_rating || item.rating) || 5.0;
@@ -426,7 +426,7 @@ export default function SearchPage() {
           const cleanLoc = resolveCleanLocation(item);
           const compUsername = item.username || (item.handle ? String(item.handle).replace(/^@/, "") : undefined);
           const link = compUsername
-            ? `/profile/@${compUsername.replace(/^@/, "")}?type=company`
+            ? `/profile/${compUsername.replace(/^@/, "")}?type=company`
             : `/profile/${compId}?type=company`;
 
           mappedCompanies.push({
@@ -489,7 +489,7 @@ export default function SearchPage() {
               verified: item.verified ?? item.is_verified,
               skills: resolveExpertiseTags(item, lang),
               services: item.services || item.profile?.services || [],
-              link: itemType === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/@${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
+              link: itemType === "service" ? `/profile/${item.profileId || item.technician_id || item.id}` : (item.username ? `/profile/${item.username.replace(/^@/, '')}` : `/profile/${item.id}`),
               serviceType: item.serviceType,
               username: item.username || item.user?.username || (item.handle ? String(item.handle).replace(/^@/, '') : undefined),
             };
@@ -892,7 +892,7 @@ export default function SearchPage() {
                   : resolveExpertiseTags(result, lang);
 
                 const profileLink = result.username
-                  ? `/profile/@${result.username.replace(/^@/, '')}${result.type === "company" ? "?type=company" : ""}`
+                  ? `/profile/${result.username.replace(/^@/, '')}${result.type === "company" ? "?type=company" : ""}`
                   : (result.type === "company" ? `/profile/${result.id}?type=company` : `/profile/${result.id}`);
 
                 const initials = (result.name || "B")
