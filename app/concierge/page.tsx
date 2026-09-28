@@ -401,7 +401,7 @@ export default function ConciergePage() {
     other_scope: "",
 
     // 4. Attachments
-    attached_files: [] as string[],
+    attached_files: [] as Array<{ name: string; size: number; type: string; data: string }>,
 
     // 5. Timelines, Reporting & Budget
     urgency_level: "⚡ Within 48 Hours",
@@ -462,22 +462,37 @@ export default function ConciergePage() {
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const newFiles: string[] = [];
-    for (let i = 0; i < e.target.files.length; i++) {
-      newFiles.push(e.target.files[i].name);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const filesArray = Array.from(e.target.files);
+    const loadedFiles: Array<{ name: string; size: number; type: string; data: string }> = [];
+
+    for (const file of filesArray) {
+      const base64Data = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string) || "");
+        reader.onerror = () => resolve("");
+        reader.readAsDataURL(file);
+      });
+
+      loadedFiles.push({
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        data: base64Data
+      });
     }
+
     setFormData((prev) => ({
       ...prev,
-      attached_files: [...prev.attached_files, ...newFiles]
+      attached_files: [...prev.attached_files, ...loadedFiles]
     }));
   };
 
-  const handleRemoveFile = (fileName: string) => {
+  const handleRemoveFile = (indexToRemove: number) => {
     setFormData((prev) => ({
       ...prev,
-      attached_files: prev.attached_files.filter((f) => f !== fileName)
+      attached_files: prev.attached_files.filter((_, idx) => idx !== indexToRemove)
     }));
   };
 
@@ -515,6 +530,7 @@ Space Type: ${formData.handyman_space}`;
       scopeSummary = `Custom Scope: ${formData.other_scope || "Standard custom technical specifications"}`;
     }
 
+    const attachedNames = formData.attached_files.map((f) => f.name);
     const detailsBody = `[VIP Concierge Request]
 Project Title: ${formData.title}
 Client Name: ${formData.name}
@@ -534,7 +550,7 @@ Access Instructions: ${formData.access_instructions || "Provided upon dispatch"}
 ${scopeSummary}
 
 === 4. Technical Uploads & Media ===
-Attachments: ${formData.attached_files.length > 0 ? formData.attached_files.join(", ") : "None attached"}
+Attachments: ${attachedNames.length > 0 ? attachedNames.join(", ") : "None attached"}
 
 === 5. Timelines, Reporting & Budget ===
 Urgency Level: ${formData.urgency_level}
@@ -553,6 +569,7 @@ Estimated Budget: ${formData.budget_tier}`;
       location_type: formData.location_type,
       city: formData.city,
       details: detailsBody,
+      attached_files: formData.attached_files,
       budget_tier: formData.budget_tier,
       urgency: formData.urgency_level,
       status: "Pending Review"
@@ -1193,10 +1210,10 @@ Estimated Budget: ${formData.budget_tier}`;
                       {formData.attached_files.map((file, idx) => (
                         <span key={idx} className={styles.fileBadge}>
                           <iconify-icon icon="lucide:file-text" />
-                          <span>{file}</span>
+                          <span>{file.name}</span>
                           <span
                             className={styles.fileRemove}
-                            onClick={() => handleRemoveFile(file)}
+                            onClick={() => handleRemoveFile(idx)}
                           >
                             ×
                           </span>

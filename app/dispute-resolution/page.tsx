@@ -198,7 +198,7 @@ export default function DisputeResolutionPage() {
     details: ""
   });
 
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: number; type: string; data: string }>>([]);
 
   useEffect(() => {
     const updateLang = () => {
@@ -215,10 +215,28 @@ export default function DisputeResolutionPage() {
     setActiveFaq(activeFaq === index ? null : index);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const names = Array.from(e.target.files).map((f) => f.name);
-      setAttachedFiles((prev) => [...prev, ...names]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      const loadedFiles: Array<{ name: string; size: number; type: string; data: string }> = [];
+
+      for (const file of filesArray) {
+        const base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string) || "");
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        });
+
+        loadedFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          data: base64Data
+        });
+      }
+
+      setAttachedFiles((prev) => [...prev, ...loadedFiles]);
     }
   };
 
@@ -234,6 +252,7 @@ export default function DisputeResolutionPage() {
 
     setLoading(true);
     try {
+      const attachedNames = attachedFiles.map((f) => f.name);
       const payloadDetails = `=== 1. Claimant Profile ===
 Claimant: ${formData.name} (${formData.role})
 Email: ${formData.email}
@@ -254,7 +273,7 @@ Urgency Level: ${formData.urgency}
 ${formData.details}
 
 === 5. Evidence Attachments ===
-Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+Attachments: ${attachedNames.length > 0 ? attachedNames.join(", ") : "None attached"}`;
 
       const newDispute = {
         id: `DISP-${Date.now().toString().slice(-6)}`,
@@ -284,7 +303,7 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
         }),
         api.createSupportTicket({
           subject: `[Dispute & Escrow Mediation] ${formData.taskRef} - ${formData.name} vs ${formData.targetUser || "Counterparty"}`,
-          body: `Claimant: ${formData.name} (${formData.role} | ${formData.email} | ${formData.phone})\nCounterparty: ${formData.targetUser}\nRef: ${formData.taskRef}\nAmount: ${formData.disputedAmount}\nEscrow: ${formData.escrowStatus}\nCategory: ${formData.category}\nOutcome: ${formData.desiredOutcome}\nUrgency: ${formData.urgency}\nEvidence: ${attachedFiles.join(", ") || "None"}\n\nFacts:\n${formData.details}`
+          body: `Claimant: ${formData.name} (${formData.role} | ${formData.email} | ${formData.phone})\nCounterparty: ${formData.targetUser}\nRef: ${formData.taskRef}\nAmount: ${formData.disputedAmount}\nEscrow: ${formData.escrowStatus}\nCategory: ${formData.category}\nOutcome: ${formData.desiredOutcome}\nUrgency: ${formData.urgency}\nEvidence: ${attachedNames.join(", ") || "None"}\n\nFacts:\n${formData.details}`
         })
       ]);
 
@@ -673,9 +692,9 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
 
                   {attachedFiles.length > 0 ? (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
-                      {attachedFiles.map((name, idx) => (
+                      {attachedFiles.map((file, idx) => (
                         <span key={idx} className={styles.fileBadge}>
-                          📎 {name}
+                          📎 {file.name}
                           <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
                             ✕
                           </button>

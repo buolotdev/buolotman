@@ -35,7 +35,7 @@ export default function CommunityGuidelinesPage() {
     description: "",
     contact: "Email"
   });
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: number; type: string; data: string }>>([]);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,10 +67,28 @@ export default function CommunityGuidelinesPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const names = Array.from(e.target.files).map((f) => f.name);
-      setAttachedFiles((prev) => [...prev, ...names]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      const loadedFiles: Array<{ name: string; size: number; type: string; data: string }> = [];
+
+      for (const file of filesArray) {
+        const base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string) || "");
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        });
+
+        loadedFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          data: base64Data
+        });
+      }
+
+      setAttachedFiles((prev) => [...prev, ...loadedFiles]);
     }
   };
 
@@ -86,6 +104,7 @@ export default function CommunityGuidelinesPage() {
 
     setSubmitting(true);
     try {
+      const attachedNames = attachedFiles.map((f) => f.name);
       const payloadDetails = `=== 1. Reporter Information ===
 Reporter: ${reportForm.isAnonymous ? "Anonymous Community Member" : reportForm.name}
 Role: ${reportForm.role}
@@ -107,7 +126,7 @@ Approximate Date: ${reportForm.incidentDate || "Recent"}
 ${reportForm.description}
 
 === 5. Evidence & Screenshots ===
-Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+Attachments: ${attachedNames.length > 0 ? attachedNames.join(", ") : "None attached"}`;
 
       const newReport = {
         id: `COMM-${Date.now().toString().slice(-6)}`,
@@ -131,7 +150,7 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
       await Promise.allSettled([
         api.createSupportTicket({
           subject: `[Community Incident Report] ${reportForm.concern} - Target: ${reportForm.user || "Unknown"}`,
-          body: `Reporter: ${reportForm.isAnonymous ? "Confidential/Anonymous" : `${reportForm.name} (${reportForm.role})`}\nReported Target: ${reportForm.user} (${reportForm.offenderRole})\nRef: ${reportForm.reference}\nCategory: ${reportForm.concern}\nSeverity: ${reportForm.severity}\nEvidence: ${attachedFiles.join(", ") || "None"}\n\nIncident Statement:\n${reportForm.description}`
+          body: `Reporter: ${reportForm.isAnonymous ? "Confidential/Anonymous" : `${reportForm.name} (${reportForm.role})`}\nReported Target: ${reportForm.user} (${reportForm.offenderRole})\nRef: ${reportForm.reference}\nCategory: ${reportForm.concern}\nSeverity: ${reportForm.severity}\nEvidence: ${attachedNames.join(", ") || "None"}\n\nIncident Statement:\n${reportForm.description}`
         }),
         api.createDispute({
           reason: `Community Guideline Breach: ${reportForm.concern}`,
@@ -930,9 +949,9 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
 
                       {attachedFiles.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
-                          {attachedFiles.map((name, idx) => (
+                          {attachedFiles.map((file, idx) => (
                             <span key={idx} className={styles.fileBadge}>
-                              📎 {name}
+                              📎 {file.name}
                               <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
                                 ✕
                               </button>

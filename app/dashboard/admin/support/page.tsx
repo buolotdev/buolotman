@@ -27,6 +27,14 @@ export default function AdminSupportPage() {
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
+  // File Preview Lightbox State
+  const [previewFile, setPreviewFile] = useState<{
+    name: string;
+    size?: number;
+    type?: string;
+    data?: string;
+  } | null>(null);
+
   const fetchAll = async () => {
     setLoading(true);
     try {
@@ -44,6 +52,7 @@ export default function AdminSupportPage() {
         subject: `[${(inq.inquiry_type || "General").toUpperCase()} Inquiry] ${inq.company_name || inq.name}`,
         client: `${inq.name || "Client"} (${inq.email || ""})`,
         status: inq.status || "Pending",
+        attached_files: inq.attached_files || [],
         messages: [
           {
             id: `msg-inq-${inq.id}`,
@@ -85,6 +94,7 @@ export default function AdminSupportPage() {
               subject: inq.topic || `[${(inq.category || inq.team_type || "Inquiry").toUpperCase()}] ${inq.title || inq.name || inq.projectTitle || "Service Request"}`,
               client: `${inq.name || "Lead"} (${inq.phone || inq.email || ""})`,
               status: inq.status || "Pending",
+              attached_files: inq.attached_files || [],
               messages: [
                 {
                   id: `msg-${inq.id || Math.random()}`,
@@ -299,6 +309,60 @@ export default function AdminSupportPage() {
     };
   };
 
+  const downloadFile = (file: { name: string; data?: string; type?: string }) => {
+    if (file.data) {
+      const a = document.createElement("a");
+      a.href = file.data;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      const blob = new Blob([`Attachment Record: ${file.name}\nTicket: ${activeTicket?.subject || "Support Inquiry"}`], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name.endsWith(".txt") ? file.name : `${file.name}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const getCombinedAttachedFiles = (ticket: any, contact: any) => {
+    const list: Array<{ name: string; size?: number; type?: string; data?: string }> = [];
+    const seenNames = new Set<string>();
+
+    if (Array.isArray(ticket?.attached_files)) {
+      ticket.attached_files.forEach((f: any) => {
+        if (typeof f === "string" && f.trim()) {
+          if (!seenNames.has(f)) {
+            seenNames.add(f);
+            list.push({ name: f });
+          }
+        } else if (f && typeof f === "object" && f.name) {
+          if (!seenNames.has(f.name)) {
+            seenNames.add(f.name);
+            list.push(f);
+          }
+        }
+      });
+    }
+
+    if (contact?.attachments && contact.attachments !== "None attached") {
+      const parsed = contact.attachments.split(",").map((s: string) => s.trim()).filter(Boolean);
+      parsed.forEach((fname: string) => {
+        if (!seenNames.has(fname)) {
+          seenNames.add(fname);
+          list.push({ name: fname });
+        }
+      });
+    }
+
+    return list;
+  };
+
   // Filter tickets by Tab, Search Query, and Status
   const filteredTickets = allTickets.filter((ticket) => {
     const category = getTicketCategory(ticket);
@@ -401,6 +465,7 @@ export default function AdminSupportPage() {
 
   const activeContact = activeTicket ? extractContactInfo(activeTicket) : null;
   const activeCategory = activeTicket ? getTicketCategory(activeTicket) : "client";
+  const attachedFilesList = activeTicket ? getCombinedAttachedFiles(activeTicket, activeContact) : [];
 
   return (
     <div className={styles.page}>
@@ -664,51 +729,51 @@ export default function AdminSupportPage() {
               </div>
 
               {/* STRUCTURED SPECIFICATION BOX FOR ALL FORMS */}
-              {(activeContact?.projectTitle || activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles || activeContact?.sitePhase || activeContact?.techSystems || activeContact?.budget || activeContact?.urgency || activeContact?.champion || activeContact?.attachments) && (
+              {(activeContact?.projectTitle || activeContact?.trade || activeContact?.teamSize || activeContact?.location || activeContact?.duration || activeContact?.requestType || activeContact?.roles || activeContact?.sitePhase || activeContact?.techSystems || activeContact?.budget || activeContact?.urgency || activeContact?.champion || attachedFilesList.length > 0) && (
                 <div className={styles.specsBox}>
-                  {activeContact.projectTitle && (
+                  {activeContact?.projectTitle && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>Project / Entity / Subject Name</span>
                       <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F", fontSize: 14 }}>{activeContact.projectTitle}</span>
                     </div>
                   )}
-                  {activeContact.trade && (
+                  {activeContact?.trade && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Category / Trade / Nature</span>
                       <span className={styles.specVal}>{activeContact.trade}</span>
                     </div>
                   )}
-                  {activeContact.location && (
+                  {activeContact?.location && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>City / Location / Region</span>
                       <span className={styles.specVal}>{activeContact.location}</span>
                     </div>
                   )}
-                  {activeContact.locationType && (
+                  {activeContact?.locationType && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Location / Sub-Region Mode</span>
                       <span className={styles.specVal}>{activeContact.locationType}</span>
                     </div>
                   )}
-                  {activeContact.requestType && (
+                  {activeContact?.requestType && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Request / Track / Classification</span>
                       <span className={styles.specVal}>{activeContact.requestType}</span>
                     </div>
                   )}
-                  {activeContact.teamSize && (
+                  {activeContact?.teamSize && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Scale / Volume / Scope</span>
                       <span className={styles.specVal}>{activeContact.teamSize}</span>
                     </div>
                   )}
-                  {activeContact.budget && (
+                  {activeContact?.budget && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Budget / Disputed Value</span>
                       <span className={styles.specVal} style={{ fontWeight: 700, color: "#001F3F" }}>{activeContact.budget}</span>
                     </div>
                   )}
-                  {activeContact.urgency && (
+                  {activeContact?.urgency && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Urgency / Risk Severity</span>
                       <span className={styles.specVal} style={{ color: activeContact.urgency.includes("Emergency") || activeContact.urgency.includes("Risk") || activeContact.urgency.includes("🚨") ? "#dc2626" : "#0f172a", fontWeight: 700 }}>
@@ -716,13 +781,13 @@ export default function AdminSupportPage() {
                       </span>
                     </div>
                   )}
-                  {activeContact.duration && (
+                  {activeContact?.duration && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Duration / Launch Timeframe</span>
                       <span className={styles.specVal}>{activeContact.duration}</span>
                     </div>
                   )}
-                  {activeContact.champion && (
+                  {activeContact?.champion && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>City Champion Status</span>
                       <span className={styles.specVal} style={{ color: activeContact.champion.includes("Yes") ? "#16a34a" : "#0f172a", fontWeight: 700 }}>
@@ -730,34 +795,55 @@ export default function AdminSupportPage() {
                       </span>
                     </div>
                   )}
-                  {activeContact.roles && (
+                  {activeContact?.roles && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>Roles / Offending Party Details</span>
                       <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.roles}</span>
                     </div>
                   )}
-                  {activeContact.blueprints && (
+                  {activeContact?.blueprints && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>Task / Contract Reference / Portal</span>
                       <span className={styles.specVal}>{activeContact.blueprints}</span>
                     </div>
                   )}
-                  {activeContact.techSystems && (
+                  {activeContact?.techSystems && (
                     <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
                       <span className={styles.specLabel}>Tech Systems / Desired Outcome</span>
                       <span className={styles.specVal} style={{ fontWeight: 600, color: "#1e293b" }}>{activeContact.techSystems}</span>
                     </div>
                   )}
-                  {activeContact.access && (
+                  {activeContact?.access && (
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Meeting / Access Preference</span>
                       <span className={styles.specVal}>{activeContact.access}</span>
                     </div>
                   )}
-                  {activeContact.attachments && activeContact.attachments !== "None attached" && (
-                    <div className={styles.specItem} style={{ gridColumn: "1 / -1" }}>
-                      <span className={styles.specLabel}>Attached Documentation &amp; Evidence</span>
-                      <span className={styles.specVal} style={{ fontWeight: 600, color: "#2563eb" }}>📎 {activeContact.attachments}</span>
+
+                  {/* CLICKABLE EXPANDABLE ATTACHMENTS */}
+                  {attachedFilesList.length > 0 && (
+                    <div className={styles.specItem} style={{ gridColumn: "1 / -1", marginTop: 4 }}>
+                      <span className={styles.specLabel}>Attached Documentation &amp; Evidence (Click to Open &amp; Download)</span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px" }}>
+                        {attachedFilesList.map((file, idx) => {
+                          const isImg = file.type?.includes("image") || /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
+                          const isPdf = file.type?.includes("pdf") || /\.pdf$/i.test(file.name);
+
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setPreviewFile(file)}
+                              className={styles.attachmentBadge}
+                              title="Click to expand, preview and download"
+                            >
+                              <iconify-icon icon={isImg ? "lucide:image" : isPdf ? "lucide:file-text" : "lucide:file"} />
+                              <span>{file.name}</span>
+                              <iconify-icon icon="lucide:maximize-2" className={styles.actionIcon} />
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -837,6 +923,88 @@ export default function AdminSupportPage() {
           )}
         </div>
       </div>
+
+      {/* ================= FILE PREVIEW & DOWNLOAD LIGHTBOX MODAL ================= */}
+      {previewFile && (
+        <div className={styles.filePreviewOverlay} onClick={() => setPreviewFile(null)}>
+          <div className={styles.filePreviewModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.filePreviewHeader}>
+              <div className={styles.filePreviewTitle}>
+                <iconify-icon
+                  icon={
+                    previewFile.type?.includes("image") || /\.(jpg|jpeg|png|webp|gif)$/i.test(previewFile.name)
+                      ? "lucide:image"
+                      : previewFile.type?.includes("pdf") || /\.pdf$/i.test(previewFile.name)
+                      ? "lucide:file-text"
+                      : "lucide:file"
+                  }
+                  style={{ color: "#ff4500", fontSize: 20 }}
+                />
+                <span>{previewFile.name}</span>
+              </div>
+              <div className={styles.filePreviewActions}>
+                <button
+                  type="button"
+                  className={styles.downloadBtn}
+                  onClick={() => downloadFile(previewFile)}
+                >
+                  <iconify-icon icon="lucide:download" /> Download File
+                </button>
+                <button
+                  type="button"
+                  className={styles.closePreviewBtn}
+                  onClick={() => setPreviewFile(null)}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.filePreviewBody}>
+              {previewFile.data && (previewFile.type?.includes("image") || /\.(jpg|jpeg|png|webp|gif)$/i.test(previewFile.name)) ? (
+                <img
+                  src={previewFile.data}
+                  alt={previewFile.name}
+                  className={styles.previewImage}
+                />
+              ) : previewFile.data && (previewFile.type?.includes("pdf") || /\.pdf$/i.test(previewFile.name)) ? (
+                <iframe
+                  src={previewFile.data}
+                  title={previewFile.name}
+                  className={styles.previewIframe}
+                />
+              ) : (
+                <div className={styles.previewGenericDoc}>
+                  <iconify-icon
+                    icon={
+                      previewFile.name.endsWith(".pdf")
+                        ? "lucide:file-text"
+                        : /\.(png|jpg|jpeg|webp)$/i.test(previewFile.name)
+                        ? "lucide:image"
+                        : "lucide:file"
+                    }
+                    style={{ fontSize: 64, color: "#001F3F" }}
+                  />
+                  <div>
+                    <h3 style={{ margin: "0 0 6px 0", color: "#001F3F", fontSize: 18 }}>{previewFile.name}</h3>
+                    <p style={{ margin: 0, color: "#64748b", fontSize: 14 }}>
+                      Document attachment record registered with this case.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.downloadBtn}
+                    onClick={() => downloadFile(previewFile)}
+                    style={{ marginTop: 8 }}
+                  >
+                    <iconify-icon icon="lucide:download" /> Download Attachment
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

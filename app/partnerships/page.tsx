@@ -322,7 +322,7 @@ export default function PartnershipsPage() {
   const [lang, setLang] = useState("en");
 
   // Files state
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: number; type: string; data: string }>>([]);
 
   useEffect(() => {
     const updateLang = () => {
@@ -351,10 +351,28 @@ export default function PartnershipsPage() {
     details: "",
   });
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const names = Array.from(e.target.files).map((f) => f.name);
-      setAttachedFiles((prev) => [...prev, ...names]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      const loadedFiles: Array<{ name: string; size: number; type: string; data: string }> = [];
+
+      for (const file of filesArray) {
+        const base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string) || "");
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        });
+
+        loadedFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          data: base64Data
+        });
+      }
+
+      setAttachedFiles((prev) => [...prev, ...loadedFiles]);
     }
   };
 
@@ -379,6 +397,7 @@ export default function PartnershipsPage() {
 
     setSubmitting(true);
     try {
+      const attachedNames = attachedFiles.map((f) => f.name);
       const payloadDetails = `=== 1. Organization Profile ===
 Organization / Company Legal Name: ${form.orgName}
 Organization Type: ${form.orgType}
@@ -401,7 +420,7 @@ Preferred Meeting: ${form.meetingPlatform}
 ${form.details || "No additional narrative provided."}
 
 === 5. Documentation ===
-Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+Attachments: ${attachedNames.length > 0 ? attachedNames.join(", ") : "None attached"}`;
 
       const newInquiry = {
         id: `PARTNER-${Date.now().toString().slice(-6)}`,
@@ -434,7 +453,7 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
         }),
         api.createSupportTicket({
           subject: `[Partnership Proposal] ${form.orgName} - ${form.track}`,
-          body: `Executive Contact: ${form.contactName} (${form.email} | ${form.phone})\nOrg Type: ${form.orgType}\nCountry: ${form.country}\nTrack: ${form.track}\nScale: ${form.scale}\nBudget: ${form.budget}\nTimeframe: ${form.timeframe}\nMeeting: ${form.meetingPlatform}\nAttachments: ${attachedFiles.join(", ") || "None"}\n\nObjectives:\n${form.details}`
+          body: `Executive Contact: ${form.contactName} (${form.email} | ${form.phone})\nOrg Type: ${form.orgType}\nCountry: ${form.country}\nTrack: ${form.track}\nScale: ${form.scale}\nBudget: ${form.budget}\nTimeframe: ${form.timeframe}\nMeeting: ${form.meetingPlatform}\nAttachments: ${attachedNames.join(", ") || "None"}\n\nObjectives:\n${form.details}`
         })
       ]);
 
@@ -871,9 +890,9 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
 
                 {attachedFiles.length > 0 ? (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
-                    {attachedFiles.map((name, idx) => (
+                    {attachedFiles.map((file, idx) => (
                       <span key={idx} className={styles.fileBadge}>
-                        📎 {name}
+                        📎 {file.name}
                         <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
                           ✕
                         </button>

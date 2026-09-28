@@ -98,14 +98,32 @@ export default function SafetyCenterPage() {
     description: "",
     contactMethod: "Email"
   });
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: number; type: string; data: string }>>([]);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const names = Array.from(e.target.files).map((f) => f.name);
-      setAttachedFiles((prev) => [...prev, ...names]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      const loadedFiles: Array<{ name: string; size: number; type: string; data: string }> = [];
+
+      for (const file of filesArray) {
+        const base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string) || "");
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        });
+
+        loadedFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type || "application/octet-stream",
+          data: base64Data
+        });
+      }
+
+      setAttachedFiles((prev) => [...prev, ...loadedFiles]);
     }
   };
 
@@ -121,6 +139,7 @@ export default function SafetyCenterPage() {
 
     setSubmitting(true);
     try {
+      const attachedNames = attachedFiles.map((f) => f.name);
       const payloadDetails = `=== 1. Reporter Details ===
 Reporter: ${reportForm.name}
 Role: ${reportForm.role}
@@ -143,7 +162,7 @@ Task / Project Reference: ${reportForm.reference || "N/A"}
 ${reportForm.description}
 
 === 5. Attached Proof & Evidence ===
-Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attached"}`;
+Attachments: ${attachedNames.length > 0 ? attachedNames.join(", ") : "None attached"}`;
 
       const newReport = {
         id: `SAFE-${Date.now().toString().slice(-6)}`,
@@ -167,7 +186,7 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
       await Promise.allSettled([
         api.createSupportTicket({
           subject: `[Safety & Trust Incident] ${reportForm.issueType} - ${reportForm.username || reportForm.name} (${reportForm.severity})`,
-          body: `Reporter: ${reportForm.name} (${reportForm.role} | ${reportForm.email} | ${reportForm.phone})\nTarget: ${reportForm.username} (${reportForm.offenderRole})\nRef: ${reportForm.reference}\nLocation: ${reportForm.location}\nConcern: ${reportForm.issueType}\nSeverity: ${reportForm.severity}\nEvidence: ${attachedFiles.join(", ") || "None"}\n\nStatement:\n${reportForm.description}`
+          body: `Reporter: ${reportForm.name} (${reportForm.role} | ${reportForm.email} | ${reportForm.phone})\nTarget: ${reportForm.username} (${reportForm.offenderRole})\nRef: ${reportForm.reference}\nLocation: ${reportForm.location}\nConcern: ${reportForm.issueType}\nSeverity: ${reportForm.severity}\nEvidence: ${attachedNames.join(", ") || "None"}\n\nStatement:\n${reportForm.description}`
         }),
         api.createDispute({
           reason: `Safety Violation [${reportForm.severity}]: ${reportForm.issueType}`,
@@ -817,9 +836,9 @@ Attachments: ${attachedFiles.length > 0 ? attachedFiles.join(", ") : "None attac
 
                 {attachedFiles.length > 0 ? (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
-                    {attachedFiles.map((name, idx) => (
+                    {attachedFiles.map((file, idx) => (
                       <span key={idx} className={styles.fileBadge}>
-                        📎 {name}
+                        📎 {file.name}
                         <button type="button" onClick={() => removeFile(idx)} className={styles.fileRemove}>
                           ✕
                         </button>
