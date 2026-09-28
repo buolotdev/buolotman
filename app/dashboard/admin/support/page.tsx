@@ -255,28 +255,28 @@ export default function AdminSupportPage() {
     const emailMatch = body.match(/Email(?:\s*Address)?:\s*([^\s|,\n]+)/i) || (ticket?.client?.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/));
     const phoneMatch = body.match(/Phone(?:\/WhatsApp)?:\s*([^\s|,\n]+)/i);
     const locationMatch = body.match(/(?:Location|City \/ Neighborhood|Location \/ City|Target City \/ Urban Area|Country \/ Region|Location \/ Worksite):\s*([^\n|]+)/i);
-    const tradeMatch = body.match(/(?:Category|Primary Trade|Trade(?:\/Company)?|Requested Trades|Violation Nature|Concern Category|Dispute Category):\s*([^\n|]+)/i);
+    const tradeMatch = body.match(/(?:Primary Category|Category|Primary Trade|Trade(?:\/Company)?|Requested Trades|Violation Nature|Concern Category|Dispute Category):\s*([^\n|]+)/i);
     const teamSizeMatch = body.match(/(?:Team Size|Estimated Scale \/ Scope|Estimated Demand Volume):\s*([^\n|]+)/i);
-    const durationMatch = body.match(/(?:Deployment Duration|Duration|Target Launch Timeframe):\s*([^\n|]+)/i);
-    const requestTypeMatch = body.match(/(?:Request Type|Partnership Track|Organization Type|Dispute Classification):\s*([^\n|]+)/i);
-    const pmLeadMatch = body.match(/On-Site PM \/ Team Lead:\s*([^\n|]+)/i);
-    const rolesMatch = body.match(/(?:Roles Needed|Offending Party Role|Role of Offending Party):\s*([^\n|]+)/i);
+    const durationMatch = body.match(/(?:Deployment Duration|Estimated Duration|Duration|Target Launch Timeframe):\s*([^\n|]+)/i);
+    const requestTypeMatch = body.match(/(?:Request Type|Client Type|Partnership Track|Organization Type|Dispute Classification):\s*([^\n|]+)/i);
+    const pmLeadMatch = body.match(/(?:On-Site PM \/ Team Lead|Management Requirement):\s*([^\n|]+)/i);
+    const rolesMatch = body.match(/(?:Required Trades|Roles Needed|Offending Party Role|Role of Offending Party):\s*([^\n|]+)/i);
     const arrangementMatch = body.match(/Working Arrangement:\s*([^\n|]+)/i);
-    const equipmentMatch = body.match(/Equipment Provision:\s*([^\n|]+)/i);
-    const siteReadinessMatch = body.match(/Site Readiness:\s*([^\n|]+)/i);
+    const equipmentMatch = body.match(/(?:Equipment Provision|Payment Structure):\s*([^\n|]+)/i);
+    const siteReadinessMatch = body.match(/(?:Site Readiness|Target Start):\s*([^\n|]+)/i);
     
     // Concierge & Enterprise specific fields
     const projectTitleMatch = body.match(/(?:Project Title|Organization \/ Company Legal Name|Reported User \/ Entity|Reported Username \/ Company|Reported Counterparty):\s*([^\n|]+)/i);
     const locationTypeMatch = body.match(/(?:Location Mode|Location Type|District \/ Sub-region):\s*([^\n|]+)/i);
     const accessMatch = body.match(/(?:Access Instructions|Preferred Meeting|Preferred Contact):\s*([^\n|]+)/i);
-    const sitePhaseMatch = body.match(/Site Phase:\s*([^\n|]+)/i);
+    const sitePhaseMatch = body.match(/(?:Current Phase|Site Phase):\s*([^\n|]+)/i);
     const tasksMatch = body.match(/Tasks:\s*([^\n|]+)/i);
     const blueprintsMatch = body.match(/(?:Plans & Blueprints|Official Website|Task \/ Contract Reference|Task, Project, or Order Reference ID|Task \/ Project ID):\s*([^\n|]+)/i);
     const techSystemsMatch = body.match(/(?:Tech Systems|Disputed Amount|Desired Outcome):\s*([^\n|]+)/i);
     const techAccessMatch = body.match(/(?:Access|Escrow Status):\s*([^\n|]+)/i);
     const urgencyMatch = body.match(/(?:Urgency Level|Urgency|Severity|Risk Level|Threat \/ Severity Level):\s*([^\n|]+)/i);
     const updatesMatch = body.match(/(?:Updates Frequency|Approximate Time|Time of Incident|Approximate Date):\s*([^\n|]+)/i);
-    const budgetMatch = body.match(/(?:Estimated Budget|Budget \/ Investment Tier|Disputed Amount):\s*([^\n|]+)/i);
+    const budgetMatch = body.match(/(?:Estimated Budget|Budget Tier|Budget \/ Investment Tier|Disputed Amount):\s*([^\n|]+)/i);
     const attachmentsMatch = body.match(/Attachments:\s*([^\n|]+)/i);
     const championMatch = body.match(/Local Champion \/ Hub Partner:\s*([^\n|]+)/i);
 

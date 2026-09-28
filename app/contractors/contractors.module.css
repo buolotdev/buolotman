@@ -725,33 +725,70 @@
 }
 
 .formCard {
-  padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 16px;
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
   background: #ffffff;
   color: #172033;
-  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
 }
 
 .formCard h3 {
   margin: 0 0 6px;
   color: #001f3f;
-  font-size: 22px;
-  line-height: 1.35;
+  font-size: 24px;
+  line-height: 1.3;
   font-weight: 800;
 }
 
 .formCard > p {
-  margin: 0 0 22px;
+  margin: 0 0 26px;
   color: #667085;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.6;
+}
+
+.formBlock {
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.blockTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #001f3f;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.blockBadge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 69, 0, 0.1);
+  color: #ff4500;
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 15px;
+  gap: 16px;
 }
 
 .formGroup {
@@ -766,7 +803,7 @@
 
 .formGroup label {
   color: #001f3f;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -774,25 +811,25 @@
 .formGroup select,
 .formGroup textarea {
   width: 100%;
-  border: 1px solid #d6dce4;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   outline: none;
   background: #ffffff;
   color: #172033;
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .formGroup input,
 .formGroup select {
-  height: 44px;
-  padding: 0 12px;
+  height: 46px;
+  padding: 0 14px;
 }
 
 .formGroup textarea {
-  min-height: 110px;
-  padding: 12px;
+  min-height: 120px;
+  padding: 12px 14px;
   resize: vertical;
 }
 
@@ -800,20 +837,171 @@
 .formGroup select:focus,
 .formGroup textarea:focus {
   border-color: #ff4500;
-  box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.12);
+}
+
+/* Pill Grid for Multi-Select Trades */
+.pillGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pillBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.pillBtn:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.pillBtnActive {
+  background: #fff7ed;
+  border-color: #ff4500;
+  color: #ff4500;
+}
+
+/* Radio Cards */
+.radioCardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.radioCard {
+  padding: 14px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.radioCard:hover {
+  border-color: #cbd5e1;
+}
+
+.radioCardSelected {
+  border-color: #ff4500;
+  background: #fff7ed;
+}
+
+.radioCardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #001f3f;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radioCardSub {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Upload Dropzone */
+.uploadZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.uploadZone:hover {
+  border-color: #ff4500;
+  background: #fffbf9;
+}
+
+.uploadIcon {
+  font-size: 32px;
+  color: #ff4500;
+  margin-bottom: 6px;
+}
+
+.uploadText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #001f3f;
+  margin-bottom: 4px;
+}
+
+.uploadSub {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.fileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fileBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fileRemove {
+  cursor: pointer;
+  color: #ef4444;
+  font-weight: bold;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.fileRemove:hover {
+  background: #fee2e2;
 }
 
 .submitBtn {
   width: 100%;
-  min-height: 48px;
-  margin-top: 18px;
+  min-height: 52px;
+  margin-top: 8px;
   background: #ff4500;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   transition: all 0.2s ease;
 }
 
@@ -822,17 +1010,23 @@
   box-shadow: 0 8px 24px rgba(255, 69, 0, 0.3);
 }
 
+.submitBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .successMsg {
-  padding: 16px;
+  padding: 18px 20px;
   background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  border: 1.5px solid #10b981;
   color: #065f46;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 20px;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 /* =====================================================
