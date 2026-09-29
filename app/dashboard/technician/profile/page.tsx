@@ -665,20 +665,28 @@ export default function TechnicianProfilePage() {
     } else {
       setCustomMainCategory("");
       setPrimaryOccupation(val);
+      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel") {
+        setHeadline(val);
+      }
     }
   };
 
   const handleSubCategoryChange = (val: string) => {
     setSelectedSubCategory(val);
     if (val === "Other") {
-      setPrimaryOccupation(
-        customSubCategory || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other")
-      );
+      const occ = customSubCategory || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other");
+      setPrimaryOccupation(occ);
     } else if (val) {
       setCustomSubCategory("");
       setPrimaryOccupation(val);
+      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel" || (selectedMainCategory && headline.toLowerCase() === selectedMainCategory.toLowerCase())) {
+        setHeadline(val);
+      }
     } else {
       setPrimaryOccupation(selectedMainCategory || "");
+      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel") {
+        setHeadline(selectedMainCategory || "");
+      }
     }
   };
 
@@ -812,15 +820,20 @@ export default function TechnicianProfilePage() {
       const userBio = userData.bio || userData.about || techProf.bio || "";
       setBio(savedP.bio !== undefined ? savedP.bio : userBio);
 
-      const userHeadline = savedP.headline !== undefined 
-        ? savedP.headline 
-        : (userData.headline || techProf.headline || "");
-      setHeadline(userHeadline);
-
       const userTrade = savedP.primaryOccupation !== undefined 
         ? savedP.primaryOccupation 
         : (userData.primary_occupation || techProf.occupation || techProf.category || (userData as any).category || "");
       setPrimaryOccupation(userTrade);
+
+      const userHeadline = savedP.headline !== undefined 
+        ? savedP.headline 
+        : (userData.headline || techProf.headline || "");
+      
+      if (!userHeadline || userHeadline.trim() === "" || userHeadline.toLowerCase() === "professional specialist" || userHeadline.toLowerCase() === "spécialiste professionnel") {
+        setHeadline(userTrade || "");
+      } else {
+        setHeadline(userHeadline);
+      }
 
       // Hierarchical Category Resolution
       const rawTrade = (userTrade || "").trim();
@@ -1091,12 +1104,16 @@ export default function TechnicianProfilePage() {
     const isFinal = typeof isCompleting === "boolean" ? isCompleting : false;
     setProfileSaving(true);
     try {
+      const effectiveHeadline = (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel")
+        ? (primaryOccupation || selectedSubCategory || selectedMainCategory || "").trim()
+        : headline.trim();
+
       // 1. Immediately persist custom profile fields locally
       const customProfileData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         displayName: displayName.trim(),
-        headline: headline.trim(),
+        headline: effectiveHeadline,
         bio: bio.trim(),
         city: city.trim(),
         country: country.trim(),
@@ -1145,7 +1162,8 @@ export default function TechnicianProfilePage() {
           address: address.trim() || city.trim(),
           education_level: educationLevel,
           expertise_level: expertiseLevel,
-          headline: headline.trim(),
+          headline: effectiveHeadline,
+          primary_occupation: primaryOccupation,
           hourly_rate: numericHourly || null,
           daily_rate: dailyRate.trim(),
           inspection_fee: inspectionFee.trim(),
@@ -1155,7 +1173,9 @@ export default function TechnicianProfilePage() {
             bio: bio.trim(),
             city: city.trim(),
             country: country.trim(),
-            headline: headline.trim(),
+            headline: effectiveHeadline,
+            occupation: primaryOccupation,
+            category: selectedMainCategory || undefined,
             experience_years: experienceYears,
             hourly_rate: numericHourly || null,
             daily_rate: dailyRate.trim(),

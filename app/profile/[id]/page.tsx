@@ -9,6 +9,7 @@ import { api, getImageUrl } from "@/app/lib/api";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import OnlineStatusBadge from "@/app/components/OnlineStatusBadge";
+import { resolveProfessionTitle } from "@/app/lib/professionUtils";
 import styles from "./profile.module.css";
 
 const translations: Record<string, Record<string, string>> = {
@@ -665,8 +666,8 @@ export default function PublicProfilePage() {
 
   // Individual Specialist Attributes
   const techDisplayName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.username || "Specialist";
-  const techCategory = profile?.category || profile?.primary_occupation || profile?.trade_category || "";
-  const techHeadline = profile?.headline || profile?.technician_profile?.headline || (techCategory ? `Certified ${techCategory}` : "Professional Specialist");
+  const techCategory = profile?.category || profile?.primary_occupation || profile?.trade_category || profile?.technician_profile?.category || "";
+  const techHeadline = resolveProfessionTitle(profile, lang) || profile?.headline || (techCategory ? `Certified ${techCategory}` : (lang === "fr" ? "Spécialiste Technique Certifié" : "Certified Technical Specialist"));
   const techCity = profile?.city || profile?.technician_profile?.city || profile?.address || "";
   const techCountry = profile?.country || profile?.technician_profile?.country || "";
   const techLocation = [techCity, techCountry].filter(Boolean).join(", ") || "Location on request";
