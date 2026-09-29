@@ -39,6 +39,28 @@ function cleanDegreeTitle(raw: string): string {
 export function resolveProfessionTitle(item: any, lang: string = "en"): string {
   if (!item) return lang === "fr" ? "Entreprise & Ingénierie" : "General Contractors & Civil Engineering";
 
+  // Check local storage for any live technician custom profile
+  if (typeof window !== "undefined" && item) {
+    try {
+      const keys = [
+        item.id ? `boulotman_technician_profile_custom_${item.id}` : null,
+        item.user_id ? `boulotman_technician_profile_custom_${item.user_id}` : null,
+        item.username ? `boulotman_technician_profile_custom_${String(item.username).replace(/^@/, '')}` : null,
+        item.handle ? `boulotman_technician_profile_custom_${String(item.handle).replace(/^@/, '')}` : null,
+      ].filter(Boolean) as string[];
+      for (const k of keys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const customTitle = parsed.primaryTrade || parsed.primaryOccupation || parsed.headline || parsed.primaryDomain;
+          if (customTitle && !isGarbageText(customTitle)) {
+            return cleanDegreeTitle(customTitle);
+          }
+        }
+      }
+    } catch {}
+  }
+
   // If company
   const isCompany = item.type === "company" || item.role?.toString().toLowerCase() === "company";
   if (isCompany) {
@@ -92,11 +114,17 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
 
   // 3. Primary Industry Domain / Category
   const cat = item.category || item.category_name || item.service_category || item.primary_domain || item.industry || item.technician_profile?.category;
-  if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services") {
+  if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services" && cat.toLowerCase() !== "services techniques") {
     return formatCategoryToProfession(cat.trim(), lang);
   }
 
-  // 4. Services offered posted by technician in their profile
+  // 4. Inferred Category Domain based on Technician's Skills & Services
+  const inferredCat = resolveServiceCategoryTag(item, lang);
+  if (inferredCat && inferredCat !== "Technical Services" && inferredCat !== "Services Techniques" && inferredCat !== "General Contracting Services" && inferredCat !== "Services Généraux d'Entreprise") {
+    return formatCategoryToProfession(inferredCat, lang);
+  }
+
+  // 5. Services offered posted by technician in their profile
   const services = item.services || item.profile?.services || item.technician_profile?.services || item.services_offered || [];
   if (Array.isArray(services) && services.length > 0) {
     const firstSrv = typeof services[0] === "string" ? services[0] : services[0]?.title || services[0]?.name;
@@ -109,7 +137,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 5. Education / Certification Level
+  // 6. Education / Certification Level
   const edu = item.education_level || item.expertise_level;
   if (edu && typeof edu === "string" && !isGarbageText(edu)) {
     const cleanedEdu = cleanDegreeTitle(edu);
