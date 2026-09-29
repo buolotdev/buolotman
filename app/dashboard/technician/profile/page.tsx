@@ -1119,6 +1119,8 @@ export default function TechnicianProfilePage() {
         country: country.trim(),
         experienceYears: experienceYears.trim(),
         primaryOccupation,
+        primaryDomain: selectedMainCategory,
+        primaryTrade: selectedSubCategory || primaryOccupation,
         educationLevel: educationLevel.trim(),
         expertiseLevel,
         skills,
