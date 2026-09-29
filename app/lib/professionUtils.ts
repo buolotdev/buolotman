@@ -109,16 +109,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 5. Skills list
-  const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
-  if (Array.isArray(skills) && skills.length > 0) {
-    const validSkill = skills.find((s: string) => typeof s === "string" && !isGarbageText(s));
-    if (validSkill) {
-      return formatSkillToProfession(validSkill.trim(), lang);
-    }
-  }
-
-  // 6. Education
+  // 5. Education / Certification Level
   const edu = item.education_level || item.expertise_level;
   if (edu && typeof edu === "string" && !isGarbageText(edu)) {
     const cleanedEdu = cleanDegreeTitle(edu);

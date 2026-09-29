@@ -661,45 +661,45 @@ export default function TechnicianProfilePage() {
     setSelectedSubCategory("");
     setCustomSubCategory("");
     if (val === "Other") {
-      setPrimaryOccupation(customMainCategory || "Other");
+      const text = customMainCategory.trim() || "Other";
+      setPrimaryOccupation(text);
+      setHeadline(text);
     } else {
       setCustomMainCategory("");
       setPrimaryOccupation(val);
-      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel") {
-        setHeadline(val);
-      }
+      setHeadline(val);
     }
   };
 
   const handleSubCategoryChange = (val: string) => {
     setSelectedSubCategory(val);
     if (val === "Other") {
-      const occ = customSubCategory || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other");
+      const occ = customSubCategory.trim() || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other");
       setPrimaryOccupation(occ);
+      setHeadline(occ);
     } else if (val) {
       setCustomSubCategory("");
       setPrimaryOccupation(val);
-      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel" || (selectedMainCategory && headline.toLowerCase() === selectedMainCategory.toLowerCase())) {
-        setHeadline(val);
-      }
+      setHeadline(val);
     } else {
-      setPrimaryOccupation(selectedMainCategory || "");
-      if (!headline || headline.trim() === "" || headline.toLowerCase() === "professional specialist" || headline.toLowerCase() === "spécialiste professionnel") {
-        setHeadline(selectedMainCategory || "");
-      }
+      const parent = selectedMainCategory || "";
+      setPrimaryOccupation(parent);
+      setHeadline(parent);
     }
   };
 
   const handleCustomMainCategoryChange = (val: string) => {
     setCustomMainCategory(val);
-    setPrimaryOccupation(val.trim() || "Other");
+    const text = val.trim() || "Other";
+    setPrimaryOccupation(text);
+    setHeadline(text);
   };
 
   const handleCustomSubCategoryChange = (val: string) => {
     setCustomSubCategory(val);
-    setPrimaryOccupation(
-      val.trim() || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other")
-    );
+    const text = val.trim() || (selectedMainCategory !== "Other" ? `${selectedMainCategory} - Other` : "Other");
+    setPrimaryOccupation(text);
+    setHeadline(text);
   };
 
   const handleAddQuickSkill = (skillName: string) => {
