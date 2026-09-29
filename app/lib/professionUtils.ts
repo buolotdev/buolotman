@@ -11,23 +11,14 @@ const INVALID_TERMS = [
 export function isGarbageText(str: string): boolean {
   if (!str || typeof str !== "string") return true;
   const clean = str.trim().toLowerCase();
-  if (clean.length < 3 || clean.length > 70) return true;
+  if (clean.length < 2 || clean.length > 80) return true;
   if (INVALID_TERMS.includes(clean)) return true;
 
-  // Check if contains non-alphanumeric junk or long repeated characters (e.g. "aaaaaaa")
+  // Check if contains long repeated characters (e.g. "aaaaaaa")
   if (/(.)\1{3,}/.test(clean)) return true;
 
-  // Check consonant clusters (4 or more consecutive consonants is almost always gibberish like ebhjwevg, htrpsx)
-  if (/[bcdfghjklmnpqrstvwxyz]{4,}/i.test(clean)) return true;
-
-  // Check vowel to consonant ratio for random gibberish
-  const letters = clean.replace(/[^a-z]/g, "");
-  if (letters.length >= 4) {
-    const vowels = (letters.match(/[aeiou]/g) || []).length;
-    if (vowels === 0 || vowels / letters.length < 0.15 || vowels / letters.length > 0.85) {
-      return true;
-    }
-  }
+  // Check long consonant clusters of 6 or more in a single word
+  if (/[bcdfghjklmnpqrstvwxyz]{6,}/i.test(clean)) return true;
 
   return false;
 }
@@ -85,21 +76,27 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     return lang === "fr" ? "Entreprise Générale & Ingénierie" : "General Contractors & Civil Engineering";
   }
 
-  // 1. Direct explicit profession / headline / specialty (if NOT generic like "Professional Specialist")
+  // 1. TOP PRIORITY: Primary Trade / Occupation chosen by the technician
+  const tradeRole = item.primary_occupation || item.trade_category || item.primary_trade || item.specialization || item.trade || item.technician_profile?.primary_occupation || item.technician_profile?.trade_category || item.technician_profile?.occupation;
+  if (tradeRole && typeof tradeRole === "string" && !isGarbageText(tradeRole)) {
+    const cleanedTrade = cleanDegreeTitle(tradeRole.trim());
+    if (cleanedTrade && !isGarbageText(cleanedTrade)) return cleanedTrade;
+  }
+
+  // 2. Explicit Profession / Headline (if NOT generic like "Professional Specialist")
   const explicitRole = item.headline || item.profession || item.specialty || item.title || item.technician_profile?.headline;
   if (explicitRole && typeof explicitRole === "string" && !isGarbageText(explicitRole)) {
     const cleaned = cleanDegreeTitle(explicitRole.trim());
     if (cleaned && !isGarbageText(cleaned)) return cleaned;
   }
 
-  // 2. PRIORITY: Check primary trade / occupation / specialization
-  const tradeRole = item.primary_occupation || item.trade_category || item.primary_trade || item.specialization || item.trade || item.technician_profile?.primary_occupation || item.technician_profile?.trade_category;
-  if (tradeRole && typeof tradeRole === "string" && !isGarbageText(tradeRole)) {
-    const cleanedTrade = cleanDegreeTitle(tradeRole.trim());
-    if (cleanedTrade && !isGarbageText(cleanedTrade)) return cleanedTrade;
+  // 3. Primary Industry Domain / Category
+  const cat = item.category || item.category_name || item.service_category || item.primary_domain || item.industry || item.technician_profile?.category;
+  if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services") {
+    return formatCategoryToProfession(cat.trim(), lang);
   }
 
-  // 3. PRIORITY: Check services offered posted by technician in their profile
+  // 4. Services offered posted by technician in their profile
   const services = item.services || item.profile?.services || item.technician_profile?.services || item.services_offered || [];
   if (Array.isArray(services) && services.length > 0) {
     const firstSrv = typeof services[0] === "string" ? services[0] : services[0]?.title || services[0]?.name;
@@ -112,7 +109,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 4. Check skills list
+  // 5. Skills list
   const skills = item.skills || item.profile?.skills || item.technician_profile?.skills || [];
   if (Array.isArray(skills) && skills.length > 0) {
     const validSkill = skills.find((s: string) => typeof s === "string" && !isGarbageText(s));
@@ -121,13 +118,7 @@ export function resolveProfessionTitle(item: any, lang: string = "en"): string {
     }
   }
 
-  // 5. Check category / domain
-  const cat = item.category || item.category_name || item.service_category || item.primary_domain || item.industry || item.technician_profile?.category;
-  if (cat && typeof cat === "string" && !isGarbageText(cat) && cat.toLowerCase() !== "technical services") {
-    return formatCategoryToProfession(cat.trim(), lang);
-  }
-
-  // 6. Check education
+  // 6. Education
   const edu = item.education_level || item.expertise_level;
   if (edu && typeof edu === "string" && !isGarbageText(edu)) {
     const cleanedEdu = cleanDegreeTitle(edu);
