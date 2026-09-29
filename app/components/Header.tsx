@@ -234,14 +234,14 @@ function Header() {
             : `<div style="width:26px; height:26px; border-radius:50%; background:#001F3F; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; letter-spacing:0.5px; flex-shrink:0;">${initials}</div>`;
 
           const profileBtnHtml = `
-            <a href="${dashboardUrl}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding: 3px 12px 3px 4px; border-radius: 20px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; height: 32px; box-sizing: border-box;">
+            <a href="${dashboardUrl}" class="bm-top-profile-btn" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; padding: 3px 10px 3px 4px; border-radius: 20px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; height: 30px; box-sizing: border-box; flex-shrink:0;">
               ${avatarHtml}
-              <div style="display:flex; flex-direction:column; line-height:1.15; padding-right:2px;">
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="color:#0f172a; font-weight:700; font-size:12px; white-space:nowrap; max-width:130px; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+              <div class="bm-top-profile-info" style="display:flex; flex-direction:column; line-height:1.15; padding-right:2px; min-width:0;">
+                <div style="display:flex; align-items:center; gap:4px; min-width:0;">
+                  <span class="bm-top-profile-name" style="color:#0f172a; font-weight:700; font-size:12px; white-space:nowrap; max-width:110px; overflow:hidden; text-overflow:ellipsis;">${name}</span>
                   ${isVerified ? `<iconify-icon icon="lucide:badge-check" style="font-size:13px; color:#16a34a; flex-shrink:0;"></iconify-icon>` : ''}
                 </div>
-                <span style="color:#64748b; font-size:9.5px; text-transform:uppercase; font-weight:700; letter-spacing:0.04em;">${role || 'User'}</span>
+                <span class="bm-top-profile-role" style="color:#64748b; font-size:9px; text-transform:uppercase; font-weight:700; letter-spacing:0.04em;">${role || 'User'}</span>
               </div>
             </a>
           `;
@@ -1217,9 +1217,10 @@ function Header() {
 
     <div class="bmNavRight">
       <!-- COUNTRY -->
-      <div class="bmDropWrap">
-        <div class="bmDropBtn">
-          <img class="bmFlag" src="https://flagcdn.com/w20/${((country && country.toLowerCase() !== 'united states') ? getCountryCodeFromName(country) : (countryCode || 'US')).toLowerCase()}.png" onerror="this.src='https://flagcdn.com/w20/us.png'" alt="${country}"> ${country}
+      <div class="bmDropWrap bmDropWrapCountry">
+        <div class="bmDropBtn bmDropBtnCountry">
+          <img class="bmFlag" src="https://flagcdn.com/w20/${((country && country.toLowerCase() !== 'united states') ? getCountryCodeFromName(country) : (countryCode || 'US')).toLowerCase()}.png" onerror="this.src='https://flagcdn.com/w20/us.png'" alt="${country}">
+          <span class="bmDropBtnText">${country}</span>
         </div>
         <div class="bmDropMenu" style="max-height:280px; overflow-y:auto;">
           <div class="bmDropItem" data-country="United States" data-code="US"><img class="bmFlag" src="https://flagcdn.com/w20/us.png"> United States</div>
@@ -1240,9 +1241,10 @@ function Header() {
         </div>
       </div>
       <!-- LANGUAGE -->
-      <div class="bmDropWrap">
-        <div class="bmDropBtn">
-          <img class="bmFlag" src="${lang === 'fr' ? 'https://flagcdn.com/w20/fr.png' : 'https://flagcdn.com/w20/gb.png'}"> ${lang === 'fr' ? 'Français' : 'English'}
+      <div class="bmDropWrap bmDropWrapLang">
+        <div class="bmDropBtn bmDropBtnLang">
+          <img class="bmFlag" src="${lang === 'fr' ? 'https://flagcdn.com/w20/fr.png' : 'https://flagcdn.com/w20/gb.png'}">
+          <span class="bmDropBtnText">${lang === 'fr' ? 'Français' : 'English'}</span>
         </div>
         <div class="bmDropMenu">
           <div class="bmDropItem"><img class="bmFlag" src="https://flagcdn.com/w20/gb.png"> English</div>
@@ -1250,7 +1252,7 @@ function Header() {
         </div>
       </div>
       <!-- USER PROFILE BADGE -->
-      <div id="bmTopUserContainer" style="display:inline-flex; align-items:center;"></div>
+      <div id="bmTopUserContainer" style="display:inline-flex; align-items:center; flex-shrink:0;"></div>
     </div>
   </div>
 </div>

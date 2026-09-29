@@ -2482,18 +2482,15 @@ body {
   }
 
   #bmMegaRoot .bmHdrInner {
-    padding: 5px 8px;
-    gap: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 100vw;
-    box-sizing: border-box;
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    padding: 6px 10px !important;
+    gap: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
   }
 
   #bmMegaRoot .bmHdrInner::-webkit-scrollbar {
@@ -2501,112 +2498,155 @@ body {
   }
 
   #bmMegaRoot .bmNavLeft {
-    gap: 8px;
+    gap: 6px;
     display: flex;
     align-items: center;
     flex-shrink: 0;
   }
 
-  #bmMegaRoot .bmNavItem {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 2px;
-    white-space: nowrap;
-    flex-shrink: 0;
+  /* Hide Apps and Help Center on mobile - they are accessible in mobile drawer */
+  #bmMegaRoot .bmMegaGroup[data-menu-group="apps"],
+  #bmMegaRoot .bmMegaGroup[data-menu-group="help"] {
+    display: none !important;
+  }
+
+  #bmMegaRoot .bmMegaGroup[data-menu-group="cats"] .bmNavItem {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    padding: 4px 8px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    color: #0f172a !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
   #bmMegaRoot .bmMegaGroup {
-    padding-bottom: 0;
-    margin-bottom: 0;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   #bmMegaRoot .bmNavRight {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-shrink: 0;
-    margin-left: auto;
-    padding-right: 2px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    position: relative !important;
+    z-index: 10020 !important;
   }
 
   #bmMegaRoot .bmDropWrap {
-    position: relative;
-    flex-shrink: 0;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    z-index: 10025 !important;
   }
 
   #bmMegaRoot .bmDropBtn {
-    font-size: 10.5px;
-    font-weight: 600;
-    padding: 3.5px 7px;
-    gap: 4px;
-    white-space: nowrap;
-    border-radius: 6px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    display: flex;
-    align-items: center;
-    max-width: 96px;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 7px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    display: flex !important;
+    align-items: center !important;
+    max-width: 95px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex-shrink: 0 !important;
+  }
+
+  #bmMegaRoot .bmDropBtnText {
     overflow: hidden;
     text-overflow: ellipsis;
-    flex-shrink: 0;
+    white-space: nowrap;
+    max-width: 65px;
+    display: inline-block;
   }
 
   #bmMegaRoot .bmFlag {
-    width: 14px;
-    height: 10px;
-    flex-shrink: 0;
+    width: 15px !important;
+    height: 11px !important;
+    flex-shrink: 0 !important;
+    border-radius: 2px;
   }
 
   #bmMegaRoot .bmDropMenu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    left: auto;
-    background: #ffffff;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 10px;
-    box-shadow: 0 12px 35px rgba(0, 31, 63, 0.25);
-    min-width: 165px;
-    max-width: 220px;
-    max-height: 280px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    z-index: 100050 !important;
+    position: absolute !important;
+    top: calc(100% + 4px) !important;
+    right: 0 !important;
+    left: auto !important;
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 12px 35px rgba(0, 31, 63, 0.25) !important;
+    min-width: 160px !important;
+    max-width: 220px !important;
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 999999 !important;
   }
 
   #bmMegaRoot .bmDropItem {
-    padding: 9px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    border-bottom: 1px solid #f1f5f9;
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    border-bottom: 1px solid #f1f5f9 !important;
   }
 
   #bmMegaRoot .bmDropItem:last-child {
-    border-bottom: none;
+    border-bottom: none !important;
   }
 
   #bmMegaRoot .bmDropItem:active,
   #bmMegaRoot .bmDropItem:hover {
-    background: #f0fdf4;
-    color: #001f3f;
+    background: #f0fdf4 !important;
+    color: #001f3f !important;
+  }
+
+  #bmTopUserContainer {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  #bmTopUserContainer .bm-top-profile-btn {
+    padding: 2px 7px 2px 3px !important;
+    height: 28px !important;
+    gap: 5px !important;
+  }
+
+  #bmTopUserContainer .bm-top-profile-name {
+    font-size: 11px !important;
+    max-width: 80px !important;
+  }
+
+  #bmTopUserContainer .bm-top-profile-role {
+    font-size: 8.5px !important;
   }
 
   /* Fullscreen Mega Menu on Mobile */
   #bmMegaRoot .bmMega {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    z-index: 100050;
-    background: #ffffff;
-    overflow-y: auto;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 100050 !important;
+    background: #ffffff !important;
+    overflow-y: auto !important;
     display: none;
   }
 
@@ -2615,31 +2655,31 @@ body {
   }
 
   #bmMegaRoot .bmMegaInner {
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding-top: 50px;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-top: 50px !important;
   }
 
   #bmMegaRoot .bmSidebar {
-    width: 100%;
-    max-height: 42vh;
-    overflow-y: auto;
-    flex-shrink: 0;
-    border-right: none;
-    border-bottom: 2px solid #e2e8f0;
+    width: 100% !important;
+    max-height: 42vh !important;
+    overflow-y: auto !important;
+    flex-shrink: 0 !important;
+    border-right: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
   }
 
   #bmMegaRoot .bmContent {
-    width: 100%;
-    overflow-y: auto;
-    padding: 14px;
-    flex: 1;
+    width: 100% !important;
+    overflow-y: auto !important;
+    padding: 14px !important;
+    flex: 1 !important;
   }
 
   #bmMegaRoot .bmGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .bm-ts-header h2 {
@@ -2648,6 +2688,37 @@ body {
 
   .bm-ts-inner {
     padding: 0 22px;
+  }
+}
+
+@media(max-width: 480px) {
+  #bmMegaRoot .bmHdrInner {
+    padding: 5px 6px !important;
+    gap: 4px !important;
+  }
+
+  #bmMegaRoot .bmMegaGroup[data-menu-group="cats"] .bmNavItem {
+    font-size: 10.5px !important;
+    padding: 3px 6px !important;
+  }
+
+  #bmMegaRoot .bmDropBtn {
+    font-size: 10px !important;
+    padding: 3px 5px !important;
+    max-width: 76px !important;
+  }
+
+  #bmMegaRoot .bmDropBtnText {
+    max-width: 46px !important;
+  }
+
+  #bmTopUserContainer .bm-top-profile-name {
+    max-width: 62px !important;
+    font-size: 10px !important;
+  }
+
+  #bmTopUserContainer .bm-top-profile-role {
+    display: none !important;
   }
 }
 
