@@ -226,7 +226,7 @@ export function resolveExpertiseTags(item: any, lang: string = "en"): string[] {
   }
 
   // 3. Domain fallback based on profession
-  const prof = (resolveProfessionTitle(item, lang) || "").toLowerCase();
+  const prof = (item.primary_occupation || item.headline || item.profession || item.trade_category || item.category || "").toLowerCase();
   if (prof.includes("plumb") || prof.includes("water") || prof.includes("sanitation")) {
     return lang === "fr" ? ["Plomberie", "Tuyauterie", "Sanitaire", "Dépannage"] : ["Plumbing", "Pipe Fitting", "Drainage", "Installation"];
   }
@@ -256,23 +256,26 @@ export function resolveExpertiseTags(item: any, lang: string = "en"): string[] {
 }
 
 export function resolveServiceCategoryTag(item: any, lang: string = "en"): string {
-  if (item.category && item.category !== "Technical Services" && item.category !== "General Contracting" && !isGarbageText(item.category)) {
+  if (!item) return lang === "fr" ? "Services Techniques" : "Technical Services";
+
+  if (item.category && item.category !== "Technical Services" && item.category !== "Services Techniques" && item.category !== "General Contracting" && !isGarbageText(item.category)) {
     return item.category;
   }
   if (item.category_name && !isGarbageText(item.category_name)) return item.category_name;
+  if (item.primary_domain && !isGarbageText(item.primary_domain)) return item.primary_domain;
 
-  const profession = (resolveProfessionTitle(item, lang) || "").toLowerCase();
+  const rawRole = (item.primary_occupation || item.headline || item.profession || item.trade_category || item.specialization || "").toLowerCase();
   const services = (item.services || []).map((s: any) => s.title || "").join(" ").toLowerCase();
   const skills = (item.skills || []).join(" ").toLowerCase();
-  const allText = `${profession} ${services} ${skills}`;
+  const allText = `${rawRole} ${services} ${skills}`;
 
-  if (allText.includes("it ") || allText.includes("engineer") || allText.includes("network") || allText.includes("cyber") || allText.includes("software") || allText.includes("backend") || allText.includes("web")) {
+  if (allText.includes("it ") || allText.includes("engineer") || allText.includes("network") || allText.includes("cyber") || allText.includes("software") || allText.includes("backend") || allText.includes("web") || allText.includes("directory") || allText.includes("active directory")) {
     return lang === "fr" ? "Ingénierie Logicielle & IT" : "Software & Digital Engineering";
   }
   if (allText.includes("handyman") || allText.includes("plumb") || allText.includes("home")) {
     return lang === "fr" ? "Services de Bricolage & Plomberie" : "Handyman & Plumbing Services";
   }
-  if (allText.includes("cctv") || allText.includes("secur") || allText.includes("telecom")) {
+  if (allText.includes("cctv") || allText.includes("secur") || allText.includes("telecom") || allText.includes("antenna") || allText.includes("radio")) {
     return lang === "fr" ? "Télécoms & Systèmes de Sécurité" : "Telecom & Security Systems";
   }
   if (allText.includes("clean")) {
@@ -281,10 +284,10 @@ export function resolveServiceCategoryTag(item: any, lang: string = "en"): strin
   if (allText.includes("hair") || allText.includes("beauty")) {
     return lang === "fr" ? "Soins, Beauté & Coiffure" : "Health, Beauty & Personal Care";
   }
-  if (allText.includes("electric") || allText.includes("phone")) {
+  if (allText.includes("electric") || allText.includes("phone") || allText.includes("transformer") || allText.includes("energy")) {
     return lang === "fr" ? "Génie Électrique & Électronique" : "Electrical & Electronics Engineering";
   }
-  if (allText.includes("auto") || allText.includes("mechanic")) {
+  if (allText.includes("auto") || allText.includes("mechanic") || allText.includes("engine") || allText.includes("overhaul")) {
     return lang === "fr" ? "Services Automobile" : "Automotive & Heavy Equipment";
   }
 
